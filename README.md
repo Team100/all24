@@ -16,10 +16,19 @@ Here is the directory layout:
   * another project
   * etc ...
 
- 
+# VS Code
+
+When you open the swerve100 project, VS Code should show a message in the bottom-right corner suggesting that you open the "workspace" instead, which includes lib:
+
+<img src="openworkspace.png" width=350/>
+
+When you have VS Code correctly set up, the Explorer view should contain two top-level folders: "swerve100" and "lib":
+
+<img src="workspace.png" width=350/>
+
 # Setup
 
-To make your project use the code in lib, you need to do two things:
+To include "lib" in your own "study" workspace, you need to do two things:
 
 * add a workspace file, to make vscode features work with lib code
 * edit build.gradle, so gradle builds include lib code
@@ -56,4 +65,3 @@ sourceSets {
     }
 }
 ```
-
