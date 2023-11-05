@@ -11,6 +11,14 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2023.4.3"
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir "../../lib/src/main/java"
+        }
+    }
+}
+
 // these four lines are for development builds
 // https://github.com/wpilibsuite/allwpilib/blob/main/DevelopmentBuilds.md
 wpi.maven.useLocal = false
