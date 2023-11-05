@@ -2,8 +2,10 @@ package org.team100.lib.planners;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import org.team100.lib.controller.DrivePIDController;
+import org.team100.lib.controller.DrivePursuitController;
+import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.Lookahead;
 import org.team100.lib.controller.SynchronousPIDF;
 import org.team100.lib.geometry.GeometryUtil;
@@ -47,10 +49,10 @@ public class DriveMotionPlanner {
     public static final double kMaxVelocityMetersPerSecond = 4.959668;
 
     // TODO: what loop time to use?
-    private static final double kLooperDt = 0.02;
+    public static final double kLooperDt = 0.02;
 
 
-    private final Telemetry t = Telemetry.get();
+    public static final Telemetry t = Telemetry.get();
 
     public enum FollowerType {
         FEEDFORWARD_ONLY,
@@ -196,170 +198,6 @@ public class DriveMotionPlanner {
                         distance_view, kMaxDx, all_constraints, start_vel, end_vel, max_vel, max_accel);
     }
 
-    protected ChassisSpeeds updateRamsete(TimedPose fieldToGoal, Pose2d fieldToRobot, Twist2d currentVelocity) {
-        // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
-        final double kBeta = 2.0;  // >0.
-        final double kZeta = 0.7;  // Damping coefficient, [0, 1].
-
-        // Convert from current velocity into course.
-        Optional<Rotation2d> maybe_field_to_course = Optional.empty();
-        Optional<Rotation2d> maybe_robot_to_course = GeometryUtil.getCourse(currentVelocity);
-        if (maybe_robot_to_course.isPresent()) {
-            // Course is robot_to_course, we want to be field_to_course.
-            // field_to_course = field_to_robot * robot_to_course
-            maybe_field_to_course = Optional.of(fieldToRobot.getRotation().rotateBy(maybe_robot_to_course.get()));
-        }
-
-        // Convert goal into a desired course (in robot frame).
-        double goal_linear_velocity = fieldToGoal.velocityM_S();
-        double goal_angular_velocity = goal_linear_velocity * fieldToGoal.state().getCurvature();
-        Optional<Rotation2d> maybe_field_to_goal = fieldToGoal.state().getCourse();
-
-        // Deal with lack of course data by always being optimistic.
-        if (maybe_field_to_course.isEmpty()) {
-            maybe_field_to_course = maybe_field_to_goal;
-        }
-        if (maybe_field_to_goal.isEmpty()) {
-            maybe_field_to_goal = maybe_field_to_course;
-        }
-        if (maybe_field_to_goal.isEmpty() && maybe_field_to_course.isEmpty()) {
-            // Course doesn't matter.
-            maybe_field_to_course = maybe_field_to_goal = Optional.of(GeometryUtil.kRotationIdentity);
-        }
-        Rotation2d field_to_course = maybe_field_to_course.get();
-        Rotation2d robot_to_course = fieldToRobot.getRotation().unaryMinus().rotateBy(field_to_course);
-
-        // Convert goal course to be relative to current course.
-        // course_to_goal = course_to_field * field_to_goal
-        Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
-
-        // Rotate error to be aligned to current course.
-        // Error is in robot (heading) frame. Need to rotate it to be in course frame.
-        // course_to_error = robot_to_course.inverse() * robot_to_error
-        Translation2d linear_error_course_relative = GeometryUtil.transformBy(GeometryUtil.fromRotation(robot_to_course), mError).getTranslation();
-
-        // Compute time-varying gain parameter.
-        final double k = 2.0 * kZeta * Math.sqrt(kBeta * goal_linear_velocity * goal_linear_velocity + goal_angular_velocity * goal_angular_velocity);
-
-        // Compute error components.
-        final double angle_error_rads = course_to_goal.getRadians();
-        final double sin_x_over_x = MathUtil.epsilonEquals(angle_error_rads, 0.0, 1E-2) ?
-                1.0 : course_to_goal.getSin() / angle_error_rads;
-        double adjusted_linear_velocity = goal_linear_velocity * course_to_goal.getCos() + k * linear_error_course_relative.getX();
-        double adjusted_angular_velocity = goal_angular_velocity + k * angle_error_rads + goal_linear_velocity * kBeta * sin_x_over_x * linear_error_course_relative.getY();
-
-        final double kThetaKp = 5.0;  // Units are rad/s per rad of error.
-        double heading_rate = goal_linear_velocity * fieldToGoal.state().getHeadingRate() + kThetaKp * mError.getRotation().getRadians();
-
-        // Create a course-relative Twist2d.
-        Twist2d adjusted_course_relative_velocity = new Twist2d(adjusted_linear_velocity, 0.0, adjusted_angular_velocity - heading_rate);
-        // See where that takes us in one dt.
-        final double kNominalDt = kLooperDt;
-        Pose2d adjusted_course_to_goal = new Pose2d().exp(GeometryUtil.scale(adjusted_course_relative_velocity, kNominalDt));
-
-        // Now rotate to be robot-relative.
-        // robot_to_goal = robot_to_course * course_to_goal
-        Translation2d adjusted_robot_to_goal = GeometryUtil.transformBy(GeometryUtil.fromRotation(robot_to_course), adjusted_course_to_goal).getTranslation().times(1.0 / kNominalDt);
-
-        return new ChassisSpeeds(
-            adjusted_robot_to_goal.getX(),
-            adjusted_robot_to_goal.getY(),
-            heading_rate);
-    }
-
-    protected ChassisSpeeds updatePIDChassis(ChassisSpeeds chassisSpeeds) {
-        // Feedback on longitudinal error (distance).
-        final double kPathk = 2.4;
-        //2.4;
-        // Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond)
-        //0.15;
-        final double kPathKTheta = 2.4;
-
-        t.log("/planner/error", mError);
-
-        Twist2d pid_error = new Pose2d().log(mError);
-        t.log("/planner/pid error", pid_error);
-
-        chassisSpeeds.vxMetersPerSecond =
-                chassisSpeeds.vxMetersPerSecond + kPathk * pid_error.dx;
-        chassisSpeeds.vyMetersPerSecond =
-                chassisSpeeds.vyMetersPerSecond + kPathk * pid_error.dy;
-        chassisSpeeds.omegaRadiansPerSecond =
-                chassisSpeeds.omegaRadiansPerSecond + kPathKTheta * pid_error.dtheta;
-        return chassisSpeeds;
-    }
-
-    protected ChassisSpeeds updatePurePursuit(Pose2d current_state, double feedforwardOmegaRadiansPerSecond) {
-        t.log("/planner/error", mError);
-
-        double lookahead_time = kPathLookaheadTime;
-        final double kLookaheadSearchDt = 0.01;
-
-        TimedPose lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
-        t.log("/planner/lookahead state", lookahead_state);
-
-        double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
-        double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
-        //Find the Point on the Trajectory that is Lookahead Distance Away
-        while (actual_lookahead_distance < adaptive_lookahead_distance &&
-                mCurrentTrajectory.getRemainingProgress() > lookahead_time) {
-            lookahead_time += kLookaheadSearchDt;
-            lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
-            actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
-        }
-
-        //If the Lookahead Point's Distance is less than the Lookahead Distance transform it so it is the lookahead distance away
-        if (actual_lookahead_distance < adaptive_lookahead_distance) {
-            lookahead_state = new TimedPose(
-                new Pose2dWithMotion(
-                   GeometryUtil.transformBy(lookahead_state.state()
-                    .getPose(), GeometryUtil.fromTranslation(new Translation2d(
-                            (mIsReversed ? -1.0 : 1.0) * (kPathMinLookaheadDistance -
-                                    actual_lookahead_distance), 0.0))), 0.0), lookahead_state.getTimeS()
-                    , lookahead_state.velocityM_S(), lookahead_state.acceleration());
-        }
-        t.log("/planner/updated lookahead state", lookahead_state);
-
-        //Find the vector between robot's current position and the lookahead state
-        Translation2d lookaheadTranslation = lookahead_state.state().getTranslation().minus(current_state.getTranslation());
-        t.log("/planner/lookahead translation", lookaheadTranslation);
-
-        //Set the steering direction as the direction of the vector
-        Rotation2d steeringDirection = lookaheadTranslation.getAngle();
-
-        //Convert from field-relative steering direction to robot-relative
-        steeringDirection = steeringDirection.rotateBy(GeometryUtil.inverse(current_state).getRotation());
-
-        //Use the Velocity Feedforward of the Closest Point on the Trajectory
-        double normalizedSpeed = Math.abs(mSetpoint.velocityM_S()) / kMaxVelocityMetersPerSecond;
-
-        //The Default Cook is the minimum speed to use. So if a feedforward speed is less than defaultCook, the robot will drive at the defaultCook speed
-        if(normalizedSpeed > defaultCook || mSetpoint.getTimeS() > (mCurrentTrajectoryLength / 2.0)){
-            useDefaultCook = false;
-        }
-        if(useDefaultCook){
-            normalizedSpeed = defaultCook;
-        }
-
-        //Convert the Polar Coordinate (speed, direction) into a Rectangular Coordinate (Vx, Vy) in Robot Frame
-        final Translation2d steeringVector = new Translation2d(steeringDirection.getCos() * normalizedSpeed, steeringDirection.getSin() * normalizedSpeed);
-        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(steeringVector.getX() * kMaxVelocityMetersPerSecond, steeringVector.getY() * kMaxVelocityMetersPerSecond, feedforwardOmegaRadiansPerSecond);
-
-        t.log("/planner/pursuit speeds", chassisSpeeds);
-
-        //Use the PD-Controller for To Follow the Time-Parametrized Heading
-        final double kThetakP = 3.5;
-        final double kThetakD = 0.0;
-        final double kPositionkP = 2.0;
-
-        chassisSpeeds.vxMetersPerSecond =
-                chassisSpeeds.vxMetersPerSecond + kPositionkP * mError.getTranslation().getX();
-        chassisSpeeds.vyMetersPerSecond =
-                chassisSpeeds.vyMetersPerSecond + kPositionkP * mError.getTranslation().getY();
-        chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond + (kThetakP * mError.getRotation().getRadians()) + kThetakD * ((mError.getRotation().getRadians() - mPrevHeadingError.getRadians()) / mDt);
-        return chassisSpeeds;
-    }
-
     public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
         if (mCurrentTrajectory == null) return null;
         t.log("/planner/current state", current_state);
@@ -401,7 +239,7 @@ public class DriveMotionPlanner {
                 mSetpoint = sample_point.state();
                 mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
-                mOutput = updateRamsete(sample_point.state(), current_state, current_velocity);
+                mOutput = DriveRamseteController.updateRamsete(sample_point.state(), current_state, current_velocity, mError);
             } else if (mFollowerType == FollowerType.PID) {
                 sample_point = mCurrentTrajectory.advance(mDt);
                 t.log("/planner/sample point", sample_point);
@@ -431,7 +269,7 @@ public class DriveMotionPlanner {
                 t.log("/planner/chassis speeds", chassis_speeds);
 
                 // PID is in robot frame
-                mOutput = updatePIDChassis(chassis_speeds);
+                mOutput = DrivePIDController.updatePIDChassis(chassis_speeds, mError);
             } else if (mFollowerType == FollowerType.PURE_PURSUIT) {
                 double searchStepSize = 1.0;
                 double previewQuantity = 0.0;
@@ -454,7 +292,18 @@ public class DriveMotionPlanner {
                 mSetpoint = sample_point.state();
                 mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
-                mOutput = updatePurePursuit(current_state,0.0);
+                mOutput = DrivePursuitController.updatePurePursuit(current_state,0.0,
+                 mError,
+                 mCurrentTrajectory,
+                 mSetpoint,
+                 mSpeedLookahead,
+                 mIsReversed,
+                 defaultCook,
+                 mCurrentTrajectoryLength,
+                 useDefaultCook,
+                 mPrevHeadingError,
+                 mDt
+                );
             }
         } else {
             mOutput = new ChassisSpeeds();
