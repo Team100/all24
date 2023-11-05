@@ -1,0 +1,97 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+        "type": "java",
+        "name": "PendulumView",
+        "request": "launch",
+        "mainClass": "org.team100.lib.rrt.example.swingup.PendulumView",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "ArenaView",
+        "request": "launch",
+        "mainClass": "org.team100.lib.rrt.example.arena.ArenaView",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "FullStateArenaView",
+        "request": "launch",
+        "mainClass": "org.team100.lib.rrt.example.full_state_arena.FullStateArenaView",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "ArenaFrame",
+        "request": "launch",
+        "mainClass": "org.team100.lib.rrt.example.arena.ArenaFrame",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "FullStateArenaFrame",
+        "request": "launch",
+        "mainClass": "org.team100.lib.rrt.example.full_state_arena.FullStateArenaFrame",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "PendulumFrame",
+        "request": "launch",
+        "mainClass": "org.team100.lib.rrt.example.swingup.PendulumFrame",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "FullStateArenaFrame",
+        "request": "launch",
+        "mainClass": "edu.unc.robotics.prrts.example.full_state_arena.FullStateArenaFrame",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "Launch PendulumFrame",
+        "request": "launch",
+        "mainClass": "edu.unc.robotics.prrts.example.swingup.PendulumFrame",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "ArenaFrame",
+        "request": "launch",
+        "mainClass": "edu.unc.robotics.prrts.example.arena.ArenaFrame",
+        "projectName": "rrts"
+    },
+    {
+        "type": "java",
+        "name": "PendulumFrame",
+        "request": "launch",
+        "mainClass": "edu.unc.robotics.prrts.example.swingup.PendulumFrame",
+        "projectName": "prrts"
+    },
+    {
+        "type": "java",
+        "name": "ArenaFrame",
+        "request": "launch",
+        "mainClass": "edu.unc.robotics.prrts.example.arena.ArenaFrame",
+        "projectName": "prrts"
+    },
+    {
+        "type": "wpilib",
+        "name": "WPILib Desktop Debug",
+        "request": "launch",
+        "desktop": true
+    },
+    {
+        "type": "wpilib",
+        "name": "WPILib roboRIO Debug",
+        "request": "launch",
+        "desktop": false
+    }
+]
+}

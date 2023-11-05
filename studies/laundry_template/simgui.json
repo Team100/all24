@@ -1,0 +1,17 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo"
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "arm": {
+        "open": true
+      },
+      "drive": {
+        "open": true
+      }
+    }
+  }
+}

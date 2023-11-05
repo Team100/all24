@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 24 24" font-size="12" stroke-width="1">
+
+<path d="
+M12 31
+C7.02944 31 3 26.9706 3 22
+L3 12
+C3 7.02944 7.02944 3 12 3
+C16.9706 3 21 7.02944 21 12
+L21 22
+C21 26.9706 16.9706 31 12 31
+Z
+" stroke="black"  fill="none" />
+
+</svg>
