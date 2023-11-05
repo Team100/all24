@@ -1,0 +1,24 @@
+{
+  "NetworkTables": {
+    "transitory": {
+      "FieldRelativeDrive": {
+        "open": true
+      },
+      "FieldRelativeLaundryStick": {
+        "open": true
+      },
+      "drive": {
+        "open": true
+      },
+      "gyro": {
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo"
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT3)"
+  }
+}

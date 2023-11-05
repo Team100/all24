@@ -1,0 +1,114 @@
+{
+  "HALProvider": {
+    "Timing": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/Talon FX [11]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [12]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [21]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [22]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon SRX [3]": "Motor Controller",
+      "/LiveWindow/Ungrouped/navX-Sensor[2]": "Gyro",
+      "/SmartDashboard/Arm": "Subsystem",
+      "/SmartDashboard/Arm Subsystem": "Subsystem",
+      "/SmartDashboard/Drive Subsystem": "Subsystem",
+      "/SmartDashboard/Drive with Heading:": "Command",
+      "/SmartDashboard/Drive with Heading: 0 Degrees": "Command",
+      "/SmartDashboard/Drive with Heading: 180 Degrees": "Command",
+      "/SmartDashboard/Drive with Heading: 270 Degrees": "Command",
+      "/SmartDashboard/Drive with Heading: 90 Degrees": "Command",
+      "/SmartDashboard/Gamepiece Locator": "Subsystem",
+      "/SmartDashboard/Lower Motor": "Subsystem",
+      "/SmartDashboard/Manipulator": "Subsystem",
+      "/SmartDashboard/ROTATE COMMAND": "Command",
+      "/SmartDashboard/Upper Motor": "Subsystem",
+      "/SmartDashboard/Vision Data Provider": "Subsystem",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/field": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Vision": {
+        "open": true,
+        "{...}##v_/Vision/1000000013c9c96c": {
+          "[...]##v_tags": {
+            "open": true,
+            "{...}##v_[0]": {
+              "[...]##v_pose_t": {
+                "[...]##v_[2]": {
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            }
+          },
+          "open": true
+        },
+        "{...}##v_/Vision/100000004e0a1fb9": {
+          "[...]##v_tags": {
+            "open": true,
+            "{...}##v_[0]": {
+              "[...]##v_pose_t": {
+                "[...]##v_[2]": {
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            },
+            "{...}##v_[1]": {
+              "[...]##v_pose_t": {
+                "[...]##v_[2]": {
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            },
+            "{...}##v_[2]": {
+              "[...]##v_pose_t": {
+                "[...]##v_[2]": {
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            }
+          },
+          "open": true
+        },
+        "{...}##v_/Vision/10000000a7a892c0": {
+          "open": true
+        }
+      }
+    }
+  }
+}
