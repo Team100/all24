@@ -3,7 +3,11 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimedPose;
+import org.team100.lib.trajectory.TrajectorySamplePoint;
+import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.MathUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,6 +22,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 public class DriveRamseteController {
     public static final double kLooperDt = 0.02;
+    public static final Telemetry t = Telemetry.get();
 
     private Pose2d mError = GeometryUtil.kPose2dIdentity;
 
@@ -25,18 +30,51 @@ public class DriveRamseteController {
         return mError;
     }
 
+    private TrajectoryTimeIterator mCurrentTrajectory;
+    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
+    double mLastTime = Double.POSITIVE_INFINITY;
 
+    public void setTrajectory(final TrajectoryTimeIterator trajectory) {
+        mCurrentTrajectory = trajectory;
+        mSetpoint = trajectory.getState();
+
+    }
+
+    public boolean isDone() {
+        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+    }
 
     public void reset() {
- mError = GeometryUtil.kPose2dIdentity;
+        mError = GeometryUtil.kPose2dIdentity;
+        mLastTime = Double.POSITIVE_INFINITY;
+
     }
 
     public ChassisSpeeds updateRamsete(
-        final Pose2d current_state,
-        final TimedPose mSetpoint,
-            TimedPose fieldToGoal,
-            Pose2d fieldToRobot,
+            final double timestamp,
+            final Pose2d current_state,
+
             Twist2d currentVelocity) {
+        if (mCurrentTrajectory == null)
+            return null;
+
+        t.log("/planner/current state", current_state);
+        if (isDone()) {
+            return new ChassisSpeeds();
+        }
+
+        if (!Double.isFinite(mLastTime))
+            mLastTime = timestamp;
+        final double mDt = timestamp - mLastTime;
+        mLastTime = timestamp;
+
+        TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
+        t.log("/ramsete_planner/sample point", sample_point);
+        mSetpoint = sample_point.state();
+        t.log("/ramsete_planner/setpoint", mSetpoint);
+
+        TimedPose fieldToGoal = mSetpoint;
+        Pose2d fieldToRobot = current_state;
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
@@ -119,5 +157,16 @@ public class DriveRamseteController {
                 adjusted_robot_to_goal.getY(),
                 heading_rate);
     }
+
+    public synchronized Translation2d getTranslationalError() {
+        return new Translation2d(
+                getError().getTranslation().getX(),
+                getError().getTranslation().getY());
+    }
+
+    public synchronized Rotation2d getHeadingError() {
+        return getError().getRotation();
+    }
+
 
 }

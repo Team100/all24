@@ -36,43 +36,28 @@ public class DriveMotionPlanner {
         mFollowerType = type;
     }
 
-    TrajectoryTimeIterator mCurrentTrajectory;
-    boolean mIsReversed = false;
-    double mLastTime = Double.POSITIVE_INFINITY;
-    public TimedPose mLastSetpoint = null;
-    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-
-
-    double mCurrentTrajectoryLength = 0.0;
-
     private final DriveRamseteController m_ramsete = new DriveRamseteController();
     private final DrivePIDController m_pid = new DrivePIDController();
     private final DrivePursuitController m_pursuit = new DrivePursuitController();
     private final DriveFeedforwardController m_ff = new DriveFeedforwardController();
 
-    public DriveMotionPlanner() {
-        // TODO remove this
-    }
-
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
-        mCurrentTrajectory = trajectory;
-        mSetpoint = trajectory.getState();
-        mLastSetpoint = null;
-        mCurrentTrajectoryLength = mCurrentTrajectory.trajectory().getLastPoint().state().getTimeS();
-        for (int i = 0; i < trajectory.trajectory().length(); ++i) {
-            if (trajectory.trajectory().getPoint(i).state().velocityM_S() > MathUtil.EPSILON) {
-                mIsReversed = false;
-                break;
-            } else if (trajectory.trajectory().getPoint(i).state().velocityM_S() < -MathUtil.EPSILON) {
-                mIsReversed = true;
-                break;
-            }
+        if (mFollowerType == FollowerType.FEEDFORWARD_ONLY) {
+            m_ff.setTrajectory(trajectory);
         }
+        if (mFollowerType == FollowerType.RAMSETE) {
+            m_ramsete.setTrajectory(trajectory);
+        }
+        if (mFollowerType == FollowerType.PID) {
+            m_pid.setTrajectory(trajectory);
+        }
+        if (mFollowerType == FollowerType.PURE_PURSUIT) {
+            m_pursuit.setTrajectory(trajectory);
+        }
+
     }
 
     public void reset() {
-        mLastSetpoint = null;
-        mLastTime = Double.POSITIVE_INFINITY;
         m_pursuit.reset();
         m_ff.reset();
         m_pid.reset();
@@ -80,71 +65,37 @@ public class DriveMotionPlanner {
     }
 
     public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
-        if (mCurrentTrajectory == null)
-            return null;
-        t.log("/planner/current state", current_state);
-
-        if (!Double.isFinite(mLastTime))
-            mLastTime = timestamp;
-        final double mDt = timestamp - mLastTime;
-        mLastTime = timestamp;
-
-        if (isDone()) {
-            return new ChassisSpeeds();
-        }
 
         if (mFollowerType == FollowerType.FEEDFORWARD_ONLY) {
-
-            TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-            t.log("/ff_planner/sample point", sample_point);
-            mSetpoint = sample_point.state();
-            t.log("/ff_planner/setpoint", mSetpoint);
-
-            return m_ff.updateFeedforward(current_state, mSetpoint);
-
+            return m_ff.updateFeedforward(timestamp, current_state);
         }
         if (mFollowerType == FollowerType.RAMSETE) {
-
-            TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-            t.log("/ramsete_planner/sample point", sample_point);
-            mSetpoint = sample_point.state();
-            t.log("/ramsete_planner/setpoint", mSetpoint);
-
-            return m_ramsete.updateRamsete(current_state, mSetpoint, sample_point.state(), current_state, current_velocity);
-
+            return m_ramsete.updateRamsete(timestamp, current_state, current_velocity);
         }
         if (mFollowerType == FollowerType.PID) {
-
-            TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-            t.log("/pid_planner/sample point", sample_point);
-            mSetpoint = sample_point.state();
-            t.log("/pid_planner/setpoint", mSetpoint);
-
-            return m_pid.updatePIDChassis(current_state, mSetpoint);
-
+            return m_pid.updatePIDChassis(timestamp, current_state);
         }
         if (mFollowerType == FollowerType.PURE_PURSUIT) {
-
-            double previewQuantity = DrivePursuitController.previewDt(mCurrentTrajectory, current_state);
-
-            TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(previewQuantity);
-            t.log("/pid_planner/sample point", sample_point);
-            mSetpoint = sample_point.state();
-            t.log("/pid_planner/setpoint", mSetpoint);
-
-            return m_pursuit.updatePurePursuit(current_state, 0.0,
-                    mCurrentTrajectory,
-                    mSetpoint,
-                    mIsReversed,
-                    mCurrentTrajectoryLength,
-                    mDt);
+            return m_pursuit.updatePurePursuit(timestamp, current_state, 0.0);
         }
 
         return new ChassisSpeeds();
     }
 
     public boolean isDone() {
-        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+        if (mFollowerType == FollowerType.FEEDFORWARD_ONLY) {
+            return m_ff.isDone();
+        }
+        if (mFollowerType == FollowerType.RAMSETE) {
+            return m_ramsete.isDone();
+        }
+        if (mFollowerType == FollowerType.PID) {
+            return m_pid.isDone();
+        }
+        if (mFollowerType == FollowerType.PURE_PURSUIT) {
+            return m_pursuit.isDone();
+        }
+        return true;
     }
 
     private Pose2d getError() {
@@ -174,6 +125,20 @@ public class DriveMotionPlanner {
     }
 
     public synchronized TimedPose getSetpoint() {
-        return mSetpoint;
+
+        if (mFollowerType == FollowerType.FEEDFORWARD_ONLY) {
+            return m_ff.mSetpoint;
+        }
+        if (mFollowerType == FollowerType.RAMSETE) {
+            return m_ramsete.mSetpoint;
+        }
+        if (mFollowerType == FollowerType.PID) {
+            return m_pid.mSetpoint;
+        }
+        if (mFollowerType == FollowerType.PURE_PURSUIT) {
+            return m_pursuit.mSetpoint;
+        }
+
+        return null;
     }
 }

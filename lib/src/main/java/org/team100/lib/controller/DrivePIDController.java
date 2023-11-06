@@ -1,11 +1,15 @@
 package org.team100.lib.controller;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimedPose;
+import org.team100.lib.trajectory.TrajectorySamplePoint;
+import org.team100.lib.trajectory.TrajectoryTimeIterator;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
@@ -13,7 +17,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * This originated in DriveMotionPlanner, which included several
  * controllers.
  * 
- * Implements feedforward based on trajectory velocity, and proportional feedback on pose.
+ * Implements feedforward based on trajectory velocity, and proportional
+ * feedback on pose.
  */
 public class DrivePIDController {
     public static final Telemetry t = Telemetry.get();
@@ -24,11 +29,44 @@ public class DrivePIDController {
         return mError;
     }
 
-    public void reset() {
-        mError = GeometryUtil.kPose2dIdentity;
+    private TrajectoryTimeIterator mCurrentTrajectory;
+    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
+    double mLastTime = Double.POSITIVE_INFINITY;
+
+    public void setTrajectory(final TrajectoryTimeIterator trajectory) {
+        mCurrentTrajectory = trajectory;
+        mSetpoint = trajectory.getState();
+
     }
 
-    public ChassisSpeeds updatePIDChassis(final Pose2d current_state, final TimedPose mSetpoint) {
+    public boolean isDone() {
+        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+    }
+
+    public void reset() {
+        mError = GeometryUtil.kPose2dIdentity;
+        mLastTime = Double.POSITIVE_INFINITY;
+
+    }
+
+    public ChassisSpeeds updatePIDChassis(final double timestamp, final Pose2d current_state) {
+        if (mCurrentTrajectory == null)
+            return null;
+
+        t.log("/planner/current state", current_state);
+        if (isDone()) {
+            return new ChassisSpeeds();
+        }
+
+        if (!Double.isFinite(mLastTime))
+            mLastTime = timestamp;
+        final double mDt = timestamp - mLastTime;
+        mLastTime = timestamp;
+
+        TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
+        t.log("/pid_planner/sample point", sample_point);
+        mSetpoint = sample_point.state();
+        t.log("/pid_planner/setpoint", mSetpoint);
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
@@ -70,5 +108,16 @@ public class DrivePIDController {
         chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond + kPathKTheta * pid_error.dtheta;
         return chassisSpeeds;
     }
+
+    public synchronized Translation2d getTranslationalError() {
+        return new Translation2d(
+                getError().getTranslation().getX(),
+                getError().getTranslation().getY());
+    }
+
+    public synchronized Rotation2d getHeadingError() {
+        return getError().getRotation();
+    }
+
 
 }

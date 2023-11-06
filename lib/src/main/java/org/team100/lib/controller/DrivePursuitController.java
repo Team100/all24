@@ -4,6 +4,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimedPose;
+import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.MathUtil;
 
@@ -19,7 +20,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class DrivePursuitController {
     public static final Telemetry t = Telemetry.get();
 
-
     private static final double defaultCook = 0.5;
 
     private static final double kPathLookaheadTime = 0.25;
@@ -34,30 +34,72 @@ public class DrivePursuitController {
     // used for the "D" term of the heading controller
     Rotation2d mPrevHeadingError = GeometryUtil.kRotationIdentity;
 
-    private Pose2d  mError = GeometryUtil.kPose2dIdentity;
+    private Pose2d mError = GeometryUtil.kPose2dIdentity;
 
     public Pose2d getError() {
         return mError;
     }
 
+    private TrajectoryTimeIterator mCurrentTrajectory;
+    double mCurrentTrajectoryLength = 0.0;
+    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
+    double mLastTime = Double.POSITIVE_INFINITY;
+    boolean mIsReversed = false;
 
+    public void setTrajectory(final TrajectoryTimeIterator trajectory) {
+        mCurrentTrajectory = trajectory;
+        mCurrentTrajectoryLength = mCurrentTrajectory.trajectory().getLastPoint().state().getTimeS();
+        mSetpoint = trajectory.getState();
+
+        for (int i = 0; i < trajectory.trajectory().length(); ++i) {
+            if (trajectory.trajectory().getPoint(i).state().velocityM_S() > MathUtil.EPSILON) {
+                mIsReversed = false;
+                break;
+            } else if (trajectory.trajectory().getPoint(i).state().velocityM_S() < -MathUtil.EPSILON) {
+                mIsReversed = true;
+                break;
+            }
+        }
+
+    }
+
+    public boolean isDone() {
+        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+    }
 
     public void reset() {
         useDefaultCook = true;
-        mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0, kMaxVelocityMetersPerSecond);
+        mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0,
+                kMaxVelocityMetersPerSecond);
         mPrevHeadingError = GeometryUtil.kRotationIdentity;
         mError = GeometryUtil.kPose2dIdentity;
+        mLastTime = Double.POSITIVE_INFINITY;
+
     }
 
     // TODO: move these states to this class.
-    public ChassisSpeeds updatePurePursuit(
+    public ChassisSpeeds updatePurePursuit(final double timestamp,
             final Pose2d current_state,
-            final double feedforwardOmegaRadiansPerSecond,
-            final TrajectoryTimeIterator mCurrentTrajectory,
-            final TimedPose mSetpoint,
-            final boolean mIsReversed,
-            final double mCurrentTrajectoryLength,
-            final double mDt) {
+            final double feedforwardOmegaRadiansPerSecond) {
+        if (mCurrentTrajectory == null)
+            return null;
+
+        t.log("/planner/current state", current_state);
+        if (isDone()) {
+            return new ChassisSpeeds();
+        }
+
+        if (!Double.isFinite(mLastTime))
+            mLastTime = timestamp;
+        final double mDt = timestamp - mLastTime;
+        mLastTime = timestamp;
+
+        double previewQuantity = DrivePursuitController.previewDt(mCurrentTrajectory, current_state);
+
+        TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(previewQuantity);
+        t.log("/pid_planner/sample point", sample_point);
+        mSetpoint = sample_point.state();
+        t.log("/pid_planner/setpoint", mSetpoint);
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
@@ -148,29 +190,43 @@ public class DrivePursuitController {
         return chassisSpeeds;
     }
 
-    public static double distance(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state, double additional_progress){
-        return GeometryUtil.distance(mCurrentTrajectory.preview(additional_progress).state().state().getPose(), current_state);
+    public static double distance(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state,
+            double additional_progress) {
+        return GeometryUtil.distance(mCurrentTrajectory.preview(additional_progress).state().state().getPose(),
+                current_state);
     }
 
-    public static double previewDt(TrajectoryTimeIterator mCurrentTrajectory,  Pose2d current_state) {
+    public static double previewDt(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state) {
         double searchStepSize = 1.0;
         double previewQuantity = 0.0;
         double searchDirection = 1.0;
         double forwardDistance = distance(mCurrentTrajectory, current_state, previewQuantity + searchStepSize);
         double reverseDistance = distance(mCurrentTrajectory, current_state, previewQuantity - searchStepSize);
         searchDirection = Math.signum(reverseDistance - forwardDistance);
-        while(searchStepSize > 0.001){
-            if(MathUtil.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01)) break;
-            while(/* next point is closer than current point */ distance(mCurrentTrajectory, current_state, previewQuantity + searchStepSize*searchDirection) <
-                    distance(mCurrentTrajectory, current_state, previewQuantity)) {
+        while (searchStepSize > 0.001) {
+            if (MathUtil.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01))
+                break;
+            while (/* next point is closer than current point */ distance(mCurrentTrajectory, current_state,
+                    previewQuantity + searchStepSize * searchDirection) < distance(mCurrentTrajectory, current_state,
+                            previewQuantity)) {
                 /* move to next point */
-                previewQuantity += searchStepSize*searchDirection;
+                previewQuantity += searchStepSize * searchDirection;
             }
             searchStepSize /= 10.0;
             searchDirection *= -1;
         }
         return previewQuantity;
-    
+
+    }
+
+    public synchronized Translation2d getTranslationalError() {
+        return new Translation2d(
+                getError().getTranslation().getX(),
+                getError().getTranslation().getY());
+    }
+
+    public synchronized Rotation2d getHeadingError() {
+        return getError().getRotation();
     }
 
 }
