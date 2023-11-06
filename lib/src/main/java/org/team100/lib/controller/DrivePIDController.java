@@ -9,7 +9,6 @@ import org.team100.lib.trajectory.TrajectoryTimeIterator;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
@@ -20,40 +19,32 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * Implements feedforward based on trajectory velocity, and proportional
  * feedback on pose.
  */
-public class DrivePIDController {
+public class DrivePIDController implements DriveMotionController {
     public static final Telemetry t = Telemetry.get();
 
-    private Pose2d mError = GeometryUtil.kPose2dIdentity;
-
-    public Pose2d getError() {
-        return mError;
-    }
-
     private TrajectoryTimeIterator mCurrentTrajectory;
-    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    double mLastTime = Double.POSITIVE_INFINITY;
+    private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
+    private Pose2d mError = GeometryUtil.kPose2dIdentity;
+    private double mLastTime = Double.POSITIVE_INFINITY;
 
+    @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         mCurrentTrajectory = trajectory;
         mSetpoint = trajectory.getState();
-
-    }
-
-    public boolean isDone() {
-        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
-    }
-
-    public void reset() {
         mError = GeometryUtil.kPose2dIdentity;
         mLastTime = Double.POSITIVE_INFINITY;
+    }
 
+    @Override
+    public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
+        return updatePIDChassis(timestamp, current_state);
     }
 
     public ChassisSpeeds updatePIDChassis(final double timestamp, final Pose2d current_state) {
         if (mCurrentTrajectory == null)
             return null;
 
-        t.log("/planner/current state", current_state);
+        t.log("/pid_planner/current state", current_state);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -109,15 +100,18 @@ public class DrivePIDController {
         return chassisSpeeds;
     }
 
-    public synchronized Translation2d getTranslationalError() {
-        return new Translation2d(
-                getError().getTranslation().getX(),
-                getError().getTranslation().getY());
+    @Override
+    public boolean isDone() {
+        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
     }
 
-    public synchronized Rotation2d getHeadingError() {
-        return getError().getRotation();
+    // for testing
+    TimedPose getSetpoint() {
+        return mSetpoint;
     }
 
-
+    // for testing
+    Pose2d getError() {
+        return mError;
+    }
 }

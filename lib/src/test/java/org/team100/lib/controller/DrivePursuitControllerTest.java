@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.planners.DriveMotionPlanner;
 import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -24,15 +23,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
-public class DrivePursuitControllerTest {
+class DrivePursuitControllerTest {
 
-    public static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
-    public static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
+    private static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
+    private static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
 
-    public static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
-    public static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
+    private static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
+    private static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
 
-    public static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
+    private static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
             // Front left
             new Translation2d(kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
             // Front right
@@ -42,15 +41,12 @@ public class DrivePursuitControllerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    public static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
     static {
         kSmoothKinematicLimits.kMaxDriveVelocity = kMaxVelocityMetersPerSecond * .9;
         kSmoothKinematicLimits.kMaxDriveAcceleration = kMaxAccelerationMetersPerSecondSquared;
         kSmoothKinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
     }
-
-    
-
 
     @Test
     void testPursuit() {
@@ -67,19 +63,18 @@ public class DrivePursuitControllerTest {
         List<Rotation2d> headings = List.of(
                 GeometryUtil.fromDegrees(90),
                 GeometryUtil.fromDegrees(180));
-        // so this trajectory is actually (robot-relative) -x the whole way, more or less.
+        // so this trajectory is actually (robot-relative) -x the whole way, more or
+        // less.
         // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
-        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner();
-        mMotionPlanner.setFollowerType(DriveMotionPlanner.FollowerType.PURE_PURSUIT);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = tPlanner.generateTrajectory(
+        Trajectory trajectory = planner.generateTrajectory(
                 false,
                 waypoints,
                 headings,
@@ -98,19 +93,19 @@ public class DrivePursuitControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
-        mMotionPlanner.reset();
-        mMotionPlanner.setTrajectory(iter);
+        DrivePursuitController controller = new DrivePursuitController();
+        controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
         // based on the trajectory itself.
 
         {
             // System.out.println("============initialize============");
-            ChassisSpeeds output = mMotionPlanner.update(0,
+            ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
-                    // this is default cook.
-                    // TODO: remove that idea.
+            // this is default cook.
+            // TODO: remove that idea.
             assertEquals(-2.48, output.vxMetersPerSecond, 0.05);
             assertEquals(0, output.vyMetersPerSecond, 0.05);
             // omega is NaN, i think pursuit ignores omega, it uses feedforward only.
@@ -119,7 +114,7 @@ public class DrivePursuitControllerTest {
 
         {
             // System.out.println("============4 sec============");
-            ChassisSpeeds output = mMotionPlanner.update(4.0,
+            ChassisSpeeds output = controller.update(4.0,
                     new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69)),
                     new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
@@ -129,12 +124,14 @@ public class DrivePursuitControllerTest {
             // turning slowly to the left
             // i think pure pursuit might ignore omega
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
-            Translation2d translational_error = mMotionPlanner.getTranslationalError();
+            Translation2d translational_error = new Translation2d(
+                controller.getError().getTranslation().getX(),
+                controller.getError().getTranslation().getY());
             assertEquals(0, translational_error.getX(), 0.05);
             assertEquals(0, translational_error.getY(), 0.05);
-            Rotation2d heading_error = mMotionPlanner.getHeadingError();
+            Rotation2d heading_error = controller.getError().getRotation();
             assertEquals(0, heading_error.getRadians(), 0.05);
-            TimedPose path_setpoint = mMotionPlanner.getSetpoint();
+            TimedPose path_setpoint = controller.getSetpoint();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
             assertEquals(1.69, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
@@ -146,20 +143,22 @@ public class DrivePursuitControllerTest {
         }
         {
             // System.out.println("============8 sec============");
-            ChassisSpeeds output = mMotionPlanner.update(8.0,
+            ChassisSpeeds output = controller.update(8.0,
                     new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22)),
                     new Twist2d());
-                    // this is default cook again
+            // this is default cook again
             assertEquals(-2.5, output.vxMetersPerSecond, 0.05);
             // this is more Y than PID because it looks ahead
             assertEquals(-0.15, output.vyMetersPerSecond, 0.05);
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
-            Translation2d translational_error = mMotionPlanner.getTranslationalError();
+            Translation2d translational_error = new Translation2d(
+                controller.getError().getTranslation().getX(),
+                controller.getError().getTranslation().getY());
             assertEquals(0, translational_error.getX(), 0.05);
             assertEquals(0, translational_error.getY(), 0.01);
-            Rotation2d heading_error = mMotionPlanner.getHeadingError();
+            Rotation2d heading_error = controller.getError().getRotation();
             assertEquals(0, heading_error.getRadians(), 0.01);
-            TimedPose path_setpoint = mMotionPlanner.getSetpoint();
+            TimedPose path_setpoint = controller.getSetpoint();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
@@ -170,6 +169,5 @@ public class DrivePursuitControllerTest {
             // assertEquals(0, heading_setpoint.getRadians(), 0.001);
         }
     }
-
 
 }

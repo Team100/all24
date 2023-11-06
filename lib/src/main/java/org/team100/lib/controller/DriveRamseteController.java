@@ -20,41 +20,30 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * This originated in DriveMotionPlanner, which included several
  * controllers.
  */
-public class DriveRamseteController {
-    public static final double kLooperDt = 0.02;
-    public static final Telemetry t = Telemetry.get();
-
-    private Pose2d mError = GeometryUtil.kPose2dIdentity;
-
-    public Pose2d getError() {
-        return mError;
-    }
+public class DriveRamseteController implements DriveMotionController {
+    private static final double kLooperDt = 0.02;
+    private static final Telemetry t = Telemetry.get();
 
     private TrajectoryTimeIterator mCurrentTrajectory;
-    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    double mLastTime = Double.POSITIVE_INFINITY;
+    private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
+    private Pose2d mError = GeometryUtil.kPose2dIdentity;
+    private double mLastTime = Double.POSITIVE_INFINITY;
 
+    @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         mCurrentTrajectory = trajectory;
         mSetpoint = trajectory.getState();
-
-    }
-
-    public boolean isDone() {
-        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
-    }
-
-    public void reset() {
         mError = GeometryUtil.kPose2dIdentity;
         mLastTime = Double.POSITIVE_INFINITY;
-
     }
 
-    public ChassisSpeeds updateRamsete(
-            final double timestamp,
-            final Pose2d current_state,
+    @Override
+    public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
+        return updateRamsete(timestamp, current_state, current_velocity);
+    }
 
-            Twist2d currentVelocity) {
+    private ChassisSpeeds updateRamsete(final double timestamp, final Pose2d current_state,
+            final Twist2d currentVelocity) {
         if (mCurrentTrajectory == null)
             return null;
 
@@ -158,15 +147,21 @@ public class DriveRamseteController {
                 heading_rate);
     }
 
-    public synchronized Translation2d getTranslationalError() {
-        return new Translation2d(
-                getError().getTranslation().getX(),
-                getError().getTranslation().getY());
+
+
+    @Override
+    public boolean isDone() {
+        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+    }
+    
+    // for testing
+    TimedPose getSetpoint() {
+        return mSetpoint;
     }
 
-    public synchronized Rotation2d getHeadingError() {
-        return getError().getRotation();
+    // for testing
+    Pose2d getError() {
+        return mError;
     }
-
 
 }

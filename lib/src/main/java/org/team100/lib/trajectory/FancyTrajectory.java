@@ -2,9 +2,10 @@ package org.team100.lib.trajectory;
 
 import java.util.List;
 
+import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.controller.DrivePIDController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.planners.DriveMotionPlanner;
 import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Telemetry;
@@ -27,8 +28,8 @@ public class FancyTrajectory extends Command {
     private final Telemetry t = Telemetry.get();
 
     private final SwerveDriveSubsystem m_robotDrive;
-    private final DriveMotionPlanner mMotionPlanner;
-    private final TrajectoryPlanner tPlanner;
+    private final DriveMotionController m_controller;
+    private final TrajectoryPlanner m_planner;
     // private final SwerveDriveKinematics m_kinematics;
     // private final SwerveKinematicLimits m_limits;
 
@@ -41,8 +42,8 @@ public class FancyTrajectory extends Command {
         m_robotDrive = robotDrive;
         // TODO: try the other follower types.
         // TODO: move this constructor out of here
-        mMotionPlanner = new DriveMotionPlanner();
-        tPlanner = new TrajectoryPlanner(kinematics, limits);
+        m_controller = new DrivePIDController();
+        m_planner = new TrajectoryPlanner(kinematics, limits);
         addRequirements(m_robotDrive);
     }
 
@@ -64,7 +65,7 @@ public class FancyTrajectory extends Command {
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = tPlanner
+        Trajectory trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
@@ -81,8 +82,7 @@ public class FancyTrajectory extends Command {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(trajectory));
 
-        mMotionPlanner.reset();
-        mMotionPlanner.setTrajectory(iter);
+        m_controller.setTrajectory(iter);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class FancyTrajectory extends Command {
 
         Twist2d velocity = new Twist2d(); // <<< FIX ME
 
-        ChassisSpeeds output = mMotionPlanner.update(now, currentPose, velocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log("/fancy trajectory/chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output);
     }

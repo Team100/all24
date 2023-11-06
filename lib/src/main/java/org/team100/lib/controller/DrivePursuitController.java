@@ -11,41 +11,36 @@ import org.team100.lib.util.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * This originated in DriveMotionPlanner, which included several
  * controllers.
  */
-public class DrivePursuitController {
+public class DrivePursuitController implements DriveMotionController {
     public static final Telemetry t = Telemetry.get();
 
     private static final double defaultCook = 0.5;
-
     private static final double kPathLookaheadTime = 0.25;
     private static final double kPathMinLookaheadDistance = 12.0;
     private static final double kAdaptivePathMinLookaheadDistance = 0.1;
     private static final double kAdaptivePathMaxLookaheadDistance = 0.1;
-    private static final double kAdaptiveErrorLookaheadCoefficient = 0.01;
+    private static final double kLookaheadSearchDt = 0.01;
     private static final double kMaxVelocityMetersPerSecond = 4.959668;
 
     private boolean useDefaultCook = true;
     private Lookahead mSpeedLookahead = null;
     // used for the "D" term of the heading controller
-    Rotation2d mPrevHeadingError = GeometryUtil.kRotationIdentity;
-
+    private Rotation2d mPrevHeadingError = GeometryUtil.kRotationIdentity;
     private Pose2d mError = GeometryUtil.kPose2dIdentity;
-
-    public Pose2d getError() {
-        return mError;
-    }
-
     private TrajectoryTimeIterator mCurrentTrajectory;
-    double mCurrentTrajectoryLength = 0.0;
-    public TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    double mLastTime = Double.POSITIVE_INFINITY;
-    boolean mIsReversed = false;
+    private double mCurrentTrajectoryLength = 0.0;
+    private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
+    private double mLastTime = Double.POSITIVE_INFINITY;
+    private boolean mIsReversed = false;
 
+    @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         mCurrentTrajectory = trajectory;
         mCurrentTrajectoryLength = mCurrentTrajectory.trajectory().getLastPoint().state().getTimeS();
@@ -60,24 +55,19 @@ public class DrivePursuitController {
                 break;
             }
         }
-
-    }
-
-    public boolean isDone() {
-        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
-    }
-
-    public void reset() {
         useDefaultCook = true;
         mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0,
                 kMaxVelocityMetersPerSecond);
         mPrevHeadingError = GeometryUtil.kRotationIdentity;
         mError = GeometryUtil.kPose2dIdentity;
         mLastTime = Double.POSITIVE_INFINITY;
-
     }
 
-    // TODO: move these states to this class.
+    @Override
+    public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
+        return updatePurePursuit(timestamp, current_state, 0.0);
+    }
+
     public ChassisSpeeds updatePurePursuit(final double timestamp,
             final Pose2d current_state,
             final double feedforwardOmegaRadiansPerSecond) {
@@ -106,7 +96,6 @@ public class DrivePursuitController {
         t.log("/pursuit_planner/error", mError);
 
         double lookahead_time = kPathLookaheadTime;
-        final double kLookaheadSearchDt = 0.01;
 
         TimedPose lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
         t.log("/pursuit_planner/lookahead state", lookahead_state);
@@ -190,13 +179,28 @@ public class DrivePursuitController {
         return chassisSpeeds;
     }
 
-    public static double distance(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state,
+    @Override
+    public boolean isDone() {
+        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+    }
+
+    // for testing
+    TimedPose getSetpoint() {
+        return mSetpoint;
+    }
+
+    // for testing
+    Pose2d getError() {
+        return mError;
+    }
+
+    private static double distance(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state,
             double additional_progress) {
         return GeometryUtil.distance(mCurrentTrajectory.preview(additional_progress).state().state().getPose(),
                 current_state);
     }
 
-    public static double previewDt(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state) {
+    private static double previewDt(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state) {
         double searchStepSize = 1.0;
         double previewQuantity = 0.0;
         double searchDirection = 1.0;
@@ -216,17 +220,5 @@ public class DrivePursuitController {
             searchDirection *= -1;
         }
         return previewQuantity;
-
     }
-
-    public synchronized Translation2d getTranslationalError() {
-        return new Translation2d(
-                getError().getTranslation().getX(),
-                getError().getTranslation().getY());
-    }
-
-    public synchronized Rotation2d getHeadingError() {
-        return getError().getRotation();
-    }
-
 }
