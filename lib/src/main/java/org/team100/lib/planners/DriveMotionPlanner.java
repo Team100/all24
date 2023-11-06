@@ -120,27 +120,7 @@ public class DriveMotionPlanner {
             mSetpoint = sample_point.state();
             t.log("/pid_planner/setpoint", mSetpoint);
 
-            final double velocity_m = mSetpoint.velocityM_S();
-            t.log("/pid_planner/setpoint velocity", velocity_m);
-
-            // Field relative
-            var course = mSetpoint.state().getCourse();
-            Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationIdentity;
-            // Adjust course by ACTUAL heading rather than planned to decouple heading and
-            // translation errors.
-            motion_direction = current_state.getRotation().unaryMinus().rotateBy(motion_direction);
-            t.log("/planner/motion direction", motion_direction);
-
-            ChassisSpeeds chassis_speeds = new ChassisSpeeds(
-                    motion_direction.getCos() * velocity_m,
-                    motion_direction.getSin() * velocity_m,
-                    // Need unit conversion because Pose2dWithMotion heading rate is per unit
-                    // distance.
-                    velocity_m * mSetpoint.state().getHeadingRate());
-            t.log("/planner/chassis speeds", chassis_speeds);
-
-            // PID is in robot frame
-            return m_pid.updatePIDChassis(current_state, mSetpoint, chassis_speeds);
+            return m_pid.updatePIDChassis(current_state, mSetpoint);
 
         }
         if (mFollowerType == FollowerType.PURE_PURSUIT) {

@@ -5,31 +5,52 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * This originated in DriveMotionPlanner, which included several
  * controllers.
+ * 
+ * Implements feedforward based on trajectory velocity, and proportional feedback on pose.
  */
 public class DrivePIDController {
     public static final Telemetry t = Telemetry.get();
 
-    private Pose2d  mError = GeometryUtil.kPose2dIdentity;
+    private Pose2d mError = GeometryUtil.kPose2dIdentity;
 
     public Pose2d getError() {
         return mError;
     }
 
-
     public void reset() {
         mError = GeometryUtil.kPose2dIdentity;
     }
 
-    public ChassisSpeeds updatePIDChassis(final Pose2d current_state, final TimedPose mSetpoint, ChassisSpeeds chassisSpeeds) {
+    public ChassisSpeeds updatePIDChassis(final Pose2d current_state, final TimedPose mSetpoint) {
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
+        final double velocity_m = mSetpoint.velocityM_S();
+        t.log("/pid_planner/setpoint velocity", velocity_m);
+
+        // Field relative
+        var course = mSetpoint.state().getCourse();
+        Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationIdentity;
+        // Adjust course by ACTUAL heading rather than planned to decouple heading and
+        // translation errors.
+        motion_direction = current_state.getRotation().unaryMinus().rotateBy(motion_direction);
+        t.log("/planner/motion direction", motion_direction);
+
+        // this is feedforward
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+                motion_direction.getCos() * velocity_m,
+                motion_direction.getSin() * velocity_m,
+                // Need unit conversion because Pose2dWithMotion heading rate is per unit
+                // distance.
+                velocity_m * mSetpoint.state().getHeadingRate());
+        t.log("/planner/chassis speeds", chassisSpeeds);
 
         // Feedback on longitudinal error (distance).
         final double kPathk = 2.4;
@@ -43,6 +64,7 @@ public class DrivePIDController {
         Twist2d pid_error = new Pose2d().log(mError);
         t.log("/drive_pid_controller/pid error", pid_error);
 
+        // u = u_FF + K(error)
         chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond + kPathk * pid_error.dx;
         chassisSpeeds.vyMetersPerSecond = chassisSpeeds.vyMetersPerSecond + kPathk * pid_error.dy;
         chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond + kPathKTheta * pid_error.dtheta;
