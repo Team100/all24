@@ -19,7 +19,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 public class DriveRamseteController {
 
-    public static ChassisSpeeds updateRamsete(
+    public void reset() {
+
+    }
+
+    public ChassisSpeeds updateRamsete(
             TimedPose fieldToGoal,
             Pose2d fieldToRobot,
             Twist2d currentVelocity,

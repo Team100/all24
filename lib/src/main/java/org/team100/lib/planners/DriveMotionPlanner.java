@@ -3,6 +3,7 @@ package org.team100.lib.planners;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.team100.lib.controller.DriveFeedforwardController;
 import org.team100.lib.controller.DrivePIDController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
@@ -70,9 +71,6 @@ public class DriveMotionPlanner {
     final SwerveDriveKinematics swerve_kinematics_;
     final SwerveKinematicLimits swerve_kinematic_limits_;
 
-    private double defaultCook = 0.5;
-    private boolean useDefaultCook = true;
-
     TrajectoryTimeIterator mCurrentTrajectory;
     boolean mIsReversed = false;
     double mLastTime = Double.POSITIVE_INFINITY;
@@ -98,6 +96,11 @@ public class DriveMotionPlanner {
 
     double mDt = 0.0;
 
+    private final DriveRamseteController m_ramsete = new DriveRamseteController();
+    private final DrivePIDController m_pid = new DrivePIDController();
+    private final DrivePursuitController m_pursuit = new DrivePursuitController();
+    private final DriveFeedforwardController m_ff = new DriveFeedforwardController();
+
     public DriveMotionPlanner(SwerveDriveKinematics kinematics, SwerveKinematicLimits kinematic_limits) {
         swerve_kinematics_ = kinematics;
         swerve_kinematic_limits_ = kinematic_limits;
@@ -107,7 +110,6 @@ public class DriveMotionPlanner {
         mCurrentTrajectory = trajectory;
         mSetpoint = trajectory.getState();
         mLastSetpoint = null;
-        useDefaultCook = true;
         mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0, kMaxVelocityMetersPerSecond);
         mCurrentTrajectoryLength = mCurrentTrajectory.trajectory().getLastPoint().state().getTimeS();
         for (int i = 0; i < trajectory.trajectory().length(); ++i) {
@@ -127,6 +129,10 @@ public class DriveMotionPlanner {
         mLastSetpoint = null;
         mOutput = new ChassisSpeeds();
         mLastTime = Double.POSITIVE_INFINITY;
+        m_pursuit.reset();
+        m_ff.reset();
+        m_pid.reset();
+        m_ramsete.reset();
     }
 
     public Trajectory generateTrajectory(
@@ -221,25 +227,14 @@ public class DriveMotionPlanner {
                 mSetpoint = sample_point.state();
                 mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
-                final double velocity_m = mSetpoint.velocityM_S();
-                // Field relative
-                var course = mSetpoint.state().getCourse();
-                Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationIdentity;
-                // Adjust course by ACTUAL heading rather than planned to decouple heading and translation errors.
-                motion_direction = current_state.getRotation().unaryMinus().rotateBy(motion_direction);
-
-                mOutput = new ChassisSpeeds(
-                        motion_direction.getCos() * velocity_m,
-                        motion_direction.getSin() * velocity_m,
-                        // Need unit conversion because Pose2dWithMotion heading rate is per unit distance.
-                        velocity_m * mSetpoint.state().getHeadingRate());
+                mOutput = m_ff.updateFeedforward(current_state, mSetpoint);
             } else if (mFollowerType == FollowerType.RAMSETE) {
                 sample_point = mCurrentTrajectory.advance(mDt);
                 // RobotState.getInstance().setDisplaySetpointPose(Pose2d.fromTranslation(RobotState.getInstance().getFieldToOdom(timestamp)).transformBy(sample_point.state().state().getPose()));
                 mSetpoint = sample_point.state();
                 mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
-                mOutput = DriveRamseteController.updateRamsete(sample_point.state(), current_state, current_velocity, mError);
+                mOutput = m_ramsete.updateRamsete(sample_point.state(), current_state, current_velocity, mError);
             } else if (mFollowerType == FollowerType.PID) {
                 sample_point = mCurrentTrajectory.advance(mDt);
                 t.log("/planner/sample point", sample_point);
@@ -269,7 +264,7 @@ public class DriveMotionPlanner {
                 t.log("/planner/chassis speeds", chassis_speeds);
 
                 // PID is in robot frame
-                mOutput = DrivePIDController.updatePIDChassis(chassis_speeds, mError);
+                mOutput = m_pid.updatePIDChassis(chassis_speeds, mError);
             } else if (mFollowerType == FollowerType.PURE_PURSUIT) {
                 double searchStepSize = 1.0;
                 double previewQuantity = 0.0;
@@ -292,15 +287,13 @@ public class DriveMotionPlanner {
                 mSetpoint = sample_point.state();
                 mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
-                mOutput = DrivePursuitController.updatePurePursuit(current_state,0.0,
+                mOutput = m_pursuit.updatePurePursuit(current_state,0.0,
                  mError,
                  mCurrentTrajectory,
                  mSetpoint,
                  mSpeedLookahead,
                  mIsReversed,
-                 defaultCook,
                  mCurrentTrajectoryLength,
-                 useDefaultCook,
                  mPrevHeadingError,
                  mDt
                 );

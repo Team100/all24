@@ -13,7 +13,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class DrivePIDController {
     public static final Telemetry t = Telemetry.get();
 
-    public static ChassisSpeeds updatePIDChassis(ChassisSpeeds chassisSpeeds, Pose2d mError) {
+    public void reset() {
+
+    }
+
+    public ChassisSpeeds updatePIDChassis(ChassisSpeeds chassisSpeeds, Pose2d mError) {
         // Feedback on longitudinal error (distance).
         final double kPathk = 2.4;
         // 2.4;
