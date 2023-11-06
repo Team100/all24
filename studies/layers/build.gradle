@@ -3,8 +3,23 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2023.4.2"
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+sourceSets {
+    main {
+        java {
+            srcDir "../../lib/src/main/java"
+        }
+    }
+}
+
+// these four lines are for development builds
+// https://github.com/wpilibsuite/allwpilib/blob/main/DevelopmentBuilds.md
+wpi.maven.useLocal = false
+wpi.maven.useDevelopment = true
+wpi.versions.wpilibVersion = '2023.+'
+wpi.versions.wpimathVersion = '2023.+'
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -48,6 +63,10 @@ def includeDesktopSupport = true
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
+    
+    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.3'
+    implementation "org.ejml:ejml-simple:0.43.1"
+
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
