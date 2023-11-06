@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.team100.lib.util.MathUtil;
 
+// TODO: get rid of this, I hate the builder pattern.
 public class MotionProfileBuilder {
     private final List<MotionSegment> segments;
     private MotionState currentState;
