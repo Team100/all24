@@ -1,18 +1,18 @@
 package org.team100.lib.paths;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.team100.lib.planners.TrajectoryPlanner;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.VelocityLimitRegionConstraint;
+import org.team100.lib.trajectory.Trajectory;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.team100.lib.planners.DriveMotionPlanner;
-import org.team100.lib.timing.TimingConstraint;
-import org.team100.lib.timing.VelocityLimitRegionConstraint;
-import org.team100.lib.trajectory.Trajectory;
 
 /** This is from 254 2023.  I commented out the ones that seem unused. */
 public class TrajectoryGenerator {
@@ -20,10 +20,10 @@ public class TrajectoryGenerator {
     private static final double kMaxVoltage = 9.0;
     public static final double kMaxVelocityMetersPerSecond = 5.05; //Calibrated 3/12 on Comp Bot
 
-    private final DriveMotionPlanner mMotionPlanner;
+    private final TrajectoryPlanner mMotionPlanner;
     private TrajectorySet mTrajectorySet = null;
 
-    public TrajectoryGenerator(DriveMotionPlanner motion_planner) {
+    public TrajectoryGenerator(TrajectoryPlanner motion_planner) {
         mMotionPlanner = motion_planner;
     }
 

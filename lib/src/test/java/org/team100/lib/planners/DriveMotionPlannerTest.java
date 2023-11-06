@@ -98,7 +98,7 @@ class DriveMotionPlannerTest {
         // System.out.println(timed_trajectory.getPoint(i).index());
         // }
 
-        DriveMotionPlanner planner = new DriveMotionPlanner(kKinematics, kSmoothKinematicLimits);
+        DriveMotionPlanner planner = new DriveMotionPlanner();
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         planner.setTrajectory(traj_iterator);
@@ -129,8 +129,9 @@ class DriveMotionPlannerTest {
     void testAllTrajectories() {
         SwerveDriveKinematics kinematics = kKinematics;
         SwerveKinematicLimits limits = kSmoothKinematicLimits;
-        DriveMotionPlanner planner = new DriveMotionPlanner(kinematics, limits);
-        TrajectoryGenerator generator = new TrajectoryGenerator(planner);
+        DriveMotionPlanner planner = new DriveMotionPlanner();
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
+        TrajectoryGenerator generator = new TrajectoryGenerator(tPlanner);
         generator.generateTrajectories();
         var trajectories = generator.getTrajectorySet().getAllTrajectories();
 

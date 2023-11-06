@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.planners.DriveMotionPlanner;
+import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
@@ -67,11 +68,12 @@ class FancyTrajectoryTest {
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner(kKinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
+        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner();
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = mMotionPlanner.generateTrajectory(
+        Trajectory trajectory = tPlanner.generateTrajectory(
                 false,
                 waypoints,
                 headings,
@@ -90,6 +92,7 @@ class FancyTrajectoryTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
+        mMotionPlanner.reset();
         mMotionPlanner.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -177,12 +180,13 @@ class FancyTrajectoryTest {
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner(kKinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
+        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner();
         mMotionPlanner.setFollowerType(DriveMotionPlanner.FollowerType.PURE_PURSUIT);
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = mMotionPlanner.generateTrajectory(
+        Trajectory trajectory = tPlanner.generateTrajectory(
                 false,
                 waypoints,
                 headings,
@@ -201,6 +205,7 @@ class FancyTrajectoryTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
+        mMotionPlanner.reset();
         mMotionPlanner.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -294,12 +299,13 @@ class FancyTrajectoryTest {
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner(kKinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
+        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner();
         mMotionPlanner.setFollowerType(DriveMotionPlanner.FollowerType.FEEDFORWARD_ONLY);
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = mMotionPlanner.generateTrajectory(
+        Trajectory trajectory = tPlanner.generateTrajectory(
                 false,
                 waypoints,
                 headings,
@@ -318,6 +324,7 @@ class FancyTrajectoryTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
+        mMotionPlanner.reset();
         mMotionPlanner.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -404,12 +411,13 @@ class FancyTrajectoryTest {
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner(kKinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
+        DriveMotionPlanner mMotionPlanner = new DriveMotionPlanner();
         mMotionPlanner.setFollowerType(DriveMotionPlanner.FollowerType.RAMSETE);
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = mMotionPlanner.generateTrajectory(
+        Trajectory trajectory = tPlanner.generateTrajectory(
                 false,
                 waypoints,
                 headings,
@@ -428,6 +436,7 @@ class FancyTrajectoryTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
+        mMotionPlanner.reset();
         mMotionPlanner.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,

@@ -2,9 +2,10 @@ package org.team100.lib.controller;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.planners.DriveMotionPlanner;
+import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.util.MathUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,34 +17,57 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * controllers.
  */
 public class DrivePursuitController {
+    public static final Telemetry t = Telemetry.get();
+
 
     private static final double defaultCook = 0.5;
 
+    private static final double kPathLookaheadTime = 0.25;
+    private static final double kPathMinLookaheadDistance = 12.0;
+    private static final double kAdaptivePathMinLookaheadDistance = 0.1;
+    private static final double kAdaptivePathMaxLookaheadDistance = 0.1;
+    private static final double kAdaptiveErrorLookaheadCoefficient = 0.01;
+    private static final double kMaxVelocityMetersPerSecond = 4.959668;
+
     private boolean useDefaultCook = true;
+    private Lookahead mSpeedLookahead = null;
+    // used for the "D" term of the heading controller
+    Rotation2d mPrevHeadingError = GeometryUtil.kRotationIdentity;
+
+    private Pose2d  mError = GeometryUtil.kPose2dIdentity;
+
+    public Pose2d getError() {
+        return mError;
+    }
+
+
 
     public void reset() {
         useDefaultCook = true;
+        mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0, kMaxVelocityMetersPerSecond);
+        mPrevHeadingError = GeometryUtil.kRotationIdentity;
+        mError = GeometryUtil.kPose2dIdentity;
     }
 
     // TODO: move these states to this class.
     public ChassisSpeeds updatePurePursuit(
             final Pose2d current_state,
             final double feedforwardOmegaRadiansPerSecond,
-            final Pose2d mError,
             final TrajectoryTimeIterator mCurrentTrajectory,
             final TimedPose mSetpoint,
-            final Lookahead mSpeedLookahead,
             final boolean mIsReversed,
             final double mCurrentTrajectoryLength,
-            final Rotation2d mPrevHeadingError,
             final double mDt) {
-        DriveMotionPlanner.t.log("/planner/error", mError);
 
-        double lookahead_time = DriveMotionPlanner.kPathLookaheadTime;
+        mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
+
+        t.log("/pursuit_planner/error", mError);
+
+        double lookahead_time = kPathLookaheadTime;
         final double kLookaheadSearchDt = 0.01;
 
         TimedPose lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
-        DriveMotionPlanner.t.log("/planner/lookahead state", lookahead_state);
+        t.log("/pursuit_planner/lookahead state", lookahead_state);
 
         double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
@@ -63,18 +87,18 @@ public class DrivePursuitController {
                             GeometryUtil.transformBy(lookahead_state.state()
                                     .getPose(),
                                     GeometryUtil.fromTranslation(new Translation2d(
-                                            (mIsReversed ? -1.0 : 1.0) * (DriveMotionPlanner.kPathMinLookaheadDistance -
+                                            (mIsReversed ? -1.0 : 1.0) * (kPathMinLookaheadDistance -
                                                     actual_lookahead_distance),
                                             0.0))),
                             0.0),
                     lookahead_state.getTimeS(), lookahead_state.velocityM_S(), lookahead_state.acceleration());
         }
-        DriveMotionPlanner.t.log("/planner/updated lookahead state", lookahead_state);
+        t.log("/pursuit_planner/updated lookahead state", lookahead_state);
 
         // Find the vector between robot's current position and the lookahead state
         Translation2d lookaheadTranslation = lookahead_state.state().getTranslation()
                 .minus(current_state.getTranslation());
-        DriveMotionPlanner.t.log("/planner/lookahead translation", lookaheadTranslation);
+        t.log("/pursuit_planner/lookahead translation", lookaheadTranslation);
 
         // Set the steering direction as the direction of the vector
         Rotation2d steeringDirection = lookaheadTranslation.getAngle();
@@ -83,13 +107,11 @@ public class DrivePursuitController {
         steeringDirection = steeringDirection.rotateBy(GeometryUtil.inverse(current_state).getRotation());
 
         // Use the Velocity Feedforward of the Closest Point on the Trajectory
-        double normalizedSpeed = Math.abs(mSetpoint.velocityM_S()) / DriveMotionPlanner.kMaxVelocityMetersPerSecond;
+        double normalizedSpeed = Math.abs(mSetpoint.velocityM_S()) / kMaxVelocityMetersPerSecond;
 
         // The Default Cook is the minimum speed to use. So if a feedforward speed is
         // less than defaultCook, the robot will drive at the defaultCook speed
         if (normalizedSpeed > defaultCook || mSetpoint.getTimeS() > (mCurrentTrajectoryLength / 2.0)) {
-            ///////////////////////////// ???########################
-            // TODO: put this back.
             useDefaultCook = false;
         }
         if (useDefaultCook) {
@@ -101,11 +123,11 @@ public class DrivePursuitController {
         final Translation2d steeringVector = new Translation2d(steeringDirection.getCos() * normalizedSpeed,
                 steeringDirection.getSin() * normalizedSpeed);
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-                steeringVector.getX() * DriveMotionPlanner.kMaxVelocityMetersPerSecond,
-                steeringVector.getY() * DriveMotionPlanner.kMaxVelocityMetersPerSecond,
+                steeringVector.getX() * kMaxVelocityMetersPerSecond,
+                steeringVector.getY() * kMaxVelocityMetersPerSecond,
                 feedforwardOmegaRadiansPerSecond);
 
-        DriveMotionPlanner.t.log("/planner/pursuit speeds", chassisSpeeds);
+        t.log("/pursuit_planner/pursuit speeds", chassisSpeeds);
 
         // Use the PD-Controller for To Follow the Time-Parametrized Heading
         final double kThetakP = 3.5;
@@ -119,7 +141,36 @@ public class DrivePursuitController {
         chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond
                 + (kThetakP * mError.getRotation().getRadians())
                 + kThetakD * ((mError.getRotation().getRadians() - mPrevHeadingError.getRadians()) / mDt);
+
+        // save rotation error for next iteration
+        mPrevHeadingError = mError.getRotation();
+
         return chassisSpeeds;
+    }
+
+    public static double distance(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state, double additional_progress){
+        return GeometryUtil.distance(mCurrentTrajectory.preview(additional_progress).state().state().getPose(), current_state);
+    }
+
+    public static double previewDt(TrajectoryTimeIterator mCurrentTrajectory,  Pose2d current_state) {
+        double searchStepSize = 1.0;
+        double previewQuantity = 0.0;
+        double searchDirection = 1.0;
+        double forwardDistance = distance(mCurrentTrajectory, current_state, previewQuantity + searchStepSize);
+        double reverseDistance = distance(mCurrentTrajectory, current_state, previewQuantity - searchStepSize);
+        searchDirection = Math.signum(reverseDistance - forwardDistance);
+        while(searchStepSize > 0.001){
+            if(MathUtil.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01)) break;
+            while(/* next point is closer than current point */ distance(mCurrentTrajectory, current_state, previewQuantity + searchStepSize*searchDirection) <
+                    distance(mCurrentTrajectory, current_state, previewQuantity)) {
+                /* move to next point */
+                previewQuantity += searchStepSize*searchDirection;
+            }
+            searchStepSize /= 10.0;
+            searchDirection *= -1;
+        }
+        return previewQuantity;
+    
     }
 
 }

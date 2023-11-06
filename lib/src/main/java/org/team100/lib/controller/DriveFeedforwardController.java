@@ -9,13 +9,23 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveFeedforwardController {
 
-    public void reset() {
+    private Pose2d  mError = GeometryUtil.kPose2dIdentity;
 
+    public Pose2d getError() {
+        return mError;
+    }
+
+
+    public void reset() {
+        mError = GeometryUtil.kPose2dIdentity;
     }
 
     public ChassisSpeeds updateFeedforward(
             final Pose2d current_state,
             final TimedPose mSetpoint) {
+
+        mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
+
         final double velocity_m = mSetpoint.velocityM_S();
         // Field relative
         var course = mSetpoint.state().getCourse();

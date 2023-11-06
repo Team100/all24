@@ -3,7 +3,6 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.planners.DriveMotionPlanner;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.util.MathUtil;
 
@@ -18,16 +17,29 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * controllers.
  */
 public class DriveRamseteController {
+    public static final double kLooperDt = 0.02;
+
+    private Pose2d mError = GeometryUtil.kPose2dIdentity;
+
+    public Pose2d getError() {
+        return mError;
+    }
+
+
 
     public void reset() {
-
+ mError = GeometryUtil.kPose2dIdentity;
     }
 
     public ChassisSpeeds updateRamsete(
+        final Pose2d current_state,
+        final TimedPose mSetpoint,
             TimedPose fieldToGoal,
             Pose2d fieldToRobot,
-            Twist2d currentVelocity,
-            Pose2d mError) {
+            Twist2d currentVelocity) {
+
+        mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
+
         // Implements eqn. 5.12 from
         // https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
         final double kBeta = 2.0; // >0.
@@ -92,7 +104,7 @@ public class DriveRamseteController {
         Twist2d adjusted_course_relative_velocity = new Twist2d(adjusted_linear_velocity, 0.0,
                 adjusted_angular_velocity - heading_rate);
         // See where that takes us in one dt.
-        final double kNominalDt = DriveMotionPlanner.kLooperDt;
+        final double kNominalDt = kLooperDt;
         Pose2d adjusted_course_to_goal = new Pose2d()
                 .exp(GeometryUtil.scale(adjusted_course_relative_velocity, kNominalDt));
 

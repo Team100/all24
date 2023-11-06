@@ -1,6 +1,8 @@
 package org.team100.lib.controller;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -13,11 +15,22 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class DrivePIDController {
     public static final Telemetry t = Telemetry.get();
 
-    public void reset() {
+    private Pose2d  mError = GeometryUtil.kPose2dIdentity;
 
+    public Pose2d getError() {
+        return mError;
     }
 
-    public ChassisSpeeds updatePIDChassis(ChassisSpeeds chassisSpeeds, Pose2d mError) {
+
+    public void reset() {
+        mError = GeometryUtil.kPose2dIdentity;
+    }
+
+    public ChassisSpeeds updatePIDChassis(final Pose2d current_state, final TimedPose mSetpoint, ChassisSpeeds chassisSpeeds) {
+
+        mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
+
+
         // Feedback on longitudinal error (distance).
         final double kPathk = 2.4;
         // 2.4;
