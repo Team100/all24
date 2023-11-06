@@ -67,6 +67,11 @@ public class RotateTest {
         public ChassisSpeeds speeds() {
             return new ChassisSpeeds();
         }
+
+        @Override
+        public void setChassisSpeeds(ChassisSpeeds output) {
+            // do nothing
+        }
     }
 
     class MockTimer extends Timer {

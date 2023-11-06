@@ -1,4 +1,4 @@
-package org.team100.lib.trajectory;
+package org.team100.lib.commands;
 
 import java.util.List;
 
@@ -6,11 +6,15 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.trajectory.TrajectoryTimeSampler;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,7 +31,7 @@ public class FancyTrajectory extends Command {
 
     private final Telemetry t = Telemetry.get();
 
-    private final SwerveDriveSubsystem m_robotDrive;
+    private final SwerveDriveSubsystemInterface m_robotDrive;
     private final DriveMotionController m_controller;
     private final TrajectoryPlanner m_planner;
     // private final SwerveDriveKinematics m_kinematics;
@@ -36,7 +40,7 @@ public class FancyTrajectory extends Command {
     public FancyTrajectory(
             SwerveDriveKinematics kinematics,
             SwerveKinematicLimits limits,
-            SwerveDriveSubsystem robotDrive) {
+            SwerveDriveSubsystemInterface robotDrive) {
         // m_kinematics = kinematics;
         // m_limits = limits;
         m_robotDrive = robotDrive;
@@ -44,7 +48,11 @@ public class FancyTrajectory extends Command {
         // TODO: move this constructor out of here
         m_controller = new DrivePIDController();
         m_planner = new TrajectoryPlanner(kinematics, limits);
-        addRequirements(m_robotDrive);
+        SwerveDriveSubsystem swerveDriveSubsystem = m_robotDrive.get();
+        if (swerveDriveSubsystem != null) {
+            // it's null in tests.
+            addRequirements(swerveDriveSubsystem);
+        }
     }
 
     @Override

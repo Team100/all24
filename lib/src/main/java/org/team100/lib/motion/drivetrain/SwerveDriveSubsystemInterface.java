@@ -18,4 +18,6 @@ public interface SwerveDriveSubsystemInterface {
 
     /** Because Subsystem is now concrete, it needs an accessor. */
     SwerveDriveSubsystem get();
+
+    void setChassisSpeeds(ChassisSpeeds output);
 }
