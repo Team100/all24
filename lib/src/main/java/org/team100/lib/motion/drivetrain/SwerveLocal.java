@@ -25,8 +25,9 @@ public class SwerveLocal {
     private final SwerveModuleCollectionInterface m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private final AsymSwerveSetpointGenerator.KinematicLimits limits;
-
     private SwerveSetpoint prevSetpoint;
+        // private SwerveSetpoint prevSetpoint;
+
 
     public SwerveLocal(
             Experiments experiments,
@@ -61,11 +62,11 @@ public class SwerveLocal {
      * @param targetChassisSpeeds speeds in robot coordinates.
      */
     public void setChassisSpeeds(ChassisSpeeds targetChassisSpeeds) {
-        if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
+        // if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
-        } else {
-            setChassisSpeedsNormally(targetChassisSpeeds);
-        }
+        // } else {
+        //     setChassisSpeedsNormally(targetChassisSpeeds);
+        // }
     }
 
     private void setChassisSpeedsNormally(ChassisSpeeds targetChassisSpeeds) {
@@ -73,6 +74,8 @@ public class SwerveLocal {
         t.log("/desired speed/y", targetChassisSpeeds.vyMetersPerSecond);
         t.log("/desired speed/theta", targetChassisSpeeds.omegaRadiansPerSecond);
         SwerveModuleState[] targetModuleStates = m_DriveKinematics.toSwerveModuleStates(targetChassisSpeeds);
+
+        // setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, setpoint, targetChassisSpeeds, 0.020);
         setModuleStates(targetModuleStates);
     }
 
@@ -87,7 +90,9 @@ public class SwerveLocal {
         prevSetpoint = setpoint;
 
         SwerveModuleState[] states = m_DriveKinematics.toSwerveModuleStates(setpoint.getChassisSpeeds());
-        setModuleStates(states);
+        setModuleStates(setpoint.getModuleStates());
+        // setModuleStates(states);
+
     }
 
     /**
