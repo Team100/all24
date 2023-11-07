@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Team100/all24/actions/workflows/main.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/main.yml)
 
+[![CI](https://github.com/Team100/all24/actions/workflows/lib.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/lib.yml)
+
 [![CI](https://github.com/Team100/all24/actions/workflows/vision.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/vision.yml)
 
 
