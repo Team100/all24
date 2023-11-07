@@ -30,8 +30,11 @@ When you have VS Code correctly set up, the Explorer view should contain two top
 
 To include "lib" in your own "study" workspace, you need to do two things:
 
-* add a workspace file, to make vscode features work with lib code
-* edit build.gradle, so gradle builds include lib code
+* Add a workspace file, to make vscode features work with lib code
+* Edit build.gradle, so gradle builds include lib code
+* Copy the lib vendordeps to your project.
+
+## Workspace
 
 To make a workspace file, in your project in vscode, click "add folder to workspace" choosing the lib folder, and then "save workspace to file," choosing your project directory as the location to save it.
 
@@ -54,7 +57,9 @@ This should result in a file at the root level of your project (next to build.gr
 }
 ```
 
-In your build.gradle file, add this clause:
+## Build.gradle
+
+In your build.gradle file, add this clause just after the "plugins" clause (near the top).
 
 ```gradle
 sourceSets {
@@ -65,3 +70,20 @@ sourceSets {
     }
 }
 ```
+
+You also need to add some dependencies.  So inside the "dependencies" section, add these:
+
+```gradle
+    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.3'
+    implementation "org.ejml:ejml-simple:0.43.1"
+```
+
+## Vendordeps
+
+To copy the vendordeps files, find the vendordeps directory in lib, highlight one, say, "NavX.json", and click "copy."
+
+Then find the vendordeps directory in your project (it should contain WPILibNewCommands.json and nothing else).
+
+Highlight the directory name ("vendordeps") and click "paste."
+
+Repeat this process for each of the other two vendordeps files.
