@@ -25,7 +25,7 @@ public class ArmTrajectory extends Command {
         public double normalLowerP = 2;
         public double normalLowerI = 0;
         public double normalLowerD = 0.1;
-        public double normalUpperP = 2;
+        public double normalUpperP = 1.5;
         public double normalUpperI = 0;
         public double normalUpperD = 0.05;
         public double tolerance = 0.001;
@@ -37,6 +37,7 @@ public class ArmTrajectory extends Command {
         public TrajectoryConfig safeTrajectory = new TrajectoryConfig(9, 1.5);
         public TrajectoryConfig normalTrajectory = new TrajectoryConfig(1, 1);
     }
+
     private boolean t = false;
     private final Config m_config = new Config();
     private final ArmSubsystem m_armSubsystem;
@@ -44,8 +45,10 @@ public class ArmTrajectory extends Command {
     private final double m_endAngle;
     private final Timer m_timer;
     private final Translation2d m_set;
-    private final PIDController m_lowerController;
-    private final PIDController m_upperController;
+    private final PIDController m_lowerPosController;
+    private final PIDController m_upperPosController;
+    private final PIDController m_lowerVelController;
+    private final PIDController m_upperVelController;
     private final DoublePublisher measurmentX;
     private final DoublePublisher measurmentY;
     private final DoublePublisher setpointUpper;
@@ -63,34 +66,39 @@ public class ArmTrajectory extends Command {
         m_endAngle = endAngle;
         m_startAngle = startAngle;
         m_timer = new Timer();
-        m_lowerController = new PIDController(m_config.normalLowerP, m_config.normalLowerI, m_config.normalLowerD);
-        m_upperController = new PIDController(m_config.normalUpperP, m_config.normalUpperI, m_config.normalUpperD);
+        m_lowerPosController = new PIDController(m_config.normalLowerP, m_config.normalLowerI, m_config.normalLowerD);
+        m_upperPosController = new PIDController(m_config.normalUpperP, m_config.normalUpperI, m_config.normalUpperD);
+        m_lowerVelController = new PIDController(.1,0, 0);
+        m_upperVelController = new PIDController(.1,0, 0);
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
         measurmentX = inst.getTable("Arm Trajec").getDoubleTopic("measurmentX").publish();
         measurmentY = inst.getTable("Arm Trajec").getDoubleTopic("measurmentY").publish();
         setpointUpper = inst.getTable("Arm Trajec").getDoubleTopic("Setpoint Upper").publish();
         setpointLower = inst.getTable("Arm Trajec").getDoubleTopic("Setpoint Lower").publish();
     }
-    public ArmTrajectory(ArmSubsystem armSubSystem, Translation2d set){
+
+    public ArmTrajectory(ArmSubsystem armSubSystem, Translation2d set) {
         this(armSubSystem, set, -1, -1);
         t = true;
     }
+
     @Override
     public void initialize() {
-        m_lowerController.setIntegratorRange(1, 1);
-        m_upperController.setIntegratorRange(1, 1);
-        m_lowerController.setTolerance(m_config.tolerance);
-        m_upperController.setTolerance(m_config.tolerance);
+        m_lowerPosController.setIntegratorRange(1, 1);
+        m_upperPosController.setIntegratorRange(1, 1);
+        m_lowerPosController.setTolerance(m_config.tolerance);
+        m_upperPosController.setTolerance(m_config.tolerance);
         m_timer.restart();
         final TrajectoryConfig trajectoryConfig;
         trajectoryConfig = m_config.normalTrajectory;
         if (t == true) {
-        m_trajectory = new ArmTrajectories(trajectoryConfig).makeTrajectory(
-                m_armSubsystem.kinematics.forward(m_armSubsystem.getMeasurement()), m_set);
-            } else {
-                m_trajectory = new ArmTrajectories(trajectoryConfig).onePoint(
-                    m_armSubsystem.kinematics.forward(m_armSubsystem.getMeasurement()), m_set, m_startAngle, m_endAngle);
-                }
+            m_trajectory = new ArmTrajectories(trajectoryConfig).makeTrajectory(
+                    m_armSubsystem.kinematics.forward(m_armSubsystem.getMeasurement()), m_set);
+        } else {
+            m_trajectory = new ArmTrajectories(trajectoryConfig).onePoint(
+                    m_armSubsystem.kinematics.forward(m_armSubsystem.getMeasurement()), m_set, m_startAngle,
+                    m_endAngle);
+        }
 
     }
 
@@ -107,9 +115,10 @@ public class ArmTrajectory extends Command {
         double desiredYPos = desiredState.poseMeters.getY();
         double desiredVecloity = desiredState.velocityMetersPerSecond;
         double desiredAcceleration = desiredState.accelerationMetersPerSecondSq;
-        if (desiredState == m_trajectory.sample(10)) {
+        if (desiredState == m_trajectory.sample(100)) {
             desiredAcceleration = 0;
         }
+        System.out.println(desiredAcceleration);
         double theta = desiredState.poseMeters.getRotation().getRadians();
         double desiredXVel = desiredVecloity * Math.cos(theta);
         double desiredYVel = desiredVecloity * Math.cos(Math.PI / 2 - theta);
@@ -121,20 +130,20 @@ public class ArmTrajectory extends Command {
         Translation2d XYPosReference = new Translation2d(desiredXPos, desiredYPos);
         ArmAngles thetaPosReference = m_armSubsystem.kinematics.inverse(XYPosReference);
         ArmAngles thetaVelReference = m_armSubsystem.kinematics.inverseVel(thetaPosReference, XYVelReference);
-        double lowerControllerOutput = m_lowerController.calculate(currentLower, thetaPosReference.th1);
+        double lowerPosControllerOutput = m_lowerPosController.calculate(currentLower, thetaPosReference.th1);
+        double lowerVelControllerOutput = m_lowerVelController.calculate(m_armSubsystem.getVel().th1, thetaVelReference.th1);
         double lowerFeedForward = thetaVelReference.th1 / (Math.PI * 2) * 4;
-        double u1 = lowerFeedForward+lowerControllerOutput;
-        double upperControllerOutput = m_upperController.calculate(currentUpper, thetaPosReference.th2);
+        double u1 = lowerFeedForward+lowerPosControllerOutput+lowerVelControllerOutput;
+        double upperPosControllerOutput = m_upperPosController.calculate(currentUpper, thetaPosReference.th2);
+        double upperVelControllerOutput = m_upperVelController.calculate(m_armSubsystem.getVel().th2, thetaVelReference.th2);
         double upperFeedForward = thetaVelReference.th2 / (Math.PI * 2) * 4;
-        double u2 = upperFeedForward+upperControllerOutput;
+        double u2 = upperFeedForward+upperPosControllerOutput+upperVelControllerOutput;
         m_armSubsystem.set(u1, u2);
-        SmartDashboard.putNumber("Lower Encoder: ", currentLower);
         SmartDashboard.putNumber("Lower FF ", lowerFeedForward);
-        SmartDashboard.putNumber("Lower Controller Output: ", lowerControllerOutput);
+        SmartDashboard.putNumber("Lower Controller Output: ", lowerPosControllerOutput);
         SmartDashboard.putNumber("Upper FF ", upperFeedForward);
-        SmartDashboard.putNumber("Upper Controller Output: ", upperControllerOutput);
+        SmartDashboard.putNumber("Upper Controller Output: ", upperPosControllerOutput);
         SmartDashboard.putNumber("Lower Ref: ", thetaPosReference.th1);
-        SmartDashboard.putNumber("Upper Encoder: ", currentUpper);
         SmartDashboard.putNumber("Upper Ref: ", thetaPosReference.th2);
         SmartDashboard.putNumber("Output Upper: ", u1);
         SmartDashboard.putNumber("Output Lower: ", u2);
@@ -154,5 +163,11 @@ public class ArmTrajectory extends Command {
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public void end(boolean interrupted) {
+        System.out.println("FINISHEDDDDDDDDDD");
+        m_armSubsystem.set(0, 0);
     }
 }
