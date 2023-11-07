@@ -1,4 +1,4 @@
-package org.team100.lib.planners;
+package org.team100.lib.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +11,7 @@ import org.team100.lib.path.Path;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.paths.TrajectoryGenerator;
+import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
@@ -29,13 +30,13 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 
 class DriveMotionPlannerTest {
-    public static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
-    public static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
+    private static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
+    private static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
 
-    public static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
-    public static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
+    private static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
+    private static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
 
-    public static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
+    private static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
             // Front left
             new Translation2d(kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
             // Front right
@@ -45,7 +46,7 @@ class DriveMotionPlannerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    public static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
+            private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
     static {
         kSmoothKinematicLimits.kMaxDriveVelocity = kMaxVelocityMetersPerSecond * .9;
         kSmoothKinematicLimits.kMaxDriveAcceleration = kMaxAccelerationMetersPerSecondSquared;
@@ -98,18 +99,18 @@ class DriveMotionPlannerTest {
         // System.out.println(timed_trajectory.getPoint(i).index());
         // }
 
-        DriveMotionPlanner planner = new DriveMotionPlanner(kKinematics, kSmoothKinematicLimits);
+        DriveMotionController controller = new DrivePIDController();
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
-        planner.setTrajectory(traj_iterator);
+        controller.setTrajectory(traj_iterator);
 
         Pose2d pose = timed_trajectory.getPoint(0).state().state().getPose();
         Twist2d velocity = new Twist2d();
 
         double time = 0.0;
         double mDt = 0.005;
-        while (!planner.isDone()) {
-            ChassisSpeeds speeds = planner.update(time, pose, velocity);
+        while (!controller.isDone()) {
+            ChassisSpeeds speeds = controller.update(time, pose, velocity);
             Twist2d twist = new Twist2d(speeds.vxMetersPerSecond * mDt, speeds.vyMetersPerSecond * mDt,
                     speeds.omegaRadiansPerSecond * mDt);
             velocity = GeometryUtil.toTwist2d(speeds);
@@ -129,8 +130,9 @@ class DriveMotionPlannerTest {
     void testAllTrajectories() {
         SwerveDriveKinematics kinematics = kKinematics;
         SwerveKinematicLimits limits = kSmoothKinematicLimits;
-        DriveMotionPlanner planner = new DriveMotionPlanner(kinematics, limits);
-        TrajectoryGenerator generator = new TrajectoryGenerator(planner);
+        DrivePIDController controller = new DrivePIDController();
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
+        TrajectoryGenerator generator = new TrajectoryGenerator(tPlanner);
         generator.generateTrajectories();
         var trajectories = generator.getTrajectorySet().getAllTrajectories();
 
@@ -138,10 +140,9 @@ class DriveMotionPlannerTest {
 
         for (var traj : trajectories) {
             // System.out.println("\n" + traj.toString());
-            planner.reset();
             TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                     new TrajectoryTimeSampler(traj));
-            planner.setTrajectory(traj_iterator);
+            controller.setTrajectory(traj_iterator);
             final Pose2d kInjectedError = new Pose2d(0.3, -0.1, Rotation2d.fromDegrees(9.0));
             final Twist2d kInjectedVelocityError = new Twist2d(0.1, 0.3, 0.0);
             final double kInjectionTime = 20.0;
@@ -151,7 +152,7 @@ class DriveMotionPlannerTest {
             double time = 0.0;
             double mDt = 0.005;
             boolean error_injected = false;
-            while (!planner.isDone()) {
+            while (!controller.isDone()) {
                 // System.out.println("\n\n-----t=" + time);
                 if (!error_injected && time >= kInjectionTime) {
                     pose = GeometryUtil.transformBy(pose, kInjectedError);
@@ -159,7 +160,7 @@ class DriveMotionPlannerTest {
                             velocity.dy + kInjectedVelocityError.dy, velocity.dtheta + kInjectedVelocityError.dtheta);
                     error_injected = true;
                 }
-                ChassisSpeeds speeds = planner.update(time, pose, velocity);
+                ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
                     // Initialilze from first chassis speeds.
                     SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
@@ -181,7 +182,7 @@ class DriveMotionPlannerTest {
                 // System.out.println(pose);
                 // System.out.println("Setpoint:" + planner.getSetpoint());
                 // Inches and degrees
-                Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose), planner.getSetpoint().state().getPose());
+                Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose), controller.getSetpoint().state().getPose());
                 // System.out.println("Setpoint: " + planner.getSetpoint());
                 // System.out.println("Error: " + error);
                 Assertions.assertEquals(0.0, error.getTranslation().getX(), 0.0508);
