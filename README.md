@@ -1,5 +1,10 @@
 # all24
 
+[![CI](https://github.com/Team100/all24/actions/workflows/main.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/main.yml)
+
+[![CI](https://github.com/Team100/all24/actions/workflows/vision.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/vision.yml)
+
+
 all24 contains *all* the Team 100 code for *2024.*  There's just one repository,
 so that sharing library code across projects is easier.
 
