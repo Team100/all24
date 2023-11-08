@@ -1,13 +1,19 @@
 package org.team100.lib.motion.example1d;
 
-import java.util.function.DoubleSupplier;
+import org.team100.lib.profile.MotionProfile;
 
-/** Always supplies zero, for "safe mode."" */
-public class ZeroVelocitySupplier1d implements DoubleSupplier {
+/**
+ * Always supplies zero, for "safe mode."
+ */
+public class ZeroVelocitySupplier1d implements ProfileFollower {
 
-    /** @return velocity in meters per second */
     @Override
-    public double getAsDouble() {
+    public void accept(MotionProfile profile) {
+        //
+    }
+
+    @Override
+    public Double apply(double position_M) {
         return 0.0;
     }
 }
