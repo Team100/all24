@@ -12,20 +12,29 @@ public class HID {
     public void chooseStop(Command command) {
         new JoystickButton(genericHID, 1).onTrue(command);
     }
-    
-    /** Run FF while held. */
+
+    /** Set follower to feedforward only. */
     public void chooseFF(Command command) {
-        new JoystickButton(genericHID, 2).whileTrue(command);
+        new JoystickButton(genericHID, 2).onTrue(command);
     }
 
-    /** Run PID while held. */
+    /** Set follower to PID. */
     public void choosePID(Command command) {
-        new JoystickButton(genericHID, 3).whileTrue(command);
+        new JoystickButton(genericHID, 3).onTrue(command);
+    }
+
+    /** Run a profile while held. */
+    public void runProfile1(Command command) {
+        new JoystickButton(genericHID, 4).whileTrue(command);
+    }
+
+    /** Run a profile while held. */
+    public void runProfile2(Command command) {
+        new JoystickButton(genericHID, 4).whileTrue(command);
     }
 
     /** In reality this would be manual input. */
     public double manual() {
         return 1.0;
     }
-
 }

@@ -4,6 +4,8 @@ package org.team100.lib.profile;
  * Kinematic state of a one-dimensional motion profile at any given time.
  * 
  * Includes position, velocity, acceleration, and jerk.
+ * 
+ * All units are meters and seconds
  */
 public class MotionState {
     private final double x;
@@ -55,18 +57,22 @@ public class MotionState {
         return String.format("(x=%.3f, v=%.3f, a=%.3f, j=%.3f)", x, v, a, j);
     }
 
+    /** Position in m */
     public double getX() {
         return x;
     }
 
+    /** Velocity in m_s */
     public double getV() {
         return v;
     }
 
+    /** Acceleration in m_s_s */
     public double getA() {
         return a;
     }
 
+    /** Jerk in m_s_s_s */
     public double getJ() {
         return j;
     }
