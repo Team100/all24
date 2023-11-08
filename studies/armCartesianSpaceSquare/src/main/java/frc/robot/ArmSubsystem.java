@@ -74,13 +74,15 @@ public class ArmSubsystem extends Subsystem {
 
     /** Lower arm angle (radians), 0 up, positive forward. */
     private double getLowerArm() {
-        double x = (lowerArmEncoder.getAbsolutePosition() - 0.861614) * 360;
+        double encoderZero = 0.861614;
+        double x = (lowerArmEncoder.getAbsolutePosition() - encoderZero) * 360;
         return (-1.0 * x) * Math.PI / 180;
     }
 
     /** Upper arm angle (radians), 0 up, positive forward. */
     private double getUpperArm() {
-        double x = (upperArmEncoder.getAbsolutePosition() - 0.266396) * 360;
+        double encoderZero = 0.266396;
+        double x = (upperArmEncoder.getAbsolutePosition() - encoderZero) * 360;
         return x * Math.PI / 180;
     }
 

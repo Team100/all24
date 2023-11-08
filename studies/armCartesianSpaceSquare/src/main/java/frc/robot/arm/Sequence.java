@@ -8,11 +8,11 @@ public class Sequence extends SequentialCommandGroup {
     private final ArmSubsystem m_armSubsystem;
     public Sequence(ArmSubsystem armSubsystem) {
         m_armSubsystem = armSubsystem;
-        addCommands(new ArmTrajectory(m_armSubsystem, new Translation2d(.6, .6)), 
-        new ArmTrajectory(m_armSubsystem, new Translation2d(1, .6)),
-        new ArmTrajectory(m_armSubsystem, new Translation2d(1, 1)),
-        new ArmTrajectory(m_armSubsystem, new Translation2d(.6, 1)),
-        new ArmTrajectory(m_armSubsystem, new Translation2d(.6, .6))
+        addCommands(new ArmTrajectoryCommand(m_armSubsystem, new Translation2d(.6, .6)), 
+        new ArmTrajectoryCommand(m_armSubsystem, new Translation2d(1, .6)),
+        new ArmTrajectoryCommand(m_armSubsystem, new Translation2d(1, 1)),
+        new ArmTrajectoryCommand(m_armSubsystem, new Translation2d(.6, 1)),
+        new ArmTrajectoryCommand(m_armSubsystem, new Translation2d(.6, .6))
         );
     }
 }

@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ArmTrajectory extends Command {
+public class ArmTrajectoryCommand extends Command {
     public static class Config {
         public double softStop = -0.594938;
         public double kUpperArmLengthM = 0.92;
@@ -60,7 +60,7 @@ public class ArmTrajectory extends Command {
      * Go to the specified position and optionally oscillate when you get there.
      * Units for angles are degrees
      */
-    public ArmTrajectory(ArmSubsystem armSubSystem, Translation2d set, double startAngle, double endAngle) {
+    public ArmTrajectoryCommand(ArmSubsystem armSubSystem, Translation2d set, double startAngle, double endAngle) {
         m_set = set;
         m_armSubsystem = armSubSystem;
         m_endAngle = endAngle;
@@ -77,7 +77,7 @@ public class ArmTrajectory extends Command {
         setpointLower = inst.getTable("Arm Trajec").getDoubleTopic("Setpoint Lower").publish();
     }
 
-    public ArmTrajectory(ArmSubsystem armSubSystem, Translation2d set) {
+    public ArmTrajectoryCommand(ArmSubsystem armSubSystem, Translation2d set) {
         this(armSubSystem, set, -1, -1);
         t = true;
     }
@@ -95,6 +95,9 @@ public class ArmTrajectory extends Command {
             m_trajectory = new ArmTrajectories(trajectoryConfig).makeTrajectory(
                     m_armSubsystem.kinematics.forward(m_armSubsystem.getMeasurement()), m_set);
         } else {
+            if (m_startAngle == -1 && m_endAngle == -1) {
+                System.out.println("POSSIBLE ERROR");
+            }
             m_trajectory = new ArmTrajectories(trajectoryConfig).onePoint(
                     m_armSubsystem.kinematics.forward(m_armSubsystem.getMeasurement()), m_set, m_startAngle,
                     m_endAngle);
@@ -132,11 +135,12 @@ public class ArmTrajectory extends Command {
         ArmAngles thetaVelReference = m_armSubsystem.kinematics.inverseVel(thetaPosReference, XYVelReference);
         double lowerPosControllerOutput = m_lowerPosController.calculate(currentLower, thetaPosReference.th1);
         double lowerVelControllerOutput = m_lowerVelController.calculate(m_armSubsystem.getVel().th1, thetaVelReference.th1);
-        double lowerFeedForward = thetaVelReference.th1 / (Math.PI * 2) * 4;
+        double rotsPerSecToVoltsPerSec = 4;
+        double lowerFeedForward = thetaVelReference.th1 / (Math.PI * 2) * rotsPerSecToVoltsPerSec;
         double u1 = lowerFeedForward+lowerPosControllerOutput+lowerVelControllerOutput;
         double upperPosControllerOutput = m_upperPosController.calculate(currentUpper, thetaPosReference.th2);
         double upperVelControllerOutput = m_upperVelController.calculate(m_armSubsystem.getVel().th2, thetaVelReference.th2);
-        double upperFeedForward = thetaVelReference.th2 / (Math.PI * 2) * 4;
+        double upperFeedForward = thetaVelReference.th2 / (Math.PI * 2) * rotsPerSecToVoltsPerSec;
         double u2 = upperFeedForward+upperPosControllerOutput+upperVelControllerOutput;
         m_armSubsystem.set(u1, u2);
         SmartDashboard.putNumber("Lower FF ", lowerFeedForward);
