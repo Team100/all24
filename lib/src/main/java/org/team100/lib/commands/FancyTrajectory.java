@@ -1,14 +1,20 @@
-package org.team100.lib.trajectory;
+package org.team100.lib.commands;
 
 import java.util.List;
 
+import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.controller.DrivePIDController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.planners.DriveMotionPlanner;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.trajectory.TrajectoryTimeSampler;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,22 +31,28 @@ public class FancyTrajectory extends Command {
 
     private final Telemetry t = Telemetry.get();
 
-    private final SwerveDriveSubsystem m_robotDrive;
-    private final DriveMotionPlanner mMotionPlanner;
+    private final SwerveDriveSubsystemInterface m_robotDrive;
+    private final DriveMotionController m_controller;
+    private final TrajectoryPlanner m_planner;
     // private final SwerveDriveKinematics m_kinematics;
     // private final SwerveKinematicLimits m_limits;
 
     public FancyTrajectory(
             SwerveDriveKinematics kinematics,
             SwerveKinematicLimits limits,
-            SwerveDriveSubsystem robotDrive) {
+            SwerveDriveSubsystemInterface robotDrive) {
         // m_kinematics = kinematics;
         // m_limits = limits;
         m_robotDrive = robotDrive;
         // TODO: try the other follower types.
         // TODO: move this constructor out of here
-        mMotionPlanner = new DriveMotionPlanner(kinematics, limits);
-        addRequirements(m_robotDrive);
+        m_controller = new DrivePIDController();
+        m_planner = new TrajectoryPlanner(kinematics, limits);
+        SwerveDriveSubsystem swerveDriveSubsystem = m_robotDrive.get();
+        if (swerveDriveSubsystem != null) {
+            // it's null in tests.
+            addRequirements(swerveDriveSubsystem);
+        }
     }
 
     @Override
@@ -61,7 +73,7 @@ public class FancyTrajectory extends Command {
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = mMotionPlanner
+        Trajectory trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
@@ -78,8 +90,7 @@ public class FancyTrajectory extends Command {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(trajectory));
 
-        mMotionPlanner.reset();
-        mMotionPlanner.setTrajectory(iter);
+        m_controller.setTrajectory(iter);
     }
 
     @Override
@@ -104,7 +115,7 @@ public class FancyTrajectory extends Command {
 
         Twist2d velocity = new Twist2d(); // <<< FIX ME
 
-        ChassisSpeeds output = mMotionPlanner.update(now, currentPose, velocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log("/fancy trajectory/chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output);
     }

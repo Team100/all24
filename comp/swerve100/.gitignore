@@ -1,3 +1,4 @@
+*.wpilog
 unused.txt
 
 # This gitignore has been specially created by the WPILib team.

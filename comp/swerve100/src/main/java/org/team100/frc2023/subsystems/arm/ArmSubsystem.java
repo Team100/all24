@@ -198,7 +198,7 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
 
     public void setCubeMode(boolean mode) {
         cubeMode = mode;
-        t.log("Arm Subsystem/Cube Mode", cubeMode);
+        t.log("/Arm Subsystem/Cube Mode", cubeMode);
     }
 
     @Override
