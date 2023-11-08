@@ -21,6 +21,7 @@ public interface ProfileFollower extends Consumer<MotionProfile>, DoubleFunction
     /**
      * @param position_M current state, meters
      * @return control output, u, meters per second
+     * TODO: change this type to reflect the "workspace" type. 
      */
     @Override
     Double apply(double position_M);

@@ -8,12 +8,20 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /** This is an example subsystem using the 1d components. */
 public class Subsystem1d extends Subsystem {
-    /** Closed loop controller on velocity. */
-    private final DoubleConsumer m_servo;
+    /**
+     * Closed loop controller on velocity.
+     * 
+     * Acts in configuration space, e.g. joints.
+     * 
+     * TODO: change this type to reflect the "configuration space" type
+     */
+    private final DoubleConsumer m_jointServo;
 
     /**
      * Source of velocity references. parameters are time (sec) and state (position
      * in meters).
+     * 
+     * Acts in work space, e.g. cartesian.  Should it?
      */
     private ProfileFollower m_follower;
 
@@ -27,7 +35,7 @@ public class Subsystem1d extends Subsystem {
     private DoublePredicate m_enabler;
 
     public Subsystem1d(DoubleConsumer servo) {
-        m_servo = servo;
+        m_jointServo = servo;
         m_follower = new ZeroVelocitySupplier1d();
         m_filter = x -> x;
         m_enabler = x -> true;
@@ -74,14 +82,15 @@ public class Subsystem1d extends Subsystem {
     @Override
     public void periodic() {
         if (!enabled()) {
-            m_servo.accept(0);
+            m_jointServo.accept(0);
             return;
         }
-        double u = m_follower.apply(getPositionM());
+        double workspaceControlM_S = m_follower.apply(getPositionM());
+
         if (m_filter != null) {
-            u = m_filter.applyAsDouble(u);
+            workspaceControlM_S = m_filter.applyAsDouble(workspaceControlM_S);
         }
-        m_servo.accept(u);
+        m_jointServo.accept(workspaceControlM_S);
     }
 
 }

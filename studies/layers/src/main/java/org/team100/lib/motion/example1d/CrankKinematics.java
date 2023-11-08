@@ -18,7 +18,7 @@ package org.team100.lib.motion.example1d;
  * https://en.wikipedia.org/wiki/Slider-crank_linkage
  * https://en.wikipedia.org/wiki/Piston_motion_equations
  */
-public class CrankKinematics {
+public class CrankKinematics implements Kinematics1d {
     private final double m_crankRadius;
     private final double m_rodLength;
 
@@ -29,9 +29,13 @@ public class CrankKinematics {
     }
 
     /**
+     * Given a point in configuration space (crank angle), returns a point in work
+     * space (slider position).
+     * 
      * @return slider position measured from the crank axis, using the same units
      *         used in the constructor.
      */
+    @Override
     public double forward(double crankAngleRad) {
         // this is directly from wikipedia
         double cosAngle = Math.cos(crankAngleRad);
@@ -41,9 +45,13 @@ public class CrankKinematics {
     }
 
     /**
+     * Given a point in work space (slider position), returns a point in
+     * configuration space (crank angle).
+     * 
      * @param sliderPosition measured from the crank axis, using the same units used
      *                       in the constructor.
      */
+    @Override
     public double inverse(double sliderPosition) {
         // this is the wikipedia expression inverted.
         return Math.acos((sliderPosition * sliderPosition + m_crankRadius * m_crankRadius
