@@ -10,7 +10,6 @@ import org.team100.frc2023.commands.Defense;
 import org.team100.frc2023.commands.DriveScaled;
 import org.team100.frc2023.commands.DriveWithHeading;
 import org.team100.frc2023.commands.DriveWithSetpointGenerator;
-import org.team100.frc2023.commands.GoalOffset;
 import org.team100.frc2023.commands.arm.ArmTrajectory;
 import org.team100.frc2023.commands.arm.SetConeMode;
 import org.team100.frc2023.commands.arm.SetCubeMode;
@@ -389,11 +388,9 @@ public class RobotContainer {
                 tagID,
                 xOffset,
                 yOffset,
-                () -> GoalOffset.center,
                 m_robotDrive,
                 m_kinematics,
-                layout,
-                () -> 0.0);
+                layout);
     }
 
     // this keeps the tests from conflicting via the use of simulated HAL ports.
