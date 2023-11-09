@@ -11,7 +11,6 @@ import org.team100.frc2023.commands.DriveScaled;
 import org.team100.frc2023.commands.DriveWithHeading;
 import org.team100.frc2023.commands.DriveWithSetpointGenerator;
 import org.team100.frc2023.commands.GoalOffset;
-import org.team100.frc2023.commands.RumbleOn;
 import org.team100.frc2023.commands.arm.ArmTrajectory;
 import org.team100.frc2023.commands.arm.SetConeMode;
 import org.team100.frc2023.commands.arm.SetCubeMode;
@@ -270,7 +269,6 @@ public class RobotContainer {
 
         //////////////////////////
         // MISC COMMANDS
-        control.rumbleTrigger(new RumbleOn(control));
 
         m_auton = new Autonomous(
                 m_robotDrive,

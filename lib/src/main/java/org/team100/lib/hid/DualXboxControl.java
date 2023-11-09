@@ -124,24 +124,6 @@ public class DualXboxControl implements Control {
     }
 
     @Override
-    public void rumbleOn() {
-        controller0.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
-        controller0.getHID().setRumble(RumbleType.kRightRumble, 0.0);
-    }
-
-    @Override
-    public void rumbleTrigger(Command command) {
-        // controller0.a().whileTrue(command);
-    }
-
-    @Override
-    public void rumbleOff() {
-        controller0.getHID().setRumble(RumbleType.kLeftRumble, 0);
-        controller0.getHID().setRumble(RumbleType.kRightRumble, 0);
-
-    }
-
-    @Override
     public void rotate0(Command command) {
         JoystickButton button = new JoystickButton(controller0.getHID(), 9);
         button.whileTrue(command);
