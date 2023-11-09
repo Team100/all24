@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import frc.robot.arm.ArmTrajectories;
+import frc.robot.armMotion.ArmTrajectories;
 
 public class test2 {
 

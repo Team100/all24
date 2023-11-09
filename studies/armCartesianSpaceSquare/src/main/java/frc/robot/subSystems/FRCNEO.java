@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subSystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;

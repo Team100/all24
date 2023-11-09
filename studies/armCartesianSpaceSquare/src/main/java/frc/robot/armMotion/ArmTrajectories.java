@@ -1,9 +1,6 @@
-package frc.robot.arm;
+package frc.robot.armMotion;
 
 import java.util.List;
-
-import frc.robot.armMotion.ArmAngles;
-import frc.robot.armMotion.ArmKinematics;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -80,8 +77,6 @@ public class ArmTrajectories {
     }
 
     private Trajectory withList(Translation2d start, List<Translation2d> list, Translation2d end, double firstDegree, double secondDegree) {
-        System.out.println("Start lower theta: " + start.getX() + " Start upper theta: " + start.getY());
-        System.out.println("End lower theta: " + end.getX() + " End upper theta: " + end.getY());
         try {
             return TrajectoryGenerator.generateTrajectory(setPose(start, firstDegree), list, setPose(end, secondDegree),
                     trajecConfig);
