@@ -9,7 +9,6 @@ import org.team100.lib.telemetry.Telemetry;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
@@ -100,6 +99,7 @@ public class DualXboxControl implements Control {
         controller0.leftBumper().whileTrue(command);
     }
 
+    @Override
     public void resetPose(Command command) {
         controller0.leftBumper().onTrue(command);
     }
@@ -141,119 +141,5 @@ public class DualXboxControl implements Control {
     @Override
     public void circle(Command command){
         controller0.a().whileTrue(command);
-    }
-
-    ///////////////////////////////
-    //
-    // OPERATOR: arm and manipulator controls
-
-    /** @return [-1,1] */
-    @Override
-    public double openSpeed() {
-        return controller1.getRightTriggerAxis();
-    }
-
-    /** @return [-1,1] */
-    @Override
-    public double closeSpeed() {
-        return controller1.getLeftTriggerAxis();
-    }
-
-    /** @return [-1,1] */
-    @Override
-    public double lowerSpeed() {
-        return 0.25 * deadband(controller1.getRightX(), 0.15, 1.0);
-    }
-
-    /** @return [-1,1] */
-    @Override
-    public double upperSpeed() {
-        return 0.25 * deadband(controller1.getLeftY(), 0.15, 1.0);
-    }
-
-    @Override
-    public void armHigh(Command command) {
-        controller1.povUp().whileTrue(command);
-    }
-
-    @Override
-    public void armLow(Command command) {
-        controller1.povLeft().whileTrue(command);
-    }
-
-    @Override
-    public void armSafe(Command command) {
-        controller1.povDown().whileTrue(command);
-    }
-
-    @Override
-    public void safeWaypoint(Command command) {
-        // SequentialCommandGroup commandGroup = new SequentialCommandGroup(command,
-        // comman)
-        // controller1.rightBumper().whileTrue(command);
-    }
-
-    @Override
-    public void armSafeSequential(Command command, Command command2) {
-        SequentialCommandGroup commandGroup = new SequentialCommandGroup(command, command2);
-        controller1.povDown().whileTrue(commandGroup);
-    }
-
-    @Override
-    public void armSafeBack(Command command) {
-        // controller1.leftBumper().whileTrue(command);
-    }
-
-    @Override
-    public void armSubstation(Command command) {
-        controller1.povRight().whileTrue(command);
-    }
-
-    @Override
-    public void armMid(Command command) {
-        JoystickButton button = new JoystickButton(controller0.getHID(), 7);
-        button.whileTrue(command);
-    }
-
-    @Override
-    public void cubeMode(Command command) {
-        controller1.y().onTrue(command);
-    }
-
-    @Override
-    public void coneMode(Command command) {
-        controller1.a().onTrue(command);
-    }
-
-    @Override
-    public void armToSub(Command command) {
-        // JoystickButton button = new JoystickButton(controller1.getHID(), 7);
-        // button.onTrue(command);
-
-        // controller1.rightBumper().whileTrue(command);
-    }
-
-    @Override
-    public void oscillate(Command command) {
-        controller1.rightBumper().whileTrue(command);
-    }
-
-    @Override
-    public void armSubSafe(Command command) {
-        // controller1.rightBumper().whileTrue(command);
-    }
-
-    @Override
-    public double armX() {
-        // TODO: wire this up
-        // return 0.2 * deadband(-1.0 * controller1.getLeftY(), 0.15, 1.0);
-        return 0;
-    }
-
-    @Override
-    public double armY() {
-        // TODO: wire this up
-        // return 0.2 * deadband(controller1.getRightX(), 0.15, 1.0);
-        return 0;
     }
 }

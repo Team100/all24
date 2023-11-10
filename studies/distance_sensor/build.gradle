@@ -21,7 +21,7 @@ wpi.versions.wpimathVersion = '2023.+'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-def ROBOT_MAIN_CLASS = "org.team100.rolly_grabber"
+def ROBOT_MAIN_CLASS = "org.team100.distance_sensor.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
