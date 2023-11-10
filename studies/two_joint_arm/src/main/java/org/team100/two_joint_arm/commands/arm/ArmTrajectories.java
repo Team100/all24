@@ -1,9 +1,10 @@
-package org.team100.frc2023.commands.arm;
+package org.team100.two_joint_arm.commands.arm;
 
 import java.util.List;
 
-import org.team100.frc2023.subsystems.arm.ArmPosition;
+
 import org.team100.lib.motion.arm.ArmAngles;
+import org.team100.two_joint_arm.subsystems.arm.ArmPosition;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;

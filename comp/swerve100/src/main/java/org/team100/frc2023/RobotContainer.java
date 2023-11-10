@@ -7,12 +7,6 @@ import org.team100.frc2023.autonomous.Rotate;
 import org.team100.frc2023.commands.Defense;
 import org.team100.frc2023.commands.DriveScaled;
 import org.team100.frc2023.commands.DriveWithHeading;
-import org.team100.frc2023.commands.arm.ArmTrajectory;
-import org.team100.frc2023.commands.arm.SetConeMode;
-import org.team100.frc2023.commands.arm.SetCubeMode;
-import org.team100.frc2023.subsystems.arm.ArmInterface;
-import org.team100.frc2023.subsystems.arm.ArmPosition;
-import org.team100.frc2023.subsystems.arm.ArmSubsystem;
 import org.team100.lib.commands.FancyTrajectory;
 import org.team100.lib.commands.ResetPose;
 import org.team100.lib.commands.ResetRotation;
@@ -96,7 +90,7 @@ public class RobotContainer {
 
     private final FrameTransform m_frameTransform;
 
-    private final ArmInterface m_arm;
+
 
     // HID CONTROL
     private final Control control;
@@ -178,7 +172,7 @@ public class RobotContainer {
                 controller,
                 m_field);
 
-        m_arm = new ArmSubsystem.Factory(identity).get();
+
 
         // TODO: control selection using names
         control = new DualXboxControl();
@@ -198,9 +192,7 @@ public class RobotContainer {
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
         control.rotate0(new Rotate(m_robotDrive, m_heading, speedLimits, new Timer(), 0));
 
-        ////////////////////////////
-        // ARM COMMANDS
-
+  
         // new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive,
         // m_kinematics
 
@@ -216,19 +208,9 @@ public class RobotContainer {
         // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
         // m_robotDrive, m_kinematics));
         control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));
-        control.armHigh(new ArmTrajectory(ArmPosition.HIGH, m_arm, false));
-        control.armSafe(new ArmTrajectory(ArmPosition.SAFE, m_arm, false));
-        control.armSubstation(new ArmTrajectory(ArmPosition.SUB, m_arm, false));
-        control.coneMode(new SetConeMode(m_arm, m_indicator));
-        control.cubeMode(new SetCubeMode(m_arm, m_indicator));
-        control.armLow(new ArmTrajectory(ArmPosition.MID, m_arm, false));
-        control.armSafeBack(new ArmTrajectory(ArmPosition.SAFEBACK, m_arm, false));
-        control.armToSub(new ArmTrajectory(ArmPosition.SUBTOCUBE, m_arm, false));
-        control.safeWaypoint(new ArmTrajectory(ArmPosition.SAFEWAYPOINT, m_arm, false));
-        // control.oscillate(new Oscillate(armController));
-        control.oscillate(new ArmTrajectory(ArmPosition.SUB, m_arm, true));
-        // control.armSafeSequential(armSafeWaypoint, armSafe);
-        // control.armMid(new ArmTrajectory(ArmPosition.LOW, armController));
+
+
+
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
 
         ///////////////////////////
@@ -251,10 +233,7 @@ public class RobotContainer {
                             control::desiredRotation));
         }
 
-        ////////////////////////
-        // ARM
-        // m_arm.setDefaultCommand(new ManualArm(m_arm, control::lowerSpeed,
-        //////////////////////// control::upperSpeed));
+
     }
 
     public void scheduleAuton() {
@@ -338,6 +317,5 @@ public class RobotContainer {
         m_allianceSelector.close();
         m_indicator.close();
         m_modules.close();
-        m_arm.close();
     }
 }

@@ -1,9 +1,10 @@
-package org.team100.frc2023.commands.arm;
+package org.team100.two_joint_arm.commands.arm;
 
 import java.util.function.Supplier;
 
-import org.team100.frc2023.subsystems.arm.ArmSubsystem;
+
 import org.team100.lib.motion.arm.ArmKinematics;
+import org.team100.two_joint_arm.subsystems.arm.ArmSubsystem;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;

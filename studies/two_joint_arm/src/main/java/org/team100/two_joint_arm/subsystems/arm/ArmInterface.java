@@ -1,4 +1,4 @@
-package org.team100.frc2023.subsystems.arm;
+package org.team100.two_joint_arm.subsystems.arm;
 
 import org.team100.lib.motion.arm.ArmAngles;
 

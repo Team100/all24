@@ -1,15 +1,16 @@
-package org.team100.frc2023.commands.arm;
+package org.team100.two_joint_arm.commands.arm;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
-import org.team100.frc2023.subsystems.arm.ArmPosition;
+
 import org.team100.lib.motion.arm.ArmAngles;
+import org.team100.two_joint_arm.subsystems.arm.ArmPosition;
 
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
-public class ArmTrajectoriesTest {
+class ArmTrajectoriesTest {
 
     @Test
     void testUnreachable() {
