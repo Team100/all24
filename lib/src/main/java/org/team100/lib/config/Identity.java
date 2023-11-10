@@ -5,7 +5,6 @@ import java.util.Map;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
 /*
  * Represents a specific RoboRIO, as a key for configurations.
@@ -28,7 +27,8 @@ public enum Identity {
     BLANK(""), // e.g. test default or simulation
     UNKNOWN(null);
 
-    private static Map<String, Identity> identities = new HashMap<>();
+    private static final Map<String, Identity> identities = new HashMap<>();
+    private static String simIdentity = "";
 
     static {
         for (Identity i : Identity.values()) {
@@ -36,27 +36,33 @@ public enum Identity {
         }
     }
 
-    private String m_serialNumber;
+    private final String m_serialNumber;
 
     private Identity(String serialNumber) {
         m_serialNumber = serialNumber;
     }
 
     public static Identity get() {
-        // calling getSerialNumber in a vscode unit test SEGVs because
-        // it does the wrong thing with JNIs, so don't do that.
-        if (!RobotBase.isReal())
-            return BLANK;
-        String serialNumber = RobotController.getSerialNumber();
+        String serialNumber = "";
+        if (RobotBase.isReal()) {
+            // Calling getSerialNumber in a vscode unit test
+            // SEGVs because it does the wrong
+            // thing with JNIs, so don't do that.
+            serialNumber = RobotController.getSerialNumber();
+        } else {
+            serialNumber = simIdentity;
+        }
         if (identities.containsKey(serialNumber))
             return identities.get(serialNumber);
         return UNKNOWN;
     }
 
     /*
-     * For simulation only.
+     * For simulation and testing only.
      */
-    public static void set(Identity i) {
-        RoboRioSim.setSerialNumber(i.m_serialNumber);
+    static void set(String serialNumber) {
+        if (!RobotBase.isReal()) {
+            simIdentity = serialNumber;
+        }
     }
 }
