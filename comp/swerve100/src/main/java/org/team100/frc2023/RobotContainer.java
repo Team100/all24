@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.team100.frc2023.autonomous.Autonomous;
 import org.team100.frc2023.autonomous.DriveToAprilTag;
-import org.team100.frc2023.autonomous.MoveConeWidth;
 import org.team100.frc2023.autonomous.Rotate;
 import org.team100.frc2023.commands.Defense;
 import org.team100.frc2023.commands.DriveScaled;
@@ -220,11 +219,6 @@ public class RobotContainer {
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
         control.rotate0(new Rotate(m_robotDrive, m_heading, speedLimits, new Timer(), 0));
-
-        control.moveConeWidthLeft(new MoveConeWidth(m_robotDrive, speedLimits, new Timer(), true));
-        control.moveConeWidthRight(new MoveConeWidth(m_robotDrive, speedLimits, new Timer(), false));
-
-        // control.driveWithLQR(new DriveToWaypoint3(new Pose2d(5, 0, new Rotation2d()), m_robotDrive, m_kinematics));
 
         ///////////////////////////
         // MANIPULATOR COMMANDS

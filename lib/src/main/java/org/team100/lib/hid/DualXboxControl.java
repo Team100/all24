@@ -8,7 +8,6 @@ import org.team100.lib.telemetry.Telemetry;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -135,21 +134,6 @@ public class DualXboxControl implements Control {
     }
 
     @Override
-    public void moveConeWidthLeft(Command command) {
-        // controller0.y().whileTrue(command);
-    }
-
-    @Override
-    public void moveConeWidthRight(Command command) {
-        // controller0.a().whileTrue(command);
-    }
-
-    @Override
-    public void driveWithLQR(Command command) {
-        controller0.y().whileTrue(command);
-    }
-
-    @Override
     public void driveWithFancyTrajec(Command command){
         //controller0.a().whileTrue(command);
     }
@@ -222,7 +206,6 @@ public class DualXboxControl implements Control {
 
     @Override
     public void hold(Command command) {
-    
         controller1.leftBumper().whileTrue(command);
     }
 
