@@ -8,7 +8,6 @@ import org.team100.frc2023.autonomous.Rotate;
 import org.team100.frc2023.commands.Defense;
 import org.team100.frc2023.commands.DriveScaled;
 import org.team100.frc2023.commands.DriveWithHeading;
-import org.team100.frc2023.commands.DriveWithSetpointGenerator;
 import org.team100.frc2023.commands.arm.ArmTrajectory;
 import org.team100.frc2023.commands.arm.SetConeMode;
 import org.team100.frc2023.commands.arm.SetCubeMode;
@@ -80,8 +79,6 @@ public class RobotContainer {
 
         public double kDriveCurrentLimit = 30;
         // public double kDriveCurrentLimit = SHOW_MODE ? 20 : 60;
-
-        public boolean useSetpointGenerator = false;
     }
 
     private final Config m_config = new Config();
@@ -139,7 +136,6 @@ public class RobotContainer {
         m_kinematicLimits.kMaxDriveVelocity = 4;
         m_kinematicLimits.kMaxDriveAcceleration = 2;
         m_kinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
-    
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
@@ -152,7 +148,6 @@ public class RobotContainer {
                 identity,
                 m_config.kDriveCurrentLimit).get();
 
-
         SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
                 m_kinematics,
                 m_heading.getHeadingNWU(),
@@ -163,9 +158,10 @@ public class RobotContainer {
 
         // TODO: make this override work better
         // if (m_allianceSelector.alliance() == DriverStation.Alliance.Blue) {
-            layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
+        layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
         // } else { // red
-        //     layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
+        // layout =
+        // AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
         // }
 
         // hunting the memory leak
@@ -196,18 +192,6 @@ public class RobotContainer {
 
         ////////////////////////////
         // DRIVETRAIN COMMANDS
-        // control.autoLevel(new AutoLevel(false, m_robotDrive, ahrsclass));
-        // if (m_allianceSelector.alliance() == DriverStation.Alliance.Blue) {
-        //     control.driveToLeftGrid(toTag(6, 1.25, 0));
-        //     control.driveToCenterGrid(toTag(7, 0.95, .55));
-        //     control.driveToRightGrid(toTag(8, 0.95, .55));
-        //     control.driveToSubstation(toTag(4, 0.53, -0.749));
-        // } else {
-        //     control.driveToLeftGrid(toTag(1, 0.95, .55));
-        //     control.driveToCenterGrid(toTag(2, 0.95, .55));
-        //     control.driveToRightGrid(toTag(3, 0.95, .55));
-        //     control.driveToSubstation(toTag(5, 0.9, -0.72));
-        // }
         control.defense(new Defense(m_robotDrive));
         control.resetRotation0(new ResetRotation(m_robotDrive, new Rotation2d(0)));
         control.resetRotation180(new ResetRotation(m_robotDrive, Rotation2d.fromDegrees(180)));
@@ -230,20 +214,20 @@ public class RobotContainer {
         ////////////////////////////
         // ARM COMMANDS
 
+        // new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive,
+        // m_kinematics
 
-        //new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive, m_kinematics
+        // Circle circle =
 
-        // Circle circle = 
+        Pose2d[] goalArr = { new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
+                new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
+                new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
+                new Pose2d(-3.312756, -0.400119, Rotation2d.fromDegrees(180)),
+                new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
 
-        
-        Pose2d[] goalArr = {  new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-3.312756,  -0.400119, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
-
-                            };
-        // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)), m_robotDrive, m_kinematics));
+        };
+        // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
+        // m_robotDrive, m_kinematics));
         control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));
         control.armHigh(new ArmTrajectory(ArmPosition.HIGH, m_arm, false));
         control.armSafe(new ArmTrajectory(ArmPosition.SAFE, m_arm, false));
@@ -280,25 +264,16 @@ public class RobotContainer {
                     new DriveScaled(
                             control::twist,
                             m_robotDrive,
-                            SpeedLimitsFactory.get(identity, false))
-            );
+                            SpeedLimitsFactory.get(identity, false)));
         } else {
-            if (m_config.useSetpointGenerator) {
-                m_robotDrive.setDefaultCommand(
-                        new DriveWithSetpointGenerator(
-                                control::twist,
-                                m_robotDrive,
-                                speedLimits));
-            } else {
-                m_robotDrive.setDefaultCommand(
-                        new DriveWithHeading(
-                                control::twist,
-                                m_robotDrive,
-                                m_heading,
-                                speedLimits,
-                                new Timer(),
-                                control::desiredRotation));
-            }
+            m_robotDrive.setDefaultCommand(
+                    new DriveWithHeading(
+                            control::twist,
+                            m_robotDrive,
+                            m_heading,
+                            speedLimits,
+                            new Timer(),
+                            control::desiredRotation));
         }
 
         /////////////////////////
@@ -309,7 +284,8 @@ public class RobotContainer {
 
         ////////////////////////
         // ARM
-        // m_arm.setDefaultCommand(new ManualArm(m_arm, control::lowerSpeed, control::upperSpeed));
+        // m_arm.setDefaultCommand(new ManualArm(m_arm, control::lowerSpeed,
+        //////////////////////// control::upperSpeed));
     }
 
     public void scheduleAuton() {
