@@ -10,11 +10,6 @@ import org.team100.frc2023.commands.DriveWithHeading;
 import org.team100.frc2023.commands.arm.ArmTrajectory;
 import org.team100.frc2023.commands.arm.SetConeMode;
 import org.team100.frc2023.commands.arm.SetCubeMode;
-import org.team100.frc2023.commands.manipulator.Eject;
-import org.team100.frc2023.commands.manipulator.Hold;
-import org.team100.frc2023.commands.manipulator.Intake;
-import org.team100.frc2023.subsystems.Manipulator;
-import org.team100.frc2023.subsystems.ManipulatorInterface;
 import org.team100.frc2023.subsystems.arm.ArmInterface;
 import org.team100.frc2023.subsystems.arm.ArmPosition;
 import org.team100.frc2023.subsystems.arm.ArmSubsystem;
@@ -100,7 +95,7 @@ public class RobotContainer {
     private final SwerveKinematicLimits m_kinematicLimits;
 
     private final FrameTransform m_frameTransform;
-    private final ManipulatorInterface manipulator;
+
     private final ArmInterface m_arm;
 
     // HID CONTROL
@@ -182,7 +177,7 @@ public class RobotContainer {
                 swerveLocal,
                 controller,
                 m_field);
-        manipulator = new Manipulator.Factory(identity).get();
+
         m_arm = new ArmSubsystem.Factory(identity).get();
 
         // TODO: control selection using names
@@ -202,13 +197,6 @@ public class RobotContainer {
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
         control.rotate0(new Rotate(m_robotDrive, m_heading, speedLimits, new Timer(), 0));
-
-        ///////////////////////////
-        // MANIPULATOR COMMANDS
-        // control.open(new Open(manipulator));
-        control.intake(new Intake(manipulator));
-        control.eject(new Eject(manipulator));
-        control.hold(new Hold(manipulator));
 
         ////////////////////////////
         // ARM COMMANDS
@@ -262,12 +250,6 @@ public class RobotContainer {
                             new Timer(),
                             control::desiredRotation));
         }
-
-        /////////////////////////
-        // MANIPULATOR
-        manipulator.setDefaultCommand(new RunCommand(() -> {
-            manipulator.set(0, 30);
-        }, manipulator.subsystem()));
 
         ////////////////////////
         // ARM
