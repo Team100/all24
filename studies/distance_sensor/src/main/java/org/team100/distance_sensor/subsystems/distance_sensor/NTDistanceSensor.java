@@ -1,4 +1,4 @@
-package org.team100.frc2023.subsystems.game_piece_detection.distance_sensors;
+package org.team100.distance_sensor.subsystems.distance_sensor;
 
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
