@@ -54,15 +54,6 @@ public interface Control {
     default void defense(Command defense) {
     }
 
-    default void rumbleOn() {
-    }
-
-    default void rumbleTrigger(Command command) {
-    }
-
-    default void rumbleOff() {
-    }
-
     default void rotate0(Command command) {
     }
 
