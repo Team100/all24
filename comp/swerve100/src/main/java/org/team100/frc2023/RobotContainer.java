@@ -2,7 +2,6 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 
-import org.team100.frc2023.autonomous.Autonomous;
 import org.team100.frc2023.autonomous.DriveToAprilTag;
 import org.team100.frc2023.autonomous.Rotate;
 import org.team100.frc2023.commands.Defense;
@@ -108,7 +107,7 @@ public class RobotContainer {
     private final Control control;
 
     // AUTON
-    private final Command m_auton;
+    private final Command m_auton = null; // TODO: make an auton class.
 
     public RobotContainer() throws IOException {
 
@@ -243,18 +242,6 @@ public class RobotContainer {
         // control.armSafeSequential(armSafeWaypoint, armSafe);
         // control.armMid(new ArmTrajectory(ArmPosition.LOW, armController));
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
-
-        //////////////////////////
-        // MISC COMMANDS
-
-        m_auton = new Autonomous(
-                m_robotDrive,
-                m_frameTransform,
-                m_arm,
-                manipulator,
-                ahrsclass,
-                m_indicator,
-                m_autonSelector.routine());
 
         ///////////////////////////
         // DRIVE
