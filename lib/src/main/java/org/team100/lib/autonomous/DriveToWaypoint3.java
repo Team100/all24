@@ -39,16 +39,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * This is a simpler way to drive to a waypoint. It's just like
- * SwerveControllerCommand except that it generates the trajectory at the time
+ * This is a simpler way to drive to a waypoint. It generates the trajectory at the time
  * the command is scheduled, so it can capture the current robot location at
  * that instant. It runs forever, so it expects to be scheduled via
  * Trigger.whileTrue().
  */
-
 public class DriveToWaypoint3 extends Command {
     public static class Config {
-
         public TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(8, 12);
     }
 
