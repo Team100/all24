@@ -205,11 +205,6 @@ public class DualXboxControl implements Control {
     }
 
     @Override
-    public void hold(Command command) {
-        controller1.leftBumper().whileTrue(command);
-    }
-
-    @Override
     public void armSubstation(Command command) {
         controller1.povRight().whileTrue(command);
     }
@@ -218,21 +213,6 @@ public class DualXboxControl implements Control {
     public void armMid(Command command) {
         JoystickButton button = new JoystickButton(controller0.getHID(), 7);
         button.whileTrue(command);
-    }
-
-    @Override
-    public void open(Command command) {
-        // controller1.a().whileTrue(command);
-    }
-
-    @Override
-    public void eject(Command command) {
-        controller1.b().whileTrue(command);
-    }
-
-    @Override
-    public void intake(Command command) {
-        controller1.x().whileTrue(command);
     }
 
     @Override
