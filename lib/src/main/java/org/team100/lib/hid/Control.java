@@ -60,15 +60,6 @@ public interface Control {
     default void driveMedium(Command command) {
     }
 
-    default void moveConeWidthLeft(Command command) {
-    }
-
-    default void moveConeWidthRight(Command command) {
-    }
-
-    default void driveWithLQR(Command command) {
-    }
-
     ///////////////////////////////
     //
     // OPERATOR: arm and manipulator controls
