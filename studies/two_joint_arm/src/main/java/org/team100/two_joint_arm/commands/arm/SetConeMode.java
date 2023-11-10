@@ -18,7 +18,7 @@ public class SetConeMode extends Command {
 
     @Override
     public void initialize() {
-        m_arm.setCubeMode ( false);
+        m_arm.setCubeMode(false);
         m_indicator.set(State.YELLOW);
     }
 

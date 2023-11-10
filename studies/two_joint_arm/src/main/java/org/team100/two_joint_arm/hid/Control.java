@@ -12,7 +12,7 @@ public interface Control {
 
     default void safeWaypoint(Command command) {
     }
-    
+
     default void armHigh(Command command) {
     }
 
@@ -34,14 +34,14 @@ public interface Control {
     default void coneMode(Command command) {
     }
 
-        /** @return [-1,1] */
-        default double lowerSpeed() {
-            return 0;
-        }
-    
-        /** @return [-1,1] */
-        default double upperSpeed() {
-            return 0;
-        }
+    /** @return [-1,1] */
+    default double lowerSpeed() {
+        return 0;
+    }
+
+    /** @return [-1,1] */
+    default double upperSpeed() {
+        return 0;
+    }
 
 }

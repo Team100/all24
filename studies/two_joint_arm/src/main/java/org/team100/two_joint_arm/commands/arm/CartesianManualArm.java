@@ -2,7 +2,6 @@ package org.team100.two_joint_arm.commands.arm;
 
 import java.util.function.Supplier;
 
-
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.two_joint_arm.subsystems.arm.ArmSubsystem;
 

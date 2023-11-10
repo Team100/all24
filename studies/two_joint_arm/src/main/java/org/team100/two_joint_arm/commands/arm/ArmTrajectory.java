@@ -1,6 +1,5 @@
 package org.team100.two_joint_arm.commands.arm;
 
-
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.two_joint_arm.subsystems.arm.ArmInterface;

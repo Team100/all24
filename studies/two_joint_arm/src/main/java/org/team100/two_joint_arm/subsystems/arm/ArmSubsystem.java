@@ -1,7 +1,5 @@
 package org.team100.two_joint_arm.subsystems.arm;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.controller.State100;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.telemetry.Telemetry;
@@ -20,66 +18,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
  * Arm servo. Subsystem runs *all the time*, commands feed it references.
  */
 public class ArmSubsystem extends Subsystem implements ArmInterface {
-    private static class Noop extends Subsystem implements ArmInterface {
-
-        @Override
-        public Subsystem subsystem() {
-            return this;
-        }
-
-        @Override
-        public boolean getCubeMode() {
-            return false;
-        }
-
-        @Override
-        public void setCubeMode(boolean b) {
-            //
-        }
-
-        @Override
-        public void setReference(ArmAngles reference) {
-            //
-        }
-
-        @Override
-        public ArmAngles getMeasurement() {
-            return new ArmAngles(0, 0);
-        }
-
-        @Override
-        public void setControlNormal() {
-            //
-        }
-
-        @Override
-        public void setControlSafe() {
-            //
-        }
-
-        @Override
-        public void close() {
-            //
-        }
-    }
-
-    public static class Factory {
-        private final Identity m_identity;
-
-        public Factory(Identity identity) {
-            m_identity = identity;
-        }
-
-        public ArmInterface get() {
-            switch (m_identity) {
-                case COMP_BOT:
-                    return new ArmSubsystem();
-                default:
-                    return new Noop();
-            }
-        }
-    }
-
     public static class Config {
         public double softStop = -0.594938;
         public double kUpperArmLengthM = 0.92;
@@ -96,25 +34,6 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
         public double normalUpperI = 0.2;
         public double normalUpperD = 0.05;
         public double tolerance = 0.001;
-    }
-
-    // TODO: do something with this
-    public static class ArmState {
-        private final State100 m_lower;
-        private final State100 m_upper;
-
-        public ArmState(State100 lower, State100 upper) {
-            m_lower = lower;
-            m_upper = upper;
-        }
-
-        public State100 lower() {
-            return m_lower;
-        }
-
-        public State100 upper() {
-            return m_upper;
-        }
     }
 
     private final Config m_config = new Config();
@@ -137,7 +56,7 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
     private boolean cubeMode;
     private ArmAngles m_reference;
 
-    private ArmSubsystem() {
+    ArmSubsystem() {
         setCubeMode(true);
         m_armKinematicsM = new ArmKinematics(m_config.kLowerArmLengthM, m_config.kUpperArmLengthM);
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(m_config.filterTimeConstantS, m_config.filterPeriodS);
@@ -147,19 +66,19 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
         m_lowerController.setTolerance(m_config.tolerance);
         m_upperController.setTolerance(m_config.tolerance);
 
-		lowerArmMotor = new CANSparkMax(43, MotorType.kBrushless);
-		lowerArmMotor.restoreFactoryDefaults();
-		lowerArmMotor.setInverted(false);
-		lowerArmMotor.setSmartCurrentLimit(40);
-		lowerArmMotor.setSecondaryCurrentLimit(40);
-		lowerArmMotor.setIdleMode(IdleMode.kBrake);
+        lowerArmMotor = new CANSparkMax(43, MotorType.kBrushless);
+        lowerArmMotor.restoreFactoryDefaults();
+        lowerArmMotor.setInverted(false);
+        lowerArmMotor.setSmartCurrentLimit(40);
+        lowerArmMotor.setSecondaryCurrentLimit(40);
+        lowerArmMotor.setIdleMode(IdleMode.kBrake);
 
-		upperArmMotor = new CANSparkMax(42, MotorType.kBrushless);
-		upperArmMotor.restoreFactoryDefaults();
-		upperArmMotor.setInverted(false);
-		upperArmMotor.setSmartCurrentLimit(40);
-		upperArmMotor.setSecondaryCurrentLimit(40);
-		upperArmMotor.setIdleMode(IdleMode.kBrake);        
+        upperArmMotor = new CANSparkMax(42, MotorType.kBrushless);
+        upperArmMotor.restoreFactoryDefaults();
+        upperArmMotor.setInverted(false);
+        upperArmMotor.setSmartCurrentLimit(40);
+        upperArmMotor.setSecondaryCurrentLimit(40);
+        upperArmMotor.setIdleMode(IdleMode.kBrake);
 
         lowerArmInput = new AnalogInput(6);
         lowerArmEncoder = new AnalogEncoder(lowerArmInput);
@@ -171,7 +90,8 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
 
     @Override
     public void periodic() {
-        // TODO: add some sort of "enable auto" for this to be safe and not conflict with manual mode
+        // TODO: add some sort of "enable auto" for this to be safe and not conflict
+        // with manual mode
         ArmAngles measurement = getMeasurement();
 
         t.log("/Arm Subsystem/Upper Arm Measurement Radians", measurement.th2);
