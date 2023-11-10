@@ -1,4 +1,4 @@
-package org.team100.frc2023.localization;
+package org.team100.lib.localization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,11 +12,11 @@ import edu.wpi.first.math.numbers.N3;
 /**
  * Remind myself how 3d rotations work.
  */
-public class CameraTest {
+class CameraTest {
     private static final double kDelta = 0.01;
 
     @Test
-    public void testNoRotation() {
+    void testNoRotation() {
         double roll = 0.0; // around X (ahead)
         double pitch = 0.0; // around Y (left)
         double yaw = 0.0; // around Z (up)
@@ -27,7 +27,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testRoll() {
+    void testRoll() {
         double roll = 1.0; // clockwise
         double pitch = 0.0;
         double yaw = 0.0;
@@ -38,7 +38,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testPitch() {
+    void testPitch() {
         double roll = 0.0;
         double pitch = 1.0; // down
         double yaw = 0.0;
@@ -49,7 +49,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testYaw() {
+    void testYaw() {
         double roll = 0.0;
         double pitch = 0.0;
         double yaw = 1.0; // left
@@ -60,7 +60,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testIMatrix() {
+    void testIMatrix() {
         Matrix<N3, N3> matrix = Matrix.eye(Nat.N3());
         Rotation3d r = new Rotation3d(matrix);
         assertEquals(0, r.getX(), kDelta);
@@ -69,7 +69,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testRollMatrix() {
+    void testRollMatrix() {
         // in FRC X is the roll axis, positive roll is clockwise looking in the X
         // direction
         Matrix<N3, N3> matrix = new Matrix<>(Nat.N3(), Nat.N3());
@@ -98,7 +98,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testPitchMatrix() {
+    void testPitchMatrix() {
         // in FRC Y is the pitch axis, positive pitch is clockwise looking in the Y
         // direction, which means pitch down.
         Matrix<N3, N3> matrix = new Matrix<>(Nat.N3(), Nat.N3());
@@ -127,7 +127,7 @@ public class CameraTest {
     }
 
     @Test
-    public void testYawMatrix() {
+    void testYawMatrix() {
         // in FRC Z is the yaw axis, positive yaw is clockwise looking in the Z
         // direction, which means yaw left.
         Matrix<N3, N3> matrix = new Matrix<>(Nat.N3(), Nat.N3());

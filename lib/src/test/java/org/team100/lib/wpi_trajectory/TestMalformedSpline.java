@@ -1,4 +1,4 @@
-package org.team100.frc2023;
+package org.team100.lib.wpi_trajectory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -13,9 +13,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
 
-public class TestMalformedSpline {
+class TestMalformedSpline {
     @Test
-    public void malformedSplineTest() throws IOException {
+    void malformedSplineTest() throws IOException {
         assertThrows(TrajectoryGenerationException.class,
                 () -> TrajectoryGenerator.generateTrajectory(
                         new Pose2d(0, 0, new Rotation2d()),
