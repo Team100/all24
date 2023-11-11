@@ -1,9 +1,7 @@
 package org.team100.frc2023.autonomous;
 
 import java.util.List;
-import java.util.function.Supplier;
 
-import org.team100.frc2023.commands.GoalOffset;
 import org.team100.lib.controller.PidGains;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -28,15 +26,9 @@ public class DriveToAprilTag extends Command {
 
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
-    private final SwerveDriveKinematics m_kinematics;
-    private final Supplier<GoalOffset> m_goalOffsetSupplier;
-    private final Supplier<Double> m_gamePieceOffsetSupplier;
     private final Timer m_timer;
-
     private final TrajectoryConfig translationConfig;
 
-    private final double m_yOffset;
-    private GoalOffset previousOffset;
     private Trajectory m_trajectory;
     private boolean isFinished = false;
 
@@ -44,31 +36,22 @@ public class DriveToAprilTag extends Command {
             int tagID,
             double xOffset,
             double yOffset,
-            Supplier<GoalOffset> offsetSupplier,
             SwerveDriveSubsystem drivetrain,
             SwerveDriveKinematics kinematics,
-            AprilTagFieldLayoutWithCorrectOrientation layout,
-            Supplier<Double> gamePieceOffsetSupplier) {
-        m_goal = goal(tagID, xOffset, layout);
-        m_yOffset = yOffset;
+            AprilTagFieldLayoutWithCorrectOrientation layout) {
+        m_goal = goal(tagID, xOffset, yOffset, layout);
         m_swerve = drivetrain;
-        m_kinematics = kinematics;
-        m_goalOffsetSupplier = offsetSupplier;
-        m_gamePieceOffsetSupplier = gamePieceOffsetSupplier;
         m_timer = new Timer();
-
-        previousOffset = m_goalOffsetSupplier.get();
 
         translationConfig = new TrajectoryConfig(5, 4.5).setKinematics(kinematics);
         addRequirements(drivetrain);
-
     }
 
     @Override
     public void initialize() {
         isFinished = false;
         m_timer.restart();
-        m_trajectory = makeTrajectory(previousOffset, 0);
+        m_trajectory = makeTrajectory();
         m_swerve.setGains(
                 new PidGains(2, 0, 0, 0, 0.01, false),
                 new PidGains(6.5, 0, 1, 0, 0.01, true));
@@ -91,15 +74,6 @@ public class DriveToAprilTag extends Command {
         if (m_trajectory == null) {
             return;
         }
-        if (m_goalOffsetSupplier.get() != previousOffset) {
-            m_trajectory = makeTrajectory(m_goalOffsetSupplier.get(),
-                    m_trajectory.sample(m_timer.get()).velocityMetersPerSecond);
-            previousOffset = m_goalOffsetSupplier.get();
-            m_timer.restart();
-        }
-        if (m_trajectory == null) {
-            return;
-        }
 
         // TODO: combine xy and theta
         State desiredState = m_trajectory.sample(m_timer.get());
@@ -116,33 +90,20 @@ public class DriveToAprilTag extends Command {
 
     ///////////////////////////////////////////////////////////////
 
-    static Pose2d goal(int tagID, double xOffset, AprilTagFieldLayoutWithCorrectOrientation layout) {
-        Transform2d m_offset = new Transform2d(new Translation2d(-xOffset, 0), new Rotation2d(0));
+    static Pose2d goal(int tagID, double xOffset, double yOffset, AprilTagFieldLayoutWithCorrectOrientation layout) {
+        Transform2d m_offset = new Transform2d(new Translation2d(-xOffset, -yOffset), new Rotation2d(0));
         Pose2d m_tagPose = layout.getTagPose(tagID).get().toPose2d();
-        Pose2d m_goal = m_tagPose.plus(m_offset);
-        return m_goal;
+        return m_tagPose.plus(m_offset);
     }
 
     ///////////////////////////////////////////////////////////////
 
-    private Trajectory makeTrajectory(GoalOffset goalOffset, double startVelocity) {
+    private Trajectory makeTrajectory() {
         Pose2d currentPose = m_swerve.getPose();
         Translation2d currentTranslation = currentPose.getTranslation();
-        Transform2d goalTransform = new Transform2d();
-        if (goalOffset == GoalOffset.left) {
-            goalTransform = new Transform2d(new Translation2d(0, -m_yOffset - m_gamePieceOffsetSupplier.get()),
-                    new Rotation2d());
-        }
-        if (goalOffset == GoalOffset.right) {
-            goalTransform = new Transform2d(new Translation2d(0, m_yOffset - m_gamePieceOffsetSupplier.get()),
-                    new Rotation2d());
-        }
-        Pose2d transformedGoal = m_goal.plus(goalTransform);
-        Translation2d goalTranslation = transformedGoal.getTranslation();
+        Translation2d goalTranslation = m_goal.getTranslation();
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
-        TrajectoryConfig withStartVelocityConfig = new TrajectoryConfig(5, 2).setKinematics(m_kinematics);
-        withStartVelocityConfig.setStartVelocity(startVelocity);
 
         try {
             return TrajectoryGenerator.generateTrajectory(

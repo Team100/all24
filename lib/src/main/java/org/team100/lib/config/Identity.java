@@ -3,8 +3,8 @@ package org.team100.lib.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
 /*
  * Represents a specific RoboRIO, as a key for configurations.
@@ -16,7 +16,7 @@ public enum Identity {
     SWERVE_TWO("0317f285"),
     SQUAREBOT("031e31e3"),
     CAMERA_DOLLY("03126d76"),
-    FRC_100_ea4("0306cea4"), 
+    FRC_100_ea4("0306cea4"),
     TEST_BOARD_8D("03063c8d"),
     TEST_BOARD_B0("030628b0"),
     COMP_BOT("032363AC"),
@@ -27,7 +27,8 @@ public enum Identity {
     BLANK(""), // e.g. test default or simulation
     UNKNOWN(null);
 
-    private static Map<String, Identity> identities = new HashMap<>();
+    private static final Map<String, Identity> identities = new HashMap<>();
+    private static String simIdentity = "";
 
     static {
         for (Identity i : Identity.values()) {
@@ -35,23 +36,33 @@ public enum Identity {
         }
     }
 
-    private String m_serialNumber;
+    private final String m_serialNumber;
 
     private Identity(String serialNumber) {
         m_serialNumber = serialNumber;
     }
 
     public static Identity get() {
-        String serialNumber = RobotController.getSerialNumber();
+        String serialNumber = "";
+        if (RobotBase.isReal()) {
+            // Calling getSerialNumber in a vscode unit test
+            // SEGVs because it does the wrong
+            // thing with JNIs, so don't do that.
+            serialNumber = RobotController.getSerialNumber();
+        } else {
+            serialNumber = simIdentity;
+        }
         if (identities.containsKey(serialNumber))
             return identities.get(serialNumber);
         return UNKNOWN;
     }
 
     /*
-     * For simulation only.
+     * For simulation and testing only.
      */
-    public static void set(Identity i) {
-        RoboRioSim.setSerialNumber(i.m_serialNumber);
+    static void set(String serialNumber) {
+        if (!RobotBase.isReal()) {
+            simIdentity = serialNumber;
+        }
     }
 }

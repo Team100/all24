@@ -59,7 +59,7 @@ public class GainCalculator<States extends Num, Inputs extends Num, Outputs exte
 
         var S = DARE.dare(discA, discB, m_Q, m_R);
 
-        // K = (BᵀSB + R)⁻¹BᵀSA
+        // K = (B^TSB + R) ^-1 B^TSA
         m_K = discB
                 .transpose()
                 .times(S)
