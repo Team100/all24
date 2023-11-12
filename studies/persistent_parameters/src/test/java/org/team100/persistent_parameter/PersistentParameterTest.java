@@ -3,6 +3,8 @@ package org.team100.persistent_parameter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -11,17 +13,22 @@ import edu.wpi.first.wpilibj.Preferences;
 class PersistentParameterTest {
     private static final double kDelta = 0.001;
 
-    /**
-     * Set up the data file with defaults. The relative path is so
-     * long because the 'current directory' for the test is build/jni/release.
-     * The data file has the key "foo" in it, so wait until that key appears,
-     * indicating the server is done reading the file.
-     */
     private static void init(NetworkTableInstance inst) {
-        inst.startServer("../../../nttest.json");
+        String cwd = Path.of("").toAbsolutePath().toString();
+        if (cwd.endsWith("release")) {
+            // vscode test runner cwd is build/jni/release
+            inst.startServer("../../../nttest.json");
+        } else if (cwd.endsWith("persistent_parameters")) {
+            // wpilib test runner cwd is project root
+            inst.startServer("nttest.json");
+        } else {
+            fail("weird cwd: " + cwd);
+        }
         Preferences.setNetworkTableInstance(inst);
         try {
             int count = 0;
+            // The data file has the key "foo" in it, so wait until that key appears,
+            // indicating the server is done reading the file.
             while (!Preferences.containsKey("foo")) {
                 Thread.sleep(100);
                 count++;
