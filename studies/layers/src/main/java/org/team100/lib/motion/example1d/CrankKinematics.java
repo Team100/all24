@@ -1,5 +1,8 @@
 package org.team100.lib.motion.example1d;
 
+import org.team100.lib.motion.example1d.framework.Configuration;
+import org.team100.lib.motion.example1d.framework.Workstate;
+
 /**
  * Kinematics of a rotating crank, like a steam locomotive.
  * 
@@ -36,12 +39,12 @@ public class CrankKinematics implements Kinematics1d {
      *         used in the constructor.
      */
     @Override
-    public double forward(double crankAngleRad) {
+    public Workstate<Double> forward(Configuration<Double> crankAngleRad) {
         // this is directly from wikipedia
-        double cosAngle = Math.cos(crankAngleRad);
-        double sinAngle = Math.sin(crankAngleRad);
-        return m_crankRadius * cosAngle + Math.sqrt(m_rodLength * m_rodLength
-                - m_crankRadius * m_crankRadius * sinAngle * sinAngle);
+        double cosAngle = Math.cos(crankAngleRad.getConfiguration());
+        double sinAngle = Math.sin(crankAngleRad.getConfiguration());
+        return new CrankWorkstate(m_crankRadius * cosAngle + Math.sqrt(m_rodLength * m_rodLength
+                - m_crankRadius * m_crankRadius * sinAngle * sinAngle));
     }
 
     /**
@@ -52,9 +55,9 @@ public class CrankKinematics implements Kinematics1d {
      *                       in the constructor.
      */
     @Override
-    public double inverse(double sliderPosition) {
+    public Configuration<Double> inverse(Workstate<Double> sliderPosition) {
         // this is the wikipedia expression inverted.
-        return Math.acos((sliderPosition * sliderPosition + m_crankRadius * m_crankRadius
-                - m_rodLength * m_rodLength) / (2 * sliderPosition * m_crankRadius));
+        return new CrankConfigurationState(Math.acos((sliderPosition.getWorkstate() * sliderPosition.getWorkstate() + m_crankRadius * m_crankRadius
+                - m_rodLength * m_rodLength) / (2 * sliderPosition.getWorkstate() * m_crankRadius)));
     }
 }

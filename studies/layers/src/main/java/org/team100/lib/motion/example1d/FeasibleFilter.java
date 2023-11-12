@@ -1,10 +1,16 @@
 package org.team100.lib.motion.example1d;
 
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.UnaryOperator;
+
+import org.team100.lib.motion.example1d.framework.Workstate;
 
 import edu.wpi.first.wpilibj.Timer;
 
-public class FeasibleFilter implements DoubleUnaryOperator {
+/** Workspace feasibility
+ * TODO: add a parameter
+ */
+public class FeasibleFilter implements UnaryOperator<Workstate<Double>> {
 
     private final double m_maxVelocityM_S;
     private final double m_maxAccelM_S_S;
@@ -24,22 +30,22 @@ public class FeasibleFilter implements DoubleUnaryOperator {
      * @return a feasible velocity in meters per second
      */
     @Override
-    public double applyAsDouble(double velocityM_S) {
+    public Workstate<Double> apply(Workstate<Double> velocityM_S) {
         double nowS = Timer.getFPGATimestamp();
         double dtS = nowS - m_prevTimeS;
         m_prevTimeS = nowS;
-        double accelM_S_S = (velocityM_S - m_prevVelM_S)/dtS;
-        if (velocityM_S > m_maxVelocityM_S) {
-            return m_maxAccelM_S_S;
+        double accelM_S_S = (velocityM_S.getWorkstate() - m_prevVelM_S)/dtS;
+        if (velocityM_S.getWorkstate() > m_maxVelocityM_S) {
+            return new CrankWorkstate(m_maxAccelM_S_S);
         }
-        if (velocityM_S < -m_maxVelocityM_S) {
-            return -m_maxVelocityM_S;
+        if (velocityM_S.getWorkstate() < -m_maxVelocityM_S) {
+            return new CrankWorkstate(-m_maxVelocityM_S);
         }
         if (accelM_S_S > m_maxAccelM_S_S) {
-            return m_prevVelM_S + m_maxAccelM_S_S * dtS;
+            return new CrankWorkstate(m_prevVelM_S + m_maxAccelM_S_S * dtS);
         }
         if (accelM_S_S < -m_maxAccelM_S_S) {
-            return m_prevVelM_S - m_maxAccelM_S_S * dtS;
+            return new CrankWorkstate(m_prevVelM_S - m_maxAccelM_S_S * dtS);
         }
         return velocityM_S;
     }

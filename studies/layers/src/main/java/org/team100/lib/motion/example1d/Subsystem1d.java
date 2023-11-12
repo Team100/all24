@@ -3,6 +3,12 @@ package org.team100.lib.motion.example1d;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.UnaryOperator;
+
+import org.team100.lib.motion.example1d.framework.Actuator;
+import org.team100.lib.motion.example1d.framework.Configuration;
+import org.team100.lib.motion.example1d.framework.Kinematics;
+import org.team100.lib.motion.example1d.framework.Workstate;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -15,30 +21,37 @@ public class Subsystem1d extends Subsystem {
      * 
      * TODO: change this type to reflect the "configuration space" type
      */
-    private final DoubleConsumer m_jointServo;
+    private final Actuator<Double> m_jointServo;
 
     /**
      * Source of velocity references. parameters are time (sec) and state (position
      * in meters).
      * 
      * Acts in work space, e.g. cartesian.  Should it?
+     * TODO: immutable
      */
     private ProfileFollower m_follower;
 
     /**
      * Adjusts setpoints for policy, e.g. feasibility. This is useful for manual
      * control, which isn't guaranteed to be feasible.
+     * TODO: immutable, generic
      */
-    private DoubleUnaryOperator m_filter;
+    private UnaryOperator<Workstate<Double>> m_filter;
 
     /** Enables the servo. */
     private DoublePredicate m_enabler;
 
-    public Subsystem1d(DoubleConsumer servo) {
+    private Kinematics<Workstate<Double>, Configuration<Double>> m_kinematics;
+
+    // TODO: make this generic
+    public Subsystem1d(Actuator<Double> servo) {
         m_jointServo = servo;
         m_follower = new ZeroVelocitySupplier1d();
         m_filter = x -> x;
         m_enabler = x -> true;
+        // TODO: inject kinematics?
+        m_kinematics = new CrankKinematics(1,2);
     }
 
     public void setProfileFollower(ProfileFollower follower) {
@@ -51,7 +64,10 @@ public class Subsystem1d extends Subsystem {
         return m_follower;
     }
 
-    public void setFilter(DoubleUnaryOperator filter) {
+    /** set the workspace filter 
+     * TODO: make this generic
+    */
+    public void setFilter(UnaryOperator<Workstate<Double>> filter) {
         if (filter == null)
             throw new IllegalArgumentException("null filter");
         m_filter = filter;
@@ -82,15 +98,18 @@ public class Subsystem1d extends Subsystem {
     @Override
     public void periodic() {
         if (!enabled()) {
-            m_jointServo.accept(0);
+            m_jointServo.set(new CrankActuation(0));
             return;
         }
-        double workspaceControlM_S = m_follower.apply(getPositionM());
+        Workstate<Double> workspaceControlM_S = m_follower.apply(getPositionM());
 
         if (m_filter != null) {
-            workspaceControlM_S = m_filter.applyAsDouble(workspaceControlM_S);
+            workspaceControlM_S = m_filter.apply(workspaceControlM_S);
         }
-        m_jointServo.accept(workspaceControlM_S);
+
+        CrankActuation actuation = m_kinematics.inverse(workspaceControlM_S);
+        // TODO: add configuration controller here.
+        m_jointServo.set(actuation);
     }
 
 }

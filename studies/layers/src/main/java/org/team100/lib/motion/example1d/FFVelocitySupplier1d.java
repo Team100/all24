@@ -1,5 +1,6 @@
 package org.team100.lib.motion.example1d;
 
+import org.team100.lib.motion.example1d.framework.Workstate;
 import org.team100.lib.profile.MotionProfile;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -22,17 +23,9 @@ public class FFVelocitySupplier1d implements ProfileFollower {
         m_profile = null;
     }
 
-    @Override
-    public void accept(MotionProfile profile) {
-        m_profile = profile;
-        m_timer.restart();
-    }
 
-    /** @return velocity in meters per second */
     @Override
-    public Double apply(double position_M) {
-        if (m_profile == null)
-            return 0.0;
+    public Workstate<Double> apply(Workstate<Double> position_M) {
         return m_profile.get(m_timer.get()).getV();
     }
 }

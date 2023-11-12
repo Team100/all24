@@ -1,28 +1,22 @@
 package org.team100.lib.motion.example1d;
 
-import java.util.function.Consumer;
-import java.util.function.DoubleFunction;
+import java.util.function.Function;
 
-import org.team100.lib.profile.MotionProfile;
+import org.team100.lib.motion.example1d.framework.Workstate;
 
 /**
  * A profile follower accepts profiles and then begins supplying velocity
  * setpoints based on an internal timer and supplied state. This is intended to
  * be instantiated and used once per command invocation.
+ * 
+ * // TODO i think this shouldn't get position.
  */
-public interface ProfileFollower extends Consumer<MotionProfile>, DoubleFunction<Double> {
-
-    /**
-     * Accept a motion profile and start the timer.
-     */
-    @Override
-    void accept(MotionProfile profile);
+public interface ProfileFollower extends Function<Workstate<Double>,Workstate<Double>> {
 
     /**
      * @param position_M current state, meters
      * @return control output, u, meters per second
-     * TODO: change this type to reflect the "workspace" type. 
      */
     @Override
-    Double apply(double position_M);
+    Workstate<Double> apply(Workstate<Double> position_M);
 }

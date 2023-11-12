@@ -1,5 +1,6 @@
 package org.team100.lib.motion.example1d;
 
+import org.team100.lib.motion.example1d.framework.Workstate;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionState;
 
@@ -39,6 +40,12 @@ public class PIDVelocitySupplier1d implements ProfileFollower {
         double u_FF = motionState.getV();
         double u_FB = m_controller.calculate(position_M, motionState.getX());
         return u_FF + u_FB;
+    }
+
+    @Override
+    public Workstate<Double> apply(Workstate<Double> position_M) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'apply'");
     }
 
   
