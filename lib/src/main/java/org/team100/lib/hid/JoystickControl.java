@@ -49,7 +49,7 @@ public class JoystickControl implements Control {
                 deadband(-1.0 * clamp(m_controller.getY(), 1), m_config.kDeadband, 1),
                 m_config.kExpo);
         double dy = expo(
-                deadband(1.0 * clamp(m_controller.getX(), 1), m_config.kDeadband, 1),
+                deadband(-1.0 * clamp(m_controller.getX(), 1), m_config.kDeadband, 1),
                 m_config.kExpo);
         double dtheta = expo(
                 deadband(-1.0 * clamp(m_controller.getTwist(), 1), m_config.kDeadband, 1),
