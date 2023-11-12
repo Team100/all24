@@ -104,11 +104,11 @@ public class DriveToWaypoint3 extends Command {
         m_rotationController = new ProfiledPIDController(6.5, 0, 1, m_config.rotationConstraints);
         m_rotationController.setTolerance(Math.PI / 180);
 
-        xController = new PIDController(2, 0, 0);
+        xController = new PIDController(3, 0, 0);
         xController.setIntegratorRange(-0.3, 0.3);
         xController.setTolerance(0.00000001);
 
-        yController = new PIDController(2, 0, 0);
+        yController = new PIDController(3, 0, 0);
         yController.setIntegratorRange(-0.3, 0.3);
         yController.setTolerance(0.00000001);
 
@@ -148,6 +148,8 @@ public class DriveToWaypoint3 extends Command {
         DriveControllers controllers = new DriveControllersFactory().get(identity, speedLimits);
 
         m_controller = new HolonomicDriveController3(controllers);
+
+        
         // m_rotationController, m_gyro);
 
         // globalGoalTranslation = new Translation2d();
@@ -156,6 +158,8 @@ public class DriveToWaypoint3 extends Command {
 
         addRequirements(m_swerve);
 
+
+        m_swerve.setUsingSetpointGenerator(true);
         translationConfig = new TrajectoryConfig(2, 2).setKinematics(kinematics);
         addRequirements(drivetrain);
     }
@@ -260,7 +264,7 @@ public class DriveToWaypoint3 extends Command {
                 );
 
         SwerveState manualState = SwerveDriveSubsystem.incremental(currentPose, fieldRelativeTarget);
-        m_swerve.setDesiredState(manualState);
+        m_swerve.setDesiredState(manualState, true);
 
         t.log("/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
         t.log("/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());
@@ -285,6 +289,8 @@ public class DriveToWaypoint3 extends Command {
     @Override
     public void end(boolean interrupted) {
         System.out.println("ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+        m_swerve.setUsingSetpointGenerator(true);
+
         m_timer.stop();
         m_swerve.truncate();
     }

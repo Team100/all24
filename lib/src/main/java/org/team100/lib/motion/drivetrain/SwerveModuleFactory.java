@@ -51,14 +51,14 @@ public class SwerveModuleFactory {
 
         // TURNING PID
         ProfiledPIDController turningController = new ProfiledPIDController(
-                1, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
+                2.7, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
                 0, // kI
                 0, // kD
                 new TrapezoidProfile.Constraints( //
                         20 * Math.PI, // max angular speed radians/sec
                         20 * Math.PI)); // max accel radians/sec/sec
         turningController.enableContinuousInput(0, 2 * Math.PI);
-
+        turningController.setTolerance(0.01);
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
                 0.06, // kS

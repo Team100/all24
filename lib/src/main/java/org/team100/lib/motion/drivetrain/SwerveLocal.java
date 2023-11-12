@@ -41,8 +41,8 @@ public class SwerveLocal {
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics);
 
         limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        limits.kMaxDriveVelocity = 5;
-        limits.kMaxDriveAcceleration = 1;
+        limits.kMaxDriveVelocity = 2;
+        limits.kMaxDriveAcceleration = 2;
         limits.kMaxDriveDecceleration = 4;
         limits.kMaxSteeringVelocity = 5;
 
@@ -65,7 +65,7 @@ public class SwerveLocal {
         // if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
         // } else {
-        //     setChassisSpeedsNormally(targetChassisSpeeds);
+            // setChassisSpeedsNormally(targetChassisSpeeds);
         // }
     }
 
@@ -79,17 +79,17 @@ public class SwerveLocal {
         setModuleStates(targetModuleStates);
     }
 
-    private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds targetChassisSpeeds2) {
+    public void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds targetChassisSpeeds2) {
         ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds(
                 targetChassisSpeeds2.vxMetersPerSecond, targetChassisSpeeds2.vyMetersPerSecond,
                 targetChassisSpeeds2.omegaRadiansPerSecond);
 
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, prevSetpoint, targetChassisSpeeds,
-                .05);
+        .020);
         System.out.println(setpoint);
         prevSetpoint = setpoint;
 
-        SwerveModuleState[] states = m_DriveKinematics.toSwerveModuleStates(setpoint.getChassisSpeeds());
+        // SwerveModuleState[] states = m_DriveKinematics.toSwerveModuleStates(setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
         // setModuleStates(states);
 

@@ -53,6 +53,7 @@ public class FalconTurningMotor implements TurningMotor {
 
     public void setPIDVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double motorVelocityRotsPerSec = m_motor.getSelectedSensorVelocity() / (ticksPerRevolution / 10 * gearRatio);
+
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
         double revolutionsPerSec2 = outputRadiansPerSecPerSec / (2 * Math.PI);
         double revsPer100ms = revolutionsPerSec / 10;
@@ -65,8 +66,14 @@ public class FalconTurningMotor implements TurningMotor {
         if (motorVelocityRotsPerSec < .1) {
             Ks = 0.0375;
         }
+
+        // Ks = 0; //TODO undo this
+                
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * gearRatio, type, kFF);
+        t.log(m_name + "/Actual Velocity", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
+        t.log(m_name + "/Desired Velocity", m_motor.get());
+        
         log();
     }
 
@@ -85,6 +92,7 @@ public class FalconTurningMotor implements TurningMotor {
     private void log() {
         t.log(m_name + "/Output", get());
         t.log(m_name + "/Error", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
+        // t.log(m_name + "/Measurment Velocity", )
     }
 
 }

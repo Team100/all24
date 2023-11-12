@@ -244,13 +244,22 @@ public class RobotContainer {
         // Circle circle = 
 
         
-        Pose2d[] goalArr = {  new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-3.312756,  -0.400119, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
+        Pose2d[] goalArr = { 
+            new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
+            new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
+            new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
+            new Pose2d(-3.312756,  -0.400119, Rotation2d.fromDegrees(180)),
+            new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
 
                             };
+
+        // Pose2d[] goalArr = {  new Pose2d(1, 1, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(1, -1, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(-1, -1, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(-1,  1, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(1, 1, Rotation2d.fromDegrees(180))
+
+        //                     };
         // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)), m_robotDrive, m_kinematics));
         control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));
         control.armHigh(new ArmTrajectory(ArmPosition.HIGH, m_arm, false));
