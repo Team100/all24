@@ -1,4 +1,4 @@
-package frc.robot.armMotion;
+package frc.robot.armmotion;
 
 import java.util.List;
 
@@ -70,7 +70,7 @@ public class ArmTrajectories {
     firstDegree, secondDegree);
     }
 
-    public  Trajectory  fivePoint(Translation2d start, Translation2d mid1, Translation2d mid2, Translation2d mid3, Translation2d mid4,
+    public Trajectory fivePoint(Translation2d start, Translation2d mid1, Translation2d mid2, Translation2d mid3, Translation2d mid4,
     Translation2d end, double firstDegree, double secondDegree) {
         List<Translation2d> list = List.of(mid1,mid2,mid3,mid4);
             return withList(start, list, end, firstDegree, secondDegree);

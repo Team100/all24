@@ -46,7 +46,7 @@ public class Pilot implements Control {
     @Override
     public Twist2d twist() {
         double dx = expo(deadband(-1.0 * clamp(axis(1), 1), m_config.kDeadband, 1), m_config.kExpo);
-        double dy = expo(deadband(1.0 * clamp(axis(0), 1), m_config.kDeadband, 1), m_config.kExpo);
+        double dy = expo(deadband(-1.0 * clamp(axis(0), 1), m_config.kDeadband, 1), m_config.kExpo);
         double dtheta = 0; // there is no rotational velocity control.
         return new Twist2d(dx, dy, dtheta);
     }

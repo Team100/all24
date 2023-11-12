@@ -18,9 +18,9 @@ import org.jfree.data.xy.XYSeriesCollection;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import frc.robot.armMotion.ArmAngles;
-import frc.robot.armMotion.ArmKinematics;
-import frc.robot.armMotion.ArmTrajectories;
+import frc.robot.armmotion.ArmAngles;
+import frc.robot.armmotion.ArmKinematics;
+import frc.robot.armmotion.ArmTrajectories;
 
 /**
  * Visualize trajectories in joint space. Click "Run" below in vscode to see it.

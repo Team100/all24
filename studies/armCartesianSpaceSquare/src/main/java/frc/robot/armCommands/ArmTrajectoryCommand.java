@@ -1,9 +1,9 @@
-package frc.robot.armCommands;
+package frc.robot.armcommands;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subSystems.ArmSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 
 public class ArmTrajectoryCommand extends Command {
 

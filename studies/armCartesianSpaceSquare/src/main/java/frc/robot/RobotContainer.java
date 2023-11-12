@@ -6,8 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.armCommands.Sequence;
-import frc.robot.subSystems.ArmSubsystem;
+import frc.robot.armcommands.Sequence;
+import frc.robot.subsystems.ArmSubsystem;
 
 public class RobotContainer {
     private ArmSubsystem m_armSubsystem = new ArmSubsystem();

@@ -1,4 +1,4 @@
-package frc.robot.armMotion;
+package frc.robot.armmotion;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
