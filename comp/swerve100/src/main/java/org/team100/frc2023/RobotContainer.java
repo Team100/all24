@@ -87,7 +87,7 @@ public class RobotContainer {
     private final SwerveDriveKinematics m_kinematics;
     // TODO replace with SpeedLimits.
     private final SwerveKinematicLimits m_kinematicLimits;
-
+    private final Command m_auton;
     private final FrameTransform m_frameTransform;
 
 
@@ -96,7 +96,6 @@ public class RobotContainer {
     private final Control control;
 
     // AUTON
-    private final Command m_auton = null; // TODO: make an auton class.
 
     public RobotContainer() throws IOException {
 
@@ -172,7 +171,7 @@ public class RobotContainer {
                 controller,
                 m_field);
 
-
+        m_auton = new Defense(m_robotDrive);
 
         // TODO: control selection using names
         control = new DualXboxControl();

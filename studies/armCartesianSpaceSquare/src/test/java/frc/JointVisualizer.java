@@ -18,9 +18,9 @@ import org.jfree.data.xy.XYSeriesCollection;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import frc.robot.arm.ArmTrajectories;
-import frc.robot.armMotion.ArmAngles;
-import frc.robot.armMotion.ArmKinematics;
+import frc.robot.armmotion.ArmAngles;
+import frc.robot.armmotion.ArmKinematics;
+import frc.robot.armmotion.ArmTrajectories;
 
 /**
  * Visualize trajectories in joint space. Click "Run" below in vscode to see it.
@@ -34,7 +34,6 @@ public class JointVisualizer {
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
         ArmTrajectories trajectories = new ArmTrajectories(config);
         Translation2d t0 = kinematics.forward(new ArmAngles(-0.639248, 1.838205)); // safe
-        Translation2d mid = kinematics.forward(new ArmAngles(0.089803, 1.681915)); // mid
         Translation2d t1 = new Translation2d(.6, .6);
         Translation2d t2 = new Translation2d(1, .6);
         Translation2d t3 = new Translation2d(1, 1);
