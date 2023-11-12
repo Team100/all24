@@ -1,0 +1,10 @@
+[
+  {
+    "name": "/Preferences/foo",
+    "type": "double",
+    "value": 8.0,
+    "properties": {
+      "persistent": true
+    }
+  }
+]
