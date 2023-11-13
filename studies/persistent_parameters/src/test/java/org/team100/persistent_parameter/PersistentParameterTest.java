@@ -47,14 +47,15 @@ class PersistentParameterTest {
         init(inst);
 
         // supply a default of 1.0 here:
-        PersistentParameter p = new PersistentParameter("foo", 1.0, () -> 0.0);
+        PersistentParameter p = new PersistentParameter("foo", 1.0,
+                new PersistentParameter.Config(() -> 0.0, () -> false));
 
         // but the data file has 2.0, which takes precedence.
-        assertEquals(2.0, p.get(), kDelta);
+        assertEquals(2.0, p.getAsDouble(), kDelta);
 
         // write a different value and verify it
         p.set(3.0);
-        assertEquals(3.0, p.get(), kDelta);
+        assertEquals(3.0, p.getAsDouble(), kDelta);
 
         // set it back to what it was.
         p.set(2.0);

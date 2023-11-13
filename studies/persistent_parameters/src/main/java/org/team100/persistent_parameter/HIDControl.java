@@ -28,4 +28,8 @@ public class HIDControl {
         return m_hid.button(id);
     }
 
+    public boolean button(int id) {
+        return m_hid.getHID().getRawButton(id);
+    }
+
 }

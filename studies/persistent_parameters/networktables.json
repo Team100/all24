@@ -14,5 +14,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/no_knob",
+    "type": "double",
+    "value": 20.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

@@ -4,16 +4,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RobotContainer {
+    ExampleSubsystem m_subsystem;
+
     public RobotContainer() {
         HIDControl hid = new HIDControl();
-        Map<String, Integer> k = new HashMap<>();
-        k.put("foo", 0);
-        k.put("bar", 1);
-        k.put("baz", 2);
-        k.put("biz", 3);
-        ParameterFactory parameters = new ParameterFactory(hid, k);
-        ExampleSubsystem s = new ExampleSubsystem(parameters);
-        hid.reset(1).onTrue(s.resetA());
-        hid.reset(2).onTrue(s.resetB());
+        Map<String, PersistentParameter.Config> configs = new HashMap<>();
+        configs.put("foo", conf(hid, 0, 1));
+        configs.put("bar", conf(hid, 1, 2));
+        configs.put("baz", conf(hid, null, 3)); // no knob
+        configs.put("biz", conf(hid, 3, null)); // no reset
+        ParameterFactory parameters = new ParameterFactory(configs);
+        m_subsystem = new ExampleSubsystem(parameters);
+    }
+
+    public void doNothing() {
+        m_subsystem.doNothing();
+    }
+
+    private PersistentParameter.Config conf(HIDControl hid, Integer knob, Integer button) {
+        return new PersistentParameter.Config(
+                knob == null ? () -> 0.0 : () -> hid.knob(knob),
+                button == null ? () -> false : () -> hid.button(button));
     }
 }

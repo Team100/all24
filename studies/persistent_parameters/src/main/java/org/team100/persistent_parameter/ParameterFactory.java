@@ -5,12 +5,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /** Provides persistent parameters, some of which map to knobs. */
 public class ParameterFactory {
-    private final HIDControl m_hid;
-    private final Map<String, Integer> m_knobs;
+    private final Map<String, PersistentParameter.Config> m_knobs;
     private final Map<String, PersistentParameter> m_parameters;
 
-    public ParameterFactory(HIDControl hid,  Map<String, Integer> knobs) {
-        m_hid = hid;
+    public ParameterFactory(Map<String,  PersistentParameter.Config> knobs) {
         // in general the knob mapping will change depending on the
         // robot identity and console identity.
         m_knobs = knobs;
@@ -23,8 +21,8 @@ public class ParameterFactory {
 
     private PersistentParameter make(String key, double defaultValue) {
         if (m_knobs.containsKey(key)) {
-            return new PersistentParameter(key, defaultValue,
-                    () -> m_hid.knob(m_knobs.get(key)));
+            PersistentParameter.Config conf = m_knobs.get(key);
+            return new PersistentParameter(key, defaultValue, conf);
         } else {
             return new PersistentParameter(key, defaultValue);
         }
