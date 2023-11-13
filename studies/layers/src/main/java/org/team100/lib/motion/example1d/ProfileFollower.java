@@ -3,6 +3,7 @@ package org.team100.lib.motion.example1d;
 import java.util.function.Function;
 
 import org.team100.lib.motion.example1d.framework.Workstate;
+import org.team100.lib.profile.MotionProfile;
 
 /**
  * A profile follower accepts profiles and then begins supplying velocity
@@ -13,6 +14,8 @@ import org.team100.lib.motion.example1d.framework.Workstate;
  */
 public interface ProfileFollower extends Function<Workstate<Double>,Workstate<Double>> {
 
+    ProfileFollower withProfile(MotionProfile profile);
+    
     /**
      * @param position_M current state, meters
      * @return control output, u, meters per second

@@ -10,13 +10,13 @@ public class MotionProfileFollower implements SpecFollower<Workstate<Double>> {
     MotionProfile m_profile;
 
     public MotionProfileFollower(MotionProfile profile) {
-m_profile = profile;
+        m_profile = profile;
     }
 
     // TODO : this is wrong, needs to return the whole state not just X
     @Override
     public Workstate<Double> getReference(double time) {
-       return new CrankWorkstate(m_profile.get(time).getX());
+        return new CrankWorkstate(m_profile.get(time).getX());
     }
-    
+
 }

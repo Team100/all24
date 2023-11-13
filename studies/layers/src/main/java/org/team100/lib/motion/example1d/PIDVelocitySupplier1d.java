@@ -13,40 +13,35 @@ import edu.wpi.first.wpilibj.Timer;
 public class PIDVelocitySupplier1d implements ProfileFollower {
     private final PIDController m_controller;
     private final Timer m_timer;
-    private MotionProfile m_profile;
+    private final MotionProfile m_profile;
 
     /**
      * Supplies zero until a profile is specified. Instantiate once per command
      * invocation, don't reuse it.
      */
     public PIDVelocitySupplier1d() {
-        m_controller = new PIDController(1, 0, 0);
-        m_timer = new Timer();
-        // there is no safe default profile.
-        m_profile = null;
-    }
-
-    @Override
-    public void accept(MotionProfile profile) {
-        m_profile = profile;
-        m_timer.restart();
-    }
-
-    @Override
-    public Double apply(double position_M) {
-        if (m_profile == null)
-            return 0.0;
-        MotionState motionState = m_profile.get(m_timer.get());
-        double u_FF = motionState.getV();
-        double u_FB = m_controller.calculate(position_M, motionState.getX());
-        return u_FF + u_FB;
+        this(null);
     }
 
     @Override
     public Workstate<Double> apply(Workstate<Double> position_M) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'apply'");
+        if (m_profile == null)
+            return new CrankWorkstate(0.0);
+        MotionState motionState = m_profile.get(m_timer.get());
+        double u_FF = motionState.getV();
+        double u_FB = m_controller.calculate(position_M.getWorkstate(), motionState.getX());
+        return new CrankWorkstate(u_FF + u_FB);
     }
 
-  
+    @Override
+    public ProfileFollower withProfile(MotionProfile profile) {
+        return new PIDVelocitySupplier1d(profile);
+    }
+
+    private PIDVelocitySupplier1d(MotionProfile profile) {
+        m_controller = new PIDController(1, 0, 0);
+        m_timer = new Timer();
+        m_profile = profile;
+    }
+
 }

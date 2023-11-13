@@ -30,11 +30,13 @@ public class Container {
                 () -> subsystem.setProfileFollower(new PIDVelocitySupplier1d())));
 
         hid.runProfile1(subsystem.runOnce(
-                () -> subsystem.getProfileFollower().accept(makeProfile())));
+                () -> subsystem.setProfileFollower(
+                        subsystem.getProfileFollower().withProfile(makeProfile()))));
 
         hid.runProfile2(subsystem.runOnce(
-                () -> subsystem.getProfileFollower().accept(
-                        makeProfile(subsystem.getPositionM(), subsystem.getVelocityM_S()))));
+                () -> subsystem.setProfileFollower(
+                        subsystem.getProfileFollower().withProfile(
+                                makeProfile(subsystem.getPositionM(), subsystem.getVelocityM_S())))));
     }
 
     /** @return a profile starting at zero */
@@ -44,11 +46,10 @@ public class Container {
 
     /** @return a profile starting at the specified state */
     private static MotionProfile makeProfile(double p, double v) {
-        return MotionProfileGenerator
-                .generateSimpleMotionProfile(
-                        new MotionState(p, v), // start
-                        new MotionState(0, 1), // end
-                        1, // v
-                        1); // a
+        return MotionProfileGenerator.generateSimpleMotionProfile(
+                new MotionState(p, v), // start
+                new MotionState(0, 1), // end
+                1, // v
+                1); // a
     }
 }

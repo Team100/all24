@@ -5,8 +5,10 @@ import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.UnaryOperator;
 
+import org.team100.lib.motion.example1d.framework.Actuation;
 import org.team100.lib.motion.example1d.framework.Actuator;
 import org.team100.lib.motion.example1d.framework.Configuration;
+import org.team100.lib.motion.example1d.framework.ConfigurationController;
 import org.team100.lib.motion.example1d.framework.Kinematics;
 import org.team100.lib.motion.example1d.framework.Workstate;
 
@@ -44,6 +46,8 @@ public class Subsystem1d extends Subsystem {
 
     private Kinematics<Workstate<Double>, Configuration<Double>> m_kinematics;
 
+    private ConfigurationController<Double, Double> m_confController;
+
     // TODO: make this generic
     public Subsystem1d(Actuator<Double> servo) {
         m_jointServo = servo;
@@ -52,6 +56,17 @@ public class Subsystem1d extends Subsystem {
         m_enabler = x -> true;
         // TODO: inject kinematics?
         m_kinematics = new CrankKinematics(1,2);
+        // TODO: make this a real class
+        m_confController = new ConfigurationController<>(){
+
+            @Override
+            public Actuation<Double> calculate(Configuration<Double> config) {
+                // for now this is a passthrough which is completely wrong
+                // TODO fix it
+                return new CrankActuation(config.getConfiguration());
+            }
+            
+        };
     }
 
     public void setProfileFollower(ProfileFollower follower) {
@@ -101,13 +116,15 @@ public class Subsystem1d extends Subsystem {
             m_jointServo.set(new CrankActuation(0));
             return;
         }
-        Workstate<Double> workspaceControlM_S = m_follower.apply(getPositionM());
+        Workstate<Double> workspaceControlM_S = m_follower.apply(new CrankWorkstate(getPositionM()));
 
         if (m_filter != null) {
             workspaceControlM_S = m_filter.apply(workspaceControlM_S);
         }
 
-        CrankActuation actuation = m_kinematics.inverse(workspaceControlM_S);
+        Configuration<Double> conf = m_kinematics.inverse(workspaceControlM_S);
+
+        Actuation<Double> actuation = m_confController.calculate(conf);
         // TODO: add configuration controller here.
         m_jointServo.set(actuation);
     }
