@@ -5,12 +5,13 @@ import java.util.function.UnaryOperator;
 
 import org.team100.lib.motion.example1d.crank.CrankActuation;
 import org.team100.lib.motion.example1d.crank.CrankConfiguration;
-import org.team100.lib.motion.example1d.crank.CrankConfigurationController;
+import org.team100.lib.motion.example1d.crank.CrankConfigurationZero;
 import org.team100.lib.motion.example1d.crank.CrankKinematics;
 import org.team100.lib.motion.example1d.crank.CrankWorkstate;
 import org.team100.lib.motion.example1d.framework.Actuator;
 import org.team100.lib.motion.example1d.framework.ConfigurationController;
 import org.team100.lib.motion.example1d.framework.Kinematics;
+import org.team100.lib.motion.example1d.framework.WorkspaceController;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -34,12 +35,15 @@ public class Subsystem1d extends Subsystem {
      */
     private ProfileFollower<CrankWorkstate> m_follower;
 
+    private WorkspaceController<CrankWorkstate> m_workspaceController;
+
     /**
      * Adjusts setpoints for policy, e.g. feasibility. This is useful for manual
      * control, which isn't guaranteed to be feasible.
      * TODO: immutable, generic
      */
-    private UnaryOperator<CrankWorkstate> m_filter;
+    private UnaryOperator<CrankWorkstate> m_workspaceFilter;
+    private UnaryOperator<CrankActuation> m_actuationFilter;
 
     /** Enables the servo. */
     private DoublePredicate m_enabler;
@@ -52,12 +56,15 @@ public class Subsystem1d extends Subsystem {
     public Subsystem1d(Actuator<CrankActuation> servo) {
         m_jointServo = servo;
         m_follower = new ZeroVelocitySupplier1d<>(CrankWorkstate::new);
-        m_filter = x -> x;
+        m_workspaceController = new IdentityWorkspaceController<>(CrankWorkstate::new);
+        m_workspaceFilter = x -> x;
+        m_actuationFilter = x -> x;
         m_enabler = x -> true;
         // TODO: inject kinematics?
         m_kinematics = new CrankKinematics(1, 2);
 
-        m_confController = new CrankConfigurationController();
+        // m_confController = new CrankConfigurationController();
+        m_confController = new CrankConfigurationZero();
     }
 
     public void setProfileFollower(ProfileFollower<CrankWorkstate> follower) {
@@ -75,15 +82,21 @@ public class Subsystem1d extends Subsystem {
      * TODO: make this generic
      */
     public void setFilter(UnaryOperator<CrankWorkstate> filter) {
-        if (filter == null)
-            throw new IllegalArgumentException("null filter");
-        m_filter = filter;
+        m_workspaceFilter = filter;
+    }
+
+    public void setActuationFilter(UnaryOperator<CrankActuation> filter) {
+        m_actuationFilter = filter;
     }
 
     public void setEnable(DoublePredicate enabler) {
         if (enabler == null)
             throw new IllegalArgumentException("null enabler");
         m_enabler = enabler;
+    }
+
+    public void setConfigurationController(ConfigurationController<CrankConfiguration, CrankActuation> confController) {
+        m_confController = confController;
     }
 
     /** fake for the example; they should actually measure something. */
@@ -110,10 +123,14 @@ public class Subsystem1d extends Subsystem {
             m_jointServo.set(new CrankActuation(0));
             return;
         }
-        CrankWorkstate workspaceControlM_S = m_follower.apply(new CrankWorkstate(getPositionM()));
+        CrankWorkstate measurement = new CrankWorkstate(getPositionM());
 
-        if (m_filter != null) {
-            workspaceControlM_S = m_filter.apply(workspaceControlM_S);
+        CrankWorkstate workspaceControlM_S = m_follower.apply(measurement);
+
+        // workspaceControlM_S = m_workspaceController.calculate(measurement, null);
+
+        if (m_workspaceFilter != null) {
+            workspaceControlM_S = m_workspaceFilter.apply(workspaceControlM_S);
         }
 
         CrankConfiguration setpoint = m_kinematics.inverse(workspaceControlM_S);
@@ -121,6 +138,10 @@ public class Subsystem1d extends Subsystem {
         CrankActuation actuation = m_confController.calculate(
                 new CrankConfiguration(getPositionM()),
                 setpoint);
+
+        if (m_actuationFilter != null) {
+            actuation = m_actuationFilter.apply(actuation);
+        }
 
         m_jointServo.set(actuation);
     }
