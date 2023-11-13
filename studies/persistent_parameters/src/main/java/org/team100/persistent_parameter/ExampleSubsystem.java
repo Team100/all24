@@ -1,7 +1,5 @@
 package org.team100.persistent_parameter;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -23,12 +21,13 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 public class ExampleSubsystem extends Subsystem {
     private static final double kDefault = 1.0;
     private static final String kKey = "foo";
+    private final ParameterFactory m_parameters;
     private final PersistentParameter p;
 
     /** @param knob console adjustment, absolute but starting at zero. */
-    public ExampleSubsystem(DoubleSupplier knob) {
-        // instantiated here because it has the key and the default
-        p = new PersistentParameter(kKey, kDefault, knob);
+    public ExampleSubsystem(ParameterFactory parameters) {
+        m_parameters = parameters;
+        p = m_parameters.get(kKey, kDefault);
     }
 
     @Override

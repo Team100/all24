@@ -15,10 +15,11 @@ public class HIDControl {
         m_joystick = new CommandJoystick(0);
     }
 
-    public double getKnobValue() {
+    /** Exposes knobs by id; doesn't know what they're for. */
+    public double knob(int id) {
         // The knob is mapped to axis 6 in the Arduino code.
         // For simulation use 0, which is mapped to "a" and "d"
-        return kScale * m_joystick.getRawAxis(0);
+        return kScale * m_joystick.getRawAxis(id);
     }
 
     public Trigger reset() {
