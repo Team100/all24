@@ -1,7 +1,7 @@
 package org.team100.lib.motion.example1d.framework;
 
-public interface Kinematics<State, Conf> {
-    State forward(Conf x);
+public interface Kinematics<T extends Workstate<T>, U extends Configuration<U>> {
+    T forward(U x);
 
-    Conf inverse(State x);
+    U inverse(T x);
 }

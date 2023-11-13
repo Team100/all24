@@ -1,5 +1,8 @@
 package org.team100.lib.motion.example1d;
 
+import org.team100.lib.motion.example1d.crank.CrankActuation;
+import org.team100.lib.motion.example1d.crank.CrankWorkspaceController;
+import org.team100.lib.motion.example1d.crank.CrankWorkstate;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
@@ -13,21 +16,22 @@ public class Container {
 
     public Container() {
         hid = new HID();
-        subsystem = new Subsystem1d(new VelocityServo1d());
+        subsystem = new Subsystem1d(new VelocityServo1d<>(new CrankActuation(0)));
         subsystem.setEnable(new PositionLimit(0, 1));
         subsystem.setFilter(new FeasibleFilter(1, 1));
 
         subsystem.setDefaultCommand(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new ManualVelocitySupplier1d(hid::manual))));
+                () -> subsystem.setProfileFollower(new ManualVelocitySupplier1d<>(hid::manual, CrankWorkstate::new))));
 
         hid.chooseStop(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new ZeroVelocitySupplier1d())));
+                () -> subsystem.setProfileFollower(new ZeroVelocitySupplier1d<>(CrankWorkstate::new))));
 
         hid.chooseFF(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new FFVelocitySupplier1d())));
+                () -> subsystem.setProfileFollower(new FFVelocitySupplier1d<>(CrankWorkstate::new))));
 
         hid.choosePID(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new PIDVelocitySupplier1d())));
+                () -> subsystem.setProfileFollower(
+                        new PIDVelocitySupplier1d<>(new CrankWorkspaceController(), CrankWorkstate::new))));
 
         hid.runProfile1(subsystem.runOnce(
                 () -> subsystem.setProfileFollower(

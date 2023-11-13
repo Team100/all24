@@ -1,7 +1,6 @@
-package org.team100.lib.motion.example1d;
+package org.team100.lib.motion.example1d.crank;
 
-import org.team100.lib.motion.example1d.framework.Configuration;
-import org.team100.lib.motion.example1d.framework.Workstate;
+import org.team100.lib.motion.example1d.framework.Kinematics;
 
 /**
  * Kinematics of a rotating crank, like a steam locomotive.
@@ -21,7 +20,7 @@ import org.team100.lib.motion.example1d.framework.Workstate;
  * https://en.wikipedia.org/wiki/Slider-crank_linkage
  * https://en.wikipedia.org/wiki/Piston_motion_equations
  */
-public class CrankKinematics implements Kinematics1d {
+public class CrankKinematics implements Kinematics<CrankWorkstate, CrankConfiguration> {
     private final double m_crankRadius;
     private final double m_rodLength;
 
@@ -39,10 +38,10 @@ public class CrankKinematics implements Kinematics1d {
      *         used in the constructor.
      */
     @Override
-    public Workstate<Double> forward(Configuration<Double> crankAngleRad) {
+    public CrankWorkstate forward(CrankConfiguration crankAngleRad) {
         // this is directly from wikipedia
-        double cosAngle = Math.cos(crankAngleRad.getConfiguration());
-        double sinAngle = Math.sin(crankAngleRad.getConfiguration());
+        double cosAngle = Math.cos(crankAngleRad.getCrankAngleRad());
+        double sinAngle = Math.sin(crankAngleRad.getCrankAngleRad());
         return new CrankWorkstate(m_crankRadius * cosAngle + Math.sqrt(m_rodLength * m_rodLength
                 - m_crankRadius * m_crankRadius * sinAngle * sinAngle));
     }
@@ -55,9 +54,10 @@ public class CrankKinematics implements Kinematics1d {
      *                       in the constructor.
      */
     @Override
-    public Configuration<Double> inverse(Workstate<Double> sliderPosition) {
+    public CrankConfiguration inverse(CrankWorkstate sliderPosition) {
         // this is the wikipedia expression inverted.
-        return new CrankConfigurationState(Math.acos((sliderPosition.getWorkstate() * sliderPosition.getWorkstate() + m_crankRadius * m_crankRadius
-                - m_rodLength * m_rodLength) / (2 * sliderPosition.getWorkstate() * m_crankRadius)));
+        return new CrankConfiguration(
+                Math.acos((sliderPosition.getState() * sliderPosition.getState() + m_crankRadius * m_crankRadius
+                        - m_rodLength * m_rodLength) / (2 * sliderPosition.getState() * m_crankRadius)));
     }
 }
