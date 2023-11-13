@@ -20,6 +20,17 @@
   "NetworkTables": {
     "persistent": {
       "Preferences": {
+        "nesting": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "transitory": {
+      "Constants": {
+        "nesting": {
+          "open": true
+        },
         "open": true
       }
     }

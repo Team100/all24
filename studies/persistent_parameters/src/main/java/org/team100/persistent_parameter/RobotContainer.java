@@ -8,7 +8,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         HIDControl hid = new HIDControl();
-        Map<String, PersistentParameter.Config> configs = new HashMap<>();
+        Map<String, PersistentParameter.HIDConfig> configs = new HashMap<>();
         configs.put("foo", conf(hid, 0, 1));
         configs.put("bar", conf(hid, 1, 2));
         configs.put("baz", conf(hid, null, 3)); // no knob
@@ -21,8 +21,8 @@ public class RobotContainer {
         m_subsystem.doNothing();
     }
 
-    private PersistentParameter.Config conf(HIDControl hid, Integer knob, Integer button) {
-        return new PersistentParameter.Config(
+    private PersistentParameter.HIDConfig conf(HIDControl hid, Integer knob, Integer button) {
+        return new PersistentParameter.HIDConfig(
                 knob == null ? () -> 0.0 : () -> hid.knob(knob),
                 button == null ? () -> false : () -> hid.button(button));
     }

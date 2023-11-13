@@ -22,24 +22,20 @@ import edu.wpi.first.wpilibj.Preferences;
  * a bug in the simulation GUI, not a real NT bug.
  */
 public class PersistentParameter implements DoubleSupplier {
-    public static record Config(
+    /** Config for the HID features. */
+    public static record HIDConfig(
             DoubleSupplier knob,
             BooleanSupplier reset) {
     }
 
     private final String m_key;
     private final double m_defaultValue;
-    private final Config m_conf;
+    private final HIDConfig m_conf;
     private double m_knob_offset;
 
-    /** Zero default, no knob or reset. */
-    public PersistentParameter(String key) {
-        this(key, 0.0);
-    }
-
-    /** No knob or reset. */
+    /** No HID support. */
     public PersistentParameter(String key, double defaultValue) {
-        this(key, defaultValue, new Config(() -> 0.0, () -> false));
+        this(key, defaultValue, new HIDConfig(() -> 0.0, () -> false));
     }
 
     /**
@@ -49,29 +45,30 @@ public class PersistentParameter implements DoubleSupplier {
      * @param defaultValue if no persisted value exists
      * @param conf         includes update and reset from HID
      */
-    public PersistentParameter(String key, double defaultValue, Config conf) {
+    public PersistentParameter(String key, double defaultValue, HIDConfig conf) {
         m_key = key;
         m_defaultValue = defaultValue;
         m_conf = conf;
         m_knob_offset = conf.knob().getAsDouble();
         Preferences.initDouble(key, defaultValue);
-    }
 
-    /** Set the value in the store and the network. */
-    public synchronized void set(double value) {
-        Preferences.setDouble(m_key, value);
     }
 
     /**
-     * Get the value most recently received (or read from storage), adjusted by the
-     * knob. Or reset the value if the reset supplier says so. This is synchronized
-     * to guarantee the offset arithmetic is correct.
+     * Return the default if this is a read-only instance.
+     * 
+     * Reset the value if the reset supplier says so.
+     * 
+     * Get the value most recently received (or read from storage)
+     * 
+     * Adjust the value according to the knob.
+     * 
+     * This is synchronized to guarantee the offset arithmetic is correct.
      */
     @Override
     public synchronized double getAsDouble() {
         double knobVal = m_conf.knob().getAsDouble();
         if (m_conf.reset().getAsBoolean()) {
-            System.out.println("reset " + m_key);
             m_knob_offset = knobVal;
             Preferences.setDouble(m_key, m_defaultValue);
             return m_defaultValue;

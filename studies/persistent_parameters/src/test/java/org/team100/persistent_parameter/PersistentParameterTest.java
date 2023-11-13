@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.nio.file.Path;
+import java.util.function.DoubleSupplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,29 +42,61 @@ class PersistentParameterTest {
         }
     }
 
+    private static class Setter implements DoubleSupplier {
+        public double val;
+
+        @Override
+        public double getAsDouble() {
+            return val;
+        }
+    }
+
     @Test
     void testPersistentParameter() throws InterruptedException {
         NetworkTableInstance inst = NetworkTableInstance.create();
         init(inst);
 
+        Setter setter = new Setter();
+
         // supply a default of 1.0 here:
-        PersistentParameter p = new PersistentParameter("foo", 1.0,
-                new PersistentParameter.Config(() -> 0.0, () -> false));
+        DoubleSupplier p = new PersistentParameter(
+                "foo",
+                1.0,
+                new PersistentParameter.HIDConfig(setter, () -> false));
 
         // but the data file has 2.0, which takes precedence.
         assertEquals(2.0, p.getAsDouble(), kDelta);
 
         // write a different value and verify it
-        p.set(3.0);
+        setter.val = 1.0;
         assertEquals(3.0, p.getAsDouble(), kDelta);
 
         // set it back to what it was.
-        p.set(2.0);
+        setter.val = 0.0;
+        assertEquals(2.0, p.getAsDouble(), kDelta);
 
         // and write the file again in case the value above was written.
         inst.flush();
 
-        // flushing is asynchronous, so wait a bit.
+        // flushing uses C++ async, so wait a bit.
         Thread.sleep(1000);
+    }
+
+    @Test
+    void testReadOnlyParameter() throws InterruptedException {
+        NetworkTableInstance inst = NetworkTableInstance.create();
+        init(inst);
+
+        Setter setter = new Setter();
+
+        // supply a default of 1.0 here:
+        DoubleSupplier p = new ConstantParameter("bar", 1.0);
+
+        // use only the specified value.
+        assertEquals(1.0, p.getAsDouble(), kDelta);
+
+        // this should do nothing
+        setter.val = 1.0;
+        assertEquals(1.0, p.getAsDouble(), kDelta);
     }
 }
