@@ -19,25 +19,33 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
  * 
  */
 public class ExampleSubsystem extends Subsystem {
-    private static final double kDefault = 1.0;
-    private static final String kKey = "foo";
+    private static final double kDefaultA = 1.0;
+    private static final double kDefaultB = 2.0;
+    private static final String kKeyA = "foo";
+    private static final String kKeyB = "bar";
     private final ParameterFactory m_parameters;
-    private final PersistentParameter p;
+    private final PersistentParameter m_parameterA;
+    private final PersistentParameter m_parameterB;
 
     /** @param knob console adjustment, absolute but starting at zero. */
     public ExampleSubsystem(ParameterFactory parameters) {
         m_parameters = parameters;
-        p = m_parameters.get(kKey, kDefault);
+        m_parameterA = m_parameters.get(kKeyA, kDefaultA);
+        m_parameterB = m_parameters.get(kKeyB, kDefaultB);
     }
 
     @Override
     public void periodic() {
-        System.out.println(p.getAsDouble());
+        System.out.printf("%5.3f %5.3f\n",
+                m_parameterA.getAsDouble(), m_parameterB.getAsDouble());
     }
 
     /** Only works when enabled. */
-    public Command reset() {
-        return runOnce(p::reset);
+    public Command resetA() {
+        return runOnce(m_parameterA::reset);
     }
 
+    public Command resetB() {
+        return runOnce(m_parameterB::reset);
+    }
 }

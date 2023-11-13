@@ -1,6 +1,5 @@
 package org.team100.persistent_parameter;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,17 +9,12 @@ public class ParameterFactory {
     private final Map<String, Integer> m_knobs;
     private final Map<String, PersistentParameter> m_parameters;
 
-    public ParameterFactory(HIDControl hid) {
+    public ParameterFactory(HIDControl hid,  Map<String, Integer> knobs) {
         m_hid = hid;
         // in general the knob mapping will change depending on the
         // robot identity and console identity.
-        m_knobs = new HashMap<>();
+        m_knobs = knobs;
         m_parameters = new ConcurrentHashMap<>();
-        // keep these in order to match the console labels
-        m_knobs.put("foo", 0);
-        m_knobs.put("bar", 1);
-        m_knobs.put("baz", 2);
-        m_knobs.put("biz", 3);
     }
 
     public PersistentParameter get(String key, double defaultValue) {
