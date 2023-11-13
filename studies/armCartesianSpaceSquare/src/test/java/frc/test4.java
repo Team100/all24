@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.armMotion.ArmAngles;
-import frc.robot.armMotion.ArmKinematics;
+import frc.robot.armmotion.ArmAngles;
+import frc.robot.armmotion.ArmKinematics;
 
 public class test4 {
     @Test

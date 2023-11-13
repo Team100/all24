@@ -8,8 +8,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.armMotion.ArmAngles;
-import frc.robot.armMotion.ArmKinematics;
+import frc.robot.armmotion.ArmAngles;
+import frc.robot.armmotion.ArmKinematics;
 
 public class test3 {
     public ArmKinematics kinematics = new ArmKinematics(1, 1);

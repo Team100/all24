@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import frc.robot.arm.ArmTrajectories;
+import frc.robot.armmotion.ArmTrajectories;
 
 public class test {
 

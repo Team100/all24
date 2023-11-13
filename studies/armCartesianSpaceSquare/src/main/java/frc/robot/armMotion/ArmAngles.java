@@ -1,4 +1,4 @@
-package frc.robot.armMotion;
+package frc.robot.armmotion;
 
 /**
  * Represents a 2DOF serial arm.
