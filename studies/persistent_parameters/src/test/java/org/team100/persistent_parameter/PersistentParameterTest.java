@@ -47,7 +47,7 @@ class PersistentParameterTest {
         init(inst);
 
         // supply a default of 1.0 here:
-        PersistentParameter p = new PersistentParameter("foo", 1.0);
+        PersistentParameter p = new PersistentParameter("foo", 1.0, () -> 0.0);
 
         // but the data file has 2.0, which takes precedence.
         assertEquals(2.0, p.get(), kDelta);
