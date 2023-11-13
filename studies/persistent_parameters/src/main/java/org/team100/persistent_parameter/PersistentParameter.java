@@ -17,11 +17,21 @@ import edu.wpi.first.wpilibj.Preferences;
  * 
  * Updates are sent to preference storage and the network.
  */
-public class PersistentParameter {
+public class PersistentParameter implements DoubleSupplier {
     private final String m_key;
     private final double m_defaultValue;
     private final DoubleSupplier m_knob;
     private double m_knob_offset;
+
+    /** Zero default. */
+    public PersistentParameter(String key) {
+        this(key, 0.0);
+    }
+
+    /** No knob input. */
+    public PersistentParameter(String key, double defaultValue) {
+        this(key, defaultValue, () -> 0.0);
+    }
 
     /**
      * Use the persisted value if it exists.
@@ -66,4 +76,9 @@ public class PersistentParameter {
         m_knob_offset = m_knob.getAsDouble();
         Preferences.setDouble(m_key, m_defaultValue);
     }
+
+	@Override
+	public double getAsDouble() {
+		return get();
+	}
 }

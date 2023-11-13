@@ -33,7 +33,7 @@ public class ExampleSubsystem extends Subsystem {
 
     @Override
     public void periodic() {
-        System.out.println(p.get());
+        System.out.println(p.getAsDouble());
     }
 
     /** Only works when enabled. */
