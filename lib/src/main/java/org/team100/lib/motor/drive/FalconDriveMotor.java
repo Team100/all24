@@ -114,7 +114,9 @@ public class FalconDriveMotor implements DriveMotor {
 
         t.log(m_name + "/Speed (rot_s)", getVelocityRot_S());
         t.log(m_name + "/Output [-1,1]", get());
-        t.log(m_name + "/Speed (2048ths_100ms)", getVelocity2048_100());
+        t.log(m_name + "/DESIRED SPEED (2048ths_100ms)", ticksPer100ms * m_gearRatio);
+        t.log(m_name + "/ACTUAL SPEED (2048ths_100ms)", getVelocity2048_100());
+
     }
 
     double getVelocityRot_S() {
