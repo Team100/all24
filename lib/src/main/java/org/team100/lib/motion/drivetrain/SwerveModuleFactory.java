@@ -51,7 +51,7 @@ public class SwerveModuleFactory {
 
         // TURNING PID
         ProfiledPIDController turningController = new ProfiledPIDController(
-                2.7, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
+                2.8, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
                 0, // kI
                 0, // kD
                 new TrapezoidProfile.Constraints( //

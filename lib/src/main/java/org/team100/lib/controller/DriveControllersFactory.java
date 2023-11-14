@@ -13,6 +13,9 @@ public class DriveControllersFactory {
         // public PidGains swerveOneCartesianGain = new PidGains(2, 0.1, 0.15, 0.1, 0.01, false);
 
         public PidGains swerveTwoCartesianGain = new PidGains(2.0, 0.1, 0.15, 0.1, 0.01, false);
+
+        // public PidGains compBotCartesianGain = new PidGains(7, 2, 0, 0.1, 0, false);
+
     }
 
     private final Config m_config = new Config();

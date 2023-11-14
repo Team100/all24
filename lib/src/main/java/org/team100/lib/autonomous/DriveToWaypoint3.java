@@ -160,7 +160,7 @@ public class DriveToWaypoint3 extends Command {
 
 
         m_swerve.setUsingSetpointGenerator(true);
-        translationConfig = new TrajectoryConfig(2, 2).setKinematics(kinematics);
+        translationConfig = new TrajectoryConfig(2, 0.5).setKinematics(kinematics);
         addRequirements(drivetrain);
     }
 
@@ -199,6 +199,7 @@ public class DriveToWaypoint3 extends Command {
         // m_controller.updateProfile(m_goal.getX(), m_goal.getY(), 5, 3, 1);
         // m_controller.start();
         m_trajectory = makeTrajectory(0);
+        System.out.println(m_trajectory);
 
     }
 
