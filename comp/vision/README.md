@@ -2,12 +2,15 @@
 
 What's here:
 
-* led-timer.py: exploration by @Vasili into image capture pipeline latency
+* led_timer.py: exploration by @Vasili into image capture pipeline latency
+* gamepiece_finder.py: color-based cube- and cone-finder using opencv
+* blip_serializer.py: find retroreflective poles for 2023
+* tag_finder.py: find apriltags as used in 2023
 
-TODO: clean up the stuff here.
 
-# Set up the Pi
+# How to set up the Raspberry Pi
 
+* Make sure you're using a Raspberry Pi 4b or 5; the 3 won't work.
 * Grab the image from the [WPILibPi Releases page](https://github.com/wpilibsuite/WPILibPi/releases)
 * In ubuntu:
   * uncompress the zip file
