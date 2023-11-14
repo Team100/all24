@@ -2,7 +2,7 @@
   {
     "name": "/Preferences/foo",
     "type": "double",
-    "value": 8.0,
+    "value": 1.2023345232009888,
     "properties": {
       "persistent": true
     }
@@ -10,7 +10,7 @@
   {
     "name": "/Preferences/bar",
     "type": "double",
-    "value": 3.0,
+    "value": 1.4335848093032837,
     "properties": {
       "persistent": true
     }

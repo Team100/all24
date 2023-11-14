@@ -9,10 +9,12 @@ public class RobotContainer {
     public RobotContainer() {
         HIDControl hid = new HIDControl();
         Map<String, PersistentParameter.HIDConfig> configs = new HashMap<>();
-        configs.put("foo", conf(hid, 0, 1));
-        configs.put("bar", conf(hid, 1, 2));
+        // these axes are for the "pilot" thing
+        // each encoder has a "button" that resets it
+        configs.put("foo", conf(hid, 4, 5));
+        configs.put("bar", conf(hid, 6, 6));
         configs.put("baz", conf(hid, null, 3)); // no knob
-        configs.put("biz", conf(hid, 3, null)); // no reset
+        configs.put("biz", conf(hid, 7, null)); // no reset
         ParameterFactory parameters = new ParameterFactory(configs);
         m_subsystem = new ExampleSubsystem(parameters);
     }
