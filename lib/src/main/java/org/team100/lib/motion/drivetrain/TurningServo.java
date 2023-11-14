@@ -63,6 +63,10 @@ public class TurningServo {
 
         t.log(m_name + "/Controller Output rad_s", turningMotorControllerOutputRad_S);
         t.log(m_name + "/Feed Forward Output rad_s", turningFeedForwardRad_S);
+
+        t.log(m_name + "/DESIRED POSITION", state.angle.getRadians());
+        t.log(m_name + "/ACTUAL POSITION", getTurningAngleRad());
+
     }
 
     void onboard(SwerveModuleState state) {
@@ -74,6 +78,10 @@ public class TurningServo {
 
         t.log(m_name + "/Controller Output", turningMotorControllerOutput);
         t.log(m_name + "/Feed Forward Output", turningFeedForwardOutput);
+        t.log(m_name + "/Total Output", turningFeedForwardOutput);
+        t.log(m_name + "/Actual Speed", m_turningMotor.get());
+
+
     }
 
     private void log() {
@@ -98,7 +106,16 @@ public class TurningServo {
     }
 
     double getTurningAngleRad() {
-        return m_turningEncoder.getAngle();
+        // if(m_turningEncoder.getAngle() >= 2 * Math.PI){
+        //     return m_turningEncoder.getAngle() / (2* Math.PI);
+        // } else if (m_turningEncoder.getAngle() <= -2* Math.PI){
+        //     return m_turningEncoder.getAngle() / (2* Math.PI);
+        // } else {
+        //     return m_turningEncoder.getAngle();
+
+        // }
+
+        return MathUtil.angleModulus(m_turningEncoder.getAngle());
     }
 
     Rotation2d getTurningRotation() {
