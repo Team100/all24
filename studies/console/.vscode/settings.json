@@ -25,5 +25,9 @@
       }
     },
   ],
-  "java.test.defaultConfig": "WPIlibUnitTests"
+"java.test.defaultConfig": "WPIlibUnitTests",
+"cmake.configureOnOpen": false,
+"files.associations": {
+    "typeinfo": "cpp"
+}
 }
