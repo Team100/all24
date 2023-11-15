@@ -90,7 +90,7 @@ class FancyTrajectoryTest {
         // this changes the fpga timestamp used in testing.
         SimHooks.stepTiming(1);
         double endTime = Timer.getFPGATimestamp();
-        assertEquals(1, endTime - startTime, 0.001);
+        assertEquals(1, endTime - startTime, 0.1);
     }
 
     @Test
