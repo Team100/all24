@@ -108,8 +108,8 @@ public class HolonomicDriveRegulator {
         Vector<N2> rDot_theta = SubRegulator1D.getRDot(newDesiredState.theta());
 
         Matrix<N1, N1> totalU_x = xRegulator.calculateTotalU(xhat_x, r_x, rDot_x, kDt);
-        Matrix<N1, N1> totalU_y = xRegulator.calculateTotalU(xhat_y, r_y, rDot_y, kDt);
-        Matrix<N1, N1> totalU_theta = xRegulator.calculateTotalU(xhat_theta, r_theta, rDot_theta, kDt);
+        Matrix<N1, N1> totalU_y = yRegulator.calculateTotalU(xhat_y, r_y, rDot_y, kDt);
+        Matrix<N1, N1> totalU_theta = thetaRegulator.calculateTotalU(xhat_theta, r_theta, rDot_theta, kDt);
 
         xhat_x = xRegulator.predictState(xhat_x, totalU_x, kDt);
         xhat_y = yRegulator.predictState(xhat_y, totalU_y, kDt);

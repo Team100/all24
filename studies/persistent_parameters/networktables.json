@@ -1,0 +1,26 @@
+[
+  {
+    "name": "/Preferences/foo",
+    "type": "double",
+    "value": 1.2023345232009888,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/bar",
+    "type": "double",
+    "value": 1.4335848093032837,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/no_knob",
+    "type": "double",
+    "value": 20.0,
+    "properties": {
+      "persistent": true
+    }
+  }
+]

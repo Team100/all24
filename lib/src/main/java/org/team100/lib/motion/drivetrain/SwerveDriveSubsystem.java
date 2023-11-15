@@ -32,6 +32,8 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
 
     private SwerveState m_desiredState;
 
+    private boolean m_useSetpointGenerator;
+
     public SwerveDriveSubsystem(
             Heading heading,
             SwerveDrivePoseEstimator poseEstimator,
@@ -82,6 +84,12 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         m_desiredState = desiredState;
     }
 
+    public void setDesiredState(SwerveState desiredState, boolean useSetpointGenerator) {
+
+        m_useSetpointGenerator = useSetpointGenerator;
+        m_desiredState = desiredState;
+    }
+
     public void setGains(PidGains cartesian, PidGains rotation) {
         m_controller.setGains(cartesian, rotation);
     }
@@ -126,7 +134,18 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         Pose2d currentPose = getPose();
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, m_desiredState);
+
+
         driveInFieldCoords(fieldRelativeTarget);
+    }
+
+    public void setUsingSetpointGenerator(boolean bool){
+        if(bool){
+            m_useSetpointGenerator = true;
+        } else{
+            m_useSetpointGenerator = false;
+
+        }
     }
 
     private void driveToReference2() {
@@ -154,6 +173,13 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         t.log("/chassis/x m", twist.dx);
         t.log("/chassis/y m", twist.dy);
         t.log("/chassis/theta rad", twist.dtheta);
+
+        // if(m_useSetpointGenerator){
+        //     m_swerveLocal.setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
+        // } else {
+        //     m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
+
+        // }
 
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
     }
