@@ -84,8 +84,8 @@ public class FancyTrajectory extends Command {
                         kMaxVelM_S,
                         kMaxAccelM_S_S,
                         kMaxVoltage);
-        System.out.println(trajectory);
-        System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
+        // System.out.println(trajectory);
+        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
         // assertEquals(10, trajectory.length());
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(trajectory));

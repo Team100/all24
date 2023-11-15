@@ -117,14 +117,14 @@ class SubRegulator1DTest {
             // forecast actual behavior, lossy double integrator
             actual += actual_v * kDt;
             actual_v += (output.get(0, 0) - actual_v) * kDt;
-            System.out.printf("t: %f, sample x %f v %f, actual %f, xhat x %f v %f, output %f\n",
-                    time,
-                    sample.getX(),
-                    sample.getV(),
-                    actual,
-                    xhat_x.x.get(0, 0),
-                    xhat_x.x.get(1, 0),
-                    output.get(0, 0));
+            // System.out.printf("t: %f, sample x %f v %f, actual %f, xhat x %f v %f, output %f\n",
+            //         time,
+            //         sample.getX(),
+            //         sample.getV(),
+            //         actual,
+            //         xhat_x.x.get(0, 0),
+            //         xhat_x.x.get(1, 0),
+            //         output.get(0, 0));
             time += kDt;
         }
 
