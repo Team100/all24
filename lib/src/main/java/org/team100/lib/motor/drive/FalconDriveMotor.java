@@ -105,7 +105,7 @@ public class FalconDriveMotor implements DriveMotor {
         double revolutionsPerSec = outputMetersPerSec / (m_wheelDiameter * Math.PI);
         double revsPer100ms = revolutionsPerSec / 10;
         double ticksPer100ms = revsPer100ms * ticksPerRevolution;
-        if (revolutionsPerSec < .575) {
+        if (this.getVelocityRot_S() < .575) { //TODO TUNE THISSSS
             Ks = .03;
         }
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
