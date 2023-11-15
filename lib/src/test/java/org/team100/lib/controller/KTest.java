@@ -42,7 +42,7 @@ class KTest {
 
         var S = DARE.dare(discA, discB, Q, R);
 
-        // K = (BᵀSB + R)⁻¹BᵀSA
+        // K = (B^T S B + R)^-1 B^T S A
         Matrix<N1, N2> m_K = discB
                 .transpose()
                 .times(S)
