@@ -1,12 +1,12 @@
-package org.team100.lib.motion.example1d;
+package org.team100.lib.motion.example1d.crank;
 
 import java.util.function.DoublePredicate;
 
-public class PositionLimit implements DoublePredicate {
+public class CrankPositionLimit implements DoublePredicate {
     private final double m_min;
     private final double m_max;
 
-    public PositionLimit(double min, double max) {
+    public CrankPositionLimit(double min, double max) {
         m_min = min;
         m_max = max;
     }

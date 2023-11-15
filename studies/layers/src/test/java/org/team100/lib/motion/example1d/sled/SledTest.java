@@ -3,7 +3,6 @@ package org.team100.lib.motion.example1d.sled;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.example1d.VelocityServo1d;
 
 class SledTest {
     private static final double kDelta = 0.001;
@@ -14,7 +13,7 @@ class SledTest {
      */
     @Test
     void testActuator() {
-        VelocityServo1d<SledActuation> servo = new VelocityServo1d<>(new SledActuation(0));
+        SledVelocityServo servo = new SledVelocityServo(new SledActuation(0));
         SimulatedSled sled = new SimulatedSled(servo);
 
         {
@@ -40,7 +39,7 @@ class SledTest {
 
     @Test
     void testConfigurationController() {
-        VelocityServo1d<SledActuation> servo = new VelocityServo1d<>(new SledActuation(0));
+        SledVelocityServo servo = new SledVelocityServo(new SledActuation(0));
         SimulatedSled sled = new SimulatedSled(servo);
         SledConfigurationController confCon = new SledConfigurationController();
         SledConfiguration setpoint = new SledConfiguration(0);

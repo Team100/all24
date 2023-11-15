@@ -1,8 +1,5 @@
-package org.team100.lib.motion.example1d;
+package org.team100.lib.motion.example1d.crank;
 
-import java.util.function.Function;
-
-import org.team100.lib.motion.example1d.framework.Workstate;
 import org.team100.lib.profile.MotionProfile;
 
 /**
@@ -14,14 +11,13 @@ import org.team100.lib.profile.MotionProfile;
  * 
  * // TODO i think this shouldn't get position.
  */
-public interface ProfileFollower<T extends Workstate<T>> extends Function<T, T> {
+public interface CrankProfileFollower {
 
-    ProfileFollower<T> withProfile(MotionProfile profile);
+    CrankProfileFollower withProfile(MotionProfile profile);
 
     /**
      * @param position_M current state, meters
      * @return control output, u, meters per second
      */
-    @Override
-    T apply(T position_M);
+    CrankWorkstate apply(CrankWorkstate position_M);
 }

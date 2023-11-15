@@ -1,8 +1,6 @@
 package org.team100.lib.motion.example1d.crank;
 
-import org.team100.lib.motion.example1d.framework.Workstate;
-
-public class CrankWorkstate implements Workstate<CrankWorkstate> {
+public class CrankWorkstate {
 
     private final Double m_state;
 
@@ -14,7 +12,6 @@ public class CrankWorkstate implements Workstate<CrankWorkstate> {
         m_state = state;
     }
 
-    @Override
     public CrankWorkstate getWorkstate() {
         return this;
     }

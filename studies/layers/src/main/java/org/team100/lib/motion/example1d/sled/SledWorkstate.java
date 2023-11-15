@@ -1,8 +1,6 @@
 package org.team100.lib.motion.example1d.sled;
 
-import org.team100.lib.motion.example1d.framework.Workstate;
-
-public class SledWorkstate implements Workstate<SledWorkstate> {
+public class SledWorkstate {
 
     // TODO: make this a full state, not just position
     private final Double m_state;
@@ -11,7 +9,6 @@ public class SledWorkstate implements Workstate<SledWorkstate> {
         m_state = state;
     }
 
-    @Override
     public SledWorkstate getWorkstate() {
         return this;
     }

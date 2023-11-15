@@ -1,7 +1,5 @@
 package org.team100.lib.motion.example1d.sled;
 
-import org.team100.lib.motion.example1d.framework.Actuator;
-
 /**
  * Represents a perfectly controllable 1d configuration.
  * 
@@ -10,11 +8,12 @@ import org.team100.lib.motion.example1d.framework.Actuator;
  */
 public class SimulatedSled {
     /** Actuator attached to the sled */
-    private final Actuator<SledActuation> m_actuator;
+    private final SledVelocityServo m_actuator;
+
     /** Current configuration */
     private SledConfiguration m_config;
 
-    public SimulatedSled(Actuator<SledActuation> actuator) {
+    public SimulatedSled(SledVelocityServo actuator) {
         m_actuator = actuator;
         m_config = new SledConfiguration(0);
     }

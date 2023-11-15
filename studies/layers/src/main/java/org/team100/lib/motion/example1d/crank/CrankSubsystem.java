@@ -1,22 +1,12 @@
-package org.team100.lib.motion.example1d;
+package org.team100.lib.motion.example1d.crank;
 
 import java.util.function.DoublePredicate;
 import java.util.function.UnaryOperator;
 
-import org.team100.lib.motion.example1d.crank.CrankActuation;
-import org.team100.lib.motion.example1d.crank.CrankConfiguration;
-import org.team100.lib.motion.example1d.crank.CrankConfigurationZero;
-import org.team100.lib.motion.example1d.crank.CrankKinematics;
-import org.team100.lib.motion.example1d.crank.CrankWorkstate;
-import org.team100.lib.motion.example1d.framework.Actuator;
-import org.team100.lib.motion.example1d.framework.ConfigurationController;
-import org.team100.lib.motion.example1d.framework.Kinematics;
-import org.team100.lib.motion.example1d.framework.WorkspaceController;
-
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /** This is an example subsystem using the 1d components. */
-public class Subsystem1d extends Subsystem {
+public class CrankSubsystem extends Subsystem {
     /**
      * Closed loop controller on velocity.
      * 
@@ -24,7 +14,7 @@ public class Subsystem1d extends Subsystem {
      * 
      * TODO: change this type to reflect the "configuration space" type
      */
-    private final Actuator<CrankActuation> m_jointServo;
+    private final CrankVelocityServo m_jointServo;
 
     /**
      * Source of velocity references. parameters are time (sec) and state (position
@@ -33,9 +23,9 @@ public class Subsystem1d extends Subsystem {
      * Acts in work space, e.g. cartesian. Should it?
      * TODO: immutable
      */
-    private ProfileFollower<CrankWorkstate> m_follower;
+    private CrankProfileFollower m_follower;
 
-    private WorkspaceController<CrankWorkstate> m_workspaceController;
+    // private WorkspaceController<CrankWorkstate> m_workspaceController;
 
     /**
      * Adjusts setpoints for policy, e.g. feasibility. This is useful for manual
@@ -48,15 +38,14 @@ public class Subsystem1d extends Subsystem {
     /** Enables the servo. */
     private DoublePredicate m_enabler;
 
-    private Kinematics<CrankWorkstate, CrankConfiguration> m_kinematics;
+    private CrankKinematics m_kinematics;
 
-    private ConfigurationController<CrankConfiguration, CrankActuation> m_confController;
+    private CrankConfigurationController m_confController;
 
-    // TODO: make this generic
-    public Subsystem1d(Actuator<CrankActuation> servo) {
+    public CrankSubsystem(CrankVelocityServo servo) {
         m_jointServo = servo;
-        m_follower = new ZeroVelocitySupplier1d<>(CrankWorkstate::new);
-        m_workspaceController = new IdentityWorkspaceController<>(CrankWorkstate::new);
+        m_follower = new CrankZeroVelocitySupplier1d();
+        // m_workspaceController = new IdentityWorkspaceController<>(CrankWorkstate::new);
         m_workspaceFilter = x -> x;
         m_actuationFilter = x -> x;
         m_enabler = x -> true;
@@ -67,13 +56,13 @@ public class Subsystem1d extends Subsystem {
         m_confController = new CrankConfigurationZero();
     }
 
-    public void setProfileFollower(ProfileFollower<CrankWorkstate> follower) {
+    public void setProfileFollower(CrankProfileFollower follower) {
         if (follower == null)
             throw new IllegalArgumentException("null follower");
         m_follower = follower;
     }
 
-    public ProfileFollower<CrankWorkstate> getProfileFollower() {
+    public CrankProfileFollower getProfileFollower() {
         return m_follower;
     }
 
@@ -95,7 +84,7 @@ public class Subsystem1d extends Subsystem {
         m_enabler = enabler;
     }
 
-    public void setConfigurationController(ConfigurationController<CrankConfiguration, CrankActuation> confController) {
+    public void setConfigurationController(CrankConfigurationController confController) {
         m_confController = confController;
     }
 

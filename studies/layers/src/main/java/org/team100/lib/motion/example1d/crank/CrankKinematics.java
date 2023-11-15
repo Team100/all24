@@ -1,7 +1,5 @@
 package org.team100.lib.motion.example1d.crank;
 
-import org.team100.lib.motion.example1d.framework.Kinematics;
-
 /**
  * Kinematics of a rotating crank, like a steam locomotive.
  * 
@@ -20,7 +18,7 @@ import org.team100.lib.motion.example1d.framework.Kinematics;
  * https://en.wikipedia.org/wiki/Slider-crank_linkage
  * https://en.wikipedia.org/wiki/Piston_motion_equations
  */
-public class CrankKinematics implements Kinematics<CrankWorkstate, CrankConfiguration> {
+public class CrankKinematics {
     private final double m_crankRadius;
     private final double m_rodLength;
 
@@ -37,7 +35,6 @@ public class CrankKinematics implements Kinematics<CrankWorkstate, CrankConfigur
      * @return slider position measured from the crank axis, using the same units
      *         used in the constructor.
      */
-    @Override
     public CrankWorkstate forward(CrankConfiguration crankAngleRad) {
         // this is directly from wikipedia
         double cosAngle = Math.cos(crankAngleRad.getCrankAngleRad());
@@ -53,7 +50,6 @@ public class CrankKinematics implements Kinematics<CrankWorkstate, CrankConfigur
      * @param sliderPosition measured from the crank axis, using the same units used
      *                       in the constructor.
      */
-    @Override
     public CrankConfiguration inverse(CrankWorkstate sliderPosition) {
         // this is the wikipedia expression inverted.
         return new CrankConfiguration(

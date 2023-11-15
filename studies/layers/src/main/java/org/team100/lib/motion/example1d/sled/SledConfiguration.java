@@ -1,9 +1,8 @@
 package org.team100.lib.motion.example1d.sled;
 
-import org.team100.lib.motion.example1d.framework.Configuration;
 
 /** Represents the 1d position of the sled in meters. */
-public class SledConfiguration implements Configuration<SledConfiguration> {
+public class SledConfiguration {
     private final double m_positionM;
 
     /** @param positionM sled position in meters */

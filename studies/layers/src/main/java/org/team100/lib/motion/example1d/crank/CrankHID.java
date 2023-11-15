@@ -1,11 +1,11 @@
-package org.team100.lib.motion.example1d;
+package org.team100.lib.motion.example1d.crank;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /** Example human interface device. */
-public class HID {
+public class CrankHID {
     GenericHID genericHID = new GenericHID(0);
 
     /** Stop while held. */
