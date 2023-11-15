@@ -1,5 +1,7 @@
 package org.team100.lib.motion.example1d.crank;
 
+import java.util.function.Supplier;
+
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
@@ -8,40 +10,46 @@ import org.team100.lib.profile.MotionState;
  * This is an example container, like RobotContainer.
  */
 public class CrankContainer {
+    private static final CrankProfileFollower kDefaultFollower = new CrankZeroVelocitySupplier1d();
     private final CrankSubsystem subsystem;
     private final CrankHID hid;
 
+    // this is supplied via lambdas
+    private CrankProfileFollower currentCrankProfileFollower = kDefaultFollower;
+
     public CrankContainer() {
         hid = new CrankHID();
+
+        CrankFeasibleFilter crankFeasibleFilter = new CrankFeasibleFilter(() -> currentCrankProfileFollower, 1, 1);
+
+        CrankInverseKinematics kinematics = new CrankInverseKinematics(crankFeasibleFilter, new CrankKinematics(1,2));
+
         subsystem = new CrankSubsystem(
-                new CrankZeroVelocitySupplier1d(),
-                new CrankVelocityServo(new CrankActuation(0)));
+            () -> kinematics,
+            new CrankVelocityServo(new CrankActuation(0)));
+
         subsystem.setEnable(new CrankPositionLimit(0, 1));
-        subsystem.setFilter(new CrankFeasibleFilter(1, 1));
 
         subsystem.setDefaultCommand(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new CrankManualVelocitySupplier1d(hid::manual))));
+                () -> currentCrankProfileFollower = new CrankManualVelocitySupplier1d(hid::manual)));
 
         hid.chooseStop(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new CrankZeroVelocitySupplier1d())));
+                () -> currentCrankProfileFollower = new CrankZeroVelocitySupplier1d()));
 
         hid.chooseFF(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new CrankFFVelocitySupplier1d(() -> new CrankWorkstate(0.0)))));
+                () -> currentCrankProfileFollower = new CrankFFVelocitySupplier1d(() -> new CrankWorkstate(0.0))));
 
         hid.choosePID(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(
-                        new CrankPIDVelocitySupplier1d(
-                            new CrankWorkspaceController(),
-                            () -> new CrankWorkstate(0.0)))));
+                () -> currentCrankProfileFollower = new CrankPIDVelocitySupplier1d(
+                        new CrankWorkspaceController(),
+                        () -> new CrankWorkstate(0.0))));
 
         hid.runProfile1(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(
-                        subsystem.getProfileFollower().withProfile(makeProfile()))));
+                () -> currentCrankProfileFollower = currentCrankProfileFollower.withProfile(makeProfile())));
 
         hid.runProfile2(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(
-                        subsystem.getProfileFollower().withProfile(
-                                makeProfile(0.0, 0.0))))); // TODO: real measurement
+                () -> currentCrankProfileFollower = currentCrankProfileFollower.withProfile(
+                        makeProfile(0.0, 0.0)))); // TODO: real measurement
     }
 
     /** @return a profile starting at zero */

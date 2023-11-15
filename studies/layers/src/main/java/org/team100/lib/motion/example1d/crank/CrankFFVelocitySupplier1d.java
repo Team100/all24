@@ -34,16 +34,11 @@ public class CrankFFVelocitySupplier1d implements CrankProfileFollower {
 
     // TODO: this seems wrong
     @Override
-    public CrankWorkstate apply(CrankWorkstate position_M) {
+    public CrankWorkstate get() {
         if (m_profile == null)
-            return position_M;
+            return m_measurement.get();
         // this is wrong; return position or velocity here? or both?
         return new CrankWorkstate(m_profile.get(m_timer.get()).getV());
-    }
-
-    @Override
-    public CrankWorkstate calculate() {
-        return apply(m_measurement.get());
     }
 
     private CrankFFVelocitySupplier1d(MotionProfile profile, Supplier<CrankWorkstate> measurement) {

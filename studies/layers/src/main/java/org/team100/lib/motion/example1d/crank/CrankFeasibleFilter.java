@@ -1,37 +1,42 @@
 package org.team100.lib.motion.example1d.crank;
 
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import edu.wpi.first.wpilibj.Timer;
 
-/** Workspace feasibility
- * TODO: add a parameter
+/**
+ * Enforce workspace feasibility by editing reference state.
  */
-public class CrankFeasibleFilter implements UnaryOperator<CrankWorkstate> {
-
+public class CrankFeasibleFilter implements Supplier<CrankWorkstate> {
+    private final Supplier<Supplier<CrankWorkstate>> m_follower;
     private final double m_maxVelocityM_S;
     private final double m_maxAccelM_S_S;
     private double m_prevVelM_S;
     private double m_prevTimeS;
 
-    public CrankFeasibleFilter( double maxVelocityM_S, double maxAccelM_S_S) {
+    /**
+     * @param follower is a supplier of followers so that it can be mutable.
+     */
+    public CrankFeasibleFilter(
+            Supplier<Supplier<CrankWorkstate>> follower,
+            double maxVelocityM_S,
+            double maxAccelM_S_S) {
+        m_follower = follower;
         m_maxVelocityM_S = maxVelocityM_S;
         m_maxAccelM_S_S = maxAccelM_S_S;
         m_prevTimeS = 0;
         m_prevVelM_S = 0;
     }
 
-    /**
-     * Limit velocity and acceleration.
-     * 
-     * @return a feasible velocity in meters per second
-     */
     @Override
-    public CrankWorkstate apply(CrankWorkstate velocityM_S) {
+    public CrankWorkstate get() {
+        CrankWorkstate velocityM_S = m_follower.get().get();
+        
         double nowS = Timer.getFPGATimestamp();
         double dtS = nowS - m_prevTimeS;
         m_prevTimeS = nowS;
-        double accelM_S_S = (velocityM_S.getWorkstate().getState() - m_prevVelM_S)/dtS;
+        double accelM_S_S = (velocityM_S.getWorkstate().getState() - m_prevVelM_S) / dtS;
         if (velocityM_S.getWorkstate().getState() > m_maxVelocityM_S) {
             return new CrankWorkstate(m_maxAccelM_S_S);
         }

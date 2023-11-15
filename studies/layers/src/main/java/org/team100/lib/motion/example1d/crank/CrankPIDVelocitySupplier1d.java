@@ -30,23 +30,18 @@ public class CrankPIDVelocitySupplier1d implements CrankProfileFollower {
     }
 
     @Override
-    public CrankWorkstate apply(CrankWorkstate position_M) {
-        if (m_profile == null)
-            return new CrankWorkstate(0.0);
-        // TODO: wrap the profile in the same type to avoid wrapping here.
-        MotionState motionState = m_profile.get(m_timer.get());
-        return m_controller.calculate(position_M.getWorkstate(), motionState);
-    }
-
-    @Override
     public CrankProfileFollower withProfile(MotionProfile profile) {
         return new CrankPIDVelocitySupplier1d(m_controller, profile, m_measurement);
     }
 
 
     @Override
-    public CrankWorkstate calculate() {
-        return apply(m_measurement.get());
+    public CrankWorkstate get() {
+        if (m_profile == null)
+            return new CrankWorkstate(0.0);
+        // TODO: wrap the profile in the same type to avoid wrapping here.
+        MotionState motionState = m_profile.get(m_timer.get());
+        return m_controller.calculate(m_measurement.get().getWorkstate(), motionState);
     }
 
     private CrankPIDVelocitySupplier1d(

@@ -15,18 +15,13 @@ public class CrankManualVelocitySupplier1d implements CrankProfileFollower {
     }
 
     @Override
-    public CrankWorkstate apply(CrankWorkstate position_M) {
-        return new CrankWorkstate(m_manual.getAsDouble());
-    }
-
-    @Override
     public CrankProfileFollower withProfile(MotionProfile profile) {
         // ignore the profile
         return this;
     }
 
     @Override
-    public CrankWorkstate calculate() {
-        return apply(null);
+    public CrankWorkstate get() {
+        return new CrankWorkstate(m_manual.getAsDouble());
     }
 }

@@ -7,10 +7,6 @@ import org.team100.lib.profile.MotionProfile;
  */
 public class CrankZeroVelocitySupplier1d implements CrankProfileFollower {
 
-    public CrankWorkstate apply(CrankWorkstate position_M) {
-        return new CrankWorkstate(0.0);
-    }
-
     @Override
     public CrankProfileFollower withProfile(MotionProfile profile) {
         // ignore the profile
@@ -18,7 +14,7 @@ public class CrankZeroVelocitySupplier1d implements CrankProfileFollower {
     }
 
     @Override
-    public CrankWorkstate calculate() {
-        return apply(null);
+    public CrankWorkstate get() {
+        return new CrankWorkstate(0.0);
     }
 }

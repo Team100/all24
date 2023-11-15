@@ -1,5 +1,7 @@
 package org.team100.lib.motion.example1d.crank;
 
+import java.util.function.Supplier;
+
 import org.team100.lib.profile.MotionProfile;
 
 /**
@@ -9,21 +11,16 @@ import org.team100.lib.profile.MotionProfile;
  * 
  * this is a weird follower that gets positions and produces positions? eh?
  * 
- * // TODO i think this shouldn't get position.
+ * TODO i think this shouldn't get position.
  */
-public interface CrankProfileFollower {
+public interface CrankProfileFollower extends Supplier<CrankWorkstate> {
 
     CrankProfileFollower withProfile(MotionProfile profile);
 
     /**
-     * @param position_M current state, meters
-     * @return control output, u, meters per second
-     */
-    CrankWorkstate apply(CrankWorkstate position_M);
-
-    /**
-     * use the supplier as input
+     * use the ctor supplier as input
      * 
      * @return control output, u, meters per second */
-    CrankWorkstate calculate();
+    @Override
+    CrankWorkstate get();
 }

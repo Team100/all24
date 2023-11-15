@@ -1,6 +1,7 @@
 package org.team100.lib.motion.example1d.crank;
 
 import java.util.function.DoublePredicate;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -21,59 +22,36 @@ public class CrankSubsystem extends Subsystem {
      * in meters).
      * 
      * Acts in work space, e.g. cartesian. Should it?
-     * TODO: immutable
      */
-    private CrankProfileFollower m_follower;
-
-    // private WorkspaceController<CrankWorkstate> m_workspaceController;
+    private final Supplier<Supplier<CrankConfiguration>> m_follower;
 
     /**
      * Adjusts setpoints for policy, e.g. feasibility. This is useful for manual
      * control, which isn't guaranteed to be feasible.
-     * TODO: immutable, generic
      */
-    private UnaryOperator<CrankWorkstate> m_workspaceFilter;
     private UnaryOperator<CrankActuation> m_actuationFilter;
 
     /** Enables the servo. */
     private DoublePredicate m_enabler;
 
-    private CrankKinematics m_kinematics;
-
     private CrankConfigurationController m_confController;
 
+    /**
+     * @param follower using a supplier to decouple mutations of the follower
+     */
     public CrankSubsystem(
-        CrankProfileFollower follower,
-        CrankVelocityServo servo) {
-        m_jointServo = servo;
-        m_follower = follower;
-        // m_workspaceController = new IdentityWorkspaceController<>(CrankWorkstate::new);
-        m_workspaceFilter = x -> x;
-        m_actuationFilter = x -> x;
-        m_enabler = x -> true;
-        // TODO: inject kinematics?
-        m_kinematics = new CrankKinematics(1, 2);
-
-        // m_confController = new CrankConfigurationController();
-        m_confController = new CrankConfigurationZero();
-    }
-
-    public void setProfileFollower(CrankProfileFollower follower) {
+            Supplier<Supplier<CrankConfiguration>> follower,
+            CrankVelocityServo servo) {
         if (follower == null)
             throw new IllegalArgumentException("null follower");
         m_follower = follower;
-    }
+        m_jointServo = servo;
 
-    public CrankProfileFollower getProfileFollower() {
-        return m_follower;
-    }
+        m_actuationFilter = x -> x;
+        m_enabler = x -> true;
 
-    /**
-     * set the workspace filter
-     * TODO: make this generic
-     */
-    public void setFilter(UnaryOperator<CrankWorkstate> filter) {
-        m_workspaceFilter = filter;
+        // m_confController = new CrankConfigurationController();
+        m_confController = new CrankConfigurationZero();
     }
 
     public void setActuationFilter(UnaryOperator<CrankActuation> filter) {
@@ -91,8 +69,6 @@ public class CrankSubsystem extends Subsystem {
     }
 
     private boolean enabled() {
-        if (m_follower == null)
-            return false;
         if (m_enabler == null)
             return false;
         double measurement = 0.0; // TODO: use a real measurement here.
@@ -106,15 +82,7 @@ public class CrankSubsystem extends Subsystem {
             return;
         }
 
-        CrankWorkstate workspaceControlM_S = m_follower.calculate();
-
-        // workspaceControlM_S = m_workspaceController.calculate(measurement, null);
-
-        if (m_workspaceFilter != null) {
-            workspaceControlM_S = m_workspaceFilter.apply(workspaceControlM_S);
-        }
-
-        CrankConfiguration setpoint = m_kinematics.inverse(workspaceControlM_S);
+        CrankConfiguration setpoint = m_follower.get().get();
 
         // TODO: use a real measurement here
         CrankActuation actuation = m_confController.calculate(

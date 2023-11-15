@@ -18,7 +18,9 @@ class CrankTest {
     void testActuation() {
         CrankVelocityServo servo = new CrankVelocityServo(new CrankActuation(0));
         assertNotNull(servo.m_state);
-        CrankSubsystem subsystem = new CrankSubsystem(new CrankZeroVelocitySupplier1d(), servo);
+        CrankProfileFollower follower = new CrankZeroVelocitySupplier1d();
+        CrankInverseKinematics kinematics = new CrankInverseKinematics(follower, new CrankKinematics(1,2));
+        CrankSubsystem subsystem = new CrankSubsystem(()->kinematics, servo);
         subsystem.setEnable(new CrankPositionLimit(0, 1));
         // subsystem.setFilter(new FeasibleFilter(1, 1));
         subsystem.periodic();
@@ -29,7 +31,9 @@ class CrankTest {
     void testUnfiltered() {
         CrankVelocityServo servo = new CrankVelocityServo(new CrankActuation(0));
         assertNotNull(servo.m_state);
-        CrankSubsystem subsystem = new CrankSubsystem(new CrankZeroVelocitySupplier1d(), servo);
+        CrankProfileFollower follower = new CrankZeroVelocitySupplier1d();
+        CrankInverseKinematics kinematics = new CrankInverseKinematics(follower, new CrankKinematics(1,2));
+        CrankSubsystem subsystem = new CrankSubsystem(()->kinematics, servo);
         subsystem.setEnable(new CrankPositionLimit(0, 1));
         // subsystem.setFilter(new FeasibleFilter(1, 1));
         subsystem.periodic();
@@ -41,16 +45,23 @@ class CrankTest {
         assertEquals(1, servo.m_state.getVelocityM_S(), 0.001);
     }
 
+    CrankProfileFollower currentFollower = new CrankZeroVelocitySupplier1d();
+
     // this does not yet work
    // @Test
     void testFiltered() {
         CrankVelocityServo servo = new CrankVelocityServo(new CrankActuation(0));
-        CrankSubsystem subsystem = new CrankSubsystem(new CrankZeroVelocitySupplier1d(), servo);
-        subsystem.setEnable(new CrankPositionLimit(0, 1));
-        subsystem.setFilter(new CrankFeasibleFilter(1, 1));
+        
+        CrankFeasibleFilter filter = new CrankFeasibleFilter(() -> currentFollower,1, 1);
+        CrankInverseKinematics kinematics = new CrankInverseKinematics(filter, new CrankKinematics(1,2));
+        CrankSubsystem subsystem = new CrankSubsystem(() -> kinematics, servo);
+
+        CrankPositionLimit enabler = new CrankPositionLimit(0, 1);
+        subsystem.setEnable(enabler);
+
         subsystem.periodic();
         assertEquals(0, servo.m_state.getVelocityM_S(), 0.001);
-        subsystem.setProfileFollower(new CrankManualVelocitySupplier1d(() -> 1.0));
+        currentFollower = new CrankManualVelocitySupplier1d(() -> 1.0);
         SimHooks.stepTiming(0.5);
         subsystem.periodic();
         // this is acceleration limited. :-)
