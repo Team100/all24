@@ -24,4 +24,9 @@ public class CrankManualVelocitySupplier1d implements CrankProfileFollower {
         // ignore the profile
         return this;
     }
+
+    @Override
+    public CrankWorkstate calculate() {
+        return apply(null);
+    }
 }

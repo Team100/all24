@@ -1,5 +1,7 @@
 package org.team100.lib.motion.example1d.crank;
 
+import java.util.function.Supplier;
+
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionState;
 
@@ -14,13 +16,17 @@ public class CrankPIDVelocitySupplier1d implements CrankProfileFollower {
     private final CrankWorkspaceController m_controller;
     private final Timer m_timer;
     private final MotionProfile m_profile;
+    private final Supplier<CrankWorkstate> m_measurement;
+
 
     /**
      * Supplies zero until a profile is specified. Instantiate once per command
      * invocation, don't reuse it.
      */
-    public CrankPIDVelocitySupplier1d(CrankWorkspaceController controller) {
-        this(controller, null);
+    public CrankPIDVelocitySupplier1d(CrankWorkspaceController controller,
+    Supplier<CrankWorkstate> measurement
+    ) {
+        this(controller, null, measurement);
     }
 
     @Override
@@ -34,16 +40,24 @@ public class CrankPIDVelocitySupplier1d implements CrankProfileFollower {
 
     @Override
     public CrankProfileFollower withProfile(MotionProfile profile) {
-        return new CrankPIDVelocitySupplier1d(m_controller, profile);
+        return new CrankPIDVelocitySupplier1d(m_controller, profile, m_measurement);
+    }
+
+
+    @Override
+    public CrankWorkstate calculate() {
+        return apply(m_measurement.get());
     }
 
     private CrankPIDVelocitySupplier1d(
             CrankWorkspaceController controller,
-            MotionProfile profile) {
+            MotionProfile profile,
+            Supplier<CrankWorkstate> measurement) {
         m_controller = controller;
         // m_controller = new PIDController(1, 0, 0);
         m_timer = new Timer();
         m_profile = profile;
+        m_measurement = measurement;
     }
 
 }

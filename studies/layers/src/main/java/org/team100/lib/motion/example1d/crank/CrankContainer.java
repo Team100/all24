@@ -13,7 +13,9 @@ public class CrankContainer {
 
     public CrankContainer() {
         hid = new CrankHID();
-        subsystem = new CrankSubsystem(new CrankVelocityServo(new CrankActuation(0)));
+        subsystem = new CrankSubsystem(
+                new CrankZeroVelocitySupplier1d(),
+                new CrankVelocityServo(new CrankActuation(0)));
         subsystem.setEnable(new CrankPositionLimit(0, 1));
         subsystem.setFilter(new CrankFeasibleFilter(1, 1));
 
@@ -24,11 +26,13 @@ public class CrankContainer {
                 () -> subsystem.setProfileFollower(new CrankZeroVelocitySupplier1d())));
 
         hid.chooseFF(subsystem.runOnce(
-                () -> subsystem.setProfileFollower(new CrankFFVelocitySupplier1d())));
+                () -> subsystem.setProfileFollower(new CrankFFVelocitySupplier1d(() -> new CrankWorkstate(0.0)))));
 
         hid.choosePID(subsystem.runOnce(
                 () -> subsystem.setProfileFollower(
-                        new CrankPIDVelocitySupplier1d(new CrankWorkspaceController()))));
+                        new CrankPIDVelocitySupplier1d(
+                            new CrankWorkspaceController(),
+                            () -> new CrankWorkstate(0.0)))));
 
         hid.runProfile1(subsystem.runOnce(
                 () -> subsystem.setProfileFollower(
@@ -37,7 +41,7 @@ public class CrankContainer {
         hid.runProfile2(subsystem.runOnce(
                 () -> subsystem.setProfileFollower(
                         subsystem.getProfileFollower().withProfile(
-                                makeProfile(subsystem.getPositionM(), subsystem.getVelocityM_S())))));
+                                makeProfile(0.0, 0.0))))); // TODO: real measurement
     }
 
     /** @return a profile starting at zero */

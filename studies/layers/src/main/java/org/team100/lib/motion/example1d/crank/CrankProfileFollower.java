@@ -20,4 +20,10 @@ public interface CrankProfileFollower {
      * @return control output, u, meters per second
      */
     CrankWorkstate apply(CrankWorkstate position_M);
+
+    /**
+     * use the supplier as input
+     * 
+     * @return control output, u, meters per second */
+    CrankWorkstate calculate();
 }

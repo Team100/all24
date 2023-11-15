@@ -42,9 +42,11 @@ public class CrankSubsystem extends Subsystem {
 
     private CrankConfigurationController m_confController;
 
-    public CrankSubsystem(CrankVelocityServo servo) {
+    public CrankSubsystem(
+        CrankProfileFollower follower,
+        CrankVelocityServo servo) {
         m_jointServo = servo;
-        m_follower = new CrankZeroVelocitySupplier1d();
+        m_follower = follower;
         // m_workspaceController = new IdentityWorkspaceController<>(CrankWorkstate::new);
         m_workspaceFilter = x -> x;
         m_actuationFilter = x -> x;
@@ -88,22 +90,13 @@ public class CrankSubsystem extends Subsystem {
         m_confController = confController;
     }
 
-    /** fake for the example; they should actually measure something. */
-    public double getPositionM() {
-        return 0.0;
-    }
-
-    /** fake for the example; they should actually measure something. */
-    public double getVelocityM_S() {
-        return 0.0;
-    }
-
     private boolean enabled() {
         if (m_follower == null)
             return false;
         if (m_enabler == null)
             return false;
-        return m_enabler.test(getPositionM());
+        double measurement = 0.0; // TODO: use a real measurement here.
+        return m_enabler.test(measurement);
     }
 
     @Override
@@ -112,9 +105,8 @@ public class CrankSubsystem extends Subsystem {
             m_jointServo.set(new CrankActuation(0));
             return;
         }
-        CrankWorkstate measurement = new CrankWorkstate(getPositionM());
 
-        CrankWorkstate workspaceControlM_S = m_follower.apply(measurement);
+        CrankWorkstate workspaceControlM_S = m_follower.calculate();
 
         // workspaceControlM_S = m_workspaceController.calculate(measurement, null);
 
@@ -124,8 +116,9 @@ public class CrankSubsystem extends Subsystem {
 
         CrankConfiguration setpoint = m_kinematics.inverse(workspaceControlM_S);
 
+        // TODO: use a real measurement here
         CrankActuation actuation = m_confController.calculate(
-                new CrankConfiguration(getPositionM()),
+                new CrankConfiguration(0.0),
                 setpoint);
 
         if (m_actuationFilter != null) {

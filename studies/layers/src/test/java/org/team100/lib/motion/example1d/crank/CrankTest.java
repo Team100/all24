@@ -18,7 +18,7 @@ class CrankTest {
     void testActuation() {
         CrankVelocityServo servo = new CrankVelocityServo(new CrankActuation(0));
         assertNotNull(servo.m_state);
-        CrankSubsystem subsystem = new CrankSubsystem(servo);
+        CrankSubsystem subsystem = new CrankSubsystem(new CrankZeroVelocitySupplier1d(), servo);
         subsystem.setEnable(new CrankPositionLimit(0, 1));
         // subsystem.setFilter(new FeasibleFilter(1, 1));
         subsystem.periodic();
@@ -29,7 +29,7 @@ class CrankTest {
     void testUnfiltered() {
         CrankVelocityServo servo = new CrankVelocityServo(new CrankActuation(0));
         assertNotNull(servo.m_state);
-        CrankSubsystem subsystem = new CrankSubsystem(servo);
+        CrankSubsystem subsystem = new CrankSubsystem(new CrankZeroVelocitySupplier1d(), servo);
         subsystem.setEnable(new CrankPositionLimit(0, 1));
         // subsystem.setFilter(new FeasibleFilter(1, 1));
         subsystem.periodic();
@@ -45,7 +45,7 @@ class CrankTest {
    // @Test
     void testFiltered() {
         CrankVelocityServo servo = new CrankVelocityServo(new CrankActuation(0));
-        CrankSubsystem subsystem = new CrankSubsystem(servo);
+        CrankSubsystem subsystem = new CrankSubsystem(new CrankZeroVelocitySupplier1d(), servo);
         subsystem.setEnable(new CrankPositionLimit(0, 1));
         subsystem.setFilter(new CrankFeasibleFilter(1, 1));
         subsystem.periodic();
