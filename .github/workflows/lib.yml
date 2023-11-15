@@ -10,11 +10,6 @@ on:
   pull_request:
     branches: [ main ]
 
-permissions:
-  contents: read
-  actions: read
-  checks: write
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -45,11 +40,3 @@ jobs:
     # Runs a single command using the runners shell
     - name: Compile and run tests on robot code
       run: ./gradlew build
-
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: success() || failure()
-      with:
-        name: JEST Tests
-        path: reports/jest-*.xml
-        reporter: jest-junit
