@@ -83,17 +83,17 @@ class HolonomicDriveRegulatorTest {
                     currentTwist.dy + output.dy * kDtSec,
                     currentTwist.dtheta + output.dtheta * kDtSec);
 
-            System.out.printf("t: %f, sample [[%f %f %f][%f %f %f][%f %f %f]]"
-                    + " current [%f %f %f]"
-                    + " u [%f %f %f]\n",
-                    time,
-                    desiredState.x().x(), desiredState.x().v(), desiredState.x().a(),
-                    desiredState.y().x(), desiredState.y().v(), desiredState.y().a(),
-                    desiredState.theta().x(), desiredState.theta().v(), desiredState.theta().a(),
-                    currentPose.getX(), currentPose.getY(), currentPose.getRotation().getRadians(),
-                    output.dx,
-                    output.dy,
-                    output.dtheta);
+            // System.out.printf("t: %f, sample [[%f %f %f][%f %f %f][%f %f %f]]"
+            //         + " current [%f %f %f]"
+            //         + " u [%f %f %f]\n",
+            //         time,
+            //         desiredState.x().x(), desiredState.x().v(), desiredState.x().a(),
+            //         desiredState.y().x(), desiredState.y().v(), desiredState.y().a(),
+            //         desiredState.theta().x(), desiredState.theta().v(), desiredState.theta().a(),
+            //         currentPose.getX(), currentPose.getY(), currentPose.getRotation().getRadians(),
+            //         output.dx,
+            //         output.dy,
+            //         output.dtheta);
             time += kDtSec;
         }
 
