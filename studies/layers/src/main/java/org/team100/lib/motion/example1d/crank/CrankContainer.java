@@ -1,10 +1,13 @@
 package org.team100.lib.motion.example1d.crank;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
+
+import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
  * This is an example container, like RobotContainer.
@@ -12,48 +15,61 @@ import org.team100.lib.profile.MotionState;
 public class CrankContainer {
     private static final CrankProfileFollower kDefaultFollower = new CrankZeroVelocitySupplier1d();
 
-    // this is supplied via lambdas
-    private CrankProfileFollower currentCrankProfileFollower = kDefaultFollower;
+    // elements that can be changed at runtime
+    private CrankProfileFollower m_currentCrankProfileFollower;
+    private Consumer<CrankActuation> m_currentActuator;
 
     public CrankContainer() {
+        m_currentCrankProfileFollower = kDefaultFollower;
 
-        CrankFeasibleFilter crankFeasibleFilter = new CrankFeasibleFilter(() -> currentCrankProfileFollower, 1, 1);
+        MotorWrapper motor = new MotorWrapper();
+
+        m_currentActuator = new CrankOnboardVelocityServo(motor);
+
+        CrankFeasibleFilter crankFeasibleFilter = new CrankFeasibleFilter(() -> m_currentCrankProfileFollower, 1, 1);
 
         CrankInverseKinematics kinematics = new CrankInverseKinematics(crankFeasibleFilter, new CrankKinematics(1, 2));
 
-        CrankVelocityServo actuator = new CrankVelocityServo(new CrankActuation(0));
+        Supplier<CrankConfiguration> measurement = new CrankMeasurement(motor);
 
-        // TODO: a real measurement.
-        CrankConfiguration measurement = new CrankConfiguration(0.0);
+        CrankConfigurationController m_confController = new CrankConfigurationController(measurement, kinematics);
 
-        CrankConfigurationController m_confController = new CrankConfigurationController(() -> measurement, kinematics);
-
-        final CrankSubsystem subsystem = new CrankSubsystem(() -> m_confController, actuator);
+        final CrankSubsystem subsystem = new CrankSubsystem(() -> m_confController, () -> m_currentActuator);
 
         subsystem.setEnable(new CrankPositionLimit(0, 1));
 
         final CrankHID hid = new CrankHID();
 
         subsystem.setDefaultCommand(subsystem.runOnce(
-                () -> currentCrankProfileFollower = new CrankManualVelocitySupplier1d(hid::manual)));
+                () -> m_currentCrankProfileFollower = new CrankManualVelocitySupplier1d(hid::manual)));
 
         hid.chooseStop(subsystem.runOnce(
-                () -> currentCrankProfileFollower = new CrankZeroVelocitySupplier1d()));
+                () -> m_currentCrankProfileFollower = new CrankZeroVelocitySupplier1d()));
 
         hid.chooseFF(subsystem.runOnce(
-                () -> currentCrankProfileFollower = new CrankFFVelocitySupplier1d(() -> new CrankWorkstate(0.0))));
+                () -> m_currentCrankProfileFollower = new CrankFFVelocitySupplier1d(() -> new CrankWorkstate(0.0))));
 
         hid.choosePID(subsystem.runOnce(
-                () -> currentCrankProfileFollower = new CrankPIDVelocitySupplier1d(
+                () -> m_currentCrankProfileFollower = new CrankPIDVelocitySupplier1d(
                         new CrankWorkspaceController(),
                         () -> new CrankWorkstate(0.0))));
 
         hid.runProfile1(subsystem.runOnce(
-                () -> currentCrankProfileFollower = currentCrankProfileFollower.withProfile(makeProfile())));
+                () -> m_currentCrankProfileFollower = m_currentCrankProfileFollower.withProfile(makeProfile())));
 
         hid.runProfile2(subsystem.runOnce(
-                () -> currentCrankProfileFollower = currentCrankProfileFollower.withProfile(
+                () -> m_currentCrankProfileFollower = m_currentCrankProfileFollower.withProfile(
                         makeProfile(0.0, 0.0)))); // TODO: real measurement
+
+        //
+        // these actions don't interrupt the subsystem's current command, because they
+        // use Commands.runOnce instead of subsystem.runOnce.
+        //
+        hid.onboard(Commands.runOnce(
+                () -> m_currentActuator = new CrankOnboardVelocityServo(motor)));
+
+        hid.outboard(Commands.runOnce(
+                () -> m_currentActuator = new CrankOutboardVelocityServo(motor)));
     }
 
     /** @return a profile starting at zero */

@@ -23,6 +23,16 @@ public class CrankHID {
         new JoystickButton(genericHID, 3).onTrue(command);
     }
 
+    /** Set the servo to onboard */
+    public void onboard(Command command) {
+        new JoystickButton(genericHID, 4).onTrue(command);
+    }
+
+    /** Set the servo to outboard */
+    public void outboard(Command command) {
+        new JoystickButton(genericHID, 5).onTrue(command);
+    }
+
     /** Run a profile while held. */
     public void runProfile1(Command command) {
         new JoystickButton(genericHID, 4).whileTrue(command);
@@ -30,7 +40,7 @@ public class CrankHID {
 
     /** Run a profile while held. */
     public void runProfile2(Command command) {
-        new JoystickButton(genericHID, 4).whileTrue(command);
+        new JoystickButton(genericHID, 5).whileTrue(command);
     }
 
     /** In reality this would be manual input. */

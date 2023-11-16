@@ -10,12 +10,12 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 /** This is an example subsystem using the 1d components. */
 public class CrankSubsystem extends Subsystem {
 
-    private final Consumer<CrankActuation> m_actuator;
+    private final Supplier<Consumer<CrankActuation>> m_actuator;
     private final Supplier<Supplier<CrankActuation>> m_actuation;
     private UnaryOperator<CrankActuation> m_actuationFilter;
     private DoublePredicate m_enabler;
 
-    public CrankSubsystem(Supplier<Supplier<CrankActuation>> actuation, Consumer<CrankActuation> actuator) {
+    public CrankSubsystem(Supplier<Supplier<CrankActuation>> actuation, Supplier<Consumer<CrankActuation>> actuator) {
         if (actuation == null)
             throw new IllegalArgumentException("null follower");
         m_actuation = actuation;
@@ -44,7 +44,7 @@ public class CrankSubsystem extends Subsystem {
     @Override
     public void periodic() {
         if (!enabled()) {
-            m_actuator.accept(new CrankActuation(0));
+            m_actuator.get().accept(new CrankActuation(0));
             return;
         }
 
@@ -54,7 +54,7 @@ public class CrankSubsystem extends Subsystem {
             actuation = m_actuationFilter.apply(actuation);
         }
 
-        m_actuator.accept(actuation);
+        m_actuator.get().accept(actuation);
     }
 
 }
