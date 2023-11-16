@@ -1,10 +1,12 @@
 package org.team100.lib.motion.example1d.crank;
 
+import java.util.function.Consumer;
+
 /**
  * Example one-dimensional velocity actuator with imperative interface.
  * This could be either a software servo or an offboard servo.
  */
-public class CrankVelocityServo {
+public class CrankVelocityServo implements Consumer<CrankActuation> {
     // this is public so the tests can see it.
     public CrankActuation m_state;
 
@@ -14,14 +16,11 @@ public class CrankVelocityServo {
         m_state = initial;
     }
 
-    public void set(CrankActuation state) {
+    @Override
+    public void accept(CrankActuation state) {
         if (state == null)
             throw new IllegalArgumentException("null actuation");
         // this is just for testing
         m_state = state;
-    }
-
-    public CrankActuation get() {
-        return m_state;
     }
 }

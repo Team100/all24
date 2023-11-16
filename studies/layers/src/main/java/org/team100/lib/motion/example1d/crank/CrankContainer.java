@@ -11,24 +11,28 @@ import org.team100.lib.profile.MotionState;
  */
 public class CrankContainer {
     private static final CrankProfileFollower kDefaultFollower = new CrankZeroVelocitySupplier1d();
-    private final CrankSubsystem subsystem;
-    private final CrankHID hid;
 
     // this is supplied via lambdas
     private CrankProfileFollower currentCrankProfileFollower = kDefaultFollower;
 
     public CrankContainer() {
-        hid = new CrankHID();
 
         CrankFeasibleFilter crankFeasibleFilter = new CrankFeasibleFilter(() -> currentCrankProfileFollower, 1, 1);
 
-        CrankInverseKinematics kinematics = new CrankInverseKinematics(crankFeasibleFilter, new CrankKinematics(1,2));
+        CrankInverseKinematics kinematics = new CrankInverseKinematics(crankFeasibleFilter, new CrankKinematics(1, 2));
 
-        subsystem = new CrankSubsystem(
-            () -> kinematics,
-            new CrankVelocityServo(new CrankActuation(0)));
+        CrankVelocityServo actuator = new CrankVelocityServo(new CrankActuation(0));
+
+        // TODO: a real measurement.
+        CrankConfiguration measurement = new CrankConfiguration(0.0);
+
+        CrankConfigurationController m_confController = new CrankConfigurationController(() -> measurement, kinematics);
+
+        final CrankSubsystem subsystem = new CrankSubsystem(() -> m_confController, actuator);
 
         subsystem.setEnable(new CrankPositionLimit(0, 1));
+
+        final CrankHID hid = new CrankHID();
 
         subsystem.setDefaultCommand(subsystem.runOnce(
                 () -> currentCrankProfileFollower = new CrankManualVelocitySupplier1d(hid::manual)));
