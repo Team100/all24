@@ -12,47 +12,28 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * TODO: split the profile-following part from the PID-controlling part.
  */
-public class CrankPIDVelocitySupplier1d implements CrankProfileFollower {
+public class CrankPIDVelocitySupplier1d implements Supplier<CrankWorkstate> {
     private final CrankWorkspaceController m_controller;
     private final Timer m_timer;
-    private final MotionProfile m_profile;
+    private final Supplier<Supplier<MotionProfile>> m_profile;
     private final Supplier<CrankWorkstate> m_measurement;
 
-
-    /**
-     * Supplies zero until a profile is specified. Instantiate once per command
-     * invocation, don't reuse it.
-     */
-    public CrankPIDVelocitySupplier1d(CrankWorkspaceController controller,
-    Supplier<CrankWorkstate> measurement
-    ) {
-        this(controller, null, measurement);
-    }
-
-    @Override
-    public CrankProfileFollower withProfile(MotionProfile profile) {
-        return new CrankPIDVelocitySupplier1d(m_controller, profile, m_measurement);
-    }
-
-
-    @Override
-    public CrankWorkstate get() {
-        if (m_profile == null)
-            return new CrankWorkstate(0.0);
-        // TODO: wrap the profile in the same type to avoid wrapping here.
-        MotionState motionState = m_profile.get(m_timer.get());
-        return m_controller.calculate(m_measurement.get().getWorkstate(), motionState);
-    }
-
-    private CrankPIDVelocitySupplier1d(
+    public CrankPIDVelocitySupplier1d(
             CrankWorkspaceController controller,
-            MotionProfile profile,
+            Supplier<Supplier<MotionProfile>> profile,
             Supplier<CrankWorkstate> measurement) {
         m_controller = controller;
-        // m_controller = new PIDController(1, 0, 0);
         m_timer = new Timer();
         m_profile = profile;
         m_measurement = measurement;
     }
 
+    @Override
+    public CrankWorkstate get() {
+        if (m_profile.get().get() == null)
+            return m_measurement.get();
+        // TODO: wrap the profile in the same type to avoid wrapping here.
+        MotionState motionState = m_profile.get().get().get(m_timer.get());
+        return m_controller.calculate(m_measurement.get().getWorkstate(), motionState);
+    }
 }

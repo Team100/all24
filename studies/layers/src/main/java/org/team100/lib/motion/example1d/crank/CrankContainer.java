@@ -13,14 +13,18 @@ import edu.wpi.first.wpilibj2.command.Commands;
  * This is an example container, like RobotContainer.
  */
 public class CrankContainer {
-    private static final CrankProfileFollower kDefaultFollower = new CrankZeroVelocitySupplier1d();
+    private static final Supplier<CrankWorkstate> kDefaultFollower = new CrankZeroVelocitySupplier1d();
 
     // elements that can be changed at runtime
-    private CrankProfileFollower m_currentFollower;
+    private Supplier<MotionProfile> m_profile;
+    private Supplier<CrankWorkstate> m_currentFollower;
     private Consumer<CrankActuation> m_currentActuator;
     private Supplier<CrankActuation> m_enabler;
 
     public CrankContainer() {
+        // there is no profile until one is specified
+        m_profile = () -> null;
+
         m_currentFollower = kDefaultFollower;
 
         MotorWrapper motor = new MotorWrapper();
@@ -29,13 +33,17 @@ public class CrankContainer {
 
         CrankFeasibleFilter crankFeasibleFilter = new CrankFeasibleFilter(() -> m_currentFollower, 1, 1);
 
-        CrankInverseKinematics kinematics = new CrankInverseKinematics(crankFeasibleFilter, new CrankKinematics(1, 2));
+        CrankKinematics kinematics = new CrankKinematics(1, 2);
+        CrankInverseKinematics inverseKinematics = new CrankInverseKinematics(crankFeasibleFilter, kinematics);
 
-        Supplier<CrankConfiguration> measurement = new CrankMeasurement(motor);
+        Supplier<CrankConfiguration> configurationMeasurement = new CrankMeasurement(motor);
+        Supplier<CrankWorkstate> workstateMeasurement = new CrankForwardKinematics(configurationMeasurement,
+                kinematics);
 
-        CrankConfigurationController controller = new CrankConfigurationController(measurement, kinematics);
+        CrankConfigurationController controller = new CrankConfigurationController(configurationMeasurement,
+                inverseKinematics);
 
-        Supplier<CrankActuation> filter = new CrankActuationFilter(controller, measurement);
+        Supplier<CrankActuation> filter = new CrankActuationFilter(controller, configurationMeasurement);
 
         m_enabler = () -> new CrankActuation(0.0);
 
@@ -53,19 +61,28 @@ public class CrankContainer {
                 () -> m_currentFollower = new CrankZeroVelocitySupplier1d()));
 
         hid.chooseFF(subsystem.runOnce(
-                () -> m_currentFollower = new CrankFFVelocitySupplier1d(() -> new CrankWorkstate(0.0))));
+                () -> m_currentFollower = new CrankFFVelocitySupplier1d(
+                        () -> m_profile,
+                        workstateMeasurement)));
 
+        CrankWorkspaceController workspaceController = new CrankWorkspaceController();
         hid.choosePID(subsystem.runOnce(
                 () -> m_currentFollower = new CrankPIDVelocitySupplier1d(
-                        new CrankWorkspaceController(),
-                        () -> new CrankWorkstate(0.0))));
+                        workspaceController,
+                        () -> m_profile,
+                        workstateMeasurement)));
 
         hid.runProfile1(subsystem.runOnce(
-                () -> m_currentFollower = m_currentFollower.withProfile(makeProfile())));
+                () -> { // local var means make it once
+                    MotionProfile p = makeProfile();
+                    m_profile = () -> p;
+                }));
 
         hid.runProfile2(subsystem.runOnce(
-                () -> m_currentFollower = m_currentFollower.withProfile(
-                        makeProfile(0.0, 0.0)))); // TODO: real measurement
+                () -> { // local var means make it once
+                    MotionProfile p = makeProfile(0.0, 0.0); // TODO: real measurement
+                    m_profile = () -> p;
+                }));
 
         //
         // these actions don't interrupt the subsystem's current command, because they
