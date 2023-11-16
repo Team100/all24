@@ -15,6 +15,7 @@ import org.team100.lib.profile.MotionProfile;
  */
 public interface CrankProfileFollower extends Supplier<CrankWorkstate> {
 
+    // TODO remove the profile here, use a supplier.
     CrankProfileFollower withProfile(MotionProfile profile);
 
     /**

@@ -11,6 +11,10 @@ public class CrankActuationFilter implements Supplier<CrankActuation> {
     private final Supplier<CrankActuation> m_supplier;
     private final Supplier<CrankConfiguration> m_measurement;
 
+    /**
+     * Supply the given actuation when the configuration is within limits, otherwise
+     * zero actuation.
+     */
     public CrankActuationFilter(Supplier<CrankActuation> supplier, Supplier<CrankConfiguration> measurement) {
         m_supplier = supplier;
         m_measurement = measurement;
