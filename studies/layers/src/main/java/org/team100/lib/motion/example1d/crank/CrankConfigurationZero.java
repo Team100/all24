@@ -1,15 +1,12 @@
 package org.team100.lib.motion.example1d.crank;
 
-/** Always produces zero actuation. */
-// TODO remove this superclass
-public class CrankConfigurationZero extends CrankConfigurationController {
+import java.util.function.Supplier;
 
-    public CrankConfigurationZero() {
-        super(null,null);
-    }
+/** Always produces zero actuation. */
+public class CrankConfigurationZero implements Supplier<CrankActuation> {
 
     @Override
-    public CrankActuation calculate(CrankConfiguration measurement, CrankConfiguration setpoint) {
+    public CrankActuation get() {
         return new CrankActuation(0.0);
     }
 }

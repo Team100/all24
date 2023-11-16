@@ -4,12 +4,12 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /**
- * Supplies raw manual input as velocities.
+ * Supplies workspace state as manual input.
  */
-public class CrankManualVelocitySupplier1d implements Supplier<CrankWorkstate> {
+public class CrankManualWorkstate implements Supplier<CrankWorkstate> {
     private final DoubleSupplier m_manual;
 
-    public CrankManualVelocitySupplier1d(DoubleSupplier manual) {
+    public CrankManualWorkstate(DoubleSupplier manual) {
         m_manual = manual;
     }
 

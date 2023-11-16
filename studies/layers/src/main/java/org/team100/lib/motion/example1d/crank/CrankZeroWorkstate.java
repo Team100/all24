@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 /**
  * Always supplies zero, for "safe mode."
  */
-public class CrankZeroVelocitySupplier1d implements Supplier<CrankWorkstate> {
+public class CrankZeroWorkstate implements Supplier<CrankWorkstate> {
 
     @Override
     public CrankWorkstate get() {

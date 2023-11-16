@@ -18,16 +18,10 @@ public class CrankConfigurationController implements Supplier<CrankActuation> {
         m_controller = new PIDController(1, 0, 0);
     }
 
-    public CrankActuation calculate(
-            CrankConfiguration measurement,
-            CrankConfiguration setpoint) {
-        return new CrankActuation(m_controller.calculate(
-                measurement.getCrankAngleRad(),
-                setpoint.getCrankAngleRad()));
-    }
-
     @Override
     public CrankActuation get() {
-        return calculate(m_measurement.get(), m_setpoint.get());
+        return new CrankActuation(m_controller.calculate(
+                m_measurement.get().getCrankAngleRad(),
+                m_setpoint.get().getCrankAngleRad()));
     }
 }

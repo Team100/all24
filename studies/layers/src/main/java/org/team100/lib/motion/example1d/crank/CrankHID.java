@@ -9,8 +9,12 @@ public class CrankHID {
     GenericHID genericHID = new GenericHID(0);
 
     /** Stop while held. */
-    public void chooseStop(Command command) {
+    public void stopWorkstate(Command command) {
         new JoystickButton(genericHID, 1).onTrue(command);
+    }
+
+    public void stopActuation(Command command) {
+        new JoystickButton(genericHID, 10).onTrue(command);
     }
 
     /** Set follower to feedforward only. */
@@ -41,6 +45,14 @@ public class CrankHID {
     /** Disable the subsystem */
     public void disable(Command command) {
         new JoystickButton(genericHID, 7).onTrue(command);
+    }
+
+    public void manualConfiguration(Command command) {
+        new JoystickButton(genericHID, 12).onTrue(command);
+    }
+
+    public void manualActuation(Command command) {
+        new JoystickButton(genericHID, 8).onTrue(command);
     }
 
     /** Run a profile while held. */

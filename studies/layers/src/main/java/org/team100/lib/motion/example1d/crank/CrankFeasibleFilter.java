@@ -1,7 +1,6 @@
 package org.team100.lib.motion.example1d.crank;
 
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import edu.wpi.first.wpilibj.Timer;
 

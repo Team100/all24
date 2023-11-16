@@ -1,21 +1,18 @@
 package org.team100.lib.motion.example1d.crank;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
-/**
- * Manual configuration control, passing a manual input directly to actuation.
- */
-// TODO: remove this superclass
-public class CrankManualConfiguration extends CrankConfigurationController {
+/** Supplies configuration based on manual input. */
+public class CrankManualConfiguration implements Supplier<CrankConfiguration> {
     private final DoubleSupplier m_manual;
 
     public CrankManualConfiguration(DoubleSupplier manual) {
-        super(null,null);
         m_manual = manual;
     }
 
     @Override
-    public CrankActuation calculate(CrankConfiguration measurement, CrankConfiguration setpoint) {
-        return new CrankActuation(m_manual.getAsDouble());
+    public CrankConfiguration get() {
+        return new CrankConfiguration(m_manual.getAsDouble());
     }
 }

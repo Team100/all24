@@ -24,7 +24,7 @@ class CrankTest {
         MotorWrapper motor = new MotorWrapper();
         CrankOnboardVelocityServo servo = new CrankOnboardVelocityServo(motor);
         assertEquals(0.0, servo.m_motor.m_dutyCycle, 0.001);
-        Supplier<CrankWorkstate> follower = new CrankZeroVelocitySupplier1d();
+        Supplier<CrankWorkstate> follower = new CrankZeroWorkstate();
         CrankInverseKinematics kinematics = new CrankInverseKinematics(follower, new CrankKinematics(1,2));
         CrankConfiguration measurement = new CrankConfiguration(0.0);
         CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
@@ -38,7 +38,7 @@ class CrankTest {
         MotorWrapper motor = new MotorWrapper();
         CrankOnboardVelocityServo servo = new CrankOnboardVelocityServo(motor);
         assertEquals(0.0, servo.m_motor.m_dutyCycle, 0.001);
-        Supplier<CrankWorkstate> follower = new CrankZeroVelocitySupplier1d();
+        Supplier<CrankWorkstate> follower = new CrankZeroWorkstate();
         CrankInverseKinematics kinematics = new CrankInverseKinematics(follower, new CrankKinematics(1,2));
         CrankConfiguration measurement = new CrankConfiguration(0.0);
         CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
@@ -52,7 +52,7 @@ class CrankTest {
         assertEquals(1, servo.m_motor.m_dutyCycle, 0.001);
     }
 
-    Supplier<CrankWorkstate> currentFollower = new CrankZeroVelocitySupplier1d();
+    Supplier<CrankWorkstate> currentFollower = new CrankZeroWorkstate();
 
     // this does not yet work
    // @Test
@@ -67,7 +67,7 @@ class CrankTest {
 
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);
-        currentFollower = new CrankManualVelocitySupplier1d(() -> 1.0);
+        currentFollower = new CrankManualWorkstate(() -> 1.0);
         SimHooks.stepTiming(0.5);
         subsystem.periodic();
         // this is acceleration limited. :-)
