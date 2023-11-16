@@ -28,8 +28,6 @@ class CrankTest {
         CrankConfiguration measurement = new CrankConfiguration(0.0);
         CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
         CrankSubsystem subsystem = new CrankSubsystem(()->m_confController, ()->servo);
-        subsystem.setEnable(new CrankPositionLimit(0, 1));
-        // subsystem.setFilter(new FeasibleFilter(1, 1));
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);  
     }
@@ -44,8 +42,6 @@ class CrankTest {
         CrankConfiguration measurement = new CrankConfiguration(0.0);
         CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
         CrankSubsystem subsystem = new CrankSubsystem(()->m_confController, ()->servo);
-        subsystem.setEnable(new CrankPositionLimit(0, 1));
-        // subsystem.setFilter(new FeasibleFilter(1, 1));
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);
         // subsystem.setProfileFollower(new ManualVelocitySupplier1d<>(() -> 1.0, CrankWorkstate::new));
@@ -67,9 +63,6 @@ class CrankTest {
         CrankConfiguration measurement = new CrankConfiguration(0.0);
         CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
         CrankSubsystem subsystem = new CrankSubsystem(() -> m_confController, () -> servo);
-
-        CrankPositionLimit enabler = new CrankPositionLimit(0, 1);
-        subsystem.setEnable(enabler);
 
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);

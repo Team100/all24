@@ -33,6 +33,16 @@ public class CrankHID {
         new JoystickButton(genericHID, 5).onTrue(command);
     }
 
+    /** Enable the subsystem */
+    public void enable(Command command) {
+        new JoystickButton(genericHID, 6).onTrue(command);
+    }
+
+    /** Disable the subsystem */
+    public void disable(Command command) {
+        new JoystickButton(genericHID, 7).onTrue(command);
+    }
+
     /** Run a profile while held. */
     public void runProfile1(Command command) {
         new JoystickButton(genericHID, 4).whileTrue(command);

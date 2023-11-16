@@ -18,6 +18,7 @@ public class CrankContainer {
     // elements that can be changed at runtime
     private CrankProfileFollower m_currentCrankProfileFollower;
     private Consumer<CrankActuation> m_currentActuator;
+    private Supplier<CrankActuation> m_enabler;
 
     public CrankContainer() {
         m_currentCrankProfileFollower = kDefaultFollower;
@@ -34,14 +35,17 @@ public class CrankContainer {
 
         CrankConfigurationController m_confController = new CrankConfigurationController(measurement, kinematics);
 
-        final CrankSubsystem subsystem = new CrankSubsystem(() -> m_confController, () -> m_currentActuator);
+        m_enabler = () -> new CrankActuation(0.0);
 
-        subsystem.setEnable(new CrankPositionLimit(0, 1));
+        final CrankSubsystem subsystem = new CrankSubsystem(() -> m_enabler, () -> m_currentActuator);
 
         final CrankHID hid = new CrankHID();
 
         subsystem.setDefaultCommand(subsystem.runOnce(
                 () -> m_currentCrankProfileFollower = new CrankManualVelocitySupplier1d(hid::manual)));
+
+        hid.enable(subsystem.runOnce(() -> m_enabler = m_confController));
+        hid.disable(subsystem.runOnce(() -> m_enabler = () -> new CrankActuation(0.0)));
 
         hid.chooseStop(subsystem.runOnce(
                 () -> m_currentCrankProfileFollower = new CrankZeroVelocitySupplier1d()));

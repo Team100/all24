@@ -13,7 +13,6 @@ public class CrankSubsystem extends Subsystem {
     private final Supplier<Consumer<CrankActuation>> m_actuator;
     private final Supplier<Supplier<CrankActuation>> m_actuation;
     private UnaryOperator<CrankActuation> m_actuationFilter;
-    private DoublePredicate m_enabler;
 
     public CrankSubsystem(Supplier<Supplier<CrankActuation>> actuation, Supplier<Consumer<CrankActuation>> actuator) {
         if (actuation == null)
@@ -21,33 +20,15 @@ public class CrankSubsystem extends Subsystem {
         m_actuation = actuation;
         m_actuator = actuator;
         m_actuationFilter = x -> x;
-        m_enabler = x -> true;
     }
 
     public void setActuationFilter(UnaryOperator<CrankActuation> filter) {
         m_actuationFilter = filter;
     }
 
-    public void setEnable(DoublePredicate enabler) {
-        if (enabler == null)
-            throw new IllegalArgumentException("null enabler");
-        m_enabler = enabler;
-    }
-
-    private boolean enabled() {
-        if (m_enabler == null)
-            return false;
-        double measurement = 0.0; // TODO: use a real measurement here.
-        return m_enabler.test(measurement);
-    }
 
     @Override
     public void periodic() {
-        if (!enabled()) {
-            m_actuator.get().accept(new CrankActuation(0));
-            return;
-        }
-
         CrankActuation actuation = m_actuation.get().get();
 
         if (m_actuationFilter != null) {
