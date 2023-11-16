@@ -1,6 +1,5 @@
 package org.team100.lib.motion.crank;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.team100.lib.profile.MotionProfile;
@@ -20,7 +19,7 @@ public class Container {
     private Supplier<Workstate> m_workstate;
     private Supplier<Configuration> m_configuration;
     private Supplier<Actuation> m_actuation;
-    private Consumer<Actuation> m_actuator;
+    private ActuatorSelector m_actuator;
     private Supplier<Actuation> m_enabler;
 
     public Container() {
@@ -31,7 +30,8 @@ public class Container {
 
         MotorWrapper motor = new MotorWrapper();
 
-        m_actuator = new ActuatorOnboard(motor);
+        // m_actuator = new ActuatorOnboard(motor);
+        m_actuator = new ActuatorSelector(motor);
 
         Supplier<Workstate> crankFeasibleFilter = new WorkspaceFeasible(() -> m_workstate, 1, 1);
 
@@ -82,9 +82,11 @@ public class Container {
         // these actions don't interrupt the subsystem's current command, because they
         // use Commands.runOnce instead of subsystem.runOnce.
         //
-        hid.onboard(Commands.runOnce(() -> m_actuator = new ActuatorOnboard(motor)));
+        hid.onboard(Commands.runOnce(() -> m_actuator.set(ActuatorSelector.Actuator.ONBOARD)));
+        hid.outboard(Commands.runOnce(() -> m_actuator.set(ActuatorSelector.Actuator.OUTBOARD)));
 
-        hid.outboard(Commands.runOnce(() -> m_actuator = new ActuatorOutboard(motor)));
+        Indicator indicator = new Indicator();
+        indicator.bind(()-> hid.indicate(m_actuator));
     }
 
     /** @return a profile starting at zero */

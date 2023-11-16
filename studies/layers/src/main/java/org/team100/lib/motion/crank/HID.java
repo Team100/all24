@@ -4,7 +4,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
-/** Example human interface device. */
+/**
+ * Example human interface device.
+ */
 public class HID {
     GenericHID genericHID = new GenericHID(0);
 
@@ -68,5 +70,22 @@ public class HID {
     /** In reality this would be manual input. */
     public double manual() {
         return 1.0;
+    }
+
+    public void indicate(ActuatorSelector actuator) {
+        switch (actuator.get()) {
+            case ONBOARD:
+                genericHID.setOutput(0, true);
+                genericHID.setOutput(1, false);
+                break;
+            case OUTBOARD:
+                genericHID.setOutput(0, false);
+                genericHID.setOutput(1, true);
+                break;
+            default:
+                genericHID.setOutput(0, false);
+                genericHID.setOutput(0, false);
+                break;
+        }
     }
 }
