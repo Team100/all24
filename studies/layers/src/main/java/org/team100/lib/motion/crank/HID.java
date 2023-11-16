@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /** Example human interface device. */
-public class CrankHID {
+public class HID {
     GenericHID genericHID = new GenericHID(0);
 
     /** Stop while held. */

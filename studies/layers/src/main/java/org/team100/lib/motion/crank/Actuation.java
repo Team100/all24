@@ -1,10 +1,9 @@
 package org.team100.lib.motion.crank;
 
-
-public class CrankActuation {
+public class Actuation {
     private double m_velocityM_S;
 
-    public CrankActuation(double veloctiyM_S) {
+    public Actuation(double veloctiyM_S) {
         m_velocityM_S = veloctiyM_S;
     }
 

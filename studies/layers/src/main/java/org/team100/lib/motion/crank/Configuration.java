@@ -1,14 +1,14 @@
 package org.team100.lib.motion.crank;
 
-
-public class CrankConfiguration {
+/** Represents state in configuration space. */
+public class Configuration {
     private double m_crankAngleRad;
 
-    public CrankConfiguration(double crankAngleRad) {
+    public Configuration(double crankAngleRad) {
         m_crankAngleRad = crankAngleRad;
     }
 
-    public CrankConfiguration getConfiguration() {
+    public Configuration getConfiguration() {
         return this;
     }
 

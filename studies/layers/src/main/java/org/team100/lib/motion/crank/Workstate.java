@@ -1,18 +1,19 @@
 package org.team100.lib.motion.crank;
 
-public class CrankWorkstate {
+/** Represents state in workspace. */
+public class Workstate {
 
     private final Double m_state;
 
-    public CrankWorkstate() {
+    public Workstate() {
         this(0.0);
     }
 
-    public CrankWorkstate(Double state) {
+    public Workstate(Double state) {
         m_state = state;
     }
 
-    public CrankWorkstate getWorkstate() {
+    public Workstate getWorkstate() {
         return this;
     }
 

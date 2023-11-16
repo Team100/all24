@@ -18,12 +18,12 @@ package org.team100.lib.motion.crank;
  * https://en.wikipedia.org/wiki/Slider-crank_linkage
  * https://en.wikipedia.org/wiki/Piston_motion_equations
  */
-public class CrankKinematics {
+public class Kinematics {
     private final double m_crankRadius;
     private final double m_rodLength;
 
     /** Length units can be anything, they just need to be consistent. */
-    public CrankKinematics(double crankRadius, double rodLength) {
+    public Kinematics(double crankRadius, double rodLength) {
         m_crankRadius = crankRadius;
         m_rodLength = rodLength;
     }
@@ -35,11 +35,11 @@ public class CrankKinematics {
      * @return slider position measured from the crank axis, using the same units
      *         used in the constructor.
      */
-    public CrankWorkstate forward(CrankConfiguration crankAngleRad) {
+    public Workstate forward(Configuration crankAngleRad) {
         // this is directly from wikipedia
         double cosAngle = Math.cos(crankAngleRad.getCrankAngleRad());
         double sinAngle = Math.sin(crankAngleRad.getCrankAngleRad());
-        return new CrankWorkstate(m_crankRadius * cosAngle + Math.sqrt(m_rodLength * m_rodLength
+        return new Workstate(m_crankRadius * cosAngle + Math.sqrt(m_rodLength * m_rodLength
                 - m_crankRadius * m_crankRadius * sinAngle * sinAngle));
     }
 
@@ -50,9 +50,9 @@ public class CrankKinematics {
      * @param sliderPosition measured from the crank axis, using the same units used
      *                       in the constructor.
      */
-    public CrankConfiguration inverse(CrankWorkstate sliderPosition) {
+    public Configuration inverse(Workstate sliderPosition) {
         // this is the wikipedia expression inverted.
-        return new CrankConfiguration(
+        return new Configuration(
                 Math.acos((sliderPosition.getState() * sliderPosition.getState() + m_crankRadius * m_crankRadius
                         - m_rodLength * m_rodLength) / (2 * sliderPosition.getState() * m_crankRadius)));
     }

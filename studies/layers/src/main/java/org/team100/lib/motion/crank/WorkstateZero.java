@@ -5,10 +5,10 @@ import java.util.function.Supplier;
 /**
  * Always supplies zero, for "safe mode."
  */
-public class CrankZeroWorkstate implements Supplier<CrankWorkstate> {
+public class WorkstateZero implements Supplier<Workstate> {
 
     @Override
-    public CrankWorkstate get() {
-        return new CrankWorkstate(0.0);
+    public Workstate get() {
+        return new Workstate(0.0);
     }
 }

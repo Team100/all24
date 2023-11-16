@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionState;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -12,28 +13,33 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * TODO: split the profile-following part from the PID-controlling part.
  */
-public class CrankPIDVelocitySupplier1d implements Supplier<CrankWorkstate> {
-    private final CrankWorkspaceController m_controller;
+public class WorkspaceControllerPID implements Supplier<Workstate> {
     private final Timer m_timer;
     private final Supplier<Supplier<MotionProfile>> m_profile;
-    private final Supplier<CrankWorkstate> m_measurement;
+    private final Supplier<Workstate> m_measurement;
+    private final PIDController m_controller;
 
-    public CrankPIDVelocitySupplier1d(
-            CrankWorkspaceController controller,
+    public WorkspaceControllerPID(
             Supplier<Supplier<MotionProfile>> profile,
-            Supplier<CrankWorkstate> measurement) {
-        m_controller = controller;
+            Supplier<Workstate> measurement) {
         m_timer = new Timer();
         m_profile = profile;
         m_measurement = measurement;
+        m_controller = new PIDController(1,0,0);
     }
 
     @Override
-    public CrankWorkstate get() {
+    public Workstate get() {
         if (m_profile.get().get() == null)
             return m_measurement.get();
+
         // TODO: wrap the profile in the same type to avoid wrapping here.
-        MotionState motionState = m_profile.get().get().get(m_timer.get());
-        return m_controller.calculate(m_measurement.get().getWorkstate(), motionState);
+        MotionState reference = m_profile.get().get().get(m_timer.get());
+        Workstate measurement = m_measurement.get().getWorkstate();
+
+        double u_FF = reference.getV();
+        double u_FB = m_controller.calculate(measurement.getState(), reference.getX());
+
+        return new Workstate(u_FF + u_FB);
     }
 }

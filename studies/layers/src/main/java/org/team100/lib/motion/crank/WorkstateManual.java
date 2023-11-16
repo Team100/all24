@@ -6,15 +6,15 @@ import java.util.function.Supplier;
 /**
  * Supplies workspace state as manual input.
  */
-public class CrankManualWorkstate implements Supplier<CrankWorkstate> {
+public class WorkstateManual implements Supplier<Workstate> {
     private final DoubleSupplier m_manual;
 
-    public CrankManualWorkstate(DoubleSupplier manual) {
+    public WorkstateManual(DoubleSupplier manual) {
         m_manual = manual;
     }
 
     @Override
-    public CrankWorkstate get() {
-        return new CrankWorkstate(m_manual.getAsDouble());
+    public Workstate get() {
+        return new Workstate(m_manual.getAsDouble());
     }
 }

@@ -7,17 +7,17 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.crank.CrankConfiguration;
-import org.team100.lib.motion.crank.CrankConfigurationController;
-import org.team100.lib.motion.crank.CrankContainer;
-import org.team100.lib.motion.crank.CrankFeasibleFilter;
-import org.team100.lib.motion.crank.CrankInverseKinematics;
-import org.team100.lib.motion.crank.CrankKinematics;
-import org.team100.lib.motion.crank.CrankManualWorkstate;
-import org.team100.lib.motion.crank.CrankOnboardVelocityServo;
+import org.team100.lib.motion.crank.Configuration;
+import org.team100.lib.motion.crank.ConfigurationController;
+import org.team100.lib.motion.crank.Container;
+import org.team100.lib.motion.crank.WorkspaceFeasible;
+import org.team100.lib.motion.crank.InverseKinematics;
+import org.team100.lib.motion.crank.Kinematics;
+import org.team100.lib.motion.crank.WorkstateManual;
+import org.team100.lib.motion.crank.ActuatorOnboard;
 import org.team100.lib.motion.crank.CrankSubsystem;
-import org.team100.lib.motion.crank.CrankWorkstate;
-import org.team100.lib.motion.crank.CrankZeroWorkstate;
+import org.team100.lib.motion.crank.Workstate;
+import org.team100.lib.motion.crank.WorkstateZero;
 import org.team100.lib.motion.crank.MotorWrapper;
 
 import edu.wpi.first.wpilibj.simulation.SimHooks;
@@ -27,19 +27,19 @@ class CrankTest {
 
     @Test
     void testSimple() {
-        CrankContainer container = new CrankContainer();
+        Container container = new Container();
         assertNotNull(container);
     }
 
    // @Test
     void testActuation() {
         MotorWrapper motor = new MotorWrapper();
-        CrankOnboardVelocityServo servo = new CrankOnboardVelocityServo(motor);
+        ActuatorOnboard servo = new ActuatorOnboard(motor);
         assertEquals(0.0, servo.m_motor.m_dutyCycle, 0.001);
-        Supplier<CrankWorkstate> follower = new CrankZeroWorkstate();
-        CrankInverseKinematics kinematics = new CrankInverseKinematics(follower, new CrankKinematics(1,2));
-        CrankConfiguration measurement = new CrankConfiguration(0.0);
-        CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
+        Supplier<Workstate> follower = new WorkstateZero();
+        InverseKinematics kinematics = new InverseKinematics(follower, new Kinematics(1,2));
+        Configuration measurement = new Configuration(0.0);
+        ConfigurationController m_confController = new ConfigurationController(()->measurement, kinematics);
         CrankSubsystem subsystem = new CrankSubsystem(()->m_confController, ()->servo);
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);  
@@ -48,12 +48,12 @@ class CrankTest {
     //@Test
     void testUnfiltered() {
         MotorWrapper motor = new MotorWrapper();
-        CrankOnboardVelocityServo servo = new CrankOnboardVelocityServo(motor);
+        ActuatorOnboard servo = new ActuatorOnboard(motor);
         assertEquals(0.0, servo.m_motor.m_dutyCycle, 0.001);
-        Supplier<CrankWorkstate> follower = new CrankZeroWorkstate();
-        CrankInverseKinematics kinematics = new CrankInverseKinematics(follower, new CrankKinematics(1,2));
-        CrankConfiguration measurement = new CrankConfiguration(0.0);
-        CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
+        Supplier<Workstate> follower = new WorkstateZero();
+        InverseKinematics kinematics = new InverseKinematics(follower, new Kinematics(1,2));
+        Configuration measurement = new Configuration(0.0);
+        ConfigurationController m_confController = new ConfigurationController(()->measurement, kinematics);
         CrankSubsystem subsystem = new CrankSubsystem(()->m_confController, ()->servo);
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);
@@ -64,22 +64,22 @@ class CrankTest {
         assertEquals(1, servo.m_motor.m_dutyCycle, 0.001);
     }
 
-    Supplier<CrankWorkstate> currentFollower = new CrankZeroWorkstate();
+    Supplier<Workstate> currentFollower = new WorkstateZero();
 
     // this does not yet work
    // @Test
     void testFiltered() {
         MotorWrapper motor = new MotorWrapper();
-        CrankOnboardVelocityServo servo = new CrankOnboardVelocityServo(motor);
-        CrankFeasibleFilter filter = new CrankFeasibleFilter(() -> currentFollower,1, 1);
-        CrankInverseKinematics kinematics = new CrankInverseKinematics(filter, new CrankKinematics(1,2));
-        CrankConfiguration measurement = new CrankConfiguration(0.0);
-        CrankConfigurationController m_confController = new CrankConfigurationController(()->measurement, kinematics);
+        ActuatorOnboard servo = new ActuatorOnboard(motor);
+        WorkspaceFeasible filter = new WorkspaceFeasible(() -> currentFollower,1, 1);
+        InverseKinematics kinematics = new InverseKinematics(filter, new Kinematics(1,2));
+        Configuration measurement = new Configuration(0.0);
+        ConfigurationController m_confController = new ConfigurationController(()->measurement, kinematics);
         CrankSubsystem subsystem = new CrankSubsystem(() -> m_confController, () -> servo);
 
         subsystem.periodic();
         assertEquals(0, servo.m_motor.m_dutyCycle, 0.001);
-        currentFollower = new CrankManualWorkstate(() -> 1.0);
+        currentFollower = new WorkstateManual(() -> 1.0);
         SimHooks.stepTiming(0.5);
         subsystem.periodic();
         // this is acceleration limited. :-)
