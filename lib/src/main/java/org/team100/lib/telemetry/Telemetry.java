@@ -55,7 +55,7 @@ public class Telemetry {
 
     public void log(String key, boolean val) {
         if (kAlsoPrint)
-            System.out.println(key + val);
+            System.out.println(key + ": " + val);
         pub(key, k -> inst.getBooleanTopic(k).publish(), BooleanPublisher.class).set(val);
     }
 
