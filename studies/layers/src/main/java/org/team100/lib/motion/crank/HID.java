@@ -71,21 +71,4 @@ public class HID {
     public double manual() {
         return 1.0;
     }
-
-    public void indicate(ActuatorSelector actuator) {
-        switch (actuator.get()) {
-            case ONBOARD:
-                genericHID.setOutput(0, true);
-                genericHID.setOutput(1, false);
-                break;
-            case OUTBOARD:
-                genericHID.setOutput(0, false);
-                genericHID.setOutput(1, true);
-                break;
-            default:
-                genericHID.setOutput(0, false);
-                genericHID.setOutput(0, false);
-                break;
-        }
-    }
 }

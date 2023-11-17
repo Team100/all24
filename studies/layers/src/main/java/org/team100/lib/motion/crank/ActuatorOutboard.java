@@ -1,8 +1,6 @@
 package org.team100.lib.motion.crank;
 
-import java.util.function.Consumer;
-
-public class ActuatorOutboard implements Consumer<Actuation> {
+public class ActuatorOutboard implements Actuator {
     private final MotorWrapper m_motor;
 
     public ActuatorOutboard(MotorWrapper motor) {
@@ -15,6 +13,11 @@ public class ActuatorOutboard implements Consumer<Actuation> {
     public void accept(Actuation state) {
         double feedforward = 0.0; // TODO: real feedforward
         m_motor.setPID(state.getVelocityM_S(), feedforward);
+    }
+
+    @Override
+    public void accept(Indicator indicator) {
+        indicator.indicate(this);
     }
 
 }

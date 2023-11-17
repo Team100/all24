@@ -15,11 +15,12 @@ public class Container {
     private static final Supplier<Workstate> kDefaultFollower = new WorkstateZero();
 
     // elements that can be changed at runtime
+    // these must be passed in lambdas: () -> m_profile, to get the current value.
     private Supplier<MotionProfile> m_profile;
     private Supplier<Workstate> m_workstate;
     private Supplier<Configuration> m_configuration;
     private Supplier<Actuation> m_actuation;
-    private ActuatorSelector m_actuator;
+    private Actuator m_actuator;
     private Supplier<Actuation> m_enabler;
 
     public Container() {
@@ -30,8 +31,8 @@ public class Container {
 
         MotorWrapper motor = new MotorWrapper();
 
-        // m_actuator = new ActuatorOnboard(motor);
-        m_actuator = new ActuatorSelector(motor);
+        // default
+        m_actuator = new ActuatorOnboard(motor);
 
         Supplier<Workstate> crankFeasibleFilter = new WorkspaceFeasible(() -> m_workstate, 1, 1);
 
@@ -82,11 +83,12 @@ public class Container {
         // these actions don't interrupt the subsystem's current command, because they
         // use Commands.runOnce instead of subsystem.runOnce.
         //
-        hid.onboard(Commands.runOnce(() -> m_actuator.set(ActuatorSelector.Actuator.ONBOARD)));
-        hid.outboard(Commands.runOnce(() -> m_actuator.set(ActuatorSelector.Actuator.OUTBOARD)));
+        hid.onboard(Commands.runOnce(() -> m_actuator = new ActuatorOnboard(motor)));
+        hid.outboard(Commands.runOnce(() -> m_actuator = new ActuatorOutboard(motor)));
 
-        Indicator indicator = new Indicator();
-        indicator.bind(()-> hid.indicate(m_actuator));
+        Indicator indicator = new Indicator(hid, () -> m_actuator);
+        indicator.start();
+
     }
 
     /** @return a profile starting at zero */
