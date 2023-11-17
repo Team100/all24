@@ -65,8 +65,9 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
     @Override
     public void periodic() {
         updateOdometry();
-        driveToReference();
         m_field.setRobotPose(getPose());
+
+        driveToReference();
     }
 
     /** The speed implied by the module states. */
