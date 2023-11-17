@@ -43,14 +43,19 @@ public class Indicator {
         log(visible);
     }
 
-    public void indicate(ActuatorOnboard visible) {
+    public void indicate(CrankSubsystem visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_0001;
     }
 
-    public void indicate(ActuatorOutboard visible) {
+    public void indicate(ActuatorOnboard visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_0010;
+    }
+
+    public void indicate(ActuatorOutboard visible) {
+        log(visible);
+        indicators |= 0b0000_0000_0000_0100;
     }
 
     private void log(Visible visible) {

@@ -23,7 +23,7 @@ class IndicatorTest {
         Indicator indicator = new Indicator(hid, () -> root);
         assertEquals(0, indicator.indicators);
         indicator.rooter();
-        assertEquals(2, indicator.indicators);
+        assertEquals(4, indicator.indicators);
     }
 
 }

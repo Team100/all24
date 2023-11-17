@@ -16,14 +16,22 @@ public class Container {
 
     // elements that can be changed at runtime
     // these must be passed in lambdas: () -> m_profile, to get the current value.
+    // package private for testing.
     private Supplier<MotionProfile> m_profile;
     private Supplier<Workstate> m_workstate;
     private Supplier<Configuration> m_configuration;
     private Supplier<Actuation> m_actuation;
-    private Actuator m_actuator;
+    Actuator m_actuator;
     private Supplier<Actuation> m_enabler;
 
-    public Container() {
+    public void init() {
+        HID hid = new HID();
+        CrankSubsystem subsystem = makeSubsystem(hid);
+        Indicator indicator = new Indicator(hid, () -> subsystem);
+        indicator.start();
+    }
+
+    CrankSubsystem makeSubsystem(HID hid) {
         // there is no profile until one is specified
         m_profile = () -> null;
 
@@ -51,8 +59,6 @@ public class Container {
         m_enabler = () -> new Actuation(0.0);
 
         CrankSubsystem subsystem = new CrankSubsystem(() -> m_enabler, () -> m_actuator);
-
-        HID hid = new HID();
 
         // default command is manual operation in workspace
         subsystem.setDefaultCommand(subsystem.runOnce(() -> m_workstate = new WorkstateManual(hid::manual)));
@@ -86,9 +92,7 @@ public class Container {
         hid.onboard(Commands.runOnce(() -> m_actuator = new ActuatorOnboard(motor)));
         hid.outboard(Commands.runOnce(() -> m_actuator = new ActuatorOutboard(motor)));
 
-        Indicator indicator = new Indicator(hid, () -> m_actuator);
-        indicator.start();
-
+        return subsystem;
     }
 
     /** @return a profile starting at zero */
