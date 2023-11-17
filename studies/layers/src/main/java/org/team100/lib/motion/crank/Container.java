@@ -1,7 +1,5 @@
 package org.team100.lib.motion.crank;
 
-import java.util.function.Supplier;
-
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
@@ -12,16 +10,17 @@ import edu.wpi.first.wpilibj2.command.Commands;
  * This is an example container, like RobotContainer.
  */
 public class Container {
-    private static final Supplier<Workstate> kDefaultFollower = new WorkstateZero();
+    private static final Actuations kZeroActuation = new ActuationConstant(new Actuation(0.0));
+    private static final Workstates kZeroWorkstate = new WorkstateConstant(new Workstate(0.0));
 
     // elements that can be changed at runtime
     // these must be passed in lambdas: () -> m_profile, to get the current value.
     // package private for testing.
-    private Supplier<MotionProfile> m_profile;
-    private Supplier<Workstate> m_workstate;
-    private Supplier<Configuration> m_configuration;
+    private MotionProfiles m_profile;
+    private Workstates m_workspaceReference;
+    private Configurations m_configurationReference;
     private Actuations m_actuation;
-    private Actuations m_enabler;
+    private Actuations m_enabledActuation;
     Actuator m_actuator;
 
     public void init() {
@@ -33,56 +32,59 @@ public class Container {
 
     CrankSubsystem makeSubsystem(HID hid) {
         // there is no profile until one is specified
-        m_profile = () -> null;
+        m_profile = new ProfileNull();
 
-        m_workstate = kDefaultFollower;
+        // default workspace goal is home
+        m_workspaceReference = kZeroWorkstate;
 
+        // set up the motor and sensor
         MotorWrapper motor = new MotorWrapper();
+        Configurations configurationMeasurement = new ConfigurationMeasurement(motor);
 
-        // default
-        m_actuator = new ActuatorOnboard(motor);
+        // default actuator does nothing
+        m_actuator = new ActuatorNull();
 
-        Supplier<Workstate> crankFeasibleFilter = new WorkspaceFeasible(() -> m_workstate, 1, 1);
+        Workstates feasibleWorkspaceReference = new WorkspaceFeasible(() -> m_workspaceReference, 1, 1);
 
         Kinematics kinematics = new Kinematics(1, 2);
-        m_configuration = new InverseKinematics(crankFeasibleFilter, kinematics);
+        m_configurationReference = new InverseKinematics(() -> feasibleWorkspaceReference, kinematics);
 
-        Supplier<Configuration> configurationMeasurement = new ConfigurationMeasurement(motor);
+        Workstates workstateMeasurement = new ForwardKinematics(() -> configurationMeasurement, kinematics);
 
-        Supplier<Workstate> workstateMeasurement = new ForwardKinematics(configurationMeasurement,
-                kinematics);
+        // default actuation comes from a PID in configuration space
+        m_actuation = new ConfigurationController(() -> configurationMeasurement, () -> m_configurationReference);
 
-        m_actuation = new ConfigurationController(configurationMeasurement, m_configuration);
+        Actuations feasibleActuation = new ActuationFilter(() -> m_actuation, () -> configurationMeasurement);
 
-        Actuations filter = new ActuationFilter(() -> m_actuation, configurationMeasurement);
+        // default actuation is zero until enabled
+        m_enabledActuation = kZeroActuation;
 
-        m_enabler = new ActuationZero();
-
-        CrankSubsystem subsystem = new CrankSubsystem(() -> m_enabler, () -> m_actuator);
+        CrankSubsystem subsystem = new CrankSubsystem(() -> m_enabledActuation, () -> m_actuator);
 
         // default command is manual operation in workspace
-        subsystem.setDefaultCommand(subsystem.runOnce(() -> m_workstate = new WorkstateManual(hid::manual)));
+        subsystem.setDefaultCommand(subsystem.runOnce(() -> m_workspaceReference = new WorkstateManual(hid::manual)));
 
         // rewire the configuration layer
-        hid.manualConfiguration(subsystem.runOnce(() -> m_configuration = new ConfigurationManual(hid::manual)));
+        hid.manualConfiguration(subsystem.runOnce(() -> m_configurationReference = new ConfigurationManual(hid::manual)));
 
         // rewire the actuation layer
         hid.manualActuation(subsystem.runOnce(() -> m_actuation = new ActuationManual(hid::manual)));
-        hid.stopActuation(subsystem.runOnce(() -> m_actuation = new ConfigurationZero()));
+        hid.stopActuation(subsystem.runOnce(() -> m_actuation = kZeroActuation));
 
-        hid.enable(subsystem.runOnce(() -> m_enabler = filter));
-        hid.disable(subsystem.runOnce(() -> m_enabler = new ActuationZero()));
+        // the enabler is the bottom of the stack
+        hid.enable(subsystem.runOnce(() -> m_enabledActuation = feasibleActuation));
+        hid.disable(subsystem.runOnce(() -> m_enabledActuation = kZeroActuation));
 
-        hid.stopWorkstate(subsystem.runOnce(() -> m_workstate = new WorkstateZero()));
+        hid.homeWorkstate(subsystem.runOnce(() -> m_workspaceReference = kZeroWorkstate));
 
-        hid.chooseFF(subsystem.runOnce(
-                () -> m_workstate = new WorkspaceControllerFF(() -> m_profile, workstateMeasurement)));
+        // choose a controller in workspace
+        hid.chooseFF(subsystem
+                .runOnce(() -> m_workspaceReference = new WorkspaceControllerFF(() -> m_profile, () -> workstateMeasurement)));
+        hid.choosePID(subsystem
+                .runOnce(() -> m_workspaceReference = new WorkspaceControllerPID(() -> m_profile, () -> workstateMeasurement)));
 
-        hid.choosePID(subsystem.runOnce(
-                () -> m_workstate = new WorkspaceControllerPID(() -> m_profile, workstateMeasurement)));
-
+                // choose a profile
         hid.runProfile1(subsystem.runOnce(() -> m_profile = makeProfile()));
-
         hid.runProfile2(subsystem.runOnce(() -> m_profile = makeProfile(0.0, 0.0)));
 
         //
@@ -96,18 +98,18 @@ public class Container {
     }
 
     /** @return a profile starting at zero */
-    private static Supplier<MotionProfile> makeProfile() {
+    private static MotionProfiles makeProfile() {
         return makeProfile(0, 0);
     }
 
     /** @return a profile starting at the specified state */
-    private static Supplier<MotionProfile> makeProfile(double p, double v) {
+    private static MotionProfiles makeProfile(double p, double v) {
         // this local variable ensures eager evaluation.
         MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
                 new MotionState(p, v), // start
                 new MotionState(0, 1), // end
                 1, // v
                 1); // a
-        return () -> profile;
+        return new MotionProfileConstant(profile);
     }
 }

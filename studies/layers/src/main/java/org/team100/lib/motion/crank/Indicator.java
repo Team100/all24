@@ -7,7 +7,9 @@ import org.team100.lib.telemetry.Telemetry;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-/** Use the scheduler button loop to update console indicators. */
+/** Use the scheduler button loop to update console indicators. 
+ * TODO: make another indicator visitor that just prints the tree.
+*/
 public class Indicator {
     public interface Visible {
         void accept(Indicator indicator);
@@ -41,6 +43,7 @@ public class Indicator {
     /** catch-all */
     public void indicate(Visible visible) {
         log(visible);
+        System.out.println("unrecognized visible " + visible.getClass().getName());
     }
 
     private void log(Visible visible) {
@@ -48,46 +51,98 @@ public class Indicator {
         t.log("/indicator/" + name, true);
     }
 
-    // one-hot indicator encoding, keep this in order.
+    // one-hot indicator encoding to make it easy for the console.
+    // maybe use a dense encoding instead?
+    // NOTE: keep this in order.
 
     public void indicate(CrankSubsystem visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_0001;
     }
 
-    public void indicate(ActuatorOnboard visible) {
+    public void indicate(ActuatorNull visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_0010;
     }
 
-    public void indicate(ActuatorOutboard visible) {
+    public void indicate(ActuatorOnboard visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_0100;
     }
 
-    public void indicate(ActuationFilter visible) {
+    public void indicate(ActuatorOutboard visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_1000;
     }
 
-    public void indicate(ActuationZero visible) {
+    public void indicate(ActuationFilter visible) {
         log(visible);
         indicators |= 0b0000_0000_0001_0000;
     }
 
-    public void indicate(ActuationManual visible) {
+    public void indicate(ActuationConstant visible) {
         log(visible);
         indicators |= 0b0000_0000_0010_0000;
     }
 
-    public void indicate(ConfigurationController visible) {
+    public void indicate(ActuationManual visible) {
         log(visible);
         indicators |= 0b0000_0000_0100_0000;
     }
 
-    public void indicate(ConfigurationZero visible) {
+    public void indicate(ConfigurationController visible) {
         log(visible);
         indicators |= 0b0000_0000_1000_0000;
+    }
+
+    public void indicate(ConfigurationConstant visible) {
+        log(visible);
+        indicators |= 0b0000_0001_0000_0000;
+    }
+
+    public void indicate(InverseKinematics visible) {
+        log(visible);
+        indicators |= 0b0000_0010_0000_0000;
+    }
+
+    public void indicate(ConfigurationMeasurement visible) {
+        log(visible);
+        indicators |= 0b0000_0100_0000_0000;
+    }
+
+    public void indicate(ConfigurationManual visible) {
+        log(visible);
+        indicators |= 0b0000_1000_0000_0000;
+    }
+
+    public void indicate(ForwardKinematics visible) {
+        log(visible);
+        indicators |= 0b0001_0000_0000_0000;
+    }
+
+    public void indicate(WorkspaceControllerFF visible) {
+        log(visible);
+        indicators |= 0b0010_0000_0000_0000;
+    }
+
+    public void indicate(WorkspaceControllerPID visible) {
+        log(visible);
+        indicators |= 0b0100_0000_0000_0000;
+    }
+
+    public void indicate(WorkstateManual visible) {
+        log(visible);
+        indicators |= 0b1000_0000_0000_0000;
+    }
+
+    public void indicate(WorkstateConstant visible) {
+        log(visible);
+        indicators |= 0b0001_0000_0000_0000_0000;
+    }
+    
+    public void indicate(MotionProfileConstant visible) {
+        log(visible);
+        indicators |= 0b0010_0000_0000_0000_0000;
     }
 
 }

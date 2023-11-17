@@ -10,11 +10,12 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 public class HID {
     GenericHID genericHID = new GenericHID(0);
 
-    /** Stop while held. */
-    public void stopWorkstate(Command command) {
+    /** Home the system.  Note this produces motion, it is not a stop command. */
+    public void homeWorkstate(Command command) {
         new JoystickButton(genericHID, 1).onTrue(command);
     }
 
+    /** Give the actuators zero input.  This should be "safe torque off." */
     public void stopActuation(Command command) {
         new JoystickButton(genericHID, 10).onTrue(command);
     }

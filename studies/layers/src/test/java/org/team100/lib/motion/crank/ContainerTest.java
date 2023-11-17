@@ -13,13 +13,14 @@ class ContainerTest {
         Indicator indicator = new Indicator(hid, () -> subsystem);
         // nothing indicated yet
         assertEquals(0, indicator.indicators);
+        System.out.println("================");
         indicator.rooter();
-        // bits 0, 1 and 4
-        assertEquals(19, indicator.indicators);
+        assertEquals(35, indicator.indicators);
         // usually a command would do this.
         c.m_actuator = new ActuatorOutboard(new MotorWrapper());
+        System.out.println("================");
         indicator.rooter();
         // bits 0, 2 and 4
-        assertEquals(21, indicator.indicators);
+        assertEquals(41, indicator.indicators);
     }
 }

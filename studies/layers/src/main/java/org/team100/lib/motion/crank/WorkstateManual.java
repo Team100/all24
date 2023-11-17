@@ -1,12 +1,11 @@
 package org.team100.lib.motion.crank;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 /**
  * Supplies workspace state as manual input.
  */
-public class WorkstateManual implements Supplier<Workstate> {
+public class WorkstateManual implements Workstates {
     private final DoubleSupplier m_manual;
 
     public WorkstateManual(DoubleSupplier manual) {
@@ -16,5 +15,10 @@ public class WorkstateManual implements Supplier<Workstate> {
     @Override
     public Workstate get() {
         return new Workstate(m_manual.getAsDouble());
+    }
+
+    @Override
+    public void accept(Indicator indicator) {
+        indicator.indicate(this);
     }
 }

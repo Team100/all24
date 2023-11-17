@@ -1,16 +1,15 @@
 package org.team100.lib.motion.crank;
 
-/** Stops everything.  */
-public class ActuationZero implements Actuations {
-
+/** Swallows all input. */
+public class ActuatorNull implements Actuator {
     @Override
-    public Actuation get() {
-        return new Actuation(0.0);
+    public void accept(Actuation state) {
+        System.out.println(state);
     }
 
     @Override
     public void accept(Indicator indicator) {
         indicator.indicate(this);
     }
-    
+
 }

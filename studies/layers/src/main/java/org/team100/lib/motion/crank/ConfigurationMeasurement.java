@@ -1,8 +1,6 @@
 package org.team100.lib.motion.crank;
 
-import java.util.function.Supplier;
-
-public class ConfigurationMeasurement implements Supplier<Configuration> {
+public class ConfigurationMeasurement implements Configurations {
     private final MotorWrapper m_motor;
 
     public ConfigurationMeasurement(MotorWrapper motor) {
@@ -13,6 +11,11 @@ public class ConfigurationMeasurement implements Supplier<Configuration> {
     public Configuration get() {
         // TODO: full state measurement, or something?
         return new Configuration(m_motor.getPosition());
+    }
+
+    @Override
+    public void accept(Indicator indicator) {
+        indicator.indicate(this);
     }
     
 }

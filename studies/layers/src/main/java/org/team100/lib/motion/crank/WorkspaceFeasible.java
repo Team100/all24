@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * Enforce workspace feasibility by editing reference state.
  */
-public class WorkspaceFeasible implements Supplier<Workstate> {
-    private final Supplier<Supplier<Workstate>> m_follower;
+public class WorkspaceFeasible implements Workstates {
+    private final Supplier<Workstates> m_follower;
     private final double m_maxVelocityM_S;
     private final double m_maxAccelM_S_S;
     private double m_prevVelM_S;
@@ -18,7 +18,7 @@ public class WorkspaceFeasible implements Supplier<Workstate> {
      * @param follower is a supplier of followers so that it can be mutable.
      */
     public WorkspaceFeasible(
-            Supplier<Supplier<Workstate>> follower,
+            Supplier<Workstates> follower,
             double maxVelocityM_S,
             double maxAccelM_S_S) {
         m_follower = follower;
@@ -49,5 +49,11 @@ public class WorkspaceFeasible implements Supplier<Workstate> {
             return new Workstate(m_prevVelM_S - m_maxAccelM_S_S * dtS);
         }
         return velocityM_S;
+    }
+
+    @Override
+    public void accept(Indicator indicator) {
+        m_follower.get().accept(indicator);
+        indicator.indicate(this);
     }
 }
