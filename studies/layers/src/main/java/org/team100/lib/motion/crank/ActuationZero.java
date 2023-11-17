@@ -1,7 +1,7 @@
 package org.team100.lib.motion.crank;
 
-/** Always produces zero actuation. */
-public class ConfigurationZero implements Actuations {
+/** Stops everything.  */
+public class ActuationZero implements Actuations {
 
     @Override
     public Actuation get() {
@@ -12,4 +12,5 @@ public class ConfigurationZero implements Actuations {
     public void accept(Indicator indicator) {
         indicator.indicate(this);
     }
+    
 }

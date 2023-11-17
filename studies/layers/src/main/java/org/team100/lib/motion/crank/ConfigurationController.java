@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.PIDController;
 
-public class ConfigurationController implements Supplier<Actuation> {
+public class ConfigurationController implements Actuations {
     private final PIDController m_controller;
 
     private final Supplier<Configuration> m_measurement;
@@ -23,5 +23,10 @@ public class ConfigurationController implements Supplier<Actuation> {
         return new Actuation(m_controller.calculate(
                 m_measurement.get().getCrankAngleRad(),
                 m_setpoint.get().getCrankAngleRad()));
+    }
+
+    @Override
+    public void accept(Indicator indicator) {
+        indicator.indicate(this);
     }
 }

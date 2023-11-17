@@ -14,12 +14,12 @@ class ContainerTest {
         // nothing indicated yet
         assertEquals(0, indicator.indicators);
         indicator.rooter();
-        // bits 0 and 1
-        assertEquals(3, indicator.indicators);
+        // bits 0, 1 and 4
+        assertEquals(19, indicator.indicators);
         // usually a command would do this.
         c.m_actuator = new ActuatorOutboard(new MotorWrapper());
         indicator.rooter();
-        // bits 0 and 2
-        assertEquals(5, indicator.indicators);
+        // bits 0, 2 and 4
+        assertEquals(21, indicator.indicators);
     }
 }

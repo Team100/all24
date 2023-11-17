@@ -43,6 +43,13 @@ public class Indicator {
         log(visible);
     }
 
+    private void log(Visible visible) {
+        String name = visible.getClass().getSimpleName();
+        t.log("/indicator/" + name, true);
+    }
+
+    // one-hot indicator encoding, keep this in order.
+
     public void indicate(CrankSubsystem visible) {
         log(visible);
         indicators |= 0b0000_0000_0000_0001;
@@ -58,9 +65,29 @@ public class Indicator {
         indicators |= 0b0000_0000_0000_0100;
     }
 
-    private void log(Visible visible) {
-        String name = visible.getClass().getSimpleName();
-        t.log("/indicator/" + name, true);
+    public void indicate(ActuationFilter visible) {
+        log(visible);
+        indicators |= 0b0000_0000_0000_1000;
+    }
+
+    public void indicate(ActuationZero visible) {
+        log(visible);
+        indicators |= 0b0000_0000_0001_0000;
+    }
+
+    public void indicate(ActuationManual visible) {
+        log(visible);
+        indicators |= 0b0000_0000_0010_0000;
+    }
+
+    public void indicate(ConfigurationController visible) {
+        log(visible);
+        indicators |= 0b0000_0000_0100_0000;
+    }
+
+    public void indicate(ConfigurationZero visible) {
+        log(visible);
+        indicators |= 0b0000_0000_1000_0000;
     }
 
 }

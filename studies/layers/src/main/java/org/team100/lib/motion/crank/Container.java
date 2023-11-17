@@ -20,9 +20,9 @@ public class Container {
     private Supplier<MotionProfile> m_profile;
     private Supplier<Workstate> m_workstate;
     private Supplier<Configuration> m_configuration;
-    private Supplier<Actuation> m_actuation;
+    private Actuations m_actuation;
+    private Actuations m_enabler;
     Actuator m_actuator;
-    private Supplier<Actuation> m_enabler;
 
     public void init() {
         HID hid = new HID();
@@ -54,9 +54,9 @@ public class Container {
 
         m_actuation = new ConfigurationController(configurationMeasurement, m_configuration);
 
-        Supplier<Actuation> filter = new ActuationFilter(() -> m_actuation, configurationMeasurement);
+        Actuations filter = new ActuationFilter(() -> m_actuation, configurationMeasurement);
 
-        m_enabler = () -> new Actuation(0.0);
+        m_enabler = new ActuationZero();
 
         CrankSubsystem subsystem = new CrankSubsystem(() -> m_enabler, () -> m_actuator);
 
@@ -71,7 +71,7 @@ public class Container {
         hid.stopActuation(subsystem.runOnce(() -> m_actuation = new ConfigurationZero()));
 
         hid.enable(subsystem.runOnce(() -> m_enabler = filter));
-        hid.disable(subsystem.runOnce(() -> m_enabler = () -> new Actuation(0.0)));
+        hid.disable(subsystem.runOnce(() -> m_enabler = new ActuationZero()));
 
         hid.stopWorkstate(subsystem.runOnce(() -> m_workstate = new WorkstateZero()));
 

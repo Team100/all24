@@ -1,12 +1,11 @@
 package org.team100.lib.motion.crank;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 /**
  * Supplies actuation based on manual input.
  */
-public class ActuationManual implements Supplier<Actuation> {
+public class ActuationManual implements Actuations {
     private final DoubleSupplier m_manual;
 
     public ActuationManual(DoubleSupplier manual) {
@@ -16,5 +15,10 @@ public class ActuationManual implements Supplier<Actuation> {
     @Override
     public Actuation get() {
         return new Actuation(m_manual.getAsDouble());
+    }
+
+    @Override
+    public void accept(Indicator indicator) {
+        indicator.indicate(this);
     }
 }
