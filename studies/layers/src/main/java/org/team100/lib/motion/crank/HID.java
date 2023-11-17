@@ -10,12 +10,12 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 public class HID {
     GenericHID genericHID = new GenericHID(0);
 
-    /** Home the system.  Note this produces motion, it is not a stop command. */
+    /** Home the system. Note this produces motion, it is not a stop command. */
     public void homeWorkstate(Command command) {
         new JoystickButton(genericHID, 1).onTrue(command);
     }
 
-    /** Give the actuators zero input.  This should be "safe torque off." */
+    /** Give the actuators zero input. This should be "safe torque off." */
     public void stopActuation(Command command) {
         new JoystickButton(genericHID, 10).onTrue(command);
     }
@@ -27,6 +27,11 @@ public class HID {
 
     /** Set follower to PID. */
     public void choosePID(Command command) {
+        new JoystickButton(genericHID, 3).onTrue(command);
+    }
+
+    /** Set follower to Fancy. */
+    public void chooseFancy(Command command) {
         new JoystickButton(genericHID, 3).onTrue(command);
     }
 

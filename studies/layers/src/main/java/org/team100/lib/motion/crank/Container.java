@@ -15,13 +15,12 @@ public class Container {
 
     // elements that can be changed at runtime
     // these must be passed in lambdas: () -> m_profile, to get the current value.
-    // package private for testing.
     private MotionProfiles m_profile;
     private Workstates m_workspaceReference;
     private Configurations m_configurationReference;
     private Actuations m_actuation;
     private Actuations m_enabledActuation;
-    Actuator m_actuator;
+    Actuator m_actuator; // package private for testing.
 
     public void init() {
         HID hid = new HID();
@@ -65,7 +64,8 @@ public class Container {
         subsystem.setDefaultCommand(subsystem.runOnce(() -> m_workspaceReference = new WorkstateManual(hid::manual)));
 
         // rewire the configuration layer
-        hid.manualConfiguration(subsystem.runOnce(() -> m_configurationReference = new ConfigurationManual(hid::manual)));
+        hid.manualConfiguration(
+                subsystem.runOnce(() -> m_configurationReference = new ConfigurationManual(hid::manual)));
 
         // rewire the actuation layer
         hid.manualActuation(subsystem.runOnce(() -> m_actuation = new ActuationManual(hid::manual)));
@@ -78,12 +78,17 @@ public class Container {
         hid.homeWorkstate(subsystem.runOnce(() -> m_workspaceReference = kZeroWorkstate));
 
         // choose a controller in workspace
-        hid.chooseFF(subsystem
-                .runOnce(() -> m_workspaceReference = new WorkspaceControllerFF(() -> m_profile, () -> workstateMeasurement)));
-        hid.choosePID(subsystem
-                .runOnce(() -> m_workspaceReference = new WorkspaceControllerPID(() -> m_profile, () -> workstateMeasurement)));
+        hid.chooseFF(subsystem.runOnce(
+                () -> m_workspaceReference = new WorkspaceControllerFF(() -> m_profile)));
+        hid.choosePID(subsystem.runOnce(
+                () -> m_workspaceReference = new WorkspaceControllerPID(
+                        () -> new MotionProfileSampler(() -> m_profile),
+                        () -> workstateMeasurement)));
+        WorkspaceControllerFancy.Specs specs = new WorkspaceControllerFancy.Specs();
+        hid.chooseFancy(subsystem.runOnce(
+                () -> m_workspaceReference = new WorkspaceControllerFancy(() -> specs, () -> workstateMeasurement)));
 
-                // choose a profile
+        // choose a profile for the controllers that need them
         hid.runProfile1(subsystem.runOnce(() -> m_profile = makeProfile()));
         hid.runProfile2(subsystem.runOnce(() -> m_profile = makeProfile(0.0, 0.0)));
 
