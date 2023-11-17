@@ -8,7 +8,7 @@ import edu.wpi.first.math.numbers.N2;
  * 
  * xdot = f(x, u, t) + w(t)
  * 
- * also sometimes xi or ξ or η.
+ * also sometimes xi or eta.
  * 
  * White noise is a process that produces uncorrelated
  * samples drawn from a gaussian distribution with zero mean and the specified
