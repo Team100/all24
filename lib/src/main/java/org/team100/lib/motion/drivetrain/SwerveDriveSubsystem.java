@@ -65,8 +65,9 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
     @Override
     public void periodic() {
         updateOdometry();
-        driveToReference();
         m_field.setRobotPose(getPose());
+
+        driveToReference();
     }
 
     /** The speed implied by the module states. */
@@ -77,10 +78,7 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
     /**
      * Give the controller a new reference state.
      */
-    public void 
-    
-    
-    setDesiredState(SwerveState desiredState) {
+    public void setDesiredState(SwerveState desiredState) {
         m_desiredState = desiredState;
     }
 
@@ -135,14 +133,13 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, m_desiredState);
 
-
         driveInFieldCoords(fieldRelativeTarget);
     }
 
-    public void setUsingSetpointGenerator(boolean bool){
-        if(bool){
+    public void setUsingSetpointGenerator(boolean bool) {
+        if (bool) {
             m_useSetpointGenerator = true;
-        } else{
+        } else {
             m_useSetpointGenerator = false;
 
         }
@@ -175,9 +172,9 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         t.log("/chassis/theta rad", twist.dtheta);
 
         // if(m_useSetpointGenerator){
-        //     m_swerveLocal.setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
+        // m_swerveLocal.setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
         // } else {
-        //     m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
+        // m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
 
         // }
 
