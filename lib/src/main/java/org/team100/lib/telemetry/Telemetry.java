@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
  */
 public class Telemetry {
     /**
-     * useful for troubleshooting unit tests.
+     * useful for troubleshooting unit tests.  it's quite slow.
      */
     private static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
