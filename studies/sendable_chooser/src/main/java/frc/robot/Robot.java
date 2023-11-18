@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
     for (Mode mode : Mode.values()) {
         m_chooser.addOption(mode.name(), mode);
     }
+    m_chooser.setDefaultOption(Mode.ONE.name(), Mode.ONE);
     // SmartDashboard is EOL but it does still work, so fine. 
     SmartDashboard.putData(m_chooser);
   }

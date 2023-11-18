@@ -96,25 +96,14 @@ public class FancyTrajectory extends Command {
     @Override
     public void execute() {
         final double now = Timer.getFPGATimestamp();
-
-        Pose2d currentPose = new Pose2d(
-                m_robotDrive.getPose().getX(),
-                m_robotDrive.getPose().getY(),
-                m_robotDrive.getPose().getRotation());
-
-        // *****************************************************
-        // *****************************************************
-        //
-        // TODO: measure velocity!
-        // SwerveDriveOdometry used to take both positions and velocities; use module
-        // velocities to determine chassis speed, and turn that into a twist.
-        //
-        // *****************************************************
-        // *****************************************************
-        // *****************************************************
-
-        Twist2d velocity = new Twist2d(); // <<< FIX ME
-
+        Pose2d currentPose = m_robotDrive.getPose();
+        ChassisSpeeds currentSpeed = m_robotDrive.speeds();
+        // NOTE(joel): none of the controller implementations actually use the magnitude
+        // of the velocity so i'm not sure what unit they expect.
+        Twist2d velocity = new Twist2d(
+                currentSpeed.vxMetersPerSecond,
+                currentSpeed.vyMetersPerSecond,
+                currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log("/fancy trajectory/chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output);

@@ -1,5 +1,9 @@
-package org.team100.frc2023.autonomous;
+package org.team100.lib.commands;
 
+import org.team100.lib.config.Identity;
+import org.team100.lib.controller.DriveControllers;
+import org.team100.lib.controller.DriveControllersFactory;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.HeadingInterface;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -11,6 +15,7 @@ import org.team100.lib.profile.MotionState;
 import org.team100.lib.telemetry.Telemetry;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,18 +31,16 @@ public class Rotate extends Command {
     }
 
     private final Config m_config = new Config();
-
     private final Telemetry t = Telemetry.get();
-
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final HeadingInterface m_heading;
     private final SpeedLimits m_speedLimits;
     private final Timer m_timer;
     private final MotionState m_goalState;
+    private final HolonomicDriveController3 m_controller;
+
     MotionProfile m_profile; // set in initialize(), package private for testing
     MotionState refTheta; // updated in execute(), package private for testing.
-    private double headingMeasurement; // updated in execute()
-    private double headingRate;
 
     public Rotate(
             SwerveDriveSubsystemInterface drivetrain,
@@ -51,6 +54,14 @@ public class Rotate extends Command {
         m_timer = timer;
         m_goalState = new MotionState(targetAngleRadians, 0);
         refTheta = new MotionState(0, 0);
+
+        Identity identity = Identity.get();
+
+        DriveControllers controllers = new DriveControllersFactory().get(identity);
+
+        m_controller = new HolonomicDriveController3(controllers);
+        m_controller.setTolerance(m_config.xToleranceRad, m_config.vToleranceRad_S);
+
         if (drivetrain.get() != null)
             addRequirements(drivetrain.get());
     }
@@ -77,22 +88,22 @@ public class Rotate extends Command {
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
 
-        // tell the drivetrain the state we want
-        m_robotDrive.setDesiredState(
-                new SwerveState(
-                        new State100(currentPose.getX(), 0, 0), // stationary at current pose
-                        new State100(currentPose.getY(), 0, 0),
-                        new State100(refTheta.getX(), refTheta.getV(), refTheta.getA())));
+        SwerveState reference = new SwerveState(
+                new State100(currentPose.getX(), 0, 0), // stationary at current pose
+                new State100(currentPose.getY(), 0, 0),
+                new State100(refTheta.getX(), refTheta.getV(), refTheta.getA()));
 
-        // update measurement (this is for isFinished())
-        headingMeasurement = currentPose.getRotation().getRadians();
+        Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+        m_robotDrive.driveInFieldCoords(fieldRelativeTarget);
+
+        double headingMeasurement = currentPose.getRotation().getRadians();
         // note the use of Heading here.
         // TODO: extend the pose estimator to include rate.
-        headingRate = m_heading.getHeadingRateNWU();
+        double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did
-        t.log("/rotate/errorX", xErrorRad());
-        t.log("/rotate/errorV", vErrorRad_S());
+        t.log("/rotate/errorX", refTheta.getX() - headingMeasurement);
+        t.log("/rotate/errorV", refTheta.getV() - headingRate);
         t.log("/rotate/measurementX", headingMeasurement);
         t.log("/rotate/measurementV", headingRate);
         t.log("/rotate/refX", refTheta.getX());
@@ -101,25 +112,11 @@ public class Rotate extends Command {
 
     @Override
     public boolean isFinished() {
-        return m_timer.get() > m_profile.duration() && atSetpoint();
+        return m_timer.get() > m_profile.duration() && m_controller.atReference();
     }
 
     @Override
     public void end(boolean isInterupted) {
-        m_robotDrive.truncate();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    private double xErrorRad() {
-        return refTheta.getX() - headingMeasurement;
-    }
-
-    private double vErrorRad_S() {
-        return refTheta.getV() - headingRate;
-    }
-
-    private boolean atSetpoint() {
-        return Math.abs(xErrorRad()) < m_config.xToleranceRad && Math.abs(vErrorRad_S()) < m_config.vToleranceRad_S;
+        m_robotDrive.stop();
     }
 }

@@ -14,6 +14,9 @@ import edu.wpi.first.math.geometry.Twist2d;
  * with zero velocity/acceleration.
  * 
  * Be careful about where the "zero" is.
+ * 
+ * This requires a controller under the manual command, so for now
+ * it's not in use, but it should be.
  */
 public class ManualSwerveState implements Supplier<SwerveState> {
     private static final double kScale = 1.0;
