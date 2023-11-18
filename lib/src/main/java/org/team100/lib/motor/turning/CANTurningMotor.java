@@ -18,7 +18,6 @@ public class CANTurningMotor implements TurningMotor {
     private final double ticksPerRevolution = 28;
     private final int canID;
     public static final double kTurningCurrentLimit = 7;
-    // TODO fix this
     private final AnalogTurningEncoder m_encoder;
     private final String m_name;
 
@@ -48,10 +47,6 @@ public class CANTurningMotor implements TurningMotor {
         m_motor.configVoltageCompSaturation(11);
         m_motor.enableVoltageCompensation(true);
         m_motor.setSensorPhase(true);
-        // TODO fix this
-        if (swerveBot == 2 && name != "Rear Right") {
-            m_motor.setInverted(true);
-        }
         m_name = String.format("/CAN Turning Motor %s", name);
 
         t.log(m_name + "/Device ID", canID);
