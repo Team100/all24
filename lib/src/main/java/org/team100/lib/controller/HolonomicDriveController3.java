@@ -52,6 +52,7 @@ public class HolonomicDriveController3 {
     public Twist2d calculate(
             Pose2d currentPose,
             SwerveState desiredState) {
+
         Rotation2d currentRotation = currentPose.getRotation();
 
         double xFF = desiredState.x().v(); // m/s
@@ -71,18 +72,22 @@ public class HolonomicDriveController3 {
         double yFeedback = m_yController.calculate(currentPose.getY(), desiredState.y().x());
         double thetaFeedback = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        System.out.println("Theta DESIRED::::::::" + desiredState.theta().x());
+        // System.out.println("Theta DESIRED::::::::" + desiredState.theta().x());
         xSetPublisher.set(m_xController.getSetpoint());
         ySetPublisher.set(m_yController.getSetpoint());
         thetaSetPublisher.set(m_thetaController.getSetpoint());
         poseXErrorPublisher.set(m_xController.getPositionError());
         poseYErrorPublisher.set(m_yController.getPositionError());
         thetaErrorPublisher.set(m_thetaController.getPositionError());
+
         xFBPublisher.set(xFeedback);
         yFBPublisher.set(yFeedback);
         thetaFBPublisher.set(thetaFeedback);
 
-        return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
+        return new Twist2d(xFF, yFF, thetaFF);
+
+
+        // return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
     }
 
     public void setGains(PidGains cartesian, PidGains rotation) {

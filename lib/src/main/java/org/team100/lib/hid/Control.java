@@ -1,5 +1,7 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.commands.Drive01;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,6 +54,10 @@ public interface Control {
     }
 
     default void defense(Command defense) {
+    }
+
+    default void drive01(Command command){
+        
     }
 
     default void rotate0(Command command) {

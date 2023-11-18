@@ -157,7 +157,7 @@ public class DriveToWaypoint3 extends Command {
 
 
         m_swerve.setUsingSetpointGenerator(true);
-        translationConfig = new TrajectoryConfig(2, 0.5).setKinematics(kinematics);
+        translationConfig = new TrajectoryConfig(0.5, 0.5).setKinematics(kinematics);
         addRequirements(drivetrain);
     }
 
@@ -174,6 +174,7 @@ public class DriveToWaypoint3 extends Command {
         Rotation2d angleToGoal = translationToGoal.getAngle();
         TrajectoryConfig withStartVelocityConfig = new TrajectoryConfig(5, 2).setKinematics(m_kinematics);
         withStartVelocityConfig.setStartVelocity(startVelocity);
+
 
         try {
             return TrajectoryGenerator.generateTrajectory(
@@ -196,12 +197,17 @@ public class DriveToWaypoint3 extends Command {
         // m_controller.updateProfile(m_goal.getX(), m_goal.getY(), 5, 3, 1);
         // m_controller.start();
         m_trajectory = makeTrajectory(0);
+
+        System.out.println("WE ARE IN INITIALIZE");
         System.out.println(m_trajectory);
 
     }
 
     @Override
     public void execute() {
+
+
+        // System.out.println("AJAAAAAAAAAAAAAAHDFOEOHOUBROVUBOUBOUBBOUBOUBOUBOUB");
         // if (m_trajectory == null) {
         // return;
         // }
@@ -229,8 +235,8 @@ public class DriveToWaypoint3 extends Command {
         if(currentPose.getX() > m_goal.getX() - 0.1 && currentPose.getX() < m_goal.getX() + 0.1){
             if(currentPose.getY() > m_goal.getY() - 0.1 && currentPose.getY() < m_goal.getY() + 0.1){
                 // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-                System.out.println(desiredState.poseMeters.getY());
-                System.out.println(m_goal.getY());
+                // System.out.println(desiredState.poseMeters.getY());
+                // System.out.println(m_goal.getY());
 
                 
                 isFinished = true;
@@ -251,8 +257,8 @@ public class DriveToWaypoint3 extends Command {
         //         desiredState,
         //         m_goal.getRotation());
         SwerveState des = new SwerveState(
-            new State100(desiredState.poseMeters.getX(), 0, 0),
-            new State100(desiredState.poseMeters.getY(), 0, 0),
+            new State100(desiredState.poseMeters.getX(), desiredState.velocityMetersPerSecond, 0),
+            new State100(desiredState.poseMeters.getY(), desiredState.velocityMetersPerSecond, 0),
             new State100(0, 0, 0));
         
         
@@ -263,7 +269,8 @@ public class DriveToWaypoint3 extends Command {
 
         SwerveState manualState = SwerveDriveSubsystem.incremental(currentPose, fieldRelativeTarget);
         m_swerve.setDesiredState(manualState, true);
-
+        // m_swerve.setChassisSpeeds(null);
+        // m_swerve.driveInFieldCoords(fieldRelativeTarget);
         t.log("/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
         t.log("/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());
         t.log("/Drive To Waypoint/Pose X", m_swerve.getPose().getX());

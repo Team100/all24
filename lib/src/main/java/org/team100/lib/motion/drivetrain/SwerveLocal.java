@@ -86,7 +86,7 @@ public class SwerveLocal {
 
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, prevSetpoint, targetChassisSpeeds,
         .020);
-        System.out.println(setpoint);
+        // System.out.println(setpoint);
         prevSetpoint = setpoint;
 
         // SwerveModuleState[] states = m_DriveKinematics.toSwerveModuleStates(setpoint.getChassisSpeeds());
@@ -137,6 +137,10 @@ public class SwerveLocal {
         SwerveDriveKinematics.desaturateWheelSpeeds(targetModuleStates, m_speedLimits.speedM_S);
         logImpliedChassisSpeeds(targetModuleStates);
         m_modules.setDesiredStates(targetModuleStates);
+    }
+
+    public void setVelocity(){
+        m_modules.setVelocity();
     }
 
     /**

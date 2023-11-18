@@ -62,6 +62,11 @@ public class DualXboxControl implements Control {
     }
 
     @Override
+    public void drive01(Command command){
+        controller0.y().whileTrue(command);
+    }
+
+    @Override
     public void driveToRightGrid(Command command) {
         // controller0.b().whileTrue(command);
     }

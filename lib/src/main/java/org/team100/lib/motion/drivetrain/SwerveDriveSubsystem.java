@@ -156,13 +156,17 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         driveInFieldCoords(fieldRelativeTarget);
     }
 
+    public void setVelocity(){
+        m_swerveLocal.setVelocity();
+    }
+
     ////////////////////////////
     // TODO: push the stuff below down
 
     /**
      * @param twist Field coordinate velocities in meters and radians per second.
      */
-    private void driveInFieldCoords(Twist2d twist) {
+    public void driveInFieldCoords(Twist2d twist) {
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
 

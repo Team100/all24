@@ -7,6 +7,7 @@ import org.team100.frc2023.autonomous.Rotate;
 import org.team100.frc2023.commands.Defense;
 import org.team100.frc2023.commands.DriveScaled;
 import org.team100.frc2023.commands.DriveWithHeading;
+import org.team100.lib.commands.Drive01;
 import org.team100.lib.commands.FancyTrajectory;
 import org.team100.lib.commands.ResetPose;
 import org.team100.lib.commands.ResetRotation;
@@ -191,6 +192,7 @@ public class RobotContainer {
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
         control.rotate0(new Rotate(m_robotDrive, m_heading, speedLimits, new Timer(), 0));
 
+        control.drive01(new Drive01(m_robotDrive));
 
         //new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive, m_kinematics
 
@@ -214,12 +216,17 @@ public class RobotContainer {
 
         //                     };
 
-        Pose2d[] goalArr = {  new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180)),
-                              new Pose2d(0.5, -0.5, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-0.5, -0.5, Rotation2d.fromDegrees(180)),
-                              new Pose2d(-0.5,  0.5, Rotation2d.fromDegrees(180)),
-                              new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180))
+        // Pose2d[] goalArr = {  new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(0.5, -0.5, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(-0.5, -0.5, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(-0.5,  0.5, Rotation2d.fromDegrees(180)),
+        //                       new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180))
 
+        //                     };
+
+
+        Pose2d[] goalArr = {  new Pose2d(-1, 0, Rotation2d.fromDegrees(0))
+                             
                             };
         // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)), m_robotDrive, m_kinematics));
         control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));

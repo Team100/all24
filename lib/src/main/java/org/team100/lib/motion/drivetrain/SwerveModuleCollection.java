@@ -43,6 +43,12 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         public void setDesiredStates(SwerveModuleState[] targetModuleStates) { 
         }
 
+        @Override
+        public void setVelocity() {
+            // TODO Auto-generated method stub
+            
+        }
+
     }
     private final SwerveModule m_frontLeft;
     private final SwerveModule m_frontRight;
@@ -85,6 +91,13 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_frontRight.setDesiredState(swerveModuleStates[1]);
         m_rearLeft.setDesiredState(swerveModuleStates[2]);
         m_rearRight.setDesiredState(swerveModuleStates[3]);
+    }
+
+    public void setVelocity(){
+        m_frontLeft.setVelocity();
+        m_frontRight.setVelocity();
+        m_rearLeft.setVelocity();
+        m_rearRight.setVelocity();
     }
 
     public void close() {

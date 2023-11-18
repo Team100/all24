@@ -123,6 +123,23 @@ public class FalconDriveMotor implements DriveMotor {
         return m_motor.getSelectedSensorVelocity() / (ticksPerRevolution / 10 * m_gearRatio);
     }
 
+    public void setVelocity(){
+
+        System.out.println("AHHHHHHHHHHH");
+        DemandType type = DemandType.ArbitraryFeedForward;
+
+        // m_motor.set(ControlMode.Velocity, 1);
+        // double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
+
+
+        // m_motor.set(ControlMode.Velocity, 1, type, 0);
+        // m_motor.set(ControlMode.PercentOutput, 0.5);
+
+
+        // m_motor.set(ControlMode.Velocity, 0.1);
+
+    }
+
     /**
      * @return integrated sensor position in sensor units (1/2048 turn).
      */

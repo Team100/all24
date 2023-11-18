@@ -65,15 +65,21 @@ public class DriveServo {
     void offboard(double speedM_S) {
 
         
-        if(speedM_S >= -0.3 && speedM_S <= 0.3){
-            // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
-            speedM_S = 0;
-        }
+        // if(speedM_S >= -0.3 && speedM_S <= 0.3){
+        //     // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
+        //     speedM_S = 0;
+        // }
+
+        // System.out.println(speedM_S);
 
         m_driveMotor.setPID(ControlMode.Velocity, speedM_S);
 
         
         // System.out.println("SPPPPPEED" + speedM_S);
+    }
+
+    public void setVelocity(){
+        m_driveMotor.setVelocity();
     }
 
     void onboard(double speedM_S) {

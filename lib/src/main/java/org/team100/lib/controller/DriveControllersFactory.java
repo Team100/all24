@@ -21,35 +21,35 @@ public class DriveControllersFactory {
     private final Config m_config = new Config();
 
     public DriveControllers get(Identity identity, SpeedLimits speedLimits) {
-        // switch (identity) {
-        //     case COMP_BOT:
-        //         return new DriveControllers(
-        //                 pid(m_config.compBotCartesianGain),
-        //                 pid(m_config.compBotCartesianGain),
-        //                 pid(m_config.thetaGain));
-        //     case SWERVE_ONE:
-        //         return new DriveControllers(
-        //                 pid(m_config.swerveOneCartesianGain),
-        //                 pid(m_config.swerveOneCartesianGain),
-        //                 pid(m_config.thetaGain));
-        //     case SWERVE_TWO:
-        //         return new DriveControllers(
-        //                 pid(m_config.swerveTwoCartesianGain),
-        //                 pid(m_config.swerveTwoCartesianGain),
-        //                 pid(m_config.thetaGain));
-        //     default:
-        //         // these RoboRIO's are have no drivetrains
-        //         return new DriveControllers(
-        //                 new PIDController(1, 0.0, 0.0),
-        //                 new PIDController(1, 0.0, 0.0),
-        //                 new PIDController(1, 0.0, 0.0));
-        // }
+        switch (identity) {
+            case COMP_BOT:
+                return new DriveControllers(
+                        pid(m_config.compBotCartesianGain),
+                        pid(m_config.compBotCartesianGain),
+                        pid(m_config.thetaGain));
+            case SWERVE_ONE:
+                return new DriveControllers(
+                        pid(m_config.swerveOneCartesianGain),
+                        pid(m_config.swerveOneCartesianGain),
+                        pid(m_config.thetaGain));
+            case SWERVE_TWO:
+                return new DriveControllers(
+                        pid(m_config.swerveTwoCartesianGain),
+                        pid(m_config.swerveTwoCartesianGain),
+                        pid(m_config.thetaGain));
+            default:
+                // these RoboRIO's are have no drivetrains
+                return new DriveControllers(
+                        new PIDController(1, 0.0, 0.0),
+                        new PIDController(1, 0.0, 0.0),
+                        new PIDController(1, 0.0, 0.0));
+        }
 
         
-        return new DriveControllers(
-            pid(m_config.compBotCartesianGain),
-            pid(m_config.compBotCartesianGain),
-            pid(m_config.thetaGain));
+        // return new DriveControllers(
+        //     pid(m_config.compBotCartesianGain),
+        //     pid(m_config.compBotCartesianGain),
+        //     pid(m_config.thetaGain));
     }
 
     private static PIDController pid(PidGains g) {

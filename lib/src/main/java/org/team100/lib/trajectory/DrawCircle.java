@@ -22,11 +22,11 @@ public class DrawCircle extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
 
-    new DriveToWaypoint3(goalArr[0], drivetrain, kinematics),
-    new DriveToWaypoint3(goalArr[1], drivetrain, kinematics),
-    new DriveToWaypoint3(goalArr[2], drivetrain, kinematics),
-    new DriveToWaypoint3(goalArr[3], drivetrain, kinematics),
-    new DriveToWaypoint3(goalArr[4], drivetrain, kinematics)
+    new DriveToWaypoint3(goalArr[0], drivetrain, kinematics)
+    // new DriveToWaypoint3(goalArr[1], drivetrain, kinematics),
+    // new DriveToWaypoint3(goalArr[2], drivetrain, kinematics),
+    // new DriveToWaypoint3(goalArr[3], drivetrain, kinematics),
+    // new DriveToWaypoint3(goalArr[4], drivetrain, kinematics)
 
 
 
