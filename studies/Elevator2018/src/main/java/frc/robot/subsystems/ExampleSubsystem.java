@@ -4,28 +4,30 @@
 
 package frc.robot.subsystems;
 
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ExampleSubsystem extends SubsystemBase {
 
-    private final CANSparkMax m_motor;
+  private final CANSparkMax m_motor;
 
   /** Creates a new ExampleSubsystem. */
   public ExampleSubsystem(
-    CANSparkMax motor) {
+      CANSparkMax motor) {
     m_motor = motor;
-        m_motor.enableVoltageCompensation(12.0);
-        m_motor.setSmartCurrentLimit(10);
-        m_motor.setIdleMode(IdleMode.kCoast);
+    m_motor.enableVoltageCompensation(12.0);
+    m_motor.setSmartCurrentLimit(10);
+    m_motor.setIdleMode(IdleMode.kCoast);
   }
 
   public void set(double value) {
     m_motor.set(value);
+  }
+
+  public double get() {
+    return m_motor.getEncoder().getPosition();
   }
 
   /**
@@ -43,7 +45,8 @@ public class ExampleSubsystem extends SubsystemBase {
   }
 
   /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
+   * An example method querying a boolean state of the subsystem (for example, a
+   * digital sensor).
    *
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
@@ -55,7 +58,7 @@ public class ExampleSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-  
+
   }
 
   @Override

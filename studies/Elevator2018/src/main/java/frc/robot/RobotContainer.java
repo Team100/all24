@@ -17,7 +17,6 @@ public class RobotContainer {
     m_driverController = new CommandXboxController(0);
     m_motor = new CANSparkMax(5, MotorType.kBrushless);
     m_exampleSubsystem = new ExampleSubsystem(m_motor);
-    m_driverController.b().whileTrue(new ExampleCommand(m_exampleSubsystem));
+    m_driverController.b().whileTrue(new ExampleCommand(m_exampleSubsystem, m_driverController));
   }
-
 }
