@@ -27,7 +27,7 @@ public class ExampleCommand extends CommandBase {
 
   @Override
   public void execute() {
-    double leftX = m_driverController.getLeftX() * 100;
+    double leftX = m_driverController.getLeftX() * 10;
     double output = m_controller.calculate(m_subsystem.get(), leftX);
     System.out.printf("%5.3f %5.3f %5.3f\n", leftX, m_subsystem.get(), output);
     m_subsystem.set(output);
@@ -36,7 +36,7 @@ public class ExampleCommand extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_subsystem.set(0);
+    m_subsystem.set(-200);
   }
 
   // Returns true when the command should end.
