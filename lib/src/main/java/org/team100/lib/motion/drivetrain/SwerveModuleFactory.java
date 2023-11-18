@@ -51,8 +51,8 @@ public class SwerveModuleFactory {
 
         // TURNING PID
         ProfiledPIDController turningController = new ProfiledPIDController(
-                2.8, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
-                0, // kI
+                2.86, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
+                0.06, // kI
                 0, // kD
                 new TrapezoidProfile.Constraints( //
                         20 * Math.PI, // max angular speed radians/sec
@@ -67,7 +67,7 @@ public class SwerveModuleFactory {
 
         // TURNING FF
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                0.0005, // kS: Multiplied by around 20 of previous value as that is how much we changed P by 
+                0.0006, // kS: Multiplied by around 20 of previous value as that is how much we changed P by  0.0005
                 0.005, // kV: Since we are decreasing the value of how much the PID system does we need to conpensate for making feedforward larger as well
                 0); // kA: I have no idea what this value should be
 

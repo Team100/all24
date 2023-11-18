@@ -28,7 +28,7 @@ public class Drive01 extends Command {
     // ChassisSpeeds newChassisSpeeds = new ChassisSpeeds(0.1, 0, 0);
     // m_swerve.setChassisSpeeds(newChassisSpeeds);
 
-    m_swerve.setVelocity();
+    // m_swerve.setVelocity();
   }
 
   // Called once the command ends or is interrupted.

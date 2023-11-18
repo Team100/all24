@@ -65,10 +65,10 @@ public class HolonomicDriveController3 {
         t.log("/Holonomic3/yErr", m_yController.getPositionError());
         t.log("/Holonomic3/thetaErr", m_thetaController.getPositionError());
 
-        return new Twist2d(xFF, yFF, thetaFF);
+        // return new Twist2d(xFF, yFF, thetaFF);
 
 
-        // return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
+        return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
     }
 
     public void setGains(PidGains cartesian, PidGains rotation) {
