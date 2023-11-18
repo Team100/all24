@@ -41,6 +41,9 @@
       "/SmartDashboard/Lower Motor": "Subsystem",
       "/SmartDashboard/Manipulator": "Subsystem",
       "/SmartDashboard/ROTATE COMMAND": "Command",
+      "/SmartDashboard/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/SendableChooser[1]": "String Chooser",
+      "/SmartDashboard/SendableChooser[2]": "String Chooser",
       "/SmartDashboard/Upper Motor": "Subsystem",
       "/SmartDashboard/Vision Data Provider": "Subsystem",
       "/field": "Field2d"

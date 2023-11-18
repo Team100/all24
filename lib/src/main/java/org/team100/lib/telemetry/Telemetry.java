@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
  */
 public class Telemetry {
     /**
-     * useful for troubleshooting unit tests.
+     * useful for troubleshooting unit tests.  it's quite slow.
      */
     private static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
@@ -55,7 +55,7 @@ public class Telemetry {
 
     public void log(String key, boolean val) {
         if (kAlsoPrint)
-            System.out.println(key + val);
+            System.out.println(key + ": " + val);
         pub(key, k -> inst.getBooleanTopic(k).publish(), BooleanPublisher.class).set(val);
     }
 

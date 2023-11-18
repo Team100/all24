@@ -2,21 +2,16 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 
-import org.team100.frc2023.autonomous.DriveToAprilTag;
-import org.team100.frc2023.autonomous.Rotate;
-import org.team100.frc2023.commands.Defense;
-import org.team100.frc2023.commands.DriveScaled;
-import org.team100.frc2023.commands.DriveWithHeading;
-import org.team100.lib.commands.Drive01;
+import org.team100.lib.commands.Defense;
+import org.team100.lib.commands.DriveManually;
+import org.team100.lib.commands.DriveWithHeading;
 import org.team100.lib.commands.FancyTrajectory;
 import org.team100.lib.commands.ResetPose;
-import org.team100.lib.commands.ResetRotation;
+import org.team100.lib.commands.Rotate;
+import org.team100.lib.commands.SetRotation;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
-import org.team100.lib.controller.HolonomicDriveController2;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.hid.Control;
 import org.team100.lib.hid.DualXboxControl;
@@ -46,12 +41,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 
 public class RobotContainer {
     public static class Config {
@@ -77,7 +70,6 @@ public class RobotContainer {
     private final AutonSelector m_autonSelector;
     private final AllianceSelector m_allianceSelector;
 
-    // SUBSYSTEMS
     private final Heading m_heading;
     private final LEDIndicator m_indicator;
     private final RedundantGyroInterface ahrsclass;
@@ -86,17 +78,10 @@ public class RobotContainer {
     private final SwerveDriveSubsystem m_robotDrive;
     private final SwerveModuleCollectionInterface m_modules;
     private final SwerveDriveKinematics m_kinematics;
-    // TODO replace with SpeedLimits.
-    private final SwerveKinematicLimits m_kinematicLimits;
     private final Command m_auton;
     private final FrameTransform m_frameTransform;
 
-
-
-    // HID CONTROL
     private final Control control;
-
-    // AUTON
 
     public RobotContainer() throws IOException {
 
@@ -116,10 +101,11 @@ public class RobotContainer {
         m_heading = new Heading(ahrsclass);
         m_field = new Field2d();
 
-        SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, false);
+        SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, m_config.SHOW_MODE);
         m_kinematics = SwerveDriveKinematicsFactory.get(identity);
 
-        m_kinematicLimits = new SwerveKinematicLimits();
+        // TODO replace with SpeedLimits.
+        SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits();
         // TODO: fix these limits
         m_kinematicLimits.kMaxDriveVelocity = 4;
         m_kinematicLimits.kMaxDriveAcceleration = 2;
@@ -142,7 +128,7 @@ public class RobotContainer {
                 m_modules.positions(),
                 new Pose2d(),
                 VecBuilder.fill(0.5, 0.5, 0.5),
-                VecBuilder.fill(0.1, 0.1, 0.4)); // note tight rotation variance here, used to be MAX_VALUE
+                VecBuilder.fill(0.1, 0.1, 0.4));
 
         // TODO: make this override work better
         // if (m_allianceSelector.alliance() == DriverStation.Alliance.Blue) {
@@ -152,86 +138,78 @@ public class RobotContainer {
         // AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
         // }
 
-        // hunting the memory leak
         VisionDataProvider visionDataProvider = new VisionDataProvider(
                 layout,
                 poseEstimator,
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(experiments, speedLimits, m_kinematics, m_modules);
-
-        DriveControllers controllers = new DriveControllersFactory().get(identity, speedLimits);
-        HolonomicDriveController2 controller = new HolonomicDriveController2(controllers);
+        SwerveLocal swerveLocal = new SwerveLocal(
+                experiments,
+                speedLimits,
+                m_kinematics,
+                m_modules);
 
         m_robotDrive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
                 m_frameTransform,
                 swerveLocal,
-                controller,
                 m_field);
 
         m_auton = new Defense(m_robotDrive);
 
-        // TODO: control selection using names
-        control = new DualXboxControl();
-        // control = new JoystickControl();
-
         ////////////////////////////
         // DRIVETRAIN COMMANDS
+        // TODO: control selection using names
+        // control = new JoystickControl();
+
+        control = new DualXboxControl();
         control.defense(new Defense(m_robotDrive));
-        control.resetRotation0(new ResetRotation(m_robotDrive, new Rotation2d(0)));
-        control.resetRotation180(new ResetRotation(m_robotDrive, Rotation2d.fromDegrees(180)));
+        control.resetRotation0(new SetRotation(m_robotDrive, new Rotation2d(0)));
+        control.resetRotation180(new SetRotation(m_robotDrive, Rotation2d.fromDegrees(180)));
+
         SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow(new DriveScaled(control::twist, m_robotDrive, slow));
+        control.driveSlow(new DriveManually(control::twist, m_robotDrive, slow));
         SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium(new DriveScaled(control::twist, m_robotDrive, medium));
+        control.driveMedium(new DriveManually(control::twist, m_robotDrive, medium));
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
         control.rotate0(new Rotate(m_robotDrive, m_heading, speedLimits, new Timer(), 0));
 
-        control.drive01(new Drive01(m_robotDrive));
+        // new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive,
+        // m_kinematics
 
-        //new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive, m_kinematics
+        // Circle circle =
 
-        // Circle circle = 
+        // Pose2d[] goalArr = {
+        // new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
+        // new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
+        // new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
+        // new Pose2d(-3.312756, -0.400119, Rotation2d.fromDegrees(180)),
+        // new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
 
-        
-        // Pose2d[] goalArr = { 
-        //     new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
-        //     new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
-        //     new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
-        //     new Pose2d(-3.312756,  -0.400119, Rotation2d.fromDegrees(180)),
-        //     new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
+        // };
 
-        //                     };
+        // Pose2d[] goalArr = { new Pose2d(1, 1, Rotation2d.fromDegrees(180)),
+        // new Pose2d(1, -1, Rotation2d.fromDegrees(180)),
+        // new Pose2d(-1, -1, Rotation2d.fromDegrees(180)),
+        // new Pose2d(-1, 1, Rotation2d.fromDegrees(180)),
+        // new Pose2d(1, 1, Rotation2d.fromDegrees(180))
 
-        // Pose2d[] goalArr = {  new Pose2d(1, 1, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(1, -1, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(-1, -1, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(-1,  1, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(1, 1, Rotation2d.fromDegrees(180))
+        // };
 
-        //                     };
+        Pose2d[] goalArr = { new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180)),
+                new Pose2d(0.5, -0.5, Rotation2d.fromDegrees(180)),
+                new Pose2d(-0.5, -0.5, Rotation2d.fromDegrees(180)),
+                new Pose2d(-0.5, 0.5, Rotation2d.fromDegrees(180)),
+                new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180))
 
-        // Pose2d[] goalArr = {  new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(0.5, -0.5, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(-0.5, -0.5, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(-0.5,  0.5, Rotation2d.fromDegrees(180)),
-        //                       new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180))
-
-        //                     };
-
-
-        Pose2d[] goalArr = {  new Pose2d(-1, 0, Rotation2d.fromDegrees(0))
-                             
-                            };
-        // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)), m_robotDrive, m_kinematics));
+        };
+        // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
+        // m_robotDrive, m_kinematics));
         control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));
-
-
 
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
 
@@ -240,10 +218,10 @@ public class RobotContainer {
 
         if (m_config.SHOW_MODE) {
             m_robotDrive.setDefaultCommand(
-                    new DriveScaled(
+                    new DriveManually(
                             control::twist,
                             m_robotDrive,
-                            SpeedLimitsFactory.get(identity, false)));
+                            speedLimits));
         } else {
             m_robotDrive.setDefaultCommand(
                     new DriveWithHeading(
@@ -255,34 +233,21 @@ public class RobotContainer {
                             control::desiredRotation));
         }
 
-
     }
 
     public void scheduleAuton() {
+        if (m_auton == null)
+            return;
         m_auton.schedule();
     }
 
     public void cancelAuton() {
+        if (m_auton == null)
+            return;
         m_auton.cancel();
     }
 
-    public void runTest() {
-        XboxController controller0 = new XboxController(0);
-        System.out.printf(
-                "name: %s   left X: %5.2f   left Y: %5.2f   right X: %5.2f   right Y: %5.2f   left T: %5.2f   right T: %5.2f\n",
-                DriverStation.getJoystickName(0),
-                // DriverStation.getStickAxis(0, 0),
-                controller0.getLeftX(), // 0 = GP right X, -0.66 to 0.83
-                controller0.getLeftY(), // 1 = GP right Y, -0.64 to 0.64
-                controller0.getRightX(), // 4 = GP left X, -0.7 to 0.8
-                controller0.getRightY(), // 5
-                controller0.getLeftTriggerAxis(), // 2 = GP left Y, -0.64 to 0.6
-                controller0.getRightTriggerAxis() // 3
-        );
-    }
-
     public void runTest2() {
-
         XboxController controller0 = new XboxController(0);
         boolean rearLeft = controller0.getAButton();
         boolean rearRight = controller0.getBButton();
@@ -297,7 +262,6 @@ public class RobotContainer {
                 { rearRight ? driveControl : 0, rearRight ? turnControl : 0 }
         };
         m_robotDrive.test(desiredOutputs);
-
     }
 
     public double getRoutine() {
@@ -318,19 +282,6 @@ public class RobotContainer {
 
     public void green() {
         m_indicator.set(State.GREEN);
-    }
-
-    private DriveToAprilTag toTag(
-            int tagID,
-            double xOffset,
-            double yOffset) {
-        return new DriveToAprilTag(
-                tagID,
-                xOffset,
-                yOffset,
-                m_robotDrive,
-                m_kinematics,
-                layout);
     }
 
     // this keeps the tests from conflicting via the use of simulated HAL ports.

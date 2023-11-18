@@ -1,23 +1,36 @@
 package org.team100.lib.motion.drivetrain;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Minimal interface makes testing easier. */
 public interface SwerveDriveSubsystemInterface {
 
-    Pose2d getPose();
+    ///////////////////////////////////
+    //
+    // DRIVE METHODS
+    //
+    // there are four mutually exclusive drive methods
+    // we depend on CommandScheduler to enforce the mutex.
+
+    void driveInFieldCoords(Twist2d twist);
+
+    void setChassisSpeeds(ChassisSpeeds speeds);
+
+    void setRawModuleStates(SwerveModuleState[] states);
 
     void stop();
 
-    void setDesiredState(SwerveState desiredState);
+    //
+    //
+    ///////////////////////////////
+
+    Pose2d getPose();
 
     ChassisSpeeds speeds();
 
-    void truncate();
-
     /** Because Subsystem is now concrete, it needs an accessor. */
     SwerveDriveSubsystem get();
-
-    void setChassisSpeeds(ChassisSpeeds output);
 }

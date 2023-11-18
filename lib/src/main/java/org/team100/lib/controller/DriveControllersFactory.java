@@ -1,7 +1,6 @@
 package org.team100.lib.controller;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -10,7 +9,8 @@ public class DriveControllersFactory {
         public PidGains thetaGain = new PidGains(3.0, 0, 0, 0.01, 0.01, true);
         public PidGains compBotCartesianGain = new PidGains(3, 2, 0, 0.1, 0.01, false);
         public PidGains swerveOneCartesianGain = new PidGains(0.15, 0, 0, 0.1, 0.2, false);
-        // public PidGains swerveOneCartesianGain = new PidGains(2, 0.1, 0.15, 0.1, 0.01, false);
+        // public PidGains swerveOneCartesianGain = new PidGains(2, 0.1, 0.15, 0.1,
+        // 0.01, false);
 
         public PidGains swerveTwoCartesianGain = new PidGains(2.0, 0.1, 0.15, 0.1, 0.01, false);
 
@@ -20,36 +20,40 @@ public class DriveControllersFactory {
 
     private final Config m_config = new Config();
 
-    public DriveControllers get(Identity identity, SpeedLimits speedLimits) {
-        switch (identity) {
-            case COMP_BOT:
-                return new DriveControllers(
-                        pid(m_config.compBotCartesianGain),
-                        pid(m_config.compBotCartesianGain),
-                        pid(m_config.thetaGain));
-            case SWERVE_ONE:
-                return new DriveControllers(
-                        pid(m_config.swerveOneCartesianGain),
-                        pid(m_config.swerveOneCartesianGain),
-                        pid(m_config.thetaGain));
-            case SWERVE_TWO:
-                return new DriveControllers(
-                        pid(m_config.swerveTwoCartesianGain),
-                        pid(m_config.swerveTwoCartesianGain),
-                        pid(m_config.thetaGain));
-            default:
-                // these RoboRIO's are have no drivetrains
-                return new DriveControllers(
-                        new PIDController(1, 0.0, 0.0),
-                        new PIDController(1, 0.0, 0.0),
-                        new PIDController(1, 0.0, 0.0));
-        }
-
-        
+    /**
+     * Note this is broken, it always returns the comp bot settings.
+     * Somebody broke the identity feature.
+     * TODO: repair this damage.
+     */
+    public DriveControllers get(Identity identity) {
+        // switch (identity) {
+        // case COMP_BOT:
         // return new DriveControllers(
-        //     pid(m_config.compBotCartesianGain),
-        //     pid(m_config.compBotCartesianGain),
-        //     pid(m_config.thetaGain));
+        // pid(m_config.compBotCartesianGain),
+        // pid(m_config.compBotCartesianGain),
+        // pid(m_config.thetaGain));
+        // case SWERVE_ONE:
+        // return new DriveControllers(
+        // pid(m_config.swerveOneCartesianGain),
+        // pid(m_config.swerveOneCartesianGain),
+        // pid(m_config.thetaGain));
+        // case SWERVE_TWO:
+        // return new DriveControllers(
+        // pid(m_config.swerveTwoCartesianGain),
+        // pid(m_config.swerveTwoCartesianGain),
+        // pid(m_config.thetaGain));
+        // default:
+        // // these RoboRIO's are have no drivetrains
+        // return new DriveControllers(
+        // new PIDController(1, 0.0, 0.0),
+        // new PIDController(1, 0.0, 0.0),
+        // new PIDController(1, 0.0, 0.0));
+        // }
+
+        return new DriveControllers(
+                pid(m_config.compBotCartesianGain),
+                pid(m_config.compBotCartesianGain),
+                pid(m_config.thetaGain));
     }
 
     private static PIDController pid(PidGains g) {

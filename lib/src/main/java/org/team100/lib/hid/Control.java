@@ -26,21 +26,6 @@ public interface Control {
         return new Rotation2d();
     }
 
-    default void driveToLeftGrid(Command command) {
-    }
-
-    default void autoLevel(Command command) {
-    }
-
-    default void driveToCenterGrid(Command command) {
-    }
-
-    default void driveToRightGrid(Command command) {
-    }
-
-    default void driveToSubstation(Command command) {
-    }
-
     default void resetRotation0(Command command) {
     }
 

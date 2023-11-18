@@ -1,6 +1,5 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -26,8 +25,6 @@ public class SwerveLocal {
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private final AsymSwerveSetpointGenerator.KinematicLimits limits;
     private SwerveSetpoint prevSetpoint;
-        // private SwerveSetpoint prevSetpoint;
-
 
     public SwerveLocal(
             Experiments experiments,
@@ -56,43 +53,22 @@ public class SwerveLocal {
         prevSetpoint = new SwerveSetpoint(chassisSpeeds, swerveModuleStates);
     }
 
+    //////////////////////////////////////////////////////////
+    //
+    // Actuators.  These are mutually exclusive within an iteration.
+
     /**
      * Drives the modules to produce the target chassis speed.
      * 
      * @param targetChassisSpeeds speeds in robot coordinates.
      */
     public void setChassisSpeeds(ChassisSpeeds targetChassisSpeeds) {
+        // TODO(Sanjan): fix the broken experiment stuff here.
         // if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
-            setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
+        setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
         // } else {
-            // setChassisSpeedsNormally(targetChassisSpeeds);
+        // setChassisSpeedsNormally(targetChassisSpeeds);
         // }
-    }
-
-    private void setChassisSpeedsNormally(ChassisSpeeds targetChassisSpeeds) {
-        t.log("/desired speed/x", targetChassisSpeeds.vxMetersPerSecond);
-        t.log("/desired speed/y", targetChassisSpeeds.vyMetersPerSecond);
-        t.log("/desired speed/theta", targetChassisSpeeds.omegaRadiansPerSecond);
-        SwerveModuleState[] targetModuleStates = m_DriveKinematics.toSwerveModuleStates(targetChassisSpeeds);
-
-        // setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, setpoint, targetChassisSpeeds, 0.020);
-        setModuleStates(targetModuleStates);
-    }
-
-    public void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds targetChassisSpeeds2) {
-        ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds(
-                targetChassisSpeeds2.vxMetersPerSecond, targetChassisSpeeds2.vyMetersPerSecond,
-                targetChassisSpeeds2.omegaRadiansPerSecond);
-
-        SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, prevSetpoint, targetChassisSpeeds,
-        .020);
-        // System.out.println(setpoint);
-        prevSetpoint = setpoint;
-
-        // SwerveModuleState[] states = m_DriveKinematics.toSwerveModuleStates(setpoint.getChassisSpeeds());
-        setModuleStates(setpoint.getModuleStates());
-        // setModuleStates(states);
-
     }
 
     /**
@@ -109,6 +85,21 @@ public class SwerveLocal {
         setModuleStates(states);
     }
 
+    public void stop() {
+        m_modules.stop();
+    }
+
+    /**
+     * Set the module states without desaturating.
+     * You had better know what you're doing if you call this method.
+     */
+    public void setRawModuleStates(SwerveModuleState[] targetModuleStates) {
+        m_modules.setDesiredStates(targetModuleStates);
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    // Getters
+
     public SwerveModuleState[] states() {
         return m_modules.states();
     }
@@ -123,24 +114,43 @@ public class SwerveLocal {
         return m_modules.positions();
     }
 
-    public void stop() {
-        m_modules.stop();
-    }
-
     void test(double[][] desiredOutputs) {
         m_modules.test(desiredOutputs);
     }
 
     ///////////////////////////////////////////////////////////
 
+    private void setChassisSpeedsNormally(ChassisSpeeds targetChassisSpeeds) {
+        t.log("/desired speed/x", targetChassisSpeeds.vxMetersPerSecond);
+        t.log("/desired speed/y", targetChassisSpeeds.vyMetersPerSecond);
+        t.log("/desired speed/theta", targetChassisSpeeds.omegaRadiansPerSecond);
+        SwerveModuleState[] targetModuleStates = m_DriveKinematics.toSwerveModuleStates(targetChassisSpeeds);
+
+        // setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, setpoint,
+        // targetChassisSpeeds, 0.020);
+        setModuleStates(targetModuleStates);
+    }
+
+    private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds targetChassisSpeeds2) {
+        ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds(
+                targetChassisSpeeds2.vxMetersPerSecond,
+                targetChassisSpeeds2.vyMetersPerSecond,
+                targetChassisSpeeds2.omegaRadiansPerSecond);
+
+        SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
+                limits,
+                prevSetpoint,
+                targetChassisSpeeds,
+                .020);
+
+        setModuleStates(setpoint.getModuleStates());
+        prevSetpoint = setpoint;
+    }
+
     private void setModuleStates(SwerveModuleState[] targetModuleStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(targetModuleStates, m_speedLimits.speedM_S);
         logImpliedChassisSpeeds(targetModuleStates);
-        m_modules.setDesiredStates(targetModuleStates);
-    }
-
-    public void setVelocity(){
-        m_modules.setVelocity();
+        setRawModuleStates(targetModuleStates);
     }
 
     /**
