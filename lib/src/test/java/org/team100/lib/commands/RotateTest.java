@@ -1,4 +1,4 @@
-package org.team100.frc2023.autonomous;
+package org.team100.lib.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,15 +9,16 @@ import org.team100.lib.motion.drivetrain.HeadingInterface;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
-import org.team100.lib.motion.drivetrain.SwerveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
 /** Example of mock objects for testing. */
-public class RotateTest {
+class RotateTest {
     private static final double kDelta = 0.001;
 
     class MockHeading implements HeadingInterface {
@@ -49,16 +50,6 @@ public class RotateTest {
         }
 
         @Override
-        public void setDesiredState(SwerveState desiredState) {
-            output = desiredState.theta().v();
-        }
-
-        @Override
-        public void truncate() {
-            stop();
-        }
-
-        @Override
         public SwerveDriveSubsystem get() {
             return null;
         }
@@ -69,8 +60,17 @@ public class RotateTest {
         }
 
         @Override
-        public void setChassisSpeeds(ChassisSpeeds output) {
-            // do nothing
+        public void driveInFieldCoords(Twist2d twist) {
+            output = twist.dtheta;
+        }
+
+        @Override
+        public void setChassisSpeeds(ChassisSpeeds speeds) {
+            output = speeds.omegaRadiansPerSecond;
+        }
+
+        @Override
+        public void setRawModuleStates(SwerveModuleState[] states) {
         }
     }
 
@@ -91,7 +91,7 @@ public class RotateTest {
     }
 
     @Test
-    public void testRotate() {
+    void testRotate() {
         MockSwerveDriveSubsystem swerveDriveSubsystem = new MockSwerveDriveSubsystem();
         swerveDriveSubsystem.pose = new Pose2d();
         MockHeading heading = new MockHeading();
@@ -122,13 +122,15 @@ public class RotateTest {
         timer.time = 1;
         rotate.execute();
         assertEquals(0.5, rotate.refTheta.getX(), kDelta);
-        assertEquals(1.0, swerveDriveSubsystem.output, kDelta);
+        // assertEquals(1.0, swerveDriveSubsystem.output, kDelta);
+        assertEquals(2.5, swerveDriveSubsystem.output, kDelta);
 
         timer.time = 2;
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(1));
         rotate.execute();
         assertEquals(1.408, rotate.refTheta.getX(), kDelta);
-        assertEquals(0.571, swerveDriveSubsystem.output, kDelta);
+        // assertEquals(0.571, swerveDriveSubsystem.output, kDelta);
+        assertEquals(1.794, swerveDriveSubsystem.output, kDelta);
 
         timer.time = 3;
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(Math.PI));

@@ -5,7 +5,8 @@ import org.team100.lib.controller.State100;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
-/** Describes the state of a holonomic drive in three dimensions,
+/**
+ * Describes the state of a holonomic drive in three dimensions,
  * x, y, and theta, each of which is represented by position, velocity,
  * and acceleration.
  */
@@ -43,10 +44,10 @@ public class SwerveState {
 
         double xv = desiredState.velocityMetersPerSecond * desiredState.poseMeters.getRotation().getCos();
         double yv = desiredState.velocityMetersPerSecond * desiredState.poseMeters.getRotation().getSin();
-        
+
         double xa = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getCos();
         double ya = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getSin();
-        
+
         // TODO: thetav, thetaa.
 
         return new SwerveState(

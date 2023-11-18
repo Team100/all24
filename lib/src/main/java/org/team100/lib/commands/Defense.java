@@ -1,4 +1,4 @@
-package org.team100.frc2023.commands;
+package org.team100.lib.commands;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
@@ -16,5 +16,4 @@ public class Defense extends Command {
     public void initialize() {
         m_robotDrive.defense();
     }
-
 }
