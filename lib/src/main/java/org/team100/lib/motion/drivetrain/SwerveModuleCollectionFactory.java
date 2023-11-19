@@ -1,115 +1,45 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.experiments.Experiments;
+
+import org.team100.lib.encoder.turning.AnalogTurningEncoder.Drive;
 
 /** Creates collections according to Identity. */
 public class SwerveModuleCollectionFactory {
-    private final Identity identity;
-    private final SwerveModuleFactory m_moduleFactory;
+    private static final String kFrontLeft = "Front Left";
+    private static final String kFrontRight = "Front Right";
+    private static final String kRearLeft = "Rear Left";
+    private static final String kRearRight = "Rear Right";
+    private final Identity m_identity;
+    private final SwerveModuleFactory m_factory;
 
-    public SwerveModuleCollectionFactory(
-            Experiments experiments,
-            Identity identity,
-            double currentLimit) {
-        this.identity = identity;
-        m_moduleFactory = new SwerveModuleFactory(experiments, currentLimit);
+    public SwerveModuleCollectionFactory(Identity identity, SwerveModuleFactory factory) {
+        m_identity = identity;
+        m_factory = factory;
     }
 
     public SwerveModuleCollectionInterface get() {
-        switch (identity) {
+        switch (m_identity) {
             case COMP_BOT:
                 return new SwerveModuleCollection(
-                        m_moduleFactory.WCPModule(
-                                "Front Left",
-                                11, // drive CAN
-                                30, // turn CAN
-                                0, // turn encoder
-                                0.708328), // turn offset
-                        m_moduleFactory.WCPModule(
-                                "Front Right",
-                                12, // drive CAN
-                                32, // turn CAN
-                                1, // turn encoder
-                                0.659267), // turn offset
-                        m_moduleFactory.WCPModule(
-                                "Rear Left",
-                                21, // drive CAN
-                                31, // turn CAN
-                                2, // turn encoder
-                                0.396148), // turn offset
-                        m_moduleFactory.WCPModule(
-                                "Rear Right",
-                                22, // drive CAN
-                                33, // turn CAN
-                                3, // turn encoder
-                                0.109823)); // turn offset
+                        m_factory.WCPModule(kFrontLeft, 11, 30, 0, 0.708328),
+                        m_factory.WCPModule(kFrontRight, 12, 32, 1, 0.659267),
+                        m_factory.WCPModule(kRearLeft, 21, 31, 2, 0.396148),
+                        m_factory.WCPModule(kRearRight, 22, 33, 3, 0.109823));
             case SWERVE_TWO:
                 return new SwerveModuleCollection(
-                    m_moduleFactory.AMCANModule(
-                        "Front Left",
-                        3, // drive CAN
-                        36, // turn PWM
-                        2, // turn encoder
-                        0.354994,
-                        false), // turn offset
-                    m_moduleFactory.AMCANModule(
-                        "Front Right",
-                        12, // drive CAN
-                        13, // turn PWM
-                        3, // turn encoder
-                        0.880423,
-                        false), // turn offset
-                   m_moduleFactory.AMCANModule(
-                        "Rear Left",
-                        22, // drive CAN
-                        1 ,// turn PWM
-                        1, // turn encoder
-                        0.916801,
-                        false), // turn offset
-                  m_moduleFactory.AMCANModule(
-                        "Rear Right",
-                        21, // drive CAN
-                        0, // turn PWM
-                        0, // turn encoder
-                        0.806963,
-                        false)); // turn offset
+                        m_factory.AMCANModule(kFrontLeft, 3, 36, 2, 0.354994, Drive.INVERSE),
+                        m_factory.AMCANModule(kFrontRight, 12, 13, 3, 0.880423, Drive.INVERSE),
+                        m_factory.AMCANModule(kRearLeft, 22, 1, 1, 0.916801, Drive.INVERSE),
+                        m_factory.AMCANModule(kRearRight, 21, 0, 0, 0.806963, Drive.INVERSE));
             case SWERVE_ONE:
                 return new SwerveModuleCollection(
-                        m_moduleFactory.AMCANModule(
-                                "Front Left",
-                                11, // drive CAN
-                                5, // turn PWM0
-                                2, // turn encoder
-                                0.694815,
-                                true), // turn offset
-                        m_moduleFactory.AMCANModule(
-                                "Front Right",
-                                12, // drive CAN
-                                2, // turn PWM
-                                0, // turn encoder
-                                0.718789,
-                                true), // turn offset
-                        m_moduleFactory.AMCANModule(
-                                "Rear Left",
-                                21, // drive CAN
-                                3, // turn PWM
-                                3, // turn encoder
-                                0.365612,
-                                true), // turn offset
-                        m_moduleFactory.AMCANModule(
-                                "Rear Right",
-                                22, // drive CAN
-                                1, // turn PWM
-                                1, // turn encoder
-                                0.942851,
-                                true)); // turn offset
+                        m_factory.AMCANModule(kFrontLeft, 11, 5, 2, 0.694815, Drive.DIRECT),
+                        m_factory.AMCANModule(kFrontRight, 12, 2, 0, 0.718789, Drive.DIRECT),
+                        m_factory.AMCANModule(kRearLeft, 21, 3, 3, 0.365612, Drive.DIRECT),
+                        m_factory.AMCANModule(kRearRight, 22, 1, 1, 0.942851, Drive.DIRECT));
             default:
-         return new SwerveModuleCollection.Noop();
-            // previously this would throw.
-            // throw new IllegalStateException("Identity is not swerve: " +
-            // Identity.get().name());
+                return new SwerveModuleCollection.Noop();
         }
     }
-
 }

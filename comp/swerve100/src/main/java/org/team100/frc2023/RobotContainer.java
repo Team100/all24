@@ -27,6 +27,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveModuleCollectionFactory;
 import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
+import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
@@ -118,10 +119,8 @@ public class RobotContainer {
 
         Experiments experiments = new Experiments(identity);
 
-        m_modules = new SwerveModuleCollectionFactory(
-                experiments,
-                identity,
-                m_config.kDriveCurrentLimit).get();
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, m_config.kDriveCurrentLimit);
+        m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
         SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
                 m_kinematics,
