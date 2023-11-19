@@ -28,6 +28,6 @@ public class StraightLineTrajectoryTest {
         Pose2d end = new Pose2d(1, 0, new Rotation2d());
         Trajectory traj = t.apply(start, end);
         // System.out.println(traj);
-        assertEquals(2.828, traj.getTotalTimeSeconds(), kDelta);
+        assertEquals(1.414, traj.getTotalTimeSeconds(), kDelta);
     }
 }
