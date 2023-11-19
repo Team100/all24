@@ -6,6 +6,7 @@ import org.team100.lib.commands.Defense;
 import org.team100.lib.commands.DriveManually;
 import org.team100.lib.commands.DriveWithHeading;
 import org.team100.lib.commands.FancyTrajectory;
+import org.team100.lib.commands.ManualMode;
 import org.team100.lib.commands.ResetPose;
 import org.team100.lib.commands.Rotate;
 import org.team100.lib.commands.SetRotation;
@@ -169,10 +170,11 @@ public class RobotContainer {
         control.resetRotation0(new SetRotation(m_robotDrive, new Rotation2d(0)));
         control.resetRotation180(new SetRotation(m_robotDrive, Rotation2d.fromDegrees(180)));
 
+        ManualMode manualMode = new ManualMode();
         SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow(new DriveManually(control::twist, m_robotDrive, slow));
+        control.driveSlow(new DriveManually(manualMode, control::twist, m_robotDrive, slow));
         SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium(new DriveManually(control::twist, m_robotDrive, medium));
+        control.driveMedium(new DriveManually(manualMode, control::twist, m_robotDrive, medium));
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
@@ -219,6 +221,7 @@ public class RobotContainer {
         if (m_config.SHOW_MODE) {
             m_robotDrive.setDefaultCommand(
                     new DriveManually(
+                            manualMode,
                             control::twist,
                             m_robotDrive,
                             speedLimits));
