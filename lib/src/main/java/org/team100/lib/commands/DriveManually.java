@@ -11,47 +11,32 @@ import org.team100.lib.motion.drivetrain.manual.ManualModuleStates;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Uses a Sendable Chooser */
 public class DriveManually extends Command {
-    public enum ManualMode {
-        MODULE_STATE,
-        ROBOT_RELATIVE_CHASSIS_SPEED,
-        FIELD_RELATIVE_TWIST
-    }
-
     private final SwerveDriveSubsystem m_drive;
     private final ManualModuleStates m_manualModuleStates;
     private final ManualChassisSpeeds m_manualChassisSpeeds;
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
-    private final SendableChooser<ManualMode> m_manualModeChooser;
+    private final ManualMode m_mode;
 
     public DriveManually(
+            ManualMode mode,
             Supplier<Twist2d> twistSupplier,
             SwerveDriveSubsystem robotDrive,
             SpeedLimits speedLimits) {
+        m_mode = mode;
         m_drive = robotDrive;
         m_manualModuleStates = new ManualModuleStates(twistSupplier, speedLimits);
         m_manualChassisSpeeds = new ManualChassisSpeeds(twistSupplier, speedLimits);
         m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(twistSupplier, speedLimits);
-        m_manualModeChooser = new SendableChooser<>();
-        for (ManualMode mode : ManualMode.values()) {
-            m_manualModeChooser.addOption(mode.name(), mode);
-        }
-        m_manualModeChooser.setDefaultOption(
-                ManualMode.FIELD_RELATIVE_TWIST.name(),
-                ManualMode.FIELD_RELATIVE_TWIST);
-        // SmartDashboard is EOL but it does still work, so fine.
-        SmartDashboard.putData(m_manualModeChooser);
         addRequirements(m_drive);
     }
 
     @Override
     public void execute() {
-        ManualMode manualMode = m_manualModeChooser.getSelected();
+        ManualMode.Mode manualMode = m_mode.getSelected();
         if (manualMode == null) {
             return;
         }
