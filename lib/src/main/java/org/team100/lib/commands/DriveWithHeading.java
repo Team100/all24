@@ -9,6 +9,7 @@ import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.MathUtil;
@@ -99,12 +100,12 @@ public class DriveWithHeading extends Command {
 
             double headingMeasurement = currentPose.getRotation().getRadians();
             double headingRate = m_heading.getHeadingRateNWU();
-            t.log("/DriveWithHeading/refX", m_ref.getX());
-            t.log("/DriveWithHeading/refV", m_ref.getV());
-            t.log("/DriveWithHeading/measurementX", headingMeasurement);
-            t.log("/DriveWithHeading/measurementV", headingRate);
-            t.log("/DriveWithHeading/errorX", m_ref.getX() - headingMeasurement);
-            t.log("/DriveWithHeading/errorV", m_ref.getV() - headingRate);
+            t.log(Level.DEBUG, "/DriveWithHeading/refX", m_ref.getX());
+            t.log(Level.DEBUG, "/DriveWithHeading/refV", m_ref.getV());
+            t.log(Level.DEBUG, "/DriveWithHeading/measurementX", headingMeasurement);
+            t.log(Level.DEBUG, "/DriveWithHeading/measurementV", headingRate);
+            t.log(Level.DEBUG, "/DriveWithHeading/errorX", m_ref.getX() - headingMeasurement);
+            t.log(Level.DEBUG, "/DriveWithHeading/errorV", m_ref.getV() - headingRate);
         } else {
             // if we're not in snap mode then it's just pure manual
             Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);

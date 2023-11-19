@@ -13,6 +13,7 @@ import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -102,12 +103,12 @@ public class Rotate extends Command {
         double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did
-        t.log("/rotate/errorX", refTheta.getX() - headingMeasurement);
-        t.log("/rotate/errorV", refTheta.getV() - headingRate);
-        t.log("/rotate/measurementX", headingMeasurement);
-        t.log("/rotate/measurementV", headingRate);
-        t.log("/rotate/refX", refTheta.getX());
-        t.log("/rotate/refV", refTheta.getV());
+        t.log(Level.DEBUG, "/rotate/errorX", refTheta.getX() - headingMeasurement);
+        t.log(Level.DEBUG, "/rotate/errorV", refTheta.getV() - headingRate);
+        t.log(Level.DEBUG, "/rotate/measurementX", headingMeasurement);
+        t.log(Level.DEBUG, "/rotate/measurementV", headingRate);
+        t.log(Level.DEBUG, "/rotate/refX", refTheta.getX());
+        t.log(Level.DEBUG, "/rotate/refV", refTheta.getV());
     }
 
     @Override

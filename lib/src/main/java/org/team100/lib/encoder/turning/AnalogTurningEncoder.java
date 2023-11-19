@@ -1,6 +1,7 @@
 package org.team100.lib.encoder.turning;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -51,11 +52,11 @@ public class AnalogTurningEncoder implements TurningEncoder {
 
     @Override
     public double getAngle() {
-        t.log(m_name + "/Channel", m_encoder.getChannel());
-        t.log(m_name + "/Angle rad", m_encoder.getDistance());
-        t.log(m_name + "/Turns", m_encoder.get());
-        t.log(m_name + "/Absolute", m_encoder.getAbsolutePosition());
-        t.log(m_name + "/Volts", m_input.getVoltage());
+        t.log(Level.DEBUG, m_name + "/Channel", m_encoder.getChannel());
+        t.log(Level.DEBUG, m_name + "/Angle rad", m_encoder.getDistance());
+        t.log(Level.DEBUG, m_name + "/Turns", m_encoder.get());
+        t.log(Level.DEBUG, m_name + "/Absolute", m_encoder.getAbsolutePosition());
+        t.log(Level.DEBUG, m_name + "/Volts", m_input.getVoltage());
         return m_encoder.getDistance();
     }
 

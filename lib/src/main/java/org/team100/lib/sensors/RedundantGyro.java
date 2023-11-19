@@ -2,6 +2,7 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -128,7 +129,7 @@ public class RedundantGyro implements RedundantGyroInterface {
         // TODO fix this
         float result = m_gyro1.getYaw();
 
-        t.log("/RedundantGyro/Gyro Redundant Yaw NED (rad)", result);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro Redundant Yaw NED (rad)", result);
 
         return result;
     }
@@ -161,7 +162,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = redundPitch / tmpInputs;
 
-        t.log("/RedundantGyro/Gyro Redundant Pitch (deg)", result);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro Redundant Pitch (deg)", result);
 
         return result;
     }
@@ -193,7 +194,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = redundRoll / tmpInputs;
 
-        t.log("/RedundantGyro/Gyro Redundant Roll (deg)", result);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro Redundant Roll (deg)", result);
 
         return result;
     }
@@ -224,7 +225,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = (redundRate) / tmpInputs;
 
-        t.log("/RedundantGyro/Gyro Redundant Rate NED (rad/s)", result);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro Redundant Rate NED (rad/s)", result);
 
         return result;
     }
@@ -251,34 +252,34 @@ public class RedundantGyro implements RedundantGyroInterface {
         totalConnected(tmpInputs);
         float result = redundGyroZ / tmpInputs;
 
-        t.log("/RedundantGyro/Gyro Z ", result);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro Z ", result);
 
         return result;
     }
 
     private void connected1(boolean connected) {
-        t.log("/RedundantGyro/Gyro 1 Connected", connected);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 1 Connected", connected);
     }
 
     private void connected2(boolean connected) {
-        t.log("/RedundantGyro/Gyro 2 Connected", connected);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 2 Connected", connected);
     }
 
     private void totalConnected(int connected) {
-        t.log("/RedundantGyro/Total Connected", connected);
+        t.log(Level.DEBUG, "/RedundantGyro/Total Connected", connected);
     }
 
     public void logStuff() {
-        t.log("/RedundantGyro/Gyro 1 Angle (deg)", m_gyro1.getAngle());
-        t.log("/RedundantGyro/Gyro 2 Angle (deg)", m_gyro2.getAngle());
-        t.log("/RedundantGyro/Gyro 1 Fused (deg)", m_gyro1.getFusedHeading());
-        t.log("/RedundantGyro/Gyro 2 Fused (deg)", m_gyro2.getFusedHeading());
-        t.log("/RedundantGyro/Gyro 1 Yaw", m_gyro1.getYaw());
-        t.log("/RedundantGyro/Gyro 2 Yaw", m_gyro2.getYaw());
-        t.log("/RedundantGyro/Gyro 1 Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
-        t.log("/RedundantGyro/Gyro 2 Angle Mod 360 (deg)", m_gyro2.getAngle() % 360);
-        t.log("/RedundantGyro/Gyro 1 Compass Heading (deg)", m_gyro1.getCompassHeading());
-        t.log("/RedundantGyro/Gyro 2 Compass Heading (deg)", m_gyro2.getCompassHeading());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 1 Angle (deg)", m_gyro1.getAngle());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 2 Angle (deg)", m_gyro2.getAngle());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 1 Fused (deg)", m_gyro1.getFusedHeading());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 2 Fused (deg)", m_gyro2.getFusedHeading());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 1 Yaw", m_gyro1.getYaw());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 2 Yaw", m_gyro2.getYaw());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 1 Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 2 Angle Mod 360 (deg)", m_gyro2.getAngle() % 360);
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 1 Compass Heading (deg)", m_gyro1.getCompassHeading());
+        t.log(Level.DEBUG, "/RedundantGyro/Gyro 2 Compass Heading (deg)", m_gyro2.getCompassHeading());
 
     }
 }

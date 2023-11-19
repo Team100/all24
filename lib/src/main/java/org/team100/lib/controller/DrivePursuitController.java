@@ -3,6 +3,7 @@ package org.team100.lib.controller;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -74,7 +75,7 @@ public class DrivePursuitController implements DriveMotionController {
         if (mCurrentTrajectory == null)
             return null;
 
-        t.log("/planner/current state", current_state);
+        t.log(Level.DEBUG, "/planner/current state", current_state);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -87,18 +88,18 @@ public class DrivePursuitController implements DriveMotionController {
         double previewQuantity = DrivePursuitController.previewDt(mCurrentTrajectory, current_state);
 
         TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(previewQuantity);
-        t.log("/pid_planner/sample point", sample_point);
+        t.log(Level.DEBUG, "/pursuit_planner/sample point", sample_point);
         mSetpoint = sample_point.state();
-        t.log("/pid_planner/setpoint", mSetpoint);
+        t.log(Level.DEBUG, "/pursuit_planner/setpoint", mSetpoint);
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
-        t.log("/pursuit_planner/error", mError);
+        t.log(Level.DEBUG, "/pursuit_planner/error", mError);
 
         double lookahead_time = kPathLookaheadTime;
 
         TimedPose lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
-        t.log("/pursuit_planner/lookahead state", lookahead_state);
+        t.log(Level.DEBUG, "/pursuit_planner/lookahead state", lookahead_state);
 
         double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
@@ -124,12 +125,12 @@ public class DrivePursuitController implements DriveMotionController {
                             0.0),
                     lookahead_state.getTimeS(), lookahead_state.velocityM_S(), lookahead_state.acceleration());
         }
-        t.log("/pursuit_planner/updated lookahead state", lookahead_state);
+        t.log(Level.DEBUG, "/pursuit_planner/updated lookahead state", lookahead_state);
 
         // Find the vector between robot's current position and the lookahead state
         Translation2d lookaheadTranslation = lookahead_state.state().getTranslation()
                 .minus(current_state.getTranslation());
-        t.log("/pursuit_planner/lookahead translation", lookaheadTranslation);
+        t.log(Level.DEBUG, "/pursuit_planner/lookahead translation", lookaheadTranslation);
 
         // Set the steering direction as the direction of the vector
         Rotation2d steeringDirection = lookaheadTranslation.getAngle();
@@ -158,7 +159,7 @@ public class DrivePursuitController implements DriveMotionController {
                 steeringVector.getY() * kMaxVelocityMetersPerSecond,
                 feedforwardOmegaRadiansPerSecond);
 
-        t.log("/pursuit_planner/pursuit speeds", chassisSpeeds);
+        t.log(Level.DEBUG, "/pursuit_planner/pursuit speeds", chassisSpeeds);
 
         // Use the PD-Controller for To Follow the Time-Parametrized Heading
         final double kThetakP = 3.5;

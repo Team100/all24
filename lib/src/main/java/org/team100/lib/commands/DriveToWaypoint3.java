@@ -10,6 +10,7 @@ import org.team100.lib.controller.HolonomicDriveRegulator;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -65,12 +66,12 @@ public class DriveToWaypoint3 extends Command {
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
-        t.log("/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
-        t.log("/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());
-        t.log("/Drive To Waypoint/Pose X", m_swerve.getPose().getX());
-        t.log("/Drive To Waypoint/Pose Y", m_swerve.getPose().getY());
-        t.log("/Drive To Waypoint/Desired Rot", m_goal.getRotation().getRadians());
-        t.log("/Drive To Waypoint/Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Pose X", m_swerve.getPose().getX());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Pose Y", m_swerve.getPose().getY());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Desired Rot", m_goal.getRotation().getRadians());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Pose Rot", m_swerve.getPose().getRotation().getRadians());
     }
 
     @Override

@@ -35,6 +35,7 @@ import org.team100.lib.sensors.RedundantGyro;
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.DrawCircle;
 
 import edu.wpi.first.math.VecBuilder;
@@ -88,10 +89,10 @@ public class RobotContainer {
     public RobotContainer() throws IOException {
 
         m_autonSelector = new AutonSelector();
-        t.log("/Routine", getRoutine());
+        t.log(Level.INFO, "/Routine", getRoutine());
 
         m_allianceSelector = new AllianceSelector();
-        t.log("/Alliance", m_allianceSelector.alliance().name());
+        t.log(Level.INFO, "/Alliance", m_allianceSelector.alliance().name());
 
         m_indicator = new LEDIndicator(8);
 

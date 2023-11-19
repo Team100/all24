@@ -3,6 +3,7 @@ package org.team100.lib.controller;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -35,7 +36,7 @@ public class DriveFeedforwardController implements DriveMotionController {
     private ChassisSpeeds updateFeedforward(final double timestamp, final Pose2d current_state) {
         if (mCurrentTrajectory == null)
             return null;
-        t.log("/ff_planner/current state", current_state);
+        t.log(Level.DEBUG, "/ff_planner/current state", current_state);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -46,9 +47,9 @@ public class DriveFeedforwardController implements DriveMotionController {
         mLastTime = timestamp;
 
         TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-        t.log("/ff_planner/sample point", sample_point);
+        t.log(Level.DEBUG, "/ff_planner/sample point", sample_point);
         mSetpoint = sample_point.state();
-        t.log("/ff_planner/setpoint", mSetpoint);
+        t.log(Level.DEBUG, "/ff_planner/setpoint", mSetpoint);
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 

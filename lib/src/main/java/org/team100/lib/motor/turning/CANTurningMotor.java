@@ -2,6 +2,7 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -49,7 +50,7 @@ public class CANTurningMotor implements TurningMotor {
         m_motor.setSensorPhase(true);
         m_name = String.format("/CAN Turning Motor %s", name);
 
-        t.log(m_name + "/Device ID", canID);
+        t.log(Level.DEBUG, m_name + "/Device ID", canID);
     }
 
     @Override
@@ -64,9 +65,9 @@ public class CANTurningMotor implements TurningMotor {
     @Override
     public void set(double output) {
         m_motor.set(output);
-        t.log(m_name + "/Output", output);
-        t.log(m_name + "/Encoder Value", m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.log(m_name + "/Velocity Value",
+        t.log(Level.DEBUG, m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name + "/Encoder Value", m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
+        t.log(Level.DEBUG, m_name + "/Velocity Value",
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 

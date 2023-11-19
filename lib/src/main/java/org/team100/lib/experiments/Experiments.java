@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -37,7 +38,7 @@ public class Experiments {
     public Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
-        t.log("/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
+        t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
         m_overrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
             SendableChooser<BooleanSupplier> override = new SendableChooser<>();

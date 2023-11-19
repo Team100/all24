@@ -5,6 +5,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.drive.DriveMotor;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
@@ -74,17 +75,17 @@ public class DriveServo {
         // output deadband to prevent shivering.
         set(MathUtil.applyDeadband(driveOutput, m_config.kDriveDeadband));
 
-        t.log(m_name + "Controller Output", driveMotorControllerOutput);
-        t.log(m_name + "Feed Forward Output", driveFeedForwardOutput);
+        t.log(Level.DEBUG, m_name + "Controller Output", driveMotorControllerOutput);
+        t.log(Level.DEBUG, m_name + "Feed Forward Output", driveFeedForwardOutput);
     }
 
     private void log() {
-        t.log(m_name + "Drive position (m)", m_driveEncoder.getDistance());
-        t.log(m_name + "Drive Speed (m_s)", getDriveSpeedMS());
-        t.log(m_name + "Drive Setpoint (m_s)", m_driveController.getSetpoint());
-        t.log(m_name + "Drive Speed Error (m_s)", m_driveController.getPositionError());
-        t.log(m_name + "Drive Accel Error (m_s_s)", m_driveController.getVelocityError());
-        t.log(m_name + "Drive Motor Output [-1, 1]", m_driveMotor.get());
+        t.log(Level.DEBUG, m_name + "Drive position (m)", m_driveEncoder.getDistance());
+        t.log(Level.DEBUG, m_name + "Drive Speed (m_s)", getDriveSpeedMS());
+        t.log(Level.DEBUG, m_name + "Drive Setpoint (m_s)", m_driveController.getSetpoint());
+        t.log(Level.DEBUG, m_name + "Drive Speed Error (m_s)", m_driveController.getPositionError());
+        t.log(Level.DEBUG, m_name + "Drive Accel Error (m_s_s)", m_driveController.getVelocityError());
+        t.log(Level.DEBUG, m_name + "Drive Motor Output [-1, 1]", m_driveMotor.get());
     }
 
     double getDriveDistanceM() {

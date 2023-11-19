@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,7 +33,7 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         m_field = field;
 
         stop();
-        t.log("/field/.type", "Field2d");
+        t.log(Level.INFO, "/field/.type", "Field2d");
     }
 
     /** For now, periodic() is not doing actuation. */
@@ -63,15 +64,15 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
 
         // Update the Field2d widget
         Pose2d newEstimate = getPose();
-        t.log("/field/robotPose", new double[] {
+        t.log(Level.DEBUG, "/field/robotPose", new double[] {
                 newEstimate.getX(),
                 newEstimate.getY(),
                 newEstimate.getRotation().getDegrees()
         });
-        t.log("/current pose/x m", newEstimate.getX());
-        t.log("/current pose/y m", newEstimate.getY());
-        t.log("/current pose/theta rad", newEstimate.getRotation().getRadians());
-        t.log("/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
+        t.log(Level.DEBUG, "/current pose/x m", newEstimate.getX());
+        t.log(Level.DEBUG, "/current pose/y m", newEstimate.getY());
+        t.log(Level.DEBUG, "/current pose/theta rad", newEstimate.getRotation().getRadians());
+        t.log(Level.DEBUG, "/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
     }
 
     ////////////
@@ -84,9 +85,9 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
     public void driveInFieldCoords(Twist2d twist) {
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
-        t.log("/chassis/x m", twist.dx);
-        t.log("/chassis/y m", twist.dy);
-        t.log("/chassis/theta rad", twist.dtheta);
+        t.log(Level.DEBUG, "/chassis/x m", twist.dx);
+        t.log(Level.DEBUG, "/chassis/y m", twist.dy);
+        t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
     }
 

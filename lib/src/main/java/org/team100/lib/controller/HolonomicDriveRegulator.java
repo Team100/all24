@@ -9,6 +9,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.system.examples.DoubleIntegratorCartesian1D;
 import org.team100.lib.system.examples.DoubleIntegratorRotary1D;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -118,11 +119,9 @@ public class HolonomicDriveRegulator {
         xhat_y = yRegulator.predictState(xhat_y, totalU_y, kDt);
         xhat_theta = thetaRegulator.predictState(xhat_theta, totalU_theta, kDt);
 
-        t.log("/Holonomic Regulator/X Hat X", xhat_x.x.get(0, 0));
-        t.log("/Holonomic Regulator/X Hat Y", xhat_y.x.get(0, 0));
-        t.log("/Holonomic Regulator/X Hat Theta", xhat_theta.x.get(0, 0));
-
-
+        t.log(Level.DEBUG, "/Holonomic Regulator/X Hat X", xhat_x.x.get(0, 0));
+        t.log(Level.DEBUG, "/Holonomic Regulator/X Hat Y", xhat_y.x.get(0, 0));
+        t.log(Level.DEBUG, "/Holonomic Regulator/X Hat Theta", xhat_theta.x.get(0, 0));
 
         return new Twist2d(totalU_x.get(0, 0), totalU_y.get(0, 0), totalU_theta.get(0, 0));
     }

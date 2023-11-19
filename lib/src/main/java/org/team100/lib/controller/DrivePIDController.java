@@ -3,6 +3,7 @@ package org.team100.lib.controller;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -44,7 +45,7 @@ public class DrivePIDController implements DriveMotionController {
         if (mCurrentTrajectory == null)
             return null;
 
-        t.log("/pid_planner/current state", current_state);
+        t.log(Level.DEBUG, "/pid_planner/current state", current_state);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -55,14 +56,14 @@ public class DrivePIDController implements DriveMotionController {
         mLastTime = timestamp;
 
         TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-        t.log("/pid_planner/sample point", sample_point);
+        t.log(Level.DEBUG, "/pid_planner/sample point", sample_point);
         mSetpoint = sample_point.state();
-        t.log("/pid_planner/setpoint", mSetpoint);
+        t.log(Level.DEBUG, "/pid_planner/setpoint", mSetpoint);
 
         mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
 
         final double velocity_m = mSetpoint.velocityM_S();
-        t.log("/pid_planner/setpoint velocity", velocity_m);
+        t.log(Level.DEBUG, "/pid_planner/setpoint velocity", velocity_m);
 
         // Field relative
         var course = mSetpoint.state().getCourse();
@@ -70,7 +71,7 @@ public class DrivePIDController implements DriveMotionController {
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
         motion_direction = current_state.getRotation().unaryMinus().rotateBy(motion_direction);
-        t.log("/planner/motion direction", motion_direction);
+        t.log(Level.DEBUG, "/planner/motion direction", motion_direction);
 
         // this is feedforward
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
@@ -79,7 +80,7 @@ public class DrivePIDController implements DriveMotionController {
                 // Need unit conversion because Pose2dWithMotion heading rate is per unit
                 // distance.
                 velocity_m * mSetpoint.state().getHeadingRate());
-        t.log("/planner/chassis speeds", chassisSpeeds);
+        t.log(Level.DEBUG, "/planner/chassis speeds", chassisSpeeds);
 
         // Feedback on longitudinal error (distance).
         final double kPathk = 2.4;
@@ -88,10 +89,10 @@ public class DrivePIDController implements DriveMotionController {
         // 0.15;
         final double kPathKTheta = 2.4;
 
-        t.log("/drive_pid_controller/error", mError);
+        t.log(Level.DEBUG, "/drive_pid_controller/error", mError);
 
         Twist2d pid_error = new Pose2d().log(mError);
-        t.log("/drive_pid_controller/pid error", pid_error);
+        t.log(Level.DEBUG, "/drive_pid_controller/pid error", pid_error);
 
         // u = u_FF + K(error)
         chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond + kPathk * pid_error.dx;
