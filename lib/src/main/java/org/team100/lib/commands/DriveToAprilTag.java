@@ -11,6 +11,7 @@ import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -80,9 +81,9 @@ public class DriveToAprilTag extends Command {
         SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
-        t.log("/desired pose/x", reference.x().x());
-        t.log("/desired pose/y", reference.y().x());
-        t.log("/desired pose/theta", reference.theta().x());
+        t.log(Level.DEBUG, "/desired pose/x", reference.x().x());
+        t.log(Level.DEBUG, "/desired pose/y", reference.y().x());
+        t.log(Level.DEBUG, "/desired pose/theta", reference.theta().x());
     }
 
     @Override

@@ -5,6 +5,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.turning.TurningMotor;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -61,16 +62,10 @@ public class TurningServo {
         double turnOutputDeadbandRad_S = MathUtil.applyDeadband(turnOutputRad_S, m_config.kSteeringDeadband);
         m_turningMotor.setPIDVelocity(turnOutputDeadbandRad_S, 0);
 
-        t.log(m_name + "/Controller Output rad_s", turningMotorControllerOutputRad_S);
-        t.log(m_name + "/Feed Forward Output rad_s", turningFeedForwardRad_S);
-
-        t.log(m_name + "/DESIRED POSITION", state.angle.getRadians());
-        t.log(m_name + "/ACTUAL POSITION", getTurningAngleRad());
-
-
-        // t.log(m_name + "/DESIRED POSITION", state.angle.getRadians());
-
-
+        t.log(Level.DEBUG, m_name + "/Controller Output rad_s", turningMotorControllerOutputRad_S);
+        t.log(Level.DEBUG, m_name + "/Feed Forward Output rad_s", turningFeedForwardRad_S);
+        t.log(Level.DEBUG, m_name + "/DESIRED POSITION", state.angle.getRadians());
+        t.log(Level.DEBUG, m_name + "/ACTUAL POSITION", getTurningAngleRad());
     }
 
     void onboard(SwerveModuleState state) {
@@ -80,25 +75,21 @@ public class TurningServo {
         double turnOutput = turningMotorControllerOutput + turningFeedForwardOutput;
         set(MathUtil.applyDeadband(turnOutput, m_config.kSteeringDeadband));
 
-        t.log(m_name + "/Controller Output", turningMotorControllerOutput);
-        t.log(m_name + "/Feed Forward Output", turningFeedForwardOutput);
-        t.log(m_name + "/Total Output", turningFeedForwardOutput);
-        t.log(m_name + "/Actual Speed", m_turningMotor.get());
-
-
+        t.log(Level.DEBUG, m_name + "/Controller Output", turningMotorControllerOutput);
+        t.log(Level.DEBUG, m_name + "/Feed Forward Output", turningFeedForwardOutput);
+        t.log(Level.DEBUG, m_name + "/Total Output", turningFeedForwardOutput);
+        t.log(Level.DEBUG, m_name + "/Actual Speed", m_turningMotor.get());
     }
 
     private void log() {
-        t.log(m_name + "/Turning Measurement (rad)", getTurningAngleRad());
-        t.log(m_name + "/Turning Measurement (deg)", Units.radiansToDegrees(getTurningAngleRad()));
-
-        t.log(m_name + "/Turning Goal (rad)", m_turningController.getGoal().position);
-        t.log(m_name + "/Turning Setpoint (rad)", m_turningController.getSetpoint().position);
-        t.log(m_name + "/Turning Setpoint Velocity (rad/s)", getTurnSetpointVelocityRadS());
-        t.log(m_name + "/Turning Error (rad)", m_turningController.getPositionError());
-        t.log(m_name + "/Turning Error Velocity (rad/s)", m_turningController.getVelocityError());
-
-        t.log(m_name + "/Turning Motor Output [-1, 1]", m_turningMotor.get());
+        t.log(Level.DEBUG, m_name + "/Turning Measurement (rad)", getTurningAngleRad());
+        t.log(Level.DEBUG, m_name + "/Turning Measurement (deg)", Units.radiansToDegrees(getTurningAngleRad()));
+        t.log(Level.DEBUG, m_name + "/Turning Goal (rad)", m_turningController.getGoal().position);
+        t.log(Level.DEBUG, m_name + "/Turning Setpoint (rad)", m_turningController.getSetpoint().position);
+        t.log(Level.DEBUG, m_name + "/Turning Setpoint Velocity (rad/s)", getTurnSetpointVelocityRadS());
+        t.log(Level.DEBUG, m_name + "/Turning Error (rad)", m_turningController.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Turning Error Velocity (rad/s)", m_turningController.getVelocityError());
+        t.log(Level.DEBUG, m_name + "/Turning Motor Output [-1, 1]", m_turningMotor.get());
     }
 
     void set(double output) {
@@ -110,15 +101,6 @@ public class TurningServo {
     }
 
     double getTurningAngleRad() {
-        // if(m_turningEncoder.getAngle() >= 2 * Math.PI){
-        //     return m_turningEncoder.getAngle() / (2* Math.PI);
-        // } else if (m_turningEncoder.getAngle() <= -2* Math.PI){
-        //     return m_turningEncoder.getAngle() / (2* Math.PI);
-        // } else {
-        //     return m_turningEncoder.getAngle();
-
-        // }
-
         return MathUtil.angleModulus(m_turningEncoder.getAngle());
     }
 

@@ -4,6 +4,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -121,9 +122,9 @@ public class SwerveLocal {
     ///////////////////////////////////////////////////////////
 
     private void setChassisSpeedsNormally(ChassisSpeeds targetChassisSpeeds) {
-        t.log("/desired speed/x", targetChassisSpeeds.vxMetersPerSecond);
-        t.log("/desired speed/y", targetChassisSpeeds.vyMetersPerSecond);
-        t.log("/desired speed/theta", targetChassisSpeeds.omegaRadiansPerSecond);
+        t.log(Level.DEBUG, "/desired speed/x", targetChassisSpeeds.vxMetersPerSecond);
+        t.log(Level.DEBUG, "/desired speed/y", targetChassisSpeeds.vyMetersPerSecond);
+        t.log(Level.DEBUG, "/desired speed/theta", targetChassisSpeeds.omegaRadiansPerSecond);
         SwerveModuleState[] targetModuleStates = m_DriveKinematics.toSwerveModuleStates(targetChassisSpeeds);
 
         // setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, setpoint,
@@ -162,10 +163,10 @@ public class SwerveLocal {
      */
     private void logImpliedChassisSpeeds(SwerveModuleState[] actualModuleState) {
         ChassisSpeeds actualChassisSpeeds = impliedSpeed(actualModuleState);
-        t.log("/actual speed/x", actualChassisSpeeds.vxMetersPerSecond);
-        t.log("/actual speed/y", actualChassisSpeeds.vyMetersPerSecond);
-        t.log("/actual speed/theta", actualChassisSpeeds.omegaRadiansPerSecond);
-        t.log("/actual speed/moving", isMoving(actualChassisSpeeds));
+        t.log(Level.DEBUG, "/actual speed/x", actualChassisSpeeds.vxMetersPerSecond);
+        t.log(Level.DEBUG, "/actual speed/y", actualChassisSpeeds.vyMetersPerSecond);
+        t.log(Level.DEBUG, "/actual speed/theta", actualChassisSpeeds.omegaRadiansPerSecond);
+        t.log(Level.DEBUG, "/actual speed/moving", isMoving(actualChassisSpeeds));
     }
 
     /** The speed implied by the module states. */

@@ -5,6 +5,7 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -63,9 +64,9 @@ public class DualXboxControl implements Control {
         double dx = expo(deadband(-1.0 * clamp(controller0.getRightY(), 1), m_config.kDeadband, 1), m_config.kExpo);
         double dy = expo(deadband(-1.0 * clamp(controller0.getRightX(), 1), m_config.kDeadband, 1), m_config.kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(controller0.getLeftX(), 1), m_config.kDeadband, 1), m_config.kExpo);
-        t.log("/Xbox/right y", controller0.getRightY());
-        t.log("/Xbox/right x", controller0.getRightX());
-        t.log("/Xbox/left x", controller0.getLeftX());
+        t.log(Level.DEBUG, "/Xbox/right y", controller0.getRightY());
+        t.log(Level.DEBUG, "/Xbox/right x", controller0.getRightX());
+        t.log(Level.DEBUG, "/Xbox/left x", controller0.getLeftX());
         return new Twist2d(dx, dy, dtheta);
     }
 

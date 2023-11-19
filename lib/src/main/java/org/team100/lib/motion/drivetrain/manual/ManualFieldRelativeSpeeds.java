@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Twist2d;
@@ -30,8 +31,8 @@ public class ManualFieldRelativeSpeeds implements Supplier<Twist2d> {
                 input,
                 m_speedLimits.speedM_S,
                 m_speedLimits.angleSpeedRad_S);
-        t.log("/manual field relative/twist x m_s", twistM_S.dx);
-        t.log("/manual field relative/twist y m_s", twistM_S.dy);
+        t.log(Level.DEBUG, "/manual field relative/twist x m_s", twistM_S.dx);
+        t.log(Level.DEBUG, "/manual field relative/twist y m_s", twistM_S.dy);
         return twistM_S;
     }
 }

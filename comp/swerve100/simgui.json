@@ -45,6 +45,7 @@
       "/SmartDashboard/SendableChooser[1]": "String Chooser",
       "/SmartDashboard/SendableChooser[2]": "String Chooser",
       "/SmartDashboard/SendableChooser[3]": "String Chooser",
+      "/SmartDashboard/SendableChooser[4]": "String Chooser",
       "/SmartDashboard/Upper Motor": "Subsystem",
       "/SmartDashboard/Vision Data Provider": "Subsystem",
       "/field": "Field2d"
@@ -78,7 +79,45 @@
     }
   },
   "NetworkTables": {
+    "retained": {
+      "Heading": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "SendableChooser[0]": {
+          "open": true
+        },
+        "open": true
+      },
+      "Xbox": {
+        "open": true
+      },
+      "actual speed": {
+        "open": true
+      },
+      "chassis": {
+        "open": true
+      },
+      "current pose": {
+        "open": true
+      },
+      "experiments": {
+        "open": true
+      },
+      "field": {
+        "open": true
+      },
+      "manual field relative": {
+        "open": true
+      },
+      "robot": {
+        "open": true
+      }
+    },
     "transitory": {
+      "SmartDashboard": {
+        "open": true
+      },
       "Vision": {
         "open": true,
         "{...}##v_/Vision/1000000013c9c96c": {

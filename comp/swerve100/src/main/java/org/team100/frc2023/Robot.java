@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -46,7 +47,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        t.log("/robot/key list size", keyListSize);
+        t.log(Level.DEBUG, "/robot/key list size", keyListSize);
         if (keyListSize == 0) {
             m_robotContainer.red();
         } else {

@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory;
@@ -105,7 +106,7 @@ public class FancyTrajectory extends Command {
                 currentSpeed.vyMetersPerSecond,
                 currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
-        t.log("/fancy trajectory/chassis speeds", output);
+        t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output);
     }
 

@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -23,8 +24,8 @@ public class Heading implements HeadingInterface {
         double yawNED = m_gyro.getRedundantYawNED();
         // invert NED to get NWU
         Rotation2d result = Rotation2d.fromDegrees(-1.0 * yawNED);
-        t.log("/Heading/Heading deg", result.getDegrees());
-        t.log("/Heading/Heading rad", result.getRadians());
+        t.log(Level.DEBUG, "/Heading/Heading deg", result.getDegrees());
+        t.log(Level.DEBUG, "/Heading/Heading rad", result.getRadians());
         return result;
     }
 

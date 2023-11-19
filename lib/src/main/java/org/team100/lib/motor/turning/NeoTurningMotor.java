@@ -1,6 +1,7 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
@@ -34,7 +35,7 @@ public class NeoTurningMotor implements TurningMotor {
 
         m_name = String.format("/Neo Turning Motor %s", name);
 
-        t.log(m_name + "/Device ID", m_motor.getDeviceId());
+        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceId());
     }
 
     @Override
@@ -45,7 +46,7 @@ public class NeoTurningMotor implements TurningMotor {
     @Override
     public void set(double output) {
         m_motor.set(output);
-        t.log(m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name + "/Output", output);
     }
 
     public void setPIDVelocity(double output, double Accel) {
