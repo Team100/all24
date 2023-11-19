@@ -24,7 +24,6 @@ public class DriveToWaypoint3 extends Command {
     private final SwerveDriveSubsystem m_swerve;
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
-    private final HolonomicDriveRegulator m_regulator;
     private final BiFunction<Pose2d, Pose2d, Trajectory> m_trajectories;
 
     private Trajectory m_trajectory;
@@ -38,8 +37,6 @@ public class DriveToWaypoint3 extends Command {
         m_trajectories = trajectories;
         m_timer = new Timer();
         Identity identity = Identity.get();
-
-        m_regulator = new HolonomicDriveRegulator();
 
         DriveControllers controllers = new DriveControllersFactory().get(identity);
 
@@ -66,8 +63,6 @@ public class DriveToWaypoint3 extends Command {
         // TODO: rotation profile, use new trajectory type.
         SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-
-        fieldRelativeTarget = m_regulator.calculate(currentPose, reference);
 
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
         t.log("/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());

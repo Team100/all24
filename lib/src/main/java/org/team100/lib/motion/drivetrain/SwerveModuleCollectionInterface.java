@@ -16,8 +16,4 @@ public interface SwerveModuleCollectionInterface {
     void test(double[][] desiredOutputs);
 
     void setDesiredStates(SwerveModuleState[] targetModuleStates);
-
-    void setVelocity();
-
-    
 }

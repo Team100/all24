@@ -93,7 +93,6 @@ public class DualXboxControl implements Control {
     @Override
     public void defense(Command defense) {
         JoystickButton button = new JoystickButton(controller0.getHID(), 2);
-
         button.whileTrue(defense);
     }
 
