@@ -11,7 +11,4 @@ public interface DriveMotor {
     void set(double output);
 
     void setPID(ControlMode control, double output);
-
-    void setVelocity();
-
 }

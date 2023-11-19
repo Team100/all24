@@ -16,8 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 /** Feedforward and feedback control of a single drive motor. */
 public class DriveServo {
     public static class Config {
-        public double kDriveDeadband = 0.2;
-        //public double kDriveDeadband = 0.03;
+        public double kDriveDeadband = 0.03;
     }
 
     private final Config m_config = new Config();
@@ -50,11 +49,11 @@ public class DriveServo {
 
     void setDrive(SwerveModuleState state) {
         double speedM_S = state.speedMetersPerSecond;
-        // if (m_experiments.enabled(Experiment.UseClosedLoopDrive)) {
+        if (m_experiments.enabled(Experiment.UseClosedLoopDrive)) {
             offboard(speedM_S);
-        // } else {
-        //     onboard(speedM_S);
-        // }
+        } else {
+            onboard(speedM_S);
+        }
         log();
     }
 
@@ -63,23 +62,7 @@ public class DriveServo {
     }
 
     void offboard(double speedM_S) {
-
-        
-        // if(speedM_S >= -0.3 && speedM_S <= 0.3){
-        //     // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
-        //     speedM_S = 0;
-        // }
-
-        // System.out.println(speedM_S);
-
         m_driveMotor.setPID(ControlMode.Velocity, speedM_S);
-
-        
-        // System.out.println("SPPPPPEED" + speedM_S);
-    }
-
-    public void setVelocity(){
-        m_driveMotor.setVelocity();
     }
 
     void onboard(double speedM_S) {
@@ -98,11 +81,9 @@ public class DriveServo {
     private void log() {
         t.log(m_name + "Drive position (m)", m_driveEncoder.getDistance());
         t.log(m_name + "Drive Speed (m_s)", getDriveSpeedMS());
-
         t.log(m_name + "Drive Setpoint (m_s)", m_driveController.getSetpoint());
         t.log(m_name + "Drive Speed Error (m_s)", m_driveController.getPositionError());
         t.log(m_name + "Drive Accel Error (m_s_s)", m_driveController.getVelocityError());
-
         t.log(m_name + "Drive Motor Output [-1, 1]", m_driveMotor.get());
     }
 
