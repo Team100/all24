@@ -40,6 +40,7 @@ public class HolonomicDriveController3 {
     public Twist2d calculate(
             Pose2d currentPose,
             SwerveState desiredState) {
+
         Rotation2d currentRotation = currentPose.getRotation();
 
         double xFF = desiredState.x().v(); // m/s
@@ -63,6 +64,9 @@ public class HolonomicDriveController3 {
         t.log("/Holonomic3/xErr", m_xController.getPositionError());
         t.log("/Holonomic3/yErr", m_yController.getPositionError());
         t.log("/Holonomic3/thetaErr", m_thetaController.getPositionError());
+
+        // return new Twist2d(xFF, yFF, thetaFF);
+
 
         return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
     }

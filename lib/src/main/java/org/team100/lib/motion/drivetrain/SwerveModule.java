@@ -19,6 +19,10 @@ public class SwerveModule {
         m_turningServo.setTurning(state);
     }
 
+    public void setVelocity(){
+        m_driveServo.setVelocity();
+    }
+
     /////////////////////////////////////////////////////////////
 
     /**

@@ -16,7 +16,7 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 /** Make straight lines, rest-to-rest. */
 public class StraightLineTrajectory implements BiFunction<Pose2d, Pose2d, Trajectory> {
     private static final double maxVelocityM_S = 2.0;
-    private static final double maxAccelM_S_S = 0.5;
+    private static final double maxAccelM_S_S = 2;
     private final TrajectoryConfig config;
 
     public StraightLineTrajectory(SwerveDriveKinematics kinematics) {
@@ -31,6 +31,8 @@ public class StraightLineTrajectory implements BiFunction<Pose2d, Pose2d, Trajec
         Translation2d goalTranslation = transformedGoal.getTranslation();
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
+
+        
         try {
             return TrajectoryGenerator.generateTrajectory(
                     new Pose2d(currentTranslation, angleToGoal),
