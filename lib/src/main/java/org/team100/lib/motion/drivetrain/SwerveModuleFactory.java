@@ -51,8 +51,8 @@ public class SwerveModuleFactory {
 
         // TURNING PID
         ProfiledPIDController turningController = new ProfiledPIDController(
-                2.8, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
-                0, // kI
+                2.86, // kP: High P to keep the measurments acurate while maintaining an agresive wheel turning
+                0.06, // kI
                 0, // kD
                 new TrapezoidProfile.Constraints( //
                         20 * Math.PI, // max angular speed radians/sec
@@ -67,7 +67,7 @@ public class SwerveModuleFactory {
 
         // TURNING FF
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                0.0005, // kS: Multiplied by around 20 of previous value as that is how much we changed P by 
+                0.0006, // kS: Multiplied by around 20 of previous value as that is how much we changed P by  0.0005
                 0.005, // kV: Since we are decreasing the value of how much the PID system does we need to conpensate for making feedforward larger as well
                 0); // kA: I have no idea what this value should be
 
@@ -90,12 +90,13 @@ public class SwerveModuleFactory {
     }
 
     // for 8048's config and new Offloaded PID
-    public SwerveModule Swerve2CAN(
+    public SwerveModule AMCANModule(
             String name,
             int driveMotorCanId,
             int turningMotorCanId,
             int turningEncoderChannel,
-            double turningOffset) {
+            double turningOffset,
+            boolean analogEncoderSensorPhase) {
         final double kWheelDiameterMeters = 0.1016; // AndyMark Swerve & Steer has 4 inch wheel
         final double kDriveReduction = 6.67*9/10; // see andymark.com/products/swerve-and-steer 
         //TODO Temperarely added a modifyer to make this more realistic through some testing, we will need to make this a real value
@@ -104,8 +105,13 @@ public class SwerveModuleFactory {
 
         FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction, kWheelDiameterMeters);
         FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset,
-                turningGearRatio);
+        AnalogTurningEncoder turningEncoder;
+        if (analogEncoderSensorPhase) {
+                turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset, turningGearRatio);
+        } else {
+                turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset, -1.0* turningGearRatio);
+        }
+        
         CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder, 2);
 
         // DRIVE PID
@@ -158,75 +164,6 @@ public class SwerveModuleFactory {
 
         return new SwerveModule(driveServo, turningServo);
 
-    }
-
-    public SwerveModule Swerve1CAN(
-        String name,
-        int driveMotorCanId,
-        int turningMotorCanId,
-        int turningEncoderChannel,
-        double turningOffset) {
-    final double kWheelDiameterMeters = 0.1016; // AndyMark Swerve & Steer has 4 inch wheel
-    final double kDriveReduction = 6.67*9/10; // see andymark.com/products/swerve-and-steer 
-    //TODO Temperarely added a modifyer to make this more realistic through some testing, we will need to make this a real value
-    final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
-    final double turningGearRatio = 1.0; // andymark ma3 encoder is 1:1
-
-    FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction, kWheelDiameterMeters);
-    FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
-    AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset,
-            turningGearRatio);
-    CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder, 1);
-
-    // DRIVE PID
-    PIDController driveController = new PIDController( //
-            0.1, // kP
-            0, // kI
-            0); // kD
-
-    // TURNING PID
-    ProfiledPIDController turningController = new ProfiledPIDController( //
-            5, // kP
-            0, // kI
-            0, // kD
-            new TrapezoidProfile.Constraints(
-                    20 * Math.PI, // speed rad/s
-                    20 * Math.PI)); // accel rad/s/s
-    turningController.enableContinuousInput(0, 2 * Math.PI);
-
-    // DRIVE FF
-    SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
-            0.0, // kS
-            .5); // kV
-
-    // TURNING FF
-    SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-            .25, // kS
-            0.015); // kV
-
-    // TODO: what is this?
-    // SimpleMotorFeedforward headingDriveFeedForward = new SimpleMotorFeedforward(
-    // //
-    // 0.05, // kS: friction is unimportant
-    // 0.35, // kV: from experiment; higher than AM modules, less reduction gear
-    // 0.08); // kA: I have no idea what this value should be
-
-    DriveServo driveServo = new DriveServo(
-            experiments,
-            name,
-            driveMotor,
-            driveEncoder,
-            driveController,
-            driveFeedforward);
-    TurningServo turningServo = new TurningServo(
-            experiments,
-            name,
-            turningMotor,
-            turningEncoder,
-            turningController,
-            turningFeedforward);
-
-    return new SwerveModule(driveServo, turningServo);
     }
 
     public SwerveModule AMModule(
