@@ -6,6 +6,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;
 import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.HolonomicDriveRegulator;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
@@ -48,6 +49,7 @@ public class DriveToWaypoint3 extends Command {
     @Override
     public void initialize() {
         m_trajectory = m_trajectories.apply(m_swerve.getPose(), m_goal);
+        System.out.println(m_trajectory);
         m_timer.restart();
     }
 
@@ -61,6 +63,7 @@ public class DriveToWaypoint3 extends Command {
         // TODO: rotation profile, use new trajectory type.
         SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
         t.log("/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
         t.log("/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());

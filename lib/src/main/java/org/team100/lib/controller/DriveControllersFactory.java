@@ -6,7 +6,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class DriveControllersFactory {
     public static class Config {
-        public PidGains thetaGain = new PidGains(3.0, 0, 0, 0.01, 0.01, true);
+        public PidGains thetaGain = new PidGains(3.5, 0, 0, 0.01, 0.01, true);
         public PidGains compBotCartesianGain = new PidGains(3, 2, 0, 0.1, 0.01, false);
         public PidGains swerveOneCartesianGain = new PidGains(0.15, 0, 0, 0.1, 0.2, false);
         // public PidGains swerveOneCartesianGain = new PidGains(2, 0.1, 0.15, 0.1,

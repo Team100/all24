@@ -122,15 +122,13 @@ class RotateTest {
         timer.time = 1;
         rotate.execute();
         assertEquals(0.5, rotate.refTheta.getX(), kDelta);
-        // assertEquals(1.0, swerveDriveSubsystem.output, kDelta);
-        assertEquals(2.5, swerveDriveSubsystem.output, kDelta);
+        assertEquals(2.75, swerveDriveSubsystem.output, kDelta);
 
         timer.time = 2;
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(1));
         rotate.execute();
         assertEquals(1.408, rotate.refTheta.getX(), kDelta);
-        // assertEquals(0.571, swerveDriveSubsystem.output, kDelta);
-        assertEquals(1.794, swerveDriveSubsystem.output, kDelta);
+        assertEquals(1.998, swerveDriveSubsystem.output, kDelta);
 
         timer.time = 3;
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(Math.PI));

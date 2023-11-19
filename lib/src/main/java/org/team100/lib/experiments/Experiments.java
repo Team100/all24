@@ -1,11 +1,16 @@
 package org.team100.lib.experiments;
 
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Experiments {
     private final Telemetry t = Telemetry.get();
@@ -26,13 +31,41 @@ public class Experiments {
     /** Computed for the actual identity used. */
     private final Set<Experiment> m_experiments;
 
+    /** Starts with the config above, but can be overridden. */
+    private final Map<Experiment, SendableChooser<BooleanSupplier>> m_overrides;
+
     public Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
         t.log("/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
+        m_overrides = new EnumMap<>(Experiment.class);
+        for (Experiment e : Experiment.values()) {
+            SendableChooser<BooleanSupplier> override = new SendableChooser<>();
+            if (m_experiments.contains(e)) {
+                override.setDefaultOption(on(e), () -> true);
+                override.addOption(off(e), () -> false);
+            } else {
+                override.addOption(on(e), () -> true);
+                override.setDefaultOption(off(e), () -> false);
+            }
+            m_overrides.put(e, override);
+            SmartDashboard.putData(override);
+        }
     }
 
     public boolean enabled(Experiment experiment) {
-        return m_experiments.contains(experiment);
+        return m_overrides.get(experiment).getSelected().getAsBoolean();
+        // return m_experiments.contains(experiment);
     }
+
+    ////////////////////////////////////////
+
+    private String on(Experiment e) {
+        return e.name() + " ON";
+    }
+
+    private String off(Experiment e) {
+        return e.name() + " OFF";
+    }
+
 }

@@ -8,6 +8,7 @@ import org.team100.lib.math.WhiteNoiseVector;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.system.examples.DoubleIntegratorCartesian1D;
 import org.team100.lib.system.examples.DoubleIntegratorRotary1D;
+import org.team100.lib.telemetry.Telemetry;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -26,6 +27,8 @@ import edu.wpi.first.math.numbers.N2;
  * TODO: use a more realistic system model.
  */
 public class HolonomicDriveRegulator {
+    private final Telemetry t = Telemetry.get();
+
     private static final double kDt = 0.02;
     // for determining completion, this seems too large.
     // TODO: figure out what this is in practice.
@@ -114,6 +117,12 @@ public class HolonomicDriveRegulator {
         xhat_x = xRegulator.predictState(xhat_x, totalU_x, kDt);
         xhat_y = yRegulator.predictState(xhat_y, totalU_y, kDt);
         xhat_theta = thetaRegulator.predictState(xhat_theta, totalU_theta, kDt);
+
+        t.log("/Holonomic Regulator/X Hat X", xhat_x.x.get(0, 0));
+        t.log("/Holonomic Regulator/X Hat Y", xhat_y.x.get(0, 0));
+        t.log("/Holonomic Regulator/X Hat Theta", xhat_theta.x.get(0, 0));
+
+
 
         return new Twist2d(totalU_x.get(0, 0), totalU_y.get(0, 0), totalU_theta.get(0, 0));
     }

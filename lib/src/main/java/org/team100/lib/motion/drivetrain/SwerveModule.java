@@ -54,19 +54,6 @@ public class SwerveModule {
         m_turningServo.set(output[1]);
     }
 
-    // do we need this?
-    // /** Reset just distance to zero, leave angle alone. */
-    // public void resetDriveEncoders() {
-    // m_driveEncoder.reset();
-    // }
-
-    // do we need this?
-    // /** Reset distance and angle to zero. */
-    // public void resetEncoders() {
-    // m_driveEncoder.reset();
-    // m_turningEncoder.reset();
-    // }
-
     public void close() {
         m_turningServo.close();
     }
