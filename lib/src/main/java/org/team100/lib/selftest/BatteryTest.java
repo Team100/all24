@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class BatteryTest extends Command {
     private TestListener m_listener;
 
+    /** Verify battery voltage between 11 and 14 volts */
     public BatteryTest(TestListener listener) {
         m_listener = listener;
     }

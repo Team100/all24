@@ -83,7 +83,8 @@ public class SwerveLocal {
                 new SwerveModuleState(0, new Rotation2d(3 * Math.PI / 4)),
                 new SwerveModuleState(0, new Rotation2d(5 * Math.PI / 4))
         };
-        setModuleStates(states);
+        // not optimizing makes it easier to test, not sure it's worth the slowness.
+        setRawModuleStates(states);
     }
 
     public void stop() {

@@ -8,6 +8,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -104,10 +105,6 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         m_swerveLocal.defense();
     }
 
-    public void test(double[][] desiredOutputs) {
-        m_swerveLocal.test(desiredOutputs);
-    }
-
     @Override
     public void stop() {
         m_swerveLocal.stop();
@@ -124,5 +121,10 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
 
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+    }
+
+    /** for testing only */
+    public SwerveModulePosition[] positions() {
+        return m_swerveLocal.positions();
     }
 }

@@ -19,10 +19,10 @@ public class DriveManually extends Command {
     private final ManualModuleStates m_manualModuleStates;
     private final ManualChassisSpeeds m_manualChassisSpeeds;
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
-    private final ManualMode m_mode;
+    private final Supplier<ManualMode.Mode> m_mode;
 
     public DriveManually(
-            ManualMode mode,
+            Supplier<ManualMode.Mode> mode,
             Supplier<Twist2d> twistSupplier,
             SwerveDriveSubsystem robotDrive,
             SpeedLimits speedLimits) {
@@ -36,7 +36,7 @@ public class DriveManually extends Command {
 
     @Override
     public void execute() {
-        ManualMode.Mode manualMode = m_mode.getSelected();
+        ManualMode.Mode manualMode = m_mode.get();
         if (manualMode == null) {
             return;
         }

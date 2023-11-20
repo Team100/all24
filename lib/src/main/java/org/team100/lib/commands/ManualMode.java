@@ -1,9 +1,11 @@
 package org.team100.lib.commands;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class ManualMode {
+public class ManualMode implements Supplier<ManualMode.Mode> {
     public enum Mode {
         MODULE_STATE,
         ROBOT_RELATIVE_CHASSIS_SPEED,
@@ -24,6 +26,11 @@ public class ManualMode {
 
     public Mode getSelected() {
         return m_manualModeChooser.getSelected();
+    }
+
+    @Override
+    public Mode get() {
+        return getSelected();
     }
     
 }
