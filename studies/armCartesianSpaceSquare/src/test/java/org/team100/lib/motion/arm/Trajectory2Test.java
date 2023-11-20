@@ -1,13 +1,12 @@
-package frc;
+package org.team100.lib.motion.arm;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import frc.robot.armmotion.ArmTrajectories;
 
-public class TrajectoryTest2 {
+public class Trajectory2Test {
 
     @Test
     void testUnreachable() {

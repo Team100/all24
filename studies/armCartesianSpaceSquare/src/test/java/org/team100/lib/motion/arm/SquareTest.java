@@ -1,5 +1,4 @@
-
-package frc;
+package org.team100.lib.motion.arm;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -8,8 +7,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.armmotion.ArmAngles;
-import frc.robot.armmotion.ArmKinematics;
 
 public class SquareTest {
     public ArmKinematics kinematics = new ArmKinematics(1, 1);

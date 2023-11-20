@@ -1,4 +1,4 @@
-package frc.robot.armmotion;
+package org.team100.lib.motion.arm;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -63,12 +63,17 @@ public class ArmKinematics {
             return null;
         return new ArmAngles(th1, th2);
     }
-    public ArmAngles inverseVel(ArmAngles pos, Translation2d vel) { 
-        //Lower Arm Calculation
-        double changeInLower = (Math.sin(pos.th2)*vel.getY() + Math.cos(pos.th2)*vel.getX())/(l1*Math.sin(pos.th2-pos.th1));
-        //Upper Arm Calculation
-        double changeInUpper = (Math.sin(pos.th1)*vel.getY() + Math.cos(pos.th1)*vel.getX())/(l2*Math.sin(pos.th1-pos.th2));
-        ArmAngles dtheta = new ArmAngles(changeInLower, changeInUpper);
-        return dtheta;
+
+    public ArmAngles inverseVel(ArmAngles pos, Translation2d vel) {
+        double dy = vel.getY();
+        double dx = vel.getX();
+
+        double dth1 = (dx * Math.cos(pos.th2) + dy * Math.sin(pos.th2))
+                / (l1 * Math.sin(pos.th2 - pos.th1));
+
+        double dth2 = (dx * Math.cos(pos.th1) + dy * Math.sin(pos.th1) )
+                / (l2 * Math.sin(pos.th1 - pos.th2));
+
+        return new ArmAngles(dth1, dth2);
     }
 }

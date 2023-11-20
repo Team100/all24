@@ -1,4 +1,4 @@
-package frc.robot.armmotion;
+package org.team100.lib.motion.arm;
 
 import java.util.List;
 
@@ -54,8 +54,7 @@ public class ArmTrajectories {
             constant += 180;
         }
         double atan = Math.atan(y/x);
-        double angle = Units.radiansToDegrees(atan)+constant;
-        return angle;
+        return Units.radiansToDegrees(atan)+constant;
     }
 
     /** from current location to an endpoint */

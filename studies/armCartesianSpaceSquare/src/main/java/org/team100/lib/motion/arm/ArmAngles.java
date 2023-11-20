@@ -1,4 +1,4 @@
-package frc.robot.armmotion;
+package org.team100.lib.motion.arm;
 
 /**
  * Represents a 2DOF serial arm.
