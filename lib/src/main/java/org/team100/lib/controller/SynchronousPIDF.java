@@ -1,6 +1,6 @@
 package org.team100.lib.controller;
 
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.hal.util.BoundaryException;
 import edu.wpi.first.wpilibj.Timer;
@@ -87,7 +87,7 @@ public class SynchronousPIDF {
             }
         }
 
-        if (MathUtil.inRange(m_error * m_P, m_minimumOutput, m_maximumOutput)) {
+        if (Math100.inRange(m_error * m_P, m_minimumOutput, m_maximumOutput)) {
             m_totalError += m_error * dt;
         } else {
             m_totalError = 0;
@@ -100,7 +100,7 @@ public class SynchronousPIDF {
                 + m_F * m_setpoint);
         m_prevError = m_error;
 
-        return MathUtil.limit(m_result, m_minimumOutput, m_maximumOutput);
+        return Math100.limit(m_result, m_minimumOutput, m_maximumOutput);
     }
 
     /**

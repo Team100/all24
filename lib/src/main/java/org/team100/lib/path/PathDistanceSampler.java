@@ -4,10 +4,10 @@ package org.team100.lib.path;
  * Allows sampling a path by distance along it.
  */
 public class PathDistanceSampler {
-    private final Path trajectory_;
+    private final Path100 trajectory_;
     private final double[] distances_;
 
-    public PathDistanceSampler(final Path trajectory) {
+    public PathDistanceSampler(final Path100 trajectory) {
         trajectory_ = trajectory;
         distances_ = new double[trajectory_.length()];
         distances_[0] = 0.0;

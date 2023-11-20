@@ -10,14 +10,14 @@ import org.team100.lib.timing.TimedPose;
  * 
  * As of 2023 a trajectory is not two things (path and heading) it's one thing, each path point includes heading.
  */
-public class Trajectory {
+public class Trajectory100 {
     protected final List<TrajectoryPoint> points_;
 
-    public Trajectory() {
+    public Trajectory100() {
         points_ = new ArrayList<>();
     }
 
-    public Trajectory(final List<TimedPose> states) {
+    public Trajectory100(final List<TimedPose> states) {
         points_ = new ArrayList<>(states.size());
         for (int i = 0; i < states.size(); ++i) {
             points_.add(new TrajectoryPoint(states.get(i), i));

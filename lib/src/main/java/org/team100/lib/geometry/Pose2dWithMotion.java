@@ -4,7 +4,7 @@ package org.team100.lib.geometry;
 import java.text.DecimalFormat;
 import java.util.Optional;
 
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -115,8 +115,8 @@ public class Pose2dWithMotion {
     public Pose2dWithMotion interpolate(final Pose2dWithMotion other, double x) {
         return new Pose2dWithMotion(getPose().interpolate(other.getPose(), x),
                 GeometryUtil.interpolate(motion_direction_, other.motion_direction_, x),
-                MathUtil.interpolate(getCurvature(), other.getCurvature(), x),
-                MathUtil.interpolate(getDCurvatureDs(), other.getDCurvatureDs(), x));
+                Math100.interpolate(getCurvature(), other.getCurvature(), x),
+                Math100.interpolate(getDCurvatureDs(), other.getDCurvatureDs(), x));
     }
 
     public double distance(final Pose2dWithMotion other) {
@@ -131,8 +131,8 @@ public class Pose2dWithMotion {
         Pose2dWithMotion p2dwc = (Pose2dWithMotion) other;
         return getPose().equals(p2dwc.getPose()) &&
             motion_direction_.equals(p2dwc.motion_direction_) &&
-            MathUtil.epsilonEquals(getCurvature(), p2dwc.getCurvature()) &&
-            MathUtil.epsilonEquals(getDCurvatureDs(), p2dwc.getDCurvatureDs());
+            Math100.epsilonEquals(getCurvature(), p2dwc.getCurvature()) &&
+            Math100.epsilonEquals(getDCurvatureDs(), p2dwc.getDCurvatureDs());
     }
 
     public String toString() {

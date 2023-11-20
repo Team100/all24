@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -13,8 +13,8 @@ import org.team100.lib.timing.SwerveDriveDynamicsConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.timing.YawRateConstraint;
-import org.team100.lib.trajectory.Trajectory;
-import org.team100.lib.trajectory.TrajectoryUtil;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectoryUtil100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,7 +33,7 @@ public class TrajectoryPlanner {
         m_limits = limits;
     }
 
-    public Trajectory generateTrajectory(
+    public Trajectory100 generateTrajectory(
             boolean reversed,
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
@@ -45,7 +45,7 @@ public class TrajectoryPlanner {
                 max_voltage);
     }
 
-    public Trajectory generateTrajectory(
+    public Trajectory100 generateTrajectory(
             boolean reversed,
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
@@ -68,7 +68,7 @@ public class TrajectoryPlanner {
         }
 
         // Create a trajectory from splines.
-        Path trajectory = TrajectoryUtil.trajectoryFromWaypointsAndHeadings(
+        Path100 trajectory = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
                 waypoints_maybe_flipped, headings_maybe_flipped, kMaxDx, kMaxDy, kMaxDTheta);
 
         if (reversed) {
@@ -80,7 +80,7 @@ public class TrajectoryPlanner {
                                         .getPoint(i).state().getCurvature(),
                                 trajectory.getPoint(i).state().getDCurvatureDs()));
             }
-            trajectory = new Path(flipped_points);
+            trajectory = new Path100(flipped_points);
         }
 
         // Create the constraint that the robot must be able to traverse the trajectory

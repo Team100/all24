@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Various math utilities.
  */
-public class MathUtil {
+public class Math100 {
     public static final double EPSILON = 1e-6;
 
     /**
@@ -51,6 +51,6 @@ public class MathUtil {
         return a + (b - a) * x;
     }
 
-    private MathUtil() {
+    private Math100() {
     }
 }

@@ -4,11 +4,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Feedforward and feedback control of a single module. */
-public class SwerveModule {
+public class SwerveModule100 {
     private final DriveServo m_driveServo;
     private final TurningServo m_turningServo;
 
-    public SwerveModule(DriveServo driveServo, TurningServo turningServo) {
+    public SwerveModule100(DriveServo driveServo, TurningServo turningServo) {
         m_driveServo = driveServo;
         m_turningServo = turningServo;
     }
