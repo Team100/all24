@@ -12,8 +12,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        // By default, LiveWindow turns off the CommandScheduler, but we don't want
-        // that.
+        // By default, LiveWindow turns off the CommandScheduler in test mode,
+        // but we don't want that.
         enableLiveWindowInTest(false);
         m_robotContainer = new RobotContainer();
         testRunner = new TestRunner(m_robotContainer);
@@ -29,7 +29,6 @@ public class Robot extends TimedRobot {
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().schedule(testRunner);
-
     }
 
     @Override
