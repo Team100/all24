@@ -7,7 +7,8 @@ public class ArmKinematics {
     private final double l2;
 
     /**
-     * Lengths counting out from the grounded joint.  Units here determine units below.
+     * Lengths counting out from the grounded joint. Units here determine units
+     * below.
      * 
      * @param l1 proximal
      * @param l2 distal
@@ -31,9 +32,16 @@ public class ArmKinematics {
     }
 
     /**
+     * Calculates the position of the elbow only, for visualization.
+     */
+    public Translation2d elbow(ArmAngles a) {
+        return new Translation2d(l1 * Math.cos(a.th1), l1 * Math.sin(a.th1));
+    }
+
+    /**
      * Calculate absolute joint angles given cartesian coords of the end.
      * 
-     * It's an application of the law of cosines.  For diagram, see this doc:
+     * It's an application of the law of cosines. For diagram, see this doc:
      * https://docs.google.com/document/d/135U309CXN29X3Oube1N1DaXPHlo6r-YdnPHMH8NBev8/edit
      * 
      * @param x
@@ -51,4 +59,18 @@ public class ArmKinematics {
             return null;
         return new ArmAngles(th1, th2);
     }
+
+    public ArmAngles inverseVel(ArmAngles pos, Translation2d vel) {
+        double dy = vel.getY();
+        double dx = vel.getX();
+
+        double dth1 = (dx * Math.cos(pos.th2) + dy * Math.sin(pos.th2))
+                / (l1 * Math.sin(pos.th2 - pos.th1));
+
+        double dth2 = (dx * Math.cos(pos.th1) + dy * Math.sin(pos.th1) )
+                / (l2 * Math.sin(pos.th1 - pos.th2));
+
+        return new ArmAngles(dth1, dth2);
+    }
+
 }
