@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class SquareTest extends Command {
     private static final double kExpectedDuration = 5;
-    private SwerveDriveSubsystem m_drivetrain;
-    private TestListener m_listener;
+    private final SwerveDriveSubsystem m_drivetrain;
+    private final TestListener m_listener;
     private final Timer m_timer;
     private boolean terminate = false;
 
