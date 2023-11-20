@@ -4,21 +4,25 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class SquareTest extends Command {
+public class DriveManuallyTest extends Command {
     private static final double kExpectedDuration = 5;
     private SwerveDriveSubsystem m_drivetrain;
     private TestListener m_listener;
     private final Timer m_timer;
     private boolean terminate = false;
 
-    /** Verify a square trajectory. */
-    public SquareTest(SwerveDriveSubsystem drivetrain, TestListener listener) {
+    public DriveManuallyTest(SwerveDriveSubsystem drivetrain, TestListener listener) {
         m_drivetrain = drivetrain;
         m_listener = listener;
         m_timer = new Timer();
+    }
+
+    public Twist2d treatment() {
+        return new Twist2d(1, 0, 0);
     }
 
     @Override
@@ -62,4 +66,5 @@ public class SquareTest extends Command {
         else
             m_listener.fail(this, "final rotation bad: %5.3f", state.getRotation().getRadians());
     }
+
 }
