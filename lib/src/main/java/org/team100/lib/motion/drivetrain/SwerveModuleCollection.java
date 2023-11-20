@@ -44,16 +44,16 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         }
     }
 
-    private final SwerveModule m_frontLeft;
-    private final SwerveModule m_frontRight;
-    private final SwerveModule m_rearLeft;
-    private final SwerveModule m_rearRight;
+    private final SwerveModule100 m_frontLeft;
+    private final SwerveModule100 m_frontRight;
+    private final SwerveModule100 m_rearLeft;
+    private final SwerveModule100 m_rearRight;
 
     public SwerveModuleCollection(
-            SwerveModule frontLeft,
-            SwerveModule frontRight,
-            SwerveModule rearLeft,
-            SwerveModule rearRight) {
+            SwerveModule100 frontLeft,
+            SwerveModule100 frontRight,
+            SwerveModule100 rearLeft,
+            SwerveModule100 rearRight) {
         m_frontLeft = frontLeft;
         m_frontRight = frontRight;
         m_rearLeft = rearLeft;

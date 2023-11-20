@@ -6,7 +6,7 @@ import java.util.List;
 import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.VelocityLimitRegionConstraint;
-import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.Trajectory100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** This is from 254 2023.  I commented out the ones that seem unused. */
-public class TrajectoryGenerator {
+public class TrajectoryGenerator100 {
     private static final double kMaxAccel = 2.54;
     private static final double kMaxVoltage = 9.0;
     public static final double kMaxVelocityMetersPerSecond = 5.05; //Calibrated 3/12 on Comp Bot
@@ -23,7 +23,7 @@ public class TrajectoryGenerator {
     private final TrajectoryPlanner mMotionPlanner;
     private TrajectorySet mTrajectorySet = null;
 
-    public TrajectoryGenerator(TrajectoryPlanner motion_planner) {
+    public TrajectoryGenerator100(TrajectoryPlanner motion_planner) {
         mMotionPlanner = motion_planner;
     }
 
@@ -45,7 +45,7 @@ public class TrajectoryGenerator {
         return mTrajectorySet;
     }
 
-    public Trajectory generateTrajectory(
+    public Trajectory100 generateTrajectory(
             boolean reversed,
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
@@ -56,7 +56,7 @@ public class TrajectoryGenerator {
         return mMotionPlanner.generateTrajectory(reversed, waypoints, headings, constraints, max_vel, max_accel, max_voltage);
     }
 
-    public Trajectory generateTrajectory(
+    public Trajectory100 generateTrajectory(
             boolean reversed,
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
@@ -70,39 +70,39 @@ public class TrajectoryGenerator {
     }
 
     public class TrajectorySet {
-        public final Trajectory testTrajectory;
-        public final Trajectory testTrajectory2;
-        public final Trajectory coopLinkStartToCoopFirstPickup;
-        public final Trajectory coopFirstPickupToCoopSecondScore;
-        public final Trajectory coopFirstScoreToDock;
-        public final Trajectory coopSecondScoreToDock;
-        public final Trajectory redNCPCubeScoringPositionToFarSideDockWithPickup;
-        public final Trajectory redNCPCubeScoringPositionToThirdCube;
-        public final Trajectory redCPLeftScoringPositionToCPFirstPickup;
-        public final Trajectory CPFirstPickupToFarSideDock;
-        public final Trajectory ncpScoringToCubePickup;
-        public final Trajectory ncpThirdScoreToBackoff;
+        public final Trajectory100 testTrajectory;
+        public final Trajectory100 testTrajectory2;
+        public final Trajectory100 coopLinkStartToCoopFirstPickup;
+        public final Trajectory100 coopFirstPickupToCoopSecondScore;
+        public final Trajectory100 coopFirstScoreToDock;
+        public final Trajectory100 coopSecondScoreToDock;
+        public final Trajectory100 redNCPCubeScoringPositionToFarSideDockWithPickup;
+        public final Trajectory100 redNCPCubeScoringPositionToThirdCube;
+        public final Trajectory100 redCPLeftScoringPositionToCPFirstPickup;
+        public final Trajectory100 CPFirstPickupToFarSideDock;
+        public final Trajectory100 ncpScoringToCubePickup;
+        public final Trajectory100 ncpThirdScoreToBackoff;
 
-        public final Trajectory cpFirstScoreToOutsidePickup;
-        public final Trajectory cpFirstScoreToInsidePickup;
-        public final Trajectory cpOutsidePickupToSecondAlign;
-        public final Trajectory cpInsidePickupToSecondAlign;
-        public final Trajectory cpSecondScoreToInsidePickup;
-        public final Trajectory cpSecondScoreToOutsidePickup;
-        public final Trajectory cpInsidePickupToDock;
-        public final Trajectory cpOutsidePickupToDock;
-        public final Trajectory cpInsidePickupToThirdScore;
-        public final Trajectory cpOutsidePickupToThirdScore;
-        public final Trajectory cpThirdScoreToBackoff;
+        public final Trajectory100 cpFirstScoreToOutsidePickup;
+        public final Trajectory100 cpFirstScoreToInsidePickup;
+        public final Trajectory100 cpOutsidePickupToSecondAlign;
+        public final Trajectory100 cpInsidePickupToSecondAlign;
+        public final Trajectory100 cpSecondScoreToInsidePickup;
+        public final Trajectory100 cpSecondScoreToOutsidePickup;
+        public final Trajectory100 cpInsidePickupToDock;
+        public final Trajectory100 cpOutsidePickupToDock;
+        public final Trajectory100 cpInsidePickupToThirdScore;
+        public final Trajectory100 cpOutsidePickupToThirdScore;
+        public final Trajectory100 cpThirdScoreToBackoff;
 
 
         public final VelocityLimitRegionConstraint center_outbound_charging_station_constraint;
         public final VelocityLimitRegionConstraint center_inbound_charging_station_constraint;
 
 
-        private List<Trajectory> allTrajectories;
+        private List<Trajectory100> allTrajectories;
 
-        public List<Trajectory> getAllTrajectories() {
+        public List<Trajectory100> getAllTrajectories() {
             return allTrajectories;
         }
 
@@ -182,7 +182,7 @@ public class TrajectoryGenerator {
         //     System.out.println("\n\n");
         // }
 
-        private Trajectory getTestTrajectory() {
+        private Trajectory100 getTestTrajectory() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));
@@ -194,7 +194,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.8, 1.0);
         }
 
-        private Trajectory getTestTrajectory2() {
+        private Trajectory100 getTestTrajectory2() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(2.5, 0.0, Rotation2d.fromDegrees(180)));
@@ -206,7 +206,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.3, 1.0);
         }
 
-        private Trajectory getCPFirstScoreToOutsidePickup() {
+        private Trajectory100 getCPFirstScoreToOutsidePickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)));
@@ -222,7 +222,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.75, 1.57);
         }
 
-        private Trajectory getCPFirstScoreToInsidePickup() {
+        private Trajectory100 getCPFirstScoreToInsidePickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)));
@@ -241,7 +241,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.7, 1.57);
         }
 
-        private Trajectory getCPOutsidePickupToSecondAlign() {
+        private Trajectory100 getCPOutsidePickupToSecondAlign() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(5.2832, -0.45, Rotation2d.fromDegrees(180)));
@@ -257,7 +257,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.7, 1.57);
         }
 
-        private Trajectory getCPInsidePickupToSecondAlign() {
+        private Trajectory100 getCPInsidePickupToSecondAlign() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(5.5, -1.8, Rotation2d.fromDegrees(180 - 25.158531783)));
@@ -277,7 +277,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.75, 1.57);
         }
 
-        private Trajectory getCPSecondScoreToInsidePickup() {
+        private Trajectory100 getCPSecondScoreToInsidePickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -299,7 +299,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.75, 1.57);
         }
 
-        private Trajectory getCPSecondScoreToOutsidePickup() {
+        private Trajectory100 getCPSecondScoreToOutsidePickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -318,7 +318,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.75, 1.57);
         }
 
-        private Trajectory getCPInsidePickupToDock() {
+        private Trajectory100 getCPInsidePickupToDock() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -334,7 +334,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.7, 1.75);
         }
 
-        private Trajectory getCPOutsidePickupToDock() {
+        private Trajectory100 getCPOutsidePickupToDock() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -350,7 +350,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.8, 1.75);
         }
 
-        private Trajectory getCPInsidePickupToThirdScore() {
+        private Trajectory100 getCPInsidePickupToThirdScore() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -372,7 +372,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.75, 1.57);
         }
 
-        private Trajectory getCPOutsidePickupToThirdScore() {
+        private Trajectory100 getCPOutsidePickupToThirdScore() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -390,7 +390,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.75, 1.7);
         }
 
-        private Trajectory getCPThirdScoreToBackoff() {
+        private Trajectory100 getCPThirdScoreToBackoff() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -406,7 +406,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 1.0, 2.0);
         }
 
-        private Trajectory generate(List<Pose2d> waypoints, List<Rotation2d> headings, List<TimingConstraint> constraints, boolean reversed, double percentSpeed, double percentAccel) {
+        private Trajectory100 generate(List<Pose2d> waypoints, List<Rotation2d> headings, List<TimingConstraint> constraints, boolean reversed, double percentSpeed, double percentAccel) {
             handleAllianceFlip(waypoints, headings);
 
             return generateTrajectory(reversed, waypoints, headings, constraints,
@@ -426,7 +426,7 @@ public class TrajectoryGenerator {
             }
         }
 
-        private Trajectory getCoopLinkStartToCoopFirstPickup() {
+        private Trajectory100 getCoopLinkStartToCoopFirstPickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)));
@@ -440,7 +440,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(center_outbound_charging_station_constraint), false, 0.8, 1.375);
         }
 
-        private Trajectory getCoopFirstPickupToCoopSecondScore() {
+        private Trajectory100 getCoopFirstPickupToCoopSecondScore() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(6.0, 0.20, Rotation2d.fromDegrees(180.0)));
@@ -454,7 +454,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(center_inbound_charging_station_constraint), false, 0.8, 1.375);
         }
 
-        public Trajectory getNcpThirdScoreToBackoff() {
+        public Trajectory100 getNcpThirdScoreToBackoff() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
 
@@ -468,7 +468,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 1.0, 2.0);
         }
 
-        private Trajectory getCoopFirstScoreToDock() {
+        private Trajectory100 getCoopFirstScoreToDock() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.2, 0.00, Rotation2d.fromDegrees(0.0)));
@@ -478,7 +478,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(center_outbound_charging_station_constraint), false, 0.8, 1.0);
         }
 
-        private Trajectory getCoopSecondScoreToDock() {
+        private Trajectory100 getCoopSecondScoreToDock() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.2, -0.40, Rotation2d.fromDegrees(0.0)));
@@ -505,7 +505,7 @@ public class TrajectoryGenerator {
         //     return generate(waypoints, headings, List.of(), false, 0.5, 1.0);
         // }
 
-        private Trajectory getNCPScoringtoCubePickup() {
+        private Trajectory100 getNCPScoringtoCubePickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)));
@@ -527,7 +527,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.7, 1.0);
         }
 
-        private Trajectory getRedNCPCubeScoringPositionToFarSideDockWithPickup() {
+        private Trajectory100 getRedNCPCubeScoringPositionToFarSideDockWithPickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.05, 0.55, Rotation2d.fromDegrees(0.0)));
@@ -547,7 +547,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.7, 1.0);
         }
 
-        private Trajectory getRedNCPCubeScoringPositionToThirdCube() {
+        private Trajectory100 getRedNCPCubeScoringPositionToThirdCube() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.05, 0.55, Rotation2d.fromDegrees(0.0)));
@@ -569,7 +569,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.7, 1.0);
         }
 
-        private Trajectory getRedCPLeftScoringPositionToCPFirstPickup() {
+        private Trajectory100 getRedCPLeftScoringPositionToCPFirstPickup() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)));
@@ -581,7 +581,7 @@ public class TrajectoryGenerator {
             return generate(waypoints, headings, List.of(), false, 0.5, 1.0);
         }
 
-        private Trajectory getCPFirstPickupToFarSideDock() {
+        private Trajectory100 getCPFirstPickupToFarSideDock() {
             List<Pose2d> waypoints = new ArrayList<>();
             List<Rotation2d> headings = new ArrayList<>();
             waypoints.add(new Pose2d(5.334, -0.254, Rotation2d.fromDegrees(180.0)));

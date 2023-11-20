@@ -7,7 +7,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -48,10 +48,10 @@ public class DrivePursuitController implements DriveMotionController {
         mSetpoint = trajectory.getState();
 
         for (int i = 0; i < trajectory.trajectory().length(); ++i) {
-            if (trajectory.trajectory().getPoint(i).state().velocityM_S() > MathUtil.EPSILON) {
+            if (trajectory.trajectory().getPoint(i).state().velocityM_S() > Math100.EPSILON) {
                 mIsReversed = false;
                 break;
-            } else if (trajectory.trajectory().getPoint(i).state().velocityM_S() < -MathUtil.EPSILON) {
+            } else if (trajectory.trajectory().getPoint(i).state().velocityM_S() < -Math100.EPSILON) {
                 mIsReversed = true;
                 break;
             }
@@ -209,7 +209,7 @@ public class DrivePursuitController implements DriveMotionController {
         double reverseDistance = distance(mCurrentTrajectory, current_state, previewQuantity - searchStepSize);
         searchDirection = Math.signum(reverseDistance - forwardDistance);
         while (searchStepSize > 0.001) {
-            if (MathUtil.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01))
+            if (Math100.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01))
                 break;
             while (/* next point is closer than current point */ distance(mCurrentTrajectory, current_state,
                     previewQuantity + searchStepSize * searchDirection) < distance(mCurrentTrajectory, current_state,

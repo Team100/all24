@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -138,7 +138,7 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
 
     @Override
     public Optional<Rotation2d> getCourse(double t) {
-        if (MathUtil.epsilonEquals(x.getVelocity(t), 0.0) && MathUtil.epsilonEquals(y.getVelocity(t), 0.0)) {
+        if (Math100.epsilonEquals(x.getVelocity(t), 0.0) && Math100.epsilonEquals(y.getVelocity(t), 0.0)) {
             return Optional.empty();
         }
         return Optional.of(getHeading(t));

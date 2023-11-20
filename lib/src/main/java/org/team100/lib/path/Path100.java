@@ -10,14 +10,14 @@ import org.team100.lib.geometry.Pose2dWithMotion;
  * 
  * There's no timing information here. For that, see Trajectory.
  */
-public class Path {
+public class Path100 {
     protected final List<PathPoint> points_;
 
-    public Path() {
+    public Path100() {
         points_ = new ArrayList<>();
     }
 
-    public Path(final List<Pose2dWithMotion> states) {
+    public Path100(final List<Pose2dWithMotion> states) {
         points_ = new ArrayList<>(states.size());
         for (int i = 0; i < states.size(); ++i) {
             points_.add(new PathPoint(states.get(i), i));

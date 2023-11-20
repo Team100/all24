@@ -22,7 +22,7 @@ public class SwerveModuleFactory {
         this.currentLimit = currentLimit;
     }
 
-    public SwerveModule WCPModule(
+    public SwerveModule100 WCPModule(
             String name,
             int driveMotorCanId,
             int turningMotorCanId,
@@ -90,11 +90,11 @@ public class SwerveModuleFactory {
                 turningController,
                 turningFeedforward);
 
-        return new SwerveModule(driveServo, turningServo);
+        return new SwerveModule100(driveServo, turningServo);
     }
 
     // for 8048's config and new Offloaded PID
-    public SwerveModule AMCANModule(
+    public SwerveModule100 AMCANModule(
             String name,
             int driveMotorCanId,
             int turningMotorCanId,
@@ -165,11 +165,11 @@ public class SwerveModuleFactory {
                 turningController,
                 turningFeedforward);
 
-        return new SwerveModule(driveServo, turningServo);
+        return new SwerveModule100(driveServo, turningServo);
 
     }
 
-    public SwerveModule AMModule(
+    public SwerveModule100 AMModule(
             String name,
             int driveMotorCanId,
             int turningMotorChannel,
@@ -229,6 +229,6 @@ public class SwerveModuleFactory {
                 turningController,
                 turningFeedforward);
 
-        return new SwerveModule(driveServo, turningServo);
+        return new SwerveModule100(driveServo, turningServo);
     }
 }
