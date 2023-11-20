@@ -1,9 +1,11 @@
-package frc.robot.armcommands;
+package org.team100.lib.commands.arm;
+
+
+import org.team100.lib.motion.arm.ArmSubsystem;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ArmSubsystem;
 
 public class ArmTrajectoryCommand extends Command {
 
@@ -35,7 +37,7 @@ public class ArmTrajectoryCommand extends Command {
     @Override
     public void initialize() {
         m_timer.restart();
-        if (definedAngle == true) {
+        if (definedAngle) {
             m_armSubsystem.setTrajectory(m_timer,m_set,m_startAngle,m_endAngle);
         } else {
             m_armSubsystem.setTrajectory(m_timer,m_set);

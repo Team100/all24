@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package org.team100.lib.motion.arm;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 
@@ -12,9 +12,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.armmotion.ArmAngles;
-import frc.robot.armmotion.ArmKinematics;
-import frc.robot.armmotion.ArmTrajectories;
+import frc.robot.subsystems.FRCNEO;
+import frc.robot.subsystems.FRCNEO.FRCNEOBuilder;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
 public class ArmSubsystem extends Subsystem {

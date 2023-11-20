@@ -4,10 +4,11 @@
 
 package frc.robot;
 
+import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.motion.arm.ArmSubsystem;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.armcommands.Sequence;
-import frc.robot.subsystems.ArmSubsystem;
 
 public class RobotContainer {
     private ArmSubsystem m_armSubsystem = new ArmSubsystem();
