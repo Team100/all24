@@ -9,7 +9,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import frc.robot.armmotion.ArmTrajectories;
 
-public class test {
+public class TrajectoryTest {
 
     @Test
     void testUnreachable() {

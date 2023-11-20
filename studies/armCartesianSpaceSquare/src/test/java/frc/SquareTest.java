@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.armmotion.ArmAngles;
 import frc.robot.armmotion.ArmKinematics;
 
-public class test3 {
+public class SquareTest {
     public ArmKinematics kinematics = new ArmKinematics(1, 1);
     public ArmAngles t0 = kinematics.inverse(new Translation2d(1, 1));
     public ArmAngles t1 = kinematics.inverse(new Translation2d(1.1, 1));

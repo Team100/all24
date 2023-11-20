@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import frc.robot.armmotion.ArmTrajectories;
 
-public class test2 {
+public class TrajectoryTest2 {
 
     @Test
     void testUnreachable() {

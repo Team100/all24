@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.armmotion.ArmAngles;
 import frc.robot.armmotion.ArmKinematics;
 
-public class test4 {
+public class ThetaTest {
     @Test
     void testdtheta() {
         ArmKinematics kinematics = new ArmKinematics(.93, .92);
