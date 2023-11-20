@@ -49,14 +49,12 @@ public class DualXboxControl implements Control {
 
     @Override
     public void resetRotation0(Command command) {
-        JoystickButton startButton = new JoystickButton(controller0.getHID(), 7);
-        startButton.onTrue(command);
+        new JoystickButton(controller0.getHID(), 7).onTrue(command);
     }
 
     @Override
     public void resetRotation180(Command command) {
-        JoystickButton startButton = new JoystickButton(controller0.getHID(), 8);
-        startButton.onTrue(command);
+        new JoystickButton(controller0.getHID(), 8).onTrue(command);
     }
 
     @Override
@@ -93,14 +91,12 @@ public class DualXboxControl implements Control {
 
     @Override
     public void defense(Command defense) {
-        JoystickButton button = new JoystickButton(controller0.getHID(), 2);
-        button.whileTrue(defense);
+        new JoystickButton(controller0.getHID(), 2).whileTrue(defense);
     }
 
     @Override
     public void rotate0(Command command) {
-        JoystickButton button = new JoystickButton(controller0.getHID(), 9);
-        button.whileTrue(command);
+        new JoystickButton(controller0.getHID(), 9).whileTrue(command);
     }
 
     @Override

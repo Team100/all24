@@ -1,12 +1,10 @@
-package org.team100.lib.paths;
+package org.team100.lib.trajectory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.VelocityLimitRegionConstraint;
-import org.team100.lib.trajectory.Trajectory100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;

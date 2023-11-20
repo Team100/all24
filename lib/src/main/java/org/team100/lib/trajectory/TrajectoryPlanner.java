@@ -1,4 +1,4 @@
-package org.team100.lib.planners;
+package org.team100.lib.trajectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,6 @@ import org.team100.lib.timing.SwerveDriveDynamicsConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.timing.YawRateConstraint;
-import org.team100.lib.trajectory.Trajectory100;
-import org.team100.lib.trajectory.TrajectoryUtil100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
