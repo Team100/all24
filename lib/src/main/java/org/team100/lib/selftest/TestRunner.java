@@ -22,7 +22,7 @@ public class TestRunner extends Command {
         m_listener = new TestListener();
 
         // this test needs no "treatment" command
-        addCase(new BatteryTest(m_listener));
+        addCase(new BatteryTest(m_container.getMonitor(), m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.getSwerveDriveSubsystem();
 

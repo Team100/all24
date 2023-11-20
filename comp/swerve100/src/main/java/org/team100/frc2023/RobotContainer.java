@@ -35,6 +35,8 @@ import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.RedundantGyro;
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
+import org.team100.lib.telemetry.Annunciator;
+import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.DrawCircle;
@@ -45,6 +47,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -87,9 +90,11 @@ public class RobotContainer implements Testable {
     private final Control control;
 
     private DrawCircle m_drawCircle;
+
+    private final Monitor m_monitor;
     
 
-    public RobotContainer() throws IOException {
+    public RobotContainer(TimedRobot robot) throws IOException {
 
         m_autonSelector = new AutonSelector();
         t.log(Level.INFO, "/Routine", getRoutine());
@@ -98,6 +103,10 @@ public class RobotContainer implements Testable {
         t.log(Level.INFO, "/Alliance", m_allianceSelector.alliance().name());
 
         m_indicator = new LEDIndicator(8);
+
+        m_monitor = new Monitor(new Annunciator(0));
+        robot.addPeriodic(m_monitor::periodic, 0.02);
+        
 
         Identity identity = Identity.get();
         // override the correct identity for testing.
@@ -254,8 +263,6 @@ public class RobotContainer implements Testable {
         m_auton.cancel();
     }
 
-
-
     public double getRoutine() {
         return m_autonSelector.routine();
     }
@@ -284,10 +291,18 @@ public class RobotContainer implements Testable {
         m_modules.close();
     }
 
+    //////////////////////////////////
+    //
+    // for testing
+
     public SwerveDriveSubsystem getSwerveDriveSubsystem() {
         return m_robotDrive;
     }
     public Command getDrawCircle() {
         return m_drawCircle;
+    }
+
+    public Monitor getMonitor() {
+        return m_monitor;
     }
 }

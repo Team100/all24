@@ -71,15 +71,18 @@ public class Telemetry {
     private final Map<String, Publisher> pubs;
     private final SendableChooser<Level> m_levelChooser;
 
-    /** Uses the default network table instance. */
-    public Telemetry() {
+    /**
+     * Uses the default network table instance.
+     * Clients should use the static instance, not the constructor.
+     */
+    private Telemetry() {
         inst = NetworkTableInstance.getDefault();
         pubs = new HashMap<>();
         m_levelChooser = new SendableChooser<>();
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }
-        m_levelChooser.setDefaultOption(   Level.INFO.name(), Level.INFO);
+        m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
         SmartDashboard.putData(m_levelChooser);
 
         DataLogManager.start();

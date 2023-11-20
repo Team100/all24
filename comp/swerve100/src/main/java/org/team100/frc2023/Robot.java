@@ -27,13 +27,13 @@ public class Robot extends TimedRobot {
         System.out.printf("RoboRIO serial number: %s\n", RobotController.getSerialNumber());
         System.out.printf("Identity: %s\n", Identity.get().name());
         banner();
-        
+
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
         enableLiveWindowInTest(false);
 
         try {
-            m_robotContainer = new RobotContainer();
+            m_robotContainer = new RobotContainer(this);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

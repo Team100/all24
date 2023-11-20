@@ -1,6 +1,7 @@
 package org.team100.lib.selftest;
 
-import edu.wpi.first.wpilibj.RobotController;
+import org.team100.lib.telemetry.Monitor;
+
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -8,16 +9,18 @@ import edu.wpi.first.wpilibj2.command.Command;
  * intialize().
  */
 public class BatteryTest extends Command {
-    private TestListener m_listener;
+    final  Monitor m_monitor;
+    private final TestListener m_listener;
 
     /** Verify battery voltage between 11 and 14 volts */
-    public BatteryTest(TestListener listener) {
+    public BatteryTest(Monitor monitor, TestListener listener) {
+        m_monitor = monitor;
         m_listener = listener;
     }
 
     @Override
     public void initialize() {
-        double voltage = RobotController.getBatteryVoltage();
+        double voltage = m_monitor.getBatteryVoltage();
         if (voltage > 14) {
             m_listener.fail(this, "voltage too high: %5.3f", voltage);
         } else if (voltage < 11) {
