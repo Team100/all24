@@ -31,6 +31,7 @@ import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.RedundantGyro;
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
@@ -45,11 +46,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class RobotContainer {
+public class RobotContainer implements Testable {
     public static class Config {
 
         //////////////////////////////////////
@@ -85,6 +85,9 @@ public class RobotContainer {
     private final FrameTransform m_frameTransform;
 
     private final Control control;
+
+    private DrawCircle m_drawCircle;
+    
 
     public RobotContainer() throws IOException {
 
@@ -211,7 +214,8 @@ public class RobotContainer {
         };
         // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
         // m_robotDrive, m_kinematics));
-        control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));
+        m_drawCircle = new DrawCircle(goalArr, m_robotDrive, m_kinematics);
+        control.circle(m_drawCircle);
 
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
 
@@ -250,22 +254,7 @@ public class RobotContainer {
         m_auton.cancel();
     }
 
-    public void runTest2() {
-        XboxController controller0 = new XboxController(0);
-        boolean rearLeft = controller0.getAButton();
-        boolean rearRight = controller0.getBButton();
-        boolean frontLeft = controller0.getXButton();
-        boolean frontRight = controller0.getYButton();
-        double driveControl = controller0.getLeftY();
-        double turnControl = controller0.getLeftX();
-        double[][] desiredOutputs = {
-                { frontLeft ? driveControl : 0, frontLeft ? turnControl : 0 },
-                { frontRight ? driveControl : 0, frontRight ? turnControl : 0 },
-                { rearLeft ? driveControl : 0, rearLeft ? turnControl : 0 },
-                { rearRight ? driveControl : 0, rearRight ? turnControl : 0 }
-        };
-        m_robotDrive.test(desiredOutputs);
-    }
+
 
     public double getRoutine() {
         return m_autonSelector.routine();
@@ -293,5 +282,12 @@ public class RobotContainer {
         m_allianceSelector.close();
         m_indicator.close();
         m_modules.close();
+    }
+
+    public SwerveDriveSubsystem getSwerveDriveSubsystem() {
+        return m_robotDrive;
+    }
+    public Command getDrawCircle() {
+        return m_drawCircle;
     }
 }
