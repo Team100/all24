@@ -12,32 +12,10 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 import edu.wpi.first.math.util.Units;
 
 public class ArmTrajectories {
-    public static class Config {
-        // Cone
-        public ArmKinematics kinematics = new ArmKinematics(0.93, .92);
-        public Translation2d test = new Translation2d(3, 3);
-        public Translation2d t0 = new Translation2d(.6, .6);
-        public Translation2d t1 = new Translation2d(1, 1);
-        public Translation2d t2 = new Translation2d(1.1, 1.1);
-        public Translation2d t3 = new Translation2d(1, 1.1);
-
-        // Cube
-        public ArmAngles midGoalCube = new ArmAngles(0.089803, 1.681915);
-        public ArmAngles lowGoalCube = new ArmAngles(-0.049849, 2.271662);
-        public ArmAngles subCube = new ArmAngles(-0.341841, 1.361939);
-        public ArmAngles subToCube = new ArmAngles(-0.341841, 1.361939);
-        public ArmAngles highGoalCube = new ArmAngles(0.316365, 1.147321);
-
-        public ArmAngles safeBack = new ArmAngles(-0.55, 1.97);
-        public ArmAngles safeGoalCone = new ArmAngles(-0.639248, 1.838205);
-        public ArmAngles safeGoalCube = new ArmAngles(-0.639248, 1.838205);
-        public ArmAngles safeWaypoint = new ArmAngles(-0.394089, 1.226285);
-    }
-
-    private final TrajectoryConfig trajecConfig;
+    private final TrajectoryConfig m_trajectoryConfig;
 
     public ArmTrajectories(TrajectoryConfig config) {
-        trajecConfig = config;
+        m_trajectoryConfig = config;
     }
 
     /** Make a straight line */
@@ -100,7 +78,7 @@ public class ArmTrajectories {
                     toPose(start, firstDegree),
                     list,
                     toPose(end, secondDegree),
-                    trajecConfig);
+                    m_trajectoryConfig);
         } catch (TrajectoryGenerationException e) {
             e.printStackTrace();
             return null;

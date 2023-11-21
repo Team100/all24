@@ -56,7 +56,7 @@ public class ArmSubsystem extends Subsystem {
     /** Arm angles (radians), 0 up, positive forward. */
     public ArmAngles getPosition() {
         ArmAngles result = new ArmAngles(
-                m_lowerMeasurementFilter.calculate(getLowerArm()),
+                m_lowerMeasurementFilter.calculate(getLowerArmAngleRadians()),
                 m_upperMeasurementFilter.calculate(getUpperArmAngleRadians()));
         t.log(Level.DEBUG, "/arm/Lower Encoder Pos: ", result.th1);
         t.log(Level.DEBUG, "/arm/Upper Encoder Pos: ", result.th2);
@@ -81,7 +81,7 @@ public class ArmSubsystem extends Subsystem {
     }
 
     /** Lower arm angle (radians), 0 up, positive forward. */
-    private double getLowerArm() {
+    private double getLowerArmAngleRadians() {
         double encoderZero = 0.861614;
         double x = (lowerArmEncoder.getAbsolutePosition() - encoderZero) * 360;
         return (-1.0 * x) * Math.PI / 180;
