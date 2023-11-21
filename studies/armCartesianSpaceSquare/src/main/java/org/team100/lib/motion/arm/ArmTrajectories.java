@@ -40,52 +40,75 @@ public class ArmTrajectories {
         trajecConfig = config;
     }
 
+    /** Make a straight line */
     public Trajectory makeTrajectory(Translation2d start, Translation2d end) {
         Translation2d e = end.minus(start);
         double angle = degreesFromTranslation2d(e);
-        return onePoint(start, end, angle,angle);
+        return onePoint(start, end, angle, angle);
     }
 
     private double degreesFromTranslation2d(Translation2d xy) {
         double x = xy.getX();
         double y = xy.getY();
         double constant = 0;
-        if (x <0) {
+        if (x < 0) {
             constant += 180;
         }
-        double atan = Math.atan(y/x);
-        return Units.radiansToDegrees(atan)+constant;
+        double atan = Math.atan(y / x);
+        return Units.radiansToDegrees(atan) + constant;
     }
 
-    /** from current location to an endpoint */
-    public Trajectory onePoint(Translation2d start, Translation2d end, double firstDegree, double secondDegree) {
+    /** Make a spline from start to end, with control angles. */
+    public Trajectory onePoint(
+            Translation2d start,
+            Translation2d end,
+            double firstDegree,
+            double secondDegree) {
         return withList(start, List.of(), end, firstDegree, secondDegree);
     }
 
     // /** from current location, through a waypoint, to an endpoint */
-    public Trajectory twoPoint(Translation2d start, Translation2d mid, Translation2d end,
-    double firstDegree, double secondDegree) {
-    return withList(start, List.of(mid), end,
-    firstDegree, secondDegree);
+    public Trajectory twoPoint(
+            Translation2d start,
+            Translation2d mid,
+            Translation2d end,
+            double firstDegree,
+            double secondDegree) {
+        return withList(start, List.of(mid), end,
+                firstDegree, secondDegree);
     }
 
-    public Trajectory fivePoint(Translation2d start, Translation2d mid1, Translation2d mid2, Translation2d mid3, Translation2d mid4,
-    Translation2d end, double firstDegree, double secondDegree) {
-        List<Translation2d> list = List.of(mid1,mid2,mid3,mid4);
-            return withList(start, list, end, firstDegree, secondDegree);
+    public Trajectory fivePoint(
+            Translation2d start,
+            Translation2d mid1,
+            Translation2d mid2,
+            Translation2d mid3,
+            Translation2d mid4,
+            Translation2d end, double firstDegree, double secondDegree) {
+        List<Translation2d> list = List.of(mid1, mid2, mid3, mid4);
+        return withList(start, list, end, firstDegree, secondDegree);
     }
 
-    private Trajectory withList(Translation2d start, List<Translation2d> list, Translation2d end, double firstDegree, double secondDegree) {
+    private Trajectory withList(
+            Translation2d start,
+            List<Translation2d> list,
+            Translation2d end,
+            double firstDegree,
+            double secondDegree) {
         try {
-            return TrajectoryGenerator.generateTrajectory(setPose(start, firstDegree), list, setPose(end, secondDegree),
+            return TrajectoryGenerator.generateTrajectory(
+                    toPose(start, firstDegree),
+                    list,
+                    toPose(end, secondDegree),
                     trajecConfig);
         } catch (TrajectoryGenerationException e) {
             e.printStackTrace();
-            return null;}
+            return null;
+        }
     }
 
     // note proximal is y
-    private Pose2d setPose(Translation2d start, double degrees) {
+    private Pose2d toPose(Translation2d start, double degrees) {
         return new Pose2d(start.getX(), start.getY(), Rotation2d.fromDegrees(degrees));
     }
 
