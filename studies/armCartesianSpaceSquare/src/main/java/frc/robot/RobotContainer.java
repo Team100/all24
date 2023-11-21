@@ -1,31 +1,27 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer {
-    private ArmSubsystem m_armSubsystem = new ArmSubsystem();
-    private Command m_auton = new Sequence(m_armSubsystem);
-    public RobotContainer() {
-        configureBindings();
-    }
+    private ArmSubsystem m_armSubsystem;
+    private ArmKinematics m_armKinematicsM;
+    private Command m_auton;
 
-    private void configureBindings() {
+    public RobotContainer() {
+        m_armSubsystem = new ArmSubsystem();
+        m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+        m_auton = new Sequence(m_armSubsystem, m_armKinematicsM);
     }
 
     public Command getAutonomousCommand() {
         return m_auton;
     }
-    public void runPeriodic() {
-        
-    }
+
     public void runTest() {
         XboxController controller = new XboxController(0);
         m_armSubsystem.set(0, 0);

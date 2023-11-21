@@ -83,6 +83,9 @@ dependencies {
 
     // ejml is used by 
     implementation "org.ejml:ejml-simple:0.43.1"
+    // for test visualizations
+    implementation "org.jfree:jfreechart:1.5.3"
+
 
 }
 

@@ -10,6 +10,7 @@ import org.team100.lib.commands.ManualMode;
 import org.team100.lib.commands.ResetPose;
 import org.team100.lib.commands.Rotate;
 import org.team100.lib.commands.SetRotation;
+import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -20,6 +21,8 @@ import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.VisionDataProvider;
+import org.team100.lib.motion.arm.ArmKinematics;
+import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.Heading;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SpeedLimitsFactory;
@@ -92,6 +95,12 @@ public class RobotContainer implements Testable {
     private DrawCircle m_drawCircle;
 
     private final Monitor m_monitor;
+
+    //// ARM STUFF
+
+    private ArmSubsystem m_armSubsystem;
+    private ArmKinematics m_armKinematicsM;
+    private Command m_armAuton;
     
 
     public RobotContainer(TimedRobot robot) throws IOException {
@@ -227,6 +236,14 @@ public class RobotContainer implements Testable {
         control.circle(m_drawCircle);
 
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
+
+
+        ///////// ARM STUFF
+        
+        m_armSubsystem = new ArmSubsystem();
+        m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+        m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
+
 
         ///////////////////////////
         // DRIVE

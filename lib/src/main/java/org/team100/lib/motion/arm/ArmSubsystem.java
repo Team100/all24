@@ -75,6 +75,12 @@ public class ArmSubsystem extends Subsystem {
         return result;
     }
 
+    /**
+     * Set motor controller duty cycle in range [-1, 1]
+     * 
+     * @param u1 lower, proximal
+     * @param u2 upper, distal
+     */
     public void set(double u1, double u2) {
         lowerArmMotor.set(u1);
         upperArmMotor.set(u2);
