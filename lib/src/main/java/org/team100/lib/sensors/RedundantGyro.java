@@ -84,8 +84,9 @@ public class RedundantGyro implements RedundantGyroInterface {
         m_gyro2 = new AHRS(I2C.Port.kMXP);
         m_gyro1.enableBoardlevelYawReset(true);
         m_gyro2.enableBoardlevelYawReset(true);
-        m_gyro1.calibrate();
-        m_gyro2.calibrate();
+        // i think maybe calibrate never did anything anyway.
+        // m_gyro1.calibrate();
+        // m_gyro2.calibrate();
 
         while (m_timer.get() < 2) {
             // wait a bit

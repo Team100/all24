@@ -191,7 +191,7 @@ class ExtendedKalmanFilterTest {
         // C is identity since h is identity.
         assertArrayEquals(new double[] { 1, 0, 0, 1 }, C.getData());
 
-        Pair<Matrix<N2, N2>, Matrix<N2, N2>> discPair = Discretization.discretizeAQTaylor(contA, m_contQ, dtSeconds);
+        Pair<Matrix<N2, N2>, Matrix<N2, N2>> discPair = Discretization.discretizeAQ(contA, m_contQ, dtSeconds);
         Matrix<N2, N2> discA = discPair.getFirst();
         if (kPrint)
             System.out.println("discA " + discA);
@@ -293,7 +293,7 @@ class ExtendedKalmanFilterTest {
         Matrix<N2, N2> C = NumericalJacobian.numericalJacobianX(
                 Nat.N2(), Nat.N2(), this::h, m_xHat, new Matrix<>(Nat.N1(), Nat.N1()));
 
-        Pair<Matrix<N2, N2>, Matrix<N2, N2>> discPair = Discretization.discretizeAQTaylor(contA, m_contQ, dtSeconds);
+        Pair<Matrix<N2, N2>, Matrix<N2, N2>> discPair = Discretization.discretizeAQ(contA, m_contQ, dtSeconds);
         Matrix<N2, N2> discA = discPair.getFirst();
 
         Matrix<N2, N2> discQ = discPair.getSecond();

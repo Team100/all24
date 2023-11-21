@@ -10,10 +10,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Represents a simple one-dimensional mechanism. */
-public class SimpleSubsystem extends Subsystem {
+public class SimpleSubsystem extends SubsystemBase {
     public static class Config {
         public double filterTimeConstantS = 0.06;
         public double filterPeriodS = 0.02;
