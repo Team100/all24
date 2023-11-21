@@ -3,6 +3,14 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2023.4.3"
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir "../../lib/src/main/java"
+        }
+    }
+}
+
 wpi.maven.useLocal = false
 wpi.maven.useDevelopment = true
 wpi.versions.wpilibVersion = '2023.+'
@@ -78,8 +86,10 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
 
-    implementation "org.ejml:ejml-simple:0.42"
+    implementation "org.ejml:ejml-simple:0.43.1"
     implementation "org.jfree:jfreechart:1.5.3"
+
+    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.3'
 }
 
 test {
