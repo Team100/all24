@@ -15,7 +15,7 @@ public class ExampleCommand extends CommandBase {
   public ExampleCommand(ExampleSubsystem subsystem, CommandXboxController driverController) {
     m_subsystem = subsystem;
     addRequirements(subsystem);
-    m_constraints = new Constraints(1, 1);
+    m_constraints = new Constraints(8, 16);
     m_controller = new ProfiledPIDController(0.3, 0, 0, m_constraints);
     m_driverController = driverController;
   }
@@ -36,7 +36,7 @@ public class ExampleCommand extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_subsystem.set(-200);
+    m_subsystem.set(0);
   }
 
   // Returns true when the command should end.
