@@ -1,4 +1,4 @@
-package org.team100.lib.commands;
+package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.StraightLineTrajectory;

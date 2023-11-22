@@ -21,7 +21,6 @@ public class StraightLineTrajectoryTest {
                 new Translation2d(0.1, -0.1),
                 new Translation2d(-0.1, 0.1),
                 new Translation2d(-0.1, -0.1)
-
         );
         StraightLineTrajectory t = new StraightLineTrajectory(k);
         Pose2d start = new Pose2d();

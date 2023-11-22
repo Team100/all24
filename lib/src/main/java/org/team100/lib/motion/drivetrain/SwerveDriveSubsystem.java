@@ -15,14 +15,14 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsystemInterface {
     private final Telemetry t = Telemetry.get();
-    private final Heading m_heading;
+    private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator m_poseEstimator;
     private final Field2d m_field;
     private final FrameTransform m_frameTransform;
     private final SwerveLocal m_swerveLocal;
 
     public SwerveDriveSubsystem(
-            Heading heading,
+            HeadingInterface heading,
             SwerveDrivePoseEstimator poseEstimator,
             FrameTransform frameTransform,
             SwerveLocal swerveLocal,
@@ -126,5 +126,9 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
     /** for testing only */
     public SwerveModulePosition[] positions() {
         return m_swerveLocal.positions();
+    }
+
+    public void close() {
+        m_swerveLocal.close();
     }
 }

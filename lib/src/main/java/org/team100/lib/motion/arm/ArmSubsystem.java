@@ -85,6 +85,13 @@ public class ArmSubsystem extends Subsystem {
         m_upperArmMotor.set(u2);
     }
 
+    public void close() {
+        m_lowerArmMotor.close();
+        m_upperArmMotor.close();
+        m_lowerArmEncoder.close();
+        m_upperArmEncoder.close();
+    }
+
     /** Lower arm angle (radians), 0 up, positive forward. */
     private double getLowerArmAngleRadians() {
         double x = (m_lowerArmEncoder.getAbsolutePosition() - m_config.lowerEncoderZero) * 360;

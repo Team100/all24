@@ -6,6 +6,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
     public static class Noop implements SwerveModuleCollectionInterface {
+        @Override
+        public void setDesiredStates(SwerveModuleState[] targetModuleStates) {
+            //
+        }
 
         @Override
         public SwerveModulePosition[] positions() {
@@ -19,6 +23,7 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
 
         @Override
         public void close() {
+            //
         }
 
         @Override
@@ -33,14 +38,7 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
 
         @Override
         public void stop() {
-        }
-
-        @Override
-        public void test(double[][] desiredOutputs) {
-        }
-
-        @Override
-        public void setDesiredStates(SwerveModuleState[] targetModuleStates) {
+            //
         }
     }
 
@@ -97,13 +95,5 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_frontRight.stop();
         m_rearLeft.stop();
         m_rearRight.stop();
-    }
-
-    /** Test and log. */
-    public void test(double[][] desiredOutputs) {
-        m_frontLeft.test(desiredOutputs[0]);
-        m_frontRight.test(desiredOutputs[1]);
-        m_rearLeft.test(desiredOutputs[2]);
-        m_rearRight.test(desiredOutputs[3]);
     }
 }
