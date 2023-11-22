@@ -27,6 +27,10 @@ public class ArmSubsystem extends Subsystem {
     private final CANSparkMax m_lowerArmMotor;
     private final CANSparkMax m_upperArmMotor;
 
+    // these are members in order to close them properly
+    private final AnalogInput m_lowerArmInput;
+    private final AnalogInput m_upperArmInput;
+
     private final AnalogEncoder m_lowerArmEncoder;
     private final AnalogEncoder m_upperArmEncoder;
     private ArmAngles m_previousPosition;
@@ -47,8 +51,10 @@ public class ArmSubsystem extends Subsystem {
         m_upperArmMotor.setSecondaryCurrentLimit(1);
         m_upperArmMotor.setIdleMode(IdleMode.kBrake);
 
-        m_lowerArmEncoder = new AnalogEncoder(new AnalogInput(1));
-        m_upperArmEncoder = new AnalogEncoder(new AnalogInput(0));
+        m_lowerArmInput = new AnalogInput(1);
+        m_lowerArmEncoder = new AnalogEncoder(m_lowerArmInput);
+        m_upperArmInput = new AnalogInput(0);
+        m_upperArmEncoder = new AnalogEncoder(m_upperArmInput);
         m_previousPosition = getPosition();
     }
 
@@ -90,6 +96,8 @@ public class ArmSubsystem extends Subsystem {
         m_upperArmMotor.close();
         m_lowerArmEncoder.close();
         m_upperArmEncoder.close();
+        m_lowerArmInput.close();
+        m_upperArmInput.close();
     }
 
     /** Lower arm angle (radians), 0 up, positive forward. */
