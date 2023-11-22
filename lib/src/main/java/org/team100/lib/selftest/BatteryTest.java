@@ -1,6 +1,7 @@
 package org.team100.lib.selftest;
 
 import org.team100.lib.telemetry.Monitor;
+import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -8,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * An example of a test that doesn't take any time, so everything happens in
  * intialize().
  */
+@ExcludeFromJacocoGeneratedReport
 public class BatteryTest extends Command {
     final  Monitor m_monitor;
     private final TestListener m_listener;

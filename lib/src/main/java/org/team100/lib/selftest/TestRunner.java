@@ -1,16 +1,18 @@
 package org.team100.lib.selftest;
 
-import org.team100.lib.commands.Defense;
-import org.team100.lib.commands.DriveManually;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.commands.ManualMode;
+import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
+import org.team100.lib.commands.drivetrain.Defense;
+import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.ManualMode;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 /** Run all the test cases sequentially. */
+@ExcludeFromJacocoGeneratedReport
 public class TestRunner extends Command {
     private final Testable m_container;
     private final SequentialCommandGroup m_group;

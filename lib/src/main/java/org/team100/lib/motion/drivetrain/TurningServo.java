@@ -45,18 +45,18 @@ public class TurningServo {
         m_name = String.format("/Swerve TurningServo %s", name);
     }
 
-    void setTurning(SwerveModuleState state) {
+    void setAngle(Rotation2d angle) {
         if (m_experiments.enabled(Experiment.UseClosedLoopSteering)) {
-            offboard(state);
+            offboard(angle);
         } else {
-            onboard(state);
+            onboard(angle);
         }
         log();
     }
 
-    void offboard(SwerveModuleState state) {
+    void offboard(Rotation2d angle) {
         double turningMotorControllerOutputRad_S = m_turningController.calculate(
-                getTurningAngleRad(), state.angle.getRadians());
+                getTurningAngleRad(), angle.getRadians());
         double turningFeedForwardRad_S = getTurnSetpointVelocityRadS();
         double turnOutputRad_S = turningMotorControllerOutputRad_S + turningFeedForwardRad_S;
         double turnOutputDeadbandRad_S = MathUtil.applyDeadband(turnOutputRad_S, m_config.kSteeringDeadband);
@@ -64,16 +64,16 @@ public class TurningServo {
 
         t.log(Level.DEBUG, m_name + "/Controller Output rad_s", turningMotorControllerOutputRad_S);
         t.log(Level.DEBUG, m_name + "/Feed Forward Output rad_s", turningFeedForwardRad_S);
-        t.log(Level.DEBUG, m_name + "/DESIRED POSITION", state.angle.getRadians());
+        t.log(Level.DEBUG, m_name + "/DESIRED POSITION", angle.getRadians());
         t.log(Level.DEBUG, m_name + "/ACTUAL POSITION", getTurningAngleRad());
     }
 
-    void onboard(SwerveModuleState state) {
+    void onboard(Rotation2d angle) {
         double turningMotorControllerOutput = m_turningController.calculate(
-                getTurningAngleRad(), state.angle.getRadians());
+                getTurningAngleRad(), angle.getRadians());
         double turningFeedForwardOutput = m_turningFeedforward.calculate(getTurnSetpointVelocityRadS(), 0);
         double turnOutput = turningMotorControllerOutput + turningFeedForwardOutput;
-        set(MathUtil.applyDeadband(turnOutput, m_config.kSteeringDeadband));
+        m_turningMotor.setDutyCycle(MathUtil.applyDeadband(turnOutput, m_config.kSteeringDeadband));
 
         t.log(Level.DEBUG, m_name + "/Controller Output", turningMotorControllerOutput);
         t.log(Level.DEBUG, m_name + "/Feed Forward Output", turningFeedForwardOutput);
@@ -81,17 +81,7 @@ public class TurningServo {
         t.log(Level.DEBUG, m_name + "/Actual Speed", m_turningMotor.get());
     }
 
-    private void log() {
-        t.log(Level.DEBUG, m_name + "/Turning Measurement (rad)", getTurningAngleRad());
-        t.log(Level.DEBUG, m_name + "/Turning Measurement (deg)", Units.radiansToDegrees(getTurningAngleRad()));
-        t.log(Level.DEBUG, m_name + "/Turning Goal (rad)", m_turningController.getGoal().position);
-        t.log(Level.DEBUG, m_name + "/Turning Setpoint (rad)", m_turningController.getSetpoint().position);
-        t.log(Level.DEBUG, m_name + "/Turning Setpoint Velocity (rad/s)", getTurnSetpointVelocityRadS());
-        t.log(Level.DEBUG, m_name + "/Turning Error (rad)", m_turningController.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Turning Error Velocity (rad/s)", m_turningController.getVelocityError());
-        t.log(Level.DEBUG, m_name + "/Turning Motor Output [-1, 1]", m_turningMotor.get());
-    }
-
+    /** Set raw duty cycle directly */
     void set(double output) {
         m_turningMotor.setDutyCycle(output);
     }
@@ -108,7 +98,18 @@ public class TurningServo {
         return new Rotation2d(getTurningAngleRad());
     }
 
-    public void close() {
+    void close() {
         m_turningEncoder.close();
+    }
+
+    private void log() {
+        t.log(Level.DEBUG, m_name + "/Turning Measurement (rad)", getTurningAngleRad());
+        t.log(Level.DEBUG, m_name + "/Turning Measurement (deg)", Units.radiansToDegrees(getTurningAngleRad()));
+        t.log(Level.DEBUG, m_name + "/Turning Goal (rad)", m_turningController.getGoal().position);
+        t.log(Level.DEBUG, m_name + "/Turning Setpoint (rad)", m_turningController.getSetpoint().position);
+        t.log(Level.DEBUG, m_name + "/Turning Setpoint Velocity (rad/s)", getTurnSetpointVelocityRadS());
+        t.log(Level.DEBUG, m_name + "/Turning Error (rad)", m_turningController.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Turning Error Velocity (rad/s)", m_turningController.getVelocityError());
+        t.log(Level.DEBUG, m_name + "/Turning Motor Output [-1, 1]", m_turningMotor.get());
     }
 }

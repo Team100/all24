@@ -1,4 +1,4 @@
-package org.team100.lib.commands;
+package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;
@@ -6,7 +6,7 @@ import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveToRelative extends Command {
     private final Pose2d relative;
-    private final SwerveDriveSubsystem m_robotDrive;
+    private final SwerveDriveSubsystemInterface m_robotDrive;
     private final SpeedLimits speedLimits = new SpeedLimits(5, 2, 2, 2);
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
@@ -27,7 +27,7 @@ public class DriveToRelative extends Command {
     private MotionProfile profileY;
     private MotionProfile profileTheta;
 
-    public DriveToRelative(Pose2d relative, SwerveDriveSubsystem robotDrive) {
+    public DriveToRelative(Pose2d relative, SwerveDriveSubsystemInterface robotDrive) {
         this.relative = relative;
         m_robotDrive = robotDrive;
         m_timer = new Timer();

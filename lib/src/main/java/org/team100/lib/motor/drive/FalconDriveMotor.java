@@ -90,7 +90,7 @@ public class FalconDriveMotor implements DriveMotor {
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.setVoltage(10 * MathUtil.clamp(output, -1.3, 1.3));
 
         t.log(Level.DEBUG, m_name + "/Speed (rot_s)", getVelocityRot_S());
@@ -99,7 +99,7 @@ public class FalconDriveMotor implements DriveMotor {
     }
 
     @Override
-    public void setPID(ControlMode control, double outputMetersPerSec) {
+    public void setVelocity(double outputMetersPerSec) {
         double Kn = 0.11106;
         double Ks = 0.001515;
         double VSat = 11;

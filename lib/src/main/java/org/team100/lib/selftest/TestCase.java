@@ -1,9 +1,12 @@
 package org.team100.lib.selftest;
 
+import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 
 /** Runs a stimulus and an observer in parallel. */
+@ExcludeFromJacocoGeneratedReport
 public class TestCase extends Command {
     private final ParallelDeadlineGroup m_group;
 

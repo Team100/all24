@@ -1,4 +1,4 @@
-package org.team100.lib.commands;
+package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;

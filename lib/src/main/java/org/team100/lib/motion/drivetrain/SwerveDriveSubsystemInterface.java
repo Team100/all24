@@ -29,6 +29,8 @@ public interface SwerveDriveSubsystemInterface {
 
     Pose2d getPose();
 
+    void resetPose(Pose2d robotPose);
+
     ChassisSpeeds speeds();
 
     /** Because Subsystem is now concrete, it needs an accessor. */
