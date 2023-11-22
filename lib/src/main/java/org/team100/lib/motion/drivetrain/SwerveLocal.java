@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -17,6 +18,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * nothing about the outside world, it just accepts chassis speeds.
  */
 public class SwerveLocal {
+    private static final double kDtS = .020;
+
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
@@ -56,7 +59,7 @@ public class SwerveLocal {
 
     //////////////////////////////////////////////////////////
     //
-    // Actuators.  These are mutually exclusive within an iteration.
+    // Actuators. These are mutually exclusive within an iteration.
 
     /**
      * Drives the modules to produce the target chassis speed.
@@ -64,12 +67,12 @@ public class SwerveLocal {
      * @param targetChassisSpeeds speeds in robot coordinates.
      */
     public void setChassisSpeeds(ChassisSpeeds targetChassisSpeeds) {
-        // TODO(Sanjan): fix the broken experiment stuff here.
-        // if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
-        setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
-        // } else {
-        // setChassisSpeedsNormally(targetChassisSpeeds);
-        // }
+
+        if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
+            setChassisSpeedsWithSetpointGenerator(targetChassisSpeeds);
+        } else {
+            setChassisSpeedsNormally(targetChassisSpeeds);
+        }
     }
 
     /**
@@ -116,10 +119,6 @@ public class SwerveLocal {
         return m_modules.positions();
     }
 
-    void test(double[][] desiredOutputs) {
-        m_modules.test(desiredOutputs);
-    }
-
     ///////////////////////////////////////////////////////////
 
     private void setChassisSpeedsNormally(ChassisSpeeds targetChassisSpeeds) {
@@ -127,9 +126,6 @@ public class SwerveLocal {
         t.log(Level.DEBUG, "/desired speed/y", targetChassisSpeeds.vyMetersPerSecond);
         t.log(Level.DEBUG, "/desired speed/theta", targetChassisSpeeds.omegaRadiansPerSecond);
         SwerveModuleState[] targetModuleStates = m_DriveKinematics.toSwerveModuleStates(targetChassisSpeeds);
-
-        // setpoint = m_SwerveSetpointGenerator.generateSetpoint(limits, setpoint,
-        // targetChassisSpeeds, 0.020);
         setModuleStates(targetModuleStates);
     }
 
@@ -143,8 +139,7 @@ public class SwerveLocal {
                 limits,
                 prevSetpoint,
                 targetChassisSpeeds,
-                .020);
-
+                kDtS);
 
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;

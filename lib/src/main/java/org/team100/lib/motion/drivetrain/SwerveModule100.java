@@ -37,21 +37,10 @@ public class SwerveModule100 {
 
     /**
      * Package private for SwerveModuleCollection.stop only.
-     * This is low-level shutoff, not generally useful.
-     * Most clients should use setDesiredState.
      */
     void stop() {
         m_driveServo.set(0);
         m_turningServo.set(0);
-    }
-
-    /**
-     * Package private for SwerveModuleCollection.test only.
-     * This is exact direct control, only useful for testing.
-     */
-    void test(double[] output) {
-        m_driveServo.set(output[0]);
-        m_turningServo.set(output[1]);
     }
 
     public void close() {

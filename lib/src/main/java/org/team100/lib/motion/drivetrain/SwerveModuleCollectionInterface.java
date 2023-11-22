@@ -5,15 +5,13 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public interface SwerveModuleCollectionInterface {
 
-    SwerveModulePosition[] positions();
+    void setDesiredStates(SwerveModuleState[] targetModuleStates);
 
-    void close();
+    SwerveModulePosition[] positions();
 
     SwerveModuleState[] states();
 
     void stop();
 
-    void test(double[][] desiredOutputs);
-
-    void setDesiredStates(SwerveModuleState[] targetModuleStates);
+    void close();
 }
