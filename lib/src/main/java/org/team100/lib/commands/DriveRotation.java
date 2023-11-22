@@ -2,7 +2,7 @@ package org.team100.lib.commands;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,13 +11,15 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveRotation extends Command {
-    private final SwerveDriveSubsystem m_robotDrive;
+    private final SwerveDriveSubsystemInterface m_robotDrive;
     private final Supplier<Double> m_rotSpeed;
 
-    public DriveRotation(SwerveDriveSubsystem robotDrive, Supplier<Double> rot) {
+    public DriveRotation(SwerveDriveSubsystemInterface robotDrive,
+            Supplier<Double> rot) {
         m_robotDrive = robotDrive;
         m_rotSpeed = rot;
-        addRequirements(m_robotDrive);
+        if (m_robotDrive.get() != null)
+            addRequirements(m_robotDrive.get());
     }
 
     @Override

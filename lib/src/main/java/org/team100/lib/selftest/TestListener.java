@@ -3,9 +3,12 @@ package org.team100.lib.selftest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
+
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Collects test results. */
+@ExcludeFromJacocoGeneratedReport
 public class TestListener {
     private static final String kReset = "\033[0m";
     private static final String kGreen = "\033[1;92m";

@@ -6,9 +6,8 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;
 import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.sway.controller.HolonomicDriveRegulator;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -22,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToWaypoint3 extends Command {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
-    private final SwerveDriveSubsystem m_swerve;
+    private final SwerveDriveSubsystemInterface m_swerve;
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
     private final BiFunction<Pose2d, Pose2d, Trajectory> m_trajectories;
@@ -31,7 +30,7 @@ public class DriveToWaypoint3 extends Command {
 
     public DriveToWaypoint3(
             Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
+            SwerveDriveSubsystemInterface drivetrain,
             BiFunction<Pose2d, Pose2d, Trajectory> trajectories) {
         m_goal = goal;
         m_swerve = drivetrain;
@@ -44,7 +43,8 @@ public class DriveToWaypoint3 extends Command {
         m_controller = new HolonomicDriveController3(controllers);
         m_controller.setTolerance(0.1, 1.0);
 
-        addRequirements(m_swerve);
+        if (m_swerve.get() != null)
+            addRequirements(m_swerve.get());
     }
 
     @Override

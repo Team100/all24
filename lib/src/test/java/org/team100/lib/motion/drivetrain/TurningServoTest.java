@@ -3,69 +3,27 @@ package org.team100.lib.motion.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
+import org.team100.lib.encoder.turning.MockTurningEncoder;
 import org.team100.lib.encoder.turning.TurningEncoder;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motor.turning.TurningMotor;
+import org.team100.lib.experiments.MockExperiments;
+import org.team100.lib.motor.turning.MockTurningMotor;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /** A minimal exercise. */
 class TurningServoTest {
-    boolean enablement = true;
-    double turningOutput = 0;
-    double turningVelocity = 0;
 
     @Test
     void testSimple() {
         
-        Experiments experiments = new Experiments(Identity.BLANK) {
-            @Override
-            public boolean enabled(Experiment experiment) {
-                return enablement;
-            }
-
-        };
+        MockExperiments experiments = new MockExperiments();
         String name = "test";
-        TurningMotor turningMotor = new TurningMotor() {
-
-            @Override
-            public double get() {
-                return 0;
-            }
-
-            @Override
-            public void setDutyCycle(double output) {
-                turningOutput = output;
-            }
-
-            @Override
-            public void setVelocity(double output, double outputAccel) {
-                turningVelocity = output;
-            }
-        };
-        TurningEncoder turningEncoder = new TurningEncoder() {
-
-            @Override
-            public double getAngle() {
-                return 0;
-            }
-
-            @Override
-            public void reset() {
-                //
-            }
-
-            @Override
-            public void close() {
-                //
-            }
-        };
+        MockTurningMotor turningMotor = new MockTurningMotor();
+        TurningEncoder turningEncoder = new MockTurningEncoder();
+        
         TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 1);
         // long period to make the output bigger
         ProfiledPIDController turningController = new ProfiledPIDController(1, 0, 0, constraints, 1);
@@ -80,14 +38,19 @@ class TurningServoTest {
                 turningController,
                 turningFeedforward);
 
-        SwerveModuleState state = new SwerveModuleState(1, new Rotation2d(1));
-        servo.setTurning(state);
-        assertEquals(0, turningOutput, 0.001);
-        assertEquals(1, turningVelocity, 0.001);
-        enablement = false;
-        servo.setTurning(state);
-        assertEquals(1, turningOutput, 0.001);
-        assertEquals(1, turningVelocity, 0.001);
+        servo.setAngle(new Rotation2d(1));
+        assertEquals(0, turningMotor.turningOutput, 0.001);
+        assertEquals(1, turningMotor.turningVelocity, 0.001);
+
+        experiments.enablement = false;
+        servo.setAngle(new Rotation2d(1));
+        assertEquals(1, turningMotor.turningOutput, 0.001);
+        assertEquals(1, turningMotor.turningVelocity, 0.001);
+
+        servo.set(0);
+        assertEquals(0, turningMotor.turningOutput, 0.001);
+        assertEquals(1, turningMotor.turningVelocity, 0.001);
+
     }
 
 }

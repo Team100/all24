@@ -5,90 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.HeadingInterface;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Timer;
 
 /** Example of mock objects for testing. */
 class RotateTest {
     private static final double kDelta = 0.001;
-
-    class MockHeading implements HeadingInterface {
-        @Override
-        public Rotation2d getHeadingNWU() {
-            return new Rotation2d();
-        }
-
-        @Override
-        public double getHeadingRateNWU() {
-            return 0;
-        }
-    }
-
-    class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
-
-        Pose2d pose = new Pose2d();
-        double output = 0;
-        boolean stopped = false;
-
-        @Override
-        public Pose2d getPose() {
-            return pose;
-        }
-
-        @Override
-        public void stop() {
-            stopped = true;
-        }
-
-        @Override
-        public SwerveDriveSubsystem get() {
-            return null;
-        }
-
-        @Override
-        public ChassisSpeeds speeds() {
-            return new ChassisSpeeds();
-        }
-
-        @Override
-        public void driveInFieldCoords(Twist2d twist) {
-            output = twist.dtheta;
-        }
-
-        @Override
-        public void setChassisSpeeds(ChassisSpeeds speeds) {
-            output = speeds.omegaRadiansPerSecond;
-        }
-
-        @Override
-        public void setRawModuleStates(SwerveModuleState[] states) {
-        }
-    }
-
-    class MockTimer extends Timer {
-
-        double time = 0;
-
-        @Override
-        public void reset() {
-            time = 0;
-        }
-
-        @Override
-        public double get() {
-            return time;
-        }
-
-    }
 
     @Test
     void testRotate() {
@@ -117,18 +41,18 @@ class RotateTest {
         rotate.execute();
 
         assertEquals(0, rotate.refTheta.getX(), kDelta); // at start
-        assertEquals(0, swerveDriveSubsystem.output, kDelta);
+        assertEquals(0, swerveDriveSubsystem.twist.dtheta, kDelta);
 
         timer.time = 1;
         rotate.execute();
         assertEquals(0.5, rotate.refTheta.getX(), kDelta);
-        assertEquals(2.75, swerveDriveSubsystem.output, kDelta);
+        assertEquals(2.75, swerveDriveSubsystem.twist.dtheta, kDelta);
 
         timer.time = 2;
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(1));
         rotate.execute();
         assertEquals(1.408, rotate.refTheta.getX(), kDelta);
-        assertEquals(1.998, swerveDriveSubsystem.output, kDelta);
+        assertEquals(1.998, swerveDriveSubsystem.twist.dtheta, kDelta);
 
         timer.time = 3;
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(Math.PI));

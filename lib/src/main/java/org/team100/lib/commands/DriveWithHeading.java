@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.HeadingInterface;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
@@ -22,13 +22,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveWithHeading extends Command {
     private final Telemetry t = Telemetry.get();
     private final Supplier<Twist2d> m_twistSupplier;
-    private final SwerveDriveSubsystem m_drive;
+    private final SwerveDriveSubsystemInterface m_drive;
     private final HeadingInterface m_heading;
     private final SpeedLimits m_speedLimits;
     private final Timer m_timer;
     private final Supplier<Rotation2d> m_desiredRotation;
 
-    private boolean snapMode = false;
+    boolean snapMode = false;
     private MotionProfile m_profile;
 
     /**
@@ -36,7 +36,7 @@ public class DriveWithHeading extends Command {
      */
     public DriveWithHeading(
             Supplier<Twist2d> twistSupplier,
-            SwerveDriveSubsystem robotDrive,
+            SwerveDriveSubsystemInterface robotDrive,
             HeadingInterface heading,
             SpeedLimits speedLimits,
             Timer timer,
@@ -47,7 +47,8 @@ public class DriveWithHeading extends Command {
         m_speedLimits = speedLimits;
         m_timer = timer;
         m_desiredRotation = desiredRotation;
-        addRequirements(m_drive);
+        if (m_drive.get() != null)
+            addRequirements(m_drive.get());
     }
 
     @Override
@@ -84,7 +85,8 @@ public class DriveWithHeading extends Command {
 
         Twist2d twist1_1 = m_twistSupplier.get();
         // if you touch the rotational control, we turn off snap mode
-        if (Math.abs(twist1_1.dtheta) < 0.1) {
+        // NOTE(11/22/23): this comparison used to be inverted which i think is wrong
+        if (Math.abs(twist1_1.dtheta) > 0.1) {
             snapMode = false;
         }
 

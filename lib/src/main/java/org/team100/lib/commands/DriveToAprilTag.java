@@ -8,7 +8,7 @@ import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.PidGains;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToAprilTag extends Command {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
-    private final SwerveDriveSubsystem m_swerve;
+    private final SwerveDriveSubsystemInterface m_swerve;
     private final Timer m_timer;
     private final TrajectoryConfig translationConfig;
     private final HolonomicDriveController3 m_controller;
@@ -41,7 +41,7 @@ public class DriveToAprilTag extends Command {
             int tagID,
             double xOffset,
             double yOffset,
-            SwerveDriveSubsystem drivetrain,
+            SwerveDriveSubsystemInterface drivetrain,
             SwerveDriveKinematics kinematics,
             AprilTagFieldLayoutWithCorrectOrientation layout) {
         m_goal = goal(tagID, xOffset, yOffset, layout);
@@ -61,7 +61,8 @@ public class DriveToAprilTag extends Command {
         m_controller.setTolerance(0.00000001, Math.PI / 180);
 
         translationConfig = new TrajectoryConfig(5, 4.5).setKinematics(kinematics);
-        addRequirements(drivetrain);
+        if (drivetrain.get() != null)
+            addRequirements(drivetrain.get());
     }
 
     @Override

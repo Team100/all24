@@ -3,7 +3,7 @@ package org.team100.lib.commands;
 import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualModuleStates;
@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** Uses a Sendable Chooser */
 public class DriveManually extends Command {
-    private final SwerveDriveSubsystem m_drive;
+    private final SwerveDriveSubsystemInterface m_drive;
     private final ManualModuleStates m_manualModuleStates;
     private final ManualChassisSpeeds m_manualChassisSpeeds;
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
@@ -24,14 +24,15 @@ public class DriveManually extends Command {
     public DriveManually(
             Supplier<ManualMode.Mode> mode,
             Supplier<Twist2d> twistSupplier,
-            SwerveDriveSubsystem robotDrive,
+            SwerveDriveSubsystemInterface robotDrive,
             SpeedLimits speedLimits) {
         m_mode = mode;
         m_drive = robotDrive;
         m_manualModuleStates = new ManualModuleStates(twistSupplier, speedLimits);
         m_manualChassisSpeeds = new ManualChassisSpeeds(twistSupplier, speedLimits);
         m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(twistSupplier, speedLimits);
-        addRequirements(m_drive);
+        if (m_drive.get() != null)
+            addRequirements(m_drive.get());
     }
 
     @Override

@@ -119,6 +119,10 @@ public class SwerveLocal {
         return m_modules.positions();
     }
 
+    public void close() {
+        m_modules.close();
+    }
+
     ///////////////////////////////////////////////////////////
 
     private void setChassisSpeedsNormally(ChassisSpeeds targetChassisSpeeds) {

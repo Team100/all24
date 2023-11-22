@@ -1,12 +1,14 @@
 package org.team100.lib.selftest;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+@ExcludeFromJacocoGeneratedReport
 public class SquareTest extends Command {
     private static final double kExpectedDuration = 5;
     private final SwerveDriveSubsystem m_drivetrain;
