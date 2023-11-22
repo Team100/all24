@@ -1,4 +1,4 @@
-package org.team100.lib.commands;
+package org.team100.lib.commands.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

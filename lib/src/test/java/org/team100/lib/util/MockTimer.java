@@ -1,9 +1,9 @@
-package org.team100.lib.commands;
+package org.team100.lib.util;
 
 import edu.wpi.first.wpilibj.Timer;
 
 public class MockTimer extends Timer {
-    double time = 0;
+    public double time = 0;
 
     @Override
     public void reset() {

@@ -1,6 +1,4 @@
-package org.team100.lib.commands;
-
-import org.team100.lib.motion.drivetrain.HeadingInterface;
+package org.team100.lib.motion.drivetrain;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 

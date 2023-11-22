@@ -2,15 +2,15 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 
-import org.team100.lib.commands.Defense;
-import org.team100.lib.commands.DriveManually;
-import org.team100.lib.commands.DriveWithHeading;
-import org.team100.lib.commands.FancyTrajectory;
-import org.team100.lib.commands.ManualMode;
-import org.team100.lib.commands.ResetPose;
-import org.team100.lib.commands.Rotate;
-import org.team100.lib.commands.SetRotation;
 import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.commands.drivetrain.Defense;
+import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveWithHeading;
+import org.team100.lib.commands.drivetrain.FancyTrajectory;
+import org.team100.lib.commands.drivetrain.ManualMode;
+import org.team100.lib.commands.drivetrain.ResetPose;
+import org.team100.lib.commands.drivetrain.Rotate;
+import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;

@@ -1,6 +1,6 @@
 package org.team100.lib.trajectory;
 
-import org.team100.lib.commands.DriveToWaypoint3;
+import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;

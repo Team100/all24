@@ -1,7 +1,4 @@
-package org.team100.lib.commands;
-
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+package org.team100.lib.motion.drivetrain;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,10 +9,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
 
-    Pose2d pose = new Pose2d();
+    public Pose2d pose = new Pose2d();
     ChassisSpeeds speeds = new ChassisSpeeds();
-    Twist2d twist = new Twist2d();
-    boolean stopped = false;
+    public Twist2d twist = new Twist2d();
+    public boolean stopped = false;
     SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
             new Translation2d(0.1, 0.1),
             new Translation2d(0.1, -0.1),
