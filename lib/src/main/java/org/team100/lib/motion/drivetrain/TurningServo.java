@@ -60,7 +60,7 @@ public class TurningServo {
         double turningFeedForwardRad_S = getTurnSetpointVelocityRadS();
         double turnOutputRad_S = turningMotorControllerOutputRad_S + turningFeedForwardRad_S;
         double turnOutputDeadbandRad_S = MathUtil.applyDeadband(turnOutputRad_S, m_config.kSteeringDeadband);
-        m_turningMotor.setPIDVelocity(turnOutputDeadbandRad_S, 0);
+        m_turningMotor.setVelocity(turnOutputDeadbandRad_S, 0);
 
         t.log(Level.DEBUG, m_name + "/Controller Output rad_s", turningMotorControllerOutputRad_S);
         t.log(Level.DEBUG, m_name + "/Feed Forward Output rad_s", turningFeedForwardRad_S);
@@ -93,7 +93,7 @@ public class TurningServo {
     }
 
     void set(double output) {
-        m_turningMotor.set(output);
+        m_turningMotor.setDutyCycle(output);
     }
 
     double getTurnSetpointVelocityRadS() {

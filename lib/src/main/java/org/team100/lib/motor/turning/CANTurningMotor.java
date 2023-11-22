@@ -63,15 +63,16 @@ public class CANTurningMotor implements TurningMotor {
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG, m_name + "/Encoder Value", m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
+        t.log(Level.DEBUG, m_name + "/Encoder Value",
+                m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
         t.log(Level.DEBUG, m_name + "/Velocity Value",
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
-    public void setPIDVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
+    public void setVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
         // TODO fix this
         double revolutionsPerSec2 = outputRadiansPerSecPerSec / (2 * Math.PI);
@@ -85,12 +86,5 @@ public class CANTurningMotor implements TurningMotor {
         double VSat = 11;
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);
-    }
-
-    public void setPIDPosition(double outputRadians) {
-        // TODO fix this
-        double ticksPerRevolution = 1024;
-        double outputTicks = outputRadians / (2 * Math.PI) * ticksPerRevolution;
-        m_motor.set(ControlMode.Position, outputTicks);
     }
 }

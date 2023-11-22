@@ -1,6 +1,7 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2023.4.3"
+    id "jacoco"
 }
 
 // these four lines are for development builds
@@ -92,6 +93,10 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
 }
 
 // Simulation configuration (e.g. environment variables).

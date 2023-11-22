@@ -5,10 +5,18 @@ public interface TurningMotor {
     /** @return motor output in range [-1, 1] */
     double get();
 
-    /** @param output motor output in range [-1, 1] */
-    void set(double output);
+    /**
+     * Open-loop duty cycle control.
+     * 
+     * @param output motor output in range [-1, 1]
+     */
+    void setDutyCycle(double output);
 
-    void setPIDPosition(double output);
-
-    void setPIDVelocity(double output, double outputAccel);
+    /**
+     * Closed-loop velocity control.
+     * 
+     * @param outputRadiansPerSec velocity in rad/s
+     * @param outputAccel         acceleration in rad/s/s
+     */
+    void setVelocity(double outputRadiansPerSec, double outputAccel);
 }
