@@ -2,27 +2,19 @@ import cv2
 import os
 import libcamera
 import numpy as np
-#from tflite_support.task import core
-#from tflite_support.task import processor
-#from tflite_support.task import vision
-#import utils
+from tflite_support.task import core
+from tflite_support.task import processor
+from tflite_support.task import vision
+import utils
 from cscore import CameraServer
 from picamera2 import Picamera2
 
 class GamePieceFinder:
 
-    def __init__(self, topic_name, camera_params):
-        self.purple_lower = (150, 100, 0)
-        self.purple_higher = (190, 255, 255)
-        self.yellow_lower = (15, 100, 0)
-        self.yellow_higher = (100, 255, 255)
-        self.scale_factor = 1
+    def __init__(self, camera_params):
+        self.detector
         self.width = camera_params[0]
         self.height = camera_params[1]
-        self.cube_height = .105
-        self.cone_height = .105
-        self.theta = 0
-        self.topic_name = topic_name
         self.output_stream = CameraServer.putVideo("Processed", self.width, self.height)
     
     def analyze(self, request):
@@ -32,9 +24,9 @@ class GamePieceFinder:
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
         self.img_rgb = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB)
-        #imTensor = vision.TensorImage.create_from_array(self.img_rgb)
-        #detections=self.detector.detect(imTensor)
-        #image=utils.visualize(self.img_rgb, detections)
+        imTensor = vision.TensorImage.create_from_array(self.img_rgb)
+        detections=self.detector.detect(imTensor)
+        image=utils.visualize(self.img_rgb, detections)
         self.output_stream.putFrame(self.img_rgb)
 
 
@@ -82,15 +74,14 @@ def main():
 
     # Roborio IP: 10.1.0.2
     # Pi IP: 10.1.0.21
-    #path = os.getcwd
-    #self.model = os.join(path, 'tflite_model','last_float32.tflite')
-    camera_params = [width, 400]
-    topic_name = "pieces"
-    output = GamePieceFinder(topic_name, camera_params)
-    #base_options=core.BaseOptions(file_name=model,use_coral=True,num_threads=num_threads)
-    #detection_options=processor.DetectionOptions(max_results=8, score_threshold=.3)
-    #options=vision.ObjectDetectionOptions(base_options=base_options, detection_options=detection_options)
-    #self.detector=vision.ObjectDetector.create_from_options(options)
+    path = os.getcwd
+    model = ('/home/pi/tflite_model/last_float32.tflite')
+    camera_params = [width, 200]
+    output = GamePieceFinder(camera_params)
+    base_options=core.BaseOptions(file_name=model,use_coral=True,num_threads=num_threads)
+    detection_options=processor.DetectionOptions(max_results=8, score_threshold=.3)
+    options=vision.ObjectDetectionOptions(base_options=base_options, detection_options=detection_options)
+    self.detector=vision.ObjectDetector.create_from_options(options)
     camera.start()
     try:
         while True:
