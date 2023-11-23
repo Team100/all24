@@ -1,5 +1,8 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.motion.components.DriveServo;
+import org.team100.lib.motion.components.TurningServo;
+
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 

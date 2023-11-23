@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.motion.components;
 
 import org.team100.lib.encoder.turning.TurningEncoder;
 import org.team100.lib.experiments.Experiment;
@@ -11,7 +11,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 
 /** Feedforward and feedback control of a single turning motor. */
@@ -45,7 +44,7 @@ public class TurningServo {
         m_name = String.format("/Swerve TurningServo %s", name);
     }
 
-    void setAngle(Rotation2d angle) {
+    public void setAngle(Rotation2d angle) {
         if (m_experiments.enabled(Experiment.UseClosedLoopSteering)) {
             offboard(angle);
         } else {
@@ -82,7 +81,7 @@ public class TurningServo {
     }
 
     /** Set raw duty cycle directly */
-    void set(double output) {
+    public void set(double output) {
         m_turningMotor.setDutyCycle(output);
     }
 
@@ -94,11 +93,11 @@ public class TurningServo {
         return MathUtil.angleModulus(m_turningEncoder.getAngle());
     }
 
-    Rotation2d getTurningRotation() {
+    public Rotation2d getTurningRotation() {
         return new Rotation2d(getTurningAngleRad());
     }
 
-    void close() {
+    public void close() {
         m_turningEncoder.close();
     }
 

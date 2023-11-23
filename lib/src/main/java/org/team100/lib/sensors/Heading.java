@@ -1,6 +1,5 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.sensors;
 
-import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 

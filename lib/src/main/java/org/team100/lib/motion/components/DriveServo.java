@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.motion.components;
 
 import org.team100.lib.encoder.drive.DriveEncoder;
 import org.team100.lib.experiments.Experiment;
@@ -45,7 +45,7 @@ public class DriveServo {
         m_name = String.format("/Swerve DriveServo %s", name);
     }
 
-    void setVelocity(double speedM_S) {
+    public void setVelocity(double speedM_S) {
         if (m_experiments.enabled(Experiment.UseClosedLoopDrive)) {
             offboard(speedM_S);
         } else {
@@ -55,7 +55,7 @@ public class DriveServo {
     }
 
     /** Set raw output directly. */
-    void set(double output) {
+    public void set(double output) {
         m_driveMotor.setDutyCycle(output);
     }
 
@@ -77,11 +77,11 @@ public class DriveServo {
         t.log(Level.DEBUG, m_name + "Feed Forward Output", driveFeedForwardOutput);
     }
 
-    double getDriveDistanceM() {
+    public double getDriveDistanceM() {
         return m_driveEncoder.getDistance();
     }
 
-    double getDriveSpeedMS() {
+    public double getDriveSpeedMS() {
         return m_driveEncoder.getRate();
     }
 

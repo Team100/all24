@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.motion.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

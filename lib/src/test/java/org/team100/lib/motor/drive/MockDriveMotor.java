@@ -1,6 +1,5 @@
 package org.team100.lib.motor.drive;
 
-
 public class MockDriveMotor implements DriveMotor {
     public double output = 0;
     public double velocity = 0;
@@ -19,5 +18,5 @@ public class MockDriveMotor implements DriveMotor {
     public void setVelocity(double velocity) {
         this.velocity = velocity;
     }
-    
+
 }
