@@ -1,6 +1,7 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2023.4.3"
+    id "jacoco"
 }
 
 // these four lines are for development builds
@@ -83,12 +84,22 @@ dependencies {
 
     // ejml is used by 
     implementation "org.ejml:ejml-simple:0.43.1"
+    // for test visualizations
+    implementation "org.jfree:jfreechart:1.5.3"
+
 
 }
 
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
+    reports {
+        csv.enabled true
+    }
 }
 
 // Simulation configuration (e.g. environment variables).

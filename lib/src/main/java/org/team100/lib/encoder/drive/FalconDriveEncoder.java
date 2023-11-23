@@ -2,6 +2,7 @@ package org.team100.lib.encoder.drive;
 
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 public class FalconDriveEncoder implements DriveEncoder {
     private final Telemetry t = Telemetry.get();
@@ -28,7 +29,7 @@ public class FalconDriveEncoder implements DriveEncoder {
     public double getRate() {
         // sensor velocity is 1/2048ths of a turn per 100ms
         double result = m_motor.getVelocity2048_100() * 10 * m_distancePerPulse;
-        t.log(m_name + "/Speed m_s", result);
+        t.log(Level.DEBUG, m_name + "/Speed m_s", result);
         return result;
     }
 

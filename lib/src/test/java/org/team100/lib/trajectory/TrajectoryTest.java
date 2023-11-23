@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathSamplePoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,14 +31,14 @@ class TrajectoryTest {
 
     @Test
     void testConstruction() {
-        Path traj = new Path(kWaypoints);
+        Path100 traj = new Path100(kWaypoints);
         assertFalse(traj.isEmpty());
         assertEquals(4, traj.length());
     }
 
     @Test
     void testStateAccessors() {
-        Path traj = new Path(kWaypoints);
+        Path100 traj = new Path100(kWaypoints);
 
         assertEquals(kWaypoints.get(0), traj.getPoint(0).state());
         assertEquals(kWaypoints.get(1), traj.getPoint(1).state());

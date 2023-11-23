@@ -1,6 +1,7 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
@@ -14,7 +15,7 @@ public class PWMTurningMotor implements TurningMotor {
         m_motor = new VictorSP(channel);
         m_motor.setInverted(true);
         m_name = String.format("/PWM Turning Motor %s", name);
-        t.log(m_name + "/Device ID",  channel);
+        t.log(Level.DEBUG, m_name + "/Device ID", channel);
     }
 
     @Override
@@ -23,20 +24,13 @@ public class PWMTurningMotor implements TurningMotor {
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name + "/Output", output);
     }
 
     @Override
-    // THIS DOES NOT ACTUALLY SET PID This is just here for the other turning motors
-    // TODO fix this
-    public void setPIDVelocity(double output, double Accel) {
-        set(output);
-    }
-
-    @Override
-    public void setPIDPosition(double output) {
-        set(output);
+    public void setVelocity(double outputRadiansPerSec, double Accel) {
+        throw new UnsupportedOperationException("PWM turning motor does not implement closed loop velocity.");
     }
 }

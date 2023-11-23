@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
-import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
 
@@ -75,7 +75,7 @@ class DriveRamseteControllerTest {
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory trajectory = planner.generateTrajectory(
+        Trajectory100 trajectory = planner.generateTrajectory(
                 false,
                 waypoints,
                 headings,

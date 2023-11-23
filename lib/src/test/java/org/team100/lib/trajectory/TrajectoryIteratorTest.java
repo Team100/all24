@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathIndexIterator;
 import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.path.PathSamplePoint;
@@ -41,7 +41,7 @@ class TrajectoryIteratorTest {
     
     @Test
     void test() {
-        Path traj = new Path(kWaypoints);
+        Path100 traj = new Path100(kWaypoints);
         PathIndexIterator iterator = new PathIndexIterator(new PathIndexSampler(traj));
 
         // Initial conditions.

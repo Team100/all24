@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../lib"
+		}
+	],
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.server.launchMode": "Standard",
+        "terminal.integrated.scrollback": 100000,
+        "workbench.colorTheme": "Default Light+",
+        "files.autoSave": "afterDelay"
+    }
+}

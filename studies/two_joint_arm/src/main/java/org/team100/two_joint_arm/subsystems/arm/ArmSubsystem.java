@@ -3,6 +3,7 @@ package org.team100.two_joint_arm.subsystems.arm;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -94,31 +95,31 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
         // with manual mode
         ArmAngles measurement = getMeasurement();
 
-        t.log("/Arm Subsystem/Upper Arm Measurement Radians", measurement.th2);
-        t.log("/Arm Subsystem/Lower Arm Measurement Radians", measurement.th1);
-        t.log("/Arm Subsystem/ARM X", m_armKinematicsM.forward(measurement).getX());
-        t.log("/Arm Subsystem/ARM Y", m_armKinematicsM.forward(measurement).getY());
+        t.log(Level.DEBUG, "/Arm Subsystem/Upper Arm Measurement Radians", measurement.th2);
+        t.log(Level.DEBUG, "/Arm Subsystem/Lower Arm Measurement Radians", measurement.th1);
+        t.log(Level.DEBUG, "/Arm Subsystem/ARM X", m_armKinematicsM.forward(measurement).getX());
+        t.log(Level.DEBUG, "/Arm Subsystem/ARM Y", m_armKinematicsM.forward(measurement).getY());
 
-        t.log("/Arm Subsystem/Upper Arm Absolute Angle", upperArmEncoder.getAbsolutePosition());
-        t.log("/Arm Subsystem/Lower Arm Absolute Angle", lowerArmEncoder.getAbsolutePosition());
-        t.log("/Arm Subsystem/Upper Arm Absolute Radians", getUpperArm());
-        t.log("/Arm Subsystem/Lower Arm Absolute Radians", getLowerArm());
-        t.log("/Arm Subsystem/Upper Arm Absolute Degrees", getUpperArm() * 180 / Math.PI);
-        t.log("/Arm Subsystem/Lower Arm Absolute Degrees", getLowerArm() * 180 / Math.PI);
+        t.log(Level.DEBUG, "/Arm Subsystem/Upper Arm Absolute Angle", upperArmEncoder.getAbsolutePosition());
+        t.log(Level.DEBUG, "/Arm Subsystem/Lower Arm Absolute Angle", lowerArmEncoder.getAbsolutePosition());
+        t.log(Level.DEBUG, "/Arm Subsystem/Upper Arm Absolute Radians", getUpperArm());
+        t.log(Level.DEBUG, "/Arm Subsystem/Lower Arm Absolute Radians", getLowerArm());
+        t.log(Level.DEBUG, "/Arm Subsystem/Upper Arm Absolute Degrees", getUpperArm() * 180 / Math.PI);
+        t.log(Level.DEBUG, "/Arm Subsystem/Lower Arm Absolute Degrees", getLowerArm() * 180 / Math.PI);
 
         double u1 = m_lowerController.calculate(measurement.th1, m_reference.th1);
         double u2 = m_upperController.calculate(measurement.th2, m_reference.th2);
         lowerArmMotor.set(soften(u1));
         upperArmMotor.set(u2);
 
-        t.log("/Arm Subsystem/Upper Arm Output amps", lowerArmMotor.getOutputCurrent());
-        t.log("/Arm Subsystem/Lower Arm Output amps", upperArmMotor.getOutputCurrent());
+        t.log(Level.DEBUG, "/Arm Subsystem/Upper Arm Output amps", lowerArmMotor.getOutputCurrent());
+        t.log(Level.DEBUG, "/Arm Subsystem/Lower Arm Output amps", upperArmMotor.getOutputCurrent());
 
     }
 
     public void setCubeMode(boolean mode) {
         cubeMode = mode;
-        t.log("/Arm Subsystem/Cube Mode", cubeMode);
+        t.log(Level.DEBUG, "/Arm Subsystem/Cube Mode", cubeMode);
     }
 
     @Override
@@ -132,8 +133,8 @@ public class ArmSubsystem extends Subsystem implements ArmInterface {
      */
     public void setReference(ArmAngles reference) {
         m_reference = reference;
-        t.log("/Arm Subsystem/Upper Angle Setpoint", m_reference.th2);
-        t.log("/Arm Subsystem/Lower Angle Setpoint", m_reference.th1);
+        t.log(Level.DEBUG, "/Arm Subsystem/Upper Angle Setpoint", m_reference.th2);
+        t.log(Level.DEBUG, "/Arm Subsystem/Lower Angle Setpoint", m_reference.th1);
     }
 
     /** Measure the arm position, smoothed with single-pole IIR low-pass filter. */

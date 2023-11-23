@@ -2,6 +2,7 @@ package org.team100.lib.encoder.turning;
 
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
@@ -22,7 +23,7 @@ public class TalonSRXTurningEncoder implements TurningEncoder {
     @Override
     public double getAngle() {
         double angleRad = MathUtil.angleModulus(m_motor.getSelectedSensorPosition() / ticksPerRevolution * 2 * Math.PI);
-        t.log(m_name + "/Angle rad", angleRad);
+        t.log(Level.DEBUG, m_name + "/Angle rad", angleRad);
         return angleRad;
     }
 

@@ -5,13 +5,11 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.drive.DriveMotor;
 import org.team100.lib.telemetry.Telemetry;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Feedforward and feedback control of a single drive motor. */
 public class DriveServo {
@@ -47,8 +45,7 @@ public class DriveServo {
         m_name = String.format("/Swerve DriveServo %s", name);
     }
 
-    void setDrive(SwerveModuleState state) {
-        double speedM_S = state.speedMetersPerSecond;
+    void setVelocity(double speedM_S) {
         if (m_experiments.enabled(Experiment.UseClosedLoopDrive)) {
             offboard(speedM_S);
         } else {
@@ -57,12 +54,13 @@ public class DriveServo {
         log();
     }
 
+    /** Set raw output directly. */
     void set(double output) {
-        m_driveMotor.set(output);
+        m_driveMotor.setDutyCycle(output);
     }
 
     void offboard(double speedM_S) {
-        m_driveMotor.setPID(ControlMode.Velocity, speedM_S);
+        m_driveMotor.setVelocity(speedM_S);
     }
 
     void onboard(double speedM_S) {
@@ -72,19 +70,11 @@ public class DriveServo {
         double driveFeedForwardOutput = m_driveFeedforward.calculate(speedM_S, accelM_S2);
         double driveOutput = driveMotorControllerOutput + driveFeedForwardOutput;
         // output deadband to prevent shivering.
-        set(MathUtil.applyDeadband(driveOutput, m_config.kDriveDeadband));
+        m_driveMotor.setDutyCycle(MathUtil.clamp(
+                MathUtil.applyDeadband(driveOutput, m_config.kDriveDeadband), -1, 1));
 
-        t.log(m_name + "Controller Output", driveMotorControllerOutput);
-        t.log(m_name + "Feed Forward Output", driveFeedForwardOutput);
-    }
-
-    private void log() {
-        t.log(m_name + "Drive position (m)", m_driveEncoder.getDistance());
-        t.log(m_name + "Drive Speed (m_s)", getDriveSpeedMS());
-        t.log(m_name + "Drive Setpoint (m_s)", m_driveController.getSetpoint());
-        t.log(m_name + "Drive Speed Error (m_s)", m_driveController.getPositionError());
-        t.log(m_name + "Drive Accel Error (m_s_s)", m_driveController.getVelocityError());
-        t.log(m_name + "Drive Motor Output [-1, 1]", m_driveMotor.get());
+        t.log(Level.DEBUG, m_name + "Controller Output", driveMotorControllerOutput);
+        t.log(Level.DEBUG, m_name + "Feed Forward Output", driveFeedForwardOutput);
     }
 
     double getDriveDistanceM() {
@@ -93,5 +83,14 @@ public class DriveServo {
 
     double getDriveSpeedMS() {
         return m_driveEncoder.getRate();
+    }
+
+    private void log() {
+        t.log(Level.DEBUG, m_name + "Drive position (m)", m_driveEncoder.getDistance());
+        t.log(Level.DEBUG, m_name + "Drive Speed (m_s)", getDriveSpeedMS());
+        t.log(Level.DEBUG, m_name + "Drive Setpoint (m_s)", m_driveController.getSetpoint());
+        t.log(Level.DEBUG, m_name + "Drive Speed Error (m_s)", m_driveController.getPositionError());
+        t.log(Level.DEBUG, m_name + "Drive Accel Error (m_s_s)", m_driveController.getVelocityError());
+        t.log(Level.DEBUG, m_name + "Drive Motor Output [-1, 1]", m_driveMotor.get());
     }
 }

@@ -2,13 +2,15 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 
-import org.team100.lib.commands.Defense;
-import org.team100.lib.commands.DriveManually;
-import org.team100.lib.commands.DriveWithHeading;
-import org.team100.lib.commands.FancyTrajectory;
-import org.team100.lib.commands.ResetPose;
-import org.team100.lib.commands.Rotate;
-import org.team100.lib.commands.SetRotation;
+import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.commands.drivetrain.Defense;
+import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveWithHeading;
+import org.team100.lib.commands.drivetrain.FancyTrajectory;
+import org.team100.lib.commands.drivetrain.ManualMode;
+import org.team100.lib.commands.drivetrain.ResetPose;
+import org.team100.lib.commands.drivetrain.Rotate;
+import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -19,6 +21,8 @@ import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.VisionDataProvider;
+import org.team100.lib.motion.arm.ArmKinematics;
+import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.Heading;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SpeedLimitsFactory;
@@ -26,13 +30,18 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveModuleCollectionFactory;
 import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
+import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.RedundantGyro;
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
+import org.team100.lib.telemetry.Annunciator;
+import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.DrawCircle;
 
 import edu.wpi.first.math.VecBuilder;
@@ -41,12 +50,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class RobotContainer {
+public class RobotContainer implements Testable {
     public static class Config {
 
         //////////////////////////////////////
@@ -83,15 +92,30 @@ public class RobotContainer {
 
     private final Control control;
 
-    public RobotContainer() throws IOException {
+    private DrawCircle m_drawCircle;
+
+    private final Monitor m_monitor;
+
+    //// ARM STUFF
+
+    private ArmSubsystem m_armSubsystem;
+    private ArmKinematics m_armKinematicsM;
+    private Command m_armAuton;
+    
+
+    public RobotContainer(TimedRobot robot) throws IOException {
 
         m_autonSelector = new AutonSelector();
-        t.log("/Routine", getRoutine());
+        t.log(Level.INFO, "/Routine", getRoutine());
 
         m_allianceSelector = new AllianceSelector();
-        t.log("/Alliance", m_allianceSelector.alliance().name());
+        t.log(Level.INFO, "/Alliance", m_allianceSelector.alliance().name());
 
         m_indicator = new LEDIndicator(8);
+
+        m_monitor = new Monitor(new Annunciator(0));
+        robot.addPeriodic(m_monitor::periodic, 0.02);
+        
 
         Identity identity = Identity.get();
         // override the correct identity for testing.
@@ -117,10 +141,8 @@ public class RobotContainer {
 
         Experiments experiments = new Experiments(identity);
 
-        m_modules = new SwerveModuleCollectionFactory(
-                experiments,
-                identity,
-                m_config.kDriveCurrentLimit).get();
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, m_config.kDriveCurrentLimit);
+        m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
         SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
                 m_kinematics,
@@ -169,10 +191,11 @@ public class RobotContainer {
         control.resetRotation0(new SetRotation(m_robotDrive, new Rotation2d(0)));
         control.resetRotation180(new SetRotation(m_robotDrive, Rotation2d.fromDegrees(180)));
 
+        ManualMode manualMode = new ManualMode();
         SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow(new DriveManually(control::twist, m_robotDrive, slow));
+        control.driveSlow(new DriveManually(manualMode, control::twist, m_robotDrive, slow));
         SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium(new DriveManually(control::twist, m_robotDrive, medium));
+        control.driveMedium(new DriveManually(manualMode, control::twist, m_robotDrive, medium));
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
@@ -209,9 +232,18 @@ public class RobotContainer {
         };
         // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
         // m_robotDrive, m_kinematics));
-        control.circle(new DrawCircle(goalArr, m_robotDrive, m_kinematics));
+        m_drawCircle = new DrawCircle(goalArr, m_robotDrive, m_kinematics);
+        control.circle(m_drawCircle);
 
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
+
+
+        ///////// ARM STUFF
+        
+        m_armSubsystem = new ArmSubsystem();
+        m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+        m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
+
 
         ///////////////////////////
         // DRIVE
@@ -219,6 +251,7 @@ public class RobotContainer {
         if (m_config.SHOW_MODE) {
             m_robotDrive.setDefaultCommand(
                     new DriveManually(
+                            manualMode,
                             control::twist,
                             m_robotDrive,
                             speedLimits));
@@ -247,23 +280,6 @@ public class RobotContainer {
         m_auton.cancel();
     }
 
-    public void runTest2() {
-        XboxController controller0 = new XboxController(0);
-        boolean rearLeft = controller0.getAButton();
-        boolean rearRight = controller0.getBButton();
-        boolean frontLeft = controller0.getXButton();
-        boolean frontRight = controller0.getYButton();
-        double driveControl = controller0.getLeftY();
-        double turnControl = controller0.getLeftX();
-        double[][] desiredOutputs = {
-                { frontLeft ? driveControl : 0, frontLeft ? turnControl : 0 },
-                { frontRight ? driveControl : 0, frontRight ? turnControl : 0 },
-                { rearLeft ? driveControl : 0, rearLeft ? turnControl : 0 },
-                { rearRight ? driveControl : 0, rearRight ? turnControl : 0 }
-        };
-        m_robotDrive.test(desiredOutputs);
-    }
-
     public double getRoutine() {
         return m_autonSelector.routine();
     }
@@ -290,5 +306,20 @@ public class RobotContainer {
         m_allianceSelector.close();
         m_indicator.close();
         m_modules.close();
+    }
+
+    //////////////////////////////////
+    //
+    // for testing
+
+    public SwerveDriveSubsystem getSwerveDriveSubsystem() {
+        return m_robotDrive;
+    }
+    public Command getDrawCircle() {
+        return m_drawCircle;
+    }
+
+    public Monitor getMonitor() {
+        return m_monitor;
     }
 }
