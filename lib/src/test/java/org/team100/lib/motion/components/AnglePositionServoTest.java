@@ -3,16 +3,14 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.turning.MockTurningEncoder;
+import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-// import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 class AnglePositionServoTest {
@@ -27,7 +25,7 @@ class AnglePositionServoTest {
         MockExperiments experiments = new MockExperiments();
         String name = "test";
         MockMotor100<Angle> turningMotor = new MockMotor100<>();
-        MockTurningEncoder turningEncoder = new MockTurningEncoder();
+        MockEncoder100<Angle> turningEncoder = new MockEncoder100<>();
 
         TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 1);
 
@@ -46,21 +44,21 @@ class AnglePositionServoTest {
                 angleVelocityController,
                 turningFeedforward);
 
-        AnglePositionServo servo = new AnglePositionServo(
+        PositionServo<Angle> servo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
                 constraints,
                 turningController2);
 
-        servo.setPosition(new Rotation2d(1));
+        servo.setPosition(1);
         assertEquals(0, turningMotor.output, 0.001);
         assertEquals(0.5, servo.getSetpoint().position, kDelta);
         assertEquals(1.0, servo.getSetpoint().velocity, kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);
 
         experiments.enablement = false;
-        servo.setPosition(new Rotation2d(1));
+        servo.setPosition(1);
         assertEquals(1.0, turningMotor.output, kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);
 

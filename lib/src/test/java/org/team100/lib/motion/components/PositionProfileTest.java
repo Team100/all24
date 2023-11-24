@@ -6,26 +6,26 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
-class AnglePositionServoProfileTest {
+class PositionProfileTest {
     private static final double kDelta = 0.001;
 
     private final MockExperiments experiments;
     private final String name;
-    private final MockMotor100<Angle> motor;
-    private final MockEncoder100<Angle> encoder;
+    private final MockMotor100<Distance> motor;
+    private final MockEncoder100<Distance> encoder;
     private final TrapezoidProfile.Constraints constraints;
     private final double period;
     private final PIDController controller2;
     private final SimpleMotorFeedforward feedforward;
-    private final PositionServo<Angle> servo;
+    private final PositionServo<Distance> servo;
 
-    public AnglePositionServoProfileTest() {
+    public PositionProfileTest() {
         experiments = new MockExperiments();
         name = "test";
         motor = new MockMotor100<>();
@@ -33,12 +33,11 @@ class AnglePositionServoProfileTest {
         constraints = new TrapezoidProfile.Constraints(1, 1);
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
-        controller2.enableContinuousInput(0, 2 * Math.PI);
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
                 experiments,
                 name,
                 motor,
@@ -58,7 +57,7 @@ class AnglePositionServoProfileTest {
      * Profile invariant to support refactoring the servo. This is the WPILib
      * TrapezoidalProfile.
      */
-    @Test
+   @Test
     void testProfile() {
         verify(0.077, 0.005, 0.1);
         verify(0.187, 0.020, 0.2);

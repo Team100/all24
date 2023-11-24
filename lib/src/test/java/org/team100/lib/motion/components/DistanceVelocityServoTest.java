@@ -3,7 +3,7 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.drive.MockDriveEncoder;
+import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.units.Distance;
@@ -18,7 +18,7 @@ class DistanceVelocityServoTest {
         MockExperiments experiments = new MockExperiments();
         String name = "test";
         MockMotor100<Distance> driveMotor = new MockMotor100<>();
-        MockDriveEncoder driveEncoder = new MockDriveEncoder();
+        MockEncoder100<Distance> driveEncoder = new MockEncoder100<>();
         PIDController driveController = new PIDController(1, 0, 0);
 
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(1, 1, 1);

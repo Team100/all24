@@ -4,7 +4,7 @@ import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.motion.components.AnglePositionServo;
+import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
@@ -95,7 +95,7 @@ public class SwerveModuleFactory {
                 angleVelocityController,
                 turningFeedforward);
 
-        AnglePositionServo turningServo = new AnglePositionServo(
+        PositionServo turningServo = new PositionServo(
                 name,
                 turningVelocityServo,
                 turningEncoder,
@@ -179,7 +179,7 @@ public class SwerveModuleFactory {
                 angleVelocityController,
                 turningFeedforward);
 
-        AnglePositionServo turningServo = new AnglePositionServo(
+        PositionServo turningServo = new PositionServo(
                 name,
                 turningVelocityServo,
                 turningEncoder,
@@ -253,7 +253,7 @@ public class SwerveModuleFactory {
                 angleVelocityController,
                 turningFeedforward);
 
-        AnglePositionServo turningServo = new AnglePositionServo(
+        PositionServo turningServo = new PositionServo(
                 name,
                 turningVelocityServo,
                 turningEncoder,
