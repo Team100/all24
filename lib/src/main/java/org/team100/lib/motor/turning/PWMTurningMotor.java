@@ -1,12 +1,14 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
-public class PWMTurningMotor implements TurningMotor {
+public class PWMTurningMotor implements Motor100<Angle> {
     private final Telemetry t = Telemetry.get();
     private final PWMMotorController m_motor;
     private final String m_name;

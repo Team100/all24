@@ -20,6 +20,7 @@ public class Experiments {
     private final Set<Experiment> globalExperiments = Set.of(
             Experiment.UseClosedLoopDrive,
             Experiment.UseClosedLoopSteering,
+            Experiment.UseClosedLoopVelocity,
             Experiment.UseSetpointGenerator);
 
     /** These experiments are enabled on specific robot types. */

@@ -1,7 +1,9 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -12,7 +14,7 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
-public class FalconTurningMotor implements TurningMotor {
+public class FalconTurningMotor implements Motor100<Angle> {
     private static final double ticksPerRevolution = 2048;
     private static final double gearRatio = 10.29;
 
@@ -56,6 +58,7 @@ public class FalconTurningMotor implements TurningMotor {
         double motorVelocityRotsPerSec = m_motor.getSelectedSensorVelocity() / (ticksPerRevolution / 10 * gearRatio);
 
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
+        // TODO: use accel
         double revolutionsPerSec2 = outputRadiansPerSecPerSec / (2 * Math.PI);
         double revsPer100ms = revolutionsPerSec / 10;
         double ticksPer100ms = revsPer100ms * ticksPerRevolution;

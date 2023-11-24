@@ -1,12 +1,15 @@
 package org.team100.lib.encoder.turning;
 
+import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Timer;
 
-public class AnalogTurningEncoder implements TurningEncoder {
+public class AnalogTurningEncoder implements Encoder100<Angle> {
     /** Describes how the encoder angle is linked to the steering angle. */
     public enum Drive {
         /**
@@ -26,6 +29,9 @@ public class AnalogTurningEncoder implements TurningEncoder {
     private final AnalogInput m_input;
     private final AnalogEncoder m_encoder;
     private final String m_name;
+
+    private Double prevAngle = null;
+    private Double prevTime = null;
 
     /**
      * @param inputOffset unit = turns, i.e. [0,1]
@@ -51,13 +57,38 @@ public class AnalogTurningEncoder implements TurningEncoder {
     }
 
     @Override
-    public double getAngle() {
+    public double getPosition() {
         t.log(Level.DEBUG, m_name + "/Channel", m_encoder.getChannel());
         t.log(Level.DEBUG, m_name + "/Angle rad", m_encoder.getDistance());
         t.log(Level.DEBUG, m_name + "/Turns", m_encoder.get());
         t.log(Level.DEBUG, m_name + "/Absolute", m_encoder.getAbsolutePosition());
         t.log(Level.DEBUG, m_name + "/Volts", m_input.getVoltage());
         return m_encoder.getDistance();
+    }
+
+    /**
+     * Trailing unfiltered velocity, likely to be very noisy.
+     * 
+     * Use a simple filter if you want a lagged, smoother measurement.
+     * 
+     * Use a Kalman filter if you can, to reduce the lag.
+     */
+    @Override
+    public double getRate() {
+        double angle = getPosition();
+        double time = Timer.getFPGATimestamp();
+        if (prevAngle == null) {
+            prevAngle = angle;
+            prevTime = time;
+            return 0;
+        }
+        double dx = angle - prevAngle;
+        double dt = time - prevTime;
+
+        prevAngle = angle;
+        prevTime = time;
+
+        return dx / dt;
     }
 
     @Override

@@ -3,13 +3,16 @@ package org.team100.lib.motion.drivetrain;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motion.components.AnglePositionServo;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
 import org.team100.lib.motor.turning.PWMTurningMotor;
+import org.team100.lib.units.Angle;
+import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
@@ -51,16 +54,15 @@ public class SwerveModuleFactory {
         driveController.setIntegratorRange(-0.01, 0.01); // Note very low windup limit.
 
         // TURNING PID
-        ProfiledPIDController turningController = new ProfiledPIDController(
-                2.86, // kP: High P to keep the measurments acurate while maintaining an agresive
-                      // wheel turning
-                0.06, // kI
-                0, // kD
-                new TrapezoidProfile.Constraints( //
-                        20 * Math.PI, // max angular speed radians/sec
-                        20 * Math.PI)); // max accel radians/sec/sec
-        turningController.enableContinuousInput(0, 2 * Math.PI);
-        turningController.setTolerance(0.01);
+        TrapezoidProfile.Constraints turningConstraints = new TrapezoidProfile.Constraints( //
+                20 * Math.PI, // max angular speed radians/sec
+                20 * Math.PI); // max accel radians/sec/sec
+
+        // TODO: shorter period
+        PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
+        turningController2.enableContinuousInput(0, 2 * Math.PI);
+        turningController2.setTolerance(0.01);
+
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
                 0.06, // kS
@@ -75,20 +77,30 @@ public class SwerveModuleFactory {
                        // to conpensate for making feedforward larger as well
                 0); // kA: I have no idea what this value should be
 
-        DriveServo driveServo = new DriveServo(
+        VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
                 name,
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
-        TurningServo turningServo = new TurningServo(
+
+        // TODO: tune this
+        PIDController angleVelocityController = new PIDController(2.86, 0, 0, 0.02);
+        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
                 name,
                 turningMotor,
                 turningEncoder,
-                turningController,
+                angleVelocityController,
                 turningFeedforward);
+
+        AnglePositionServo turningServo = new AnglePositionServo(
+                name,
+                turningVelocityServo,
+                turningEncoder,
+                turningConstraints,
+                turningController2);
 
         return new SwerveModule100(driveServo, turningServo);
     }
@@ -124,14 +136,13 @@ public class SwerveModuleFactory {
                 0); // kD
 
         // TURNING PID
-        ProfiledPIDController turningController = new ProfiledPIDController( //
-                5, // kP
-                0, // kI
-                0, // kD
-                new TrapezoidProfile.Constraints(
-                        20 * Math.PI, // speed rad/s
-                        20 * Math.PI)); // accel rad/s/s
-        turningController.enableContinuousInput(0, 2 * Math.PI);
+        TrapezoidProfile.Constraints turningConstraints = new TrapezoidProfile.Constraints(
+                20 * Math.PI, // speed rad/s
+                20 * Math.PI); // accel rad/s/s
+
+        // TODO: shorter period
+        PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
+        turningController2.enableContinuousInput(0, 2 * Math.PI);
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
@@ -150,20 +161,30 @@ public class SwerveModuleFactory {
         // 0.35, // kV: from experiment; higher than AM modules, less reduction gear
         // 0.08); // kA: I have no idea what this value should be
 
-        DriveServo driveServo = new DriveServo(
+        VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
                 name,
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
-        TurningServo turningServo = new TurningServo(
+
+        // TODO: tune this
+        PIDController angleVelocityController = new PIDController(5, 0, 0, 0.02);
+        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
                 name,
                 turningMotor,
                 turningEncoder,
-                turningController,
+                angleVelocityController,
                 turningFeedforward);
+
+        AnglePositionServo turningServo = new AnglePositionServo(
+                name,
+                turningVelocityServo,
+                turningEncoder,
+                turningConstraints,
+                turningController2);
 
         return new SwerveModule100(driveServo, turningServo);
 
@@ -193,16 +214,16 @@ public class SwerveModuleFactory {
                 0);// kD
 
         // TURNING PID
-        ProfiledPIDController turningController = new ProfiledPIDController(//
-                0.5, // kP
-                0, // kI
-                0, // kD
-                new TrapezoidProfile.Constraints(
-                        20 * Math.PI, // speed rad/s
-                        20 * Math.PI)); // accel rad/s/s
-        turningController.enableContinuousInput(0, 2 * Math.PI);
 
-        // Drive(IVE FF
+        TrapezoidProfile.Constraints turningConstraints = new TrapezoidProfile.Constraints(
+                20 * Math.PI, // speed rad/s
+                20 * Math.PI); // accel rad/s/s
+
+        // TODO: shorter period
+        PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
+        turningController2.enableContinuousInput(0, 2 * Math.PI);
+
+        // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
                 0.04, // kS makes it go further when almost at goal
                 0.23, // kV
@@ -214,20 +235,30 @@ public class SwerveModuleFactory {
                 0.003, // kV
                 0); // kA
 
-        DriveServo driveServo = new DriveServo(
+        VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
                 name,
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
-        TurningServo turningServo = new TurningServo(
+
+        // TODO: tune this
+        PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
+        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
                 name,
                 turningMotor,
                 turningEncoder,
-                turningController,
+                angleVelocityController,
                 turningFeedforward);
+
+        AnglePositionServo turningServo = new AnglePositionServo(
+                name,
+                turningVelocityServo,
+                turningEncoder,
+                turningConstraints,
+                turningController2);
 
         return new SwerveModule100(driveServo, turningServo);
     }

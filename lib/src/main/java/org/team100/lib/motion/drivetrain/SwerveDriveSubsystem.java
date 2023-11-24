@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -76,10 +77,10 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         t.log(Level.DEBUG, "/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
     }
 
-    ////////////
+    ////////////////
+    //
     // ACTUATORS
     //
-    // these should really move somewhere else.
     /**
      * @param twist Field coordinate velocities in meters and radians per second.
      */
