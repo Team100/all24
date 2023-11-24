@@ -1,6 +1,9 @@
 package org.team100.lib.encoder.drive;
 
-public class MockDriveEncoder implements DriveEncoder {
+import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.units.Distance;
+
+public class MockDriveEncoder implements Encoder100<Distance> {
 
     @Override
     public double getRate() {
@@ -8,12 +11,17 @@ public class MockDriveEncoder implements DriveEncoder {
     }
 
     @Override
-    public double getDistance() {
+    public double getPosition() {
         return 0;
     }
 
     @Override
     public void reset() {
+        //
+    }
+
+    @Override
+    public void close() {
         //
     }
 

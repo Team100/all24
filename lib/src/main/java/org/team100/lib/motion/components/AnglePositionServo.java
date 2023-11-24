@@ -1,57 +1,79 @@
 package org.team100.lib.motion.components;
 
-import org.team100.lib.encoder.turning.TurningEncoder;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motor.turning.TurningMotor;
+import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 
 /** Positional control using Rotation2d. */
 public class AnglePositionServo implements PositionServo<Rotation2d> {
     public static class Config {
-        public double kSteeringDeadband = 0.03;
+        public double kDeadband = 0.03;
     }
 
     private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
-
-    private final Experiments m_experiments;
-    private final TurningMotor m_turningMotor;
-    private final TurningEncoder m_turningEncoder;
-    private final ProfiledPIDController m_turningController;
-    private final SimpleMotorFeedforward m_turningFeedforward;
+    private final VelocityServo<Angle> m_servo;
+    private final Encoder100<Angle> m_encoder;
+    private final TrapezoidProfile.Constraints m_constraints;
+    private final PIDController m_controller;
+    private final double m_period;
     private final String m_name;
+    // the profile class is both a stateful follower and
+    // a stateless calculator. we use the stateless one so we can make
+    // the profile object once.
+    private final TrapezoidProfile m_profile;
+
+    private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
+    // TODO: use a profile that exposes acceleration and use it.
+    private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
 
     public AnglePositionServo(
-            Experiments experiments,
             String name,
-            TurningMotor turningMotor,
-            TurningEncoder turningEncoder,
-            ProfiledPIDController turningController,
-            SimpleMotorFeedforward turningFeedforward) {
-        m_experiments = experiments;
-        m_turningMotor = turningMotor;
-        m_turningEncoder = turningEncoder;
-        m_turningController = turningController;
-        m_turningFeedforward = turningFeedforward;
-        m_name = String.format("/Swerve TurningServo %s", name);
+            VelocityServo<Angle> servo,
+            Encoder100<Angle> encoder,
+            TrapezoidProfile.Constraints constraints,
+            PIDController controller) {
+        m_servo = servo;
+        m_encoder = encoder;
+        m_constraints = constraints;
+        m_controller = controller;
+        m_period = controller.getPeriod();
+        m_name = String.format("/angle position servo %s", name);
+        m_profile = new TrapezoidProfile(m_constraints);
     }
 
     @Override
     public void setPosition(Rotation2d angle) {
-        if (m_experiments.enabled(Experiment.UseClosedLoopSteering)) {
-            offboard(angle);
-        } else {
-            onboard(angle);
-        }
-        log();
+        double measurement = getTurningAngleRad();
+        m_goal = new TrapezoidProfile.State(angle.getRadians(), 0.0);
+        m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
+        
+        double u_FB = m_controller.calculate(measurement, m_setpoint.position);
+        double u_FF = m_setpoint.velocity;
+        double u_TOTAL = u_FB + u_FF;
+        // TODO: should there be a deadband here?
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, m_constraints.maxVelocity);
+        u_TOTAL = MathUtil.clamp(u_TOTAL, -m_constraints.maxVelocity, m_constraints.maxVelocity);
+        m_servo.setVelocity(u_TOTAL);
+        
+        t.log(Level.DEBUG, m_name + "/u_FB ", u_FB);
+        t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
+        t.log(Level.DEBUG, m_name + "/Measurement (rad)", getTurningAngleRad());
+        t.log(Level.DEBUG, m_name + "/Measurement (deg)", Units.radiansToDegrees(getTurningAngleRad()));
+        t.log(Level.DEBUG, m_name + "/Goal (rad)", m_goal.position);
+        t.log(Level.DEBUG, m_name + "/Setpoint (rad)", m_setpoint.position);
+        t.log(Level.DEBUG, m_name + "/Setpoint Velocity (rad/s)", m_setpoint.velocity);
+        t.log(Level.DEBUG, m_name + "/Error (rad)", m_controller.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Error Velocity (rad/s)", m_controller.getVelocityError());
+        t.log(Level.DEBUG, m_name + "/Actual Speed", m_servo.getVelocity());
     }
 
     @Override
@@ -60,58 +82,20 @@ public class AnglePositionServo implements PositionServo<Rotation2d> {
     }
 
     public void stop() {
-        m_turningMotor.setDutyCycle(0);
+        m_servo.stop();
     }
 
     public void close() {
-        m_turningEncoder.close();
+        m_encoder.close();
+    }
+
+    public State getSetpoint() {
+        return m_setpoint;
     }
 
     /////////////////////////////////////////////
 
-    private void offboard(Rotation2d angle) {
-        double turningMotorControllerOutputRad_S = m_turningController.calculate(
-                getTurningAngleRad(), angle.getRadians());
-        double turningFeedForwardRad_S = getTurnSetpointVelocityRadS();
-        double turnOutputRad_S = turningMotorControllerOutputRad_S + turningFeedForwardRad_S;
-        double turnOutputDeadbandRad_S = MathUtil.applyDeadband(turnOutputRad_S, m_config.kSteeringDeadband);
-        m_turningMotor.setVelocity(turnOutputDeadbandRad_S, 0);
-
-        t.log(Level.DEBUG, m_name + "/Controller Output rad_s", turningMotorControllerOutputRad_S);
-        t.log(Level.DEBUG, m_name + "/Feed Forward Output rad_s", turningFeedForwardRad_S);
-        t.log(Level.DEBUG, m_name + "/DESIRED POSITION", angle.getRadians());
-        t.log(Level.DEBUG, m_name + "/ACTUAL POSITION", getTurningAngleRad());
-    }
-
-    private void onboard(Rotation2d angle) {
-        double turningMotorControllerOutput = m_turningController.calculate(
-                getTurningAngleRad(), angle.getRadians());
-        double turningFeedForwardOutput = m_turningFeedforward.calculate(getTurnSetpointVelocityRadS(), 0);
-        double turnOutput = turningMotorControllerOutput + turningFeedForwardOutput;
-        m_turningMotor.setDutyCycle(MathUtil.applyDeadband(turnOutput, m_config.kSteeringDeadband));
-
-        t.log(Level.DEBUG, m_name + "/Controller Output", turningMotorControllerOutput);
-        t.log(Level.DEBUG, m_name + "/Feed Forward Output", turningFeedForwardOutput);
-        t.log(Level.DEBUG, m_name + "/Total Output", turningFeedForwardOutput);
-        t.log(Level.DEBUG, m_name + "/Actual Speed", m_turningMotor.get());
-    }
-
-    private double getTurnSetpointVelocityRadS() {
-        return m_turningController.getSetpoint().velocity;
-    }
-
     private double getTurningAngleRad() {
-        return MathUtil.angleModulus(m_turningEncoder.getAngle());
-    }
-
-    private void log() {
-        t.log(Level.DEBUG, m_name + "/Turning Measurement (rad)", getTurningAngleRad());
-        t.log(Level.DEBUG, m_name + "/Turning Measurement (deg)", Units.radiansToDegrees(getTurningAngleRad()));
-        t.log(Level.DEBUG, m_name + "/Turning Goal (rad)", m_turningController.getGoal().position);
-        t.log(Level.DEBUG, m_name + "/Turning Setpoint (rad)", m_turningController.getSetpoint().position);
-        t.log(Level.DEBUG, m_name + "/Turning Setpoint Velocity (rad/s)", getTurnSetpointVelocityRadS());
-        t.log(Level.DEBUG, m_name + "/Turning Error (rad)", m_turningController.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Turning Error Velocity (rad/s)", m_turningController.getVelocityError());
-        t.log(Level.DEBUG, m_name + "/Turning Motor Output [-1, 1]", m_turningMotor.get());
+        return MathUtil.angleModulus(m_encoder.getPosition());
     }
 }

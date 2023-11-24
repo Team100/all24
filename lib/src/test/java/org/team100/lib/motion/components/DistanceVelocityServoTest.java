@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.drive.MockDriveEncoder;
 import org.team100.lib.experiments.MockExperiments;
-import org.team100.lib.motor.drive.MockDriveMotor;
+import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -16,13 +17,13 @@ class DistanceVelocityServoTest {
 
         MockExperiments experiments = new MockExperiments();
         String name = "test";
-        MockDriveMotor driveMotor = new MockDriveMotor();
+        MockMotor100<Distance> driveMotor = new MockMotor100<>();
         MockDriveEncoder driveEncoder = new MockDriveEncoder();
         PIDController driveController = new PIDController(1, 0, 0);
 
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        DistanceVelocityServo servo = new DistanceVelocityServo(
+        VelocityServo<Distance> servo = new VelocityServo<>(
                 experiments,
                 name,
                 driveMotor,

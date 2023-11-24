@@ -1,11 +1,12 @@
 package org.team100.lib.motion.components;
 
-import org.team100.lib.encoder.drive.DriveEncoder;
+import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motor.drive.DriveMotor;
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -27,8 +28,8 @@ public class ProfiledPIDPositionServo implements PositionServo<Double> {
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
-    private final DriveMotor m_motor;
-    private final DriveEncoder m_encoder;
+    private final Motor100<Distance> m_motor;
+    private final Encoder100<Distance> m_encoder;
     private final ProfiledPIDController m_controller;
     private final SimpleMotorFeedforward m_feedforward;
     private final String m_name;
@@ -36,8 +37,8 @@ public class ProfiledPIDPositionServo implements PositionServo<Double> {
     public ProfiledPIDPositionServo(
             Experiments experiments,
             String name,
-            DriveMotor motor,
-            DriveEncoder encoder,
+            Motor100<Distance> motor,
+            Encoder100<Distance> encoder,
             ProfiledPIDController controller,
             SimpleMotorFeedforward feedforward) {
         m_experiments = experiments;
@@ -60,7 +61,7 @@ public class ProfiledPIDPositionServo implements PositionServo<Double> {
 
     @Override
     public Double getPosition() {
-        return m_encoder.getDistance();
+        return m_encoder.getPosition();
     }
 
     public void stop() {
@@ -74,8 +75,9 @@ public class ProfiledPIDPositionServo implements PositionServo<Double> {
         double u_FB = m_controller.calculate(measurement, goal);
         double u_FF = getSetpointVelocity();
         double u_TOTAL = u_FB + u_FF;
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband);
-        m_motor.setVelocity(u_TOTAL);
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, m_controller.getConstraints().maxVelocity);
+        u_TOTAL = MathUtil.clamp(u_TOTAL, -m_controller.getConstraints().maxVelocity, m_controller.getConstraints().maxVelocity);
+        m_motor.setVelocity(u_TOTAL, 0);
 
         t.log(Level.DEBUG, m_name + "/goal", goal);
         t.log(Level.DEBUG, m_name + "/measurement", measurement);
@@ -89,7 +91,9 @@ public class ProfiledPIDPositionServo implements PositionServo<Double> {
         double u_FB = m_controller.calculate(measurement, goal);
         double u_FF = m_feedforward.calculate(getSetpointVelocity(), 0);
         double u_TOTAL = u_FB + u_FF;
-        m_motor.setDutyCycle(MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband));
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, 1);
+        u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
+        m_motor.setDutyCycle(u_TOTAL);
 
         t.log(Level.DEBUG, m_name + "/goal", goal);
         t.log(Level.DEBUG, m_name + "/measurement", measurement);

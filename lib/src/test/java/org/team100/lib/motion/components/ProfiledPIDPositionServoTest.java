@@ -3,10 +3,10 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.drive.DriveEncoder;
 import org.team100.lib.encoder.drive.MockDriveEncoder;
 import org.team100.lib.experiments.MockExperiments;
-import org.team100.lib.motor.drive.MockDriveMotor;
+import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -18,8 +18,8 @@ class ProfiledPIDPositionServoTest {
         
         MockExperiments experiments = new MockExperiments();
         String name = "test";
-        MockDriveMotor turningMotor = new MockDriveMotor();
-        DriveEncoder turningEncoder = new MockDriveEncoder();
+        MockMotor100<Distance> motor = new MockMotor100<>();
+        MockDriveEncoder turningEncoder = new MockDriveEncoder();
         
         TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 1);
         // long period to make the output bigger
@@ -30,23 +30,23 @@ class ProfiledPIDPositionServoTest {
         ProfiledPIDPositionServo servo = new ProfiledPIDPositionServo(
                 experiments,
                 name,
-                turningMotor,
+                motor,
                 turningEncoder,
                 turningController,
                 turningFeedforward);
 
         servo.setPosition(1.0);
-        assertEquals(0, turningMotor.output, 0.001);
-        assertEquals(1, turningMotor.velocity, 0.001);
+        assertEquals(0, motor.output, 0.001);
+        assertEquals(1, motor.velocity, 0.001);
 
         experiments.enablement = false;
         servo.setPosition(1.0);
-        assertEquals(1, turningMotor.output, 0.001);
-        assertEquals(1, turningMotor.velocity, 0.001);
+        assertEquals(1, motor.output, 0.001);
+        assertEquals(1, motor.velocity, 0.001);
 
         servo.stop();
-        assertEquals(0, turningMotor.output, 0.001);
-        assertEquals(1, turningMotor.velocity, 0.001);
+        assertEquals(0, motor.output, 0.001);
+        assertEquals(1, motor.velocity, 0.001);
 
     }
 

@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.motion.components.DistanceVelocityServo;
+import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.units.Distance;
 import org.team100.lib.motion.components.AnglePositionServo;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -8,10 +9,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Feedforward and feedback control of a single module. */
 public class SwerveModule100 {
-    private final DistanceVelocityServo m_driveServo;
+    private final VelocityServo<Distance> m_driveServo;
     private final AnglePositionServo m_turningServo;
 
-    public SwerveModule100(DistanceVelocityServo driveServo, AnglePositionServo turningServo) {
+    public SwerveModule100(VelocityServo<Distance> driveServo, AnglePositionServo turningServo) {
         m_driveServo = driveServo;
         m_turningServo = turningServo;
     }
@@ -35,7 +36,7 @@ public class SwerveModule100 {
      * Package private for SwerveModuleCollection.positions only.
      */
     SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(m_driveServo.getDriveDistanceM(), m_turningServo.getPosition());
+        return new SwerveModulePosition(m_driveServo.getDistance(), m_turningServo.getPosition());
     }
 
     /**

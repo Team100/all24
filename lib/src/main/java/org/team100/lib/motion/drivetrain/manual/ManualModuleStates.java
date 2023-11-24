@@ -37,10 +37,11 @@ public class ManualModuleStates implements Supplier<SwerveModuleState[]> {
     public SwerveModuleState[] get() {
         Twist2d input = m_input.get();
         double hyp = Math.hypot(input.dx, input.dy);
+        hyp = MathUtil.clamp(hyp, 0, 1);
         double speedM_S = 0.0;
         Rotation2d angle = new Rotation2d();
         if (hyp >= kDeadband) {
-            speedM_S = m_speedLimits.speedM_S * MathUtil.applyDeadband(hyp, kDeadband);
+            speedM_S = m_speedLimits.speedM_S * MathUtil.applyDeadband(hyp, kDeadband, 1);
             angle = new Rotation2d(input.dx, input.dy);
         }
         t.log(Level.DEBUG, "/manual module state/v m_s", speedM_S);

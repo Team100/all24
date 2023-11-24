@@ -2,6 +2,7 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -40,7 +41,7 @@ import edu.wpi.first.math.MathUtil;
  * 
  * TODO: deal with delay in velocity measurement.
  */
-public class FalconDriveMotor implements DriveMotor {
+public class FalconDriveMotor implements Motor100<Distance> {
     private static final double ticksPerRevolution = 2048;
 
     private final Telemetry t = Telemetry.get();
@@ -49,9 +50,7 @@ public class FalconDriveMotor implements DriveMotor {
     private final double m_wheelDiameter;
     private final String m_name;
 
-    /**
-     * Throws if any of the configurations fail.
-     */
+
     public FalconDriveMotor(String name, int canId, double currentLimit, double kDriveReduction, double wheelDiameter) {
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
@@ -99,7 +98,7 @@ public class FalconDriveMotor implements DriveMotor {
     }
 
     @Override
-    public void setVelocity(double outputMetersPerSec) {
+    public void setVelocity(double outputMetersPerSec, double accelM_S_S) {
         double Kn = 0.11106;
         double Ks = 0.001515;
         double VSat = 11;

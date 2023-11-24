@@ -1,6 +1,8 @@
-package org.team100.lib.motor.drive;
+package org.team100.lib.motor;
 
-public class MockDriveMotor implements DriveMotor {
+import org.team100.lib.motor.drive.Motor100;
+
+public class MockMotor100<T> implements Motor100<T> {
     public double output = 0;
     public double velocity = 0;
 
@@ -15,7 +17,7 @@ public class MockDriveMotor implements DriveMotor {
     }
 
     @Override
-    public void setVelocity(double velocity) {
+    public void setVelocity(double velocity, double accel) {
         this.velocity = velocity;
     }
 
