@@ -13,8 +13,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 
-/** Feedforward and feedback control of a single turning motor. */
-public class TurningServo {
+/** Positional control using Rotation2d. */
+public class AnglePositionServo implements PositionServo<Rotation2d> {
     public static class Config {
         public double kSteeringDeadband = 0.03;
     }
@@ -29,7 +29,7 @@ public class TurningServo {
     private final SimpleMotorFeedforward m_turningFeedforward;
     private final String m_name;
 
-    public TurningServo(
+    public AnglePositionServo(
             Experiments experiments,
             String name,
             TurningMotor turningMotor,
@@ -44,7 +44,8 @@ public class TurningServo {
         m_name = String.format("/Swerve TurningServo %s", name);
     }
 
-    public void setAngle(Rotation2d angle) {
+    @Override
+    public void setPosition(Rotation2d angle) {
         if (m_experiments.enabled(Experiment.UseClosedLoopSteering)) {
             offboard(angle);
         } else {
@@ -53,7 +54,22 @@ public class TurningServo {
         log();
     }
 
-    void offboard(Rotation2d angle) {
+    @Override
+    public Rotation2d getPosition() {
+        return new Rotation2d(getTurningAngleRad());
+    }
+
+    public void stop() {
+        m_turningMotor.setDutyCycle(0);
+    }
+
+    public void close() {
+        m_turningEncoder.close();
+    }
+
+    /////////////////////////////////////////////
+
+    private void offboard(Rotation2d angle) {
         double turningMotorControllerOutputRad_S = m_turningController.calculate(
                 getTurningAngleRad(), angle.getRadians());
         double turningFeedForwardRad_S = getTurnSetpointVelocityRadS();
@@ -67,7 +83,7 @@ public class TurningServo {
         t.log(Level.DEBUG, m_name + "/ACTUAL POSITION", getTurningAngleRad());
     }
 
-    void onboard(Rotation2d angle) {
+    private void onboard(Rotation2d angle) {
         double turningMotorControllerOutput = m_turningController.calculate(
                 getTurningAngleRad(), angle.getRadians());
         double turningFeedForwardOutput = m_turningFeedforward.calculate(getTurnSetpointVelocityRadS(), 0);
@@ -80,25 +96,12 @@ public class TurningServo {
         t.log(Level.DEBUG, m_name + "/Actual Speed", m_turningMotor.get());
     }
 
-    /** Set raw duty cycle directly */
-    public void set(double output) {
-        m_turningMotor.setDutyCycle(output);
-    }
-
-    double getTurnSetpointVelocityRadS() {
+    private double getTurnSetpointVelocityRadS() {
         return m_turningController.getSetpoint().velocity;
     }
 
-    double getTurningAngleRad() {
+    private double getTurningAngleRad() {
         return MathUtil.angleModulus(m_turningEncoder.getAngle());
-    }
-
-    public Rotation2d getTurningRotation() {
-        return new Rotation2d(getTurningAngleRad());
-    }
-
-    public void close() {
-        m_turningEncoder.close();
     }
 
     private void log() {

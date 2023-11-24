@@ -3,8 +3,8 @@ package org.team100.lib.motion.drivetrain;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.components.DriveServo;
-import org.team100.lib.motion.components.TurningServo;
+import org.team100.lib.motion.components.DistanceVelocityServo;
+import org.team100.lib.motion.components.AnglePositionServo;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
@@ -77,14 +77,14 @@ public class SwerveModuleFactory {
                        // to conpensate for making feedforward larger as well
                 0); // kA: I have no idea what this value should be
 
-        DriveServo driveServo = new DriveServo(
+        DistanceVelocityServo driveServo = new DistanceVelocityServo(
                 experiments,
                 name,
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
-        TurningServo turningServo = new TurningServo(
+        AnglePositionServo turningServo = new AnglePositionServo(
                 experiments,
                 name,
                 turningMotor,
@@ -152,14 +152,14 @@ public class SwerveModuleFactory {
         // 0.35, // kV: from experiment; higher than AM modules, less reduction gear
         // 0.08); // kA: I have no idea what this value should be
 
-        DriveServo driveServo = new DriveServo(
+        DistanceVelocityServo driveServo = new DistanceVelocityServo(
                 experiments,
                 name,
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
-        TurningServo turningServo = new TurningServo(
+        AnglePositionServo turningServo = new AnglePositionServo(
                 experiments,
                 name,
                 turningMotor,
@@ -216,14 +216,14 @@ public class SwerveModuleFactory {
                 0.003, // kV
                 0); // kA
 
-        DriveServo driveServo = new DriveServo(
+        DistanceVelocityServo driveServo = new DistanceVelocityServo(
                 experiments,
                 name,
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
-        TurningServo turningServo = new TurningServo(
+        AnglePositionServo turningServo = new AnglePositionServo(
                 experiments,
                 name,
                 turningMotor,

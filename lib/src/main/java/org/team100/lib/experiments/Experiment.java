@@ -7,5 +7,7 @@ public enum Experiment {
     /** Offload the drive PID to the motor controller. */
     UseClosedLoopDrive,
     /** Offload the steering PID to the motor controller. */
-    UseClosedLoopSteering
+    UseClosedLoopSteering,
+    /** Offload simple servo velocity to the controller */
+    UseClosedLoopVelocity
 }

@@ -10,7 +10,7 @@ import org.team100.lib.motor.drive.MockDriveMotor;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-class DriveServoTest {
+class DistanceVelocityServoTest {
     @Test
     void testSimple() {
 
@@ -22,7 +22,7 @@ class DriveServoTest {
 
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        DriveServo servo = new DriveServo(
+        DistanceVelocityServo servo = new DistanceVelocityServo(
                 experiments,
                 name,
                 driveMotor,
@@ -34,9 +34,9 @@ class DriveServoTest {
         assertEquals(0.5, driveMotor.velocity, 0.001);
         experiments.enablement = false;
 
-        servo.setVelocity(1);
+        servo.setVelocity(1.0);
         assertEquals(1, driveMotor.output, 0.001);
-        servo.set(0);
+        servo.stop();
         assertEquals(0, driveMotor.output, 0.001);
     }
 }
