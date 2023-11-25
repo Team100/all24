@@ -4,9 +4,9 @@ package org.team100.lib.path;
  * Allows sampling a path by the index of points that make up a path.
  */
 public class PathIndexSampler {
-    private final Path trajectory;
+    private final Path100 trajectory;
 
-    public PathIndexSampler(Path trajectory) {
+    public PathIndexSampler(Path100 trajectory) {
         this.trajectory = trajectory;
     }
 

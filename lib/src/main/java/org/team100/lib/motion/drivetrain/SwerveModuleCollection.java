@@ -6,54 +6,57 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
     public static class Noop implements SwerveModuleCollectionInterface {
+        @Override
+        public void setDesiredStates(SwerveModuleState[] targetModuleStates) {
+            //
+        }
 
         @Override
         public SwerveModulePosition[] positions() {
             return new SwerveModulePosition[] {
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition()
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition()
             };
         }
 
         @Override
-        public void close() {      
+        public void close() {
+            //
         }
 
         @Override
         public SwerveModuleState[] states() {
-            return new SwerveModuleState[]{
-                new SwerveModuleState(),
-                new SwerveModuleState(),
-                new SwerveModuleState(),
-                new SwerveModuleState()
+            return new SwerveModuleState[] {
+                    new SwerveModuleState(),
+                    new SwerveModuleState(),
+                    new SwerveModuleState(),
+                    new SwerveModuleState()
             };
         }
 
         @Override
-        public void stop() {   
+        public boolean[] atSetpoint() {
+            return new boolean[] { true, true, true, true };
         }
 
         @Override
-        public void test(double[][] desiredOutputs) {
+        public void stop() {
+            //
         }
-
-        @Override
-        public void setDesiredStates(SwerveModuleState[] targetModuleStates) { 
-        }
-
     }
-    private final SwerveModule m_frontLeft;
-    private final SwerveModule m_frontRight;
-    private final SwerveModule m_rearLeft;
-    private final SwerveModule m_rearRight;
+
+    private final SwerveModule100 m_frontLeft;
+    private final SwerveModule100 m_frontRight;
+    private final SwerveModule100 m_rearLeft;
+    private final SwerveModule100 m_rearRight;
 
     public SwerveModuleCollection(
-            SwerveModule frontLeft,
-            SwerveModule frontRight,
-            SwerveModule rearLeft,
-            SwerveModule rearRight) {
+            SwerveModule100 frontLeft,
+            SwerveModule100 frontRight,
+            SwerveModule100 rearLeft,
+            SwerveModule100 rearRight) {
         m_frontLeft = frontLeft;
         m_frontRight = frontRight;
         m_rearLeft = rearLeft;
@@ -62,10 +65,10 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
 
     public SwerveModuleState[] states() {
         return new SwerveModuleState[] {
-            m_frontLeft.getState(),
-            m_frontRight.getState(),
-            m_rearLeft.getState(),
-            m_rearRight.getState()
+                m_frontLeft.getState(),
+                m_frontRight.getState(),
+                m_rearLeft.getState(),
+                m_rearRight.getState()
         };
     }
 
@@ -78,9 +81,16 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         };
     }
 
-    public void setDesiredStates(SwerveModuleState[] swerveModuleStates) {
-        // System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
+    public boolean[] atSetpoint() {
+        return new boolean[] {
+                m_frontLeft.atSetpoint(),
+                m_frontRight.atSetpoint(),
+                m_rearLeft.atSetpoint(),
+                m_rearRight.atSetpoint()
+        };
+    }
 
+    public void setDesiredStates(SwerveModuleState[] swerveModuleStates) {
         m_frontLeft.setDesiredState(swerveModuleStates[0]);
         m_frontRight.setDesiredState(swerveModuleStates[1]);
         m_rearLeft.setDesiredState(swerveModuleStates[2]);
@@ -100,20 +110,4 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_rearLeft.stop();
         m_rearRight.stop();
     }
-
-    /** Test and log. */
-    public void test(double[][] desiredOutputs) {
-        m_frontLeft.test(desiredOutputs[0]);
-        m_frontRight.test(desiredOutputs[1]);
-        m_rearLeft.test(desiredOutputs[2]);
-        m_rearRight.test(desiredOutputs[3]);
-    }
-
-    // TODO: do we need this?
-    // public void resetEncoders() {
-    //     m_frontLeft.resetDriveEncoders();
-    //     m_frontRight.resetDriveEncoders();
-    //     m_rearLeft.resetDriveEncoders();
-    //     m_rearRight.resetDriveEncoders();
-    // }
 }

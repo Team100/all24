@@ -1,6 +1,8 @@
 package org.team100.lib.motor.drive;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -39,7 +41,7 @@ import edu.wpi.first.math.MathUtil;
  * 
  * TODO: deal with delay in velocity measurement.
  */
-public class FalconDriveMotor implements DriveMotor {
+public class FalconDriveMotor implements Motor100<Distance> {
     private static final double ticksPerRevolution = 2048;
 
     private final Telemetry t = Telemetry.get();
@@ -48,9 +50,7 @@ public class FalconDriveMotor implements DriveMotor {
     private final double m_wheelDiameter;
     private final String m_name;
 
-    /**
-     * Throws if any of the configurations fail.
-     */
+
     public FalconDriveMotor(String name, int canId, double currentLimit, double kDriveReduction, double wheelDiameter) {
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
@@ -75,7 +75,7 @@ public class FalconDriveMotor implements DriveMotor {
         m_motor.config_kD(0, 0);
 
         m_name = String.format("/Falcon Drive Motor %s", name);
-        t.log(m_name + "/Device ID", m_motor.getDeviceID());
+        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceID());
     }
 
     private void require(ErrorCode errorCode) {
@@ -89,16 +89,16 @@ public class FalconDriveMotor implements DriveMotor {
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.setVoltage(10 * MathUtil.clamp(output, -1.3, 1.3));
 
-        t.log(m_name + "/Speed (rot_s)", getVelocityRot_S());
-        t.log(m_name + "/Output [-1,1]", get());
-        t.log(m_name + "/Speed (2048ths_100ms)", getVelocity2048_100());
+        t.log(Level.DEBUG, m_name + "/Speed (rot_s)", getVelocityRot_S());
+        t.log(Level.DEBUG, m_name + "/Output [-1,1]", get());
+        t.log(Level.DEBUG, m_name + "/Speed (2048ths_100ms)", getVelocity2048_100());
     }
 
     @Override
-    public void setPID(ControlMode control, double outputMetersPerSec) {
+    public void setVelocity(double outputMetersPerSec, double accelM_S_S) {
         double Kn = 0.11106;
         double Ks = 0.001515;
         double VSat = 11;
@@ -112,11 +112,10 @@ public class FalconDriveMotor implements DriveMotor {
         DemandType type = DemandType.ArbitraryFeedForward;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);
 
-        t.log(m_name + "/Speed (rot_s)", getVelocityRot_S());
-        t.log(m_name + "/Output [-1,1]", get());
-        t.log(m_name + "/DESIRED SPEED (2048ths_100ms)", ticksPer100ms * m_gearRatio);
-        t.log(m_name + "/ACTUAL SPEED (2048ths_100ms)", getVelocity2048_100());
-
+        t.log(Level.DEBUG, m_name + "/Speed (rot_s)", getVelocityRot_S());
+        t.log(Level.DEBUG, m_name + "/Output [-1,1]", get());
+        t.log(Level.DEBUG, m_name + "/DESIRED SPEED (2048ths_100ms)", ticksPer100ms * m_gearRatio);
+        t.log(Level.DEBUG, m_name + "/ACTUAL SPEED (2048ths_100ms)", getVelocity2048_100());
     }
 
     double getVelocityRot_S() {

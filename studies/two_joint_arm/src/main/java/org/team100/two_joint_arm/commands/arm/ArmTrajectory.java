@@ -2,6 +2,7 @@ package org.team100.two_joint_arm.commands.arm;
 
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.two_joint_arm.subsystems.arm.ArmInterface;
 import org.team100.two_joint_arm.subsystems.arm.ArmPosition;
 
@@ -88,10 +89,10 @@ public class ArmTrajectory extends Command {
 
         m_arm.setReference(reference);
 
-        t.log("/Arm Trajec/measurmentX", currentUpper);
-        t.log("/Arm Trajec/measurmentY", currentLower);
-        t.log("/Arm Trajec/Setpoint Upper", desiredUpper);
-        t.log("/Arm Trajec/Setpoint Lower", desiredLower);
+        t.log(Level.DEBUG, "/Arm Trajec/measurmentX", currentUpper);
+        t.log(Level.DEBUG, "/Arm Trajec/measurmentY", currentLower);
+        t.log(Level.DEBUG, "/Arm Trajec/Setpoint Upper", desiredUpper);
+        t.log(Level.DEBUG, "/Arm Trajec/Setpoint Lower", desiredLower);
     }
 
     @Override

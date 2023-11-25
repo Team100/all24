@@ -1,5 +1,7 @@
 package org.team100.lib.profile;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 /**
  * Kinematic state of a one-dimensional motion profile at any given time.
  * 
@@ -12,6 +14,10 @@ public class MotionState {
     private final double v;
     private final double a;
     private final double j;
+
+    public MotionState(TrapezoidProfile.State s) {
+        this(s.position, s.velocity);
+    }
 
     public MotionState(double x, double v, double a, double j) {
         this.x = x;

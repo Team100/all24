@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.team100.lib.util.DoubleProgression;
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.Pair;
 
@@ -92,7 +92,7 @@ public class MotionProfileGenerator {
                     maxJerk).flipped();
         }
 
-        if (MathUtil.epsilonEquals(maxJerk, 0.0)) {
+        if (Math100.epsilonEquals(maxJerk, 0.0)) {
             // acceleration-limited profile (trapezoidal)
             double requiredAccel = (goal.getV() * goal.getV() - start.getV() * start.getV())
                     / (2 * (goal.getX() - start.getX()));
@@ -138,7 +138,7 @@ public class MotionProfileGenerator {
                 }
             } else if (start.getV() > maxVel && goal.getV() > maxVel) {
                 // decel, accel
-                List<Double> roots = MathUtil.solveQuadratic(
+                List<Double> roots = Math100.solveQuadratic(
                         -maxAccel,
                         2 * start.getV(),
                         (goal.getV() * goal.getV() - start.getV() * start.getV()) / (2 * maxAccel) - goal.getX()
@@ -152,7 +152,7 @@ public class MotionProfileGenerator {
                         .build();
             } else {
                 // accel, decel
-                List<Double> roots = MathUtil.solveQuadratic(
+                List<Double> roots = Math100.solveQuadratic(
                         maxAccel,
                         2 * start.getV(),
                         (start.getV() * start.getV() - goal.getV() * goal.getV()) / (2 * maxAccel) - goal.getX()
@@ -220,7 +220,7 @@ public class MotionProfileGenerator {
 
                     double error = goal.getX() - searchProfile.end().getX();
 
-                    if (MathUtil.epsilonEquals(error, 0.0)) {
+                    if (Math100.epsilonEquals(error, 0.0)) {
                         return searchProfile;
                     }
 
@@ -270,7 +270,7 @@ public class MotionProfileGenerator {
             double maxVel,
             double maxAccel,
             double maxJerk) {
-        if (MathUtil.epsilonEquals(maxJerk, 0.0)) {
+        if (Math100.epsilonEquals(maxJerk, 0.0)) {
             // acceleration-limited
             double deltaT1 = Math.abs(start.getV() - maxVel) / maxAccel;
             MotionProfileBuilder builder = new MotionProfileBuilder(start);
@@ -320,7 +320,7 @@ public class MotionProfileGenerator {
 
                     if (newDeltaV2 > 0.0) {
                         // we decelerated too much
-                        List<Double> roots = MathUtil.solveQuadratic(
+                        List<Double> roots = Math100.solveQuadratic(
                                 -maxJerk,
                                 2 * start.getA(),
                                 start.getV() - maxVel - start.getA() * start.getA() / (2 * maxJerk));
@@ -344,7 +344,7 @@ public class MotionProfileGenerator {
                     }
                 } else {
                     // cut out the constant accel phase and find a shorter delta t1 and delta t3
-                    List<Double> roots = MathUtil.solveQuadratic(
+                    List<Double> roots = Math100.solveQuadratic(
                             maxJerk,
                             2 * start.getA(),
                             start.getV() - maxVel + start.getA() * start.getA() / (2 * maxJerk));
@@ -482,7 +482,7 @@ public class MotionProfileGenerator {
             // if there's a discrepancy in the displacements, split the the longer chunk in
             // two and add the second
             // to the corresponding list; this guarantees that segments are always aligned
-            if (!(MathUtil.epsilonEquals(forwardDx, backwardDx))) {
+            if (!(Math100.epsilonEquals(forwardDx, backwardDx))) {
                 if (forwardDx > backwardDx) {
                     // forward longer
                     forwardStates.add(
@@ -544,11 +544,11 @@ public class MotionProfileGenerator {
             MotionState state = finalState.getFirst();
             double stateDx = finalState.getSecond();
             double dt;
-            if (MathUtil.epsilonEquals(state.getA(), 0.0)) {
+            if (Math100.epsilonEquals(state.getA(), 0.0)) {
                 dt = stateDx / state.getV();
             } else {
                 double discriminant = state.getV() * state.getV() + 2 * state.getA() * stateDx;
-                if (MathUtil.epsilonEquals(discriminant, 0.0)) {
+                if (Math100.epsilonEquals(discriminant, 0.0)) {
                     dt = -state.getV() / state.getA();
                 } else {
                     dt = (Math.sqrt(discriminant) - state.getV()) / state.getA();
@@ -610,7 +610,7 @@ public class MotionProfileGenerator {
 
     private static MotionState afterDisplacement(MotionState state, double dx) {
         double discriminant = state.getV() * state.getV() + 2 * state.getA() * dx;
-        if (MathUtil.epsilonEquals(discriminant, 0.0)) {
+        if (Math100.epsilonEquals(discriminant, 0.0)) {
             return new MotionState(state.getX() + dx, 0.0, state.getA());
         } else {
             return new MotionState(state.getX() + dx, Math.sqrt(discriminant), state.getA());
