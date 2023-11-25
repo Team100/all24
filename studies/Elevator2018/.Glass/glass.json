@@ -18,6 +18,9 @@
     "serverTeam": "100",
     "visible": false
   },
+  "NetworkTables View": {
+    "visible": false
+  },
   "Plots": {
     "Plot <0>": {
       "plots": [
@@ -162,6 +165,29 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/FeedForward"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <6>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 185,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Current"
             }
           ]
         }

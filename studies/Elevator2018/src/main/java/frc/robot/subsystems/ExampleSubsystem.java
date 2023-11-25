@@ -20,7 +20,8 @@ public class ExampleSubsystem extends SubsystemBase {
       CANSparkMax motor) {
     m_motor = motor;
     m_motor.enableVoltageCompensation(12.0);
-    m_motor.setSmartCurrentLimit(10);
+    // m_motor.setSmartCurrentLimit(25);
+    m_motor.setSecondaryCurrentLimit(0);
     m_motor.setIdleMode(IdleMode.kCoast);
   }
 
@@ -65,6 +66,7 @@ public class ExampleSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Measurment", get());
+    SmartDashboard.putNumber("Current", m_motor.getOutputCurrent());
 
   }
 
