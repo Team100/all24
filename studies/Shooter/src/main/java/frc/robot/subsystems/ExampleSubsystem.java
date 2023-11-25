@@ -14,8 +14,8 @@ public class ExampleSubsystem extends SubsystemBase {
   private final CANSparkMax motor2;
 
   public ExampleSubsystem() {
-    motor1 = new CANSparkMax(1, MotorType.kBrush);
-    motor2 = new CANSparkMax(2, MotorType.kBrush);
+    motor1 = new CANSparkMax(1, MotorType.kBrushed);
+    motor2 = new CANSparkMax(2, MotorType.kBrushed);
   }
 
   public void set(double value) {
