@@ -3,15 +3,14 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.turning.MockTurningEncoder;
+import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 class AnglePositionServoProfileTest {
@@ -20,19 +19,17 @@ class AnglePositionServoProfileTest {
     private final MockExperiments experiments;
     private final String name;
     private final MockMotor100<Angle> motor;
-    private final MockTurningEncoder encoder;
-    private final TrapezoidProfile.Constraints constraints;
+    private final MockEncoder100<Angle> encoder;
     private final double period;
     private final PIDController controller2;
     private final SimpleMotorFeedforward feedforward;
-    private final AnglePositionServo servo;
+    private final PositionServo<Angle> servo;
 
     public AnglePositionServoProfileTest() {
         experiments = new MockExperiments();
         name = "test";
         motor = new MockMotor100<>();
-        encoder = new MockTurningEncoder();
-        constraints = new TrapezoidProfile.Constraints(1, 1);
+        encoder = new MockEncoder100<>();
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
         controller2.enableContinuousInput(0, 2 * Math.PI);
@@ -48,12 +45,14 @@ class AnglePositionServoProfileTest {
                 angleVelocityController,
                 feedforward);
 
-        servo = new AnglePositionServo(
+        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);
+        servo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 encoder,
-                constraints,
-                controller2);
+                1,
+                controller2,
+                profile);
     }
 
     /**
@@ -87,7 +86,7 @@ class AnglePositionServoProfileTest {
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
-        servo.setPosition(new Rotation2d(1));
+        servo.setPosition(1);
         assertEquals(motorVelocity, motor.velocity, kDelta);
         assertEquals(setpointPosition, servo.getSetpoint().position, kDelta);
         assertEquals(setpointVelocity, servo.getSetpoint().velocity, kDelta);
