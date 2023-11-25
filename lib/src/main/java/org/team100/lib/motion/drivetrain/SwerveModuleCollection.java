@@ -37,6 +37,11 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         }
 
         @Override
+        public boolean[] atSetpoint() {
+            return new boolean[] { true, true, true, true };
+        }
+
+        @Override
         public void stop() {
             //
         }
@@ -73,6 +78,15 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
                 m_frontRight.getPosition(),
                 m_rearLeft.getPosition(),
                 m_rearRight.getPosition()
+        };
+    }
+
+    public boolean[] atSetpoint() {
+        return new boolean[] {
+                m_frontLeft.atSetpoint(),
+                m_frontRight.atSetpoint(),
+                m_rearLeft.atSetpoint(),
+                m_rearRight.atSetpoint()
         };
     }
 

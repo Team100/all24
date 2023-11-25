@@ -2,12 +2,12 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.HeadingInterface;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
+import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;

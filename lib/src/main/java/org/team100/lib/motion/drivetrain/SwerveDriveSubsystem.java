@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -76,10 +77,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         t.log(Level.DEBUG, "/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
     }
 
-    ////////////
+    ////////////////
+    //
     // ACTUATORS
     //
-    // these should really move somewhere else.
     /**
      * @param twist Field coordinate velocities in meters and radians per second.
      */
@@ -90,6 +91,18 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         t.log(Level.DEBUG, "/chassis/y m", twist.dy);
         t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
+    }
+
+    /**
+     * steer the wheels to match the target but don't drive them. This is for the
+     * beginning of trajectories, like the "square" project or any other case where
+     * the new direction happens not to be aligned with the wheels.
+     */
+    @Override
+    public boolean steerAtRest(Twist2d twist) {
+        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
+                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds);
     }
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
@@ -119,8 +132,14 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         return m_poseEstimator.getEstimatedPosition();
     }
 
+    @Override
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+    }
+
+    @Override
+    public boolean[] atSetpoint() {
+        return m_swerveLocal.atSetpoint();
     }
 
     /** for testing only */
