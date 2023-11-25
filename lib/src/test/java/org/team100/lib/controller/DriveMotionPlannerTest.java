@@ -7,18 +7,18 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
-import org.team100.lib.paths.TrajectoryGenerator;
-import org.team100.lib.planners.TrajectoryPlanner;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
-import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectoryGenerator100;
+import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
-import org.team100.lib.trajectory.TrajectoryUtil;
+import org.team100.lib.trajectory.TrajectoryUtil100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -69,14 +69,14 @@ class DriveMotionPlannerTest {
         double max_vel = 100;
         double max_accel = 100;
 
-        Path traj = new Path();
+        Path100 traj = new Path100();
         Assertions.assertTrue(traj.isEmpty());
         Assertions.assertEquals(0.0, new PathIndexSampler(traj).first_interpolant(), 0.2);
         Assertions.assertEquals(0.0, new PathIndexSampler(traj).last_interpolant(), 0.2);
         Assertions.assertEquals(0, traj.length());
 
         // Set states at construction time.
-        traj = TrajectoryUtil.trajectoryFromWaypointsAndHeadings(waypoints, headings, 2, 0.25, 0.1);
+        traj = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(waypoints, headings, 2, 0.25, 0.1);
         Assertions.assertFalse(traj.isEmpty());
         Assertions.assertEquals(0.0, new PathIndexSampler(traj).first_interpolant(), 0.2);
         // Assertions.assertEquals(3.0, traj.getIndexView().last_interpolant(), 0.2);
@@ -88,7 +88,7 @@ class DriveMotionPlannerTest {
         // System.out.println(traj.getPoint(i).index());
         // }
 
-        Trajectory timed_trajectory = TimingUtil.timeParameterizeTrajectory(false, new PathDistanceSampler(traj), 2,
+        Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(false, new PathDistanceSampler(traj), 2,
                 Arrays.asList(), start_vel, end_vel, max_vel, max_accel);
 
         // System.out.println("\n\n\n\n\n\n\n");
@@ -132,7 +132,7 @@ class DriveMotionPlannerTest {
         SwerveKinematicLimits limits = kSmoothKinematicLimits;
         DrivePIDController controller = new DrivePIDController();
         TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
-        TrajectoryGenerator generator = new TrajectoryGenerator(tPlanner);
+        TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
         generator.generateTrajectories();
         var trajectories = generator.getTrajectorySet().getAllTrajectories();
 

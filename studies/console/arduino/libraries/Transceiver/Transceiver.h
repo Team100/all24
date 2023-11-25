@@ -82,7 +82,8 @@ public:
     CLIMB = 5,
     ARM = 6,
     BUTTONS = 7,
-    DEBUG = 8
+    DEBUG = 8,
+    KNOBS = 9
   };
 
   /**
@@ -96,6 +97,7 @@ public:
       case SubConsole::ARM: return "Arm";
       case SubConsole::BUTTONS: return "Button Board";
       case SubConsole::DEBUG: return "Debug";
+      case SubConsole::KNOBS: return "Knobs";
       default: return "Unassigned";
     }
   }

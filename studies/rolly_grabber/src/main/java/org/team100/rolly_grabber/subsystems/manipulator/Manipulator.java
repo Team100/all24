@@ -2,6 +2,7 @@ package org.team100.rolly_grabber.subsystems.manipulator;
 
 import org.team100.lib.commands.InitCommand;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -41,8 +42,8 @@ public class Manipulator extends Subsystem implements ManipulatorInterface {
     void set(double speed1_1, int currentLimit) {
         m_motor.configPeakCurrentLimit(currentLimit);
         m_motor.set(speed1_1);
-        t.log("/Manipulator/Output Current amps", m_motor.getStatorCurrent());
-        t.log("/Manipulator/Input Current amps", m_motor.getSupplyCurrent());
+        t.log(Level.DEBUG, "/Manipulator/Output Current amps", m_motor.getStatorCurrent());
+        t.log(Level.DEBUG, "/Manipulator/Input Current amps", m_motor.getSupplyCurrent());
     }
 
     @Override

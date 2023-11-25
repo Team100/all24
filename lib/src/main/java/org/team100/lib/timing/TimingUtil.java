@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.Trajectory100;
 
 public class TimingUtil {
-    public static Trajectory timeParameterizeTrajectory(
+    public static Trajectory100 timeParameterizeTrajectory(
             boolean reverse,
             final PathDistanceSampler distance_view,
             double step_size,
@@ -26,7 +26,7 @@ public class TimingUtil {
                 max_velocity, max_abs_acceleration);
     }
 
-    public static Trajectory timeParameterizeTrajectory(
+    public static Trajectory100 timeParameterizeTrajectory(
             boolean reverse,
             final List<Pose2dWithMotion> states,
             final List<TimingConstraint> constraints,
@@ -217,7 +217,7 @@ public class TimingUtil {
             s = constrained_state.distance;
             timed_states.add(new TimedPose(constrained_state.state, t, reverse ? -v : v, reverse ? -accel : accel));
         }
-        return new Trajectory(timed_states);
+        return new Trajectory100(timed_states);
     }
 
     protected static class ConstrainedState {

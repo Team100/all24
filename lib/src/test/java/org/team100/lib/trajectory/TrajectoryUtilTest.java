@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathSamplePoint;
 import org.team100.lib.spline.PoseSpline;
 
@@ -23,7 +23,7 @@ class TrajectoryUtilTest {
         double maxDx = 0.1;
         double maxDy = 0.1;
         double maxDTheta = 0.1;
-        Path path = TrajectoryUtil.trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
+        Path100 path = TrajectoryUtil100.trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
         assertEquals(0, path.length(), 0.001);
     }
 
@@ -72,7 +72,7 @@ class TrajectoryUtilTest {
         double maxDx = 0.1;
         double maxDy = 0.1;
         double maxDTheta = 0.1;
-        Path path = TrajectoryUtil.trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
+        Path100 path = TrajectoryUtil100.trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
         assertEquals(2, path.length(), 0.001);
         {
             PathSamplePoint sample = path.getInterpolated(0);

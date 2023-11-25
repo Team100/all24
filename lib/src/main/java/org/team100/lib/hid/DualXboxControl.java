@@ -5,6 +5,7 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -47,40 +48,13 @@ public class DualXboxControl implements Control {
     // DRIVER: manual driving and auto navigation controls
 
     @Override
-    public void driveToLeftGrid(Command command) {
-        // controller0.x().whileTrue(command);
-    }
-
-    @Override
-    public void autoLevel(Command command) {
-        // controller0.x().whileTrue(command);
-    }
-
-    @Override
-    public void driveToCenterGrid(Command command) {
-        // controller0.a().whileTrue(command);
-    }
-
-    @Override
-    public void driveToRightGrid(Command command) {
-        // controller0.b().whileTrue(command);
-    }
-
-    @Override
-    public void driveToSubstation(Command command) {
-        // controller0.y().whileTrue(command);
-    }
-
-    @Override
     public void resetRotation0(Command command) {
-        JoystickButton startButton = new JoystickButton(controller0.getHID(), 7);
-        startButton.onTrue(command);
+        new JoystickButton(controller0.getHID(), 7).onTrue(command);
     }
 
     @Override
     public void resetRotation180(Command command) {
-        JoystickButton startButton = new JoystickButton(controller0.getHID(), 8);
-        startButton.onTrue(command);
+        new JoystickButton(controller0.getHID(), 8).onTrue(command);
     }
 
     @Override
@@ -88,9 +62,9 @@ public class DualXboxControl implements Control {
         double dx = expo(deadband(-1.0 * clamp(controller0.getRightY(), 1), m_config.kDeadband, 1), m_config.kExpo);
         double dy = expo(deadband(-1.0 * clamp(controller0.getRightX(), 1), m_config.kDeadband, 1), m_config.kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(controller0.getLeftX(), 1), m_config.kDeadband, 1), m_config.kExpo);
-        t.log("/Xbox/right y",  controller0.getRightY());
-        t.log("/Xbox/right x",  controller0.getRightX());
-        t.log("/Xbox/left x",  controller0.getLeftX());
+        t.log(Level.DEBUG, "/Xbox/right y", controller0.getRightY());
+        t.log(Level.DEBUG, "/Xbox/right x", controller0.getRightX());
+        t.log(Level.DEBUG, "/Xbox/left x", controller0.getLeftX());
         return new Twist2d(dx, dy, dtheta);
     }
 
@@ -117,15 +91,12 @@ public class DualXboxControl implements Control {
 
     @Override
     public void defense(Command defense) {
-        JoystickButton button = new JoystickButton(controller0.getHID(), 2);
-
-        button.whileTrue(defense);
+        new JoystickButton(controller0.getHID(), 2).whileTrue(defense);
     }
 
     @Override
     public void rotate0(Command command) {
-        JoystickButton button = new JoystickButton(controller0.getHID(), 9);
-        button.whileTrue(command);
+        new JoystickButton(controller0.getHID(), 9).whileTrue(command);
     }
 
     @Override
@@ -134,12 +105,12 @@ public class DualXboxControl implements Control {
     }
 
     @Override
-    public void driveWithFancyTrajec(Command command){
-        //controller0.a().whileTrue(command);
+    public void driveWithFancyTrajec(Command command) {
+        // controller0.a().whileTrue(command);
     }
 
     @Override
-    public void circle(Command command){
+    public void circle(Command command) {
         controller0.a().whileTrue(command);
     }
 }
