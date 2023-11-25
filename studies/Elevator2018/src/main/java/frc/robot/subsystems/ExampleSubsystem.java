@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +26,10 @@ public class ExampleSubsystem extends SubsystemBase {
 
   public void set(double value) {
     m_motor.set(value);
+  }
+
+  public void reset() {
+    m_motor.getEncoder().setPosition(0);
   }
 
   public double get() {
@@ -58,6 +64,7 @@ public class ExampleSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Measurment", get());
 
   }
 
