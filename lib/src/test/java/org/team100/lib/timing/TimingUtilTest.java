@@ -12,10 +12,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
-import org.team100.lib.trajectory.Trajectory;
+import org.team100.lib.trajectory.Trajectory100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,7 +37,7 @@ public class TimingUtilTest {
             GeometryUtil.fromDegrees(0),
             GeometryUtil.fromDegrees(0));
 
-    public Trajectory buildAndCheckTrajectory(
+    public Trajectory100 buildAndCheckTrajectory(
             final PathDistanceSampler dist_view,
             double step_size,
             List<TimingConstraint> constraints,
@@ -45,7 +45,7 @@ public class TimingUtilTest {
             double end_vel,
             double max_vel,
             double max_acc) {
-        Trajectory timed_traj = TimingUtil
+        Trajectory100 timed_traj = TimingUtil
                 .timeParameterizeTrajectory(false, dist_view, step_size, constraints, start_vel, end_vel, max_vel,
                         max_acc);
         checkTrajectory(timed_traj, constraints, start_vel, end_vel, max_vel, max_acc);
@@ -53,7 +53,7 @@ public class TimingUtilTest {
     }
 
     public void checkTrajectory(
-            final Trajectory traj,
+            final Trajectory100 traj,
             List<TimingConstraint> constraints,
             double start_vel,
             double end_vel,
@@ -84,11 +84,11 @@ public class TimingUtilTest {
 
     @Test
     void testNoConstraints() {
-        Path traj = new Path(kWaypoints);
+        Path100 traj = new Path100(kWaypoints);
         PathDistanceSampler dist_view = new PathDistanceSampler(traj);
 
         // Triangle profile.
-        Trajectory timed_traj = buildAndCheckTrajectory(dist_view,
+        Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
                 1.0,
                 new ArrayList<TimingConstraint>(), 0.0, 0.0, 20.0, 5.0);
         assertNotNull(timed_traj);
@@ -106,7 +106,7 @@ public class TimingUtilTest {
 
     @Test
     void testConditionalVelocityConstraint() {
-        Path traj = new Path(kWaypoints);
+        Path100 traj = new Path100(kWaypoints);
         PathDistanceSampler dist_view = new PathDistanceSampler(traj);
 
         class ConditionalTimingConstraint implements TimingConstraint {
@@ -127,7 +127,7 @@ public class TimingUtilTest {
         }
 
         // Trapezoidal profile.
-        Trajectory timed_traj = buildAndCheckTrajectory(dist_view,
+        Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
                 1.0,
                 Arrays.asList(new ConditionalTimingConstraint()), 0.0, 0.0, 10.0, 5.0);
         assertNotNull(timed_traj);
@@ -138,7 +138,7 @@ public class TimingUtilTest {
 
     @Test
     void testConditionalAccelerationConstraint() {
-        Path traj = new Path(kWaypoints);
+        Path100 traj = new Path100(kWaypoints);
         PathDistanceSampler dist_view = new PathDistanceSampler(traj);
 
         class ConditionalTimingConstraint implements TimingConstraint {
@@ -155,7 +155,7 @@ public class TimingUtilTest {
         }
 
         // Trapezoidal profile.
-        Trajectory timed_traj = buildAndCheckTrajectory(dist_view,
+        Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
                 1.0,
                 Arrays.asList(new ConditionalTimingConstraint()), 0.0, 0.0, 10.0, 5.0);
         assertNotNull(timed_traj);

@@ -16,6 +16,9 @@ public interface SwerveDriveSubsystemInterface {
     // we depend on CommandScheduler to enforce the mutex.
 
     void driveInFieldCoords(Twist2d twist);
+    
+    /** @return true if aligned */
+    boolean steerAtRest(Twist2d twist);
 
     void setChassisSpeeds(ChassisSpeeds speeds);
 
@@ -28,6 +31,10 @@ public interface SwerveDriveSubsystemInterface {
     ///////////////////////////////
 
     Pose2d getPose();
+
+    void resetPose(Pose2d robotPose);
+
+    boolean[] atSetpoint();
 
     ChassisSpeeds speeds();
 

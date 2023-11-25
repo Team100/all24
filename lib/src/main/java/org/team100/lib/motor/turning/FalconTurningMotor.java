@@ -1,6 +1,9 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -11,7 +14,7 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
-public class FalconTurningMotor implements TurningMotor {
+public class FalconTurningMotor implements Motor100<Angle> {
     private static final double ticksPerRevolution = 2048;
     private static final double gearRatio = 10.29;
 
@@ -51,10 +54,11 @@ public class FalconTurningMotor implements TurningMotor {
         return m_motor.get();
     }
 
-    public void setPIDVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
+    public void setVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double motorVelocityRotsPerSec = m_motor.getSelectedSensorVelocity() / (ticksPerRevolution / 10 * gearRatio);
 
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
+        // TODO: use accel
         double revolutionsPerSec2 = outputRadiansPerSecPerSec / (2 * Math.PI);
         double revsPer100ms = revolutionsPerSec / 10;
         double ticksPer100ms = revsPer100ms * ticksPerRevolution;
@@ -67,32 +71,23 @@ public class FalconTurningMotor implements TurningMotor {
             Ks = 0.0375;
         }
 
-        // Ks = 0; //TODO undo this
-                
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * gearRatio, type, kFF);
-        t.log(m_name + "/Actual Velocity", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
-        t.log(m_name + "/Desired Velocity", m_motor.get());
-        
-        log();
-    }
+        t.log(Level.DEBUG, m_name + "/Actual Velocity", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
+        t.log(Level.DEBUG, m_name + "/Desired Velocity", m_motor.get());
 
-    public void setPIDPosition(double outputRadians) {
-        double outputTicks = outputRadians / (Math.PI * 2) * ticksPerRevolution;
-        m_motor.set(ControlMode.Position, outputTicks * gearRatio);
         log();
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.set(output);
         log();
     }
 
     private void log() {
-        t.log(m_name + "/Output", get());
-        t.log(m_name + "/Error", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
-        // t.log(m_name + "/Measurment Velocity", )
+        t.log(Level.DEBUG, m_name + "/Output", get());
+        t.log(Level.DEBUG, m_name + "/Error", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
     }
 
 }

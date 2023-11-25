@@ -7,11 +7,11 @@ package org.team100.lib.trajectory;
 public class TrajectoryTimeSampler {
     public static class TrajectoryTimeSampleException extends RuntimeException {}
 
-    protected final Trajectory trajectory_;
+    protected final Trajectory100 trajectory_;
     protected final double startTimeS;
     protected final double endTimeS;
 
-    public TrajectoryTimeSampler(Trajectory trajectory) {
+    public TrajectoryTimeSampler(Trajectory100 trajectory) {
         trajectory_ = trajectory;
         startTimeS = trajectory_.getPoint(0).state().getTimeS();
         endTimeS = trajectory_.getPoint(trajectory_.length() - 1).state().getTimeS();
@@ -54,7 +54,7 @@ public class TrajectoryTimeSampler {
         throw new TrajectoryTimeSampleException();
     }
 
-    public Trajectory trajectory() {
+    public Trajectory100 trajectory() {
         return trajectory_;
     }
 }

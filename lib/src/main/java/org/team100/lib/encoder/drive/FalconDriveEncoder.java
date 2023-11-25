@@ -1,9 +1,12 @@
 package org.team100.lib.encoder.drive;
 
+import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance;
 
-public class FalconDriveEncoder implements DriveEncoder {
+public class FalconDriveEncoder implements Encoder100<Distance> {
     private final Telemetry t = Telemetry.get();
 
     private final FalconDriveMotor m_motor;
@@ -20,7 +23,7 @@ public class FalconDriveEncoder implements DriveEncoder {
     }
 
     @Override
-    public double getDistance() {
+    public double getPosition() {
         return m_motor.getPosition() * m_distancePerPulse;
     }
 
@@ -28,12 +31,17 @@ public class FalconDriveEncoder implements DriveEncoder {
     public double getRate() {
         // sensor velocity is 1/2048ths of a turn per 100ms
         double result = m_motor.getVelocity2048_100() * 10 * m_distancePerPulse;
-        t.log(m_name + "/Speed m_s", result);
+        t.log(Level.DEBUG, m_name + "/Speed m_s", result);
         return result;
     }
 
     @Override
     public void reset() {
         m_motor.resetPosition();
+    }
+
+    @Override
+    public void close() {
+        //
     }
 }

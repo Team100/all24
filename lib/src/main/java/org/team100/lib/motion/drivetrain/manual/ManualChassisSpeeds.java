@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Twist2d;
@@ -32,8 +33,8 @@ public class ManualChassisSpeeds implements Supplier<ChassisSpeeds> {
                 input,
                 m_speedLimits.speedM_S,
                 m_speedLimits.angleSpeedRad_S);
-        t.log("/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
-        t.log("/manual robot relative/vy m_s", speeds.vyMetersPerSecond);
+        t.log(Level.DEBUG, "/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
+        t.log(Level.DEBUG, "/manual robot relative/vy m_s", speeds.vyMetersPerSecond);
         return speeds;
     }
 }
