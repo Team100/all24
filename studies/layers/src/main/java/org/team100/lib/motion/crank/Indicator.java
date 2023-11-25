@@ -3,6 +3,7 @@ package org.team100.lib.motion.crank;
 import java.util.function.Supplier;
 
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -15,7 +16,7 @@ public class Indicator {
         void accept(Indicator indicator);
     }
 
-    private final Telemetry t = new Telemetry();
+    private final Telemetry t = Telemetry.get();
     private final EventLoop m_loop;
     private final HID m_hid;
     private final Supplier<Visible> m_root;
@@ -48,7 +49,7 @@ public class Indicator {
 
     private void log(Visible visible) {
         String name = visible.getClass().getSimpleName();
-        t.log("/indicator/" + name, true);
+        t.log(Level.DEBUG, "/indicator/" + name, true);
     }
 
     // one-hot indicator encoding to make it easy for the console.

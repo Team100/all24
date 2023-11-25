@@ -2,6 +2,7 @@ package org.team100.lib.controller;
 
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,29 +41,33 @@ public class HolonomicDriveController3 {
     public Twist2d calculate(
             Pose2d currentPose,
             SwerveState desiredState) {
+
         Rotation2d currentRotation = currentPose.getRotation();
 
         double xFF = desiredState.x().v(); // m/s
         double yFF = desiredState.y().v(); // m/s
         double thetaFF = desiredState.theta().v(); // rad/s
 
-        t.log("/Holonomic3/xFF", xFF);
-        t.log("/Holonomic3/yFF", yFF);
-        t.log("/Holonomic3/thetaFF", thetaFF);
+        t.log(Level.DEBUG, "/Holonomic3/xFF", xFF);
+        t.log(Level.DEBUG, "/Holonomic3/yFF", yFF);
+        t.log(Level.DEBUG, "/Holonomic3/thetaFF", thetaFF);
 
         double xFeedback = m_xController.calculate(currentPose.getX(), desiredState.x().x());
         double yFeedback = m_yController.calculate(currentPose.getY(), desiredState.y().x());
         double thetaFeedback = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        t.log("/Holonomic3/xFB", xFeedback);
-        t.log("/Holonomic3/yFB", yFeedback);
-        t.log("/Holonomic3/thetaFB", thetaFeedback);
-        t.log("/Holonomic3/xSet", m_xController.getSetpoint());
-        t.log("/Holonomic3/ySet", m_yController.getSetpoint());
-        t.log("/Holonomic3/thetaSet", m_thetaController.getSetpoint());
-        t.log("/Holonomic3/xErr", m_xController.getPositionError());
-        t.log("/Holonomic3/yErr", m_yController.getPositionError());
-        t.log("/Holonomic3/thetaErr", m_thetaController.getPositionError());
+        t.log(Level.DEBUG, "/Holonomic3/xFB", xFeedback);
+        t.log(Level.DEBUG, "/Holonomic3/yFB", yFeedback);
+        t.log(Level.DEBUG, "/Holonomic3/thetaFB", thetaFeedback);
+        t.log(Level.DEBUG, "/Holonomic3/xSet", m_xController.getSetpoint());
+        t.log(Level.DEBUG, "/Holonomic3/ySet", m_yController.getSetpoint());
+        t.log(Level.DEBUG, "/Holonomic3/thetaSet", m_thetaController.getSetpoint());
+        t.log(Level.DEBUG, "/Holonomic3/xErr", m_xController.getPositionError());
+        t.log(Level.DEBUG, "/Holonomic3/yErr", m_yController.getPositionError());
+        t.log(Level.DEBUG, "/Holonomic3/thetaErr", m_thetaController.getPositionError());
+
+        // return new Twist2d(xFF, yFF, thetaFF);
+
 
         return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
     }

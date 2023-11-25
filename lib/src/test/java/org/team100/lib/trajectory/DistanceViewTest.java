@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.path.Path;
+import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,7 +34,7 @@ class DistanceViewTest {
         //         GeometryUtil.fromDegrees(180));
 
         // Create the reference trajectory (straight line motion between waypoints).
-        Path trajectory = new Path(waypoints);
+        Path100 trajectory = new Path100(waypoints);
         final PathDistanceSampler distance_view = new PathDistanceSampler(trajectory);
 
         assertEquals(0.0, distance_view.first_interpolant(), kTestEpsilon);

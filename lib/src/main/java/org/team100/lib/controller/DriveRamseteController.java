@@ -5,10 +5,11 @@ import java.util.Optional;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,7 +48,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (mCurrentTrajectory == null)
             return null;
 
-        t.log("/planner/current state", current_state);
+        t.log(Level.DEBUG, "/ramsete_planner/current state", current_state);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -58,9 +59,9 @@ public class DriveRamseteController implements DriveMotionController {
         mLastTime = timestamp;
 
         TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-        t.log("/ramsete_planner/sample point", sample_point);
+        t.log(Level.DEBUG, "/ramsete_planner/sample point", sample_point);
         mSetpoint = sample_point.state();
-        t.log("/ramsete_planner/setpoint", mSetpoint);
+        t.log(Level.DEBUG, "/ramsete_planner/setpoint", mSetpoint);
 
         TimedPose fieldToGoal = mSetpoint;
         Pose2d fieldToRobot = current_state;
@@ -116,7 +117,7 @@ public class DriveRamseteController implements DriveMotionController {
 
         // Compute error components.
         final double angle_error_rads = course_to_goal.getRadians();
-        final double sin_x_over_x = MathUtil.epsilonEquals(angle_error_rads, 0.0, 1E-2) ? 1.0
+        final double sin_x_over_x = Math100.epsilonEquals(angle_error_rads, 0.0, 1E-2) ? 1.0
                 : course_to_goal.getSin() / angle_error_rads;
         double adjusted_linear_velocity = goal_linear_velocity * course_to_goal.getCos()
                 + k * linear_error_course_relative.getX();

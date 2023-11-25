@@ -55,7 +55,7 @@ public class TrajectoryTimeIterator {
         return view_.sample(progress);
     }
 
-    public Trajectory trajectory() {
+    public Trajectory100 trajectory() {
         return view_.trajectory();
     }
 }

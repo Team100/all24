@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -36,14 +37,15 @@ public class ManualModuleStates implements Supplier<SwerveModuleState[]> {
     public SwerveModuleState[] get() {
         Twist2d input = m_input.get();
         double hyp = Math.hypot(input.dx, input.dy);
+        hyp = MathUtil.clamp(hyp, 0, 1);
         double speedM_S = 0.0;
         Rotation2d angle = new Rotation2d();
         if (hyp >= kDeadband) {
-            speedM_S = m_speedLimits.speedM_S * MathUtil.applyDeadband(hyp, kDeadband);
+            speedM_S = m_speedLimits.speedM_S * MathUtil.applyDeadband(hyp, kDeadband, 1);
             angle = new Rotation2d(input.dx, input.dy);
         }
-        t.log("/manual module state/v m_s", speedM_S);
-        t.log("/manual module state/angle rad", angle.getRadians());
+        t.log(Level.DEBUG, "/manual module state/v m_s", speedM_S);
+        t.log(Level.DEBUG, "/manual module state/angle rad", angle.getRadians());
         return new SwerveModuleState[] {
                 new SwerveModuleState(speedM_S, angle),
                 new SwerveModuleState(speedM_S, angle),

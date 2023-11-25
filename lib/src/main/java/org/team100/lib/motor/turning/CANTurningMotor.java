@@ -1,7 +1,10 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -10,7 +13,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-public class CANTurningMotor implements TurningMotor {
+public class CANTurningMotor implements Motor100<Angle> {
     private final Telemetry t = Telemetry.get();
 
     private final double m_gearRatio = 355 / 6;
@@ -18,7 +21,6 @@ public class CANTurningMotor implements TurningMotor {
     private final double ticksPerRevolution = 28;
     private final int canID;
     public static final double kTurningCurrentLimit = 7;
-    // TODO fix this
     private final AnalogTurningEncoder m_encoder;
     private final String m_name;
 
@@ -48,13 +50,9 @@ public class CANTurningMotor implements TurningMotor {
         m_motor.configVoltageCompSaturation(11);
         m_motor.enableVoltageCompensation(true);
         m_motor.setSensorPhase(true);
-        // TODO fix this
-        if (swerveBot == 2 && name != "Rear Right") {
-            m_motor.setInverted(true);
-        }
         m_name = String.format("/CAN Turning Motor %s", name);
 
-        t.log(m_name + "/Device ID", canID);
+        t.log(Level.DEBUG, m_name + "/Device ID", canID);
     }
 
     @Override
@@ -67,15 +65,16 @@ public class CANTurningMotor implements TurningMotor {
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(m_name + "/Output", output);
-        t.log(m_name + "/Encoder Value", m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.log(m_name + "/Velocity Value",
+        t.log(Level.DEBUG, m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name + "/Encoder Value",
+                m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
+        t.log(Level.DEBUG, m_name + "/Velocity Value",
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
-    public void setPIDVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
+    public void setVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
         // TODO fix this
         double revolutionsPerSec2 = outputRadiansPerSecPerSec / (2 * Math.PI);
@@ -89,12 +88,5 @@ public class CANTurningMotor implements TurningMotor {
         double VSat = 11;
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);
-    }
-
-    public void setPIDPosition(double outputRadians) {
-        // TODO fix this
-        double ticksPerRevolution = 1024;
-        double outputTicks = outputRadians / (2 * Math.PI) * ticksPerRevolution;
-        m_motor.set(ControlMode.Position, outputTicks);
     }
 }

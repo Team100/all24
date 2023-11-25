@@ -3,7 +3,7 @@ package org.team100.lib.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.util.MathUtil;
+import org.team100.lib.util.Math100;
 
 // TODO: get rid of this, I hate the builder pattern.
 public class MotionProfileBuilder {
@@ -46,7 +46,7 @@ public class MotionProfileBuilder {
      */
     MotionProfileBuilder appendProfile(MotionProfile profile) {
         for (MotionSegment segment : profile.getSegments()) {
-            if (MathUtil.epsilonEquals(segment.getStart().getJ(), 0.0)) {
+            if (Math100.epsilonEquals(segment.getStart().getJ(), 0.0)) {
                 // constant acceleration
                 appendAccelerationControl(segment.getStart().getA(), segment.getDt());
             } else {

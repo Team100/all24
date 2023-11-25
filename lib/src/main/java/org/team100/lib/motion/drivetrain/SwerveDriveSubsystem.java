@@ -1,26 +1,29 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsystemInterface {
     private final Telemetry t = Telemetry.get();
-    private final Heading m_heading;
+    private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator m_poseEstimator;
     private final Field2d m_field;
     private final FrameTransform m_frameTransform;
     private final SwerveLocal m_swerveLocal;
 
     public SwerveDriveSubsystem(
-            Heading heading,
+            HeadingInterface heading,
             SwerveDrivePoseEstimator poseEstimator,
             FrameTransform frameTransform,
             SwerveLocal swerveLocal,
@@ -32,7 +35,7 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         m_field = field;
 
         stop();
-        t.log("/field/.type", "Field2d");
+        t.log(Level.INFO, "/field/.type", "Field2d");
     }
 
     /** For now, periodic() is not doing actuation. */
@@ -63,31 +66,43 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
 
         // Update the Field2d widget
         Pose2d newEstimate = getPose();
-        t.log("/field/robotPose", new double[] {
+        t.log(Level.DEBUG, "/field/robotPose", new double[] {
                 newEstimate.getX(),
                 newEstimate.getY(),
                 newEstimate.getRotation().getDegrees()
         });
-        t.log("/current pose/x m", newEstimate.getX());
-        t.log("/current pose/y m", newEstimate.getY());
-        t.log("/current pose/theta rad", newEstimate.getRotation().getRadians());
-        t.log("/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
+        t.log(Level.DEBUG, "/current pose/x m", newEstimate.getX());
+        t.log(Level.DEBUG, "/current pose/y m", newEstimate.getY());
+        t.log(Level.DEBUG, "/current pose/theta rad", newEstimate.getRotation().getRadians());
+        t.log(Level.DEBUG, "/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
     }
 
-    ////////////
+    ////////////////
+    //
     // ACTUATORS
     //
-    // these should really move somewhere else.
     /**
      * @param twist Field coordinate velocities in meters and radians per second.
      */
     public void driveInFieldCoords(Twist2d twist) {
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
-        t.log("/chassis/x m", twist.dx);
-        t.log("/chassis/y m", twist.dy);
-        t.log("/chassis/theta rad", twist.dtheta);
+        t.log(Level.DEBUG, "/chassis/x m", twist.dx);
+        t.log(Level.DEBUG, "/chassis/y m", twist.dy);
+        t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
+    }
+
+    /**
+     * steer the wheels to match the target but don't drive them. This is for the
+     * beginning of trajectories, like the "square" project or any other case where
+     * the new direction happens not to be aligned with the wheels.
+     */
+    @Override
+    public boolean steerAtRest(Twist2d twist) {
+        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
+                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds);
     }
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
@@ -101,10 +116,6 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
 
     public void defense() {
         m_swerveLocal.defense();
-    }
-
-    public void test(double[][] desiredOutputs) {
-        m_swerveLocal.test(desiredOutputs);
     }
 
     @Override
@@ -121,7 +132,22 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         return m_poseEstimator.getEstimatedPosition();
     }
 
+    @Override
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+    }
+
+    @Override
+    public boolean[] atSetpoint() {
+        return m_swerveLocal.atSetpoint();
+    }
+
+    /** for testing only */
+    public SwerveModulePosition[] positions() {
+        return m_swerveLocal.positions();
+    }
+
+    public void close() {
+        m_swerveLocal.close();
     }
 }

@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.team100.lib.config.Cameras2023;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -131,12 +132,12 @@ public class VisionDataProvider extends Subsystem implements TableEventListener 
             Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
 
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
-            t.log("/Vision Data Provider/Vision X", currentRobotinFieldCoords.getX());
-            t.log("/Vision Data Provider/Vision Y", currentRobotinFieldCoords.getY());
-            t.log("/Vision Data Provider/Vision Rotation", currentRobotinFieldCoords.getRotation().getRadians());
+            t.log(Level.DEBUG, "/Vision Data Provider/Vision X", currentRobotinFieldCoords.getX());
+            t.log(Level.DEBUG, "/Vision Data Provider/Vision Y", currentRobotinFieldCoords.getY());
+            t.log(Level.DEBUG, "/Vision Data Provider/Vision Rotation", currentRobotinFieldCoords.getRotation().getRadians());
 
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-            t.log("/Vision Data Provider/Tag Rotation", tagRotation.getAngle());
+            t.log(Level.DEBUG, "/Vision Data Provider/Tag Rotation", tagRotation.getAngle());
 
             if (lastRobotInFieldCoords != null) {
                 Transform2d translationSinceLast = currentRobotinFieldCoords.minus(lastRobotInFieldCoords);

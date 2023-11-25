@@ -1,21 +1,24 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController;
 
-public class NeoTurningMotor implements TurningMotor {
+public class NeoTurningMotor implements Motor100<Angle> {
     public static class Config {
         public int kCurrentLimit = 40;
+        public double kMotorGearing = 1;
     }
 
     private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
 
-    private SparkMaxPIDController m_pidController;
+    private final SparkMaxPIDController m_pidController;
     private final CANSparkMax m_motor;
     private final String m_name;
 
@@ -34,7 +37,7 @@ public class NeoTurningMotor implements TurningMotor {
 
         m_name = String.format("/Neo Turning Motor %s", name);
 
-        t.log(m_name + "/Device ID", m_motor.getDeviceId());
+        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceId());
     }
 
     @Override
@@ -43,22 +46,14 @@ public class NeoTurningMotor implements TurningMotor {
     }
 
     @Override
-    public void set(double output) {
+    public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name + "/Output", output);
     }
 
-    public void setPIDVelocity(double output, double Accel) {
-        double motorGearing = 1;
-        // I believe there are not any robotics that actually use a neo turning motor I
-        // was changing this class to be more ready in case we do
-        final ControlType controlType = CANSparkMax.ControlType.kVelocity;
-        m_pidController.setReference(motorGearing * output, controlType);
-    }
-
-    // THIS DOES NOT ACTUALLY SET PID This is just here for the other turning motors
-    // TODO fix this
-    public void setPIDPosition(double output) {
-        this.set(output);
+    public void setVelocity(double outputRadiansPerSec, double Accel) {
+        t.log(Level.DEBUG, m_name + "/Output", outputRadiansPerSec);
+        m_pidController.setReference(m_config.kMotorGearing * outputRadiansPerSec, CANSparkMax.ControlType.kVelocity);
+        throw new UnsupportedOperationException("NEO closed loop velocity control is uncalibrated.");
     }
 }
