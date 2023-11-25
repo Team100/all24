@@ -51,7 +51,8 @@ class AnglePositionServoTest {
                 turningEncoder,
                 1,
                 turningController2,
-                profile);
+                profile,
+                MathUtil::angleModulus);
 
         servo.setPosition(1);
         assertEquals(0, turningMotor.output, 0.001);

@@ -25,31 +25,29 @@ public class SwerveModule100 {
         m_turningServo.setPosition(state.angle.getRadians());
     }
 
-    /////////////////////////////////////////////////////////////
+    public void close() {
+        m_turningServo.close();
+    }
 
-    /**
-     * Package private for SwerveModuleCollection.states only.
-     */
+    /////////////////////////////////////////////////////////////
+    //
+    // Package private for SwerveModuleCollection
+    //
+
     SwerveModuleState getState() {
         return new SwerveModuleState(m_driveServo.getVelocity(), new Rotation2d(m_turningServo.getPosition()));
     }
 
-    /**
-     * Package private for SwerveModuleCollection.positions only.
-     */
     SwerveModulePosition getPosition() {
         return new SwerveModulePosition(m_driveServo.getDistance(), new Rotation2d(m_turningServo.getPosition()));
     }
 
-    /**
-     * Package private for SwerveModuleCollection.stop only.
-     */
+    boolean atSetpoint() {
+        return m_turningServo.atSetpoint();
+    }
+
     void stop() {
         m_driveServo.stop();
         m_turningServo.stop();
-    }
-
-    public void close() {
-        m_turningServo.close();
     }
 }

@@ -11,6 +11,8 @@ public interface SwerveModuleCollectionInterface {
 
     SwerveModuleState[] states();
 
+    boolean[] atSetpoint();
+
     void stop();
 
     void close();

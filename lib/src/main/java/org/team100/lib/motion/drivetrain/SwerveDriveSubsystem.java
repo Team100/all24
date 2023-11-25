@@ -93,6 +93,18 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
     }
 
+    /**
+     * steer the wheels to match the target but don't drive them. This is for the
+     * beginning of trajectories, like the "square" project or any other case where
+     * the new direction happens not to be aligned with the wheels.
+     */
+    @Override
+    public boolean steerAtRest(Twist2d twist) {
+        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
+                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds);
+    }
+
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         m_swerveLocal.setChassisSpeeds(speeds);
     }
@@ -120,8 +132,14 @@ public class SwerveDriveSubsystem extends Subsystem implements SwerveDriveSubsys
         return m_poseEstimator.getEstimatedPosition();
     }
 
+    @Override
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+    }
+
+    @Override
+    public boolean[] atSetpoint() {
+        return m_swerveLocal.atSetpoint();
     }
 
     /** for testing only */

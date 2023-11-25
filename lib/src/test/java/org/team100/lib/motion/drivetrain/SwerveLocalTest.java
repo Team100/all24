@@ -50,6 +50,11 @@ class SwerveLocalTest {
             }
 
             @Override
+            public boolean[] atSetpoint() {
+                return new boolean[] { true, true, true, true };
+            }
+
+            @Override
             public void stop() {
                 stopped = true;
             }
