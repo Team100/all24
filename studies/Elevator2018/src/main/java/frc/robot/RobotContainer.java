@@ -18,7 +18,8 @@ public class RobotContainer {
     m_driverController = new CommandXboxController(0);
     m_motor = new CANSparkMax(30, MotorType.kBrushless);
     m_exampleSubsystem = new ExampleSubsystem(m_motor);
-    m_driverController.b().whileTrue(new ExampleCommand(m_exampleSubsystem, m_driverController));
+    m_driverController.b().whileTrue(new ExampleCommand(-16, m_exampleSubsystem, m_driverController));
+    m_driverController.x().whileTrue(new ExampleCommand(0, m_exampleSubsystem, m_driverController));
     m_driverController.leftBumper().onTrue(m_exampleSubsystem.runOnce(m_exampleSubsystem::reset));
   }
   public void periodic() {
