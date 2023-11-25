@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -19,7 +20,6 @@ class AnglePositionServoProfileTest {
     private final String name;
     private final MockMotor100<Angle> motor;
     private final MockEncoder100<Angle> encoder;
-    private final TrapezoidProfile.Constraints constraints;
     private final double period;
     private final PIDController controller2;
     private final SimpleMotorFeedforward feedforward;
@@ -30,7 +30,6 @@ class AnglePositionServoProfileTest {
         name = "test";
         motor = new MockMotor100<>();
         encoder = new MockEncoder100<>();
-        constraints = new TrapezoidProfile.Constraints(1, 1);
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
         controller2.enableContinuousInput(0, 2 * Math.PI);
@@ -46,12 +45,14 @@ class AnglePositionServoProfileTest {
                 angleVelocityController,
                 feedforward);
 
+        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);
         servo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 encoder,
-                constraints,
-                controller2);
+                1,
+                controller2,
+                profile);
     }
 
     /**

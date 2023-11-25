@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -19,22 +20,27 @@ class PositionProfileTest {
     private final String name;
     private final MockMotor100<Distance> motor;
     private final MockEncoder100<Distance> encoder;
-    private final TrapezoidProfile.Constraints constraints;
     private final double period;
     private final PIDController controller2;
     private final SimpleMotorFeedforward feedforward;
-    private final PositionServo<Distance> servo;
+    private PositionServo<Distance> servo;
 
     public PositionProfileTest() {
         experiments = new MockExperiments();
         name = "test";
         motor = new MockMotor100<>();
         encoder = new MockEncoder100<>();
-        constraints = new TrapezoidProfile.Constraints(1, 1);
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
+    }
 
+    /**
+     * Profile invariant to support refactoring the servo. This is the WPILib
+     * TrapezoidalProfile.
+     */
+    @Test
+    void testTrapezoid() {
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
         VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
@@ -44,21 +50,45 @@ class PositionProfileTest {
                 encoder,
                 angleVelocityController,
                 feedforward);
-
+        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);
         servo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 encoder,
-                constraints,
-                controller2);
+                1,
+                controller2,
+                profile);
+
+        verifyTrapezoid();
     }
 
     /**
-     * Profile invariant to support refactoring the servo. This is the WPILib
-     * TrapezoidalProfile.
+     * Verifies that the MotionProfile in infinite-jerk mode is the same
+     * as the WPILib trapezoid.
      */
-   @Test
+    @Test
     void testProfile() {
+        // TODO: tune this
+        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
+        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+                experiments,
+                name,
+                motor,
+                encoder,
+                angleVelocityController,
+                feedforward);
+        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.MOTION_PROFILE);
+        servo = new PositionServo<>(
+                name,
+                turningVelocityServo,
+                encoder,
+                1,
+                controller2,
+                profile);
+        verifyTrapezoid();
+    }
+
+    private void verifyTrapezoid() {
         verify(0.077, 0.005, 0.1);
         verify(0.187, 0.020, 0.2);
         verify(0.297, 0.045, 0.3);
@@ -81,6 +111,80 @@ class PositionProfileTest {
         verify(0.000, 1.000, 0.0);
         verify(0.000, 1.000, 0.0);
     }
+
+    /**
+     * With finite jerk, it's different.
+     */
+    @Test
+    void testSProfile() {
+        // TODO: tune this
+        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
+        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+                experiments,
+                name,
+                motor,
+                encoder,
+                angleVelocityController,
+                feedforward);
+        ChoosableProfile profile = new ChoosableProfile(1, 1, 100, ChoosableProfile.Mode.MOTION_PROFILE);
+        servo = new PositionServo<>(
+                name,
+                turningVelocityServo,
+                encoder,
+                1,
+                controller2,
+                profile);
+        verifySProfile();
+    }
+
+    private void verifySProfile() {
+        verify(0.072, 0.004, 0.095);
+        verify(0.176, 0.018, 0.190);
+        verify(0.280, 0.042, 0.285);
+        verify(0.384, 0.075, 0.380);
+        verify(0.486, 0.117, 0.475);
+        verify(0.587, 0.170, 0.570);
+        verify(0.688, 0.231, 0.665);
+        verify(0.788, 0.302, 0.760);
+        verify(0.888, 0.383, 0.855);
+        verify(0.987, 0.473, 0.950);
+        verify(0.962, 0.568, 0.928);
+        verify(0.851, 0.656, 0.828);
+        verify(0.740, 0.734, 0.728);
+        verify(0.631, 0.802, 0.628);
+        verify(0.522, 0.860, 0.528);
+        verify(0.414, 0.908, 0.428);
+        verify(0.308, 0.946, 0.328);
+        verify(0.202, 0.973, 0.228);
+        verify(0.096, 0.992, 0.128);
+        verify(0.000, 0.999, 0.028);
+        verify(0.000, 1.000, 0.000);
+    }
+
+    
+    // TODO: make this pass
+   //@Test
+   void testExponential() {
+       // TODO: tune this
+       PIDController angleVelocityController = new PIDController(1, 0, 0, period);
+       VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+               experiments,
+               name,
+               motor,
+               encoder,
+               angleVelocityController,
+               feedforward);
+       ChoosableProfile profile = new ChoosableProfile(1, 1, 100, ChoosableProfile.Mode.EXPONENTIAL);
+       servo = new PositionServo<>(
+               name,
+               turningVelocityServo,
+               encoder,
+               1,
+               controller2,
+               profile);
+       verifySProfile();
+   }
+
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;

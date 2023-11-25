@@ -1,6 +1,7 @@
 package org.team100.lib.motion.components;
 
 import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -20,14 +21,12 @@ public class PositionServo<T> {
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
-    private final TrapezoidProfile.Constraints m_constraints;
+    // private final TrapezoidProfile.Constraints m_constraints;
+    private final double m_maxVel;
     private final PIDController m_controller;
     private final double m_period;
     private final String m_name;
-    // the profile class is both a stateful follower and
-    // a stateless calculator. we use the stateless one so we can make
-    // the profile object once.
-    private final TrapezoidProfile m_profile;
+    private final ChoosableProfile m_profile;
 
     private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
     // TODO: use a profile that exposes acceleration and use it.
@@ -37,15 +36,16 @@ public class PositionServo<T> {
             String name,
             VelocityServo<T> servo,
             Encoder100<T> encoder,
-            TrapezoidProfile.Constraints constraints,
-            PIDController controller) {
+            double maxVel,
+            PIDController controller,
+            ChoosableProfile profile) {
         m_servo = servo;
         m_encoder = encoder;
-        m_constraints = constraints;
+        m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
         m_name = String.format("/angle position servo %s", name);
-        m_profile = new TrapezoidProfile(m_constraints);
+        m_profile = profile;
     }
 
     /**
@@ -60,8 +60,8 @@ public class PositionServo<T> {
         double u_FF = m_setpoint.velocity;
         double u_TOTAL = u_FB + u_FF;
         // TODO: should there be a deadband here?
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, m_constraints.maxVelocity);
-        u_TOTAL = MathUtil.clamp(u_TOTAL, -m_constraints.maxVelocity, m_constraints.maxVelocity);
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, m_maxVel);
+        u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
         t.log(Level.DEBUG, m_name + "/u_FB ", u_FB);
