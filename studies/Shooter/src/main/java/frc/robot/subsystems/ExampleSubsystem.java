@@ -4,23 +4,23 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ExampleSubsystem extends SubsystemBase {
-  private final CANSparkMax motor1;
-  private final CANSparkMax motor2;
+  private final VictorSP motor1;
+  private final VictorSP motor2;
 
   public ExampleSubsystem() {
-    motor1 = new CANSparkMax(1, MotorType.kBrushed);
-    motor2 = new CANSparkMax(2, MotorType.kBrushed);
+    motor1 = new VictorSP(0);
+    motor2 = new VictorSP(1);
   }
 
   public void set(double value) {
     motor1.set(-value);
     motor2.set(value);
+    System.out.println("running");
   }
 
   @Override
