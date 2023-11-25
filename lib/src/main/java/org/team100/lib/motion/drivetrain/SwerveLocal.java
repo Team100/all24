@@ -69,6 +69,25 @@ public class SwerveLocal {
         }
     }
 
+    /** @return true if aligned */
+    public boolean steerAtRest(ChassisSpeeds speeds) {
+        SwerveModuleState[] swerveModuleStates = m_DriveKinematics.toSwerveModuleStates(speeds);
+        for (SwerveModuleState state : swerveModuleStates) {
+            state.speedMetersPerSecond = 0;
+        }
+        setModuleStates(swerveModuleStates);
+        return allAtSetpoint();
+    }
+
+    private boolean allAtSetpoint() {
+        boolean[] atSetpoint = atSetpoint();
+        for (boolean s : atSetpoint) {
+            if (!s)
+                return false;
+        }
+        return true;
+    }
+
     /**
      * Sets the wheels to make an "X" pattern.
      */
@@ -110,6 +129,10 @@ public class SwerveLocal {
 
     public SwerveModulePosition[] positions() {
         return m_modules.positions();
+    }
+
+    public boolean[] atSetpoint() {
+        return m_modules.atSetpoint();
     }
 
     public void close() {

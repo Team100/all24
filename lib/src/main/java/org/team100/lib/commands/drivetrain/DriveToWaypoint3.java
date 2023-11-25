@@ -27,6 +27,12 @@ public class DriveToWaypoint3 extends Command {
     private final BiFunction<Pose2d, Pose2d, Trajectory> m_trajectories;
 
     private Trajectory m_trajectory;
+    /**
+     * Trajectory waits until wheels are aligned. If we depend on the setpoint
+     * generator to do it, then we're behind the profile timer. After the initial
+     * alignment, the steering should be able to keep up with the profile.
+     */
+    private boolean m_steeringAligned;
 
     public DriveToWaypoint3(
             Pose2d goal,
@@ -51,7 +57,9 @@ public class DriveToWaypoint3 extends Command {
     public void initialize() {
         m_trajectory = m_trajectories.apply(m_swerve.getPose(), m_goal);
         System.out.println(m_trajectory);
-        m_timer.restart();
+        m_timer.stop();
+        m_timer.reset();
+        m_steeringAligned = false;
     }
 
     @Override
@@ -65,13 +73,27 @@ public class DriveToWaypoint3 extends Command {
         SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
-        m_swerve.driveInFieldCoords(fieldRelativeTarget);
+        if (m_steeringAligned) {
+            // follow normally
+            m_swerve.driveInFieldCoords(fieldRelativeTarget);
+        } else {
+            // not aligned yet, try aligning
+            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
+            if (aligned) {
+                m_steeringAligned = true;
+                m_timer.start();
+                m_swerve.driveInFieldCoords(fieldRelativeTarget);
+            }
+        }
+
+        t.log(Level.DEBUG, "/Drive To Waypoint/Aligned", m_steeringAligned);
         t.log(Level.DEBUG, "/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
         t.log(Level.DEBUG, "/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());
         t.log(Level.DEBUG, "/Drive To Waypoint/Pose X", m_swerve.getPose().getX());
         t.log(Level.DEBUG, "/Drive To Waypoint/Pose Y", m_swerve.getPose().getY());
         t.log(Level.DEBUG, "/Drive To Waypoint/Desired Rot", m_goal.getRotation().getRadians());
         t.log(Level.DEBUG, "/Drive To Waypoint/Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.DEBUG, "/Drive To Waypoint/Time", curTime);
     }
 
     @Override

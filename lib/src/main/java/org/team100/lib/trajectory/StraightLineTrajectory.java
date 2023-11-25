@@ -31,7 +31,6 @@ public class StraightLineTrajectory implements BiFunction<Pose2d, Pose2d, Trajec
         Translation2d goalTranslation = transformedGoal.getTranslation();
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
-
         
         try {
             return TrajectoryGenerator.generateTrajectory(

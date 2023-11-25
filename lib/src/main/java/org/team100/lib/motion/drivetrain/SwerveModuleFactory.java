@@ -13,9 +13,9 @@ import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class SwerveModuleFactory {
     private final Experiments experiments;
@@ -102,7 +102,8 @@ public class SwerveModuleFactory {
                 turningEncoder,
                 20 * Math.PI,
                 turningController2,
-                profile);
+                profile,
+                MathUtil::angleModulus);
 
         return new SwerveModule100(driveServo, turningServo);
     }
@@ -189,7 +190,8 @@ public class SwerveModuleFactory {
                 turningEncoder,
                 20 * Math.PI, // vel
                 turningController2,
-                profile);
+                profile,
+                MathUtil::angleModulus);
 
         return new SwerveModule100(driveServo, turningServo);
 
@@ -262,7 +264,8 @@ public class SwerveModuleFactory {
                 turningEncoder,
                 20 * Math.PI,
                 turningController2,
-                profile);
+                profile,
+                MathUtil::angleModulus);
 
         return new SwerveModule100(driveServo, turningServo);
     }
