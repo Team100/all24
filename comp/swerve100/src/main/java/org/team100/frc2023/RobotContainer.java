@@ -92,17 +92,12 @@ public class RobotContainer implements Testable {
     private final FrameTransform m_frameTransform;
 
     private final Control control;
-
-    private DrawCircle m_drawCircle;
-
+    private final DrawCircle m_drawCircle;
     private final Monitor m_monitor;
 
-    //// ARM STUFF
-
-    private ArmSubsystem m_armSubsystem;
-    private ArmKinematics m_armKinematicsM;
-    private Command m_armAuton;
-    
+    // Identity-specific fields
+    private final ArmSubsystem m_armSubsystem;
+    private final ArmKinematics m_armKinematicsM;
 
     public RobotContainer(TimedRobot robot) throws IOException {
 
@@ -116,7 +111,6 @@ public class RobotContainer implements Testable {
 
         m_monitor = new Monitor(new Annunciator(0));
         robot.addPeriodic(m_monitor::periodic, 0.02);
-        
 
         Identity identity = Identity.get();
         // override the correct identity for testing.
@@ -180,10 +174,11 @@ public class RobotContainer implements Testable {
                 swerveLocal,
                 m_field);
 
-        m_auton = new Defense(m_robotDrive);
-
         ////////////////////////////
+        //
         // DRIVETRAIN COMMANDS
+        //
+
         // TODO: control selection using names
         // control = new JoystickControl();
 
@@ -238,17 +233,10 @@ public class RobotContainer implements Testable {
 
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
 
-
-        ///////// ARM STUFF
-        
-        // m_armSubsystem = new ArmSubsystem();
-        // m_armKinematicsM = new ArmKinematics(0.93, 0.92);
-        // m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
-
-
         ///////////////////////////
+        //
         // DRIVE
-
+        //
         if (m_config.SHOW_MODE) {
             m_robotDrive.setDefaultCommand(
                     new DriveManually(
@@ -265,6 +253,25 @@ public class RobotContainer implements Testable {
                             speedLimits,
                             new Timer(),
                             control::desiredRotation));
+        }
+
+        /////////////////////////////////
+        //
+        // IDENTITY-SPECIFIC PARTS
+        //
+
+        switch (identity) {
+            case TEST_BOARD_6B:
+                // TODO: use the correct identity.
+                m_armSubsystem = new ArmSubsystem();
+                m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+                m_auton = new Sequence(m_armSubsystem, m_armKinematicsM);
+                break;
+            default:
+                m_armSubsystem = null;
+                m_armKinematicsM = null;
+                m_auton = new Defense(m_robotDrive);
+                break;
         }
 
     }
@@ -316,6 +323,7 @@ public class RobotContainer implements Testable {
     public SwerveDriveSubsystem getSwerveDriveSubsystem() {
         return m_robotDrive;
     }
+
     public Command getDrawCircle() {
         return m_drawCircle;
     }
