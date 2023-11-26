@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.telemetry.NamedChooser;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -39,10 +40,10 @@ public class Experiments {
     public Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
-        t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
+        log();
         m_overrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
-            SendableChooser<BooleanSupplier> override = new SendableChooser<>();
+            SendableChooser<BooleanSupplier> override = new NamedChooser<>(e.name());
             if (m_experiments.contains(e)) {
                 override.setDefaultOption(on(e), () -> true);
                 override.addOption(off(e), () -> false);
@@ -56,6 +57,7 @@ public class Experiments {
     }
 
     public boolean enabled(Experiment experiment) {
+        log();
         return m_overrides.get(experiment).getSelected().getAsBoolean();
         // return m_experiments.contains(experiment);
     }
@@ -68,6 +70,10 @@ public class Experiments {
 
     private String off(Experiment e) {
         return e.name() + " OFF";
+    }
+
+    private void log() {
+        t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
     }
 
 }

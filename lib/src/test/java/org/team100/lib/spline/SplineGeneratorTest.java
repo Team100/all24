@@ -16,7 +16,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 class SplineGeneratorTest {
     @Test
     void test() {
-        Pose2d p1 = new Pose2d(new Translation2d(0, 0), new Rotation2d());
+        Pose2d p1 = new Pose2d(new Translation2d(0, 0), GeometryUtil.kRotationZero);
         Pose2d p2 = new Pose2d(new Translation2d(15, 10), new Rotation2d(1, -5));
         PoseSpline s = new QuinticHermitePoseSplineNonholonomic(p1, p2);
 

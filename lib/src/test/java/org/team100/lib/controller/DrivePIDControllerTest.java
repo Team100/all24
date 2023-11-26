@@ -41,12 +41,7 @@ class DrivePIDControllerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
-    static {
-        kSmoothKinematicLimits.kMaxDriveVelocity = kMaxVelocityMetersPerSecond * .9;
-        kSmoothKinematicLimits.kMaxDriveAcceleration = kMaxAccelerationMetersPerSecondSquared;
-        kSmoothKinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
-    }
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
 
     @Test
     void testPIDControl() {
@@ -120,8 +115,8 @@ class DrivePIDControllerTest {
             // turning slowly to the left
             assertEquals(0.1, output.omegaRadiansPerSecond, 0.05);
             Translation2d translational_error = new Translation2d(
-                controller.getError().getTranslation().getX(),
-                controller.getError().getTranslation().getY());
+                    controller.getError().getTranslation().getX(),
+                    controller.getError().getTranslation().getY());
             assertEquals(0, translational_error.getX(), 0.05);
             assertEquals(0, translational_error.getY(), 0.05);
             Rotation2d heading_error = controller.getError().getRotation();
@@ -145,8 +140,8 @@ class DrivePIDControllerTest {
             assertEquals(-0.05, output.vyMetersPerSecond, 0.05);
             assertEquals(0.18, output.omegaRadiansPerSecond, 0.05);
             Translation2d translational_error = new Translation2d(
-                controller.getError().getTranslation().getX(),
-                controller.getError().getTranslation().getY());
+                    controller.getError().getTranslation().getX(),
+                    controller.getError().getTranslation().getY());
             assertEquals(0, translational_error.getX(), 0.01);
             assertEquals(0, translational_error.getY(), 0.01);
             Rotation2d heading_error = controller.getError().getRotation();

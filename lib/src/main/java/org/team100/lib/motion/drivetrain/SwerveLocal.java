@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
@@ -19,6 +20,24 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  */
 public class SwerveLocal {
     private static final double kDtS = .020;
+    private static final SwerveModuleState[] states0 = new SwerveModuleState[] {
+            new SwerveModuleState(0, GeometryUtil.kRotationZero),
+            new SwerveModuleState(0, GeometryUtil.kRotationZero),
+            new SwerveModuleState(0, GeometryUtil.kRotationZero),
+            new SwerveModuleState(0, GeometryUtil.kRotationZero)
+    };
+    private static final SwerveModuleState[] states90 = new SwerveModuleState[] {
+            new SwerveModuleState(0, new Rotation2d(Math.PI / 2)),
+            new SwerveModuleState(0, new Rotation2d(Math.PI / 2)),
+            new SwerveModuleState(0, new Rotation2d(Math.PI / 2)),
+            new SwerveModuleState(0, new Rotation2d(Math.PI / 2))
+    };
+    private static final SwerveModuleState[] statesX = new SwerveModuleState[] {
+            new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
+            new SwerveModuleState(0, new Rotation2d(7 * Math.PI / 4)),
+            new SwerveModuleState(0, new Rotation2d(3 * Math.PI / 4)),
+            new SwerveModuleState(0, new Rotation2d(5 * Math.PI / 4))
+    };
 
     private final Telemetry t = Telemetry.get();
 
@@ -43,10 +62,10 @@ public class SwerveLocal {
 
         limits = new AsymSwerveSetpointGenerator.KinematicLimits();
         // TODO: put these magic numbers into config
-        limits.kMaxDriveVelocity = 2;
+        limits.kMaxDriveVelocity = 4;
         limits.kMaxDriveAcceleration = 2;
         limits.kMaxDriveDecceleration = 4;
-        limits.kMaxSteeringVelocity = 5;
+        limits.kMaxSteeringVelocity = 10;
 
         prevSetpoint = new SwerveSetpoint();
     }
@@ -92,14 +111,22 @@ public class SwerveLocal {
      * Sets the wheels to make an "X" pattern.
      */
     public void defense() {
-        SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
-                new SwerveModuleState(0, new Rotation2d(7 * Math.PI / 4)),
-                new SwerveModuleState(0, new Rotation2d(3 * Math.PI / 4)),
-                new SwerveModuleState(0, new Rotation2d(5 * Math.PI / 4))
-        };
         // not optimizing makes it easier to test, not sure it's worth the slowness.
-        setRawModuleStates(states);
+        setRawModuleStates(statesX);
+    }
+
+    /**
+     * Sets wheel rotation to zero, for optimizing steering control.
+     */
+    public void steer0() {
+        setRawModuleStates(states0);
+    }
+
+    /**
+     * Sets wheel rotation to 90 degrees, for optimizing steering control.
+     */
+    public void steer90() {
+        setRawModuleStates(states90);
     }
 
     public void stop() {

@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.commands.InitCommand;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSubsystemInterface {
     private final Telemetry t = Telemetry.get();
@@ -36,6 +38,15 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
 
         stop();
         t.log(Level.INFO, "/field/.type", "Field2d");
+    }
+
+    /**
+     * Runs the action on initialize and never ends; this is useful for commands
+     * that set something once, and then lock out the default command, so it should
+     * be used with Trigger.whileTrue()
+     */
+    public Command runInit(Runnable action) {
+        return new InitCommand(action, this);
     }
 
     /** For now, periodic() is not doing actuation. */
@@ -114,8 +125,19 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         m_swerveLocal.setRawModuleStates(states);
     }
 
+    /** Make an X, stopped. */
     public void defense() {
         m_swerveLocal.defense();
+    }
+
+    /** Wheels ahead, stopped, for testing. */
+    public void steer0() {
+        m_swerveLocal.steer0();
+    }
+
+    /** Wheels at 90 degrees, stopped, for testing. */
+    public void steer90() {
+        m_swerveLocal.steer90();
     }
 
     @Override

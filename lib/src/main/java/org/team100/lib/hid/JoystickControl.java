@@ -4,6 +4,8 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import org.team100.lib.geometry.GeometryUtil;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,7 +28,7 @@ public class JoystickControl implements Control {
 
     private final Config m_config = new Config();
     private final CommandJoystick m_controller;
-    private Rotation2d previousRotation = new Rotation2d(0);
+    private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public JoystickControl() {
         m_controller = new CommandJoystick(0);

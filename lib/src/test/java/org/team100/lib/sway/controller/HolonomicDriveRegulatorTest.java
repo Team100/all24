@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.State100;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.profile.MotionProfile;
@@ -24,7 +25,7 @@ class HolonomicDriveRegulatorTest {
      */
     @Test
     void testAtSetpoint() {
-        Pose2d currentPose = new Pose2d();
+        Pose2d currentPose = GeometryUtil.kPoseZero;
         SwerveState desiredState = new SwerveState(new State100(0, 0, 0), new State100(0, 0, 0), new State100(0, 0, 0));
         HolonomicDriveRegulator regulator = new HolonomicDriveRegulator();
         Twist2d output = regulator.calculate(currentPose, desiredState);
@@ -36,8 +37,8 @@ class HolonomicDriveRegulatorTest {
     @Test
     void driveOneMeter() {
         double kDtSec = 0.02;
-        Pose2d startingPose = new Pose2d();
-        Pose2d goalPose = new Pose2d(1, 0, new Rotation2d(0));
+        Pose2d startingPose = GeometryUtil.kPoseZero;
+        Pose2d goalPose = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         SpeedLimits speedLimits = new SpeedLimits(5, 2, 2, 2);
         Pose2d currentPose = startingPose;
         Twist2d currentTwist = new Twist2d(); // start at rest

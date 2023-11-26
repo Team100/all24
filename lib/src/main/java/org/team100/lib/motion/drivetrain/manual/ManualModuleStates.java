@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -39,7 +40,7 @@ public class ManualModuleStates implements Supplier<SwerveModuleState[]> {
         double hyp = Math.hypot(input.dx, input.dy);
         hyp = MathUtil.clamp(hyp, 0, 1);
         double speedM_S = 0.0;
-        Rotation2d angle = new Rotation2d();
+        Rotation2d angle = GeometryUtil.kRotationZero;
         if (hyp >= kDeadband) {
             speedM_S = m_speedLimits.speedM_S * MathUtil.applyDeadband(hyp, kDeadband, 1);
             angle = new Rotation2d(input.dx, input.dy);
