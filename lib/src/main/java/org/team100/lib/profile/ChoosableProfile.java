@@ -1,5 +1,7 @@
 package org.team100.lib.profile;
 
+import org.team100.lib.telemetry.NamedChooser;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -32,7 +34,7 @@ public class ChoosableProfile {
             double maxAccel,
             double maxJerk,
             Mode defaultMode) {
-        m_chooser = new SendableChooser<>();
+        m_chooser = new NamedChooser<>("Motion Profile");
         m_maxVel = maxVel;
         m_maxAccel = maxAccel;
         m_maxJerk = maxJerk;
