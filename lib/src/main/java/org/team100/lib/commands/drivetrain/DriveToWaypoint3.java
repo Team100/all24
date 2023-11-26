@@ -34,6 +34,10 @@ public class DriveToWaypoint3 extends Command {
      */
     private boolean m_steeringAligned;
 
+    /**
+     * @param trajectories function that takes a start and end pose and returns a
+     *                     trajectory between them.
+     */
     public DriveToWaypoint3(
             Pose2d goal,
             SwerveDriveSubsystemInterface drivetrain,

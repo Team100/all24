@@ -129,16 +129,7 @@
       "current pose": {
         "open": true
       },
-      "experiments": {
-        "open": true
-      },
-      "field": {
-        "open": true
-      },
       "manual field relative": {
-        "open": true
-      },
-      "monitor": {
         "open": true
       },
       "robot": {
@@ -146,9 +137,6 @@
       }
     },
     "transitory": {
-      "SmartDashboard": {
-        "open": true
-      },
       "Vision": {
         "open": true,
         "{...}##v_/Vision/1000000013c9c96c": {

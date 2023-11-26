@@ -5,9 +5,7 @@ import java.util.function.BiFunction;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
@@ -15,21 +13,19 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 
 /** Make straight lines, rest-to-rest. */
 public class StraightLineTrajectory implements BiFunction<Pose2d, Pose2d, Trajectory> {
-    private static final double maxVelocityM_S = 2.0;
-    private static final double maxAccelM_S_S = 2;
-    private final TrajectoryConfig config;
 
-    public StraightLineTrajectory(SwerveDriveKinematics kinematics) {
-        config = new TrajectoryConfig(maxVelocityM_S, maxAccelM_S_S).setKinematics(kinematics);
+    private final TrajectoryConfig m_config;
+
+    public StraightLineTrajectory(TrajectoryConfig config) {
+        this.m_config = config;        
     }
 
     @Override
     public Trajectory apply(Pose2d start, Pose2d end) {
         Translation2d currentTranslation = start.getTranslation();
-        Transform2d goalTransform = new Transform2d();
-        Pose2d transformedGoal = end.plus(goalTransform);
-        Translation2d goalTranslation = transformedGoal.getTranslation();
+        Translation2d goalTranslation = end.getTranslation();
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
+       
         Rotation2d angleToGoal = translationToGoal.getAngle();
         
         try {
@@ -37,7 +33,7 @@ public class StraightLineTrajectory implements BiFunction<Pose2d, Pose2d, Trajec
                     new Pose2d(currentTranslation, angleToGoal),
                     List.of(),
                     new Pose2d(goalTranslation, angleToGoal),
-                    config);
+                    m_config);
         } catch (TrajectoryGenerationException e) {
             return null;
         }

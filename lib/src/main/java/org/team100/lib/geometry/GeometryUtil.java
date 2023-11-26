@@ -14,8 +14,8 @@ import edu.wpi.first.math.spline.PoseWithCurvature;
 public class GeometryUtil {
 
     public static final Rotation2d kRotationZero = new Rotation2d();
-    public static final Rotation2d kRotationPi_2 = new Rotation2d(Math.PI/2);
-    public static final Rotation2d kRotationPi = new Rotation2d(Math.PI);
+    public static final Rotation2d kRotation90 = new Rotation2d(Math.PI/2);
+    public static final Rotation2d kRotation180 = new Rotation2d(Math.PI);
     public static final Pose2d kPoseZero = new Pose2d();
     public static final Translation2d kTranslation2dIdentity = new Translation2d();
     public static final PoseWithCurvature kPose2dWithCurvatureIdentity = new PoseWithCurvature();

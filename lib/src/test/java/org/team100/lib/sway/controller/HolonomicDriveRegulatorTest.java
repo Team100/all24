@@ -38,7 +38,7 @@ class HolonomicDriveRegulatorTest {
     void driveOneMeter() {
         double kDtSec = 0.02;
         Pose2d startingPose = GeometryUtil.kPoseZero;
-        Pose2d goalPose = new Pose2d(1, 0, new Rotation2d(0));
+        Pose2d goalPose = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         SpeedLimits speedLimits = new SpeedLimits(5, 2, 2, 2);
         Pose2d currentPose = startingPose;
         Twist2d currentTwist = new Twist2d(); // start at rest

@@ -4,6 +4,7 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -35,7 +36,7 @@ public class DualXboxControl implements Control {
 
     private final CommandXboxController controller0;
     private final CommandXboxController controller1;
-    Rotation2d previousRotation = new Rotation2d(0);
+    Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public DualXboxControl() {
         controller0 = new CommandXboxController(0);

@@ -46,7 +46,6 @@ import org.team100.lib.trajectory.DrawCircle;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -187,7 +186,7 @@ public class RobotContainer implements Testable {
         control.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
         control.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
 
-        control.resetRotation0(new SetRotation(m_drive, new Rotation2d(0)));
+        control.resetRotation0(new SetRotation(m_drive, GeometryUtil.kRotationZero));
         control.resetRotation180(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         ManualMode manualMode = new ManualMode();
@@ -200,38 +199,7 @@ public class RobotContainer implements Testable {
         control.resetPose(new ResetPose(m_drive, 0, 0, Math.PI));
         control.rotate0(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
 
-        // new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive,
-        // m_kinematics
-
-        // Circle circle =
-
-        // Pose2d[] goalArr = {
-        // new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-3.312756, -0.400119, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
-
-        // };
-
-        // Pose2d[] goalArr = { new Pose2d(1, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(1, -1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-1, -1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-1, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(1, 1, Rotation2d.fromDegrees(180))
-
-        // };
-
-        Pose2d[] goalArr = { new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(0.5, -0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(-0.5, -0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(-0.5, 0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180))
-
-        };
-        // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
-        // m_robotDrive, m_kinematics));
-        m_drawCircle = new DrawCircle(goalArr, m_drive, m_kinematics);
+        m_drawCircle = new DrawCircle(m_drive, m_kinematics);
         control.circle(m_drawCircle);
 
         control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
