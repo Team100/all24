@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.telemetry.NamedChooser;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -42,7 +43,7 @@ public class Experiments {
         t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
         m_overrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
-            SendableChooser<BooleanSupplier> override = new SendableChooser<>();
+            SendableChooser<BooleanSupplier> override = new NamedChooser<>(e.name());
             if (m_experiments.contains(e)) {
                 override.setDefaultOption(on(e), () -> true);
                 override.addOption(off(e), () -> false);

@@ -57,6 +57,8 @@
       "/SmartDashboard/Gamepiece Locator": "Subsystem",
       "/SmartDashboard/Lower Motor": "Subsystem",
       "/SmartDashboard/Manipulator": "Subsystem",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/NamedSendableChooser[0]": "String Chooser",
       "/SmartDashboard/ROTATE COMMAND": "Command",
       "/SmartDashboard/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/SendableChooser[1]": "String Chooser",
@@ -64,37 +66,43 @@
       "/SmartDashboard/SendableChooser[3]": "String Chooser",
       "/SmartDashboard/SendableChooser[4]": "String Chooser",
       "/SmartDashboard/SendableChooser[5]": "String Chooser",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/Upper Motor": "Subsystem",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/SmartDashboard/Vision Data Provider": "Subsystem",
+      "/SmartDashboard/asdfasfd": "String Chooser",
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/SendableChooser[0]": {
+      "/SmartDashboard/Manual Drive Mode": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/SendableChooser[1]": {
+      "/SmartDashboard/Telemetry Level": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/SendableChooser[2]": {
+      "/SmartDashboard/UseClosedLoopDrive": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/SendableChooser[3]": {
+      "/SmartDashboard/UseClosedLoopSteering": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/SendableChooser[4]": {
+      "/SmartDashboard/UseClosedLoopVelocity": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/SendableChooser[5]": {
+      "/SmartDashboard/UseSetpointGenerator": {
         "window": {
           "visible": true
         }
@@ -137,6 +145,18 @@
       }
     },
     "transitory": {
+      "LiveWindow": {
+        "open": true
+      },
+      "Shuffleboard": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "SendableChooser[1]": {
+          "open": true
+        },
+        "open": true
+      },
       "Vision": {
         "open": true,
         "{...}##v_/Vision/1000000013c9c96c": {
