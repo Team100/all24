@@ -1,0 +1,197 @@
+{
+  "NetworkTables": {
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "SmartDashboard": {
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo"
+    }
+  },
+  "NetworkTables Settings": {
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "100",
+    "visible": false
+  },
+  "NetworkTables View": {
+    "visible": false
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 178,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Input"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 441,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Measurment"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Setpoint"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "height": 204,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Output"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <3>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 214,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Setpoint"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 127,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Velocity"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <5>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 186,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/FeedForward"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <6>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 185,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Current"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
