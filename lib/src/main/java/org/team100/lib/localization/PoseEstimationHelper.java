@@ -3,6 +3,8 @@ package org.team100.lib.localization;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -16,6 +18,7 @@ import edu.wpi.first.math.numbers.N3;
  * Static methods used to interpret camera input.
  */
 public class PoseEstimationHelper {
+    private static final Telemetry t = Telemetry.get();
 
     /**
      * Calculate robot pose.
@@ -30,26 +33,18 @@ public class PoseEstimationHelper {
             Rotation3d robotRotationInFieldCoordsFromGyro,
             double thresholdMeters) {
 
-       
-
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
-        // System.out.println("***************************************************************************");
 
-        // System.out.println(blip.id);
+        if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
+            t.log(Level.DEBUG, "/pose_estimate_rotation_source", "CAMERA");
+            return getRobotPoseInFieldCoords(
+                    cameraInRobotCoords,
+                    tagInFieldCoords,
+                    blip);
+        }
 
-        // System.out.println(getRobotPoseInFieldCoords(
-        //     cameraInRobotCoords,
-        //     tagInFieldCoords,
-        //     blip));
+        t.log(Level.DEBUG, "/pose_estimate_rotation_source", "GYRO");
 
-        // if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-        //     return getRobotPoseInFieldCoords(
-        //             cameraInRobotCoords,
-        //             tagInFieldCoords,
-        //             blip);
-        // }
-
-        
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
                 tagInFieldCoords,
