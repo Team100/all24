@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.sensors.HeadingInterface;
@@ -17,7 +18,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 /** Exercise the code. */
 class DriveWithHeadingTest {
-    Rotation2d desiredRotation = new Rotation2d();
+    Rotation2d desiredRotation = GeometryUtil.kRotationZero;
     Twist2d desiredTwist = new Twist2d();
 
     @Test

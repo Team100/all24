@@ -41,12 +41,7 @@ class DrivePursuitControllerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
-    static {
-        kSmoothKinematicLimits.kMaxDriveVelocity = kMaxVelocityMetersPerSecond * .9;
-        kSmoothKinematicLimits.kMaxDriveAcceleration = kMaxAccelerationMetersPerSecondSquared;
-        kSmoothKinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
-    }
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
 
     @Test
     void testPursuit() {

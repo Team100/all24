@@ -18,13 +18,13 @@ public class DriveFeedforwardController implements DriveMotionController {
 
     private TrajectoryTimeIterator mCurrentTrajectory;
     private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    private Pose2d mError = GeometryUtil.kPose2dIdentity;
+    private Pose2d mError = GeometryUtil.kPoseZero;
     private double mLastTime = Double.POSITIVE_INFINITY;
 
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         mCurrentTrajectory = trajectory;
         mSetpoint = trajectory.getState();
-        mError = GeometryUtil.kPose2dIdentity;
+        mError = GeometryUtil.kPoseZero;
         mLastTime = Double.POSITIVE_INFINITY;
     }
 
@@ -56,7 +56,7 @@ public class DriveFeedforwardController implements DriveMotionController {
         final double velocity_m = mSetpoint.velocityM_S();
         // Field relative
         var course = mSetpoint.state().getCourse();
-        Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationIdentity;
+        Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationZero;
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
         motion_direction = current_state.getRotation().unaryMinus().rotateBy(motion_direction);

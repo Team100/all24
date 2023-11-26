@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathSamplePoint;
@@ -17,10 +18,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 class TrajectoryTest {
     private static final List<Pose2dWithMotion> kWaypoints = Arrays.asList(
-            new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), new Rotation2d()), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(24.0, 0.0), new Rotation2d()), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(36.0, 12.0), new Rotation2d()), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(60.0, 12.0), new Rotation2d()), 0));
+            new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), GeometryUtil.kRotationZero), 0),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(24.0, 0.0), GeometryUtil.kRotationZero), 0),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(36.0, 12.0), GeometryUtil.kRotationZero), 0),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(60.0, 12.0), GeometryUtil.kRotationZero), 0));
 
     // private static final List<Rotation2d> kHeadings = Arrays.asList(
     //         GeometryUtil.fromDegrees(0),

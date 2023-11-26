@@ -3,7 +3,6 @@ package org.team100.frc2023;
 import java.io.IOException;
 
 import org.team100.lib.commands.arm.Sequence;
-import org.team100.lib.commands.drivetrain.Defense;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveWithHeading;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -15,6 +14,7 @@ import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.Control;
 import org.team100.lib.hid.DualXboxControl;
 import org.team100.lib.indicator.LEDIndicator;
@@ -46,7 +46,6 @@ import org.team100.lib.trajectory.DrawCircle;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -85,7 +84,7 @@ public class RobotContainer implements Testable {
     private final RedundantGyroInterface ahrsclass;
     private final Field2d m_field;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
-    private final SwerveDriveSubsystem m_robotDrive;
+    private final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollectionInterface m_modules;
     private final SwerveDriveKinematics m_kinematics;
     private final Command m_auton;
@@ -124,12 +123,9 @@ public class RobotContainer implements Testable {
         m_kinematics = SwerveDriveKinematicsFactory.get(identity);
 
         // TODO replace with SpeedLimits.
-        SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits();
         // TODO: fix these limits
-        m_kinematicLimits.kMaxDriveVelocity = 4;
-        m_kinematicLimits.kMaxDriveAcceleration = 2;
-        m_kinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
-
+        SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits(4, 2, 13);
+ 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);
@@ -143,7 +139,7 @@ public class RobotContainer implements Testable {
                 m_kinematics,
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
-                new Pose2d(),
+                GeometryUtil.kPoseZero,
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
@@ -167,7 +163,7 @@ public class RobotContainer implements Testable {
                 m_kinematics,
                 m_modules);
 
-        m_robotDrive = new SwerveDriveSubsystem(
+        m_drive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
                 m_frameTransform,
@@ -183,72 +179,44 @@ public class RobotContainer implements Testable {
         // control = new JoystickControl();
 
         control = new DualXboxControl();
-        control.defense(new Defense(m_robotDrive));
-        control.resetRotation0(new SetRotation(m_robotDrive, new Rotation2d(0)));
-        control.resetRotation180(new SetRotation(m_robotDrive, Rotation2d.fromDegrees(180)));
+        control.defense().whileTrue(m_drive.runInit(m_drive::defense));
+        control.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
+        control.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
+
+        control.resetRotation0(new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        control.resetRotation180(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         ManualMode manualMode = new ManualMode();
         SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow(new DriveManually(manualMode, control::twist, m_robotDrive, slow));
+        control.driveSlow(new DriveManually(manualMode, control::twist, m_drive, slow));
         SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium(new DriveManually(manualMode, control::twist, m_robotDrive, medium));
+        control.driveMedium(new DriveManually(manualMode, control::twist, m_drive, medium));
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
-        control.resetPose(new ResetPose(m_robotDrive, 0, 0, Math.PI));
-        control.rotate0(new Rotate(m_robotDrive, m_heading, speedLimits, new Timer(), 0));
+        control.resetPose(new ResetPose(m_drive, 0, 0, Math.PI));
+        control.rotate0(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
 
-        // new Circle(new Pose2d(1, 1, Rotation2d.fromDegrees(180))), m_robotDrive,
-        // m_kinematics
-
-        // Circle circle =
-
-        // Pose2d[] goalArr = {
-        // new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-2.199237, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-3.312756, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-3.312756, -0.400119, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-2.199237, -0.400119, Rotation2d.fromDegrees(180))
-
-        // };
-
-        // Pose2d[] goalArr = { new Pose2d(1, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(1, -1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-1, -1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(-1, 1, Rotation2d.fromDegrees(180)),
-        // new Pose2d(1, 1, Rotation2d.fromDegrees(180))
-
-        // };
-
-        Pose2d[] goalArr = { new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(0.5, -0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(-0.5, -0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(-0.5, 0.5, Rotation2d.fromDegrees(180)),
-                new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(180))
-
-        };
-        // control.circle(new Circle(new Pose2d(-2, 0, Rotation2d.fromDegrees(180)),
-        // m_robotDrive, m_kinematics));
-        m_drawCircle = new DrawCircle(goalArr, m_robotDrive, m_kinematics);
+        m_drawCircle = new DrawCircle(m_drive, m_kinematics);
         control.circle(m_drawCircle);
 
-        control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_robotDrive));
+        control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
 
         ///////////////////////////
         //
         // DRIVE
         //
         if (m_config.SHOW_MODE) {
-            m_robotDrive.setDefaultCommand(
+            m_drive.setDefaultCommand(
                     new DriveManually(
                             manualMode,
                             control::twist,
-                            m_robotDrive,
+                            m_drive,
                             speedLimits));
         } else {
-            m_robotDrive.setDefaultCommand(
+            m_drive.setDefaultCommand(
                     new DriveWithHeading(
                             control::twist,
-                            m_robotDrive,
+                            m_drive,
                             m_heading,
                             speedLimits,
                             new Timer(),
@@ -270,7 +238,7 @@ public class RobotContainer implements Testable {
             default:
                 m_armSubsystem = null;
                 m_armKinematicsM = null;
-                m_auton = new Defense(m_robotDrive);
+                m_auton = m_drive.runInit(m_drive::defense);
                 break;
         }
 
@@ -321,7 +289,7 @@ public class RobotContainer implements Testable {
     // for testing
 
     public SwerveDriveSubsystem getSwerveDriveSubsystem() {
-        return m_robotDrive;
+        return m_drive;
     }
 
     public Command getDrawCircle() {

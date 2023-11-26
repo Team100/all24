@@ -2,9 +2,6 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.function.BiFunction;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -34,21 +31,20 @@ public class DriveToWaypoint3 extends Command {
      */
     private boolean m_steeringAligned;
 
+    /**
+     * @param trajectories function that takes a start and end pose and returns a
+     *                     trajectory between them.
+     */
     public DriveToWaypoint3(
             Pose2d goal,
             SwerveDriveSubsystemInterface drivetrain,
-            BiFunction<Pose2d, Pose2d, Trajectory> trajectories) {
+            BiFunction<Pose2d, Pose2d, Trajectory> trajectories,
+            HolonomicDriveController3 controller) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_trajectories = trajectories;
+        m_controller = controller;
         m_timer = new Timer();
-        Identity identity = Identity.get();
-
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-
-        m_controller = new HolonomicDriveController3(controllers);
-        m_controller.setTolerance(0.1, 1.0);
-
         if (m_swerve.get() != null)
             addRequirements(m_swerve.get());
     }
@@ -64,9 +60,10 @@ public class DriveToWaypoint3 extends Command {
 
     @Override
     public void execute() {
-        double curTime = m_timer.get();
         if (m_trajectory == null)
             return;
+
+        double curTime = m_timer.get();
         State desiredState = m_trajectory.sample(curTime);
         Pose2d currentPose = m_swerve.getPose();
         // TODO: rotation profile, use new trajectory type.

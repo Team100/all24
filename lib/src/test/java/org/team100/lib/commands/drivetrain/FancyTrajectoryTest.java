@@ -8,7 +8,6 @@ import org.team100.lib.swerve.SwerveKinematicLimits;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
 
 class FancyTrajectoryTest {
 
@@ -20,10 +19,7 @@ class FancyTrajectoryTest {
                 new Translation2d(-0.1, 0.1),
                 new Translation2d(-0.1, -0.1));
 
-        SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
-        kSmoothKinematicLimits.kMaxDriveVelocity = 5.05 * .9;
-        kSmoothKinematicLimits.kMaxDriveAcceleration = 4.4;
-        kSmoothKinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
+        SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
 
         MockSwerveDriveSubsystem drive = new MockSwerveDriveSubsystem();
         FancyTrajectory command = new FancyTrajectory(

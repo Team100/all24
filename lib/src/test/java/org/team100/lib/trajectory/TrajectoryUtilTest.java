@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathSamplePoint;
@@ -39,12 +40,12 @@ class TrajectoryUtilTest {
 
             @Override
             public Rotation2d getHeading(double t) {
-                return new Rotation2d();
+                return GeometryUtil.kRotationZero;
             }
 
             @Override
             public Optional<Rotation2d> getCourse(double t) {
-                return Optional.of(new Rotation2d());
+                return Optional.of(GeometryUtil.kRotationZero);
             }
 
             @Override

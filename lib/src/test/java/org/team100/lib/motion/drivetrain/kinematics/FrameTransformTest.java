@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.kinematics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -83,7 +84,7 @@ public class FrameTransformTest {
     @Test
     void testInverse0() {
         FrameTransform factory = new FrameTransform(new VeeringCorrection(() -> 0.0));
-        Twist2d fieldRelative = factory.toFieldRelativeSpeeds(0, 0, 0, new Rotation2d());
+        Twist2d fieldRelative = factory.toFieldRelativeSpeeds(0, 0, 0, GeometryUtil.kRotationZero);
         assertEquals(0, fieldRelative.dx, kDelta);
         assertEquals(0, fieldRelative.dy, kDelta);
         assertEquals(0, fieldRelative.dtheta, kDelta);
