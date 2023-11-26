@@ -23,7 +23,6 @@ import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.motion.drivetrain.Heading;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SpeedLimitsFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -35,6 +34,7 @@ import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.selftest.Testable;
+import org.team100.lib.sensors.Heading;
 import org.team100.lib.sensors.RedundantGyro;
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
@@ -64,7 +64,8 @@ public class RobotContainer implements Testable {
         // Show mode is for younger drivers to drive the robot slowly.
         //
         // TODO: make a physical show mode switch.
-        public boolean SHOW_MODE = true;
+        // TODO: make way more noticable.
+        public boolean SHOW_MODE = false;
         //
         //////////////////////////////////////
 
@@ -240,9 +241,9 @@ public class RobotContainer implements Testable {
 
         ///////// ARM STUFF
         
-        m_armSubsystem = new ArmSubsystem();
-        m_armKinematicsM = new ArmKinematics(0.93, 0.92);
-        m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
+        // m_armSubsystem = new ArmSubsystem();
+        // m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+        // m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
 
 
         ///////////////////////////

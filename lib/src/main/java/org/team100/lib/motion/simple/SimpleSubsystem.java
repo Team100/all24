@@ -54,7 +54,7 @@ public class SimpleSubsystem extends Subsystem {
         return result;
     }
 
-    public void set(double u) {
+    public void setDutyCycle(double u) {
         m_motor.set(u);
     }
 

@@ -1,5 +1,7 @@
 package org.team100.lib.swerve;
 
+import org.team100.lib.geometry.GeometryUtil;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -7,6 +9,18 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class SwerveSetpoint {
     private final ChassisSpeeds m_ChassisSpeeds;
     private final SwerveModuleState[] m_ModuleStates;
+
+    /** New setpoint with zero speed and zero states */
+    public SwerveSetpoint() {
+        this(
+                new ChassisSpeeds(),
+                new SwerveModuleState[] {
+                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity),
+                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity),
+                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity),
+                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity)
+                });
+    }
 
     public SwerveSetpoint(ChassisSpeeds chassisSpeeds, SwerveModuleState[] initialStates) {
         m_ChassisSpeeds = chassisSpeeds;

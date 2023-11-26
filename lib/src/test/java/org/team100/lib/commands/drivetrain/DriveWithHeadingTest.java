@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.HeadingInterface;
-import org.team100.lib.motion.drivetrain.MockHeading;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.MockHeading;
 import org.team100.lib.util.MockTimer;
 
 import edu.wpi.first.math.geometry.Rotation2d;

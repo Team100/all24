@@ -50,6 +50,11 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
     }
 
     @Override
+    public boolean steerAtRest(Twist2d twist) {
+        return true;
+    }
+
+    @Override
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         this.speeds = speeds;
     }
@@ -57,5 +62,10 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
     @Override
     public void setRawModuleStates(SwerveModuleState[] states) {
         this.speeds = kinematics.toChassisSpeeds(states);
+    }
+
+    @Override
+    public boolean[] atSetpoint() {
+        return new boolean[] { true, true, true, true };
     }
 }

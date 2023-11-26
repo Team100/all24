@@ -1,8 +1,10 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.motor.drive.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -11,7 +13,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-public class CANTurningMotor implements TurningMotor {
+public class CANTurningMotor implements Motor100<Angle> {
     private final Telemetry t = Telemetry.get();
 
     private final double m_gearRatio = 355 / 6;
