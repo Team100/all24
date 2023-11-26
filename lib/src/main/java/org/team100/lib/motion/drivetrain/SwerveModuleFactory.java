@@ -130,7 +130,7 @@ public class SwerveModuleFactory {
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset,
                 turningGearRatio, turningDrive);
 
-        CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder, 2);
+        CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder);
 
         // DRIVE PID
         PIDController driveController = new PIDController( //
