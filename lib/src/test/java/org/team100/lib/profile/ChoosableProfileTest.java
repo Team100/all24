@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
- class ChoosableProfileTest {
+class ChoosableProfileTest {
     @Test
     void testDefault() {
         ChoosableProfile p = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);

@@ -1,6 +1,5 @@
 package org.team100.lib.motion.components;
 
-import java.util.function.DoubleFunction;
 import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.encoder.Encoder100;
