@@ -46,12 +46,7 @@ class DriveMotionPlannerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-            private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits();
-    static {
-        kSmoothKinematicLimits.kMaxDriveVelocity = kMaxVelocityMetersPerSecond * .9;
-        kSmoothKinematicLimits.kMaxDriveAcceleration = kMaxAccelerationMetersPerSecondSquared;
-        kSmoothKinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
-    }
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
 
     @Test
     void testTrajectory() {
@@ -136,7 +131,8 @@ class DriveMotionPlannerTest {
         generator.generateTrajectories();
         var trajectories = generator.getTrajectorySet().getAllTrajectories();
 
-        // AsymSwerveSetpointGenerator setpoint_generator = new AsymSwerveSetpointGenerator(kinematics);
+        // AsymSwerveSetpointGenerator setpoint_generator = new
+        // AsymSwerveSetpointGenerator(kinematics);
 
         for (var traj : trajectories) {
             // System.out.println("\n" + traj.toString());
@@ -170,9 +166,9 @@ class DriveMotionPlannerTest {
                 // mDt);
                 // Don't use a twist here (assume Drive compensates for that)
                 Pose2d delta = new Pose2d(
-                    new Translation2d(
-                        setpoint.getChassisSpeeds().vxMetersPerSecond * mDt,
-                        setpoint.getChassisSpeeds().vyMetersPerSecond * mDt),
+                        new Translation2d(
+                                setpoint.getChassisSpeeds().vxMetersPerSecond * mDt,
+                                setpoint.getChassisSpeeds().vyMetersPerSecond * mDt),
                         Rotation2d.fromRadians(setpoint.getChassisSpeeds().omegaRadiansPerSecond * mDt));
                 pose = GeometryUtil.transformBy(pose, delta);
                 velocity = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
@@ -182,7 +178,8 @@ class DriveMotionPlannerTest {
                 // System.out.println(pose);
                 // System.out.println("Setpoint:" + planner.getSetpoint());
                 // Inches and degrees
-                Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose), controller.getSetpoint().state().getPose());
+                Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose),
+                        controller.getSetpoint().state().getPose());
                 // System.out.println("Setpoint: " + planner.getSetpoint());
                 // System.out.println("Error: " + error);
                 Assertions.assertEquals(0.0, error.getTranslation().getX(), 0.0508);

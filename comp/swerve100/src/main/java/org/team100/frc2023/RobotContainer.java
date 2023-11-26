@@ -123,12 +123,9 @@ public class RobotContainer implements Testable {
         m_kinematics = SwerveDriveKinematicsFactory.get(identity);
 
         // TODO replace with SpeedLimits.
-        SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits();
         // TODO: fix these limits
-        m_kinematicLimits.kMaxDriveVelocity = 4;
-        m_kinematicLimits.kMaxDriveAcceleration = 2;
-        m_kinematicLimits.kMaxSteeringVelocity = Units.degreesToRadians(750.0);
-
+        SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits(4, 2, 13);
+ 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);

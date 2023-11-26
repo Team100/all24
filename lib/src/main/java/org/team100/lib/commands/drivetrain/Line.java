@@ -1,5 +1,9 @@
 package org.team100.lib.commands.drivetrain;
 
+import org.team100.lib.config.Identity;
+import org.team100.lib.controller.DriveControllers;
+import org.team100.lib.controller.DriveControllersFactory;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 
@@ -14,7 +18,11 @@ public class Line extends Command {
     public Line(Pose2d goal, SwerveDriveSubsystem drivetrain, TrajectoryConfig config) {
         m_drivetrain = drivetrain;
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
-        m_line = new DriveToWaypoint3(goal, m_drivetrain, maker);
+        Identity identity = Identity.get();
+        DriveControllers controllers = new DriveControllersFactory().get(identity);
+        HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
+        controller.setTolerance(0.1, 1.0);
+        m_line = new DriveToWaypoint3(goal, m_drivetrain, maker, controller);
     }
 
     @Override
