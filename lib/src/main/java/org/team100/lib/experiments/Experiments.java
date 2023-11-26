@@ -40,7 +40,7 @@ public class Experiments {
     public Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
-        t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
+        log();
         m_overrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
             SendableChooser<BooleanSupplier> override = new NamedChooser<>(e.name());
@@ -57,6 +57,7 @@ public class Experiments {
     }
 
     public boolean enabled(Experiment experiment) {
+        log();
         return m_overrides.get(experiment).getSelected().getAsBoolean();
         // return m_experiments.contains(experiment);
     }
@@ -69,6 +70,10 @@ public class Experiments {
 
     private String off(Experiment e) {
         return e.name() + " OFF";
+    }
+
+    private void log() {
+        t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
     }
 
 }
