@@ -64,7 +64,8 @@ public class RobotContainer implements Testable {
         // Show mode is for younger drivers to drive the robot slowly.
         //
         // TODO: make a physical show mode switch.
-        public boolean SHOW_MODE = true;
+        // TODO: make way more noticable.
+        public boolean SHOW_MODE = false;
         //
         //////////////////////////////////////
 
@@ -240,9 +241,9 @@ public class RobotContainer implements Testable {
 
         ///////// ARM STUFF
         
-        m_armSubsystem = new ArmSubsystem();
-        m_armKinematicsM = new ArmKinematics(0.93, 0.92);
-        m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
+        // m_armSubsystem = new ArmSubsystem();
+        // m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+        // m_armAuton = new Sequence(m_armSubsystem, m_armKinematicsM);
 
 
         ///////////////////////////
