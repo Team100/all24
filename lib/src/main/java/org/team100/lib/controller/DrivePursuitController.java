@@ -33,8 +33,8 @@ public class DrivePursuitController implements DriveMotionController {
     private boolean useDefaultCook = true;
     private Lookahead mSpeedLookahead = null;
     // used for the "D" term of the heading controller
-    private Rotation2d mPrevHeadingError = GeometryUtil.kRotationIdentity;
-    private Pose2d mError = GeometryUtil.kPose2dIdentity;
+    private Rotation2d mPrevHeadingError = GeometryUtil.kRotationZero;
+    private Pose2d mError = GeometryUtil.kPoseZero;
     private TrajectoryTimeIterator mCurrentTrajectory;
     private double mCurrentTrajectoryLength = 0.0;
     private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
@@ -59,8 +59,8 @@ public class DrivePursuitController implements DriveMotionController {
         useDefaultCook = true;
         mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0,
                 kMaxVelocityMetersPerSecond);
-        mPrevHeadingError = GeometryUtil.kRotationIdentity;
-        mError = GeometryUtil.kPose2dIdentity;
+        mPrevHeadingError = GeometryUtil.kRotationZero;
+        mError = GeometryUtil.kPoseZero;
         mLastTime = Double.POSITIVE_INFINITY;
     }
 

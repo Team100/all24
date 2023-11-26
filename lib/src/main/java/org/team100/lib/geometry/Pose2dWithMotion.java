@@ -35,7 +35,7 @@ public class Pose2dWithMotion {
     protected final double dcurvature_ds_;
 
     public Pose2dWithMotion() {
-        pose_ = new Pose2d();
+        pose_ = GeometryUtil.kPoseZero;
         motion_direction_ = new Twist2d(0.0, 0.0, 0.0);
         curvature_ = 0.0;
         dcurvature_ds_ = 0.0;

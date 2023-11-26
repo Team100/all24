@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * see
@@ -90,8 +91,20 @@ public class DualXboxControl implements Control {
     }
 
     @Override
-    public void defense(Command defense) {
-        new JoystickButton(controller0.getHID(), 2).whileTrue(defense);
+    public Trigger defense() {
+        return new JoystickButton(controller0.getHID(), 2);
+    }
+
+    @Override
+    public Trigger steer0() {
+        // TODO: which button?
+        return new JoystickButton(controller0.getHID(), 3);
+    }
+
+    @Override
+    public Trigger steer90() {
+        // TODO: which button?
+        return new JoystickButton(controller0.getHID(), 4);
     }
 
     @Override

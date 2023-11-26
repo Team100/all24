@@ -114,7 +114,7 @@ class DriveMotionPlannerTest {
             Twist2d twist = new Twist2d(speeds.vxMetersPerSecond * mDt, speeds.vyMetersPerSecond * mDt,
                     speeds.omegaRadiansPerSecond * mDt);
             velocity = GeometryUtil.toTwist2d(speeds);
-            pose = GeometryUtil.transformBy(pose, new Pose2d().exp(twist));
+            pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
             // System.out.println("\n\n\n\n-----t="+time);
             // System.out.println(speeds);
             // System.out.println(pose);

@@ -27,14 +27,14 @@ public class DriveRamseteController implements DriveMotionController {
 
     private TrajectoryTimeIterator mCurrentTrajectory;
     private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    private Pose2d mError = GeometryUtil.kPose2dIdentity;
+    private Pose2d mError = GeometryUtil.kPoseZero;
     private double mLastTime = Double.POSITIVE_INFINITY;
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         mCurrentTrajectory = trajectory;
         mSetpoint = trajectory.getState();
-        mError = GeometryUtil.kPose2dIdentity;
+        mError = GeometryUtil.kPoseZero;
         mLastTime = Double.POSITIVE_INFINITY;
     }
 
@@ -96,7 +96,7 @@ public class DriveRamseteController implements DriveMotionController {
         }
         if (maybe_field_to_goal.isEmpty() && maybe_field_to_course.isEmpty()) {
             // Course doesn't matter.
-            maybe_field_to_course = maybe_field_to_goal = Optional.of(GeometryUtil.kRotationIdentity);
+            maybe_field_to_course = maybe_field_to_goal = Optional.of(GeometryUtil.kRotationZero);
         }
         Rotation2d field_to_course = maybe_field_to_course.get();
         Rotation2d robot_to_course = fieldToRobot.getRotation().unaryMinus().rotateBy(field_to_course);
@@ -133,7 +133,7 @@ public class DriveRamseteController implements DriveMotionController {
                 adjusted_angular_velocity - heading_rate);
         // See where that takes us in one dt.
         final double kNominalDt = kLooperDt;
-        Pose2d adjusted_course_to_goal = new Pose2d()
+        Pose2d adjusted_course_to_goal = GeometryUtil.kPoseZero
                 .exp(GeometryUtil.scale(adjusted_course_relative_velocity, kNominalDt));
 
         // Now rotate to be robot-relative.

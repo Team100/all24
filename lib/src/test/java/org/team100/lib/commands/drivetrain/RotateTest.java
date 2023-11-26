@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.sensors.MockHeading;
@@ -20,7 +21,7 @@ class RotateTest {
     @Test
     void testRotate() {
         MockSwerveDriveSubsystem swerveDriveSubsystem = new MockSwerveDriveSubsystem();
-        swerveDriveSubsystem.pose = new Pose2d();
+        swerveDriveSubsystem.pose = GeometryUtil.kPoseZero;
         MockHeading heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
         MockTimer timer = new MockTimer();

@@ -15,10 +15,10 @@ public class SwerveSetpoint {
         this(
                 new ChassisSpeeds(),
                 new SwerveModuleState[] {
-                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity),
-                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity),
-                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity),
-                        new SwerveModuleState(0, GeometryUtil.kRotationIdentity)
+                        new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                        new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                        new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                        new SwerveModuleState(0, GeometryUtil.kRotationZero)
                 });
     }
 

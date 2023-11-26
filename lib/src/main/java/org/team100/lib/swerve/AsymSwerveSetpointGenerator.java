@@ -269,7 +269,7 @@ public class AsymSwerveSetpointGenerator {
                 var necessaryRotation = prevSetpoint.getModuleStates()[i].angle.unaryMinus().rotateBy(
                         desiredModuleState[i].angle);
                 if (flipHeading(necessaryRotation)) {
-                    necessaryRotation = necessaryRotation.rotateBy(GeometryUtil.kPi);
+                    necessaryRotation = necessaryRotation.rotateBy(GeometryUtil.kRotationPi);
                 }
                 // getRadians() bounds to +/- Pi.
                 final double numStepsNeeded = Math.abs(necessaryRotation.getRadians()) / max_theta_step;

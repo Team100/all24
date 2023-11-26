@@ -13,9 +13,10 @@ import edu.wpi.first.math.spline.PoseWithCurvature;
 
 public class GeometryUtil {
 
-    public static final Rotation2d kRotationIdentity = new Rotation2d();
-    public static final Rotation2d kPi = new Rotation2d(Math.PI);
-    public static final Pose2d kPose2dIdentity = new Pose2d();
+    public static final Rotation2d kRotationZero = new Rotation2d();
+    public static final Rotation2d kRotationPi_2 = new Rotation2d(Math.PI/2);
+    public static final Rotation2d kRotationPi = new Rotation2d(Math.PI);
+    public static final Pose2d kPoseZero = new Pose2d();
     public static final Translation2d kTranslation2dIdentity = new Translation2d();
     public static final PoseWithCurvature kPose2dWithCurvatureIdentity = new PoseWithCurvature();
     public static final Twist2d kTwist2dIdentity = new Twist2d(0.0, 0.0, 0.0);
@@ -37,11 +38,11 @@ public class GeometryUtil {
     }
 
     public static Twist2d slog(final Pose2d transform) {
-        return new Pose2d().log(transform);
+        return GeometryUtil.kPoseZero.log(transform);
     }
 
     public static Pose2d sexp(final Twist2d delta) {
-        return new Pose2d().exp(delta);
+        return GeometryUtil.kPoseZero.exp(delta);
     }
 
     public static Pose2d fromRotation(final Rotation2d rotation) {
@@ -49,7 +50,7 @@ public class GeometryUtil {
     }
 
     public static Pose2d fromTranslation(final Translation2d translation) {
-        return new Pose2d(translation, new Rotation2d());
+        return new Pose2d(translation, GeometryUtil.kRotationZero);
     }
 
     public static Rotation2d fromRadians(double angle_radians) {
