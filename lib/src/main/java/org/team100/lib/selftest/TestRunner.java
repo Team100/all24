@@ -3,7 +3,6 @@ package org.team100.lib.selftest;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
-import org.team100.lib.commands.drivetrain.Defense;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
 
@@ -41,7 +40,7 @@ public class TestRunner extends Command {
         addCase(driveManuallyTest, driveManually);
 
         // this only tests the end-state
-        addCase(new DefenseTest(drivetrain, m_listener), new Defense(drivetrain));
+        addCase(new DefenseTest(drivetrain, m_listener), drivetrain.runInit(drivetrain::defense));
     }
 
     private void addCase(Command deadline, Command... commands) {

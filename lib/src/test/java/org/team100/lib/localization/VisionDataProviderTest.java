@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -110,7 +111,7 @@ class VisionDataProviderTest {
 
     @Test
     void testEstimateRobotPose() throws IOException {
-        Supplier<Pose2d> robotPose = () -> new Pose2d(); // always at the origin
+        Supplier<Pose2d> robotPose = () -> GeometryUtil.kPoseZero; // always at the origin
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-chargedup.json");
         VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
 

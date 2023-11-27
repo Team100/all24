@@ -3,6 +3,7 @@ package org.team100.lib.trajectory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -37,10 +38,10 @@ class AsymSwerveSetpointGeneratorTest {
         speeds.vyMetersPerSecond = 0;
         speeds.omegaRadiansPerSecond = 0;
         SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(0, org.team100.lib.geometry.GeometryUtil.kRotationIdentity),
-                new SwerveModuleState(0, org.team100.lib.geometry.GeometryUtil.kRotationIdentity),
-                new SwerveModuleState(0, org.team100.lib.geometry.GeometryUtil.kRotationIdentity),
-                new SwerveModuleState(0, org.team100.lib.geometry.GeometryUtil.kRotationIdentity)
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(speeds, states);
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds();

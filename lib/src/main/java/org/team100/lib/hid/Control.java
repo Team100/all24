@@ -1,8 +1,11 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.geometry.GeometryUtil;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /** Implementations should do their own deadbanding, scaling, expo, etc. */
 public interface Control {
@@ -21,7 +24,7 @@ public interface Control {
     }
 
     default Rotation2d desiredRotation() {
-        return new Rotation2d();
+        return GeometryUtil.kRotationZero;
     }
 
     default void resetRotation0(Command command) {
@@ -36,7 +39,16 @@ public interface Control {
     default void resetPose(Command command) {
     }
 
-    default void defense(Command defense) {
+    default Trigger defense() {
+        return new Trigger(()->false);
+    }
+
+    default Trigger steer0() {
+        return new Trigger(()->false);
+    }
+
+    default Trigger steer90() {
+        return new Trigger(()->false);
     }
 
     default void rotate0(Command command) {

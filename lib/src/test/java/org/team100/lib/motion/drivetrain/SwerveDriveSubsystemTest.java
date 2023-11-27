@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.MockExperiments;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.MockHeading;
 
@@ -25,14 +26,14 @@ class SwerveDriveSubsystemTest {
                 new Translation2d(0.1, -0.1),
                 new Translation2d(-0.1, 0.1),
                 new Translation2d(-0.1, -0.1));
-        Rotation2d gyroAngle = new Rotation2d();
+        Rotation2d gyroAngle = GeometryUtil.kRotationZero;
         SwerveModulePosition[] modulePositions = new SwerveModulePosition[] {
                 new SwerveModulePosition(),
                 new SwerveModulePosition(),
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
         };
-        Pose2d initialPoseMeters = new Pose2d();
+        Pose2d initialPoseMeters = GeometryUtil.kPoseZero;
 
         SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
                 kinematics, gyroAngle, modulePositions, initialPoseMeters);

@@ -25,7 +25,7 @@ public class CANTurningMotor implements Motor100<Angle> {
     private final String m_name;
 
     // TODO fix this
-    public CANTurningMotor(String name, int channel, AnalogTurningEncoder encoder, int swerveBot) {
+    public CANTurningMotor(String name, int channel, AnalogTurningEncoder encoder) {
         m_encoder = encoder;
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
