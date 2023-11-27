@@ -137,6 +137,9 @@
       "current pose": {
         "open": true
       },
+      "experiments": {
+        "open": true
+      },
       "manual field relative": {
         "open": true
       },
