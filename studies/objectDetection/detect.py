@@ -1,7 +1,6 @@
 import cv2
-import os
-import libcamera
 import numpy as np
+import time
 from tflite_support.task import core
 from tflite_support.task import processor
 from tflite_support.task import vision
@@ -12,7 +11,19 @@ from picamera2 import Picamera2
 class GamePieceFinder:
 
     def __init__(self, camera_params):
-        self.detector
+        self.counter, fps = 0, 0
+        self.start_time = time.time()
+        self.row_size = 20  # pixels
+        self.left_margin = 24  # pixels
+        self.text_color = (0, 0, 255)  # red
+        self.font_size = 1
+        self.font_thickness = 1
+        self.fps_avg_frame_count = 10
+        model = ('/home/pi/test/examples/lite/examples/object_detection/raspberry_pi/efficientdet_lite0_edgetpu.tflite')
+        base_options=core.BaseOptions(file_name=model,use_coral=True,num_threads=4)
+        detection_options=processor.DetectionOptions(max_results=8, score_threshold=.3)
+        options=vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
+        self.detector=vision.ObjectDetector.create_from_options(options)
         self.width = camera_params[0]
         self.height = camera_params[1]
         self.output_stream = CameraServer.putVideo("Processed", self.width, self.height)
@@ -27,7 +38,17 @@ class GamePieceFinder:
         imTensor = vision.TensorImage.create_from_array(self.img_rgb)
         detections=self.detector.detect(imTensor)
         image=utils.visualize(self.img_rgb, detections)
-        self.output_stream.putFrame(self.img_rgb)
+        self.output_stream.putFrame(image)
+        if self.counter % self.fps_avg_frame_count == 0:
+            end_time = time.time()
+            fps = self.fps_avg_frame_count / (end_time - self.start_time)
+            self.start_time = time.time()
+
+        # Show the FPS
+        fps_text = 'FPS = {:.1f}'.format(fps)
+        text_location = (self.left_margin, self.row_size)
+        #self.output_stream.putText(image, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
+                #self.font_size, self.text_color, self.font_thickness)
 
 
 def main():
@@ -36,16 +57,7 @@ def main():
     fullheight = 1232
     width = 832
     height = 616
-    # option 3: tiny, trade speed for detection distance; two circles, three squraes, ~40ms
-    # width=448
-    # height=308
-    # fast path
-    # width=640
-    # height=480
-    # medium crop
-    # width=1920
-    # height=1080
-
+  # Start capturing video input from the camera
     camera = Picamera2()
     camera_config = camera.create_still_configuration(
     # one buffer to write, one to read, one in between so we don't have to wait
@@ -58,31 +70,19 @@ def main():
         controls={
         "FrameDurationLimits": (5000, 33333),  # 41 fps
         # noise reduction takes time
-        "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
         "AwbEnable": False,
         # "AeEnable": False,
         # "AnalogueGain": 1.0
     },
 )
-    print("REQUESTED")
-    print(camera_config)
     camera.align_configuration(camera_config)
-    print("ALIGNED")
-    print(camera_config)
     camera.configure(camera_config)
-    print(camera.camera_controls)
+    camera.start()
 
     # Roborio IP: 10.1.0.2
     # Pi IP: 10.1.0.21
-    path = os.getcwd
-    model = ('/home/pi/tflite_model/last_float32.tflite')
     camera_params = [width, 200]
     output = GamePieceFinder(camera_params)
-    base_options=core.BaseOptions(file_name=model,use_coral=True,num_threads=num_threads)
-    detection_options=processor.DetectionOptions(max_results=8, score_threshold=.3)
-    options=vision.ObjectDetectionOptions(base_options=base_options, detection_options=detection_options)
-    self.detector=vision.ObjectDetector.create_from_options(options)
-    camera.start()
     try:
         while True:
             request = camera.capture_request()

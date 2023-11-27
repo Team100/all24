@@ -82,9 +82,12 @@ public class CANTurningMotor implements Motor100<Angle> {
         double ticksPer100ms = revsPer100ms * ticksPerRevolution;
         DemandType type = DemandType.ArbitraryFeedForward;
         double Kn = 0.1121212;
-        double Kf = 0.6;
-        double Ke = 0.068842;
-        double Ks = 0.007576;
+        //Value was gotten through tunning
+        //double Kf = 0.6;
+        //Kf 
+        //double Ke = 0.068842;
+        double Ks = 0.007576; 
+        //Value was gotten through tuning
         double VSat = 11;
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);
