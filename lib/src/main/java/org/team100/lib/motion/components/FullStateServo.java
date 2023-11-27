@@ -12,8 +12,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
-/** Positional control on top of a velocity servo. */
-public class PositionServo<T> {
+/** This is positional control with velocity, so full-state. */
+public class FullStateServo<T> {
     public static class Config {
         public double kDeadband = 0.03;
     }
@@ -23,7 +23,8 @@ public class PositionServo<T> {
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
     private final double m_maxVel;
-    private final PIDController m_controller;
+    private final PIDController m_xController;
+    private final PIDController m_vController;
     private final double m_period;
     private final String m_name;
     private final ChoosableProfile m_profile;
@@ -36,20 +37,22 @@ public class PositionServo<T> {
     /**
      * @param modulus wrap the measurement if desired
      */
-    public PositionServo(
+    public FullStateServo(
             String name,
             VelocityServo<T> servo,
             Encoder100<T> encoder,
             double maxVel,
-            PIDController controller,
+            PIDController xController,
+            PIDController vController,
             ChoosableProfile profile,
             DoubleUnaryOperator modulus) {
         m_servo = servo;
         m_encoder = encoder;
         m_maxVel = maxVel;
-        m_controller = controller;
-        m_period = controller.getPeriod();
-        m_name = String.format("/position servo %s", name);
+        m_xController = xController;
+        m_vController = vController;
+        m_period = xController.getPeriod();
+        m_name = String.format("/full state servo %s", name);
         m_profile = profile;
         m_modulus = modulus;
     }
@@ -61,23 +64,29 @@ public class PositionServo<T> {
         double measurement = m_modulus.applyAsDouble(m_encoder.getPosition());
         m_goal = new TrapezoidProfile.State(goal, 0.0);
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
+        double u_XFB = m_xController.calculate(measurement, m_setpoint.position);
 
-        double u_FB = m_controller.calculate(measurement, m_setpoint.position);
+        double velocityMeasurement = m_encoder.getRate();
+        double u_VFB = m_xController.calculate(velocityMeasurement, m_setpoint.velocity);
+
         double u_FF = m_setpoint.velocity;
-        double u_TOTAL = u_FB + u_FF;
+        double u_TOTAL = u_XFB + u_VFB + u_FF;
         // TODO: should there be a deadband here?
         u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, m_maxVel);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
-        t.log(Level.DEBUG, m_name + "/u_FB ", u_FB);
+        t.log(Level.DEBUG, m_name + "/u_XFB ", u_XFB);
+        t.log(Level.DEBUG, m_name + "/u_VFB ", u_VFB);
         t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
         t.log(Level.DEBUG, m_name + "/Position", getPosition());
         t.log(Level.DEBUG, m_name + "/Goal", m_goal.position);
         t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.position);
         t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.velocity);
-        t.log(Level.DEBUG, m_name + "/Error", m_controller.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Error Velocity", m_controller.getVelocityError());
+        t.log(Level.DEBUG, m_name + "/Position Error", m_xController.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Velocity Error", m_vController.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Position Error Velocity", m_xController.getVelocityError());
+        t.log(Level.DEBUG, m_name + "/Velocity Error Velocity", m_vController.getVelocityError());
         t.log(Level.DEBUG, m_name + "/Velocity", m_servo.getVelocity());
     }
 
@@ -103,7 +112,7 @@ public class PositionServo<T> {
     }
 
     public boolean atSetpoint() {
-        return m_controller.atSetpoint();
+        return m_xController.atSetpoint() && m_vController.atSetpoint();
     }
 
     public void stop() {

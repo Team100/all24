@@ -55,7 +55,6 @@ public class VelocityServo<T> {
      * 
      * @param setpoint velocity
      */
-    // @Override
     public void setVelocity(Double setpoint) {
         if (m_experiments.enabled(Experiment.UseClosedLoopVelocity)) {
             offboard(setpoint);
@@ -66,7 +65,12 @@ public class VelocityServo<T> {
         log();
     }
 
-    // @Override
+    /** Direct control for testing. */
+    public void setDutyCycle(double dutyCycle) {
+        m_motor.setDutyCycle(dutyCycle);
+    }
+
+    /** Note this can be noisy, maybe filter it. */
     public Double getVelocity() {
         return m_encoder.getRate();
     }
