@@ -99,9 +99,9 @@ test {
 }
 jacocoTestReport {
     dependsOn test
-    reports {
-        csv.enabled true
-    }
+   // reports {
+       // csv.required true
+   // }
 }
 
 // Simulation configuration (e.g. environment variables).
