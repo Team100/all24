@@ -10,7 +10,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SimpleManualMode implements Supplier<SimpleManualMode.Mode> {
     public enum Mode {
         DUTY_CYCLE,
-        VELOCITY
+        VELOCITY,
+        POSITION
     }
 
     private final SendableChooser<Mode> m_manualModeChooser;

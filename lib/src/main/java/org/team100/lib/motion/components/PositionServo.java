@@ -22,7 +22,6 @@ public class PositionServo<T> {
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
-    // private final TrapezoidProfile.Constraints m_constraints;
     private final double m_maxVel;
     private final PIDController m_controller;
     private final double m_period;
@@ -50,7 +49,7 @@ public class PositionServo<T> {
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
-        m_name = String.format("/angle position servo %s", name);
+        m_name = String.format("/position servo %s", name);
         m_profile = profile;
         m_modulus = modulus;
     }
@@ -82,11 +81,25 @@ public class PositionServo<T> {
         t.log(Level.DEBUG, m_name + "/Velocity", m_servo.getVelocity());
     }
 
+    /** Direct velocity control for testing */
+    public void setVelocity(double velocity) {
+        m_servo.setVelocity(velocity);
+    }
+
+    /** Direct duty cycle for testing */
+    public void setDutyCycle(double dutyCycle) {
+        m_servo.setDutyCycle(dutyCycle);
+    }
+
     /**
      * @return For distance this is meters, for angle this is radians.
      */
     public double getPosition() {
         return m_modulus.applyAsDouble(m_encoder.getPosition());
+    }
+
+    public double getVelocity() {
+        return m_servo.getVelocity();
     }
 
     public boolean atSetpoint() {
