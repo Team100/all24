@@ -1,18 +1,20 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2023.4.3"
+    id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-3"
     id "jacoco"
 }
 
 // these four lines are for development builds
 // https://github.com/wpilibsuite/allwpilib/blob/main/DevelopmentBuilds.md
-wpi.maven.useLocal = false
-wpi.maven.useDevelopment = true
-wpi.versions.wpilibVersion = '2023.+'
-wpi.versions.wpimathVersion = '2023.+'
+//wpi.maven.useLocal = false
+//wpi.maven.useDevelopment = true
+//wpi.versions.wpilibVersion = '2023.+'
+//wpi.versions.wpimathVersion = '2023.+'
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -97,9 +99,9 @@ test {
 }
 jacocoTestReport {
     dependsOn test
-    reports {
-        csv.enabled true
-    }
+   // reports {
+       // csv.required true
+   // }
 }
 
 // Simulation configuration (e.g. environment variables).
@@ -111,6 +113,7 @@ wpi.sim.addDriverstation()
 // knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
