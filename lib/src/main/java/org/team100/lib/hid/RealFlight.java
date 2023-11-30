@@ -72,30 +72,21 @@ public class RealFlight implements DriverControl {
     }
 
     /**
-     * Use slow when the throttle stick is all the way back,
-     * or when the right switch is on
+     * Use slow when the right switch is on
      */
     @Override
     public void driveSlow(Command command) {
-        Trigger slow = throttleLow()
-                .or(rightSwitchOn());
-        slow.whileTrue(command);
+        rightSwitchOn().whileTrue(command);
     }
 
     /**
-     * Use medium when the throttle stick is in the middle,
-     * or when the left switch is on but the right one is not
+     * Use medium when the left switch is on but the right one is not
      * (slow overrides medium)
      */
     @Override
     public void driveMedium(Command command) {
-        Trigger throttleNotLow = throttleLow().negate();
-        Trigger throttleNotHigh = throttleHigh().negate();
-        Trigger throttleMiddle = throttleNotLow.and(throttleNotHigh);
         Trigger rightSwitchOff = rightSwitchOn().negate();
-        Trigger medium = throttleMiddle
-                .or(leftSwitchOn().and(rightSwitchOff));
-        medium.whileTrue(command);
+        leftSwitchOn().and(rightSwitchOff).whileTrue(command);
     }
 
     /////////////////////////////////////////
@@ -108,22 +99,17 @@ public class RealFlight implements DriverControl {
         return hid.button(3);
     }
 
-    public Trigger throttleLow() {
-        return hid.axisGreaterThan(2, 0.5);
-    }
-
-    public Trigger throttleHigh() {
-        return hid.axisLessThan(2, -0.3);
-    }
-
+    // this doesn't do anything
     public double throttle() {
         return scaled(2);
     }
 
+    // this doesn't do anything
     public boolean medium() {
         return hid.getRawAxis(2) > -0.3 && hid.getRawAxis(2) < 0.5;
     }
 
+    // this doesn't do anything
     public boolean slow() {
         return hid.getRawAxis(2) > 0.5;
     }
