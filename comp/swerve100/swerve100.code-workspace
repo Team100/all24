@@ -14,6 +14,8 @@
         "workbench.colorTheme": "Default Light+",
         "files.autoSave": "afterDelay",
         "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable",
-        "workbench.editor.revealIfOpen": true
+        "workbench.editor.revealIfOpen": true,
+        "editor.minimap.enabled": false,
+        "editor.inlayHints.enabled": "off"
     }
 }
