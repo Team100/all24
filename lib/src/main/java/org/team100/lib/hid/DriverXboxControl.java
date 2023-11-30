@@ -10,7 +10,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -47,13 +46,13 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public void resetRotation0(Command command) {
-        new JoystickButton(m_controller.getHID(), 7).onTrue(command);
+    public Trigger resetRotation0() {
+        return new JoystickButton(m_controller.getHID(), 7);
     }
 
     @Override
-    public void resetRotation180(Command command) {
-        new JoystickButton(m_controller.getHID(), 8).onTrue(command);
+    public Trigger resetRotation180() {
+        return new JoystickButton(m_controller.getHID(), 8);
     }
 
     @Override
@@ -68,13 +67,18 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public void driveSlow(Command command) {
-        m_controller.leftBumper().whileTrue(command);
+    public Trigger driveSlow() {
+        return m_controller.leftBumper();
     }
 
     @Override
-    public void resetPose(Command command) {
-        m_controller.leftBumper().onTrue(command);
+    public Trigger driveMedium() {
+        return m_controller.rightBumper();
+    }
+
+    @Override
+    public Trigger resetPose() {
+        return m_controller.leftBumper();
     }
 
     @Override
@@ -106,22 +110,18 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public void rotate0(Command command) {
-        new JoystickButton(m_controller.getHID(), 9).whileTrue(command);
+    public Trigger rotate0() {
+        return new JoystickButton(m_controller.getHID(), 9);
     }
 
     @Override
-    public void driveMedium(Command command) {
-        m_controller.rightBumper().whileTrue(command);
-    }
-
-    @Override
-    public void driveWithFancyTrajec(Command command) {
+    public Trigger driveWithFancyTrajec() {
         // controller0.a().whileTrue(command);
+        return new Trigger(() -> false);
     }
 
     @Override
-    public void circle(Command command) {
-        m_controller.a().whileTrue(command);
+    public Trigger circle() {
+        return m_controller.a();
     }
 }

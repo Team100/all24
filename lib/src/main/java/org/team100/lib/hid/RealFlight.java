@@ -5,7 +5,6 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -67,16 +66,16 @@ public class RealFlight implements DriverControl {
     }
 
     @Override
-    public void resetPose(Command command) {
-        hid.button(1).onTrue(command);
+    public Trigger resetPose() {
+        return hid.button(1);
     }
 
     /**
      * Use slow when the right switch is on
      */
     @Override
-    public void driveSlow(Command command) {
-        rightSwitchOn().whileTrue(command);
+    public Trigger driveSlow() {
+        return rightSwitchOn();
     }
 
     /**
@@ -84,9 +83,9 @@ public class RealFlight implements DriverControl {
      * (slow overrides medium)
      */
     @Override
-    public void driveMedium(Command command) {
+    public Trigger driveMedium() {
         Trigger rightSwitchOff = rightSwitchOn().negate();
-        leftSwitchOn().and(rightSwitchOff).whileTrue(command);
+        return leftSwitchOn().and(rightSwitchOff);
     }
 
     /////////////////////////////////////////

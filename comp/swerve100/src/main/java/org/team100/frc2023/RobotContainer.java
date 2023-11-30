@@ -15,8 +15,8 @@ import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.hid.DriverXboxControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -48,7 +48,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -125,7 +124,7 @@ public class RobotContainer implements Testable {
         // TODO replace with SpeedLimits.
         // TODO: fix these limits
         SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits(4, 2, 13);
- 
+
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);
@@ -175,31 +174,34 @@ public class RobotContainer implements Testable {
         // DRIVETRAIN COMMANDS
         //
 
-        // TODO: control selection using names
         // control = new JoystickControl();
+        // control = new DriverXboxControl();
 
-        control = new DriverXboxControl();
+        // selects the correct control class for whatever is plugged in
+        control = new ControlFactory().getDriverControl();
+
         control.defense().whileTrue(m_drive.runInit(m_drive::defense));
         control.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
         control.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
 
-        control.resetRotation0(new SetRotation(m_drive, GeometryUtil.kRotationZero));
-        control.resetRotation180(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+        control.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        control.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         ManualMode manualMode = new ManualMode();
         SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow(new DriveManually(manualMode, control::twist, m_drive, slow));
+        control.driveSlow().whileTrue(new DriveManually(manualMode, control::twist, m_drive, slow));
         SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium(new DriveManually(manualMode, control::twist, m_drive, medium));
+        control.driveMedium().whileTrue(new DriveManually(manualMode, control::twist, m_drive, medium));
+
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
-        control.resetPose(new ResetPose(m_drive, 0, 0, Math.PI));
-        control.rotate0(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
+        control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
+        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
 
         m_drawCircle = new DrawCircle(m_drive, m_kinematics);
-        control.circle(m_drawCircle);
+        control.circle().whileTrue(m_drawCircle);
 
-        control.driveWithFancyTrajec(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
+        control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
 
         ///////////////////////////
         //

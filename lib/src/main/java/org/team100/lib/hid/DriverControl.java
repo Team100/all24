@@ -4,7 +4,6 @@ import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -19,10 +18,6 @@ public interface DriverControl {
         return "No HID Found!!";
     }
 
-    ///////////////////////////////
-    //
-    // DRIVER: manual driving and auto navigation controls
-
     /**
      * forward positive, left positive, counterclockwise positive
      * 
@@ -36,16 +31,24 @@ public interface DriverControl {
         return GeometryUtil.kRotationZero;
     }
 
-    default void resetRotation0(Command command) {
+    default Trigger resetPose() {
+        return new Trigger(() -> false);
     }
 
-    default void resetRotation180(Command command) {
+    default Trigger resetRotation0() {
+        return new Trigger(() -> false);
     }
 
-    default void driveSlow(Command command) {
+    default Trigger resetRotation180() {
+        return new Trigger(() -> false);
     }
 
-    default void resetPose(Command command) {
+    default Trigger driveSlow() {
+        return new Trigger(() -> false);
+    }
+
+    default Trigger driveMedium() {
+        return new Trigger(() -> false);
     }
 
     default Trigger defense() {
@@ -60,15 +63,15 @@ public interface DriverControl {
         return new Trigger(() -> false);
     }
 
-    default void rotate0(Command command) {
+    default Trigger rotate0() {
+        return new Trigger(() -> false);
     }
 
-    default void driveMedium(Command command) {
+    default Trigger driveWithFancyTrajec() {
+        return new Trigger(() -> false);
     }
 
-    default void driveWithFancyTrajec(Command command) {
-    }
-
-    default void circle(Command command) {
+    default Trigger circle() {
+        return new Trigger(() -> false);
     }
 }
