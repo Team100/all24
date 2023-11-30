@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../lib"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"java.server.launchMode": "Standard",
+		"workbench.colorTheme": "Visual Studio Light",
+		"editor.minimap.enabled": false,
+		"editor.inlayHints.enabled": "off",
+		"java.dependency.syncWithFolderExplorer": true,
+		"editor.detectIndentation": false
+	}
+}
