@@ -6,6 +6,8 @@ import static org.team100.lib.hid.ControlUtil.expo;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 
 /**
  * The RealFlight USB controller is a basic RC-style control that comes with the
@@ -23,7 +25,7 @@ import edu.wpi.first.wpilibj.GenericHID;
  * right switch: button 2
  * name: "Great Planes GP Controller"
  */
-public class RealFlight implements Control {
+public class RealFlight implements DriverControl {
     public static class Config {
         public double kDeadband = 0.02;
         public double kExpo = 0.5;
@@ -31,10 +33,15 @@ public class RealFlight implements Control {
 
     private final Config m_config = new Config();
 
-    private final GenericHID hid;
+    private final CommandGenericHID hid;
 
     public RealFlight() {
-        hid = new GenericHID(0);
+        hid = new CommandGenericHID(0);
+    }
+
+    @Override
+    public String getHIDName() {
+        return hid.getHID().getName();
     }
 
     public Twist2d twist() {
@@ -44,4 +51,8 @@ public class RealFlight implements Control {
         return new Twist2d(dx, dy, dtheta);
     }
 
+    @Override
+    public void resetPose(Command command) {
+        hid.button(0).onTrue(command);
+    }
 }

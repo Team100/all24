@@ -7,8 +7,17 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-/** Implementations should do their own deadbanding, scaling, expo, etc. */
-public interface Control {
+/**
+ * Represents the HID used by the "driver" role, which typically focuses on
+ * controlling the drivetrain only.
+ * 
+ * Implementations should do their own deadbanding, scaling, expo, etc.
+ */
+public interface DriverControl {
+
+    default String getHIDName() {
+        return "No HID Found!!";
+    }
 
     ///////////////////////////////
     //
@@ -40,15 +49,15 @@ public interface Control {
     }
 
     default Trigger defense() {
-        return new Trigger(()->false);
+        return new Trigger(() -> false);
     }
 
     default Trigger steer0() {
-        return new Trigger(()->false);
+        return new Trigger(() -> false);
     }
 
     default Trigger steer90() {
-        return new Trigger(()->false);
+        return new Trigger(() -> false);
     }
 
     default void rotate0(Command command) {

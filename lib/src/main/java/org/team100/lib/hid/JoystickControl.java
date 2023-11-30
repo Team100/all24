@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
  * Operator features are not implemented.
  * Command buttons are not implemented.
  */
-public class JoystickControl implements Control {
+public class JoystickControl implements DriverControl {
     public static class Config {
         public double kDeadband = 0.02;
         public double kExpo = 0.5;
@@ -32,7 +32,11 @@ public class JoystickControl implements Control {
 
     public JoystickControl() {
         m_controller = new CommandJoystick(0);
-        // System.out.printf("Controller0: %s\n", m_controller.getHID().getName());
+    }
+
+    @Override
+    public String getHIDName() {
+        return m_controller.getHID().getName();
     }
 
     @Override
