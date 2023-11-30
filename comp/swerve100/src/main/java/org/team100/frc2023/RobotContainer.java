@@ -15,8 +15,8 @@ import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.hid.Control;
-import org.team100.lib.hid.DualXboxControl;
+import org.team100.lib.hid.DriverControl;
+import org.team100.lib.hid.DriverXboxControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -90,7 +90,7 @@ public class RobotContainer implements Testable {
     private final Command m_auton;
     private final FrameTransform m_frameTransform;
 
-    private final Control control;
+    private final DriverControl control;
     private final DrawCircle m_drawCircle;
     private final Monitor m_monitor;
 
@@ -178,7 +178,7 @@ public class RobotContainer implements Testable {
         // TODO: control selection using names
         // control = new JoystickControl();
 
-        control = new DualXboxControl();
+        control = new DriverXboxControl();
         control.defense().whileTrue(m_drive.runInit(m_drive::defense));
         control.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
         control.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
