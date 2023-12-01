@@ -2,9 +2,9 @@ package org.team100.persistent_parameter;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ExampleSubsystem extends Subsystem {
+public class ExampleSubsystem extends SubsystemBase {
     private final DoubleSupplier m_parameterA;
     private final DoubleSupplier m_parameterB;
     private final DoubleSupplier m_parameterC;

@@ -9,6 +9,10 @@
 	],
     "settings": {
         "java.configuration.updateBuildConfiguration": "automatic",
-        "java.server.launchMode": "Standard"
+		"java.server.launchMode": "Standard",
+		"files.autoSave": "afterDelay",
+		"editor.minimap.enabled": false,
+		"workbench.colorTheme": "Default Light Modern",
+		"editor.inlayHints.enabled": "off"
     }
 }
