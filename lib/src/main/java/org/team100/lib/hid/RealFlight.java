@@ -1,6 +1,7 @@
 package org.team100.lib.hid;
 
 import static org.team100.lib.hid.ControlUtil.clamp;
+import static org.team100.lib.hid.ControlUtil.clampTwist;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
@@ -62,7 +63,7 @@ public class RealFlight implements DriverControl {
                 m_config.kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), m_config.kDeadband,
                 1), m_config.kExpo);
-        return new Twist2d(dx, dy, dtheta);
+        return clampTwist(new Twist2d(dx, dy, dtheta), 1.0);
     }
 
     @Override
