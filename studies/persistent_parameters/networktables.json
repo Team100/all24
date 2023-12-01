@@ -2,7 +2,7 @@
   {
     "name": "/Preferences/foo",
     "type": "double",
-    "value": 1.2023345232009888,
+    "value": 0.699397087097168,
     "properties": {
       "persistent": true
     }
@@ -10,7 +10,7 @@
   {
     "name": "/Preferences/bar",
     "type": "double",
-    "value": 1.4335848093032837,
+    "value": 1.0626376867294312,
     "properties": {
       "persistent": true
     }
@@ -18,7 +18,7 @@
   {
     "name": "/Preferences/no_knob",
     "type": "double",
-    "value": 20.0,
+    "value": 20000000.0,
     "properties": {
       "persistent": true
     }

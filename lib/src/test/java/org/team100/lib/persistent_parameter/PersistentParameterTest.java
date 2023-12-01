@@ -1,4 +1,4 @@
-package org.team100.persistent_parameter;
+package org.team100.lib.persistent_parameter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -19,7 +19,7 @@ class PersistentParameterTest {
         if (cwd.endsWith("release")) {
             // vscode test runner cwd is build/jni/release
             inst.startServer("../../../nttest.json");
-        } else if (cwd.endsWith("persistent_parameters")) {
+        } else if (cwd.endsWith("lib")) {
             // wpilib test runner cwd is project root
             inst.startServer("nttest.json");
         } else {

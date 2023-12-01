@@ -1,4 +1,4 @@
-package org.team100.persistent_parameter;
+package org.team100.lib.persistent_parameter;
 
 import java.util.function.DoubleSupplier;
 
@@ -10,6 +10,9 @@ public class ConstantParameter implements DoubleSupplier {
     private final double m_value;
     private final NetworkTableEntry m_entry;
 
+    /** @param key in the Constants table
+     * @param value the constant value
+     */
     public ConstantParameter(String key, double value) {
         m_value = value;
         m_entry = NetworkTableInstance.getDefault().getTable("Constants").getEntry(key);
