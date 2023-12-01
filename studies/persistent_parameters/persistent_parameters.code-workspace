@@ -13,6 +13,7 @@
 		"files.autoSave": "afterDelay",
 		"editor.minimap.enabled": false,
 		"workbench.colorTheme": "Default Light Modern",
-		"editor.inlayHints.enabled": "off"
+		"editor.inlayHints.enabled": "off",
+		"workbench.editor.revealIfOpen": true
     }
 }

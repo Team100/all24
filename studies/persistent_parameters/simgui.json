@@ -9,6 +9,14 @@
       "Preferences": {
         "open": true
       }
+    },
+    "transitory": {
+      "Constants": {
+        "nesting": {
+          "open": true
+        },
+        "open": true
+      }
     }
   }
 }

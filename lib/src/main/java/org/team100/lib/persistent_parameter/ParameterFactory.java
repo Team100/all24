@@ -1,4 +1,4 @@
-package org.team100.persistent_parameter;
+package org.team100.lib.persistent_parameter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,11 +19,18 @@ public class ParameterFactory {
     /**
      * Return a parameter linked to a preference, with knob support
      * if configured.
+     * 
+     * @param key          in the Preferences table
+     * @param defaultValue on reset or if new
      */
-    public DoubleSupplier inconstant(String key, double defaultValue) {
+    public DoubleSupplier mutable(String key, double defaultValue) {
         return m_parameters.computeIfAbsent(key, k -> make(k, defaultValue));
     }
 
+    /**
+     * Return a constant parameter. It's just a constant that's published to Network
+     * Tables.
+     */
     public DoubleSupplier constant(String key, double value) {
         return m_parameters.computeIfAbsent(key, k -> new ConstantParameter(k, value));
     }

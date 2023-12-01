@@ -1,6 +1,8 @@
-package org.team100.persistent_parameter;
+package org.team100;
 
 import java.util.function.DoubleSupplier;
+
+import org.team100.lib.persistent_parameter.ParameterFactory;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -11,11 +13,11 @@ public class ExampleSubsystem extends SubsystemBase {
     private final DoubleSupplier m_parameterD;
 
     public ExampleSubsystem(ParameterFactory parameters) {
-        m_parameterA = parameters.inconstant("foo", 1.0);
+        m_parameterA = parameters.mutable("foo", 1.0);
         // mapped to a different knob
-        m_parameterB = parameters.inconstant("bar", 2.0);
+        m_parameterB = parameters.mutable("bar", 2.0);
         // this parameter gets NT updates but not knob updates
-        m_parameterC = parameters.inconstant("no_knob", 20.0);
+        m_parameterC = parameters.mutable("no_knob", 20.0);
         m_parameterD = parameters.constant("/nesting/a_constant", 30.0);
     }
 

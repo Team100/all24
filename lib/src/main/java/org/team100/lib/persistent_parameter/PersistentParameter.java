@@ -1,4 +1,4 @@
-package org.team100.persistent_parameter;
+package org.team100.lib.persistent_parameter;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
