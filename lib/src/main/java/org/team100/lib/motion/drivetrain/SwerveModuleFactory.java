@@ -56,8 +56,8 @@ public class SwerveModuleFactory {
 
         // TODO: shorter period
         PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
-        turningController2.enableContinuousInput(0, 2 * Math.PI);
-        turningController2.setTolerance(0.01);
+        turningController2.enableContinuousInput(-Math.PI, - Math.PI);
+        turningController2.setTolerance(0.1);
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //

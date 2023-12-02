@@ -24,6 +24,8 @@ public class PositionServo<T> {
     private final Encoder100<T> m_encoder;
     private final double m_maxVel;
     private final PIDController m_controller;
+    private final double m_minimumInput;
+    private final double m_maximumInput;
     private final double m_period;
     private final String m_name;
     private final ChoosableProfile m_profile;
@@ -48,6 +50,13 @@ public class PositionServo<T> {
         m_encoder = encoder;
         m_maxVel = maxVel;
         m_controller = controller;
+        if (m_controller.isContinuousInputEnabled()) {
+            m_minimumInput = -Math.PI;
+            m_maximumInput = Math.PI;
+        } else {
+            m_minimumInput = -Double.MAX_VALUE;
+            m_maximumInput = Double.MAX_VALUE;
+        }
         m_period = controller.getPeriod();
         m_name = String.format("/position servo %s", name);
         m_profile = profile;
@@ -60,6 +69,23 @@ public class PositionServo<T> {
     public void setPosition(double goal) {
         double measurement = m_modulus.applyAsDouble(m_encoder.getPosition());
         m_goal = new TrapezoidProfile.State(goal, 0.0);
+
+        if (m_controller.isContinuousInputEnabled()) {
+            // Get error which is the smallest distance between goal and measurement
+            double errorBound = (m_maximumInput - m_minimumInput) / 2.0;
+            double goalMinDistance =
+                MathUtil.inputModulus(m_goal.position - measurement, -errorBound, errorBound);
+            double setpointMinDistance =
+                MathUtil.inputModulus(m_setpoint.position - measurement, -errorBound, errorBound);
+      
+            // Recompute the profile goal with the smallest error, thus giving the shortest path. The goal
+            // may be outside the input range after this operation, but that's OK because the controller
+            // will still go there and report an error of zero. In other words, the setpoint only needs to
+            // be offset from the measurement by the input range modulus; they don't need to be equal.
+            m_goal.position = goalMinDistance + measurement;
+            m_setpoint.position = setpointMinDistance + measurement;
+          }
+
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.position);
