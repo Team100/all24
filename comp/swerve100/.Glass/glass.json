@@ -1,13 +1,50 @@
 {
   "NetworkTables": {
+    "retained": {
+      "SmartDashboard": {
+        "Manual Drive Mode": {
+          "open": true
+        },
+        "Telemetry Level": {
+          "open": true
+        },
+        "open": true
+      }
+    },
     "transitory": {
       "SmartDashboard": {
+        "Manual Drive Mode": {
+          "open": true
+        },
         "Swerve Module Front Left": {
           "open": true
         },
         "Swerve Module Front Right": {
           "open": true
         },
+        "UseSetpointGenerator": {
+          "open": true
+        },
+        "open": true
+      },
+      "experiments": {
+        "string[]##v_/experiments/enabled": {
+          "open": true
+        }
+      },
+      "position servo Front Left": {
+        "open": true
+      },
+      "position servo Front Right": {
+        "open": true
+      },
+      "position servo Rear Left": {
+        "open": true
+      },
+      "position servo Rear Right": {
+        "open": true
+      },
+      "robot": {
         "open": true
       }
     },
@@ -39,15 +76,43 @@
       "/LiveWindow/Ungrouped/Victor SPX [9]": "Motor Controller",
       "/LiveWindow/Ungrouped/navX-Sensor[2]": "Gyro",
       "/SmartDashboard/Arm": "Subsystem",
-      "/SmartDashboard/Drive Subsystem": "Subsystem"
+      "/SmartDashboard/Drive Subsystem": "Subsystem",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
-  "NetworkTables Log": {
-    "visible": true
-  },
   "NetworkTables Settings": {
+    "dsClient": false,
     "mode": "Client (NT4)",
-    "serverTeam": "8048"
+    "serverTeam": "100"
   },
   "Plots": {
     "Plot <0>": {
@@ -58,42 +123,13 @@
               "autoFit": true
             }
           ],
-          "height": 579,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Falcon Drive Motor Front Right/Output"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Falcon Drive Motor Front Left/Output"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <1>": {
-      "plots": [
-        {
-          "axis": [
-            {
-              "autoFit": true
-            }
+          "backgroundColor": [
+            0.9399999976158142,
+            0.9399999976158142,
+            0.9399999976158142,
+            1.0
           ],
-          "height": 338,
+          "height": 424,
           "series": [
             {
               "color": [
@@ -102,7 +138,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Module Front Left/speed_meters_per_sec"
+              "id": "NT:/position servo Front Left/Goal"
             },
             {
               "color": [
@@ -111,34 +147,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Module Front Right/speed_meters_per_sec"
-            }
-          ]
-        }
-      ]
-    },
-    "Plot <2>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Swerve Module Front Left/drive_output"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Swerve Module Front Right/drive_output"
+              "id": "NT:/position servo Front Right/Goal"
             },
             {
               "color": [
@@ -147,7 +156,7 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Module Front Left/drive controller velocity error"
+              "id": "NT:/position servo Rear Left/Goal"
             },
             {
               "color": [
@@ -156,7 +165,79 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Module Front Right/drive controller velocity error"
+              "id": "NT:/position servo Rear Right/Goal"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/position servo Rear Left/Position"
+            },
+            {
+              "color": [
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
+                1.0
+              ],
+              "id": "NT:/position servo Front Right/Position"
+            },
+            {
+              "color": [
+                0.8549020290374756,
+                0.545098066329956,
+                0.7647059559822083,
+                1.0
+              ],
+              "id": "NT:/position servo Front Left/Position"
+            },
+            {
+              "color": [
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
+                1.0
+              ],
+              "id": "NT:/position servo Rear Right/Position"
+            },
+            {
+              "color": [
+                0.8000000715255737,
+                0.7254902124404907,
+                0.4549019932746887,
+                1.0
+              ],
+              "id": "NT:/position servo Rear Left/Setpoint"
+            },
+            {
+              "color": [
+                0.3921568989753723,
+                0.7098039388656616,
+                0.803921639919281,
+                1.0
+              ],
+              "id": "NT:/position servo Front Right/Setpoint"
+            },
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/position servo Front Left/Setpoint"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/position servo Rear Right/Setpoint"
             }
           ]
         }
