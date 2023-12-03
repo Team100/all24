@@ -1,5 +1,6 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;

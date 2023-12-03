@@ -1,10 +1,12 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
@@ -44,7 +46,8 @@ public class SwerveModuleFactory {
 
         FalconTurningMotor turningMotor = new FalconTurningMotor(name, turningMotorCanId);
 
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset,
+        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel,
+                turningOffset,
                 turningGearRatio, AnalogTurningEncoder.Drive.DIRECT);
 
         // DRIVE PID
@@ -56,7 +59,7 @@ public class SwerveModuleFactory {
 
         // TODO: shorter period
         PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
-        turningController2.enableContinuousInput(-Math.PI, - Math.PI);
+        turningController2.enableContinuousInput(-Math.PI, -Math.PI);
         turningController2.setTolerance(0.1);
 
         // DRIVE FF
@@ -127,7 +130,8 @@ public class SwerveModuleFactory {
         FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
                 kWheelDiameterMeters);
         FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset,
+        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel,
+                turningOffset,
                 turningGearRatio, turningDrive);
 
         CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder);
@@ -211,7 +215,8 @@ public class SwerveModuleFactory {
                 kWheelDiameterMeters);
         FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
         PWMTurningMotor turningMotor = new PWMTurningMotor(name, turningMotorChannel);
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel, turningOffset,
+        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel,
+                turningOffset,
                 turningGearRatio, AnalogTurningEncoder.Drive.DIRECT);
 
         // DRIVE PID
@@ -269,4 +274,60 @@ public class SwerveModuleFactory {
 
         return new SwerveModule100(driveServo, turningServo);
     }
+
+    public SwerveModule100 SimulatedModule(String name) {
+        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>();
+        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(driveMotor);
+        PIDController driveController = new PIDController(//
+                0.1, // kP
+                0, // kI
+                0);// kD
+
+        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
+                0.04, // kS makes it go further when almost at goal
+                0.23, // kV
+                0.02); // kA
+
+        VelocityServo<Distance> driveServo = new VelocityServo<>(
+                experiments,
+                name,
+                driveMotor,
+                driveEncoder,
+                driveController,
+                driveFeedforward);
+
+        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>();
+        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(turningMotor);
+        PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
+        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
+                0.05, // kS
+                0.003, // kV
+                0); // kA
+        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+                experiments,
+                name,
+                turningMotor,
+                turningEncoder,
+                angleVelocityController,
+                turningFeedforward);
+
+        PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
+        turningController2.enableContinuousInput(0, 2 * Math.PI);
+
+        ChoosableProfile profile = new ChoosableProfile(
+                20 * Math.PI,
+                20 * Math.PI,
+                0, ChoosableProfile.Mode.TRAPEZOID);
+        PositionServo<Angle> turningServo = new PositionServo<>(
+                name,
+                turningVelocityServo,
+                turningEncoder,
+                20 * Math.PI,
+                turningController2,
+                profile,
+                MathUtil::angleModulus);
+
+        return new SwerveModule100(driveServo, turningServo);
+    }
+
 }

@@ -58,7 +58,7 @@ public class PositionServo<T> {
             m_maximumInput = Double.MAX_VALUE;
         }
         m_period = controller.getPeriod();
-        m_name = String.format("/position servo %s", name);
+        m_name = String.format("/%s/position servo", name);
         m_profile = profile;
         m_modulus = modulus;
     }

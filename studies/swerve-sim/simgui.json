@@ -1,16 +1,8 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "AnalogGyro[0]": {
-        "header": {
-          "open": true
-        }
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -33,15 +25,31 @@
   },
   "NetworkTables": {
     "retained": {
+      "Front Right": {
+        "open": true
+      },
+      "Rear Right": {
+        "distance velocity servo": {
+          "open": true
+        },
+        "open": true
+      },
       "chassis": {
         "open": true
       },
       "current pose": {
         "open": true
-      }
-    },
-    "transitory": {
-      "SmartDashboard": {
+      },
+      "manual field relative": {
+        "open": true
+      },
+      "position servo Rear Left": {
+        "open": true
+      },
+      "swervelocal": {
+        "desired chassis speed": {
+          "open": true
+        },
         "open": true
       }
     }

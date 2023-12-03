@@ -13,6 +13,7 @@
         "java.inlayHints.parameterNames.enabled": "none",
         "workbench.colorTheme": "Default Light Modern",
         "editor.minimap.enabled": false,
-        "editor.inlayHints.enabled": "off"
+        "editor.inlayHints.enabled": "off",
+        "editor.detectIndentation": false
     }
 }
