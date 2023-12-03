@@ -11,15 +11,20 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/SmartDashboard/Drive with Heading:": "Command",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
-        "waypoint": {
-          "arrowSize": 21,
-          "style": "Track"
-        },
         "window": {
           "visible": true
         }
@@ -27,18 +32,16 @@
     }
   },
   "NetworkTables": {
-    "transitory": {
-      "LiveWindow": {
-        ".status": {
-          "open": true
-        },
+    "retained": {
+      "chassis": {
+        "open": true
+      },
+      "current pose": {
         "open": true
       }
-    }
-  },
-  "NetworkTables Info": {
-    "Server": {
-      "Publishers": {
+    },
+    "transitory": {
+      "SmartDashboard": {
         "open": true
       }
     }

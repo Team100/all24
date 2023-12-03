@@ -3,6 +3,15 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-3"
 }
 
+ sourceSets {
+    main {
+        java {
+            srcDir "../../lib/src/main/java"
+        }
+    }
+ }
+
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -71,7 +80,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    implementation "org.ejml:ejml-simple:0.42"
+    implementation "org.ejml:ejml-simple:0.43.1"
+    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.3'
+
 }
 
 test {

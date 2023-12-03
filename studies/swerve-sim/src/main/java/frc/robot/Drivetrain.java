@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.DriveUtil;
-import org.team100.lib.controller.HolonomicDriveController2;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -91,12 +91,12 @@ public class Drivetrain extends SubsystemBase {
 
     private SwerveState m_desiredState;
 
-    private final HolonomicDriveController2 m_controller;
+    private final HolonomicDriveController3 m_controller;
     FrameTransform m_frameTransform;
 
     public Drivetrain(AnalogGyro gyro,
             Supplier<PinkNoise> noiseSource,
-            HolonomicDriveController2 controller,
+            HolonomicDriveController3 controller,
             FrameTransform frameTransform) {
         m_gyro = gyro;
         gyroSim = new AnalogGyroSim(m_gyro);
