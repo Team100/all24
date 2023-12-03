@@ -9,6 +9,28 @@
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "retained": {
+      "field": {
+        "open": true
+      },
+      "fieldsd": {
+        "open": true
+      }
     }
   }
 }
