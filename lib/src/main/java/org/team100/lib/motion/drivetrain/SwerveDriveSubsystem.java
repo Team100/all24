@@ -157,6 +157,20 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         return m_poseEstimator.getEstimatedPosition();
     }
 
+    public Twist2d getImpliedTwist2d() {
+        ChassisSpeeds speeds = m_swerveLocal.speeds();
+        return m_frameTransform.toFieldRelativeSpeeds(
+                speeds.vxMetersPerSecond,
+                speeds.vyMetersPerSecond,
+                speeds.omegaRadiansPerSecond,
+                getPose().getRotation());
+    }
+
+    @Override
+    public SwerveState getState() {
+        return new SwerveState(getPose(), getImpliedTwist2d());
+    }
+
     @Override
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);

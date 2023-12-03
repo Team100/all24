@@ -21,7 +21,7 @@ public class DriveToWaypoint3 extends Command {
     private final SwerveDriveSubsystemInterface m_swerve;
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
-    private final BiFunction<Pose2d, Pose2d, Trajectory> m_trajectories;
+    private final BiFunction<SwerveState, Pose2d, Trajectory> m_trajectories;
 
     private Trajectory m_trajectory;
     /**
@@ -38,7 +38,7 @@ public class DriveToWaypoint3 extends Command {
     public DriveToWaypoint3(
             Pose2d goal,
             SwerveDriveSubsystemInterface drivetrain,
-            BiFunction<Pose2d, Pose2d, Trajectory> trajectories,
+            BiFunction<SwerveState, Pose2d, Trajectory> trajectories,
             HolonomicDriveController3 controller) {
         m_goal = goal;
         m_swerve = drivetrain;
@@ -51,7 +51,7 @@ public class DriveToWaypoint3 extends Command {
 
     @Override
     public void initialize() {
-        m_trajectory = m_trajectories.apply(m_swerve.getPose(), m_goal);
+        m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
         System.out.println(m_trajectory);
         m_timer.stop();
         m_timer.reset();

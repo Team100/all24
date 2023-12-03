@@ -13,10 +13,12 @@ import org.team100.lib.controller.DriveControllers;
 import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.PidGains;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,7 +33,7 @@ class DriveToWaypoint3Test {
     void testSimple() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        BiFunction<Pose2d, Pose2d, Trajectory> trajectories = (x, y) -> new Trajectory(List.of(new Trajectory.State()));
+        BiFunction<SwerveState, Pose2d, Trajectory> trajectories = (x, y) -> new Trajectory(List.of(new Trajectory.State()));
 
         Identity identity = Identity.get();
 
@@ -66,7 +68,8 @@ class DriveToWaypoint3Test {
 
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(kinematics);
 
-        StraightLineTrajectory maker = new StraightLineTrajectory(config);
+        Experiments e = new Experiments(Identity.BLANK);
+        StraightLineTrajectory maker = new StraightLineTrajectory(e, config);
         Transform2d transform = new Transform2d(
                 new Translation2d(-1, -1),
                 GeometryUtil.kRotationZero);

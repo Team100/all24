@@ -2,7 +2,10 @@ package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.controller.State100;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
 /**
@@ -19,6 +22,21 @@ public class SwerveState {
         m_x = x;
         m_y = y;
         m_theta = theta;
+    }
+
+    public SwerveState(Pose2d p, Twist2d t) {
+        this(
+                new State100(p.getX(), t.dx, 0),
+                new State100(p.getY(), t.dy, 0),
+                new State100(p.getRotation().getRadians(), t.dtheta, 0));
+    }
+
+    public Translation2d translation() {
+        return new Translation2d(m_x.x(), m_y.x());
+    }
+
+    public Twist2d twist() {
+        return new Twist2d(m_x.v(), m_y.v(), m_theta.v());
     }
 
     public State100 x() {
