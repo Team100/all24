@@ -85,6 +85,8 @@ public class Robot extends TimedRobot {
     private final DriveControllers controllers;
     private final HolonomicDriveController3 m_controller3;
 
+    Command waypointCommand;
+
     public Robot() {
         Identity identity = Identity.BLANK;
         m_kinematics = SwerveDriveKinematicsFactory.get(identity);
@@ -152,7 +154,7 @@ public class Robot extends TimedRobot {
         // m_manualControl::xSpeed,
         // m_manualControl::ySpeed,
         // m_manualControl::desiredRotation);
-        Command waypointCommand = toWaypoint2();
+        waypointCommand = toWaypoint2();
         m_manualControl.circle().whileTrue(waypointCommand);
         // drive normally if the trigger is down but not the thumb
         // m_manualControl.trigger().and(m_manualControl.thumb().negate()).whileTrue(m_driveCommand);
@@ -180,12 +182,12 @@ public class Robot extends TimedRobot {
 
     public Command toWaypoint() {
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
-        return new Line(new Pose2d(8, 0, new Rotation2d()), m_swerve, config);
+        return  Line.line(new Pose2d(8, 0, new Rotation2d()), m_swerve, config);
     }
 
     public Command toWaypoint2() {
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
-        return new Line(new Pose2d(8, 4, new Rotation2d()), m_swerve, config);
+        return Line.line(new Pose2d(8, 4, new Rotation2d()), m_swerve, config);
     }
 
     /**
@@ -296,7 +298,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         System.out.println("teleop init");
-        super.teleopInit();
+        // super.teleopInit();
     }
 
     @Override
@@ -320,10 +322,11 @@ public class Robot extends TimedRobot {
         // m_swerve.updateOdometry();
         // if you forget this scheduler thing then nothing will happen
         CommandScheduler.getInstance().run();
-        // System.out.printf("teleop %b, drive scheduled %b, default %s\n",
-        // isTeleopEnabled(),
-        // CommandScheduler.getInstance().isScheduled(m_driveCommand),
-        // m_swerve.getDefaultCommand().getName());
+        System.out.printf("teleop %b, drive scheduled %b, default %s wapyoint %b\n",
+                isTeleopEnabled(),
+                CommandScheduler.getInstance().isScheduled(m_driveCommand),
+                m_swerve.getDefaultCommand().getName(),
+                CommandScheduler.getInstance().isScheduled(waypointCommand));
     }
 
     @Override

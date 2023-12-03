@@ -11,32 +11,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class Line extends Command {
-    private final SwerveDriveSubsystem m_drivetrain;
-    private final DriveToWaypoint3 m_line;
+public class Line {
 
-    public Line(Pose2d goal, SwerveDriveSubsystem drivetrain, TrajectoryConfig config) {
-        m_drivetrain = drivetrain;
+    public static Command line(Pose2d goal, SwerveDriveSubsystem drivetrain, TrajectoryConfig config) {
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Identity identity = Identity.get();
         DriveControllers controllers = new DriveControllersFactory().get(identity);
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
         controller.setTolerance(0.1, 1.0);
-        m_line = new DriveToWaypoint3(goal, m_drivetrain, maker, controller);
-    }
-
-    @Override
-    public void initialize() {
-        m_line.initialize();
-    }
-
-    @Override
-    public void execute() {
-        m_line.execute();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return m_line.isFinished();
+        return new DriveToWaypoint3(goal, drivetrain, maker, controller);
     }
 }
