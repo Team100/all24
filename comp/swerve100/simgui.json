@@ -3,6 +3,7 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -20,16 +21,6 @@
         "window": {
           "visible": true
         }
-      }
-    }
-  },
-  "NetworkTables": {
-    "retained": {
-      "field": {
-        "open": true
-      },
-      "fieldsd": {
-        "open": true
       }
     }
   }
