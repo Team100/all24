@@ -19,7 +19,7 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
             double distancePerTurn) {
         this.m_motor = motor;
         this.m_distancePerPulse = distancePerTurn / 2048;
-        m_name = String.format("/Falcon Drive Encoder %s", name);
+        m_name = String.format("/%s/Falcon Drive Encoder", name);
     }
 
     @Override

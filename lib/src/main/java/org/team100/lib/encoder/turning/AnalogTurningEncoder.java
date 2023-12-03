@@ -53,7 +53,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
                 m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
                 break;
         }
-        m_name = String.format("/Analog Turning Encoder %s", name);
+        m_name = String.format("/%s/Analog Turning Encoder", name);
     }
 
     @Override

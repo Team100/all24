@@ -46,7 +46,7 @@ public class FalconTurningMotor implements Motor100<Angle> {
         m_motor.configVoltageCompSaturation(11);
         m_motor.enableVoltageCompensation(true);
 
-        m_name = String.format("/Falcon Turning Motor %s", name);
+        m_name = String.format("/%s/Falcon Turning Motor", name);
     }
 
     @Override

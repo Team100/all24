@@ -25,14 +25,28 @@
   },
   "NetworkTables": {
     "retained": {
-      "Front Right": {
-        "open": true
-      },
       "Rear Right": {
-        "distance velocity servo": {
+        "drive": {
+          "open": true,
+          "simulated_encoder": {
+            "open": true
+          },
+          "simulated_motor": {
+            "open": true
+          }
+        },
+        "position servo": {
           "open": true
         },
-        "open": true
+        "turning": {
+          "open": true,
+          "simulated_encoder": {
+            "open": true
+          }
+        },
+        "velocity servo": {
+          "open": true
+        }
       },
       "chassis": {
         "open": true
@@ -40,17 +54,10 @@
       "current pose": {
         "open": true
       },
-      "manual field relative": {
-        "open": true
-      },
-      "position servo Rear Left": {
-        "open": true
-      },
       "swervelocal": {
-        "desired chassis speed": {
+        "setpoint chassis speed": {
           "open": true
-        },
-        "open": true
+        }
       }
     }
   }

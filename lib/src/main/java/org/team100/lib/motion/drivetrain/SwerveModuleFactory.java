@@ -276,8 +276,8 @@ public class SwerveModuleFactory {
     }
 
     public SwerveModule100 SimulatedModule(String name) {
-        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>();
-        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(driveMotor);
+        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive");
+        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(name + "/drive", driveMotor);
         PIDController driveController = new PIDController(//
                 0.1, // kP
                 0, // kI
@@ -296,8 +296,8 @@ public class SwerveModuleFactory {
                 driveController,
                 driveFeedforward);
 
-        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>();
-        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(turningMotor);
+        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name + "/turning");
+        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(name + "/turning", turningMotor);
         PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
                 0.05, // kS
