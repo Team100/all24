@@ -61,8 +61,10 @@ public class VelocityServo<T> {
         } else {
             onboard(setpoint);
         }
-        t.log(Level.DEBUG, m_name + "/setpoint", setpoint);
-        log();
+        t.log(Level.DEBUG, m_name + "/Desired setpoint", setpoint);
+        t.log(Level.DEBUG, m_name + "/Controller Setpoint", m_controller.getSetpoint());
+        t.log(Level.DEBUG, m_name + "/Controller Speed Error", m_controller.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Controller Accel Error", m_controller.getVelocityError());
     }
 
     /** Direct control for testing. */
@@ -98,6 +100,7 @@ public class VelocityServo<T> {
         m_motor.setDutyCycle(u_TOTAL);
         t.log(Level.DEBUG, m_name + "/Controller Output", u_FB);
         t.log(Level.DEBUG, m_name + "/Feed Forward Output", u_FF);
+        t.log(Level.DEBUG, m_name + "/Total Output", u_TOTAL);
     }
 
     private double accel(double setpoint) {
@@ -105,17 +108,4 @@ public class VelocityServo<T> {
         previousSetpoint = setpoint;
         return accel;
     }
-
-    private void log() {
-        t.log(Level.DEBUG, m_name + "/position (m)", m_encoder.getPosition());
-        t.log(Level.DEBUG, m_name + "/Speed (m_s)", getVelocity());
-        t.log(Level.DEBUG, m_name + "/Setpoint (m_s)", m_controller.getSetpoint());
-        t.log(Level.DEBUG, m_name + "/Speed Error (m_s)", m_controller.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Accel Error (m_s_s)", m_controller.getVelocityError());
-        t.log(Level.DEBUG, m_name + "/Motor Output [-1, 1]", m_motor.get());
-    }
-
-    // void setVelocity(T value);
-
-    // T getVelocity();
 }

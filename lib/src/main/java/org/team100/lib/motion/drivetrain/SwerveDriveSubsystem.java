@@ -113,6 +113,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
      */
     @Override
     public boolean steerAtRest(Twist2d twist) {
+        System.out.println("steering ....");
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds);

@@ -24,6 +24,7 @@ public class SimulatedEncoder<T> implements Encoder100<T> {
         double dt = now - m_time;
         m_position += getRate() * dt;
         m_time = now;
+        t.log(Level.DEBUG, m_name + "/position", m_position);
         return m_position;
     }
 

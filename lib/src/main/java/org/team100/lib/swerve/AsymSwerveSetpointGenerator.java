@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -29,6 +31,8 @@ public class AsymSwerveSetpointGenerator {
         public double kMaxDriveDecceleration; // m/s^2
         public double kMaxSteeringVelocity; // rad/s
     }
+
+    private final Telemetry t = Telemetry.get();
 
     private final SwerveDriveKinematics mKinematics;
 
@@ -85,7 +89,13 @@ public class AsymSwerveSetpointGenerator {
      * @return The parameter value 's' that interpolating between 0 and 1 that
      *         corresponds to the (approximate) root.
      */
-    private double findRoot(Function2d func, double x_0, double y_0, double f_0, double x_1, double y_1, double f_1,
+    private double findRoot(Function2d func,
+            double x_0,
+            double y_0,
+            double f_0,
+            double x_1,
+            double y_1,
+            double f_1,
             int iterations_left) {
         if (iterations_left < 0 || Math.abs(f_0 - f_1) <= 1e-12) {
             return 1.0;
@@ -117,8 +127,15 @@ public class AsymSwerveSetpointGenerator {
         return findRoot(func, x_0, y_0, f_0 - offset, x_1, y_1, f_1 - offset, max_iterations);
     }
 
-    protected double findDriveMaxS(double x_0, double y_0, double f_0, double x_1, double y_1, double f_1,
-            double max_vel_step, int max_iterations) {
+    protected double findDriveMaxS(
+            double x_0,
+            double y_0,
+            double f_0,
+            double x_1,
+            double y_1,
+            double f_1,
+            double max_vel_step,
+            int max_iterations) {
         double diff = f_1 - f_0;
         if (Math.abs(diff) <= max_vel_step) {
             // Can go all the way to s=1.
@@ -166,8 +183,11 @@ public class AsymSwerveSetpointGenerator {
      * @return A Setpoint object that satisfies all of the KinematicLimits while
      *         converging to desiredState quickly.
      */
-    public SwerveSetpoint generateSetpoint(final KinematicLimits limits, final SwerveSetpoint prevSetpoint,
-            ChassisSpeeds desiredState, double dt) {
+    public SwerveSetpoint generateSetpoint(
+            final KinematicLimits limits,
+            final SwerveSetpoint prevSetpoint,
+            ChassisSpeeds desiredState,
+            double dt) {
 
         SwerveModuleState[] desiredModuleState = mKinematics.toSwerveModuleStates(desiredState);
         // Make sure desiredState respects velocity limits.
@@ -300,6 +320,8 @@ public class AsymSwerveSetpointGenerator {
             min_s = Math.min(min_s, s);
         }
 
+        t.log(Level.DEBUG, "/setpoint_generator/min_s steering", min_s);
+
         // Enforce drive wheel acceleration limits.
         // final double max_vel_step = dt * limits.kMaxDriveAcceleration;
         for (int i = 0; i < prevSetpoint.getModuleStates().length; ++i) {
@@ -307,7 +329,7 @@ public class AsymSwerveSetpointGenerator {
                 // No need to carry on.
                 break;
             }
-            var max_vel_step = Math.hypot(desired_vx[i], desired_vy[i]) >= Math.hypot(prev_vx[i], prev_vy[i])
+            double max_vel_step = Math.hypot(desired_vx[i], desired_vy[i]) >= Math.hypot(prev_vx[i], prev_vy[i])
                     ? dt * limits.kMaxDriveAcceleration
                     : dt * limits.kMaxDriveDecceleration;
             double vx_min_s = min_s == 1.0 ? desired_vx[i] : (desired_vx[i] - prev_vx[i]) * min_s + prev_vx[i];
@@ -319,11 +341,19 @@ public class AsymSwerveSetpointGenerator {
             // TODO(be smarter about root finding, since this is just a quadratic in s:
             // ((xf-x0)*s+x0)^2+((yf-y0)*s+y0)^2)
             final int kMaxIterations = 10;
-            double s = min_s * findDriveMaxS(prev_vx[i], prev_vy[i], Math.hypot(prev_vx[i], prev_vy[i]),
-                    vx_min_s, vy_min_s, Math.hypot(vx_min_s, vy_min_s),
-                    max_vel_step, kMaxIterations);
+            double s = min_s * findDriveMaxS(
+                    prev_vx[i],
+                    prev_vy[i],
+                    Math.hypot(prev_vx[i], prev_vy[i]),
+                    vx_min_s,
+                    vy_min_s,
+                    Math.hypot(vx_min_s, vy_min_s),
+                    max_vel_step,
+                    kMaxIterations);
             min_s = Math.min(min_s, s);
         }
+
+        t.log(Level.DEBUG, "/setpoint_generator/min_s final", min_s);
 
         ChassisSpeeds retSpeeds = new ChassisSpeeds(
                 prevSetpoint.getChassisSpeeds().vxMetersPerSecond + min_s * dx,

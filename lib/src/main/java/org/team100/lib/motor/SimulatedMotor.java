@@ -16,23 +16,27 @@ public class SimulatedMotor<T> implements Motor100<T> {
     @Override
     public double get() {
         // TODO: this is wrong
+        System.out.println("WRONG");
         return m_velocity;
     }
 
     @Override
     public void setDutyCycle(double output) {
+        t.log(Level.DEBUG, m_name + "/duty_cycle", output);
         // ignore it
     }
 
     @Override
     public void setVelocity(double velocity, double accel) {
-        t.log(Level.DEBUG, m_name + "/velocity", velocity);
 
         m_velocity = velocity;
         // ignore accel
+        t.log(Level.DEBUG, m_name + "/velocity", m_velocity);
+
     }
 
     public double getVelocity() {
+        t.log(Level.DEBUG, m_name + "/velocity", m_velocity);
         return m_velocity;
     }
 

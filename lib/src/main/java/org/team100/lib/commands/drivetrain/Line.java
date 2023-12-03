@@ -27,13 +27,11 @@ public class Line extends Command {
 
     @Override
     public void initialize() {
-        System.out.println("line init");
         m_line.initialize();
     }
 
     @Override
     public void execute() {
-        System.out.println("line exec");
         m_line.execute();
     }
 

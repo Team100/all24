@@ -179,13 +179,12 @@ public class Robot extends TimedRobot {
     }
 
     public Command toWaypoint() {
-        TrajectoryConfig config = new TrajectoryConfig(1, 1).setKinematics(m_kinematics);
+        TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
         return new Line(new Pose2d(8, 0, new Rotation2d()), m_swerve, config);
     }
 
     public Command toWaypoint2() {
-        TrajectoryConfig config = new TrajectoryConfig(1, 1).setKinematics(m_kinematics);
-
+        TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
         return new Line(new Pose2d(8, 4, new Rotation2d()), m_swerve, config);
     }
 

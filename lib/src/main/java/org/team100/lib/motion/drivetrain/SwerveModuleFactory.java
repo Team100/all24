@@ -78,7 +78,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/drive",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -88,7 +88,7 @@ public class SwerveModuleFactory {
         PIDController angleVelocityController = new PIDController(2.86, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/turn",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -144,7 +144,9 @@ public class SwerveModuleFactory {
 
         // TODO: shorter period
         PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
-        turningController2.enableContinuousInput(0, 2 * Math.PI);
+        turningController2.enableContinuousInput(-Math.PI, Math.PI);
+        turningController2.setTolerance(0.1);
+
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
@@ -165,7 +167,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/drive",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -175,7 +177,7 @@ public class SwerveModuleFactory {
         PIDController angleVelocityController = new PIDController(5, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/turn",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -227,7 +229,8 @@ public class SwerveModuleFactory {
 
         // TODO: shorter period
         PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
-        turningController2.enableContinuousInput(0, 2 * Math.PI);
+        turningController2.enableContinuousInput(-Math.PI, Math.PI);
+        turningController2.setTolerance(0.1);
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
@@ -243,7 +246,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/drive",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -253,7 +256,7 @@ public class SwerveModuleFactory {
         PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/turn",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -290,7 +293,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/drive",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -305,14 +308,16 @@ public class SwerveModuleFactory {
                 0); // kA
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name,
+                name + "/turn",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
                 turningFeedforward);
 
-        PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
-        turningController2.enableContinuousInput(0, 2 * Math.PI);
+        // NOTE: these PID values are untuned
+        PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
+        turningController2.enableContinuousInput(-Math.PI, Math.PI);
+        turningController2.setTolerance(0.1);
 
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI,

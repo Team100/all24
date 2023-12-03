@@ -1,0 +1,26 @@
+{
+  "NetworkTables": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/field": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
+  }
+}
