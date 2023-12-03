@@ -77,7 +77,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
 
         // Update the Field2d widget
         Pose2d newEstimate = getPose();
-        t.log(Level.DEBUG, "/field/robotPose", new double[] {
+        // the name "field" is used by Field2d.
+        // the name "robot" can be anything.
+        t.log(Level.DEBUG, "/field/robot", new double[] {
                 newEstimate.getX(),
                 newEstimate.getY(),
                 newEstimate.getRotation().getDegrees()
