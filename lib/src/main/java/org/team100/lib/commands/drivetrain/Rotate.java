@@ -61,7 +61,7 @@ public class Rotate extends Command {
         DriveControllers controllers = new DriveControllersFactory().get(identity);
 
         m_controller = new HolonomicDriveController3(controllers);
-        m_controller.setTolerance(m_config.xToleranceRad, m_config.vToleranceRad_S);
+        m_controller.setTolerance(m_config.xToleranceRad, 0.1, m_config.vToleranceRad_S, 0.1);
 
         if (drivetrain.get() != null)
             addRequirements(drivetrain.get());

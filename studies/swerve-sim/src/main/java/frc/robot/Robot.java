@@ -99,7 +99,7 @@ public class Robot extends TimedRobot {
         // final AnalogGyro gyro = new AnalogGyro(0);
         controllers = new DriveControllersFactory().get(identity);
         m_controller3 = new HolonomicDriveController3(controllers);
-        m_controller3.setTolerance(0.1, 1.0);
+        m_controller3.setTolerance(0.1, 0.1, 0.1, 0.1);
 
         veering = new VeeringCorrection(() -> m_heading.getHeadingRateNWU());
         m_frameTransform = new FrameTransform(veering);
@@ -322,11 +322,11 @@ public class Robot extends TimedRobot {
         // m_swerve.updateOdometry();
         // if you forget this scheduler thing then nothing will happen
         CommandScheduler.getInstance().run();
-        System.out.printf("teleop %b, drive scheduled %b, default %s wapyoint %b\n",
-                isTeleopEnabled(),
-                CommandScheduler.getInstance().isScheduled(m_driveCommand),
-                m_swerve.getDefaultCommand().getName(),
-                CommandScheduler.getInstance().isScheduled(waypointCommand));
+        // System.out.printf("teleop %b, drive scheduled %b, default %s wapyoint %b\n",
+        //         isTeleopEnabled(),
+        //         CommandScheduler.getInstance().isScheduled(m_driveCommand),
+        //         m_swerve.getDefaultCommand().getName(),
+        //         CommandScheduler.getInstance().isScheduled(waypointCommand));
     }
 
     @Override

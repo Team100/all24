@@ -18,7 +18,7 @@ public class Line {
         Identity identity = Identity.get();
         DriveControllers controllers = new DriveControllersFactory().get(identity);
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
-        controller.setTolerance(0.1, 1.0);
+        controller.setTolerance(0.1, 0.1, 0.1, 0.1);
         return new DriveToWaypoint3(goal, drivetrain, maker, controller);
     }
 }

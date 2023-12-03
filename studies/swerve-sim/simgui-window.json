@@ -10,19 +10,19 @@
       "style": "0",
       "userScale": "1",
       "width": "853",
-      "xpos": "42",
-      "ypos": "55"
+      "xpos": "804",
+      "ypos": "73"
     }
   },
   "Window": {
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
-      "Pos": "60,60",
+      "Pos": "109,38",
       "Size": "146,42"
     },
     "###/SmartDashboard/UseSetpointGenerator": {
       "Collapsed": "0",
-      "Pos": "266,59",
+      "Pos": "309,44",
       "Size": "146,42"
     },
     "###/field": {

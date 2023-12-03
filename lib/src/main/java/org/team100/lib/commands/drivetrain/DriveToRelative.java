@@ -36,7 +36,7 @@ public class DriveToRelative extends Command {
         DriveControllers controllers = new DriveControllersFactory().get(identity);
 
         m_controller = new HolonomicDriveController3(controllers);
-        m_controller.setTolerance(0.1, 1.0);
+        m_controller.setTolerance(0.1, 0.1, 0.1, 0.1);
     }
 
     @Override
