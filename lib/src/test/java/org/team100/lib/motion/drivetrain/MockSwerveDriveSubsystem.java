@@ -27,6 +27,11 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
     }
 
     @Override
+    public SwerveState getState() {
+        return new SwerveState(pose, twist);
+    }
+
+    @Override
     public void resetPose(Pose2d robotPose) {
         pose = robotPose;
     }

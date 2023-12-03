@@ -90,6 +90,7 @@
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/field": "Field2d"
     },
@@ -110,13 +111,18 @@
     "Plot <2>": {
       "plots": [
         {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
           "backgroundColor": [
             0.0,
             0.0,
             0.0,
             0.8500000238418579
           ],
-          "height": 357,
+          "height": 188,
           "series": [
             {
               "color": [
@@ -172,7 +178,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 166,
+          "height": 118,
           "series": [
             {
               "color": [

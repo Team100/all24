@@ -85,12 +85,13 @@ public class Robot extends TimedRobot {
     private final DriveControllers controllers;
     private final HolonomicDriveController3 m_controller3;
 
+    Experiments experiments;
     Command waypointCommand;
 
     public Robot() {
         Identity identity = Identity.BLANK;
         m_kinematics = SwerveDriveKinematicsFactory.get(identity);
-        Experiments experiments = new Experiments(identity);
+        experiments = new Experiments(identity);
         SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, 60);
         m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
@@ -182,12 +183,12 @@ public class Robot extends TimedRobot {
 
     public Command toWaypoint() {
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
-        return  Line.line(new Pose2d(8, 0, new Rotation2d()), m_swerve, config);
+        return  Line.line(experiments, new Pose2d(8, 0, new Rotation2d()), m_swerve, config);
     }
 
     public Command toWaypoint2() {
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
-        return Line.line(new Pose2d(8, 4, new Rotation2d()), m_swerve, config);
+        return Line.line(experiments, new Pose2d(8, 4, new Rotation2d()), m_swerve, config);
     }
 
     /**

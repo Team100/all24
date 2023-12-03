@@ -198,7 +198,7 @@ public class RobotContainer implements Testable {
         control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
         control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
 
-        m_drawCircle = new DrawCircle(m_drive, m_kinematics);
+        m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics);
         control.circle().whileTrue(m_drawCircle);
 
         control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));

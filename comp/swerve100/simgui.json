@@ -8,6 +8,7 @@
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/field": "Field2d"
     },

@@ -32,6 +32,8 @@ public interface SwerveDriveSubsystemInterface {
 
     Pose2d getPose();
 
+    SwerveState getState();
+
     void resetPose(Pose2d robotPose);
 
     boolean[] atSetpoint();

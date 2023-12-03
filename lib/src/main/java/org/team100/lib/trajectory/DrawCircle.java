@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;
 import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
@@ -26,9 +27,9 @@ public class DrawCircle extends SequentialCommandGroup {
      * .....|...|
      * .Y...2---1/5
      */
-    public DrawCircle(SwerveDriveSubsystem drivetrain, SwerveDriveKinematics kinematics) {
+    public DrawCircle(Experiments experiments, SwerveDriveSubsystem drivetrain, SwerveDriveKinematics kinematics) {
         TrajectoryConfig config = new TrajectoryConfig(maxVelocityM_S, maxAccelM_S_S).setKinematics(kinematics);
-        StraightLineTrajectory maker = new StraightLineTrajectory(config);
+        StraightLineTrajectory maker = new StraightLineTrajectory(experiments, config);
         Identity identity = Identity.get();
         DriveControllers controllers = new DriveControllersFactory().get(identity);
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);

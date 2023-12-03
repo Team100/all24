@@ -9,5 +9,7 @@ public enum Experiment {
     /** Offload the steering PID to the motor controller. */
     UseClosedLoopSteering,
     /** Offload simple servo velocity to the controller */
-    UseClosedLoopVelocity
+    UseClosedLoopVelocity,
+    /** Use initial state in trajectory generation */
+    UseInitialVelocity
 }

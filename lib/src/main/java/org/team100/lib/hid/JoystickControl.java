@@ -55,6 +55,11 @@ public class JoystickControl implements DriverControl {
     }
 
     @Override
+    public Trigger resetPose() {
+        return button(4);
+    }
+
+    @Override
     public Twist2d twist() {
         double dx = expo(
                 deadband(-1.0 * clamp(m_controller.getY(), 1), m_config.kDeadband, 1),

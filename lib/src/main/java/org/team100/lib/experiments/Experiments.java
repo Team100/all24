@@ -22,7 +22,8 @@ public class Experiments {
             Experiment.UseClosedLoopDrive,
             Experiment.UseClosedLoopSteering,
             Experiment.UseClosedLoopVelocity,
-            Experiment.UseSetpointGenerator);
+            Experiment.UseSetpointGenerator,
+            Experiment.UseInitialVelocity);
 
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(
