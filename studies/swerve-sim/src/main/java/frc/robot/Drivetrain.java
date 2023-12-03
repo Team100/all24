@@ -30,11 +30,11 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 import edu.wpi.first.wpilibj.simulation.CallbackStore;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import util.PinkNoise;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain extends Subsystem {
+public class Drivetrain extends SubsystemBase {
     /** 3 m/s */
     public static final double kMaxSpeed = 6.0;
     /** pi rad/s */
