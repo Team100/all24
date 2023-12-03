@@ -17,7 +17,7 @@ public class StraightLineTrajectory implements BiFunction<Pose2d, Pose2d, Trajec
     private final TrajectoryConfig m_config;
 
     public StraightLineTrajectory(TrajectoryConfig config) {
-        this.m_config = config;        
+        m_config = config;        
     }
 
     @Override

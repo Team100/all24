@@ -1,8 +1,7 @@
 {
-  "NTProvider": {
+  "NetworkTables": {
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
@@ -12,16 +11,16 @@
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Telemetry Level": {
-        "window": {
-          "visible": true
-        }
-      },
       "/field": {
         "window": {
           "visible": true
         }
       }
     }
+  },
+  "NetworkTables Settings": {
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
   }
 }

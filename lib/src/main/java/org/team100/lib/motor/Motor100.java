@@ -1,4 +1,4 @@
-package org.team100.lib.motor.drive;
+package org.team100.lib.motor;
 
 public interface Motor100<T> {
 

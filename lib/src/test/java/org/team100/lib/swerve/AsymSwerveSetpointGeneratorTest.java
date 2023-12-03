@@ -1,8 +1,10 @@
 package org.team100.lib.swerve;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,6 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class AsymSwerveSetpointGeneratorTest {
+    private static final double kDelta = 0.001;
 
     protected final static double kRobotSide = 0.616; // m
     static final Translation2d[] moduleTranslations = new Translation2d[] {
@@ -108,5 +111,134 @@ class AsymSwerveSetpointGeneratorTest {
 
         goalSpeeds = new ChassisSpeeds(1.0, 0.4, 0.0);
         setpoint = driveToGoal(setpoint, goalSpeeds, generator);
+    }
+
+    @Test
+    void testLimiting() {
+        // like 2023 comp bot
+        double kTrackWidth = 0.491;
+        double kWheelBase = 0.765;
+        final Translation2d[] moduleTranslations = new Translation2d[] {
+                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
+        };
+        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics);
+        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits();
+        limits.kMaxDriveVelocity = 5;
+        limits.kMaxDriveAcceleration = 10;
+        limits.kMaxSteeringVelocity = 5;
+
+        // initially at rest.
+        ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
+        SwerveModuleState[] initialStates = new SwerveModuleState[] {
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        };
+        SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
+
+        // desired speed is very fast
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(10, 10, 10);
+        double dt = 0.02;
+
+        // initially it's not moving fast at all
+        setpoint = swerveSetpointGenerator.generateSetpoint(limits, setpoint, desiredSpeeds, dt);
+        assertEquals(0, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+
+        // after 1 second, it's going faster.
+        for (int i = 0; i < 50; ++i) {
+            setpoint = swerveSetpointGenerator.generateSetpoint(limits, setpoint, desiredSpeeds, dt);
+        }
+        assertEquals(2.687, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(2.687, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(2.687, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+    }
+
+    @Test
+    void testNotLimiting() {
+        // like 2023 comp bot
+        double kTrackWidth = 0.491;
+        double kWheelBase = 0.765;
+        final Translation2d[] moduleTranslations = new Translation2d[] {
+                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
+        };
+        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics);
+        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits();
+        limits.kMaxDriveVelocity = 5;
+        limits.kMaxDriveAcceleration = 10;
+        limits.kMaxSteeringVelocity = 5;
+
+        // initially at rest.
+        ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
+        SwerveModuleState[] initialStates = new SwerveModuleState[] {
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        };
+        SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
+
+        // desired speed is feasible, max accel = 10 * dt = 0.02 => v = 0.2
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(0.2, 0, 0);
+        double dt = 0.02;
+
+        setpoint = swerveSetpointGenerator.generateSetpoint(limits, setpoint, desiredSpeeds, dt);
+        assertEquals(0.2, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+    }
+
+    @Test
+    void testLimitingALittle() {
+        // like 2023 comp bot
+        double kTrackWidth = 0.491;
+        double kWheelBase = 0.765;
+        final Translation2d[] moduleTranslations = new Translation2d[] {
+                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
+        };
+        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics);
+        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits();
+        limits.kMaxDriveVelocity = 5;
+        limits.kMaxDriveAcceleration = 10;
+        limits.kMaxSteeringVelocity = 5;
+
+        // initially at rest.
+        ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
+        SwerveModuleState[] initialStates = new SwerveModuleState[] {
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        };
+        SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
+
+        // desired speed is double the feasible accel so we should reach it in two
+        // iterations.
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(0.4, 0, 0);
+        double dt = 0.02;
+
+        setpoint = swerveSetpointGenerator.generateSetpoint(limits, setpoint, desiredSpeeds, dt);
+        assertEquals(0.2, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+
+        setpoint = swerveSetpointGenerator.generateSetpoint(limits, setpoint, desiredSpeeds, dt);
+        assertEquals(0.4, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
     }
 }

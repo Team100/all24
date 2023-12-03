@@ -1,5 +1,6 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
@@ -74,7 +75,7 @@ public class FalconDriveMotor implements Motor100<Distance> {
         m_motor.config_kI(0, 0);
         m_motor.config_kD(0, 0);
 
-        m_name = String.format("/Falcon Drive Motor %s", name);
+        m_name = String.format("/%s/Falcon Drive Motor", name);
         t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceID());
     }
 

@@ -32,7 +32,7 @@ public class DrawCircle extends SequentialCommandGroup {
         Identity identity = Identity.get();
         DriveControllers controllers = new DriveControllersFactory().get(identity);
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
-        controller.setTolerance(0.1, 1.0);
+        controller.setTolerance(0.1, 0.1, 0.1, 0.1);
 
         addCommands(
                 new DriveToWaypoint3(new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero), drivetrain, maker, controller),

@@ -77,7 +77,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
 
         // Update the Field2d widget
         Pose2d newEstimate = getPose();
-        t.log(Level.DEBUG, "/field/robotPose", new double[] {
+        // the name "field" is used by Field2d.
+        // the name "robot" can be anything.
+        t.log(Level.DEBUG, "/field/robot", new double[] {
                 newEstimate.getX(),
                 newEstimate.getY(),
                 newEstimate.getRotation().getDegrees()
@@ -111,6 +113,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
      */
     @Override
     public boolean steerAtRest(Twist2d twist) {
+        System.out.println("steering ....");
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds);

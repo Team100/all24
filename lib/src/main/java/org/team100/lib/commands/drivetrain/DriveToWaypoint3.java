@@ -72,9 +72,12 @@ public class DriveToWaypoint3 extends Command {
 
         if (m_steeringAligned) {
             // follow normally
+            // System.out.println("aligned");
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // not aligned yet, try aligning
+            // System.out.println("aligning...");
+
             boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
             if (aligned) {
                 m_steeringAligned = true;

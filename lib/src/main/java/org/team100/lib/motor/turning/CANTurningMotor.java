@@ -1,7 +1,7 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.motor.drive.Motor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;

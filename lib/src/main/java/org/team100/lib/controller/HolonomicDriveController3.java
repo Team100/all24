@@ -48,28 +48,29 @@ public class HolonomicDriveController3 {
         double yFF = desiredState.y().v(); // m/s
         double thetaFF = desiredState.theta().v(); // rad/s
 
-        t.log(Level.DEBUG, "/Holonomic3/xFF", xFF);
-        t.log(Level.DEBUG, "/Holonomic3/yFF", yFF);
-        t.log(Level.DEBUG, "/Holonomic3/thetaFF", thetaFF);
+        double xFB = m_xController.calculate(currentPose.getX(), desiredState.x().x());
+        double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
+        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        double xFeedback = m_xController.calculate(currentPose.getX(), desiredState.x().x());
-        double yFeedback = m_yController.calculate(currentPose.getY(), desiredState.y().x());
-        double thetaFeedback = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
-
-        t.log(Level.DEBUG, "/Holonomic3/xFB", xFeedback);
-        t.log(Level.DEBUG, "/Holonomic3/yFB", yFeedback);
-        t.log(Level.DEBUG, "/Holonomic3/thetaFB", thetaFeedback);
-        t.log(Level.DEBUG, "/Holonomic3/xSet", m_xController.getSetpoint());
-        t.log(Level.DEBUG, "/Holonomic3/ySet", m_yController.getSetpoint());
-        t.log(Level.DEBUG, "/Holonomic3/thetaSet", m_thetaController.getSetpoint());
-        t.log(Level.DEBUG, "/Holonomic3/xErr", m_xController.getPositionError());
-        t.log(Level.DEBUG, "/Holonomic3/yErr", m_yController.getPositionError());
-        t.log(Level.DEBUG, "/Holonomic3/thetaErr", m_thetaController.getPositionError());
+        t.log(Level.DEBUG, "/Holonomic3/u_FF/x", xFF);
+        t.log(Level.DEBUG, "/Holonomic3/u_FF/y", yFF);
+        t.log(Level.DEBUG, "/Holonomic3/u_FF/theta", thetaFF);
+        t.log(Level.DEBUG, "/Holonomic3/u_FB/x", xFB);
+        t.log(Level.DEBUG, "/Holonomic3/u_FB/y", yFB);
+        t.log(Level.DEBUG, "/Holonomic3/u_FB/theta", thetaFB);
+        t.log(Level.DEBUG, "/Holonomic3/measurement/x", currentPose.getX());
+        t.log(Level.DEBUG, "/Holonomic3/measurement/y", currentPose.getY());
+        t.log(Level.DEBUG, "/Holonomic3/measurement/theta", currentRotation.getRadians());
+        t.log(Level.DEBUG, "/Holonomic3/setpoint/x", m_xController.getSetpoint());
+        t.log(Level.DEBUG, "/Holonomic3/setpoint/y", m_yController.getSetpoint());
+        t.log(Level.DEBUG, "/Holonomic3/setpoint/theta", m_thetaController.getSetpoint());
+        t.log(Level.DEBUG, "/Holonomic3/error/x", m_xController.getPositionError());
+        t.log(Level.DEBUG, "/Holonomic3/error/y", m_yController.getPositionError());
+        t.log(Level.DEBUG, "/Holonomic3/error/theta", m_thetaController.getPositionError());
 
         // return new Twist2d(xFF, yFF, thetaFF);
 
-
-        return new Twist2d(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
+        return new Twist2d(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }
 
     public void setGains(PidGains cartesian, PidGains rotation) {
@@ -83,9 +84,13 @@ public class HolonomicDriveController3 {
         m_yController.setIntegratorRange(-1.0 * cartesian, cartesian);
     }
 
-    public void setTolerance(double cartesian, double rotation) {
-        m_xController.setTolerance(cartesian);
-        m_yController.setTolerance(cartesian);
-        m_thetaController.setTolerance(rotation);
+    public void setTolerance(
+            double cartesianPosition,
+            double cartesianVelocity,
+            double rotationPosition,
+            double rotationVelocity) {
+        m_xController.setTolerance(cartesianPosition, cartesianVelocity);
+        m_yController.setTolerance(cartesianPosition, cartesianVelocity);
+        m_thetaController.setTolerance(rotationPosition, rotationVelocity);
     }
 }

@@ -64,6 +64,10 @@ public class ControlFactory {
         if (driverName.equals("Team 100 Pilot")) {
             return new Pilot();
         }
+        // TODO: make a class for simulation keyboard control
+        if (driverName.contains("Keyboard")) {
+            return new JoystickControl();
+        }
         System.out.println("Unrecognized driver control name: " + driverHID.getName());
         return kNoDriver;
 

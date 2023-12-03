@@ -4,9 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;
 import org.team100.lib.controller.DriveControllersFactory;
-import org.team100.lib.controller.HolonomicDriveController2;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 
@@ -23,8 +24,8 @@ public class SwerveSimTest {
     private static final double DELTA = 0.001;
 
     Drivetrain newDrivetrain() {
-        DriveControllers controllers = new DriveControllersFactory().get();
-        HolonomicDriveController2 controller = new HolonomicDriveController2(controllers);
+        DriveControllers controllers = new DriveControllersFactory().get(Identity.BLANK);
+        HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
         AnalogGyro gyro = new AnalogGyro(0);
         VeeringCorrection veering = new VeeringCorrection(() -> -1.0 * gyro.getRate());
         FrameTransform m_frameTransform = new FrameTransform(veering);

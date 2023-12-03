@@ -32,7 +32,7 @@ class AnglePositionServoProfileTest {
         encoder = new MockEncoder100<>();
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
-        controller2.enableContinuousInput(0, 2 * Math.PI);
+        controller2.enableContinuousInput(-Math.PI, Math.PI);
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
         // TODO: tune this

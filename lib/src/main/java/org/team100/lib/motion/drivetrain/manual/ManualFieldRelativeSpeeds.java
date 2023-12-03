@@ -33,6 +33,7 @@ public class ManualFieldRelativeSpeeds implements Supplier<Twist2d> {
                 m_speedLimits.angleSpeedRad_S);
         t.log(Level.DEBUG, "/manual field relative/twist x m_s", twistM_S.dx);
         t.log(Level.DEBUG, "/manual field relative/twist y m_s", twistM_S.dy);
+        t.log(Level.DEBUG, "/manual field relative/twist theta rad_s", twistM_S.dtheta);
         return twistM_S;
     }
 }

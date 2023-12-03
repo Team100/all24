@@ -58,7 +58,7 @@ public class PositionServo<T> {
             m_maximumInput = Double.MAX_VALUE;
         }
         m_period = controller.getPeriod();
-        m_name = String.format("/position servo %s", name);
+        m_name = String.format("/%s/position servo", name);
         m_profile = profile;
         m_modulus = modulus;
     }
@@ -73,18 +73,21 @@ public class PositionServo<T> {
         if (m_controller.isContinuousInputEnabled()) {
             // Get error which is the smallest distance between goal and measurement
             double errorBound = (m_maximumInput - m_minimumInput) / 2.0;
-            double goalMinDistance =
-                MathUtil.inputModulus(m_goal.position - measurement, -errorBound, errorBound);
-            double setpointMinDistance =
-                MathUtil.inputModulus(m_setpoint.position - measurement, -errorBound, errorBound);
-      
-            // Recompute the profile goal with the smallest error, thus giving the shortest path. The goal
-            // may be outside the input range after this operation, but that's OK because the controller
-            // will still go there and report an error of zero. In other words, the setpoint only needs to
-            // be offset from the measurement by the input range modulus; they don't need to be equal.
+            double goalMinDistance = MathUtil.inputModulus(m_goal.position - measurement, -errorBound, errorBound);
+            double setpointMinDistance = MathUtil.inputModulus(m_setpoint.position - measurement, -errorBound,
+                    errorBound);
+
+            // Recompute the profile goal with the smallest error, thus giving the shortest
+            // path. The goal
+            // may be outside the input range after this operation, but that's OK because
+            // the controller
+            // will still go there and report an error of zero. In other words, the setpoint
+            // only needs to
+            // be offset from the measurement by the input range modulus; they don't need to
+            // be equal.
             m_goal.position = goalMinDistance + measurement;
             m_setpoint.position = setpointMinDistance + measurement;
-          }
+        }
 
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
 
@@ -96,15 +99,15 @@ public class PositionServo<T> {
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
-        t.log(Level.DEBUG, m_name + "/u_FB ", u_FB);
+        t.log(Level.DEBUG, m_name + "/u_FB", u_FB);
         t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
-        t.log(Level.DEBUG, m_name + "/Position", getPosition());
+        t.log(Level.DEBUG, m_name + "/u_TOTAL", u_TOTAL);
+        t.log(Level.DEBUG, m_name + "/Measurement", measurement);
         t.log(Level.DEBUG, m_name + "/Goal", m_goal.position);
         t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.position);
         t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.velocity);
-        t.log(Level.DEBUG, m_name + "/Error", m_controller.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Error Velocity", m_controller.getVelocityError());
-        t.log(Level.DEBUG, m_name + "/Velocity", m_servo.getVelocity());
+        t.log(Level.DEBUG, m_name + "/Controller Position Error", m_controller.getPositionError());
+        t.log(Level.DEBUG, m_name + "/Controller Velocity Error", m_controller.getVelocityError());
     }
 
     /** Direct velocity control for testing */
@@ -129,7 +132,11 @@ public class PositionServo<T> {
     }
 
     public boolean atSetpoint() {
-        return m_controller.atSetpoint();
+        boolean atSetpoint = m_controller.atSetpoint();
+        t.log(Level.DEBUG, m_name + "/Position Tolerance", m_controller.getPositionTolerance());
+        t.log(Level.DEBUG, m_name + "/Velocity Tolerance", m_controller.getVelocityTolerance());
+        t.log(Level.DEBUG, m_name + "/At Setpoint", atSetpoint);
+        return atSetpoint;
     }
 
     public void stop() {
@@ -140,7 +147,8 @@ public class PositionServo<T> {
         m_encoder.close();
     }
 
-    public State getSetpoint() {
+    /** for testing only */
+    State getSetpoint() {
         return m_setpoint;
     }
 }

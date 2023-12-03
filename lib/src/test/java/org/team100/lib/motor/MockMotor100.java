@@ -1,7 +1,5 @@
 package org.team100.lib.motor;
 
-import org.team100.lib.motor.drive.Motor100;
-
 public class MockMotor100<T> implements Motor100<T> {
     public double output = 0;
     public double velocity = 0;

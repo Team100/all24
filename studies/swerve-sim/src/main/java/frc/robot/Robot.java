@@ -3,50 +3,58 @@ package frc.robot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-import org.team100.frc2023.autonomous.Autonomous;
-import org.team100.frc2023.commands.DriveManually;
-import org.team100.frc2023.commands.ResetRotation;
-import org.team100.frc2023.control.LogitechExtreme3dControl;
-import org.team100.frc2023.control.ManualControl;
+import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.Line;
+import org.team100.lib.commands.drivetrain.ManualMode.Mode;
+import org.team100.lib.commands.drivetrain.SetRotation;
+import org.team100.lib.commands.drivetrain.TrajectoryCommand;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveControllers;
 import org.team100.lib.controller.DriveControllersFactory;
-import org.team100.lib.controller.HolonomicDriveController2;
+import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.experiments.Experiments;
+import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.hid.DriverControl;
+import org.team100.lib.hid.JoystickControl;
+import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.SpeedLimitsFactory;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveLocal;
+import org.team100.lib.motion.drivetrain.SwerveModuleCollectionFactory;
+import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
+import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.SimulatedHeading;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WrapperCommand;
-import util.PinkNoise;
 
 public class Robot extends TimedRobot {
-    private final ManualControl m_manualControl;
-    private final Drivetrain m_swerve;
+    private final DriverControl m_manualControl;
+    private final SwerveDriveSubsystem m_swerve;
     private final Command m_driveCommand;
     // private final Command m_drivePositional;
 
     Command autoc;
-    ProfiledPIDController m_rotationController;
-    PIDController xController;
-    PIDController yController;
+    // ProfiledPIDController m_rotationController;
+    // PIDController xController;
+    // PIDController yController;
 
     // private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
     // private final NetworkTable m_table = inst.getTable("robot");
@@ -68,27 +76,73 @@ public class Robot extends TimedRobot {
     // private final DoublePublisher m_YErrorPub =
     // m_table.getDoubleTopic("yError").publish();
 
-    VeeringCorrection veering;
+    private final VeeringCorrection veering;
+    private final FrameTransform m_frameTransform;
+    private final SwerveDriveKinematics m_kinematics;
+    private final SwerveModuleCollectionInterface m_modules;
+    private final HeadingInterface m_heading;
+    private final Field2d m_field;
+    private final DriveControllers controllers;
+    private final HolonomicDriveController3 m_controller3;
 
-    FrameTransform m_frameTransform;
+    Command waypointCommand;
 
     public Robot() {
-        final AnalogGyro gyro = new AnalogGyro(0);
-        DriveControllers controllers = new DriveControllersFactory().get();
-        HolonomicDriveController2 controller = new HolonomicDriveController2(controllers);
-        veering = new VeeringCorrection(() -> -1.0 * gyro.getRate());
+        Identity identity = Identity.BLANK;
+        m_kinematics = SwerveDriveKinematicsFactory.get(identity);
+        Experiments experiments = new Experiments(identity);
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, 60);
+        m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
+
+        m_heading = new SimulatedHeading(m_kinematics, m_modules);
+
+        // final AnalogGyro gyro = new AnalogGyro(0);
+        controllers = new DriveControllersFactory().get(identity);
+        m_controller3 = new HolonomicDriveController3(controllers);
+        m_controller3.setTolerance(0.1, 0.1, 0.1, 0.1);
+
+        veering = new VeeringCorrection(() -> m_heading.getHeadingRateNWU());
         m_frameTransform = new FrameTransform(veering);
         // alpha = 1.5 => between "pink" and random-walk "brownian"
-        m_swerve = new Drivetrain(gyro,
-                () -> new PinkNoise(1.5, 3), controller, m_frameTransform);
+        // m_swerve = new Drivetrain(gyro,
+        // () -> new PinkNoise(1.5, 3), controller, m_frameTransform);
+
+        SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, false);
+
+        SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+                m_kinematics,
+                m_heading.getHeadingNWU(),
+                m_modules.positions(),
+                GeometryUtil.kPoseZero,
+                VecBuilder.fill(0.5, 0.5, 0.5),
+                VecBuilder.fill(0.1, 0.1, 0.4));
+
+        SwerveLocal swerveLocal = new SwerveLocal(
+                experiments,
+                speedLimits,
+                m_kinematics,
+                m_modules);
+
+        m_field = new Field2d();
+
+        m_swerve = new SwerveDriveSubsystem(
+                m_heading,
+                poseEstimator,
+                m_frameTransform,
+                swerveLocal,
+                m_field
+
+        );
 
         // m_manualControl = new XboxControl();
-        m_manualControl = new LogitechExtreme3dControl();
+        m_manualControl = new JoystickControl();
         // m_manualControl = new Pilot();
-        m_manualControl.resetRotation0(new ResetRotation(m_swerve, new Rotation2d(0)));
-        m_driveCommand = new DriveManually(m_swerve, m_manualControl::xSpeed,
-                m_manualControl::ySpeed,
-                m_manualControl::rotSpeed);
+        m_manualControl.resetRotation0().onTrue(new SetRotation(m_swerve, new Rotation2d(0)));
+        m_driveCommand = new DriveManually(
+                () -> Mode.FIELD_RELATIVE_TWIST,
+                m_manualControl::twist,
+                m_swerve,
+                speedLimits);
         // m_driveCommand = new DriveWithHeading(
         // m_swerve,
         // m_manualControl::xSpeed,
@@ -100,8 +154,8 @@ public class Robot extends TimedRobot {
         // m_manualControl::xSpeed,
         // m_manualControl::ySpeed,
         // m_manualControl::desiredRotation);
-        Command waypointCommand = toWaypoint2();
-        m_manualControl.topButton().whileTrue(waypointCommand);
+        waypointCommand = toWaypoint2();
+        m_manualControl.circle().whileTrue(waypointCommand);
         // drive normally if the trigger is down but not the thumb
         // m_manualControl.trigger().and(m_manualControl.thumb().negate()).whileTrue(m_driveCommand);
         // drive positional if the thumb is down
@@ -113,66 +167,27 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        // autoc = auto();
-        // autoc = circle();
-        // autoc = toWaypoint();
-        // autoc = toWaypoint2();
-        autoc = new WrapperCommand(
-                new Autonomous(m_swerve, m_frameTransform, m_swerve.m_gyro, 2)) {
-            @Override
-            public void execute() {
-                System.out.println("wrapper execute");
-                m_command.execute();
-            }
 
-            @Override
-            public void end(boolean interrupted) {
-                System.out.println("wrapper end");
-                m_command.end(interrupted);
-            }
-        };
-        autoc.schedule();
     }
 
     @Override
     public void autonomousPeriodic() {
-        // driveWithJoystick(false);
-        // m_swerve.updateOdometry();
-
-        // System.out.printf("scheduled %s\n", autoc.isScheduled()?"yes":"no");
-
-        // TODO move this to a class for the circle path etc.
-        // m_rotationPositionError.set(m_rotationController.getPositionError());
-        // m_rotationVelocityError.set(m_rotationController.getVelocityError());
-        // m_rotationSetpointPosition.set(m_rotationController.getSetpoint().position);
-        // m_rotationSetpointVelocity.set(m_rotationController.getSetpoint().velocity);
-
-        // observe the controllers
-
-        // m_XErrorPub.set(xController.getPositionError());
-        // m_YErrorPub.set(yController.getPositionError());
 
     }
 
     @Override
     public void autonomousExit() {
-        if (autoc != null)
-            autoc.cancel();
+
     }
 
     public Command toWaypoint() {
-        // fixed waypoint for now
-        // Supplier<Pose2d> waypointSupplier = () -> new Pose2d(8, 4, new
-        // Rotation2d(-Math.PI / 2));
-        Supplier<Pose2d> waypointSupplier = () -> new Pose2d(8, 0, new Rotation2d());
-        Supplier<Pose2d> poseSupplier = m_swerve::getPose;
-        Consumer<SwerveModuleState[]> outputModuleStates = m_swerve::setModuleStates;
-        return new DriveToWaypoint(waypointSupplier, poseSupplier, m_swerve.m_kinematics,
-                outputModuleStates, m_swerve);
+        TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
+        return  Line.line(new Pose2d(8, 0, new Rotation2d()), m_swerve, config);
     }
 
     public Command toWaypoint2() {
-        return new DriveToWaypoint2(new Pose2d(8, 4, new Rotation2d()), m_swerve);
+        TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(m_kinematics);
+        return Line.line(new Pose2d(8, 4, new Rotation2d()), m_swerve, config);
     }
 
     /**
@@ -180,7 +195,7 @@ public class Robot extends TimedRobot {
      */
     public Command circle() {
         TrajectoryConfig translationConfig = new TrajectoryConfig(Drivetrain.kMaxSpeed / 2, Drivetrain.kMaxSpeed)
-                .setKinematics(m_swerve.m_kinematics);
+                .setKinematics(m_kinematics);
         Trajectory target0 = TrajectoryGenerator.generateTrajectory(
                 new Pose2d(0, 0, new Rotation2d(Math.PI / 4)), // start ~diagonally
                 List.of( // make three loops
@@ -201,23 +216,22 @@ public class Robot extends TimedRobot {
         // OK go a little crazy with the PID
         // xController = new PIDController(1.5, 0, 0);
         // yController = new PIDController(1.5, 0, 0);
-        xController = new PIDController(5, 0, 0);
-        yController = new PIDController(5, 0, 0);
+        // xController = new PIDController(5, 0, 0);
+        // yController = new PIDController(5, 0, 0);
 
-        TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
-                Drivetrain.kMaxAngularSpeed / 2, Drivetrain.kMaxAngularSpeed / 2);
+        // TrapezoidProfile.Constraints rotationConstraints = new
+        // TrapezoidProfile.Constraints(
+        // Drivetrain.kMaxAngularSpeed / 2, Drivetrain.kMaxAngularSpeed / 2);
         // OK go a little crazy with the PID
         // m_rotationController = new ProfiledPIDController(1.5, 0, 0,
         // rotationConstraints);
-        m_rotationController = new ProfiledPIDController(5, 0, 0, rotationConstraints);
-        SmartDashboard.putData("rotation controller", m_rotationController);
+        // m_rotationController = new ProfiledPIDController(5, 0, 0,
+        // rotationConstraints);
+        // SmartDashboard.putData("rotation controller", m_rotationController);
 
-        SwerveControllerCommand swerveControllerCommand0 = new SwerveControllerCommand(target0,
-                m_swerve::getPose, m_swerve.m_kinematics, xController, yController, m_rotationController,
-                () -> new Rotation2d(0), // no robot rotation at all
-                m_swerve::setModuleStates, m_swerve);
+        TrajectoryCommand swerveControllerCommand0 = new TrajectoryCommand(target0, m_swerve, m_controller3);
 
-        return swerveControllerCommand0.andThen(() -> m_swerve.truncate());
+        return swerveControllerCommand0.andThen(() -> m_swerve.stop());
     }
 
     /**
@@ -225,7 +239,7 @@ public class Robot extends TimedRobot {
      */
     public Command auto() {
         TrajectoryConfig translationConfig = new TrajectoryConfig(Drivetrain.kMaxSpeed / 2, Drivetrain.kMaxSpeed)
-                .setKinematics(m_swerve.m_kinematics);
+                .setKinematics(m_kinematics);
 
         // for now just make straight lines.
         // remember the endpoint poses are not robot poses, they are **spline controls**
@@ -252,12 +266,14 @@ public class Robot extends TimedRobot {
                 new Pose2d(15, 1, new Rotation2d(-Math.PI / 2)),
                 translationConfig);
 
-        xController = new PIDController(1.5, 0, 0);
-        yController = new PIDController(1.5, 0, 0);
-        TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
-                Drivetrain.kMaxAngularSpeed / 2, Drivetrain.kMaxAngularSpeed / 2);
-        m_rotationController = new ProfiledPIDController(1.5, 0, 0, rotationConstraints);
-        SmartDashboard.putData("rotation controler", m_rotationController);
+        // xController = new PIDController(1.5, 0, 0);
+        // yController = new PIDController(1.5, 0, 0);
+        // TrapezoidProfile.Constraints rotationConstraints = new
+        // TrapezoidProfile.Constraints(
+        // Drivetrain.kMaxAngularSpeed / 2, Drivetrain.kMaxAngularSpeed / 2);
+        // m_rotationController = new ProfiledPIDController(1.5, 0, 0,
+        // rotationConstraints);
+        // SmartDashboard.putData("rotation controler", m_rotationController);
 
         // if you don't reset the pose, it will kinda do the right thing, trying to get
         // to the correct place no matter where it starts.
@@ -265,22 +281,10 @@ public class Robot extends TimedRobot {
 
         // specify the rotations here, otherwise it takes the last spline control,
         // which only makes sense for tank drive.
-        SwerveControllerCommand swerveControllerCommand0 = new SwerveControllerCommand(target0,
-                m_swerve::getPose, m_swerve.m_kinematics, xController, yController, m_rotationController,
-                () -> new Rotation2d(Math.PI / 2),
-                m_swerve::setModuleStates, m_swerve);
-        SwerveControllerCommand swerveControllerCommand1 = new SwerveControllerCommand(target1,
-                m_swerve::getPose, m_swerve.m_kinematics, xController, yController, m_rotationController,
-                () -> new Rotation2d(-Math.PI / 2),
-                m_swerve::setModuleStates, m_swerve);
-        SwerveControllerCommand swerveControllerCommand2 = new SwerveControllerCommand(target2,
-                m_swerve::getPose, m_swerve.m_kinematics, xController, yController, m_rotationController,
-                () -> new Rotation2d(Math.PI / 2),
-                m_swerve::setModuleStates, m_swerve);
-        SwerveControllerCommand swerveControllerCommand3 = new SwerveControllerCommand(target3,
-                m_swerve::getPose, m_swerve.m_kinematics, xController, yController, m_rotationController,
-                () -> new Rotation2d(-Math.PI / 2),
-                m_swerve::setModuleStates, m_swerve);
+        TrajectoryCommand swerveControllerCommand0 = new TrajectoryCommand(target0, m_swerve, m_controller3);
+        TrajectoryCommand swerveControllerCommand1 = new TrajectoryCommand(target1, m_swerve, m_controller3);
+        TrajectoryCommand swerveControllerCommand2 = new TrajectoryCommand(target2, m_swerve, m_controller3);
+        TrajectoryCommand swerveControllerCommand3 = new TrajectoryCommand(target3, m_swerve, m_controller3);
 
         // run the sequence and stop at the end. added pauses for some realism, e.g.
         // like the robot is doing something.
@@ -288,13 +292,13 @@ public class Robot extends TimedRobot {
                 .andThen(swerveControllerCommand1).andThen(new WaitCommand(0.1))
                 .andThen(swerveControllerCommand2).andThen(new WaitCommand(0.1))
                 .andThen(swerveControllerCommand3).andThen(new WaitCommand(0.1))
-                .andThen(() -> m_swerve.truncate());
+                .andThen(() -> m_swerve.stop());
     }
 
     @Override
     public void teleopInit() {
         System.out.println("teleop init");
-        super.teleopInit();
+        // super.teleopInit();
     }
 
     @Override
@@ -304,13 +308,13 @@ public class Robot extends TimedRobot {
 
     @Override
     public void simulationInit() {
-        m_swerve.simulationInit();
+        // m_swerve.simulationInit();
     }
 
     @Override
     public void simulationPeriodic() {
         m_swerve.simulationPeriodic();
-        m_swerve.updateOdometry();
+        // m_swerve.updateOdometry();
     }
 
     @Override
@@ -318,10 +322,11 @@ public class Robot extends TimedRobot {
         // m_swerve.updateOdometry();
         // if you forget this scheduler thing then nothing will happen
         CommandScheduler.getInstance().run();
-        System.out.printf("teleop %b, drive scheduled %b, default %s\n",
-                isTeleopEnabled(),
-                CommandScheduler.getInstance().isScheduled(m_driveCommand),
-                m_swerve.getDefaultCommand().getName());
+        // System.out.printf("teleop %b, drive scheduled %b, default %s wapyoint %b\n",
+        //         isTeleopEnabled(),
+        //         CommandScheduler.getInstance().isScheduled(m_driveCommand),
+        //         m_swerve.getDefaultCommand().getName(),
+        //         CommandScheduler.getInstance().isScheduled(waypointCommand));
     }
 
     @Override

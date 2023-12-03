@@ -38,7 +38,7 @@ class DriveToWaypoint3Test {
         DriveControllers controllers = new DriveControllersFactory().get(identity);
 
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
-        controller.setTolerance(0.1, 1.0);
+        controller.setTolerance(0.1, 0.1, 0.1, 0.1);
 
         DriveToWaypoint3 command = new DriveToWaypoint3(
                 goal,
@@ -79,12 +79,12 @@ class DriveToWaypoint3Test {
         DriveControllers controllers = new DriveControllersFactory().get(identity);
 
         HolonomicDriveController3 m_controller = new HolonomicDriveController3(controllers);
-        m_controller.setTolerance(0.1, 1.0);
+        m_controller.setTolerance(0.1, 0.1, 0.1, 0.1);
         m_controller.setGains(
                 new PidGains(2, 0, 0, 0, 0.01, false),
                 new PidGains(6.5, 0, 1, 0, 0.01, true));
         m_controller.setIRange(0.3);
-        m_controller.setTolerance(0.00000001, Math.PI / 180);
+        m_controller.setTolerance(0.00000001,0.00000001, Math.PI / 180, 1.0);
 
         DriveToWaypoint3 command = new DriveToWaypoint3(goal.get(), drivetrain, maker, m_controller);
 

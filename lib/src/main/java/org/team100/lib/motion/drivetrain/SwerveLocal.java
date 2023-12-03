@@ -174,6 +174,7 @@ public class SwerveLocal {
 
     // TODO: run this twice per cycle using TimedRobot.addPeriodic and a flag.
     private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds speeds) {
+        t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
                 limits,
                 prevSetpoint,
