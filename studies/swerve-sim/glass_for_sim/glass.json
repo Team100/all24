@@ -45,6 +45,9 @@
         "prevSetpoint chassis speed": {
           "open": true
         },
+        "prevSetpoint chassis speed new": {
+          "open": true
+        },
         "setpoint chassis speed": {
           "open": true
         }
