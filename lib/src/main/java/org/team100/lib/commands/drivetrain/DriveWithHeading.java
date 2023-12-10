@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
@@ -19,6 +20,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/** This uses rotational feedforward only, so it's guaranteed to drift a lot.
+ * TODO: make another version that uses feedback too.
+ */
 public class DriveWithHeading extends Command {
     private final Telemetry t = Telemetry.get();
     private final Supplier<Twist2d> m_twistSupplier;
@@ -28,8 +32,10 @@ public class DriveWithHeading extends Command {
     private final Timer m_timer;
     private final Supplier<Rotation2d> m_desiredRotation;
 
+    private final ManualWithHeading m_manualWithHeading;
+
     boolean snapMode = false;
-    private MotionProfile m_profile;
+    MotionProfile m_profile;
 
     /**
      * @param twistSupplier [-1,1]
@@ -47,6 +53,9 @@ public class DriveWithHeading extends Command {
         m_speedLimits = speedLimits;
         m_timer = timer;
         m_desiredRotation = desiredRotation;
+
+        m_manualWithHeading = new ManualWithHeading(desiredRotation);
+        
         if (m_drive.get() != null)
             addRequirements(m_drive.get());
     }
@@ -80,6 +89,9 @@ public class DriveWithHeading extends Command {
                     m_speedLimits.angleSpeedRad_S,
                     m_speedLimits.angleAccelRad_S2,
                     m_speedLimits.angleJerkRad_S3);
+
+            // TODO: i think this is wrong, it means if you hold the POV
+            // the timer never starts.
             m_timer.reset();
         }
 
