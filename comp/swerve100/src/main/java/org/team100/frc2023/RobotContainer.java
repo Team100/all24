@@ -207,7 +207,7 @@ public class RobotContainer implements Testable {
 
         control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
 
-        control.actualCircle().whileTrue(new DriveInACircle(m_drive, 1));
+        control.actualCircle().whileTrue(new DriveInACircle(m_drive, -1));
         // control.actualCircle().whileTrue(new Spin(m_drive));
 
         ///////////////////////////

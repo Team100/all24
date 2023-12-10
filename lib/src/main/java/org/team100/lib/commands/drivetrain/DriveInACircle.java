@@ -18,7 +18,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Define a center point 1m to the left of the starting position, and circle
- * that point endlessly, with optional rotation.
+ * that point endlessly, with rotation. You can specify the ratio of rotation
+ * between the robot itself and the circle it is traveling, to make useful
+ * figures for calibration.
+ * 
+ * This trochoid desmos is handy for choosing ratios:
+ * 
+ * https://www.desmos.com/calculator/3plby3pgqv
  */
 public class DriveInACircle extends Command {
     private static final double kDtS = 0.02;
@@ -46,6 +52,7 @@ public class DriveInACircle extends Command {
      *                  Negative numbers produce hypotrochoids, i.e. "stars," e.g.
      *                  use -3 to produce a four-pointed star called an Astroid:
      *                  https://en.wikipedia.org/wiki/Astroid.
+     * 
      */
     public DriveInACircle(SwerveDriveSubsystemInterface drivetrain, double turnRatio) {
         m_swerve = drivetrain;

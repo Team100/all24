@@ -31,11 +31,17 @@
         }
       },
       "SmartDashboard": {
+        "Manual Drive Mode": {
+          "open": false
+        },
         "Swerve Module Front Left": {
           "open": true
         },
         "Swerve Module Front Right": {
           "open": true
+        },
+        "UseSetpointGenerator": {
+          "open": false
         }
       },
       "center": {
@@ -81,6 +87,9 @@
       },
       "position servo Rear Right": {
         "open": true
+      },
+      "robot": {
+        "open": false
       }
     },
     "types": {
@@ -144,6 +153,9 @@
         }
       },
       "/field": {
+        "robot": {
+          "style": "Box/Image"
+        },
         "window": {
           "visible": true
         }
@@ -169,7 +181,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 128,
+          "height": 175,
           "series": [
             {
               "color": [
@@ -207,7 +219,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 142,
+          "height": 78,
           "series": [
             {
               "color": [
@@ -250,7 +262,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 142,
+          "height": 78,
           "lockPrevX": true,
           "series": [
             {
@@ -294,7 +306,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 142,
+          "height": 78,
           "lockPrevX": true,
           "series": [
             {
