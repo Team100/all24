@@ -20,7 +20,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** This uses rotational feedforward only, so it's guaranteed to drift a lot.
+/**
+ * This uses rotational feedforward only, so it's guaranteed to drift a lot.
  * TODO: make another version that uses feedback too.
  */
 public class DriveWithHeading extends Command {
@@ -33,8 +34,9 @@ public class DriveWithHeading extends Command {
     private final Supplier<Rotation2d> m_desiredRotation;
 
     private final ManualWithHeading m_manualWithHeading;
+    private final HeadingLatch m_latch;
 
-    boolean snapMode = false;
+    Rotation2d m_currentDesiredRotation = null;
     MotionProfile m_profile;
 
     /**
@@ -55,76 +57,82 @@ public class DriveWithHeading extends Command {
         m_desiredRotation = desiredRotation;
 
         m_manualWithHeading = new ManualWithHeading(desiredRotation);
-        
+        m_latch = new HeadingLatch();
+
         if (m_drive.get() != null)
             addRequirements(m_drive.get());
     }
 
     @Override
     public void initialize() {
-        snapMode = false;
+        m_currentDesiredRotation = null;
         m_timer.restart();
+        m_latch.unlatch();
     }
 
     @Override
     public void execute() {
         Pose2d currentPose = m_drive.getPose();
+
         Rotation2d pov = m_desiredRotation.get();
-        double currentRads = MathUtil.angleModulus(currentPose.getRotation().getRadians());
-
-        if (pov != null) {
-            // if you touch the pov switch, we turn on snap mode and make a new profile
-            snapMode = true;
-
-            // the new profile starts where we are now
-            MotionState start = new MotionState(currentRads, m_heading.getHeadingRateNWU());
-
-            // the new goal is simply the pov rotation with zero velocity
-            MotionState m_goal = new MotionState(MathUtil.angleModulus(pov.getRadians()), 0);
-
-            // new profile obeys the speed limits
-            m_profile = MotionProfileGenerator.generateSimpleMotionProfile(
-                    start,
-                    m_goal,
-                    m_speedLimits.angleSpeedRad_S,
-                    m_speedLimits.angleAccelRad_S2,
-                    m_speedLimits.angleJerkRad_S3);
-
-            // TODO: i think this is wrong, it means if you hold the POV
-            // the timer never starts.
-            m_timer.reset();
-        }
-
         Twist2d twist1_1 = m_twistSupplier.get();
-        // if you touch the rotational control, we turn off snap mode
-        // NOTE(11/22/23): this comparison used to be inverted which i think is wrong
-        if (Math.abs(twist1_1.dtheta) > 0.1) {
-            snapMode = false;
-        }
 
-        if (snapMode) {
-            // in snap mode we take dx and dy from the user, and use the profile for dtheta.
-            MotionState m_ref = m_profile.get(m_timer.get());
+        Rotation2d latchedPov = m_latch.latchedRotation(pov, twist1_1);
 
-            // this is user input
-            Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
-            // the snap overrides the user input for omega.
-            Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, m_ref.getV());
-            m_drive.driveInFieldCoords(twistWithSnapM_S);
-
-            double headingMeasurement = currentPose.getRotation().getRadians();
-            double headingRate = m_heading.getHeadingRateNWU();
-            t.log(Level.DEBUG, "/DriveWithHeading/refX", m_ref.getX());
-            t.log(Level.DEBUG, "/DriveWithHeading/refV", m_ref.getV());
-            t.log(Level.DEBUG, "/DriveWithHeading/measurementX", headingMeasurement);
-            t.log(Level.DEBUG, "/DriveWithHeading/measurementV", headingRate);
-            t.log(Level.DEBUG, "/DriveWithHeading/errorX", m_ref.getX() - headingMeasurement);
-            t.log(Level.DEBUG, "/DriveWithHeading/errorV", m_ref.getV() - headingRate);
-        } else {
-            // if we're not in snap mode then it's just pure manual
+        if (latchedPov == null) {
+            // we're not in snap mode, so it's pure manual
+            m_currentDesiredRotation = null;
             Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
             m_drive.driveInFieldCoords(twistM_S);
+            return;
         }
+
+        // if the desired rotation has changed, update the profile.
+        if (latchedPov != m_currentDesiredRotation) {
+            m_currentDesiredRotation = latchedPov;
+            updateProfile(currentPose, latchedPov);
+            m_timer.restart();
+        }
+
+        // in snap mode we take dx and dy from the user, and use the profile for dtheta.
+        MotionState m_ref = m_profile.get(m_timer.get());
+
+        // this is user input
+        Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
+        // the snap overrides the user input for omega.
+        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, m_ref.getV());
+        m_drive.driveInFieldCoords(twistWithSnapM_S);
+
+        double headingMeasurement = currentPose.getRotation().getRadians();
+        double headingRate = m_heading.getHeadingRateNWU();
+        t.log(Level.DEBUG, "/DriveWithHeading/refX", m_ref.getX());
+        t.log(Level.DEBUG, "/DriveWithHeading/refV", m_ref.getV());
+        t.log(Level.DEBUG, "/DriveWithHeading/measurementX", headingMeasurement);
+        t.log(Level.DEBUG, "/DriveWithHeading/measurementV", headingRate);
+        t.log(Level.DEBUG, "/DriveWithHeading/errorX", m_ref.getX() - headingMeasurement);
+        t.log(Level.DEBUG, "/DriveWithHeading/errorV", m_ref.getV() - headingRate);
+    }
+
+    /**
+     * if you touch the pov switch, we turn on snap mode and make a new profile
+     */
+    private void updateProfile(Pose2d currentPose, Rotation2d latchedPov) {
+
+        // the new profile starts where we are now
+        // TODO: add entry velocity
+        double currentRads = MathUtil.angleModulus(currentPose.getRotation().getRadians());
+        MotionState start = new MotionState(currentRads, m_heading.getHeadingRateNWU());
+
+        // the new goal is simply the pov rotation with zero velocity
+        MotionState m_goal = new MotionState(MathUtil.angleModulus(latchedPov.getRadians()), 0);
+
+        // new profile obeys the speed limits
+        m_profile = MotionProfileGenerator.generateSimpleMotionProfile(
+                start,
+                m_goal,
+                m_speedLimits.angleSpeedRad_S,
+                m_speedLimits.angleAccelRad_S2,
+                m_speedLimits.angleJerkRad_S3);
     }
 
     @Override
