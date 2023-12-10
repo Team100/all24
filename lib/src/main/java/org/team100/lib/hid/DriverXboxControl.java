@@ -94,7 +94,8 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public Trigger defense() {
-        return new JoystickButton(m_controller.getHID(), 2);
+        // return new JoystickButton(m_controller.getHID(), 2);
+        return new Trigger(() -> false);
     }
 
     @Override
@@ -123,5 +124,10 @@ public class DriverXboxControl implements DriverControl {
     @Override
     public Trigger circle() {
         return m_controller.a();
+    }
+
+    @Override
+    public Trigger actualCircle() {
+        return m_controller.b();
     }
 }

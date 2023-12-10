@@ -45,8 +45,14 @@ public class JoystickControl implements DriverControl {
     }
 
     @Override
-    public Trigger resetRotation0() {
+    public Trigger actualCircle() {
         return button(2);
+    }
+
+    @Override
+    public Trigger resetRotation0() {
+       // return button(2);
+       return new Trigger(() -> false);
     }
 
     @Override

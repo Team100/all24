@@ -74,4 +74,8 @@ public interface DriverControl {
     default Trigger circle() {
         return new Trigger(() -> false);
     }
+
+    default Trigger actualCircle() {
+        return new Trigger(()->false);
+    }
 }

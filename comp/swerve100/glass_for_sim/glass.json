@@ -12,9 +12,27 @@
       }
     },
     "transitory": {
+      "Holonomic3": {
+        "error": {
+          "open": true
+        },
+        "measurement": {
+          "open": true
+        },
+        "open": true,
+        "setpoint": {
+          "open": true
+        },
+        "u_FB": {
+          "open": true
+        },
+        "u_FF": {
+          "open": true
+        }
+      },
       "SmartDashboard": {
         "Manual Drive Mode": {
-          "open": true
+          "open": false
         },
         "Swerve Module Front Left": {
           "open": true
@@ -23,8 +41,34 @@
           "open": true
         },
         "UseSetpointGenerator": {
+          "open": false
+        }
+      },
+      "center": {
+        "open": true
+      },
+      "circle": {
+        "center": {
           "open": true
         },
+        "open": true,
+        "reference": {
+          "open": true,
+          "theta": {
+            "open": true
+          }
+        },
+        "target": {
+          "open": true
+        },
+        "x_state": {
+          "open": true
+        },
+        "y_state": {
+          "open": true
+        }
+      },
+      "current pose": {
         "open": true
       },
       "experiments": {
@@ -45,7 +89,7 @@
         "open": true
       },
       "robot": {
-        "open": true
+        "open": false
       }
     },
     "types": {
@@ -107,6 +151,14 @@
         "window": {
           "visible": true
         }
+      },
+      "/field": {
+        "robot": {
+          "style": "Box/Image"
+        },
+        "window": {
+          "visible": true
+        }
       }
     }
   },
@@ -124,12 +176,12 @@
             }
           ],
           "backgroundColor": [
-            0.9399999976158142,
-            0.9399999976158142,
-            0.9399999976158142,
-            1.0
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
           ],
-          "height": 0,
+          "height": 175,
           "series": [
             {
               "color": [
@@ -138,7 +190,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/position servo Front Left/Goal"
+              "id": "NT:/Holonomic3/u_FB/theta"
             },
             {
               "color": [
@@ -147,7 +199,45 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/position servo Front Right/Goal"
+              "id": "NT:/Holonomic3/u_FF/theta"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 78,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/setpoint/x"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/measurement/x"
             },
             {
               "color": [
@@ -156,71 +246,25 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/position servo Rear Left/Goal"
-            },
+              "id": "NT:/Holonomic3/error/x"
+            }
+          ]
+        },
+        {
+          "axis": [
             {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/position servo Rear Right/Goal"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/position servo Rear Left/Position"
-            },
-            {
-              "color": [
-                0.5764706134796143,
-                0.4705882668495178,
-                0.3764706254005432,
-                1.0
-              ],
-              "id": "NT:/position servo Front Right/Position"
-            },
-            {
-              "color": [
-                0.8549020290374756,
-                0.545098066329956,
-                0.7647059559822083,
-                1.0
-              ],
-              "id": "NT:/position servo Front Left/Position"
-            },
-            {
-              "color": [
-                0.5490196347236633,
-                0.5490196347236633,
-                0.5490196347236633,
-                1.0
-              ],
-              "id": "NT:/position servo Rear Right/Position"
-            },
-            {
-              "color": [
-                0.8000000715255737,
-                0.7254902124404907,
-                0.4549019932746887,
-                1.0
-              ],
-              "id": "NT:/position servo Rear Left/Setpoint"
-            },
-            {
-              "color": [
-                0.3921568989753723,
-                0.7098039388656616,
-                0.803921639919281,
-                1.0
-              ],
-              "id": "NT:/position servo Front Right/Setpoint"
-            },
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 78,
+          "lockPrevX": true,
+          "series": [
             {
               "color": [
                 0.2980392277240753,
@@ -228,7 +272,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/position servo Front Left/Setpoint"
+              "id": "NT:/Holonomic3/setpoint/y"
             },
             {
               "color": [
@@ -237,11 +281,67 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/position servo Rear Right/Setpoint"
+              "id": "NT:/Holonomic3/measurement/y"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/y"
+            }
+          ]
+        },
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 78,
+          "lockPrevX": true,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/setpoint/theta"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/measurement/theta"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/theta"
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "name": "Holonomic Controller"
+      }
     }
   }
 }

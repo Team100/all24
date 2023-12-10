@@ -3,6 +3,7 @@ package org.team100.frc2023;
 import java.io.IOException;
 
 import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveWithHeading;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -10,6 +11,7 @@ import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
+import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -35,6 +37,8 @@ import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.Heading;
+import org.team100.lib.sensors.HeadingFactory;
+import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.RedundantGyro;
 import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
@@ -78,9 +82,8 @@ public class RobotContainer implements Testable {
     private final AutonSelector m_autonSelector;
     private final AllianceSelector m_allianceSelector;
 
-    private final Heading m_heading;
+    private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
-    private final RedundantGyroInterface ahrsclass;
     private final Field2d m_field;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final SwerveDriveSubsystem m_drive;
@@ -114,12 +117,18 @@ public class RobotContainer implements Testable {
         // override the correct identity for testing.
         // Identity identity = Identity.COMP_BOT;
 
-        ahrsclass = new RedundantGyro.Factory(identity).get();
-        m_heading = new Heading(ahrsclass);
+        m_kinematics = SwerveDriveKinematicsFactory.get(identity);
+        Experiments experiments = new Experiments(identity);
+
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, m_config.kDriveCurrentLimit);
+        m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
+
+        // RedundantGyroInterface ahrsclass = new RedundantGyro.Factory(identity).get();
+        // m_heading = new Heading(ahrsclass);
+        m_heading = HeadingFactory.get(identity, m_kinematics, m_modules);
         m_field = new Field2d();
 
         SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, m_config.SHOW_MODE);
-        m_kinematics = SwerveDriveKinematicsFactory.get(identity);
 
         // TODO replace with SpeedLimits.
         // TODO: fix these limits
@@ -128,11 +137,6 @@ public class RobotContainer implements Testable {
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);
-
-        Experiments experiments = new Experiments(identity);
-
-        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, m_config.kDriveCurrentLimit);
-        m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
         SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
                 m_kinematics,
@@ -202,6 +206,9 @@ public class RobotContainer implements Testable {
         control.circle().whileTrue(m_drawCircle);
 
         control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
+
+        control.actualCircle().whileTrue(new DriveInACircle(m_drive, -1));
+        // control.actualCircle().whileTrue(new Spin(m_drive));
 
         ///////////////////////////
         //
