@@ -3,6 +3,7 @@ package org.team100.frc2023;
 import java.io.IOException;
 
 import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveWithHeading;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -203,6 +204,8 @@ public class RobotContainer implements Testable {
 
         control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
 
+        control.actualCircle().whileTrue(new DriveInACircle(m_drive));
+        
         ///////////////////////////
         //
         // DRIVE
