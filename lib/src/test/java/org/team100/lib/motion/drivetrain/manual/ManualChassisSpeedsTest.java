@@ -2,8 +2,6 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.function.Supplier;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 
@@ -15,10 +13,10 @@ public class ManualChassisSpeedsTest {
 
     @Test
     void testChassisSpeedsZero() {
-        Supplier<Twist2d> input = () -> new Twist2d();
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualChassisSpeeds manual = new ManualChassisSpeeds(input, limits);
-        ChassisSpeeds speeds = manual.get();
+        ManualChassisSpeeds manual = new ManualChassisSpeeds(limits);
+        Twist2d input =  new Twist2d();
+        ChassisSpeeds speeds = manual.apply(input);
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0, speeds.vyMetersPerSecond, kDelta);
         assertEquals(0, speeds.omegaRadiansPerSecond, kDelta);
@@ -26,10 +24,10 @@ public class ManualChassisSpeedsTest {
 
     @Test
     void testChassisSpeedsNonzero() {
-        Supplier<Twist2d> input = () -> new Twist2d(1, 2, 3);
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualChassisSpeeds manual = new ManualChassisSpeeds(input, limits);
-        ChassisSpeeds speeds = manual.get();
+        ManualChassisSpeeds manual = new ManualChassisSpeeds(limits);
+        Twist2d input = new Twist2d(1, 2, 3);
+        ChassisSpeeds speeds = manual.apply(input);
         assertEquals(1, speeds.vxMetersPerSecond, kDelta);
         assertEquals(1, speeds.vyMetersPerSecond, kDelta); // speed limit
         assertEquals(1, speeds.omegaRadiansPerSecond, kDelta); // speed limit

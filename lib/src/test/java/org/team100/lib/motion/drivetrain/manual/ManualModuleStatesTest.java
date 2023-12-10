@@ -2,8 +2,6 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.function.Supplier;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 
@@ -15,10 +13,10 @@ public class ManualModuleStatesTest {
 
     @Test
     void testModuleStatesZero() {
-        Supplier<Twist2d> input = () -> new Twist2d();
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualModuleStates manual = new ManualModuleStates(input, limits);
-        SwerveModuleState[] ms = manual.get();
+        ManualModuleStates manual = new ManualModuleStates(limits);
+        Twist2d input = new Twist2d();
+        SwerveModuleState[] ms = manual.apply(input);
         assertEquals(0, ms[0].speedMetersPerSecond, kDelta);
         assertEquals(0, ms[1].speedMetersPerSecond, kDelta);
         assertEquals(0, ms[2].speedMetersPerSecond, kDelta);
@@ -32,10 +30,10 @@ public class ManualModuleStatesTest {
 
     @Test
     void testModuleStatesInDeadband() {
-        Supplier<Twist2d> input = () -> new Twist2d(0.1, 0.1, 0);
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualModuleStates manual = new ManualModuleStates(input, limits);
-        SwerveModuleState[] ms = manual.get();
+        ManualModuleStates manual = new ManualModuleStates(limits);
+        Twist2d input =  new Twist2d(0.1, 0.1, 0);
+        SwerveModuleState[] ms = manual.apply(input);
         assertEquals(0, ms[0].speedMetersPerSecond, kDelta);
         assertEquals(0, ms[1].speedMetersPerSecond, kDelta);
         assertEquals(0, ms[2].speedMetersPerSecond, kDelta);
@@ -49,10 +47,10 @@ public class ManualModuleStatesTest {
 
     @Test
     void testModuleStatesOutsideDeadband() {
-        Supplier<Twist2d> input = () -> new Twist2d(0.5, 0.5, 0);
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualModuleStates manual = new ManualModuleStates(input, limits);
-        SwerveModuleState[] ms = manual.get();
+        ManualModuleStates manual = new ManualModuleStates(limits);
+        Twist2d input =  new Twist2d(0.5, 0.5, 0);
+        SwerveModuleState[] ms = manual.apply(input);
         assertEquals(0.634, ms[0].speedMetersPerSecond, kDelta);
         assertEquals(0.634, ms[1].speedMetersPerSecond, kDelta);
         assertEquals(0.634, ms[2].speedMetersPerSecond, kDelta);

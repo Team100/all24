@@ -2,8 +2,6 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.function.Supplier;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 
@@ -14,10 +12,10 @@ public class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistZero() {
-        Supplier<Twist2d> input = () -> new Twist2d();
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(input, limits);
-        Twist2d twist = manual.get();
+        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(limits);
+        Twist2d input = new Twist2d();
+        Twist2d twist = manual.apply(input);
         assertEquals(0, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
         assertEquals(0, twist.dtheta, kDelta);
@@ -25,10 +23,10 @@ public class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistNonzero() {
-        Supplier<Twist2d> input = () -> new Twist2d(1, 2, 3);
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(input, limits);
-        Twist2d twist = manual.get();
+        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(limits);
+        Twist2d input = new Twist2d(1, 2, 3);
+        Twist2d twist = manual.apply(input);
         assertEquals(1, twist.dx, kDelta);
         assertEquals(1, twist.dy, kDelta); // speed limit
         assertEquals(1, twist.dtheta, kDelta); // speed limit

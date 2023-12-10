@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -18,17 +18,11 @@ import edu.wpi.first.math.geometry.Twist2d;
  * This requires a controller under the manual command, so for now
  * it's not in use, but it should be.
  */
-public class ManualSwerveState implements Supplier<SwerveState> {
+public class ManualSwerveState implements Function<Twist2d, SwerveState> {
     private static final double kScale = 1.0;
-    private final Supplier<Twist2d> m_input;
-
-    public ManualSwerveState(Supplier<Twist2d> input) {
-        m_input = input;
-    }
 
     @Override
-    public SwerveState get() {
-        Twist2d input = m_input.get();
+    public SwerveState apply(Twist2d input) {
         return new SwerveState(
                 new State100(kScale * input.dx, 0, 0),
                 new State100(kScale * input.dy, 0, 0),

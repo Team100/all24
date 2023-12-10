@@ -2,7 +2,6 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -15,10 +14,10 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testZero() {
-        Supplier<Twist2d> input = () -> new Twist2d();
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        SimpleManualModuleStates s = new SimpleManualModuleStates(input, limits);
-        SwerveModuleState[] ms = s.get();
+        SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
+        Twist2d input = new Twist2d();
+        SwerveModuleState[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
         assertEquals(0, ms[1].angle.getRadians(), kDelta);
         assertEquals(0, ms[2].angle.getRadians(), kDelta);
@@ -32,10 +31,10 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testAngle() {
-        Supplier<Twist2d> input = () -> new Twist2d(0, 0, 0.5);
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        SimpleManualModuleStates s = new SimpleManualModuleStates(input, limits);
-        SwerveModuleState[] ms = s.get();
+        SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
+        Twist2d input =  new Twist2d(0, 0, 0.5);
+        SwerveModuleState[] ms = s.apply(input);
         assertEquals(Math.PI / 2, ms[0].angle.getRadians(), kDelta);
         assertEquals(Math.PI / 2, ms[1].angle.getRadians(), kDelta);
         assertEquals(Math.PI / 2, ms[2].angle.getRadians(), kDelta);
@@ -49,10 +48,10 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testDrive() {
-        Supplier<Twist2d> input = () -> new Twist2d(0.5, 0, 0);
         SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
-        SimpleManualModuleStates s = new SimpleManualModuleStates(input, limits);
-        SwerveModuleState[] ms = s.get();
+        SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
+        Twist2d input =  new Twist2d(0.5, 0, 0);
+        SwerveModuleState[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
         assertEquals(0, ms[1].angle.getRadians(), kDelta);
         assertEquals(0, ms[2].angle.getRadians(), kDelta);

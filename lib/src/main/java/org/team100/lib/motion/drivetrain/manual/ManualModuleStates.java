@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -23,20 +23,17 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The x and y components of the input twist are used to determine both angle
  * and speed, with a deadband in the center. The input twist dtheta is ignored.
  */
-public class ManualModuleStates implements Supplier<SwerveModuleState[]> {
+public class ManualModuleStates implements Function<Twist2d, SwerveModuleState[]> {
     private final Telemetry t = Telemetry.get();
     private static final double kDeadband = 0.2;
-    private final Supplier<Twist2d> m_input;
     private final SpeedLimits m_speedLimits;
 
-    public ManualModuleStates(Supplier<Twist2d> input, SpeedLimits speedLimits) {
-        m_input = input;
+    public ManualModuleStates(SpeedLimits speedLimits) {
         m_speedLimits = speedLimits;
     }
 
     @Override
-    public SwerveModuleState[] get() {
-        Twist2d input = m_input.get();
+    public SwerveModuleState[] apply(Twist2d input) {
         double hyp = Math.hypot(input.dx, input.dy);
         hyp = MathUtil.clamp(hyp, 0, 1);
         double speedM_S = 0.0;
