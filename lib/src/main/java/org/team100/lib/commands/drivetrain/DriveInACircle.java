@@ -18,26 +18,38 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Define a center point 1m to the left of the starting position, and circle
- * that point endlessly, without rotation.
+ * that point endlessly, with optional rotation.
  */
 public class DriveInACircle extends Command {
     private static final double kDtS = 0.02;
     private static final double kRadiusM = 1.0;
-    private static final double kMaxSpeed = 1.0;
-    private static final double kAccel = 1.0;
+    private static final double kMaxSpeed = 0.5;
+    private static final double kAccel = 0.5;
 
     private static final Telemetry t = Telemetry.get();
 
     private final SwerveDriveSubsystemInterface m_swerve;
+    private double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
 
     private Pose2d m_center;
-    private State100 m_rotation;
+    private double m_initialRotation;
     private double m_speedRad_S;
     private double m_angleRad;
 
-    public DriveInACircle(SwerveDriveSubsystemInterface drivetrain) {
+    /**
+     * @param turnRatio How to rotate the drivetrain.
+     *                  Use 0 for no rotation.
+     *                  Use 1 to fix the aiming point.
+     *                  Larger positive numbers produce epitrochoids, i.e.
+     *                  "flowers."
+     *                  Negative numbers produce hypotrochoids, i.e. "stars," e.g.
+     *                  use -3 to produce a four-pointed star called an Astroid:
+     *                  https://en.wikipedia.org/wiki/Astroid.
+     */
+    public DriveInACircle(SwerveDriveSubsystemInterface drivetrain, double turnRatio) {
         m_swerve = drivetrain;
+        m_turnRatio = turnRatio;
         // TODO: inject the controller instead
         Identity identity = Identity.get();
         DriveControllers controllers = new DriveControllersFactory().get(identity);
@@ -50,7 +62,7 @@ public class DriveInACircle extends Command {
     public void initialize() {
         Pose2d currentPose = m_swerve.getPose();
         m_center = currentPose.transformBy(new Transform2d(0, kRadiusM, GeometryUtil.kRotationZero));
-        m_rotation = new State100(currentPose.getRotation().getRadians(), 0, 0);
+        m_initialRotation = currentPose.getRotation().getRadians();
         m_speedRad_S = 0;
         m_angleRad = 0;
     }
@@ -65,13 +77,19 @@ public class DriveInACircle extends Command {
         }
         m_angleRad += m_speedRad_S * kDtS;
 
-        SwerveState reference = getReference(m_center, kRadiusM, m_angleRad, m_speedRad_S, accelRad_S_S, m_rotation);
+        State100 rotation = new State100(
+                m_initialRotation + m_turnRatio * m_angleRad,
+                m_turnRatio * m_speedRad_S,
+                m_turnRatio * accelRad_S_S);
+
+        SwerveState reference = getReference(m_center, kRadiusM, m_angleRad, m_speedRad_S, accelRad_S_S, rotation);
 
         Twist2d fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
 
         t.log(Level.DEBUG, "/circle/center", m_center);
         t.log(Level.DEBUG, "/circle/angle", m_angleRad);
+        t.log(Level.DEBUG, "/circle/reference", reference);
         t.log(Level.DEBUG, "/circle/target", fieldRelativeTarget);
     }
 

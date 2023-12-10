@@ -13,11 +13,20 @@
     },
     "transitory": {
       "Holonomic3": {
+        "error": {
+          "open": true
+        },
         "measurement": {
           "open": true
         },
         "open": true,
         "setpoint": {
+          "open": true
+        },
+        "u_FB": {
+          "open": true
+        },
+        "u_FF": {
           "open": true
         }
       },
@@ -37,6 +46,12 @@
           "open": true
         },
         "open": true,
+        "reference": {
+          "open": true,
+          "theta": {
+            "open": true
+          }
+        },
         "target": {
           "open": true
         },
@@ -46,6 +61,9 @@
         "y_state": {
           "open": true
         }
+      },
+      "current pose": {
+        "open": true
       },
       "experiments": {
         "string[]##v_/experiments/enabled": {
@@ -137,6 +155,44 @@
     "serverTeam": "localhost"
   },
   "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 128,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/u_FB/theta"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/u_FF/theta"
+            }
+          ]
+        }
+      ]
+    },
     "Plot <2>": {
       "plots": [
         {
@@ -151,7 +207,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 135,
+          "height": 142,
           "series": [
             {
               "color": [
@@ -170,6 +226,15 @@
                 1.0
               ],
               "id": "NT:/Holonomic3/measurement/x"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/x"
             }
           ]
         },
@@ -185,7 +250,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 135,
+          "height": 142,
           "lockPrevX": true,
           "series": [
             {
@@ -205,6 +270,59 @@
                 1.0
               ],
               "id": "NT:/Holonomic3/measurement/y"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/y"
+            }
+          ]
+        },
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 142,
+          "lockPrevX": true,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/setpoint/theta"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/measurement/theta"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/theta"
             }
           ]
         }
