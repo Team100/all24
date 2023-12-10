@@ -6,7 +6,7 @@ import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualModuleStates;
+import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 /** Uses a Sendable Chooser */
 public class DriveManually extends Command {
     private final SwerveDriveSubsystemInterface m_drive;
-    private final ManualModuleStates m_manualModuleStates;
+    private final Supplier<SwerveModuleState[]>  m_manualModuleStates;
     private final ManualChassisSpeeds m_manualChassisSpeeds;
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
     private final Supplier<ManualMode.Mode> m_mode;
@@ -28,7 +28,8 @@ public class DriveManually extends Command {
             SpeedLimits speedLimits) {
         m_mode = mode;
         m_drive = robotDrive;
-        m_manualModuleStates = new ManualModuleStates(twistSupplier, speedLimits);
+        // m_manualModuleStates = new ManualModuleStates(twistSupplier, speedLimits);
+        m_manualModuleStates = new SimpleManualModuleStates(twistSupplier, speedLimits);
         m_manualChassisSpeeds = new ManualChassisSpeeds(twistSupplier, speedLimits);
         m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(twistSupplier, speedLimits);
         if (m_drive.get() != null)
