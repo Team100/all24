@@ -89,6 +89,15 @@ public class RealFlight implements DriverControl {
         return leftSwitchOn().and(rightSwitchOff);
     }
 
+    @Override
+    public Speed speed() {
+        // left
+        if (hid.getHID().getRawButton(2)) return Speed.SLOW;
+        // right
+        if (hid.getHID().getRawButton(3)) return Speed.MEDIUM;
+        return Speed.NORMAL;
+    }
+
     /////////////////////////////////////////
 
     public Trigger leftSwitchOn() {
@@ -97,21 +106,6 @@ public class RealFlight implements DriverControl {
 
     public Trigger rightSwitchOn() {
         return hid.button(3);
-    }
-
-    // this doesn't do anything
-    public double throttle() {
-        return scaled(2);
-    }
-
-    // this doesn't do anything
-    public boolean medium() {
-        return hid.getRawAxis(2) > -0.3 && hid.getRawAxis(2) < 0.5;
-    }
-
-    // this doesn't do anything
-    public boolean slow() {
-        return hid.getRawAxis(2) > 0.5;
     }
 
     /**

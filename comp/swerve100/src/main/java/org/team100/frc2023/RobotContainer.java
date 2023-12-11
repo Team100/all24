@@ -162,23 +162,24 @@ public class RobotContainer implements Testable {
                 m_kinematics,
                 m_modules);
 
-        m_drive = new SwerveDriveSubsystem(
-                m_heading,
-                poseEstimator,
-                m_frameTransform,
-                swerveLocal,
-                m_field);
-
-        ////////////////////////////
-        //
-        // DRIVETRAIN COMMANDS
-        //
-
         // control = new JoystickControl();
         // control = new DriverXboxControl();
 
         // selects the correct control class for whatever is plugged in
         control = new ControlFactory().getDriverControl();
+
+        m_drive = new SwerveDriveSubsystem(
+                m_heading,
+                poseEstimator,
+                m_frameTransform,
+                swerveLocal,
+                m_field,
+                control::speed);
+
+        ////////////////////////////
+        //
+        // DRIVETRAIN COMMANDS
+        //
 
         control.defense().whileTrue(m_drive.runInit(m_drive::defense));
         control.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
@@ -195,27 +196,27 @@ public class RobotContainer implements Testable {
 
         ManualMode manualMode = new ManualMode();
 
-        // TODO: make slow and medium into a "speed supplier"
-        SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow().whileTrue(
-                new DriveManually(manualMode,
-                        control::twist,
-                        m_drive,
-                        m_heading,
-                        slow,
-                        new Timer(),
-                        control::desiredRotation,
-                        thetaController));
-        SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium().whileTrue(
-                new DriveManually(manualMode,
-                        control::twist,
-                        m_drive,
-                        m_heading,
-                        medium,
-                        new Timer(),
-                        control::desiredRotation,
-                        thetaController));
+        // slow/medium mode are now modifiers in SwerveDriveSubsystem.
+        // SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
+        // control.driveSlow().whileTrue(
+        //         new DriveManually(manualMode,
+        //                 control::twist,
+        //                 m_drive,
+        //                 m_heading,
+        //                 slow,
+        //                 new Timer(),
+        //                 control::desiredRotation,
+        //                 thetaController));
+        // SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
+        // control.driveMedium().whileTrue(
+        //         new DriveManually(manualMode,
+        //                 control::twist,
+        //                 m_drive,
+        //                 m_heading,
+        //                 medium,
+        //                 new Timer(),
+        //                 control::desiredRotation,
+        //                 thetaController));
 
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));

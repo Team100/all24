@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.MockHeading;
 
@@ -51,7 +52,8 @@ class SwerveDriveSubsystemTest {
                 poseEstimator,
                 frameTransform,
                 swerveLocal,
-                field);
+                field,
+                () -> DriverControl.Speed.NORMAL);
         // try all the actuators
         drive.periodic();
         drive.driveInFieldCoords(new Twist2d(1, 1, 1));
