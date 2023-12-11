@@ -9,7 +9,7 @@ class ManualModeTest {
     void testSimple() {
         ManualMode mode = new ManualMode();
         // verify default
-        assertEquals(ManualMode.Mode.FIELD_RELATIVE_TWIST, mode.getSelected());
+        assertEquals(ManualMode.Mode.SNAPS, mode.getSelected());
     }
     
 }

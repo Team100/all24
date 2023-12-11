@@ -7,12 +7,15 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.sensors.MockHeading;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.Timer;
 
 class DriveManuallyTest {
     ManualMode.Mode desiredMode = null;
-    Twist2d desiredTwist = new Twist2d(1,0,0);
+    Twist2d desiredTwist = new Twist2d(1, 0, 0);
 
     @Test
     void testSimple() {
@@ -21,11 +24,16 @@ class DriveManuallyTest {
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
 
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         DriveManually command = new DriveManually(
                 mode,
                 twistSupplier,
                 robotDrive,
-                speedLimits);
+                new MockHeading(),
+                speedLimits,
+                new Timer(),
+                () -> null, thetaController);
 
         command.initialize();
 

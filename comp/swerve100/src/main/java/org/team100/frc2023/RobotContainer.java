@@ -5,13 +5,11 @@ import java.io.IOException;
 import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.DriveWithHeading;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
-import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -36,11 +34,8 @@ import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.selftest.Testable;
-import org.team100.lib.sensors.Heading;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.sensors.RedundantGyro;
-import org.team100.lib.sensors.RedundantGyroInterface;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
@@ -192,11 +187,35 @@ public class RobotContainer implements Testable {
         control.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
         control.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
+        // TODO: use the same controllers as HolonomicDriveController3
+        // P is low here to avoid oscillating
+        // TODO: add a velocity control
+        PIDController thetaController = new PIDController(2, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
         ManualMode manualMode = new ManualMode();
+
+        // TODO: make slow and medium into a "speed supplier"
         SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        control.driveSlow().whileTrue(new DriveManually(manualMode, control::twist, m_drive, slow));
+        control.driveSlow().whileTrue(
+                new DriveManually(manualMode,
+                        control::twist,
+                        m_drive,
+                        m_heading,
+                        slow,
+                        new Timer(),
+                        control::desiredRotation,
+                        thetaController));
         SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        control.driveMedium().whileTrue(new DriveManually(manualMode, control::twist, m_drive, medium));
+        control.driveMedium().whileTrue(
+                new DriveManually(manualMode,
+                        control::twist,
+                        m_drive,
+                        m_heading,
+                        medium,
+                        new Timer(),
+                        control::desiredRotation,
+                        thetaController));
 
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
@@ -215,27 +234,31 @@ public class RobotContainer implements Testable {
         //
         // DRIVE
         //
-        if (m_config.SHOW_MODE) {
-            m_drive.setDefaultCommand(
-                    new DriveManually(
-                            manualMode,
-                            control::twist,
-                            m_drive,
-                            speedLimits));
-        } else {
-            // TODO: use the same controllers as HolonomicDriveController3
-            PIDController thetaController = new PIDController(3.5,0,0);
-            thetaController.enableContinuousInput(-Math.PI,Math.PI);
-            m_drive.setDefaultCommand(
-                    new DriveWithHeading(
-                            control::twist,
-                            m_drive,
-                            m_heading,
-                            speedLimits,
-                            new Timer(),
-                            control::desiredRotation,
-                            thetaController));
-        }
+
+        // if (m_config.SHOW_MODE) {
+
+        m_drive.setDefaultCommand(
+                new DriveManually(
+                        manualMode,
+                        control::twist,
+                        m_drive,
+                        m_heading,
+                        speedLimits,
+                        new Timer(),
+                        control::desiredRotation,
+                        thetaController));
+
+        // } else {
+        // m_drive.setDefaultCommand(
+        // new DriveWithHeading(
+        // control::twist,
+        // m_drive,
+        // m_heading,
+        // speedLimits,
+        // new Timer(),
+        // control::desiredRotation,
+        // thetaController));
+        // }
 
         /////////////////////////////////
         //
@@ -312,5 +335,10 @@ public class RobotContainer implements Testable {
 
     public Monitor getMonitor() {
         return m_monitor;
+    }
+
+    @Override
+    public HeadingInterface getHeading() {
+        return m_heading;
     }
 }

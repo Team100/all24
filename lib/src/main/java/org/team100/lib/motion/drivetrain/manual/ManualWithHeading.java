@@ -24,8 +24,7 @@ import edu.wpi.first.wpilibj.Timer;
  * This is the logic from DriveWithHeading, extracted so it can be used as a
  * manual mode.
  * 
- * This uses rotational feedforward only, so it's guaranteed to drift a lot.
- * TODO: make another version that uses feedback too.
+ * TODO: add a velocity controller 
  */
 public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
     private final Telemetry t = Telemetry.get();
@@ -68,12 +67,12 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
         if (latchedPov == null) {
             // we're not in snap mode, so it's pure manual
             m_currentDesiredRotation = null;
-            t.log(Level.DEBUG, "/DriveWithHeading/mode", "free");
+            t.log(Level.DEBUG, "/ManualWithHeading/mode", "free");
             return DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
         }
 
         // if the desired rotation has changed, update the profile.
-        if (latchedPov != m_currentDesiredRotation) {
+        if (!latchedPov.equals(m_currentDesiredRotation)) {
             m_currentDesiredRotation = latchedPov;
             updateProfile(currentPose, latchedPov);
             m_timer.restart();
@@ -91,18 +90,22 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
 
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_ref.getX());
 
-        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, thetaFF + thetaFB);
+        double omega = MathUtil.clamp(
+                thetaFF + thetaFB,
+                -m_speedLimits.angleSpeedRad_S,
+                m_speedLimits.angleSpeedRad_S);
+        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx,twistM_S.dy, omega);
 
         double headingMeasurement = currentPose.getRotation().getRadians();
         double headingRate = m_heading.getHeadingRateNWU();
 
-        t.log(Level.DEBUG, "/DriveWithHeading/mode", "snap");
-        t.log(Level.DEBUG, "/DriveWithHeading/refX", m_ref.getX());
-        t.log(Level.DEBUG, "/DriveWithHeading/refV", m_ref.getV());
-        t.log(Level.DEBUG, "/DriveWithHeading/measurementX", headingMeasurement);
-        t.log(Level.DEBUG, "/DriveWithHeading/measurementV", headingRate);
-        t.log(Level.DEBUG, "/DriveWithHeading/errorX", m_ref.getX() - headingMeasurement);
-        t.log(Level.DEBUG, "/DriveWithHeading/errorV", m_ref.getV() - headingRate);
+        t.log(Level.DEBUG, "/ManualWithHeading/mode", "snap");
+        t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_ref.getX());
+        t.log(Level.DEBUG, "/ManualWithHeading/reference/omega", m_ref.getV());
+        t.log(Level.DEBUG, "/ManualWithHeading/measurement/theta", headingMeasurement);
+        t.log(Level.DEBUG, "/ManualWithHeading/measurement/omega", headingRate);
+        t.log(Level.DEBUG, "/ManualWithHeading/error/theta", m_ref.getX() - headingMeasurement);
+        t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_ref.getV() - headingRate);
 
         return twistWithSnapM_S;
 

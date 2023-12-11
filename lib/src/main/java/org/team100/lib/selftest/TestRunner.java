@@ -1,11 +1,13 @@
 package org.team100.lib.selftest;
 
+import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
-import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.ManualMode;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -32,11 +34,18 @@ public class TestRunner extends Command {
 
         // treatment is a specific manual input, supplied by the test case.
         DriveManuallyTest driveManuallyTest = new DriveManuallyTest(drivetrain, m_listener);
+       
+        PIDController thetaController = new PIDController(3.5,0,0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         DriveManually driveManually = new DriveManually(
                 () -> ManualMode.Mode.MODULE_STATE,
                 driveManuallyTest::treatment,
                 drivetrain,
-                new SpeedLimits(1, 1, 1, 1));
+                m_container.getHeading(),
+                new SpeedLimits(1, 1, 1, 1),
+                new Timer(),
+                () -> null,
+                thetaController);
         addCase(driveManuallyTest, driveManually);
 
         // this only tests the end-state

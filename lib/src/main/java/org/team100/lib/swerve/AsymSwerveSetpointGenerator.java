@@ -246,7 +246,6 @@ public class AsymSwerveSetpointGenerator {
             // It will (likely) be faster to stop the robot, rotate the modules in place to
             // the complement of the desired
             // angle, and accelerate again.
-            System.out.println("********FLIP!********");
             return generateSetpoint(limits, prevSetpoint, new ChassisSpeeds(), dt);
         }
 
