@@ -85,6 +85,11 @@ public class FalconTurningMotor implements Motor100<Angle> {
         log();
     }
 
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
     private void log() {
         t.log(Level.DEBUG, m_name + "/Output", get());
         t.log(Level.DEBUG, m_name + "/Error", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));

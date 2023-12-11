@@ -74,6 +74,11 @@ public class CANTurningMotor implements Motor100<Angle> {
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
     public void setVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
         // TODO fix this

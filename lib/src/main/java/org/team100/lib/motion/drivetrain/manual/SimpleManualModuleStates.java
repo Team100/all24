@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
@@ -18,19 +18,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The input dx is exactly the wheel speed.
  * The input dy is ignored.
  */
-public class SimpleManualModuleStates implements Supplier<SwerveModuleState[]> {
+public class SimpleManualModuleStates implements Function<Twist2d, SwerveModuleState[]> {
     private final Telemetry t = Telemetry.get();
-    private final Supplier<Twist2d> m_input;
     private final SpeedLimits m_speedLimits;
 
-    public SimpleManualModuleStates(Supplier<Twist2d> input, SpeedLimits speedLimits) {
-        m_input = input;
+    public SimpleManualModuleStates(SpeedLimits speedLimits) {
         m_speedLimits = speedLimits;
     }
 
     @Override
-    public SwerveModuleState[] get() {
-        Twist2d input = m_input.get();
+    public SwerveModuleState[] apply(Twist2d input) {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.dtheta);
         double speedM_S = m_speedLimits.speedM_S * input.dx;

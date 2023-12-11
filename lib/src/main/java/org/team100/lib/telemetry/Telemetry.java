@@ -101,6 +101,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             BooleanTopic t = inst.getBooleanTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, BooleanPublisher.class).set(val);
@@ -113,6 +114,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             DoubleTopic t = inst.getDoubleTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, DoublePublisher.class).set(val);
@@ -125,6 +127,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             DoubleArrayTopic t = inst.getDoubleArrayTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, DoubleArrayPublisher.class).set(val);
@@ -137,6 +140,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             IntegerTopic t = inst.getIntegerTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, IntegerPublisher.class).set(val);
@@ -149,6 +153,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             StringTopic t = inst.getStringTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, StringPublisher.class).set(val);
@@ -161,6 +166,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             StringArrayTopic t = inst.getStringArrayTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, StringArrayPublisher.class).set(val);

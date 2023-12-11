@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.swerve.SwerveSetpoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -74,5 +75,15 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
     @Override
     public boolean[] atSetpoint() {
         return new boolean[] { true, true, true, true };
+    }
+
+    @Override
+    public SwerveModuleState[] moduleStates() {
+        return null;
+    }
+
+    @Override
+    public void resetSetpoint(SwerveSetpoint setpoint) {
+        // do nothing
     }
 }

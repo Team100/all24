@@ -77,6 +77,13 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
+    public Speed speed() {
+        if (m_controller.getHID().getLeftBumper()) return Speed.SLOW;
+        if (m_controller.getHID().getRightBumper()) return Speed.MEDIUM;
+        return Speed.NORMAL;
+    }
+
+    @Override
     public Trigger resetPose() {
         return m_controller.leftBumper();
     }

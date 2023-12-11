@@ -21,4 +21,6 @@ public interface Motor100<T> {
      * @param accel in T/s.  TODO: make the implementations actually use accel.
      */
     void setVelocity(double velocity, double accel);
+
+    void stop();
 }

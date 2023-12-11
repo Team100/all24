@@ -23,16 +23,19 @@ public class SimulatedMotor<T> implements Motor100<T> {
     @Override
     public void setDutyCycle(double output) {
         t.log(Level.DEBUG, m_name + "/duty_cycle", output);
-        // ignore it
+        System.out.println("Unimplemented! SimulatedMotor.setDutyCycle");
+    }
+
+    @Override
+    public void stop() {
+        m_velocity = 0;
     }
 
     @Override
     public void setVelocity(double velocity, double accel) {
-
         m_velocity = velocity;
         // ignore accel
         t.log(Level.DEBUG, m_name + "/velocity", m_velocity);
-
     }
 
     public double getVelocity() {
