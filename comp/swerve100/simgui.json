@@ -20,16 +20,6 @@
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Manual Drive Mode": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Telemetry Level": {
-        "window": {
-          "visible": true
-        }
-      },
       "/field": {
         "window": {
           "visible": true

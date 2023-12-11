@@ -1,10 +1,8 @@
 package org.team100.lib.commands.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Supplier;
 
@@ -46,12 +44,12 @@ class DriveWithHeadingTest {
         command.initialize();
         command.execute();
         // with a non-null desired rotation we're in snap mode
-        assertNotNull(command.m_currentDesiredRotation);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         desiredRotation = null;
         desiredTwist = new Twist2d(0, 0, 1);
         command.execute();
         // with a nonzero desired twist, we're out of snap mode
-        assertNull(command.m_currentDesiredRotation);
+        assertNull(command.m_manualWithHeading.m_currentDesiredRotation);
         command.end(false);
     }
 
@@ -77,14 +75,14 @@ class DriveWithHeadingTest {
         desiredTwist = new Twist2d(0, 0, 1);
         command.execute();
         // not in snap mode
-        assertNull(command.m_currentDesiredRotation);
+        assertNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         assertEquals(1, robotDrive.twist.dtheta, kDelta);
 
         desiredTwist = new Twist2d(1, 0, 0);
         command.execute();
-        assertNull(command.m_currentDesiredRotation);
+        assertNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(1, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         assertEquals(0, robotDrive.twist.dtheta, kDelta);
@@ -114,11 +112,11 @@ class DriveWithHeadingTest {
         desiredTwist = new Twist2d(0, 0, 0);
         command.execute();
         // in snap mode
-        assertNotNull(command.m_currentDesiredRotation);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         // there should be a profile
-        assertEquals(2.571, command.m_profile.duration(), kDelta);
+        assertEquals(2.571, command.m_manualWithHeading.m_profile.duration(), kDelta);
         // but at t0 it hasn't started yet.
-        assertEquals(0, command.m_profile.get(0).getV(), kDelta);
+        assertEquals(0, command.m_manualWithHeading.m_profile.get(0).getV(), kDelta);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // confirm t=0 implies v=0
@@ -131,8 +129,8 @@ class DriveWithHeadingTest {
 
         timer.time = 1;
         command.execute();
-        assertEquals(1, command.m_profile.get(1).getV(), kDelta);
-        assertNotNull(command.m_currentDesiredRotation);
+        assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // still pushing since the profile isn't done
@@ -141,8 +139,8 @@ class DriveWithHeadingTest {
         // almost done
         timer.time = 2.4;
         command.execute();
-        assertEquals(1, command.m_profile.get(1).getV(), kDelta);
-        assertNotNull(command.m_currentDesiredRotation);
+        assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // almost done
@@ -150,7 +148,7 @@ class DriveWithHeadingTest {
 
         timer.time = 100;
         command.execute();
-        assertNotNull(command.m_currentDesiredRotation);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // there should be no more profile to follow
@@ -183,11 +181,11 @@ class DriveWithHeadingTest {
         desiredTwist = new Twist2d(0, 0, 0);
         command.execute();
         // in snap mode
-        assertNotNull(command.m_currentDesiredRotation);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         // there should be a profile
-        assertEquals(2.571, command.m_profile.duration(), kDelta);
+        assertEquals(2.571, command.m_manualWithHeading.m_profile.duration(), kDelta);
         // but at t0 it hasn't started yet.
-        assertEquals(0, command.m_profile.get(0).getV(), kDelta);
+        assertEquals(0, command.m_manualWithHeading.m_profile.get(0).getV(), kDelta);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // confirm t=0 implies v=0
@@ -200,8 +198,8 @@ class DriveWithHeadingTest {
 
         timer.time = 1;
         command.execute();
-        assertEquals(1, command.m_profile.get(1).getV(), kDelta);
-        assertNotNull(command.m_currentDesiredRotation);
+        assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // still pushing since the profile isn't done
@@ -210,8 +208,8 @@ class DriveWithHeadingTest {
         // almost done
         timer.time = 2.4;
         command.execute();
-        assertEquals(1, command.m_profile.get(1).getV(), kDelta);
-        assertNotNull(command.m_currentDesiredRotation);
+        assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // almost done
@@ -219,7 +217,7 @@ class DriveWithHeadingTest {
 
         timer.time = 100;
         command.execute();
-        assertNotNull(command.m_currentDesiredRotation);
+        assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
         assertEquals(0, robotDrive.twist.dy, kDelta);
         // there should be no more profile to follow

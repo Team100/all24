@@ -9,7 +9,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
-public class HeadingLatchTest {
+class HeadingLatchTest {
     private static final double kDelta = 0.001;
 
     @Test

@@ -1,0 +1,66 @@
+{
+  "Docking": {
+    "Data": [
+      "DockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,13 Size=682,499 CentralNode=1"
+    ]
+  },
+  "MainWindow": {
+    "GLOBAL": {
+      "fps": "120",
+      "height": "512",
+      "maximized": "0",
+      "style": "0",
+      "userScale": "1",
+      "width": "682",
+      "xpos": "142",
+      "ypos": "155"
+    }
+  },
+  "Window": {
+    "###/SmartDashboard/Manual Drive Mode": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "146,42"
+    },
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "146,42"
+    },
+    "###/SmartDashboard/UseClosedLoopVelocity": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "146,42"
+    },
+    "###/SmartDashboard/UseSetpointGenerator": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "146,42"
+    },
+    "###NetworkTables": {
+      "Collapsed": "0",
+      "Pos": "166,184",
+      "Size": "500,123"
+    },
+    "###NetworkTables Settings": {
+      "Collapsed": "0",
+      "Pos": "20,20",
+      "Size": "186,127"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "41,50"
+    },
+    "Debug##Default": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "400,400"
+    },
+    "DockSpaceViewport_11111111": {
+      "Collapsed": "0",
+      "Pos": "0,13",
+      "Size": "682,499"
+    }
+  }
+}
