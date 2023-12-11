@@ -51,6 +51,11 @@ public class NeoTurningMotor implements Motor100<Angle> {
         t.log(Level.DEBUG, m_name + "/Output", output);
     }
 
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
     public void setVelocity(double outputRadiansPerSec, double Accel) {
         t.log(Level.DEBUG, m_name + "/Output", outputRadiansPerSec);
         m_pidController.setReference(m_config.kMotorGearing * outputRadiansPerSec, CANSparkMax.ControlType.kVelocity);

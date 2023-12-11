@@ -78,7 +78,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name + "/drive",
+                name + "/drive velocity servo",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -88,7 +88,7 @@ public class SwerveModuleFactory {
         PIDController angleVelocityController = new PIDController(2.86, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name + "/turn",
+                name + "/turning velocity servo",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -167,7 +167,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name + "/drive",
+                name + "/drive velocity servo",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -177,7 +177,7 @@ public class SwerveModuleFactory {
         PIDController angleVelocityController = new PIDController(5, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name + "/turn",
+                name + "/turning velocity servo",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -246,7 +246,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name + "/drive",
+                name + "/drive velocity servo",
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -256,7 +256,7 @@ public class SwerveModuleFactory {
         PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name + "/turn",
+                name + "/turning velocity servo",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -279,8 +279,8 @@ public class SwerveModuleFactory {
     }
 
     public SwerveModule100 SimulatedModule(String name) {
-        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive");
-        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(name + "/drive", driveMotor);
+        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive motor");
+        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(name + "/drive encoder", driveMotor);
         PIDController driveController = new PIDController(//
                 0.1, // kP
                 0, // kI
@@ -293,14 +293,14 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name + "/drive",
+                name + "/drive velocity servo",
                 driveMotor,
                 driveEncoder,
                 driveController,
                 driveFeedforward);
 
-        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name + "/turning");
-        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(name + "/turning", turningMotor);
+        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name + "/turning motor");
+        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(name + "/turning encoder", turningMotor);
         PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
                 0.05, // kS
@@ -308,7 +308,7 @@ public class SwerveModuleFactory {
                 0); // kA
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 experiments,
-                name + "/turn",
+                name + "/turning velocity servo",
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,

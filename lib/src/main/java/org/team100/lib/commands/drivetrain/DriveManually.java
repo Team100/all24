@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.swerve.SwerveSetpoint;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -60,6 +61,19 @@ public class DriveManually extends Command {
     }
 
     @Override
+    public void initialize() {
+        // the setpoint generator remembers what it was doing before, but it might be
+        // interrupted by some other command, so when we start, we have to tell it what
+        // the real previous setpoint is.
+        // Note this is not necessarily "at rest," because we might start driving
+        // manually while the robot is moving.
+        ChassisSpeeds currentSpeeds = m_drive.speeds();
+        SwerveModuleState[] currentStates = m_drive.moduleStates();
+        SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
+        m_drive.resetSetpoint(setpoint);
+    }
+
+    @Override
     public void execute() {
         ManualMode.Mode manualMode = m_mode.get();
         if (manualMode == null) {
@@ -71,7 +85,7 @@ public class DriveManually extends Command {
             // there's state in there we'd like to forget
             m_manualWithHeading.reset();
         }
-        
+
         Twist2d input = m_twistSupplier.get();
 
         switch (manualMode) {

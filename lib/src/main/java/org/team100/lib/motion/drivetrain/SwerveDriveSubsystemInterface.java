@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.swerve.SwerveSetpoint;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -39,6 +41,10 @@ public interface SwerveDriveSubsystemInterface {
     boolean[] atSetpoint();
 
     ChassisSpeeds speeds();
+
+    SwerveModuleState[] moduleStates();
+
+    void resetSetpoint(SwerveSetpoint setpoint);
 
     /** Because Subsystem is now concrete, it needs an accessor. */
     SwerveDriveSubsystem get();

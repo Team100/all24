@@ -78,7 +78,7 @@ public class VelocityServo<T> {
     }
 
     public void stop() {
-        m_motor.setDutyCycle(0);
+        m_motor.stop();
     }
 
     public double getDistance() {

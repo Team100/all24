@@ -99,6 +99,11 @@ public class FalconDriveMotor implements Motor100<Distance> {
     }
 
     @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
+    @Override
     public void setVelocity(double outputMetersPerSec, double accelM_S_S) {
         double Kn = 0.11106;
         double Ks = 0.001515;

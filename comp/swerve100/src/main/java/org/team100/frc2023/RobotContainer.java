@@ -7,6 +7,7 @@ import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ManualMode;
+import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
@@ -228,8 +229,9 @@ public class RobotContainer implements Testable {
 
         control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
 
-        control.actualCircle().whileTrue(new DriveInACircle(m_drive, -1));
+        // control.actualCircle().whileTrue(new DriveInACircle(m_drive, -1));
         // control.actualCircle().whileTrue(new Spin(m_drive));
+        control.actualCircle().whileTrue(new Oscillate(m_drive));
 
         ///////////////////////////
         //

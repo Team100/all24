@@ -7,6 +7,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -72,6 +73,14 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         return m_swerveLocal.speeds();
     }
 
+    public SwerveModuleState[] moduleStates() {
+        return m_swerveLocal.states();
+    }
+
+    public void resetSetpoint(SwerveSetpoint setpoint) {
+        m_swerveLocal.resetSetpoint(setpoint);
+    }
+
     // this is for testing
     public SwerveDriveSubsystem get() {
         return this;
@@ -111,6 +120,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
      */
     public void driveInFieldCoords(Twist2d twist) {
         DriverControl.Speed speed = m_speed.get();
+        t.log(Level.DEBUG, "/chassis/control_speed", speed.name());
         switch (speed) {
             case SLOW:
                 twist = GeometryUtil.scale(twist, kSlow);

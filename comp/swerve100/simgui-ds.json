@@ -1,12 +1,7 @@
 {
-  "FMS": {
+  "Joysticks": {
     "window": {
       "visible": false
-    }
-  },
-  "Keyboard 0 Settings": {
-    "window": {
-      "visible": true
     }
   },
   "keyboardJoysticks": [
@@ -37,12 +32,12 @@
       ],
       "povConfig": [
         {
-          "key0": 56,
-          "key135": 51,
+          "key0": 328,
+          "key135": 323,
           "key180": 322,
           "key225": 321,
           "key270": 324,
-          "key315": 55,
+          "key315": 327,
           "key45": 329,
           "key90": 326
         }
