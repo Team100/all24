@@ -13,6 +13,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
 import org.team100.lib.util.MockTimer;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -29,16 +30,19 @@ class ManualWithHeadingTest {
         MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI,Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 timer,
-                rotationSupplier);
+                rotationSupplier,
+                thetaController);
         m_manualWithHeading.reset();
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
-        
+
         Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
@@ -62,11 +66,14 @@ class ManualWithHeadingTest {
         MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI,Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 timer,
-                rotationSupplier);
+                rotationSupplier,
+                thetaController);
 
         m_manualWithHeading.reset();
 
@@ -100,11 +107,14 @@ class ManualWithHeadingTest {
         MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI,Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 timer,
-                rotationSupplier);
+                rotationSupplier,
+                thetaController);
 
         m_manualWithHeading.reset();
 
@@ -132,6 +142,8 @@ class ManualWithHeadingTest {
         desiredRotation = null;
 
         timer.time = 1;
+        // say we've rotated a little.
+        currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
@@ -142,15 +154,19 @@ class ManualWithHeadingTest {
 
         // almost done
         timer.time = 2.4;
+        // mostly rotated
+        currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
         // almost done
-        assertEquals(0.171, twistM_S.dtheta, kDelta);
+        assertEquals(0.175, twistM_S.dtheta, kDelta);
 
         timer.time = 100;
+        // done
+        currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
@@ -168,11 +184,14 @@ class ManualWithHeadingTest {
         MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI,Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 timer,
-                rotationSupplier);
+                rotationSupplier,
+                thetaController);
 
         m_manualWithHeading.reset();
 
@@ -202,6 +221,8 @@ class ManualWithHeadingTest {
         // desiredRotation = null;
 
         timer.time = 1;
+        // say we've rotated a little.
+        currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
@@ -212,15 +233,19 @@ class ManualWithHeadingTest {
 
         // almost done
         timer.time = 2.4;
+        // mostly rotated, so the FB controller is calm
+        currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
         // almost done
-        assertEquals(0.171, twistM_S.dtheta, kDelta);
+        assertEquals(0.175, twistM_S.dtheta, kDelta);
 
         timer.time = 100;
+        // at the setpoint
+        currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);

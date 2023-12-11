@@ -14,6 +14,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -34,6 +35,7 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
     private final Timer m_timer;
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
+    private final PIDController m_thetaController;
 
     public Rotation2d m_currentDesiredRotation = null;
     public MotionProfile m_profile;
@@ -42,11 +44,13 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
             SpeedLimits speedLimits,
             HeadingInterface heading,
             Timer timer,
-            Supplier<Rotation2d> desiredRotation) {
+            Supplier<Rotation2d> desiredRotation,
+            PIDController thetaController) {
         m_heading = heading;
         m_speedLimits = speedLimits;
         m_timer = timer;
         m_desiredRotation = desiredRotation;
+        m_thetaController = thetaController;
         m_latch = new HeadingLatch();
     }
 
@@ -64,6 +68,7 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
         if (latchedPov == null) {
             // we're not in snap mode, so it's pure manual
             m_currentDesiredRotation = null;
+            t.log(Level.DEBUG, "/DriveWithHeading/mode", "free");
             return DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
         }
 
@@ -80,11 +85,18 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
         // the snap overrides the user input for omega.
-        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, m_ref.getV());
+        double thetaFF = m_ref.getV();
+
+        Rotation2d currentRotation = currentPose.getRotation();
+
+        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_ref.getX());
+
+        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, thetaFF + thetaFB);
 
         double headingMeasurement = currentPose.getRotation().getRadians();
         double headingRate = m_heading.getHeadingRateNWU();
 
+        t.log(Level.DEBUG, "/DriveWithHeading/mode", "snap");
         t.log(Level.DEBUG, "/DriveWithHeading/refX", m_ref.getX());
         t.log(Level.DEBUG, "/DriveWithHeading/refV", m_ref.getV());
         t.log(Level.DEBUG, "/DriveWithHeading/measurementX", headingMeasurement);

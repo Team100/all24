@@ -49,6 +49,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.DrawCircle;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -222,6 +223,9 @@ public class RobotContainer implements Testable {
                             m_drive,
                             speedLimits));
         } else {
+            // TODO: use the same controllers as HolonomicDriveController3
+            PIDController thetaController = new PIDController(3.5,0,0);
+            thetaController.enableContinuousInput(-Math.PI,Math.PI);
             m_drive.setDefaultCommand(
                     new DriveWithHeading(
                             control::twist,
@@ -229,7 +233,8 @@ public class RobotContainer implements Testable {
                             m_heading,
                             speedLimits,
                             new Timer(),
-                            control::desiredRotation));
+                            control::desiredRotation,
+                            thetaController));
         }
 
         /////////////////////////////////

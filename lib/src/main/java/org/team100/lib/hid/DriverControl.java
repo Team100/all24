@@ -28,8 +28,7 @@ public interface DriverControl {
     }
 
     default Rotation2d desiredRotation() {
-        // TODO: i think this should be null.
-        return GeometryUtil.kRotationZero;
+        return null;
     }
 
     default Trigger resetPose() {

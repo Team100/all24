@@ -20,10 +20,22 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "window": {
           "visible": true
         }
+      }
+    }
+  },
+  "NetworkTables": {
+    "retained": {
+      "DriveWithHeading": {
+        "open": true
       }
     }
   }
