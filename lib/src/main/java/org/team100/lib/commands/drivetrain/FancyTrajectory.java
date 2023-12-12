@@ -25,6 +25,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Follow a fixed trajectory, using the new 254-derived trajectory and follower types.
+ * 
+ * This is an experiment.
+ */
 public class FancyTrajectory extends Command {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;

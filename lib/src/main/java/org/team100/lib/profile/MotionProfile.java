@@ -4,6 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A one-dimensional motion profile.
+ * 
+ * Consists of a list of motion segments.
+ */
 public class MotionProfile {
     private final List<MotionSegment> segments;
 

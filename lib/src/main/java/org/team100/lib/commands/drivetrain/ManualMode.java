@@ -7,6 +7,9 @@ import org.team100.lib.telemetry.NamedChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * Modes for manual drivetrain control.
+ */
 public class ManualMode implements Supplier<ManualMode.Mode> {
     public enum Mode {
         /** Control module speed and direction directly */

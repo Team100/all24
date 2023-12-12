@@ -14,8 +14,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Turn clockwise in place. This exists to explore the response of the theta
- * controller.
+ * Turn clockwise in place.
+ * 
+ * Maximum turn rate and acceleration can be configured.
+ * 
+ * This exists to explore the response of the theta controller.
  */
 public class Spin extends Command {
 

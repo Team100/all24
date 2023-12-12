@@ -13,7 +13,9 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Follow a trajectory */
+/**
+ * Follow a trajectory.
+ */
 public class TrajectoryCommand extends Command {
     private final Telemetry t = Telemetry.get();
     private final Trajectory m_trajectory;

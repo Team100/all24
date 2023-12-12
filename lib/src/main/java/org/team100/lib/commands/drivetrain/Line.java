@@ -12,9 +12,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Utility class to produce trajectories.
+ */
 public class Line {
 
-    public static Command line(Experiments experiments, Pose2d goal, SwerveDriveSubsystem drivetrain, TrajectoryConfig config) {
+    /**
+     * A command to follow a straight line from the current pose to the goal pose.
+     */
+    public static Command line(Experiments experiments, Pose2d goal, SwerveDriveSubsystem drivetrain,
+            TrajectoryConfig config) {
         StraightLineTrajectory maker = new StraightLineTrajectory(experiments, config);
         Identity identity = Identity.get();
         DriveControllers controllers = new DriveControllersFactory().get(identity);

@@ -7,6 +7,12 @@ import org.team100.lib.motion.simple.SimpleSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Manual control of a single degree of freedom.
+ * 
+ * Three modes are provided: duty-cycle, closed-loop velocity, and closed-loop
+ * position.
+ */
 public class SimpleManual extends Command {
     public static class Config {
         public double maxDutyCycle = 0.5;

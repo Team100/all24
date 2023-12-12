@@ -15,6 +15,15 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Drive from the current state to a field-relative goal.
+ * 
+ * The trajectory is supplied; the supplier is free to ignore the current state.
+ * 
+ * Steering is aligned to prevent startup errors, but this isn't working right yet.
+ * 
+ * TODO: fix it and/or hide it behind an experiment.
+ */
 public class DriveToWaypoint3 extends Command {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;

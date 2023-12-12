@@ -21,15 +21,27 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Uses a Sendable Chooser */
+/**
+ * Manual drivetrain control.
+ * 
+ * Provides four manual control modes:
+ * 
+ * -- raw module state
+ * -- robot-relative
+ * -- field-relative
+ * -- field-relative with rotation control
+ * 
+ * Use the mode supplier to choose which mode to use, e.g. using a Sendable
+ * Chooser.
+ */
 public class DriveManually extends Command {
     private final Supplier<ManualMode.Mode> m_mode;
     private final Supplier<Twist2d> m_twistSupplier;
     private final SwerveDriveSubsystemInterface m_drive;
 
-    private final Function<Twist2d, SwerveModuleState[]> m_manualModuleStates;
-    private final Function<Twist2d, ChassisSpeeds> m_manualChassisSpeeds;
-    private final Function<Twist2d, Twist2d> m_manualFieldRelativeSpeeds;
+    private final SimpleManualModuleStates m_manualModuleStates;
+    private final ManualChassisSpeeds m_manualChassisSpeeds;
+    private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
     private final ManualWithHeading m_manualWithHeading;
 
     ManualMode.Mode currentManualMode = null;
@@ -46,7 +58,6 @@ public class DriveManually extends Command {
         m_mode = mode;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
-        // m_manualModuleStates = new ManualModuleStates(twistSupplier, speedLimits);
         m_manualModuleStates = new SimpleManualModuleStates(speedLimits);
         m_manualChassisSpeeds = new ManualChassisSpeeds(speedLimits);
         m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(speedLimits);

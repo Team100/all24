@@ -7,7 +7,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * 
  * Includes position, velocity, acceleration, and jerk.
  * 
- * All units are meters and seconds
+ * All units are meters and seconds.
  */
 public class MotionState {
     private final double x;

@@ -1,5 +1,10 @@
 package org.team100.lib.profile;
 
+/**
+ * A segment of a one-dimensional motion profile.
+ * 
+ * Consists of a MotionState and a duration.
+ */
 public class MotionSegment {
     private final MotionState start;
     private final double dt;
@@ -31,8 +36,8 @@ public class MotionSegment {
 
     /**
      * Returns a reversed version of the segment. Note: it isn't possible to reverse
-     * a segment completely so this
-     * method only guarantees that the start and end velocities will be swapped.
+     * a segment completely so this method only guarantees that the start and end
+     * velocities will be swapped.
      */
     MotionSegment reversed() {
         MotionState end = end();

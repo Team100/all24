@@ -17,9 +17,18 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Drive to a pose relative to the current pose.
+ * 
+ * Uses three independent MotionProfiles: the resulting path will not generally
+ * be exactly a straight line, but it will be pretty close.
+ * 
+ * TODO: perhaps the relative pose should be a Transform2d instead.
+ */
 public class DriveToRelative extends Command {
     private final Pose2d relative;
     private final SwerveDriveSubsystemInterface m_robotDrive;
+    // TODO: inject the speed limits
     private final SpeedLimits speedLimits = new SpeedLimits(5, 2, 2, 2);
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
@@ -33,8 +42,10 @@ public class DriveToRelative extends Command {
         m_timer = new Timer();
         Identity identity = Identity.get();
 
+        // TODO: inject the factory
         DriveControllers controllers = new DriveControllersFactory().get(identity);
 
+        // TODO: inject the controller
         m_controller = new HolonomicDriveController3(controllers);
         m_controller.setTolerance(0.1, 0.1, 0.1, 0.1);
     }

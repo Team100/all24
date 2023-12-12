@@ -6,7 +6,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Set the rotation of the robot pose to the specified rotation. */
+/**
+ * Set the rotation of the robot pose to the specified rotation.
+ * 
+ * This is good for resetting the "zero," in cases where the robot isn't
+ * actually facing zero (e.g. 180)
+ */
 public class SetRotation extends Command {
     private final SwerveDriveSubsystem m_drive;
     private final Rotation2d m_rotation;

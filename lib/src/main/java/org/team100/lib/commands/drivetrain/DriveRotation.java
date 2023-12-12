@@ -4,12 +4,12 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Rotate in place at the specified speed.
+ */
 public class DriveRotation extends Command {
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final Supplier<Double> m_rotSpeed;
@@ -36,10 +36,5 @@ public class DriveRotation extends Command {
     @Override
     public void end(boolean interrupted) {
         m_robotDrive.stop();
-        Translation2d endTranslation2d = new Translation2d(
-                m_robotDrive.getPose().getX(),
-                m_robotDrive.getPose().getY());
-        Pose2d endPose = new Pose2d(endTranslation2d, new Rotation2d(0));
-        m_robotDrive.resetPose(endPose);
     }
 }

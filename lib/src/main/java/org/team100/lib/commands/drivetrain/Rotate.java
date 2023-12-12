@@ -22,8 +22,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Uses a timed profile, which avoids the bad ProfiledPidController behavior of
- * staying behind. Also demonstrates Roadrunner MotionProfiles.
+ * Rotate in place to the specified angle.
+ * 
+ * Uses a MotionProfile with the holonomic drive controller.
  */
 public class Rotate extends Command {
     public static class Config {

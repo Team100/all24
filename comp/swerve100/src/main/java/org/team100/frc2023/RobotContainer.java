@@ -231,7 +231,7 @@ public class RobotContainer implements Testable {
 
         // control.actualCircle().whileTrue(new DriveInACircle(m_drive, -1));
         // control.actualCircle().whileTrue(new Spin(m_drive));
-        control.actualCircle().whileTrue(new Oscillate(m_drive));
+        control.actualCircle().whileTrue(new Oscillate(experiments, m_drive));
 
         ///////////////////////////
         //
