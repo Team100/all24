@@ -13,11 +13,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  * this is the simplest possible direct manual control.
  */
 public class ManualArm extends Command {
-    public static class Config {
-        public double maxDutyCycle = 0.5;
-    }
+    private static final double kMaxDutyCycle = 0.5;
 
-    private final Config m_config = new Config();
     private final ArmSubsystem m_arm;
     private final DoubleSupplier m_v1;
     private final DoubleSupplier m_v2;
@@ -31,9 +28,7 @@ public class ManualArm extends Command {
 
     @Override
     public void execute() {
-        m_arm.set(
-                m_config.maxDutyCycle * m_v1.getAsDouble(),
-                m_config.maxDutyCycle * m_v2.getAsDouble());
+        m_arm.set(kMaxDutyCycle * m_v1.getAsDouble(), kMaxDutyCycle * m_v2.getAsDouble());
     }
 
     @Override

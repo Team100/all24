@@ -35,6 +35,7 @@ public class TrajectoryCommand extends Command {
 
     @Override
     public void initialize() {
+        m_controller.reset();
         m_timer.stop();
         m_timer.reset();
         m_timer.start();

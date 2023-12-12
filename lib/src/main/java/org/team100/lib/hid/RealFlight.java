@@ -38,12 +38,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Right switch is slow speed.
  */
 public class RealFlight implements DriverControl {
-    public static class Config {
-        public double kDeadband = 0.02;
-        public double kExpo = 0.5;
-    }
-
-    private final Config m_config = new Config();
+    private static final double kDeadband = 0.02;
+    private static final double kExpo = 0.5;
 
     private final CommandGenericHID hid;
 
@@ -57,12 +53,9 @@ public class RealFlight implements DriverControl {
     }
 
     public Twist2d twist() {
-        double dx = expo(deadband(-1.0 * clamp(scaled(0), 1), m_config.kDeadband, 1),
-                m_config.kExpo);
-        double dy = expo(deadband(-1.0 * clamp(scaled(1), 1), m_config.kDeadband, 1),
-                m_config.kExpo);
-        double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), m_config.kDeadband,
-                1), m_config.kExpo);
+        double dx = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
+        double dy = expo(deadband(-1.0 * clamp(scaled(1), 1), kDeadband, 1), kExpo);
+        double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
         return clampTwist(new Twist2d(dx, dy, dtheta), 1.0);
     }
 
@@ -92,9 +85,11 @@ public class RealFlight implements DriverControl {
     @Override
     public Speed speed() {
         // left
-        if (hid.getHID().getRawButton(2)) return Speed.SLOW;
+        if (hid.getHID().getRawButton(2))
+            return Speed.SLOW;
         // right
-        if (hid.getHID().getRawButton(3)) return Speed.MEDIUM;
+        if (hid.getHID().getRawButton(3))
+            return Speed.MEDIUM;
         return Speed.NORMAL;
     }
 

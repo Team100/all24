@@ -34,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Extracts robot pose estimates from camera input.
  */
 public class VisionDataProvider extends SubsystemBase implements TableEventListener {
-    public static class Config {
         /**
          * If the tag is closer than this threshold, then the camera's estimate of tag
          * rotation might be more accurate than the gyro, so we use the camera's
@@ -47,11 +46,8 @@ public class VisionDataProvider extends SubsystemBase implements TableEventListe
          * Set this to some large number (e.g. 100) to disable gyro-derived rotation and
          * always use the camera.
          */
-        public double kTagRotationBeliefThresholdMeters = 0.5;
-    }
-
-    private final Config m_config = new Config();
-
+    private static final double kTagRotationBeliefThresholdMeters = 0.5;
+    
     private final Telemetry t = Telemetry.get();
 
     private final Supplier<Pose2d> poseSupplier;
@@ -127,7 +123,7 @@ public class VisionDataProvider extends SubsystemBase implements TableEventListe
                     tagInFieldCordsOptional.get(),
                     blip,
                     robotRotationInFieldCoordsFromGyro,
-                    m_config.kTagRotationBeliefThresholdMeters);
+                    kTagRotationBeliefThresholdMeters);
 
             Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
 

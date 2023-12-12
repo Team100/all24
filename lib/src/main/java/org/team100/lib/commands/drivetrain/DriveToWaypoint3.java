@@ -60,6 +60,7 @@ public class DriveToWaypoint3 extends Command {
 
     @Override
     public void initialize() {
+        m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
         System.out.println(m_trajectory);
         m_timer.stop();

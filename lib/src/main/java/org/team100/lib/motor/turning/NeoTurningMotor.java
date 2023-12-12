@@ -10,12 +10,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController;
 
 public class NeoTurningMotor implements Motor100<Angle> {
-    public static class Config {
-        public int kCurrentLimit = 40;
-        public double kMotorGearing = 1;
-    }
+    private static final int kCurrentLimit = 40;
+    private static final double kMotorGearing = 1;
 
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
 
     private final SparkMaxPIDController m_pidController;
@@ -25,7 +22,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public NeoTurningMotor(String name, int canId) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.setInverted(true);
-        m_motor.setSmartCurrentLimit(m_config.kCurrentLimit);
+        m_motor.setSmartCurrentLimit(kCurrentLimit);
         m_pidController = m_motor.getPIDController();
         m_pidController.setPositionPIDWrappingEnabled(true);
         m_pidController.setP(.1);
@@ -58,7 +55,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
 
     public void setVelocity(double outputRadiansPerSec, double Accel) {
         t.log(Level.DEBUG, m_name + "/Output", outputRadiansPerSec);
-        m_pidController.setReference(m_config.kMotorGearing * outputRadiansPerSec, CANSparkMax.ControlType.kVelocity);
+        m_pidController.setReference(kMotorGearing * outputRadiansPerSec, CANSparkMax.ControlType.kVelocity);
         throw new UnsupportedOperationException("NEO closed loop velocity control is uncalibrated.");
     }
 }

@@ -13,14 +13,11 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ArmSubsystem extends SubsystemBase {
-    public static class Config {
-        public double filterTimeConstantS = 0.06;
-        public double filterPeriodS = 0.02;
-        public double lowerEncoderZero = 0.861614;
-        public double upperEncoderZero = 0.266396;
-    }
+    private static final double kFilterTimeConstantS = 0.06;
+    private static final double kFilterPeriodS = 0.02;
+    private static final double kLowerEncoderZero = 0.861614;
+    private static final double kUpperEncoderZero = 0.266396;
 
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
@@ -36,8 +33,8 @@ public class ArmSubsystem extends SubsystemBase {
     private ArmAngles m_previousPosition;
 
     public ArmSubsystem() {
-        m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(m_config.filterTimeConstantS, m_config.filterPeriodS);
-        m_upperMeasurementFilter = LinearFilter.singlePoleIIR(m_config.filterTimeConstantS, m_config.filterPeriodS);
+        m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
+        m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
 
         m_lowerArmMotor = new CANSparkMax(4, MotorType.kBrushless);
         m_lowerArmMotor.restoreFactoryDefaults();
@@ -102,13 +99,13 @@ public class ArmSubsystem extends SubsystemBase {
 
     /** Lower arm angle (radians), 0 up, positive forward. */
     private double getLowerArmAngleRadians() {
-        double x = (m_lowerArmEncoder.getAbsolutePosition() - m_config.lowerEncoderZero) * 360;
+        double x = (m_lowerArmEncoder.getAbsolutePosition() - kLowerEncoderZero) * 360;
         return (-1.0 * x) * Math.PI / 180;
     }
 
     /** Upper arm angle (radians), 0 up, positive forward. */
     private double getUpperArmAngleRadians() {
-        double x = (m_upperArmEncoder.getAbsolutePosition() - m_config.upperEncoderZero) * 360;
+        double x = (m_upperArmEncoder.getAbsolutePosition() - kUpperEncoderZero) * 360;
         return x * Math.PI / 180;
     }
 

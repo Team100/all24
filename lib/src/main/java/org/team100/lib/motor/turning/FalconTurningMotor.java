@@ -17,12 +17,8 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 public class FalconTurningMotor implements Motor100<Angle> {
     private static final double ticksPerRevolution = 2048;
     private static final double gearRatio = 10.29;
+    private static final double kCurrentLimit = 40;
 
-    public static class Config {
-        public int kCurrentLimit = 40;
-    }
-
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
     private final WPI_TalonFX m_motor;
     private final String m_name;
@@ -34,9 +30,9 @@ public class FalconTurningMotor implements Motor100<Angle> {
         m_motor.setNeutralMode(NeutralMode.Brake);
         m_motor.setInverted(InvertType.InvertMotorOutput);
         m_motor.configStatorCurrentLimit(
-                new StatorCurrentLimitConfiguration(true, m_config.kCurrentLimit, m_config.kCurrentLimit, 0));
+                new StatorCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
         m_motor.configSupplyCurrentLimit(
-                new SupplyCurrentLimitConfiguration(true, m_config.kCurrentLimit, m_config.kCurrentLimit, 0));
+                new SupplyCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
         m_motor.configNominalOutputForward(0);
         m_motor.configNominalOutputReverse(0);
         m_motor.config_kF(0, 0);

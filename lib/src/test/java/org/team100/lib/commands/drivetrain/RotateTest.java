@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -25,6 +26,8 @@ class RotateTest {
         MockHeading heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
         double targetAngle = Math.PI / 2;
+
+
         Rotate rotate = new Rotate(
                 swerveDriveSubsystem,
                 heading,
@@ -46,14 +49,14 @@ class RotateTest {
 
         SimHooks.stepTiming(1);
         rotate.execute();
-        assertEquals(0.5, rotate.refTheta.getX(), kDelta);
-        assertEquals(2.75, swerveDriveSubsystem.twist.dtheta, kDelta);
+        assertEquals(0.5, rotate.refTheta.getX(), 0.01);
+        assertEquals(2.51, swerveDriveSubsystem.twist.dtheta, 0.01);
 
         SimHooks.stepTiming(1);
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(1));
         rotate.execute();
         assertEquals(1.408, rotate.refTheta.getX(), kDelta);
-        assertEquals(1.998, swerveDriveSubsystem.twist.dtheta, kDelta);
+        assertEquals(1.813, swerveDriveSubsystem.twist.dtheta, kDelta);
 
         SimHooks.stepTiming(1);
         swerveDriveSubsystem.pose = new Pose2d(0, 0, new Rotation2d(Math.PI));

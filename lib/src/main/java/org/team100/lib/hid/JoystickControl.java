@@ -21,12 +21,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Command buttons are not implemented.
  */
 public class JoystickControl implements DriverControl {
-    public static class Config {
-        public double kDeadband = 0.02;
-        public double kExpo = 0.5;
-    }
+    private static final double kDeadband = 0.02;
+    private static final double kExpo = 0.5;
 
-    private final Config m_config = new Config();
     private final CommandJoystick m_controller;
     private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
@@ -51,8 +48,8 @@ public class JoystickControl implements DriverControl {
 
     @Override
     public Trigger resetRotation0() {
-       // return button(2);
-       return new Trigger(() -> false);
+        // return button(2);
+        return new Trigger(() -> false);
     }
 
     @Override
@@ -67,15 +64,9 @@ public class JoystickControl implements DriverControl {
 
     @Override
     public Twist2d twist() {
-        double dx = expo(
-                deadband(-1.0 * clamp(m_controller.getY(), 1), m_config.kDeadband, 1),
-                m_config.kExpo);
-        double dy = expo(
-                deadband(-1.0 * clamp(m_controller.getX(), 1), m_config.kDeadband, 1),
-                m_config.kExpo);
-        double dtheta = expo(
-                deadband(-1.0 * clamp(m_controller.getTwist(), 1), m_config.kDeadband, 1),
-                m_config.kExpo);
+        double dx = expo(deadband(-1.0 * clamp(m_controller.getY(), 1), kDeadband, 1), kExpo);
+        double dy = expo(deadband(-1.0 * clamp(m_controller.getX(), 1), kDeadband, 1), kExpo);
+        double dtheta = expo(deadband(-1.0 * clamp(m_controller.getTwist(), 1), kDeadband, 1), kExpo);
         return new Twist2d(dx, dy, dtheta);
     }
 

@@ -16,11 +16,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  * this is direct manual control using inverse kinematics.
  */
 public class CartesianManualArm extends Command {
-    public static class Config {
-        public double maxDutyCycle = 0.5;
-    }
+    private static final double kMaxDutyCycle = 0.5;
 
-    private final Config m_config = new Config();
     private final ArmSubsystem m_arm;
     private final ArmKinematics m_kinematics;
     private final DoubleSupplier m_dx;
@@ -44,9 +41,7 @@ public class CartesianManualArm extends Command {
         Translation2d cartesianVelocity = new Translation2d(m_dx.getAsDouble(), m_dy.getAsDouble());
         ArmAngles position = m_arm.getPosition();
         ArmAngles jointVelocity = m_kinematics.inverseVel(position, cartesianVelocity);
-        m_arm.set(
-                m_config.maxDutyCycle * jointVelocity.th1,
-                m_config.maxDutyCycle * jointVelocity.th2);
+        m_arm.set(kMaxDutyCycle * jointVelocity.th1, kMaxDutyCycle * jointVelocity.th2);
     }
 
     @Override

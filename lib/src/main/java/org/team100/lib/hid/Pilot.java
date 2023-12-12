@@ -21,12 +21,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Command buttons are not implemented.
  */
 public class Pilot implements DriverControl {
-    public static class Config {
-        public double kDeadband = 0.02;
-        public double kExpo = 0.5;
-    }
+    private static final double kDeadband = 0.02;
+    private static final double kExpo = 0.5;
 
-    private final Config m_config = new Config();
     private final CommandGenericHID m_controller;
     private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
@@ -51,8 +48,8 @@ public class Pilot implements DriverControl {
 
     @Override
     public Twist2d twist() {
-        double dx = expo(deadband(-1.0 * clamp(axis(1), 1), m_config.kDeadband, 1), m_config.kExpo);
-        double dy = expo(deadband(-1.0 * clamp(axis(0), 1), m_config.kDeadband, 1), m_config.kExpo);
+        double dx = expo(deadband(-1.0 * clamp(axis(1), 1), kDeadband, 1), kExpo);
+        double dy = expo(deadband(-1.0 * clamp(axis(0), 1), kDeadband, 1), kExpo);
         double dtheta = 0; // there is no rotational velocity control.
         return new Twist2d(dx, dy, dtheta);
     }

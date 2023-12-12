@@ -14,13 +14,10 @@ import edu.wpi.first.wpilibj2.command.Command;
  * position.
  */
 public class SimpleManual extends Command {
-    public static class Config {
-        public double maxDutyCycle = 0.5;
-        public double maxVelocity = 1;
-        public double maxPosition = 1;
-    }
+    private static final double kMaxDutyCycle = 0.5;
+    private static final double kMaxVelocity = 1;
+    private static final double kMaxPosition = 1;
 
-    private final Config m_config = new Config();
     private final Supplier<SimpleManualMode.Mode> m_mode;
     private final SimpleSubsystem m_simple;
     private final DoubleSupplier m_input;
@@ -43,13 +40,13 @@ public class SimpleManual extends Command {
         }
         switch (manualMode) {
             case DUTY_CYCLE:
-                m_simple.setDutyCycle(m_config.maxDutyCycle * m_input.getAsDouble());
+                m_simple.setDutyCycle(kMaxDutyCycle * m_input.getAsDouble());
                 break;
             case VELOCITY:
-                m_simple.setVelocity(m_config.maxDutyCycle * m_input.getAsDouble());
+                m_simple.setVelocity(kMaxVelocity * m_input.getAsDouble());
                 break;
             case POSITION:
-                m_simple.setPosition(m_config.maxPosition * m_input.getAsDouble());
+                m_simple.setPosition(kMaxPosition * m_input.getAsDouble());
                 break;
             default:
                 System.out.println("invalid manual mode: " + manualMode.name());

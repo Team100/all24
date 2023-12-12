@@ -14,11 +14,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 /** Positional control on top of a velocity servo. */
 public class PositionServo<T> {
-    public static class Config {
-        public double kDeadband = 0.03;
-    }
-
-    private final Config m_config = new Config();
+    private static final double kDeadband = 0.03;
+    
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
@@ -95,7 +92,7 @@ public class PositionServo<T> {
         double u_FF = m_setpoint.velocity;
         double u_TOTAL = u_FB + u_FF;
         // TODO: should there be a deadband here?
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, m_maxVel);
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, m_maxVel);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 

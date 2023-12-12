@@ -10,19 +10,19 @@
       "style": "0",
       "userScale": "1",
       "width": "853",
-      "xpos": "92",
-      "ypos": "105"
+      "xpos": "187",
+      "ypos": "200"
     }
   },
   "Window": {
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
-      "Pos": "60,60",
+      "Pos": "87,43",
       "Size": "146,42"
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "316,58",
+      "Pos": "294,19",
       "Size": "266,133"
     },
     "###FMS": {
@@ -39,6 +39,11 @@
       "Collapsed": "0",
       "Pos": "166,184",
       "Size": "500,123"
+    },
+    "###Other Devices": {
+      "Collapsed": "0",
+      "Pos": "683,13",
+      "Size": "166,463"
     },
     "###System Joysticks": {
       "Collapsed": "0",

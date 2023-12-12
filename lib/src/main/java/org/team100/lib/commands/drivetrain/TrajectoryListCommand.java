@@ -51,6 +51,7 @@ public class TrajectoryListCommand extends Command {
 
     @Override
     public void initialize() {
+        m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_rotation = currentPose.getRotation();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();

@@ -1,8 +1,5 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -27,12 +24,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Uses a MotionProfile with the holonomic drive controller.
  */
 public class Rotate extends Command {
-    public static class Config {
-        public double xToleranceRad = 0.003;
-        public double vToleranceRad_S = 0.003;
-    }
+    private static final double kXToleranceRad = 0.003;
+    private static final  double kVToleranceRad_S = 0.003;
 
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final HeadingInterface m_heading;
@@ -50,18 +44,13 @@ public class Rotate extends Command {
             SpeedLimits speedLimits,
             double targetAngleRadians) {
         m_robotDrive = drivetrain;
+        // since we specify a different tolerance, use a new controller.
+        m_controller = HolonomicDriveController3.withTolerance(0.1, 0.1, kXToleranceRad, kVToleranceRad_S);
         m_heading = heading;
         m_speedLimits = speedLimits;
         m_timer = new Timer();
         m_goalState = new MotionState(targetAngleRadians, 0);
         refTheta = new MotionState(0, 0);
-
-        Identity identity = Identity.get();
-
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-
-        m_controller = new HolonomicDriveController3(controllers);
-        m_controller.setTolerance(m_config.xToleranceRad, 0.1, m_config.vToleranceRad_S, 0.1);
 
         if (drivetrain.get() != null)
             addRequirements(drivetrain.get());
@@ -69,6 +58,7 @@ public class Rotate extends Command {
 
     @Override
     public void initialize() {
+        m_controller.reset();
         ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
         MotionState start = new MotionState(m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
