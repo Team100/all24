@@ -85,4 +85,10 @@ public interface DriverControl {
     default Trigger actualCircle() {
         return new Trigger(()->false);
     }
+
+    // this exists to bind to commands we don't want to run,
+    // but we don't want them to rot either.
+    default Trigger never() {
+        return new Trigger(()->false);
+    }
 }

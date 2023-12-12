@@ -6,6 +6,11 @@ import org.team100.lib.motion.arm.ArmSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
+/**
+ * Sequence of arm trajectories.
+ * 
+ * These paint a square in cartesian space.
+ */
 public class Sequence extends SequentialCommandGroup {
 
     public Sequence(ArmSubsystem armSubsystem, ArmKinematics armKinematicsM) {

@@ -1,8 +1,5 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
@@ -14,8 +11,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Turn clockwise in place. This exists to explore the response of the theta
- * controller.
+ * Turn clockwise in place.
+ * 
+ * Maximum turn rate and acceleration can be configured.
+ * 
+ * This exists to explore the response of the theta controller.
  */
 public class Spin extends Command {
 
@@ -31,19 +31,16 @@ public class Spin extends Command {
     private double m_speedRad_S;
     private double m_angleRad;
 
-    public Spin(SwerveDriveSubsystemInterface swerve) {
+    public Spin(SwerveDriveSubsystemInterface swerve, HolonomicDriveController3 controller) {
         m_swerve = swerve;
-        // TODO: inject the controller instead
-        Identity identity = Identity.get();
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-        m_controller = new HolonomicDriveController3(controllers);
-
+        m_controller = controller;
         if (m_swerve.get() != null)
             addRequirements(m_swerve.get());
     }
 
     @Override
     public void initialize() {
+        m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_center = currentPose.getTranslation();
         m_initialRotation = currentPose.getRotation().getRadians();

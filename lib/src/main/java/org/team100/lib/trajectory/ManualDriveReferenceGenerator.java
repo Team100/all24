@@ -6,9 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 public class ManualDriveReferenceGenerator implements ReferenceGenerator<Pose2d> {
-    public static class Config {
-        public double scale;
-    }
+    private static final double kScale = 1;
 
     public static class ManualSample implements ReferenceGenerator.Sample<Pose2d> {
         private final Pose2d m_measurement;
@@ -31,7 +29,6 @@ public class ManualDriveReferenceGenerator implements ReferenceGenerator<Pose2d>
 
     }
 
-    private final Config m_config = new Config();
     private final Supplier<Pose2d> m_measurements;
     private final Supplier<Twist2d> m_twister;
 
@@ -49,7 +46,7 @@ public class ManualDriveReferenceGenerator implements ReferenceGenerator<Pose2d>
     }
 
     private Twist2d scale(Twist2d input) {
-        return new Twist2d(m_config.scale * input.dx, m_config.scale * input.dy, m_config.scale * input.dtheta);
+        return new Twist2d(kScale * input.dx, kScale * input.dy, kScale * input.dtheta);
     }
 
 }

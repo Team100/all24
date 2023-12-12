@@ -1,6 +1,7 @@
 package org.team100.frc2023;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -11,9 +12,12 @@ import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
+import org.team100.lib.commands.drivetrain.Spin;
+import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.ControlFactory;
@@ -43,6 +47,7 @@ import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.DrawCircle;
+import org.team100.lib.trajectory.TrajectoryMaker;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -50,29 +55,24 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer implements Testable {
-    public static class Config {
 
-        //////////////////////////////////////
-        // SHOW MODE
-        //
-        // Show mode is for younger drivers to drive the robot slowly.
-        //
-        // TODO: make a physical show mode switch.
-        // TODO: make way more noticable.
-        public boolean SHOW_MODE = false;
-        //
-        //////////////////////////////////////
+    //////////////////////////////////////
+    // SHOW MODE
+    //
+    // Show mode is for younger drivers to drive the robot slowly.
+    //
+    // TODO: make a physical show mode switch.
+    // TODO: make way more noticable.
+    private static final boolean SHOW_MODE = false;
+    //
+    //////////////////////////////////////
 
-        public double kDriveCurrentLimit = 30;
-        // public double kDriveCurrentLimit = SHOW_MODE ? 20 : 60;
-    }
-
-    private final Config m_config = new Config();
+    private static final double kDriveCurrentLimit = 30;
+    // public double kDriveCurrentLimit = SHOW_MODE ? 20 : 60;
 
     private final Telemetry t = Telemetry.get();
 
@@ -111,21 +111,17 @@ public class RobotContainer implements Testable {
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
         Identity identity = Identity.get();
-        // override the correct identity for testing.
-        // Identity identity = Identity.COMP_BOT;
 
         m_kinematics = SwerveDriveKinematicsFactory.get(identity);
         Experiments experiments = new Experiments(identity);
 
-        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, m_config.kDriveCurrentLimit);
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, kDriveCurrentLimit);
         m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
-        // RedundantGyroInterface ahrsclass = new RedundantGyro.Factory(identity).get();
-        // m_heading = new Heading(ahrsclass);
         m_heading = HeadingFactory.get(identity, m_kinematics, m_modules);
         m_field = new Field2d();
 
-        SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, m_config.SHOW_MODE);
+        SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, SHOW_MODE);
 
         // TODO replace with SpeedLimits.
         // TODO: fix these limits
@@ -200,38 +196,49 @@ public class RobotContainer implements Testable {
         // slow/medium mode are now modifiers in SwerveDriveSubsystem.
         // SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
         // control.driveSlow().whileTrue(
-        //         new DriveManually(manualMode,
-        //                 control::twist,
-        //                 m_drive,
-        //                 m_heading,
-        //                 slow,
-        //                 new Timer(),
-        //                 control::desiredRotation,
-        //                 thetaController));
+        // new DriveManually(manualMode,
+        // control::twist,
+        // m_drive,
+        // m_heading,
+        // slow,
+        // control::desiredRotation,
+        // thetaController));
         // SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
         // control.driveMedium().whileTrue(
-        //         new DriveManually(manualMode,
-        //                 control::twist,
-        //                 m_drive,
-        //                 m_heading,
-        //                 medium,
-        //                 new Timer(),
-        //                 control::desiredRotation,
-        //                 thetaController));
+        // new DriveManually(manualMode,
+        // control::twist,
+        // m_drive,
+        // m_heading,
+        // medium,
+        // control::desiredRotation,
+        // thetaController));
 
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
-        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
 
-        m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics);
+        HolonomicDriveController3 controller = new HolonomicDriveController3();
+
+        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, 0));
+
+        m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics, controller);
         control.circle().whileTrue(m_drawCircle);
 
         control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
 
-        // control.actualCircle().whileTrue(new DriveInACircle(m_drive, -1));
-        // control.actualCircle().whileTrue(new Spin(m_drive));
-        control.actualCircle().whileTrue(new Oscillate(m_drive));
+        control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
+        control.never().whileTrue(new Spin(m_drive, controller));
+        control.never().whileTrue(new Oscillate(experiments, m_drive));
+
+        // make a one-meter line
+        control.never().whileTrue(
+                new TrajectoryListCommand(m_drive, controller,
+                        x -> List.of(TrajectoryMaker.line(m_kinematics, x))));
+
+        // make a one-meter square
+        control.actualCircle().whileTrue(
+                new TrajectoryListCommand(m_drive, controller,
+                        x -> TrajectoryMaker.square(m_kinematics, x)));
 
         ///////////////////////////
         //
@@ -247,7 +254,6 @@ public class RobotContainer implements Testable {
                         m_drive,
                         m_heading,
                         speedLimits,
-                        new Timer(),
                         control::desiredRotation,
                         thetaController));
 
@@ -258,7 +264,6 @@ public class RobotContainer implements Testable {
         // m_drive,
         // m_heading,
         // speedLimits,
-        // new Timer(),
         // control::desiredRotation,
         // thetaController));
         // }

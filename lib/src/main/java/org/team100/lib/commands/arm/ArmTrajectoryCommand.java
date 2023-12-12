@@ -15,23 +15,26 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Trajectory follower for the two-jointed arm.
+ * 
+ * Sample a straight-line trajectory in cartesian coordinates, transform
+ * position, velocity and acceleration to joint space, and follow with velocity
+ * feedforward and positional feedback, both using constant parameters (i.e. no
+ * gravity feedforward, no inertia-dependent feedback).
+ */
 public class ArmTrajectoryCommand extends Command {
+    private static final double kLowerP = 2;
+    private static final double kLowerI = 0;
+    private static final double kLowerD = 0.1;
+    private static final double kUpperP = 2;
+    private static final double kUpperI = 0;
+    private static final double kUpperD = 0.05;
+    private static final double kTolerance = 0.02;
+    private static final TrajectoryConfig kConf = new TrajectoryConfig(1, 1);
+    private static final double kA = 0.2;
+    private static final double kRotsPerSecToVoltsPerSec = 4;
 
-    public static class Config {
-        public double filterTimeConstantS = 0.06;
-        public double filterPeriodS = 0.02;
-        public double normalLowerP = 2;
-        public double normalLowerI = 0;
-        public double normalLowerD = 0.1;
-        public double normalUpperP = 2;
-        public double normalUpperI = 0;
-        public double normalUpperD = 0.05;
-        public double tolerance = 0.02;
-        public TrajectoryConfig normalConf = new TrajectoryConfig(1, 1);
-        public double kA = 0.2;
-    }
-
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
 
     private final ArmSubsystem m_armSubsystem;
@@ -59,17 +62,17 @@ public class ArmTrajectoryCommand extends Command {
         m_goalAngles = m_armKinematicsM.inverse(m_goal);
         m_timer = new Timer();
 
-        m_lowerPosController = new PIDController(m_config.normalLowerP, m_config.normalLowerI, m_config.normalLowerD);
-        m_upperPosController = new PIDController(m_config.normalUpperP, m_config.normalUpperI, m_config.normalUpperD);
+        m_lowerPosController = new PIDController(kLowerP, kLowerI, kLowerD);
+        m_upperPosController = new PIDController(kUpperP, kUpperI, kUpperD);
         m_lowerVelController = new PIDController(0.1, 0, 0);
         m_upperVelController = new PIDController(0.1, 0, 0);
 
         m_lowerPosController.setIntegratorRange(1, 1);
         m_upperPosController.setIntegratorRange(1, 1);
-        m_lowerPosController.setTolerance(m_config.tolerance);
-        m_upperPosController.setTolerance(m_config.tolerance);
+        m_lowerPosController.setTolerance(kTolerance);
+        m_upperPosController.setTolerance(kTolerance);
 
-        m_trajectories = new ArmTrajectories(m_config.normalConf);
+        m_trajectories = new ArmTrajectories(kConf);
 
         addRequirements(m_armSubsystem);
     }
@@ -86,9 +89,6 @@ public class ArmTrajectoryCommand extends Command {
         if (m_trajectory == null)
             return;
 
-        ArmAngles measurement = m_armSubsystem.getPosition();
-        double currentUpper = measurement.th2;
-        double currentLower = measurement.th1;
         double curTime = m_timer.get();
         State desiredState = m_trajectory.sample(curTime);
         double desiredXPos = desiredState.poseMeters.getX();
@@ -100,29 +100,39 @@ public class ArmTrajectoryCommand extends Command {
         }
         double theta = desiredState.poseMeters.getRotation().getRadians();
         double desiredXVel = desiredVecloity * Math.cos(theta);
+        // TODO: i think Math.sin is what is needed below.
         double desiredYVel = desiredVecloity * Math.cos(Math.PI / 2 - theta);
         double desiredXAccel = desiredAcceleration * Math.cos(theta);
         double desiredYAccel = desiredAcceleration * Math.cos(Math.PI / 2 - theta);
+
         Translation2d XYVelReference = new Translation2d(desiredXVel, desiredYVel);
         Translation2d XYAccelReference = new Translation2d(desiredXAccel, desiredYAccel);
-        XYVelReference = XYVelReference.plus(XYAccelReference.times(m_config.kA));
+        XYVelReference = XYVelReference.plus(XYAccelReference.times(kA));
+
         Translation2d XYPosReference = new Translation2d(desiredXPos, desiredYPos);
         ArmAngles thetaPosReference = m_armKinematicsM.inverse(XYPosReference);
         ArmAngles thetaVelReference = m_armKinematicsM.inverseVel(thetaPosReference, XYVelReference);
+
+        ArmAngles measurement = m_armSubsystem.getPosition();
+        double currentLower = measurement.th1;
+        double currentUpper = measurement.th2;
+
         double lowerPosControllerOutput = m_lowerPosController.calculate(currentLower,
                 thetaPosReference.th1);
         double lowerVelControllerOutput = m_lowerVelController.calculate(m_armSubsystem.getVelocity().th1,
                 thetaVelReference.th1);
-        double rotsPerSecToVoltsPerSec = 4;
-        double lowerFeedForward = thetaVelReference.th1 / (Math.PI * 2) * rotsPerSecToVoltsPerSec;
+        double lowerFeedForward = thetaVelReference.th1 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
         double u1 = lowerFeedForward + lowerPosControllerOutput + lowerVelControllerOutput;
+
         double upperPosControllerOutput = m_upperPosController.calculate(currentUpper,
                 thetaPosReference.th2);
         double upperVelControllerOutput = m_upperVelController.calculate(m_armSubsystem.getVelocity().th2,
                 thetaVelReference.th2);
-        double upperFeedForward = thetaVelReference.th2 / (Math.PI * 2) * rotsPerSecToVoltsPerSec;
+        double upperFeedForward = thetaVelReference.th2 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
         double u2 = upperFeedForward + upperPosControllerOutput + upperVelControllerOutput;
+
         m_armSubsystem.set(u1, u2);
+
         t.log(Level.DEBUG, "/arm_trajectory/Lower FF ", lowerFeedForward);
         t.log(Level.DEBUG, "/arm_trajectory/Lower Controller Output: ", lowerPosControllerOutput);
         t.log(Level.DEBUG, "/arm_trajectory/Upper FF ", upperFeedForward);
@@ -137,8 +147,7 @@ public class ArmTrajectoryCommand extends Command {
     public boolean isFinished() {
         if (m_trajectory == null)
             return true;
-        return Math.abs(getTrajectoryError().th1) < m_config.tolerance
-                && Math.abs(getTrajectoryError().th2) < m_config.tolerance;
+        return Math.abs(getTrajectoryError().th1) < kTolerance && Math.abs(getTrajectoryError().th2) < kTolerance;
     }
 
     @Override

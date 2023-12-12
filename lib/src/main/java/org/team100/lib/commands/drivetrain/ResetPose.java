@@ -7,6 +7,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Set the drivetrain pose to the specified pose.
+ * 
+ * This is useful to reset where "zero" is.
+ */
 public class ResetPose extends Command {
     private final SwerveDriveSubsystem m_robotDrive;
     private final Pose2d m_pose;

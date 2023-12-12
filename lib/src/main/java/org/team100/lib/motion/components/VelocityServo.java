@@ -16,11 +16,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
  * closed-loop velocity control. There's also a PIDF, selected via experiment.
  */
 public class VelocityServo<T> {
-    public static class Config {
-        public double kDeadband = 0.03;
-    }
+    private static final double kDeadband = 0.03;
 
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
@@ -95,7 +92,7 @@ public class VelocityServo<T> {
         double u_FB = m_controller.calculate(getVelocity(), setpoint);
         double u_FF = m_feedforward.calculate(setpoint, accel(setpoint));
         double u_TOTAL = u_FB + u_FF;
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, 1);
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, 1);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
         m_motor.setDutyCycle(u_TOTAL);
         t.log(Level.DEBUG, m_name + "/Controller Output", u_FB);

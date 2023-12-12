@@ -15,21 +15,13 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
- * see
- * https://docs.google.com/document/d/1M89x_IiguQdY0VhQlOjqADMa6SYVp202TTuXZ1Ps280/edit#
+ * This is a Logitech F310 or similar.
  */
 public class DriverXboxControl implements DriverControl {
-    public static class Config {
 
-        public double kDeadband = 0.02;
-        public double kExpo = 0.5;
-
-        // public double kDtSeconds = 0.02;
-        // public double kMaxRotationRateRadiansPerSecond = Math.PI;
-        public double kTriggerThreshold = .5;
-    }
-
-    private final Config m_config = new Config();
+    private static final double kDeadband = 0.02;
+    private static final double kExpo = 0.5;
+    private static final double kTriggerThreshold = .5;
 
     private final Telemetry t = Telemetry.get();
 
@@ -57,9 +49,9 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public Twist2d twist() {
-        double dx = expo(deadband(-1.0 * clamp(m_controller.getRightY(), 1), m_config.kDeadband, 1), m_config.kExpo);
-        double dy = expo(deadband(-1.0 * clamp(m_controller.getRightX(), 1), m_config.kDeadband, 1), m_config.kExpo);
-        double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), m_config.kDeadband, 1), m_config.kExpo);
+        double dx = expo(deadband(-1.0 * clamp(m_controller.getRightY(), 1), kDeadband, 1), kExpo);
+        double dy = expo(deadband(-1.0 * clamp(m_controller.getRightX(), 1), kDeadband, 1), kExpo);
+        double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
         t.log(Level.DEBUG, "/Xbox/right y", m_controller.getRightY());
         t.log(Level.DEBUG, "/Xbox/right x", m_controller.getRightX());
         t.log(Level.DEBUG, "/Xbox/left x", m_controller.getLeftX());
@@ -78,8 +70,10 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public Speed speed() {
-        if (m_controller.getHID().getLeftBumper()) return Speed.SLOW;
-        if (m_controller.getHID().getRightBumper()) return Speed.MEDIUM;
+        if (m_controller.getHID().getLeftBumper())
+            return Speed.SLOW;
+        if (m_controller.getHID().getRightBumper())
+            return Speed.MEDIUM;
         return Speed.NORMAL;
     }
 

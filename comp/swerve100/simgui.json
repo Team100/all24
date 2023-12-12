@@ -1,16 +1,10 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "window": {
-        "visible": false
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -31,8 +25,5 @@
         }
       }
     }
-  },
-  "NetworkTables View": {
-    "visible": false
   }
 }

@@ -35,11 +35,7 @@ import edu.wpi.first.math.Pair;
  * https://colab.research.google.com/drive/1W0YVYi4eXLpfdkSNpOy4otiW2Poliems#scrollTo=ps1ulO5dYUL4
  */
 public class VarianceWeightedLinearPooling<States extends Num> extends LinearPooling<States> {
-    public static class Config {
-        public double kThreshold = 1e-15;
-    }
-
-    private final Config m_config = new Config();
+    private static final double kThreshold = 1e-15;
 
     public RandomVector<States> fuse(RandomVector<States> a, RandomVector<States> b) {
         // TODO: turn off these checks somehow for matches, use some sort of backoff
@@ -59,16 +55,16 @@ public class VarianceWeightedLinearPooling<States extends Num> extends LinearPoo
     Pair<Matrix<States, States>, Matrix<States, States>> weights(RandomVector<States> a, RandomVector<States> b) {
         Matrix<States, States> aP = a.Kxx.getValue();
         Matrix<States, States> bP = b.Kxx.getValue();
-        if (aP.det() < m_config.kThreshold) {
+        if (aP.det() < kThreshold) {
             throw new IllegalArgumentException("aP is singular.\n" + aP.toString());
         }
-        if (bP.det() < m_config.kThreshold) {
+        if (bP.det() < kThreshold) {
             throw new IllegalArgumentException("bP is singular.\n" + bP.toString());
         }
         Matrix<States, States> aPI = aP.inv();
         Matrix<States, States> bPI = bP.inv();
         Matrix<States, States> PIsum = aPI.plus(bPI);
-        if (PIsum.det() < m_config.kThreshold) {
+        if (PIsum.det() < kThreshold) {
             throw new IllegalArgumentException("PIsum is singular.\n" + PIsum.toString());
         }
         Matrix<States, States> pIsumI = PIsum.inv();

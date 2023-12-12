@@ -17,7 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
-public class StraightLineTrajectoryTest {
+class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
 
     @Test

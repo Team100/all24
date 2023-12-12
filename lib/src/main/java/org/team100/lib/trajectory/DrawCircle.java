@@ -1,9 +1,6 @@
 package org.team100.lib.trajectory;
 
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -27,14 +24,14 @@ public class DrawCircle extends SequentialCommandGroup {
      * .....|...|
      * .Y...2---1/5
      */
-    public DrawCircle(Experiments experiments, SwerveDriveSubsystem drivetrain, SwerveDriveKinematics kinematics) {
-        TrajectoryConfig config = new TrajectoryConfig(maxVelocityM_S, maxAccelM_S_S).setKinematics(kinematics);
+    public DrawCircle(
+            Experiments experiments,
+            SwerveDriveSubsystem drivetrain,
+            SwerveDriveKinematics kinematics,
+            HolonomicDriveController3 controller) {
+        TrajectoryConfig config = new TrajectoryConfig(maxVelocityM_S, maxAccelM_S_S);
+        config.setKinematics(kinematics);
         StraightLineTrajectory maker = new StraightLineTrajectory(experiments, config);
-        Identity identity = Identity.get();
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-        HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
-        controller.setTolerance(0.1, 0.1, 0.1, 0.1);
-
         addCommands(
                 new DriveToWaypoint3(new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero), drivetrain, maker, controller),
                 new DriveToWaypoint3(new Pose2d(-0.5, 0.5, GeometryUtil.kRotationZero), drivetrain, maker, controller),

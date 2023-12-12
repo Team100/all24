@@ -1,6 +1,5 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.HeadingLatch;
@@ -26,7 +25,7 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * TODO: add a velocity controller 
  */
-public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
+public class ManualWithHeading {
     private final Telemetry t = Telemetry.get();
 
     private final HeadingInterface m_heading;
@@ -42,12 +41,11 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
     public ManualWithHeading(
             SpeedLimits speedLimits,
             HeadingInterface heading,
-            Timer timer,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController) {
         m_heading = heading;
         m_speedLimits = speedLimits;
-        m_timer = timer;
+        m_timer = new Timer();
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_latch = new HeadingLatch();
@@ -59,7 +57,6 @@ public class ManualWithHeading implements BiFunction<Pose2d, Twist2d, Twist2d> {
         m_latch.unlatch();
     }
 
-    @Override
     public Twist2d apply(Pose2d currentPose, Twist2d twist1_1) {
 
         Rotation2d pov = m_desiredRotation.get();

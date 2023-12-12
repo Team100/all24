@@ -14,6 +14,15 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * Controls Experiment enablement.
+ * 
+ * There are three methods of enablement:
+ * 
+ * -- global: enabled for all robots
+ * -- per-identity: enabled for specific RoboRIO serial numbers
+ * -- override: using a Sendable Chooser in a dashboard, e.g. glass.
+ */
 public class Experiments {
     private final Telemetry t = Telemetry.get();
 
@@ -23,7 +32,8 @@ public class Experiments {
             Experiment.UseClosedLoopSteering,
             Experiment.UseClosedLoopVelocity,
             Experiment.UseSetpointGenerator,
-            Experiment.UseInitialVelocity);
+            Experiment.UseInitialVelocity,
+            Experiment.OscillateDirect);
 
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(

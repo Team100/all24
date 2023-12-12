@@ -12,12 +12,12 @@ import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
-import org.team100.lib.util.MockTimer;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveWithHeadingTest {
     private static final double kDelta = 0.001;
@@ -32,7 +32,6 @@ class DriveWithHeadingTest {
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5,0,0);
@@ -42,7 +41,6 @@ class DriveWithHeadingTest {
                 robotDrive,
                 heading,
                 speedLimits,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -64,7 +62,6 @@ class DriveWithHeadingTest {
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5,0,0);
@@ -74,7 +71,6 @@ class DriveWithHeadingTest {
                 robotDrive,
                 heading,
                 speedLimits,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -103,7 +99,6 @@ class DriveWithHeadingTest {
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5,0,0);
@@ -113,7 +108,6 @@ class DriveWithHeadingTest {
                 robotDrive,
                 heading,
                 speedLimits,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -138,7 +132,7 @@ class DriveWithHeadingTest {
         // still execute the profile
         desiredRotation = null;
 
-        timer.time = 1;
+        SimHooks.stepTiming(1);
         robotDrive.pose = new Pose2d(0,0,new Rotation2d(0.5));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
@@ -149,7 +143,7 @@ class DriveWithHeadingTest {
         assertEquals(1, robotDrive.twist.dtheta, kDelta);
 
         // almost done
-        timer.time = 2.4;
+        SimHooks.stepTiming(1.4);
         robotDrive.pose =  new Pose2d(0,0,new Rotation2d(1.555));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
@@ -159,7 +153,7 @@ class DriveWithHeadingTest {
         // almost done
         assertEquals(0.175, robotDrive.twist.dtheta, kDelta);
 
-        timer.time = 100;
+        SimHooks.stepTiming(100);
         robotDrive.pose =  new Pose2d(0,0,new Rotation2d(Math.PI/2));
         command.execute();
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
@@ -178,7 +172,6 @@ class DriveWithHeadingTest {
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5,0,0);
@@ -188,7 +181,6 @@ class DriveWithHeadingTest {
                 robotDrive,
                 heading,
                 speedLimits,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -213,7 +205,7 @@ class DriveWithHeadingTest {
         // still execute the profile
         //desiredRotation = null;
 
-        timer.time = 1;
+        SimHooks.stepTiming(1);
         robotDrive.pose = new Pose2d(0,0,new Rotation2d(0.5));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
@@ -224,7 +216,7 @@ class DriveWithHeadingTest {
         assertEquals(1, robotDrive.twist.dtheta, kDelta);
 
         // almost done
-        timer.time = 2.4;
+        SimHooks.stepTiming(1.4);
         robotDrive.pose =  new Pose2d(0,0,new Rotation2d(1.555));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
@@ -234,7 +226,7 @@ class DriveWithHeadingTest {
         // almost done
         assertEquals(0.175, robotDrive.twist.dtheta, kDelta);
 
-        timer.time = 100;
+        SimHooks.stepTiming(100);
         // done
         robotDrive.pose =  new Pose2d(0,0,new Rotation2d(Math.PI/2));
         command.execute();

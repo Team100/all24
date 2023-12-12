@@ -11,12 +11,12 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
-import org.team100.lib.util.MockTimer;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class ManualWithHeadingTest {
     private static final double kDelta = 0.001;
@@ -27,7 +27,6 @@ class ManualWithHeadingTest {
     void testModeSwitching() {
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -35,7 +34,6 @@ class ManualWithHeadingTest {
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
-                timer,
                 rotationSupplier,
                 thetaController);
         m_manualWithHeading.reset();
@@ -63,7 +61,6 @@ class ManualWithHeadingTest {
     void testNotSnapMode() {
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -71,7 +68,6 @@ class ManualWithHeadingTest {
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -104,7 +100,6 @@ class ManualWithHeadingTest {
     void testSnapMode() {
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -112,7 +107,6 @@ class ManualWithHeadingTest {
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -141,7 +135,7 @@ class ManualWithHeadingTest {
         // still execute the profile
         desiredRotation = null;
 
-        timer.time = 1;
+        SimHooks.stepTiming(1);
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -153,7 +147,7 @@ class ManualWithHeadingTest {
         assertEquals(1, twistM_S.dtheta, kDelta);
 
         // almost done
-        timer.time = 2.4;
+        SimHooks.stepTiming(1.4);
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -164,7 +158,7 @@ class ManualWithHeadingTest {
         // almost done
         assertEquals(0.175, twistM_S.dtheta, kDelta);
 
-        timer.time = 100;
+        SimHooks.stepTiming(100);
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -181,7 +175,6 @@ class ManualWithHeadingTest {
     void testSnapHeld() {
         HeadingInterface heading = new MockHeading();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        MockTimer timer = new MockTimer();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -189,7 +182,6 @@ class ManualWithHeadingTest {
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
-                timer,
                 rotationSupplier,
                 thetaController);
 
@@ -220,7 +212,7 @@ class ManualWithHeadingTest {
         // still execute the profile
         // desiredRotation = null;
 
-        timer.time = 1;
+        SimHooks.stepTiming(1);
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -232,7 +224,7 @@ class ManualWithHeadingTest {
         assertEquals(1, twistM_S.dtheta, kDelta);
 
         // almost done
-        timer.time = 2.4;
+        SimHooks.stepTiming(1.4);
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -243,7 +235,7 @@ class ManualWithHeadingTest {
         // almost done
         assertEquals(0.175, twistM_S.dtheta, kDelta);
 
-        timer.time = 100;
+        SimHooks.stepTiming(100);
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);

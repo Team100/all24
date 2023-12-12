@@ -79,6 +79,7 @@
       "/SmartDashboard/Drive Subsystem": "Subsystem",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -129,7 +130,7 @@
             0.9399999976158142,
             1.0
           ],
-          "height": 0,
+          "height": -6,
           "series": [
             {
               "color": [

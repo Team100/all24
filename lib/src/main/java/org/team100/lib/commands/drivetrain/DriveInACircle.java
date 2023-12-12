@@ -1,8 +1,5 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -54,19 +51,20 @@ public class DriveInACircle extends Command {
      *                  https://en.wikipedia.org/wiki/Astroid.
      * 
      */
-    public DriveInACircle(SwerveDriveSubsystemInterface drivetrain, double turnRatio) {
+    public DriveInACircle(
+            SwerveDriveSubsystemInterface drivetrain,
+            HolonomicDriveController3 controller,
+            double turnRatio) {
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
-        // TODO: inject the controller instead
-        Identity identity = Identity.get();
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-        m_controller = new HolonomicDriveController3(controllers);
+        m_controller = controller;
         if (m_swerve.get() != null)
             addRequirements(m_swerve.get());
     }
 
     @Override
     public void initialize() {
+        m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_center = currentPose.transformBy(new Transform2d(0, kRadiusM, GeometryUtil.kRotationZero));
         m_initialRotation = currentPose.getRotation().getRadians();
