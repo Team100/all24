@@ -20,7 +20,11 @@ public class SwerveModule100 {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningServo.getPosition()));
+        setRawDesiredState(SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningServo.getPosition())));
+    }
+
+    /** This is for testing only, it does not optimize. */
+    public void setRawDesiredState(SwerveModuleState state) {
         m_driveServo.setVelocity(state.speedMetersPerSecond);
         m_turningServo.setPosition(state.angle.getRadians());
     }

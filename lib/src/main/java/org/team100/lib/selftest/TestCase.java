@@ -1,9 +1,12 @@
 package org.team100.lib.selftest;
 
+import java.util.Set;
+
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /** Runs a stimulus and an observer in parallel. */
 @ExcludeFromJacocoGeneratedReport
@@ -36,6 +39,11 @@ public class TestCase extends Command {
     @Override
     public final void end(boolean interrupted) {
         m_group.end(interrupted);
+    }
+
+    @Override
+    public Set<Subsystem> getRequirements() {
+        return m_group.getRequirements();
     }
 
 }

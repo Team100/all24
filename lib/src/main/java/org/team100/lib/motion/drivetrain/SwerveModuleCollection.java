@@ -45,6 +45,11 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         public void stop() {
             //
         }
+
+        @Override
+        public void setRawDesiredStates(SwerveModuleState[] targetModuleStates) {
+            //
+        }
     }
 
     private final SwerveModule100 m_frontLeft;
@@ -95,6 +100,14 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_frontRight.setDesiredState(swerveModuleStates[1]);
         m_rearLeft.setDesiredState(swerveModuleStates[2]);
         m_rearRight.setDesiredState(swerveModuleStates[3]);
+    }
+
+    /** For testing only */
+    public void setRawDesiredStates(SwerveModuleState[] swerveModuleStates) {
+        m_frontLeft.setRawDesiredState(swerveModuleStates[0]);
+        m_frontRight.setRawDesiredState(swerveModuleStates[1]);
+        m_rearLeft.setRawDesiredState(swerveModuleStates[2]);
+        m_rearRight.setRawDesiredState(swerveModuleStates[3]);
     }
 
     public void close() {

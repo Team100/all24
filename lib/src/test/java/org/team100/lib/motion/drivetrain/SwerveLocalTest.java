@@ -63,6 +63,12 @@ class SwerveLocalTest {
             public void close() {
                 //
             }
+
+            @Override
+            public void setRawDesiredStates(SwerveModuleState[] targetModuleStates) {
+                m_targetModuleStates = targetModuleStates;
+
+            }
         };
         SwerveLocal local = new SwerveLocal(experiments, speedLimits, kinematics, modules);
         local.setChassisSpeeds(new ChassisSpeeds());

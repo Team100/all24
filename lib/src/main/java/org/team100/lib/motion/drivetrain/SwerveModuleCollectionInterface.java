@@ -6,6 +6,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public interface SwerveModuleCollectionInterface {
 
     void setDesiredStates(SwerveModuleState[] targetModuleStates);
+    
+    /** For testing only */
+    void setRawDesiredStates(SwerveModuleState[] targetModuleStates);
 
     SwerveModulePosition[] positions();
 

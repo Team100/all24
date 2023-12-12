@@ -11,20 +11,24 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 @ExcludeFromJacocoGeneratedReport
 public class DriveManuallyTest extends Command {
-    private static final double kExpectedDuration = 5;
-    private SwerveDriveSubsystem m_drivetrain;
-    private TestListener m_listener;
+    // two second duration
+    private static final double kExpectedDuration = 2;
+    private final SwerveDriveSubsystem m_drivetrain;
+    private final TestListener m_listener;
     private final Timer m_timer;
     private boolean terminate = false;
+    private Pose2d m_initial;
 
     public DriveManuallyTest(SwerveDriveSubsystem drivetrain, TestListener listener) {
         m_drivetrain = drivetrain;
         m_listener = listener;
         m_timer = new Timer();
+        m_initial = m_drivetrain.getPose();
     }
 
     public Twist2d treatment() {
-        return new Twist2d(1, 0, 0);
+        // the treatment is to move in +x at 0.5 m/s for 2 s so the result should be 1m
+        return new Twist2d(0.5, 0, 0);
     }
 
     @Override
@@ -46,27 +50,41 @@ public class DriveManuallyTest extends Command {
     @Override
     public void end(boolean interrupted) {
         double time = m_timer.get();
-        if (MathUtil.isNear(5, time, 0.1))
-            m_listener.pass(this, "final time ok: %5.3f", time);
+        String fmt = "final time expected %5.3f actual %5.3f";
+        double expected = kExpectedDuration;
+        if (MathUtil.isNear(expected, time, 0.1))
+            m_listener.pass(this, fmt, expected, time);
         else
-            m_listener.fail(this, "final time bad: %5.3f", time);
+            m_listener.fail(this, fmt, expected, time);
 
         Pose2d state = m_drivetrain.getPose();
 
-        if (MathUtil.isNear(5, state.getX(), 0.1))
-            m_listener.pass(this, "final x ok: %5.3f", state.getX());
+        // 0.5 m/s for 2 s is roughly 1m
+        expected = 1;
+        double actual = state.getX() - m_initial.getX();
+        fmt = "final x expected %5.3f actual %5.3f";
+        if (MathUtil.isNear(expected, actual, 0.1))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "final x bad: %5.3f", state.getX());
+            m_listener.fail(this, fmt, expected, actual);
 
-        if (MathUtil.isNear(5, state.getY(), 0.1))
-            m_listener.pass(this, "final y ok: %5.3f", state.getY());
+        // no treatment for y
+        expected = 0;
+        actual = state.getY() - m_initial.getY();
+        fmt = "final y expected %5.3f actual %5.3f";
+        if (MathUtil.isNear(expected, actual, 0.1))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "final y bad: %5.3f", state.getY());
+            m_listener.fail(this, fmt, expected, actual);
 
-        if (MathUtil.isNear(5, state.getRotation().getRadians(), 0.1))
-            m_listener.pass(this, "final rotation ok: %5.3f", state.getRotation().getRadians());
+        // no treatment in theta
+        expected = 0;
+        actual = state.getRotation().getRadians() - m_initial.getRotation().getRadians();
+        fmt = "final rotation expected %5.3f actual %5.3f";
+        if (MathUtil.isNear(expected, actual, 0.1))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "final rotation bad: %5.3f", state.getRotation().getRadians());
+            m_listener.fail(this, fmt, expected, actual);
     }
 
 }
