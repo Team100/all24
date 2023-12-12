@@ -13,9 +13,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Utility class to produce trajectories.
+ * Utility class to produce commands.
  */
-public class Line {
+public class CommandMaker {
 
     /**
      * A command to follow a straight line from the current pose to the goal pose.
@@ -28,5 +28,9 @@ public class Line {
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
         controller.setTolerance(0.1, 0.1, 0.1, 0.1);
         return new DriveToWaypoint3(goal, drivetrain, maker, controller);
+    }
+
+    private CommandMaker() {
+        //
     }
 }
