@@ -208,7 +208,6 @@ public class RobotContainer implements Testable {
         // m_drive,
         // m_heading,
         // slow,
-        // new Timer(),
         // control::desiredRotation,
         // thetaController));
         // SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
@@ -218,14 +217,13 @@ public class RobotContainer implements Testable {
         // m_drive,
         // m_heading,
         // medium,
-        // new Timer(),
         // control::desiredRotation,
         // thetaController));
 
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
-        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, new Timer(), 0));
+        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, 0));
 
         m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics);
         control.circle().whileTrue(m_drawCircle);
@@ -240,10 +238,10 @@ public class RobotContainer implements Testable {
         DriveControllers controllers = new DriveControllersFactory().get(identity);
         HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
         // control.actualCircle().whileTrue(
-        // new TrajectoryListCommand(m_drive, controller, new Timer(),
+        // new TrajectoryListCommand(m_drive, controller,
         // x -> List.of(TrajectoryMaker.line(m_kinematics, x))));
         control.actualCircle().whileTrue(
-                new TrajectoryListCommand(m_drive, controller, new Timer(),
+                new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(m_kinematics, x)));
         ///////////////////////////
         //
@@ -259,7 +257,6 @@ public class RobotContainer implements Testable {
                         m_drive,
                         m_heading,
                         speedLimits,
-                        new Timer(),
                         control::desiredRotation,
                         thetaController));
 
@@ -270,7 +267,6 @@ public class RobotContainer implements Testable {
         // m_drive,
         // m_heading,
         // speedLimits,
-        // new Timer(),
         // control::desiredRotation,
         // thetaController));
         // }

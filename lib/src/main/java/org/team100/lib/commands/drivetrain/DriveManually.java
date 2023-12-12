@@ -52,7 +52,6 @@ public class DriveManually extends Command {
             SwerveDriveSubsystemInterface robotDrive,
             HeadingInterface heading,
             SpeedLimits speedLimits,
-            Timer timer,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController) {
         m_mode = mode;
@@ -64,7 +63,6 @@ public class DriveManually extends Command {
         m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
-                timer,
                 desiredRotation,
                 thetaController);
         if (m_drive.get() != null)

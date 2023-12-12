@@ -48,12 +48,11 @@ public class Rotate extends Command {
             SwerveDriveSubsystemInterface drivetrain,
             HeadingInterface heading,
             SpeedLimits speedLimits,
-            Timer timer,
             double targetAngleRadians) {
         m_robotDrive = drivetrain;
         m_heading = heading;
         m_speedLimits = speedLimits;
-        m_timer = timer;
+        m_timer = new Timer();
         m_goalState = new MotionState(targetAngleRadians, 0);
         refTheta = new MotionState(0, 0);
 

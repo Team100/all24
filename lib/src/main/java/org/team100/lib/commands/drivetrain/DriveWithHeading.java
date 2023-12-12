@@ -27,7 +27,6 @@ public class DriveWithHeading extends Command {
             SwerveDriveSubsystemInterface robotDrive,
             HeadingInterface heading,
             SpeedLimits speedLimits,
-            Timer timer,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController) {
         m_twistSupplier = twistSupplier;
@@ -35,7 +34,6 @@ public class DriveWithHeading extends Command {
         m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
-                timer,
                 desiredRotation,
                 thetaController);
         if (m_drive.get() != null)

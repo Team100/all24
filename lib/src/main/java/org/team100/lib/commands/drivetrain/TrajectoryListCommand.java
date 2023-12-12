@@ -40,11 +40,10 @@ public class TrajectoryListCommand extends Command {
     public TrajectoryListCommand(
             SwerveDriveSubsystemInterface swerve,
             HolonomicDriveController3 controller,
-            Timer timer,
             Function<Pose2d, List<Trajectory>> trajectories) {
         m_swerve = swerve;
         m_controller = controller;
-        m_timer = timer;
+        m_timer = new Timer();
         m_trajectories = trajectories;
         if (m_swerve.get() != null)
             addRequirements(m_swerve.get());

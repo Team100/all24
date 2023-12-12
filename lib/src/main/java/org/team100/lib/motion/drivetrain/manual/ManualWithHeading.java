@@ -41,12 +41,11 @@ public class ManualWithHeading {
     public ManualWithHeading(
             SpeedLimits speedLimits,
             HeadingInterface heading,
-            Timer timer,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController) {
         m_heading = heading;
         m_speedLimits = speedLimits;
-        m_timer = timer;
+        m_timer = new Timer();
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_latch = new HeadingLatch();

@@ -85,11 +85,9 @@ class TrajectoryListCommandTest {
         DriveControllers controllers = new DriveControllersFactory().get(Identity.BLANK);
         HolonomicDriveController3 control = new HolonomicDriveController3(controllers);
 
-        Timer timer = new Timer();
         TrajectoryListCommand c = new TrajectoryListCommand(
                 drive,
                 control,
-                timer,
                 x -> List.of(TrajectoryMaker.line(kinematics, x)));
         c.initialize();
         assertEquals(0, drive.getPose().getX(), kDelta);
