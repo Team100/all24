@@ -34,10 +34,11 @@ public class SwerveLocal {
             new SwerveModuleState(0, new Rotation2d(Math.PI / 2))
     };
     private static final SwerveModuleState[] statesX = new SwerveModuleState[] {
+            // note range is [-pi,pi]
             new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
-            new SwerveModuleState(0, new Rotation2d(7 * Math.PI / 4)),
+            new SwerveModuleState(0, new Rotation2d(-1 * Math.PI / 4)),
             new SwerveModuleState(0, new Rotation2d(3 * Math.PI / 4)),
-            new SwerveModuleState(0, new Rotation2d(5 * Math.PI / 4))
+            new SwerveModuleState(0, new Rotation2d(-3 * Math.PI / 4))
     };
 
     private final Telemetry t = Telemetry.get();
@@ -144,7 +145,7 @@ public class SwerveLocal {
      * kinematics.toSwerveModuleStates does when the desired speed is zero.
      */
     public void setRawModuleStates(SwerveModuleState[] targetModuleStates) {
-        m_modules.setDesiredStates(targetModuleStates);
+        m_modules.setRawDesiredStates(targetModuleStates);
         m_DriveKinematics.resetHeadings(targetModuleStates[0].angle,
                 targetModuleStates[1].angle,
                 targetModuleStates[2].angle,
@@ -205,7 +206,7 @@ public class SwerveLocal {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, m_speedLimits.speedM_S);
         logImpliedChassisSpeeds(states);
         // all the callers of setModuleStates inform kinematics.
-        setRawModuleStates(states);
+        m_modules.setDesiredStates(states);
     }
 
     /**
