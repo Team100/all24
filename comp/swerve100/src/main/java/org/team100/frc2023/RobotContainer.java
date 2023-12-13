@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.team100.lib.commands.arm.Sequence;
+import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -241,10 +242,14 @@ public class RobotContainer implements Testable {
                 new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(m_kinematics, x)));
 
-        control.actualCircle().whileTrue(
+        // one-meter square with position and velocity feedback control
+        control.never().whileTrue(
                 new FullStateTrajectoryListCommand(m_drive,
                         x -> TrajectoryMaker.square(m_kinematics, x)));
-                        
+
+        // trying the new ChoreoLib
+        control.actualCircle().whileTrue(CommandMaker.choreo(m_drive));
+
         ///////////////////////////
         //
         // DRIVE
