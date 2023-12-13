@@ -5,25 +5,25 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "480",
+      "height": "722",
       "maximized": "0",
       "style": "0",
       "userScale": "1",
-      "width": "853",
-      "xpos": "187",
-      "ypos": "200"
+      "width": "1078",
+      "xpos": "92",
+      "ypos": "105"
     }
   },
   "Window": {
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
-      "Pos": "87,43",
+      "Pos": "107,43",
       "Size": "146,42"
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "294,19",
-      "Size": "266,133"
+      "Pos": "348,28",
+      "Size": "614,337"
     },
     "###FMS": {
       "Collapsed": "0",
@@ -32,12 +32,12 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "166,310",
+      "Pos": "8,554",
       "Size": "436,108"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "166,184",
+      "Pos": "213,396",
       "Size": "500,123"
     },
     "###Other Devices": {
