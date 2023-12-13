@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import org.team100.lib.controller.HolonomicFieldRelativeController;
+import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
@@ -18,17 +18,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Follow a list of trajectories.
- * 
- * The list can be relative to the current pose.
- * 
- * TODO: use the new holonomic trajectory type
+ * Follow a list of trajectories with the full state controller.
  */
-public class TrajectoryListCommand extends Command {
+public class FullStateTrajectoryListCommand extends Command {
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_swerve;
     private final Timer m_timer;
-    private final HolonomicFieldRelativeController m_controller;
+    private final FullStateDriveController m_controller;
     private final Function<Pose2d, List<Trajectory>> m_trajectories;
     private Iterator<Trajectory> m_trajectoryIter;
     private Trajectory m_currentTrajectory;
@@ -37,12 +33,11 @@ public class TrajectoryListCommand extends Command {
     // TODO: allow trajectory to specify it using the new type
     private Rotation2d m_rotation;
 
-    public TrajectoryListCommand(
+    public FullStateTrajectoryListCommand(
             SwerveDriveSubsystemInterface swerve,
-            HolonomicFieldRelativeController controller,
             Function<Pose2d, List<Trajectory>> trajectories) {
         m_swerve = swerve;
-        m_controller = controller;
+        m_controller = new FullStateDriveController();
         m_timer = new Timer();
         m_trajectories = trajectories;
         if (m_swerve.get() != null)
@@ -51,7 +46,6 @@ public class TrajectoryListCommand extends Command {
 
     @Override
     public void initialize() {
-        m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_rotation = currentPose.getRotation();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
@@ -77,13 +71,13 @@ public class TrajectoryListCommand extends Command {
 
         // now there is a trajectory to follow
         State desiredState = m_currentTrajectory.sample(m_timer.get());
-        Pose2d currentPose = m_swerve.getPose();
+        SwerveState measurement = m_swerve.getState();
 
         // this uses the fixed rotation.
         // TODO: rotation profile, use new trajectory type.
         SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
 
-        Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+        Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
 

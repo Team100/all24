@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * 
  * TODO: make a full-state version.
  */
-public class HolonomicDriveController3 {
+public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
     private final Telemetry t = Telemetry.get();
     private final PIDController m_xController;
     private final PIDController m_yController;
@@ -48,22 +48,13 @@ public class HolonomicDriveController3 {
         return new HolonomicDriveController3(x, y, theta);
     }
 
-    /**
-     * This uses the tolerances in the controllers.
-     * 
-     * @return True if the pose error is within tolerance of the reference.
-     */
+    @Override
     public boolean atReference() {
         return m_xController.atSetpoint() && m_yController.atSetpoint() && m_thetaController.atSetpoint();
     }
 
-    /**
-     * TODO make currentPose a state as well.
-     * 
-     * @param currentPose  robot's current pose in field coordinates
-     * @param desiredState reference state
-     * @return field-relative twist, meters and radians per second
-     */
+
+    @Override
     public Twist2d calculate(
             Pose2d currentPose,
             SwerveState desiredState) {
@@ -97,6 +88,7 @@ public class HolonomicDriveController3 {
         return new Twist2d(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }
 
+    @Override
     public void reset() {
         m_xController.reset();
         m_yController.reset();
