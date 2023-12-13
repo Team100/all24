@@ -5,25 +5,25 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "645",
+      "height": "686",
       "maximized": "0",
       "style": "0",
       "userScale": "1",
-      "width": "853",
+      "width": "815",
       "xpos": "187",
       "ypos": "200"
     }
   },
   "Window": {
+    "###/SmartDashboard/SideView": {
+      "Collapsed": "0",
+      "Pos": "528,44",
+      "Size": "200,200"
+    },
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
       "Pos": "60,60",
       "Size": "146,42"
-    },
-    "###/field": {
-      "Collapsed": "0",
-      "Pos": "252,34",
-      "Size": "469,264"
     },
     "###FMS": {
       "Collapsed": "0",
@@ -32,12 +32,12 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "179,551",
+      "Pos": "39,527",
       "Size": "436,108"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "194,360",
+      "Pos": "198,357",
       "Size": "500,123"
     },
     "###System Joysticks": {

@@ -20,319 +20,327 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class SwerveModuleFactory {
-    private final Experiments experiments;
-    private final double currentLimit;
+        private final Experiments experiments;
+        private final double currentLimit;
 
-    public SwerveModuleFactory(Experiments experiments, double currentLimit) {
-        this.experiments = experiments;
-        this.currentLimit = currentLimit;
-    }
+        public SwerveModuleFactory(Experiments experiments, double currentLimit) {
+                this.experiments = experiments;
+                this.currentLimit = currentLimit;
+        }
 
-    public SwerveModule100 WCPModule(
-            String name,
-            int driveMotorCanId,
-            int turningMotorCanId,
-            int turningEncoderChannel,
-            double turningOffset) {
-        final double kWheelDiameterMeters = 0.1015; // WCP 4 inch wheel
-        // TODO: verify the drive ratio
-        final double kDriveReduction = 5.50; // see wcproducts.com, this is the "fast" ratio.
-        final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
-        final double turningGearRatio = 1.0;
+        public SwerveModule100 WCPModule(
+                        String name,
+                        int driveMotorCanId,
+                        int turningMotorCanId,
+                        int turningEncoderChannel,
+                        double turningOffset) {
+                final double kWheelDiameterMeters = 0.1015; // WCP 4 inch wheel
+                // TODO: verify the drive ratio
+                final double kDriveReduction = 5.50; // see wcproducts.com, this is the "fast" ratio.
+                final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
+                final double turningGearRatio = 1.0;
 
-        FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
-                kWheelDiameterMeters);
-        FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
+                FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
+                                kWheelDiameterMeters);
+                FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
 
-        FalconTurningMotor turningMotor = new FalconTurningMotor(name, turningMotorCanId);
+                FalconTurningMotor turningMotor = new FalconTurningMotor(name, turningMotorCanId);
 
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel,
-                turningOffset,
-                turningGearRatio, AnalogTurningEncoder.Drive.DIRECT);
+                AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
+                                name, turningEncoderChannel,
+                                turningOffset,
+                                turningGearRatio, AnalogTurningEncoder.Drive.DIRECT);
 
-        // DRIVE PID
-        PIDController driveController = new PIDController( //
-                0.1, // kP //1.2
-                0, // kI: nonzero I eliminates small errors, e.g. to finish rotations. //0.3
-                0.0); // kD
-        driveController.setIntegratorRange(-0.01, 0.01); // Note very low windup limit.
+                // DRIVE PID
+                PIDController driveController = new PIDController( //
+                                0.1, // kP //1.2
+                                0, // kI: nonzero I eliminates small errors, e.g. to finish rotations. //0.3
+                                0.0); // kD
+                driveController.setIntegratorRange(-0.01, 0.01); // Note very low windup limit.
 
-        // TODO: shorter period
-        PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
-        turningController2.enableContinuousInput(-Math.PI, -Math.PI);
-        turningController2.setTolerance(0.1);
+                // TODO: shorter period
+                PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
+                turningController2.enableContinuousInput(-Math.PI, -Math.PI);
+                turningController2.setTolerance(0.1);
 
-        // DRIVE FF
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
-                0.06, // kS
-                0.3, // kV
-                0.025); // kA
+                // DRIVE FF
+                SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
+                                0.06, // kS
+                                0.3, // kV
+                                0.025); // kA
 
-        // TURNING FF
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                0.0006, // kS: Multiplied by around 20 of previous value as that is how much we changed
-                        // P by 0.0005
-                0.005, // kV: Since we are decreasing the value of how much the PID system does we need
-                       // to conpensate for making feedforward larger as well
-                0); // kA: I have no idea what this value should be
+                // TURNING FF
+                SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
+                                0.0006, // kS: Multiplied by around 20 of previous value as that is how much we changed
+                                        // P by 0.0005
+                                0.005, // kV: Since we are decreasing the value of how much the PID system does we need
+                                       // to conpensate for making feedforward larger as well
+                                0); // kA: I have no idea what this value should be
 
-        VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
-                name + "/drive velocity servo",
-                driveMotor,
-                driveEncoder,
-                driveController,
-                driveFeedforward);
+                VelocityServo<Distance> driveServo = new VelocityServo<>(
+                                experiments,
+                                name + "/drive velocity servo",
+                                driveMotor,
+                                driveEncoder,
+                                driveController,
+                                driveFeedforward);
 
-        // TODO: tune this
-        PIDController angleVelocityController = new PIDController(2.86, 0, 0, 0.02);
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
-                name + "/turning velocity servo",
-                turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
+                // TODO: tune this
+                PIDController angleVelocityController = new PIDController(2.86, 0, 0, 0.02);
+                VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+                                experiments,
+                                name + "/turning velocity servo",
+                                turningMotor,
+                                turningEncoder,
+                                angleVelocityController,
+                                turningFeedforward);
 
-        ChoosableProfile profile = new ChoosableProfile(
-                20 * Math.PI, // max angular speed radians/sec
-                20 * Math.PI, // max accel radians/sec/sec
-                0,
-                ChoosableProfile.Mode.TRAPEZOID);
-        PositionServo<Angle> turningServo = new PositionServo<>(
-                name,
-                turningVelocityServo,
-                turningEncoder,
-                20 * Math.PI,
-                turningController2,
-                profile,
-                MathUtil::angleModulus);
+                ChoosableProfile profile = new ChoosableProfile(
+                                20 * Math.PI, // max angular speed radians/sec
+                                20 * Math.PI, // max accel radians/sec/sec
+                                0,
+                                ChoosableProfile.Mode.TRAPEZOID);
+                PositionServo<Angle> turningServo = new PositionServo<>(
+                                name,
+                                turningVelocityServo,
+                                turningEncoder,
+                                20 * Math.PI,
+                                turningController2,
+                                profile,
+                                MathUtil::angleModulus);
 
-        return new SwerveModule100(driveServo, turningServo);
-    }
+                return new SwerveModule100(driveServo, turningServo);
+        }
 
-    // for 8048's config and new Offloaded PID
-    public SwerveModule100 AMCANModule(
-            String name,
-            int driveMotorCanId,
-            int turningMotorCanId,
-            int turningEncoderChannel,
-            double turningOffset,
-            AnalogTurningEncoder.Drive turningDrive) {
-        final double kWheelDiameterMeters = 0.1016; // AndyMark Swerve & Steer has 4 inch wheel
-        // TODO: verify the wheel diameter
-        final double kDriveReduction = 6.67 * 9 / 10; // see andymark.com/products/swerve-and-steer
-        // TODO Temperarely added a modifyer to make this more realistic through some
-        // testing, we will need to make this a real value
-        final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
-        final double turningGearRatio = 1.0; // andymark ma3 encoder is 1:1
+        // for 8048's config and new Offloaded PID
+        public SwerveModule100 AMCANModule(
+                        String name,
+                        int driveMotorCanId,
+                        int turningMotorCanId,
+                        int turningEncoderChannel,
+                        double turningOffset,
+                        AnalogTurningEncoder.Drive turningDrive) {
+                final double kWheelDiameterMeters = 0.1016; // AndyMark Swerve & Steer has 4 inch wheel
+                // TODO: verify the wheel diameter
+                final double kDriveReduction = 6.67 * 9 / 10; // see andymark.com/products/swerve-and-steer
+                // TODO Temperarely added a modifyer to make this more realistic through some
+                // testing, we will need to make this a real value
+                final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
+                final double turningGearRatio = 1.0; // andymark ma3 encoder is 1:1
 
-        FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
-                kWheelDiameterMeters);
-        FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel,
-                turningOffset,
-                turningGearRatio, turningDrive);
+                FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
+                                kWheelDiameterMeters);
+                FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
+                AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
+                                name, turningEncoderChannel,
+                                turningOffset,
+                                turningGearRatio, turningDrive);
 
-        CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder);
+                CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder);
 
-        // DRIVE PID
-        PIDController driveController = new PIDController( //
-                0.1, // kP
-                0, // kI
-                0); // kD
+                // DRIVE PID
+                PIDController driveController = new PIDController( //
+                                0.1, // kP
+                                0, // kI
+                                0); // kD
 
-        // TODO: shorter period
-        PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
-        turningController2.enableContinuousInput(-Math.PI, Math.PI);
-        turningController2.setTolerance(0.1);
+                // TODO: shorter period
+                PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
+                turningController2.enableContinuousInput(-Math.PI, Math.PI);
+                turningController2.setTolerance(0.1);
 
+                // DRIVE FF
+                SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
+                                0.0, // kS
+                                .5); // kV
 
-        // DRIVE FF
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
-                0.0, // kS
-                .5); // kV
+                // TURNING FF
+                SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
+                                .25, // kS
+                                0.015); // kV
 
-        // TURNING FF
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                .25, // kS
-                0.015); // kV
+                // TODO: what is this?
+                // SimpleMotorFeedforward headingDriveFeedForward = new SimpleMotorFeedforward(
+                // //
+                // 0.05, // kS: friction is unimportant
+                // 0.35, // kV: from experiment; higher than AM modules, less reduction gear
+                // 0.08); // kA: I have no idea what this value should be
 
-        // TODO: what is this?
-        // SimpleMotorFeedforward headingDriveFeedForward = new SimpleMotorFeedforward(
-        // //
-        // 0.05, // kS: friction is unimportant
-        // 0.35, // kV: from experiment; higher than AM modules, less reduction gear
-        // 0.08); // kA: I have no idea what this value should be
+                VelocityServo<Distance> driveServo = new VelocityServo<>(
+                                experiments,
+                                name + "/drive velocity servo",
+                                driveMotor,
+                                driveEncoder,
+                                driveController,
+                                driveFeedforward);
 
-        VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
-                name + "/drive velocity servo",
-                driveMotor,
-                driveEncoder,
-                driveController,
-                driveFeedforward);
+                // TODO: tune this
+                PIDController angleVelocityController = new PIDController(5, 0, 0, 0.02);
+                VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+                                experiments,
+                                name + "/turning velocity servo",
+                                turningMotor,
+                                turningEncoder,
+                                angleVelocityController,
+                                turningFeedforward);
 
-        // TODO: tune this
-        PIDController angleVelocityController = new PIDController(5, 0, 0, 0.02);
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
-                name + "/turning velocity servo",
-                turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
+                // TURNING PID
 
-        // TURNING PID
+                ChoosableProfile profile = new ChoosableProfile(
+                                20 * Math.PI, // speed rad/s
+                                20 * Math.PI, // accel rad/s/sturningConstraints,
+                                0, // jerk
+                                ChoosableProfile.Mode.TRAPEZOID);
+                PositionServo<Angle> turningServo = new PositionServo<>(
+                                name,
+                                turningVelocityServo,
+                                turningEncoder,
+                                20 * Math.PI, // vel
+                                turningController2,
+                                profile,
+                                MathUtil::angleModulus);
 
-        ChoosableProfile profile = new ChoosableProfile(
-                20 * Math.PI, // speed rad/s
-                20 * Math.PI, // accel rad/s/sturningConstraints,
-                0, // jerk
-                ChoosableProfile.Mode.TRAPEZOID);
-        PositionServo<Angle> turningServo = new PositionServo<>(
-                name,
-                turningVelocityServo,
-                turningEncoder,
-                20 * Math.PI, // vel
-                turningController2,
-                profile,
-                MathUtil::angleModulus);
+                return new SwerveModule100(driveServo, turningServo);
 
-        return new SwerveModule100(driveServo, turningServo);
+        }
 
-    }
+        public SwerveModule100 AMModule(
+                        String name,
+                        int driveMotorCanId,
+                        int turningMotorChannel,
+                        int turningEncoderChannel,
+                        double turningOffset) {
+                final double kWheelDiameterMeters = 0.09628; // AndyMark Swerve & Steer has 4 inch wheel
+                final double kDriveReduction = 6.67; // see andymark.com/products/swerve-and-steer
+                final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
+                final double turningGearRatio = 1.0; // andymark ma3 encoder is 1:1
+                FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
+                                kWheelDiameterMeters);
+                FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
+                PWMTurningMotor turningMotor = new PWMTurningMotor(name, turningMotorChannel);
+                AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
+                                name, turningEncoderChannel,
+                                turningOffset,
+                                turningGearRatio, AnalogTurningEncoder.Drive.DIRECT);
 
-    public SwerveModule100 AMModule(
-            String name,
-            int driveMotorCanId,
-            int turningMotorChannel,
-            int turningEncoderChannel,
-            double turningOffset) {
-        final double kWheelDiameterMeters = 0.09628; // AndyMark Swerve & Steer has 4 inch wheel
-        final double kDriveReduction = 6.67; // see andymark.com/products/swerve-and-steer
-        final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
-        final double turningGearRatio = 1.0; // andymark ma3 encoder is 1:1
-        FalconDriveMotor driveMotor = new FalconDriveMotor(name, driveMotorCanId, currentLimit, kDriveReduction,
-                kWheelDiameterMeters);
-        FalconDriveEncoder driveEncoder = new FalconDriveEncoder(name, driveMotor, driveEncoderDistancePerTurn);
-        PWMTurningMotor turningMotor = new PWMTurningMotor(name, turningMotorChannel);
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(name, turningEncoderChannel,
-                turningOffset,
-                turningGearRatio, AnalogTurningEncoder.Drive.DIRECT);
+                // DRIVE PID
+                PIDController driveController = new PIDController(//
+                                0.1, // kP
+                                0, // kI
+                                0);// kD
 
-        // DRIVE PID
-        PIDController driveController = new PIDController(//
-                0.1, // kP
-                0, // kI
-                0);// kD
+                // TODO: shorter period
+                PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
+                turningController2.enableContinuousInput(-Math.PI, Math.PI);
+                turningController2.setTolerance(0.1);
 
-        // TODO: shorter period
-        PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
-        turningController2.enableContinuousInput(-Math.PI, Math.PI);
-        turningController2.setTolerance(0.1);
+                // DRIVE FF
+                SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
+                                0.04, // kS makes it go further when almost at goal
+                                0.23, // kV
+                                0.02); // kA
 
-        // DRIVE FF
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
-                0.04, // kS makes it go further when almost at goal
-                0.23, // kV
-                0.02); // kA
+                // TURNING FF
+                SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
+                                0.05, // kS
+                                0.003, // kV
+                                0); // kA
 
-        // TURNING FF
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
-                0.05, // kS
-                0.003, // kV
-                0); // kA
+                VelocityServo<Distance> driveServo = new VelocityServo<>(
+                                experiments,
+                                name + "/drive velocity servo",
+                                driveMotor,
+                                driveEncoder,
+                                driveController,
+                                driveFeedforward);
 
-        VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
-                name + "/drive velocity servo",
-                driveMotor,
-                driveEncoder,
-                driveController,
-                driveFeedforward);
+                // TODO: tune this
+                PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
+                VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+                                experiments,
+                                name + "/turning velocity servo",
+                                turningMotor,
+                                turningEncoder,
+                                angleVelocityController,
+                                turningFeedforward);
 
-        // TODO: tune this
-        PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
-                name + "/turning velocity servo",
-                turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
+                ChoosableProfile profile = new ChoosableProfile(
+                                20 * Math.PI,
+                                20 * Math.PI,
+                                0, ChoosableProfile.Mode.TRAPEZOID);
+                PositionServo<Angle> turningServo = new PositionServo<>(
+                                name,
+                                turningVelocityServo,
+                                turningEncoder,
+                                20 * Math.PI,
+                                turningController2,
+                                profile,
+                                MathUtil::angleModulus);
 
-        ChoosableProfile profile = new ChoosableProfile(
-                20 * Math.PI,
-                20 * Math.PI,
-                0, ChoosableProfile.Mode.TRAPEZOID);
-        PositionServo<Angle> turningServo = new PositionServo<>(
-                name,
-                turningVelocityServo,
-                turningEncoder,
-                20 * Math.PI,
-                turningController2,
-                profile,
-                MathUtil::angleModulus);
+                return new SwerveModule100(driveServo, turningServo);
+        }
 
-        return new SwerveModule100(driveServo, turningServo);
-    }
+        public SwerveModule100 SimulatedModule(String name) {
+                SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive motor");
+                // TODO: what should the reduction be here?  is the drive motor velocity
+                // command actually the velocity after reduction?
+                SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(new Distance() {
+                }, name + "/drive encoder", driveMotor, 1);
+                PIDController driveController = new PIDController(//
+                                0.1, // kP
+                                0, // kI
+                                0);// kD
 
-    public SwerveModule100 SimulatedModule(String name) {
-        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive motor");
-        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(name + "/drive encoder", driveMotor);
-        PIDController driveController = new PIDController(//
-                0.1, // kP
-                0, // kI
-                0);// kD
+                SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
+                                0.04, // kS makes it go further when almost at goal
+                                0.23, // kV
+                                0.02); // kA
 
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
-                0.04, // kS makes it go further when almost at goal
-                0.23, // kV
-                0.02); // kA
+                VelocityServo<Distance> driveServo = new VelocityServo<>(
+                                experiments,
+                                name + "/drive velocity servo",
+                                driveMotor,
+                                driveEncoder,
+                                driveController,
+                                driveFeedforward);
 
-        VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
-                name + "/drive velocity servo",
-                driveMotor,
-                driveEncoder,
-                driveController,
-                driveFeedforward);
+                SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name + "/turning motor");
+                // TODO: what should the reduction be here?  is the turning motor velocity
+                // command actually the velocity after reduction?
+                SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(new Angle() {
+                }, name + "/turning encoder", turningMotor, 1);
+                PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
+                SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
+                                0.05, // kS
+                                0.003, // kV
+                                0); // kA
+                VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+                                experiments,
+                                name + "/turning velocity servo",
+                                turningMotor,
+                                turningEncoder,
+                                angleVelocityController,
+                                turningFeedforward);
 
-        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name + "/turning motor");
-        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(name + "/turning encoder", turningMotor);
-        PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
-                0.05, // kS
-                0.003, // kV
-                0); // kA
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
-                name + "/turning velocity servo",
-                turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
+                // NOTE: these PID values are untuned
+                PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
+                turningController2.enableContinuousInput(-Math.PI, Math.PI);
+                turningController2.setTolerance(0.1);
 
-        // NOTE: these PID values are untuned
-        PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
-        turningController2.enableContinuousInput(-Math.PI, Math.PI);
-        turningController2.setTolerance(0.1);
+                ChoosableProfile profile = new ChoosableProfile(
+                                20 * Math.PI,
+                                20 * Math.PI,
+                                0, ChoosableProfile.Mode.TRAPEZOID);
+                PositionServo<Angle> turningServo = new PositionServo<>(
+                                name,
+                                turningVelocityServo,
+                                turningEncoder,
+                                20 * Math.PI,
+                                turningController2,
+                                profile,
+                                MathUtil::angleModulus);
 
-        ChoosableProfile profile = new ChoosableProfile(
-                20 * Math.PI,
-                20 * Math.PI,
-                0, ChoosableProfile.Mode.TRAPEZOID);
-        PositionServo<Angle> turningServo = new PositionServo<>(
-                name,
-                turningVelocityServo,
-                turningEncoder,
-                20 * Math.PI,
-                turningController2,
-                profile,
-                MathUtil::angleModulus);
-
-        return new SwerveModule100(driveServo, turningServo);
-    }
+                return new SwerveModule100(driveServo, turningServo);
+        }
 
 }

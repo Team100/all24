@@ -3,6 +3,7 @@ package org.team100.frc2023;
 import java.io.IOException;
 import java.util.List;
 
+import org.team100.lib.commands.arm.ManualArm;
 import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -24,10 +25,12 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.VisionDataProvider;
+import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -40,6 +43,7 @@ import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -250,6 +254,24 @@ public class RobotContainer implements Testable {
         // trying the new ChoreoLib
         control.actualCircle().whileTrue(CommandMaker.choreo(m_drive));
 
+        ///////////////////////
+        //
+        // ARM
+        //
+
+        OperatorControl operatorControl = new ControlFactory().getOperatorControl();
+
+        m_armSubsystem = ArmFactory.get();
+        m_armKinematicsM = new ArmKinematics(0.93, 0.92);
+
+        operatorControl.doSomething().whileTrue(new Sequence(m_armSubsystem, m_armKinematicsM));
+
+        m_armSubsystem.setDefaultCommand(
+                new ManualArm(
+                        m_armSubsystem,
+                        operatorControl::lower,
+                        operatorControl::upper));
+
         ///////////////////////////
         //
         // DRIVE
@@ -286,13 +308,9 @@ public class RobotContainer implements Testable {
         switch (identity) {
             case TEST_BOARD_6B:
                 // TODO: use the correct identity.
-                m_armSubsystem = new ArmSubsystem();
-                m_armKinematicsM = new ArmKinematics(0.93, 0.92);
                 m_auton = new Sequence(m_armSubsystem, m_armKinematicsM);
                 break;
             default:
-                m_armSubsystem = null;
-                m_armKinematicsM = null;
                 m_auton = m_drive.runInit(m_drive::defense);
                 break;
         }

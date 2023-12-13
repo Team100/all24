@@ -12,6 +12,7 @@
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -21,15 +22,43 @@
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Telemetry Level": {
+      "/SmartDashboard/SideView": {
         "window": {
           "visible": true
         }
       },
-      "/field": {
+      "/SmartDashboard/Telemetry Level": {
         "window": {
           "visible": true
         }
+      }
+    }
+  },
+  "NetworkTables": {
+    "retained": {
+      "arm": {
+        "lower": {
+          "open": true,
+          "simulated_encoder": {
+            "open": true
+          },
+          "simulated_motor": {
+            "open": true
+          }
+        },
+        "open": true,
+        "upper": {
+          "open": true,
+          "simulated_encoder": {
+            "open": true
+          },
+          "simulated_motor": {
+            "open": true
+          }
+        }
+      },
+      "arm_trajectory": {
+        "open": true
       }
     }
   }

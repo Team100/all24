@@ -97,4 +97,9 @@ public class CANTurningMotor implements Motor100<Angle> {
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);
     }
+
+    @Override
+    public void close() {
+        m_motor.close();
+    }
 }

@@ -2,6 +2,9 @@ package org.team100.lib.motion.arm;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
+/**
+ * Kinematics for two-jointed planar arm.
+ */
 public class ArmKinematics {
     private final double l1;
     private final double l2;
@@ -61,13 +64,17 @@ public class ArmKinematics {
     }
 
     public ArmAngles inverseVel(ArmAngles pos, Translation2d vel) {
+        if (pos == null) {
+            System.out.println("NULL ARM POSITION in ArmKinematics.inverseVel()");
+            return new ArmAngles(0, 0);
+        }
         double dx = vel.getX();
         double dy = vel.getY();
 
         double dth1 = (dx * Math.cos(pos.th2) + dy * Math.sin(pos.th2))
                 / (l1 * Math.sin(pos.th2 - pos.th1));
 
-        double dth2 = (dx * Math.cos(pos.th1) + dy * Math.sin(pos.th1) )
+        double dth2 = (dx * Math.cos(pos.th1) + dy * Math.sin(pos.th1))
                 / (l2 * Math.sin(pos.th1 - pos.th2));
 
         return new ArmAngles(dth1, dth2);
