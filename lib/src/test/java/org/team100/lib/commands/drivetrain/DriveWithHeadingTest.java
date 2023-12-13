@@ -20,7 +20,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveWithHeadingTest {
-    private static final double kDelta = 0.001;
+    // using SimHooks means timing is a bit approximate so delta is a bit larger
+    private static final double kDelta = 0.01;
 
     // These are members so we can capture them without making them final.
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
@@ -34,8 +35,8 @@ class DriveWithHeadingTest {
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
-        PIDController thetaController = new PIDController(3.5,0,0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         DriveWithHeading command = new DriveWithHeading(
                 twistSupplier,
                 robotDrive,
@@ -64,8 +65,8 @@ class DriveWithHeadingTest {
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
-        PIDController thetaController = new PIDController(3.5,0,0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         DriveWithHeading command = new DriveWithHeading(
                 twistSupplier,
                 robotDrive,
@@ -101,8 +102,8 @@ class DriveWithHeadingTest {
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
-        PIDController thetaController = new PIDController(3.5,0,0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         DriveWithHeading command = new DriveWithHeading(
                 twistSupplier,
                 robotDrive,
@@ -133,7 +134,7 @@ class DriveWithHeadingTest {
         desiredRotation = null;
 
         SimHooks.stepTiming(1);
-        robotDrive.pose = new Pose2d(0,0,new Rotation2d(0.5));
+        robotDrive.pose = new Pose2d(0, 0, new Rotation2d(0.5));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
@@ -144,7 +145,7 @@ class DriveWithHeadingTest {
 
         // almost done
         SimHooks.stepTiming(1.4);
-        robotDrive.pose =  new Pose2d(0,0,new Rotation2d(1.555));
+        robotDrive.pose = new Pose2d(0, 0, new Rotation2d(1.555));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
@@ -154,7 +155,7 @@ class DriveWithHeadingTest {
         assertEquals(0.175, robotDrive.twist.dtheta, kDelta);
 
         SimHooks.stepTiming(100);
-        robotDrive.pose =  new Pose2d(0,0,new Rotation2d(Math.PI/2));
+        robotDrive.pose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         command.execute();
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
@@ -174,8 +175,8 @@ class DriveWithHeadingTest {
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
-        PIDController thetaController = new PIDController(3.5,0,0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         DriveWithHeading command = new DriveWithHeading(
                 twistSupplier,
                 robotDrive,
@@ -203,10 +204,10 @@ class DriveWithHeadingTest {
         // let go of the pov to let the profile run.
         // TODO: if you keep desired rotation the same (not null) it should
         // still execute the profile
-        //desiredRotation = null;
+        // desiredRotation = null;
 
         SimHooks.stepTiming(1);
-        robotDrive.pose = new Pose2d(0,0,new Rotation2d(0.5));
+        robotDrive.pose = new Pose2d(0, 0, new Rotation2d(0.5));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
@@ -217,7 +218,7 @@ class DriveWithHeadingTest {
 
         // almost done
         SimHooks.stepTiming(1.4);
-        robotDrive.pose =  new Pose2d(0,0,new Rotation2d(1.555));
+        robotDrive.pose = new Pose2d(0, 0, new Rotation2d(1.555));
         command.execute();
         assertEquals(1, command.m_manualWithHeading.m_profile.get(1).getV(), kDelta);
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
@@ -228,7 +229,7 @@ class DriveWithHeadingTest {
 
         SimHooks.stepTiming(100);
         // done
-        robotDrive.pose =  new Pose2d(0,0,new Rotation2d(Math.PI/2));
+        robotDrive.pose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         command.execute();
         assertNotNull(command.m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, robotDrive.twist.dx, kDelta);
