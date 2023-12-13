@@ -4,6 +4,11 @@
       "window": {
         "visible": false
       }
+    },
+    "Timing": {
+      "window": {
+        "visible": false
+      }
     }
   },
   "NTProvider": {
@@ -13,53 +18,32 @@
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/SideView": {
         "window": {
+          "name": "ARM",
           "visible": true
         }
       },
-      "/SmartDashboard/Telemetry Level": {
+      "/SmartDashboard/elevator": {
         "window": {
+          "name": "ELEVATOR",
           "visible": true
         }
       }
     }
   },
-  "NetworkTables": {
-    "retained": {
-      "arm": {
-        "lower": {
-          "open": true,
-          "simulated_encoder": {
-            "open": true
-          },
-          "simulated_motor": {
-            "open": true
-          }
-        },
-        "open": true,
-        "upper": {
-          "open": true,
-          "simulated_encoder": {
-            "open": true
-          },
-          "simulated_motor": {
-            "open": true
-          }
-        }
-      },
-      "arm_trajectory": {
-        "open": true
-      }
-    }
+  "NetworkTables View": {
+    "visible": false
   }
 }

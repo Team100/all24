@@ -26,8 +26,9 @@ public class SimulatedMotor<T> implements Motor100<T> {
     public void setDutyCycle(double output) {
         output = MathUtil.clamp(output, -1, 1);
         t.log(Level.DEBUG, m_name + "/duty_cycle", output);
-        // this is an absurd motor model
-        setVelocity(output * 10, 0);
+        // this is an absurd motor model.
+        // TODO: make this mean something?
+        setVelocity(output * 20, 0);
     }
 
     @Override

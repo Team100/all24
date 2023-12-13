@@ -17,6 +17,8 @@ import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
+import org.team100.lib.commands.simple.SimpleManual;
+import org.team100.lib.commands.simple.SimpleManualMode;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -43,6 +45,8 @@ import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motion.simple.SimpleSubsystem;
+import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.HeadingFactory;
@@ -102,6 +106,8 @@ public class RobotContainer implements Testable {
     // Identity-specific fields
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
+
+    private final SimpleSubsystem m_elevator;
 
     public RobotContainer(TimedRobot robot) throws IOException {
 
@@ -271,6 +277,14 @@ public class RobotContainer implements Testable {
                         m_armSubsystem,
                         operatorControl::lower,
                         operatorControl::upper));
+
+        ///////////////////////////
+        //
+        // ELEVATOR
+        //
+        m_elevator = new SimpleSubsystemFactory(identity, experiments).get();
+        SimpleManualMode simpleMode = new SimpleManualMode();
+        m_elevator.setDefaultCommand(new SimpleManual(simpleMode, m_elevator, operatorControl::elevator));
 
         ///////////////////////////
         //

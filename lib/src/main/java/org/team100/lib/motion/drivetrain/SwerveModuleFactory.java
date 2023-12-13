@@ -282,10 +282,10 @@ public class SwerveModuleFactory {
 
         public SwerveModule100 SimulatedModule(String name) {
                 SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive motor");
-                // TODO: what should the reduction be here?  is the drive motor velocity
+                // TODO: what should the reduction be here? is the drive motor velocity
                 // command actually the velocity after reduction?
-                SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(new Distance() {
-                }, name + "/drive encoder", driveMotor, 1);
+                SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(Distance.instance,
+                                name + "/drive encoder", driveMotor, 1);
                 PIDController driveController = new PIDController(//
                                 0.1, // kP
                                 0, // kI
@@ -305,10 +305,10 @@ public class SwerveModuleFactory {
                                 driveFeedforward);
 
                 SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name + "/turning motor");
-                // TODO: what should the reduction be here?  is the turning motor velocity
+                // TODO: what should the reduction be here? is the turning motor velocity
                 // command actually the velocity after reduction?
-                SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(new Angle() {
-                }, name + "/turning encoder", turningMotor, 1);
+                SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(
+                                Angle.instance, name + "/turning encoder", turningMotor, 1);
                 PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
                 SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
                                 0.05, // kS

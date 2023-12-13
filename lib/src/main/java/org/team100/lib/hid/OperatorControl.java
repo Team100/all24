@@ -23,4 +23,8 @@ public interface OperatorControl {
     default double upper() {
         return 0;
     }
+
+    default double elevator() {
+        return 0;
+    }
 }

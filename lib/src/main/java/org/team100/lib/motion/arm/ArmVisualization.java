@@ -1,6 +1,5 @@
 package org.team100.lib.motion.arm;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -33,11 +32,11 @@ public class ArmVisualization {
 
         m_boomLigament = new MechanismLigament2d("Boom",
                 25, Units.radiansToDegrees(angles.th1), 5, new Color8Bit(Color.kWhite));
-        m_sideRoot.append(m_boomLigament);
 
         m_stickLigament = new MechanismLigament2d("Stick",
                 25, Units.radiansToDegrees(angles.th2 - angles.th1), 5, new Color8Bit(Color.kLightGreen));
-        m_boomLigament.append(m_stickLigament);
+
+        m_sideRoot.append(m_boomLigament).append(m_stickLigament);
 
         SmartDashboard.putData("SideView", m_sideView);
     }
