@@ -58,4 +58,9 @@ public class NeoTurningMotor implements Motor100<Angle> {
         m_pidController.setReference(kMotorGearing * outputRadiansPerSec, CANSparkMax.ControlType.kVelocity);
         throw new UnsupportedOperationException("NEO closed loop velocity control is uncalibrated.");
     }
+
+    @Override
+    public void close() {
+        m_motor.close();
+    }
 }

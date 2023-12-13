@@ -100,4 +100,9 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
         m_input.close();
         m_encoder.close();
     }
+
+    @Override
+    public double getAbsolutePosition() {
+        return m_encoder.getAbsolutePosition();
+    }
 }

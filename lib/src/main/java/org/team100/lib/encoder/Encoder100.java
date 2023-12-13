@@ -17,6 +17,9 @@ public interface Encoder100<T> {
      */
     double getPosition();
 
+    /** Does not accumulate */
+    double getAbsolutePosition();
+
     /**
      * Angular or linear velocity depending on parameter.
      * 

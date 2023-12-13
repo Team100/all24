@@ -24,4 +24,9 @@ public class MockEncoder100<T> implements Encoder100<T> {
     public void close() {
         //
     }
+
+    @Override
+    public double getAbsolutePosition() {
+        return angle;
+    }
 }

@@ -15,8 +15,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class SimpleManual extends Command {
     private static final double kMaxDutyCycle = 0.5;
-    private static final double kMaxVelocity = 1;
-    private static final double kMaxPosition = 1;
+    private static final double kMaxVelocity = 2; // m/s
+    private static final double kMaxPosition = 2; // m
 
     private final Supplier<SimpleManualMode.Mode> m_mode;
     private final SimpleSubsystem m_simple;

@@ -15,4 +15,16 @@ public interface OperatorControl {
     default Trigger doSomething() {
         return new Trigger(() -> false);
     }
+
+    default double lower() {
+        return 0;
+    }
+
+    default double upper() {
+        return 0;
+    }
+
+    default double elevator() {
+        return 0;
+    }
 }

@@ -3,6 +3,8 @@ package org.team100.lib.motor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.MathUtil;
+
 public class SimulatedMotor<T> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
@@ -22,8 +24,11 @@ public class SimulatedMotor<T> implements Motor100<T> {
 
     @Override
     public void setDutyCycle(double output) {
+        output = MathUtil.clamp(output, -1, 1);
         t.log(Level.DEBUG, m_name + "/duty_cycle", output);
-        System.out.println("Unimplemented! SimulatedMotor.setDutyCycle");
+        // this is an absurd motor model.
+        // TODO: make this mean something?
+        setVelocity(output * 20, 0);
     }
 
     @Override
@@ -43,4 +48,8 @@ public class SimulatedMotor<T> implements Motor100<T> {
         return m_velocity;
     }
 
+    @Override
+    public void close() {
+        //
+    }
 }

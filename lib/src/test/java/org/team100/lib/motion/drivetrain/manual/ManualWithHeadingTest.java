@@ -19,7 +19,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class ManualWithHeadingTest {
-    private static final double kDelta = 0.001;
+    // a bit coarser because SimHooks.stepTiming is kinda coarse.
+    private static final double kDelta = 0.01;
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 

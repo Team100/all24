@@ -4,6 +4,11 @@
       "window": {
         "visible": false
       }
+    },
+    "Timing": {
+      "window": {
+        "visible": false
+      }
     }
   },
   "NTProvider": {
@@ -12,25 +17,33 @@
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Telemetry Level": {
+      "/SmartDashboard/SideView": {
         "window": {
+          "name": "ARM",
           "visible": true
         }
       },
-      "/field": {
+      "/SmartDashboard/elevator": {
         "window": {
+          "name": "ELEVATOR",
           "visible": true
         }
       }
     }
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

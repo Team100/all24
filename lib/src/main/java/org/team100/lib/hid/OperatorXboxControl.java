@@ -17,10 +17,24 @@ public class OperatorXboxControl implements OperatorControl {
         return m_controller.getHID().getName();
     }
 
-
     @Override
     public Trigger doSomething() {
-        return new JoystickButton(m_controller.getHID(), 0);
+        return new JoystickButton(m_controller.getHID(), 1);
+    }
+
+    @Override
+    public double lower() {
+        return m_controller.getLeftX();
+    }
+
+    @Override
+    public double upper() {
+        return m_controller.getLeftY();
+    }
+
+    @Override
+    public double elevator() {
+        return m_controller.getLeftTriggerAxis();
     }
 
 }

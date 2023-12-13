@@ -149,4 +149,9 @@ public class FalconDriveMotor implements Motor100<Distance> {
     public void resetPosition() {
         require(m_motor.setSelectedSensorPosition(0));
     }
+
+    @Override
+    public void close() {
+        m_motor.close();
+    }
 }
