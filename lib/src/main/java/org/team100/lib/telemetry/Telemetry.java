@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -231,6 +232,11 @@ public class Telemetry {
         log(level, key + "/x", state.x());
         log(level, key + "/y", state.y());
         log(level, key + "/theta", state.theta());
+    }
+
+    public void log(Level level, String key, ArmAngles angles) {
+        log(level, key + "/th1", angles.th1);
+        log(level, key + "/th2", angles.th2);
     }
 
     private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {

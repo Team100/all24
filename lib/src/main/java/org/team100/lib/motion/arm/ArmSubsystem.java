@@ -17,8 +17,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ArmSubsystem extends SubsystemBase {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
-    private static final double kLowerEncoderZero = 0.861614;
-    private static final double kUpperEncoderZero = 0.266396;
 
     private final Telemetry t = Telemetry.get();
     private final String m_name;
@@ -28,6 +26,9 @@ public class ArmSubsystem extends SubsystemBase {
     private final Motor100<Angle> m_upperArmMotor;
     private final Encoder100<Angle> m_lowerArmEncoder;
     private final Encoder100<Angle> m_upperArmEncoder;
+    // zeros are measured in TURNS NOT RADIANS
+    private final double m_lowerEncoderZero;
+    private final double m_upperEncoderZero;
     private final ArmVisualization m_viz;
 
     private ArmAngles m_previousPosition;
@@ -38,7 +39,9 @@ public class ArmSubsystem extends SubsystemBase {
             Motor100<Angle> lowerMotor,
             Encoder100<Angle> lowerEncoder,
             Motor100<Angle> upperMotor,
-            Encoder100<Angle> upperEncoder) {
+            Encoder100<Angle> upperEncoder,
+            double lowerEncoderZero,
+            double upperEncoderZero) {
         m_name = name;
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
@@ -47,6 +50,8 @@ public class ArmSubsystem extends SubsystemBase {
         m_lowerArmEncoder = lowerEncoder;
         m_upperArmMotor = upperMotor;
         m_upperArmEncoder = upperEncoder;
+        m_lowerEncoderZero = lowerEncoderZero;
+        m_upperEncoderZero = upperEncoderZero;
 
         m_viz = new ArmVisualization(this);
 
@@ -100,14 +105,18 @@ public class ArmSubsystem extends SubsystemBase {
 
     /** Lower arm angle (radians), 0 up, positive forward. */
     private double getLowerArmAngleRadians() {
-        double x = (m_lowerArmEncoder.getAbsolutePosition() - kLowerEncoderZero) * 360;
-        return (-1.0 * x) * Math.PI / 180;
+        double posRad = m_lowerArmEncoder.getAbsolutePosition();
+        double posTurn = posRad / (2 * Math.PI);
+        double correctedPosTurn = (posTurn - m_lowerEncoderZero);
+        return correctedPosTurn * 2 * Math.PI;
     }
 
     /** Upper arm angle (radians), 0 up, positive forward. */
     private double getUpperArmAngleRadians() {
-        double x = (m_upperArmEncoder.getAbsolutePosition() - kUpperEncoderZero) * 360;
-        return x * Math.PI / 180;
+        double posRad = m_upperArmEncoder.getAbsolutePosition();
+        double posTurn = posRad / (2 * Math.PI);
+        double correctedPosTurn = (posTurn - m_upperEncoderZero);
+        return correctedPosTurn * 2 * Math.PI;
     }
 
 }

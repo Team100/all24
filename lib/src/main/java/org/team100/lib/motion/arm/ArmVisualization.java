@@ -31,10 +31,10 @@ public class ArmVisualization {
         MechanismRoot2d m_sideRoot = m_sideView.getRoot("SideRoot", 50, 50);
 
         m_boomLigament = new MechanismLigament2d("Boom",
-                25, Units.radiansToDegrees(angles.th1), 5, new Color8Bit(Color.kWhite));
+                25, boomAngleDeg(angles), 5, new Color8Bit(Color.kWhite));
 
         m_stickLigament = new MechanismLigament2d("Stick",
-                25, Units.radiansToDegrees(angles.th2 - angles.th1), 5, new Color8Bit(Color.kLightGreen));
+                25, stickAngleDeg(angles), 5, new Color8Bit(Color.kLightGreen));
 
         m_sideRoot.append(m_boomLigament).append(m_stickLigament);
 
@@ -43,8 +43,18 @@ public class ArmVisualization {
 
     public void periodic() {
         ArmAngles angles = m_armSubsystem.getPosition();
-        m_boomLigament.setAngle(Units.radiansToDegrees(angles.th1));
-        m_stickLigament.setAngle(Units.radiansToDegrees(angles.th2 - angles.th1));
+        m_boomLigament.setAngle(boomAngleDeg(angles));
+        m_stickLigament.setAngle(stickAngleDeg(angles));
+    }
+
+    // zero is straight up
+    private double boomAngleDeg(ArmAngles angles) {
+        return Units.radiansToDegrees(angles.th1) + 90;
+    }
+
+    // the viz stick angle is relative to the boom
+    private double stickAngleDeg(ArmAngles angles) {
+        return Units.radiansToDegrees(angles.th2 - angles.th1);
     }
 
 }

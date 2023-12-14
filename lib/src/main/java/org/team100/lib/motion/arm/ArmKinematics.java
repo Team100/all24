@@ -70,6 +70,15 @@ public class ArmKinematics {
         }
         double dx = vel.getX();
         double dy = vel.getY();
+        if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001)
+            return new ArmAngles(0, 0);
+
+        if (Math.abs(pos.th1 - pos.th2) < 0.001) {
+            // when th1 and th2 are the same, the arm is straight.
+            // in that case, any movement along the arm requires infinite joint velocity
+            System.out.println("STRAIGHT ARM in ArmKinematics.inverseVel()");
+            return new ArmAngles(0, 0);
+        }
 
         double dth1 = (dx * Math.cos(pos.th2) + dy * Math.sin(pos.th2))
                 / (l1 * Math.sin(pos.th2 - pos.th1));

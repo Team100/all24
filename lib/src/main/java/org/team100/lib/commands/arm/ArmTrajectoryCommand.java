@@ -64,6 +64,8 @@ public class ArmTrajectoryCommand extends Command {
 
         m_lowerPosController = new PIDController(kLowerP, kLowerI, kLowerD);
         m_upperPosController = new PIDController(kUpperP, kUpperI, kUpperD);
+        m_lowerPosController.enableContinuousInput(-Math.PI, Math.PI);
+        m_upperPosController.enableContinuousInput(-Math.PI, Math.PI);
         m_lowerVelController = new PIDController(0.1, 0, 0);
         m_upperVelController = new PIDController(0.1, 0, 0);
 

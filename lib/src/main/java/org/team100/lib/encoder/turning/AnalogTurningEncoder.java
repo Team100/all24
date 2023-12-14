@@ -5,6 +5,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -101,8 +102,10 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
         m_encoder.close();
     }
 
+    /** This is now measured in RADIANS RADIANS RADIANS */
     @Override
     public double getAbsolutePosition() {
-        return m_encoder.getAbsolutePosition();
+        double positionTurns = m_encoder.getAbsolutePosition();
+        return MathUtil.angleModulus(2 * Math.PI * positionTurns);
     }
 }

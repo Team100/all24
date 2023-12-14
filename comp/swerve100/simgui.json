@@ -4,11 +4,6 @@
       "window": {
         "visible": false
       }
-    },
-    "Timing": {
-      "window": {
-        "visible": false
-      }
     }
   },
   "NTProvider": {
@@ -31,19 +26,44 @@
     "windows": {
       "/SmartDashboard/SideView": {
         "window": {
-          "name": "ARM",
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
           "visible": true
         }
       },
       "/SmartDashboard/elevator": {
         "window": {
-          "name": "ELEVATOR",
           "visible": true
         }
       }
     }
   },
-  "NetworkTables View": {
-    "visible": false
+  "NetworkTables": {
+    "retained": {
+      "arm position": {
+        "cartesian_measurement": {
+          "open": true
+        },
+        "error": {
+          "open": true
+        },
+        "input": {
+          "open": true
+        },
+        "measurement": {
+          "open": true
+        },
+        "open": true,
+        "output": {
+          "open": true
+        },
+        "setpoint": {
+          "open": true
+        }
+      }
+    }
   }
 }

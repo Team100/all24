@@ -19,4 +19,9 @@ public class ArmAngles {
         this.th1 = th1;
         this.th2 = th2;
     }
+
+    @Override
+    public String toString() {
+        return "ArmAngles [th1=" + th1 + ", th2=" + th2 + "]";
+    }
 }
