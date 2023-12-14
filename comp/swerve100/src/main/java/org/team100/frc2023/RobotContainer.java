@@ -3,6 +3,8 @@ package org.team100.frc2023;
 import java.io.IOException;
 import java.util.List;
 
+import org.team100.lib.commands.arm.CartesianManualArm;
+import org.team100.lib.commands.arm.CartesianManualPositionalArm;
 import org.team100.lib.commands.arm.ManualArm;
 import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.CommandMaker;
@@ -272,9 +274,23 @@ public class RobotContainer implements Testable {
 
         operatorControl.doSomething().whileTrue(new Sequence(m_armSubsystem, m_armKinematicsM));
 
-        m_armSubsystem.setDefaultCommand(
+        operatorControl.never().whileTrue(
                 new ManualArm(
                         m_armSubsystem,
+                        operatorControl::lower,
+                        operatorControl::upper));
+
+        operatorControl.never().whileTrue(
+                new CartesianManualArm(
+                        m_armSubsystem,
+                        m_armKinematicsM,
+                        operatorControl::lower,
+                        operatorControl::upper));
+
+        m_armSubsystem.setDefaultCommand(
+                new CartesianManualPositionalArm(
+                        m_armSubsystem,
+                        m_armKinematicsM,
                         operatorControl::lower,
                         operatorControl::upper));
 

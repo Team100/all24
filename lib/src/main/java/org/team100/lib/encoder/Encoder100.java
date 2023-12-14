@@ -17,7 +17,9 @@ public interface Encoder100<T> {
      */
     double getPosition();
 
-    /** Does not accumulate */
+    /**
+     * Does not accumulate. For angles, this is measured in RADIANS.
+     */
     double getAbsolutePosition();
 
     /**

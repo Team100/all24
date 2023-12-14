@@ -109,4 +109,114 @@ class ArmKinematicsTest {
         ArmAngles a = k.inverse(t);
         assertNull(a); // this case is unreachable
     }
+
+    // these are for the inverse velocity.
+
+    @Test
+    void testInverseVelocity() {
+        // unit length
+        final ArmKinematics k = new ArmKinematics(1, 1);
+        // both joints straight up
+        final ArmAngles thetas = new ArmAngles(0, 0);
+        // not moving
+        Translation2d dXY = new Translation2d(0, 0);
+        ArmAngles dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(0, dthetas.th1, kDelta);
+        assertEquals(0, dthetas.th2, kDelta);
+
+        // this this yields the wrong number because the arm is straight
+        dXY = new Translation2d(1, 0);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(0, dthetas.th1, kDelta);
+        assertEquals(0, dthetas.th2, kDelta);
+    }
+
+    @Test
+    void testInverseVelocity2() {
+        // unit length
+        final ArmKinematics k = new ArmKinematics(1, 1);
+        // proximal +x, distal +y
+        final ArmAngles thetas = new ArmAngles(0, Math.PI / 2);
+        // not moving
+        Translation2d dXY = new Translation2d(0, 0);
+        ArmAngles dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(0, dthetas.th1, kDelta);
+        assertEquals(0, dthetas.th2, kDelta);
+
+        // x motion requires distal movement only
+        dXY = new Translation2d(1, 0);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(0, dthetas.th1, kDelta);
+        assertEquals(-1, dthetas.th2, kDelta);
+
+        // y motion requires proximal movement only
+        dXY = new Translation2d(0, 1);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(1, dthetas.th1, kDelta);
+        assertEquals(0, dthetas.th2, kDelta);
+
+        // combined motion
+        dXY = new Translation2d(1, 1);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(1, dthetas.th1, kDelta);
+        assertEquals(-1, dthetas.th2, kDelta);
+
+        // faster
+        dXY = new Translation2d(2, 2);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(2, dthetas.th1, kDelta);
+        assertEquals(-2, dthetas.th2, kDelta);
+    }
+
+    @Test
+    void testInverseVelocity3() {
+        // unit length
+        final ArmKinematics k = new ArmKinematics(1, 1);
+        // proximal +x, distal at 45 degrees
+        final ArmAngles thetas = new ArmAngles(0, Math.PI / 4);
+        // not moving
+        Translation2d dXY = new Translation2d(0, 0);
+        ArmAngles dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(0, dthetas.th1, kDelta);
+        assertEquals(0, dthetas.th2, kDelta);
+
+        // x motion
+        dXY = new Translation2d(1, 0);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(1, dthetas.th1, kDelta);
+        assertEquals(-1.414, dthetas.th2, kDelta);
+
+        // y motion is the same
+        dXY = new Translation2d(0, 1);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(1, dthetas.th1, kDelta);
+        assertEquals(0, dthetas.th2, kDelta);
+
+        // directly away from the origin should be equal joint motion
+        dXY = new Translation2d(1, 0.414);
+        dthetas = k.inverseVel(thetas, dXY);
+        assertEquals(1.414, dthetas.th1, kDelta);
+        assertEquals(-1.414, dthetas.th2, kDelta);
+    }
+
+    @Test
+    void testdtheta1() {
+        ArmKinematics kinematics = new ArmKinematics(.93, .92);
+        ArmAngles thetas = new ArmAngles(0, Math.PI / 2);
+        Translation2d dXY = new Translation2d(.92, 0);
+        ArmAngles dtheta = kinematics.inverseVel(thetas, dXY);
+        assertEquals(0, dtheta.th1, kDelta);
+        assertEquals(-1, dtheta.th2, kDelta);
+    }
+
+    @Test
+    void testdtheta2() {
+        ArmKinematics kinematics = new ArmKinematics(1, 1);
+        ArmAngles thetas = new ArmAngles(Math.PI / 4, 0);
+        Translation2d dXY = new Translation2d(1, 0);
+        ArmAngles dtheta = kinematics.inverseVel(thetas, dXY);
+        assertEquals(1, dtheta.th2, kDelta, "UPPER THETA VALUE: " + dtheta.th2);
+        assertEquals(-1.414, dtheta.th1, kDelta, "LOWER THETA VALUE: " + dtheta.th1);
+    }
+
 }

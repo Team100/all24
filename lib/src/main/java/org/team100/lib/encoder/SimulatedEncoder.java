@@ -16,7 +16,11 @@ public class SimulatedEncoder<T extends Measure> implements Encoder100<T> {
     private double m_position = 0;
     private double m_time = Timer.getFPGATimestamp();
 
-    public SimulatedEncoder(T measure, String name, SimulatedMotor<T> motor, double reduction) {
+    public SimulatedEncoder(
+            T measure,
+            String name,
+            SimulatedMotor<T> motor,
+            double reduction) {
         m_measure = measure;
         m_name = name + "/simulated_encoder";
         m_motor = motor;
@@ -50,8 +54,13 @@ public class SimulatedEncoder<T extends Measure> implements Encoder100<T> {
         //
     }
 
+    /**
+     * This is measured in RADIANS
+     */
     @Override
     public double getAbsolutePosition() {
-        return m_measure.modulus(getPosition());
+        double absolutePosition = m_measure.modulus(getPosition());
+        t.log(Level.DEBUG, m_name + "/absolute position", absolutePosition);
+        return absolutePosition;
     }
 }
