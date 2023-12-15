@@ -13,6 +13,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Drive the arm to the specified cartesian position.
+ * 
+ * There are several flaws in this implementation.
+ */
 public class CartesianManualPositionalArm extends Command {
     private final Telemetry t = Telemetry.get();
 

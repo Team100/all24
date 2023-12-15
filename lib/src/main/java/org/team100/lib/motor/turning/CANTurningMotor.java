@@ -13,14 +13,17 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+/**
+ * Swerve steering motor using TalonSRX.
+ */
 public class CANTurningMotor implements Motor100<Angle> {
-    private final Telemetry t = Telemetry.get();
+    private static final double m_gearRatio = 355 / 6;
+    private static final double ticksPerRevolution = 28;
+    private static final double kTurningCurrentLimit = 7;
 
-    private final double m_gearRatio = 355 / 6;
+    private final Telemetry t = Telemetry.get();
     private final WPI_TalonSRX m_motor;
-    private final double ticksPerRevolution = 28;
     private final int canID;
-    public static final double kTurningCurrentLimit = 7;
     private final AnalogTurningEncoder m_encoder;
     private final String m_name;
 

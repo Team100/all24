@@ -5,7 +5,9 @@ import org.team100.lib.geometry.GeometryUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-/** Used to track setpoints over time and enforce limits. */
+/** 
+ * Used to track setpoints over time and enforce limits.
+ */
 public class SwerveSetpoint {
     private final ChassisSpeeds m_ChassisSpeeds;
     private final SwerveModuleState[] m_ModuleStates;

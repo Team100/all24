@@ -10,6 +10,10 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.math.MathUtil;
 
+/**
+ * This was an attempt to use the TalonSRX data interface for absolute encoder,
+ * but it didn't work out. Maybe we should delete it.
+ */
 public class TalonSRXTurningEncoder implements Encoder100<Angle> {
     private static final int ticksPerRevolution = 1666;
 

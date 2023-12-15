@@ -11,7 +11,9 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
 import edu.wpi.first.math.util.Units;
 
-/** Various ways to create trajectories. */
+/**
+ * Various ways to create arm trajectories.
+ */
 public class ArmTrajectories {
     private final TrajectoryConfig m_trajectoryConfig;
 

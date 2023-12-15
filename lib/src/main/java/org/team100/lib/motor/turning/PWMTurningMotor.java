@@ -8,6 +8,9 @@ import org.team100.lib.units.Angle;
 import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
+/**
+ * Swerve steering motor using PWM control.
+ */
 public class PWMTurningMotor implements Motor100<Angle> {
     private final Telemetry t = Telemetry.get();
     private final PWMMotorController m_motor;

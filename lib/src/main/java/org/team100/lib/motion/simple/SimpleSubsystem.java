@@ -5,7 +5,9 @@ import org.team100.lib.units.Distance;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/** Represents a simple one-dimensional mechanism. */
+/**
+ * Represents a simple one-dimensional mechanism.
+ */
 public class SimpleSubsystem extends SubsystemBase {
 
     private final PositionServo<Distance> m_actuator;

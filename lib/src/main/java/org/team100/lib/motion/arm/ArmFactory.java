@@ -9,6 +9,9 @@ import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.units.Angle;
 
+/**
+ * Produces real or simulated arm subsystems depending on identity.
+ */
 public class ArmFactory {
     private static final String kArm = "/arm";
     private static final String kLower = "/arm/lower";

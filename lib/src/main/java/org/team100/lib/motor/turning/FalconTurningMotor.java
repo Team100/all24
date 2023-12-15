@@ -14,6 +14,9 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+/**
+ * Swerve steering motor using Falcon 500.
+ */
 public class FalconTurningMotor implements Motor100<Angle> {
     private static final double ticksPerRevolution = 2048;
     private static final double gearRatio = 10.29;

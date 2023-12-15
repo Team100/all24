@@ -7,6 +7,9 @@ import org.team100.lib.units.Measure;
 
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * Simulated encoder that integrates motor velocity to get position.
+ */
 public class SimulatedEncoder<T extends Measure> implements Encoder100<T> {
     private final Telemetry t = Telemetry.get();
     private final T m_measure;

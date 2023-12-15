@@ -6,6 +6,9 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
 
+/**
+ * The built-in encoder in Falcon motors.
+ */
 public class FalconDriveEncoder implements Encoder100<Distance> {
     private final Telemetry t = Telemetry.get();
 

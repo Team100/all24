@@ -7,7 +7,6 @@ import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.profile.ChoosableProfile;
@@ -16,6 +15,9 @@ import org.team100.lib.units.Distance;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
+/**
+ * Produce a real or simulated subsystem depending on identity.
+ */
 public class SimpleSubsystemFactory {
     private final Identity m_identity;
     private final Experiments m_experiments;

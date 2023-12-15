@@ -5,7 +5,9 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-/** Publishes the value on NT but doesn't allow change. */
+/**
+ * Publishes the value on NT but doesn't allow change.
+ */
 public class ConstantParameter implements DoubleSupplier {
     private final double m_value;
     private final NetworkTableEntry m_entry;

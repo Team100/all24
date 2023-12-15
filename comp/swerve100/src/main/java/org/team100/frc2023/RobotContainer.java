@@ -8,6 +8,7 @@ import org.team100.lib.commands.arm.CartesianManualPositionalArm;
 import org.team100.lib.commands.arm.ManualArm;
 import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.CommandMaker;
+import org.team100.lib.commands.drivetrain.DrawCircle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -58,7 +59,6 @@ import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.trajectory.DrawCircle;
 import org.team100.lib.trajectory.TrajectoryMaker;
 
 import edu.wpi.first.math.VecBuilder;

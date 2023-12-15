@@ -5,6 +5,9 @@ import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
 
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
+/**
+ * Produces real or simulated gyros depending on identity.
+ */
 public class HeadingFactory {
 
     public static HeadingInterface get(

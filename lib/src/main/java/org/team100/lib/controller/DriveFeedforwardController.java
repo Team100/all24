@@ -13,6 +13,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
+/**
+ * Follow a 254 trajectory using feedforward only.
+ */
 public class DriveFeedforwardController implements DriveMotionController {
     public static final Telemetry t = Telemetry.get();
 
