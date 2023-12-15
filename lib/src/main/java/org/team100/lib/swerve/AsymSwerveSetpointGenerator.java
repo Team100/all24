@@ -15,14 +15,21 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
+ * Just-in-time kinodynamic limits.
+ * 
+ * This version uses different limits for acceleration and for deceleration,
+ * which better matches real robot behavior.
+ * 
+ * TODO: use a more realistic centripetal acceleration limit, and a better way
+ * to manage it.
+ * 
  * Takes a prior setpoint (ChassisSpeeds), a desired setpoint (from a driver, or
- * from a path follower), and outputs a new setpoint
- * that respects all of the kinematic constraints on module rotation speed and
- * wheel velocity/acceleration. By generating a new
- * setpoint every iteration, the robot will converge to the desired setpoint
- * quickly while avoiding any intermediate state that is
- * kinematically infeasible (and can result in wheel slip or robot heading drift
- * as a result).
+ * from a path follower), and outputs a new setpoint that respects all of the
+ * kinematic constraints on module rotation speed and wheel velocity and
+ * acceleration. By generating a new setpoint every iteration, the robot will
+ * converge to the desired setpoint quickly while avoiding any intermediate
+ * state that is kinematically infeasible (and can result in wheel slip or robot
+ * heading drift as a result).
  */
 public class AsymSwerveSetpointGenerator {
     public static class KinematicLimits {

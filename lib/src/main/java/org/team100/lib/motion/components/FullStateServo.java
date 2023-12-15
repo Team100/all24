@@ -12,7 +12,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
-/** This is positional control with velocity, so full-state. */
+/**
+ * Profiled motion with feedforward and feedback on position and velocity.
+*/
 public class FullStateServo<T> {
     private static final double kDeadband = 0.03;
     

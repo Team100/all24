@@ -9,6 +9,9 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController;
 
+/**
+ * Swerve steering motor using REV Neo.
+ */
 public class NeoTurningMotor implements Motor100<Angle> {
     private static final int kCurrentLimit = 40;
     private static final double kMotorGearing = 1;

@@ -8,6 +8,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * A simulated gyro that uses drivetrain odometry.
+ */
 public class SimulatedHeading implements HeadingInterface {
     private double m_heading = 0;
     private final SwerveDriveKinematics m_kinematics;

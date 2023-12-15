@@ -12,7 +12,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
-/** Positional control on top of a velocity servo. */
+/**
+ * Positional control on top of a velocity servo.
+ */
 public class PositionServo<T> {
     private static final double kDeadband = 0.03;
     

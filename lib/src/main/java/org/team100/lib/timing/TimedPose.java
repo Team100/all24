@@ -6,7 +6,9 @@ import java.text.DecimalFormat;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
 
-/** Timed Pose now includes the heading part, timed rotation is gone. */
+/**
+ * Timed Pose now includes the heading part, timed rotation is gone.
+ */
 public class TimedPose {
     private final Pose2dWithMotion state_;
     protected double timeS; // Time we achieve this state.

@@ -5,6 +5,11 @@ import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 
+/**
+ * Very simple simulated motor.
+ * 
+ * TODO: make it more realistic.
+ */
 public class SimulatedMotor<T> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;

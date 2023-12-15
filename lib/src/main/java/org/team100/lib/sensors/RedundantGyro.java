@@ -11,7 +11,11 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 
-// TODO: figure out why we disabled this mechanism during the 2023 season
+/**
+ * Combine two NavX AHRS to increase reliability.
+ * 
+ * TODO: figure out why we disabled this mechanism during the 2023 season
+ */
 public class RedundantGyro implements RedundantGyroInterface {
 
     /** For robots without a gyro. */

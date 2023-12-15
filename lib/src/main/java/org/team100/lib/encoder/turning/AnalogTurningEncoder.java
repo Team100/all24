@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
+ */
 public class AnalogTurningEncoder implements Encoder100<Angle> {
     /** Describes how the encoder angle is linked to the steering angle. */
     public enum Drive {

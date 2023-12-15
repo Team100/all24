@@ -16,6 +16,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
+ * Follow a 254 trajectory using pure pursuit.
+ * 
  * This originated in DriveMotionPlanner, which included several
  * controllers.
  */

@@ -11,6 +11,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 
+/**
+ *  Lots of utility functions.
+ */
 public class GeometryUtil {
 
     public static final Rotation2d kRotationZero = new Rotation2d();

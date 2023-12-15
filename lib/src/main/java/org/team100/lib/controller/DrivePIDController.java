@@ -14,11 +14,10 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
+ * Follow a 254 trajectory using positional feedback and velocity feedforward.
+ * 
  * This originated in DriveMotionPlanner, which included several
  * controllers.
- * 
- * Implements feedforward based on trajectory velocity, and proportional
- * feedback on pose.
  */
 public class DrivePIDController implements DriveMotionController {
     public static final Telemetry t = Telemetry.get();

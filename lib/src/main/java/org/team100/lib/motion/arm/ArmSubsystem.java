@@ -11,8 +11,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Arm mechanism with two joints.
- * 
- * 
  */
 public class ArmSubsystem extends SubsystemBase {
     private static final double kFilterTimeConstantS = 0.06;

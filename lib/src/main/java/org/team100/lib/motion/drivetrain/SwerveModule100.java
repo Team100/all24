@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-/** Feedforward and feedback control of a single module. */
+/**
+ * Feedforward and feedback control of a single module.
+ */
 public class SwerveModule100 {
     private final VelocityServo<Distance> m_driveServo;
     private final PositionServo<Angle> m_turningServo;

@@ -11,7 +11,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
-/** This is from 254 2023 motion planning; the main reason to include it
+/**
+ * This is from 254 2023 motion planning; the main reason to include it
  * is because it separates heading and course.
  */
 public class Pose2dWithMotion {

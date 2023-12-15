@@ -7,7 +7,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/** Contains a few motion profiles to choose from. */
+/**
+ * Contains a few motion profiles to choose from.
+ */
 public class ChoosableProfile {
     public enum Mode {
         /** The WPILib trapezoidal profile with infinite jerk */

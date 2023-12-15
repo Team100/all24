@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleSupplier;
 
-/** Provides persistent parameters, some of which map to knobs. */
+/**
+ * Provides persistent parameters, some of which map to knobs.
+ */
 public class ParameterFactory {
     private final Map<String, PersistentParameter.HIDConfig> m_knobs;
     private final Map<String, DoubleSupplier> m_parameters;

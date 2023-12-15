@@ -9,6 +9,9 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+/**
+ * Arm motor from 2023.
+ */
 public class JointMotor implements Motor100<Angle> {
     private final Telemetry t = Telemetry.get();
     private final CANSparkMax m_motor;
