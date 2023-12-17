@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
 
 class DrivePIDControllerTest {
 
@@ -88,7 +87,7 @@ class DrivePIDControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
-        DrivePIDController controller = new DrivePIDController();
+        DrivePIDFController controller = new DrivePIDFController(false);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -106,55 +105,51 @@ class DrivePIDControllerTest {
 
         {
             // System.out.println("============4 sec============");
-            ChassisSpeeds output = controller.update(4.0,
-                    new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69)),
-                    new Twist2d());
+            Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
+            ChassisSpeeds output = controller.update(4.0, measurement, new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
             assertEquals(-1, output.vxMetersPerSecond, 0.05);
             assertEquals(-0.1, output.vyMetersPerSecond, 0.05);
             // turning slowly to the left
             assertEquals(0.1, output.omegaRadiansPerSecond, 0.05);
-            Translation2d translational_error = new Translation2d(
-                    controller.getError().getTranslation().getX(),
-                    controller.getError().getTranslation().getY());
-            assertEquals(0, translational_error.getX(), 0.05);
-            assertEquals(0, translational_error.getY(), 0.05);
-            Rotation2d heading_error = controller.getError().getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.05);
-            TimedPose path_setpoint = controller.getSetpoint();
+
+            TimedPose path_setpoint = controller.getSetpoint(4).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
             assertEquals(1.69, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
             assertEquals(4, path_setpoint.getTimeS(), 0.01);
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
-            // Rotation2d heading_setpoint = mMotionPlanner.getHeadingSetpoint();
-            // assertEquals(0, heading_setpoint.getRadians(), 0.001);
+
+            Pose2d error = DriveMotionControllerUtil.getError(measurement, path_setpoint);
+            Translation2d translational_error = error.getTranslation();
+            assertEquals(0, translational_error.getX(), 0.05);
+            assertEquals(0, translational_error.getY(), 0.05);
+            Rotation2d heading_error = error.getRotation();
+            assertEquals(0, heading_error.getRadians(), 0.05);
         }
         {
             // System.out.println("============8 sec============");
-            ChassisSpeeds output = controller.update(8.0,
-                    new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22)),
-                    new Twist2d());
+            Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
+            ChassisSpeeds output = controller.update(8.0, measurement, new Twist2d());
             assertEquals(-0.96, output.vxMetersPerSecond, 0.05);
             assertEquals(-0.05, output.vyMetersPerSecond, 0.05);
             assertEquals(0.18, output.omegaRadiansPerSecond, 0.05);
-            Translation2d translational_error = new Translation2d(
-                    controller.getError().getTranslation().getX(),
-                    controller.getError().getTranslation().getY());
-            assertEquals(0, translational_error.getX(), 0.01);
-            assertEquals(0, translational_error.getY(), 0.01);
-            Rotation2d heading_error = controller.getError().getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.01);
-            TimedPose path_setpoint = controller.getSetpoint();
+
+            TimedPose path_setpoint = controller.getSetpoint(8).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
             assertEquals(8, path_setpoint.getTimeS(), 0.001);
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
-            // Rotation2d heading_setpoint = mMotionPlanner.getHeadingSetpoint();
-            // assertEquals(0, heading_setpoint.getRadians(), 0.001);
+
+            Pose2d error = DriveMotionControllerUtil.getError(measurement, path_setpoint);
+            Translation2d translational_error = error.getTranslation();
+            assertEquals(0, translational_error.getX(), 0.01);
+            assertEquals(0, translational_error.getY(), 0.01);
+            Rotation2d heading_error = error.getRotation();
+            assertEquals(0, heading_error.getRadians(), 0.01);
         }
     }
 

@@ -13,8 +13,8 @@
       "style": "0",
       "userScale": "2",
       "width": "1078",
-      "xpos": "804",
-      "ypos": "268"
+      "xpos": "838",
+      "ypos": "303"
     }
   },
   "Table": {
@@ -99,7 +99,7 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "401,257",
+      "Pos": "401,256",
       "Size": "432,437"
     },
     "###NetworkTables Info": {

@@ -53,7 +53,6 @@ public class DriveToWaypoint100 extends Command {
 
     @Override
     public void initialize() {
-        System.out.println("DriveToWaypoint100.initialize() start");
         Pose2d start = m_swerve.getPose();
         double startVelocity = 0;
         Pose2d end = m_goal;
@@ -91,7 +90,6 @@ public class DriveToWaypoint100 extends Command {
                 new TrajectoryTimeSampler(trajectory));
 
         m_controller.setTrajectory(iter);
-        System.out.println("DriveToWaypoint100.initialize() done");
     }
 
     @Override
@@ -105,6 +103,12 @@ public class DriveToWaypoint100 extends Command {
                 currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
+        if (Double.isNaN(output.vxMetersPerSecond))
+            throw new IllegalStateException("vx is NaN");
+        if (Double.isNaN(output.vyMetersPerSecond))
+            throw new IllegalStateException("vy is NaN");
+        if (Double.isNaN(output.omegaRadiansPerSecond))
+            throw new IllegalStateException("omega is NaN");
         m_swerve.setChassisSpeeds(output);
     }
 

@@ -53,6 +53,8 @@ public class VelocityServo<T> {
      * @param setpoint velocity
      */
     public void setVelocity(Double setpoint) {
+        if (Double.isNaN(setpoint))
+            throw new IllegalArgumentException("setpoint is NaN");
         if (m_experiments.enabled(Experiment.UseClosedLoopVelocity)) {
             offboard(setpoint);
         } else {
@@ -85,6 +87,8 @@ public class VelocityServo<T> {
     ////////////////////////////////////////////////
 
     private void offboard(double setpoint) {
+        if (Double.isNaN(setpoint))
+            throw new IllegalArgumentException("setpoint is NaN");
         m_motor.setVelocity(setpoint, 0);
     }
 

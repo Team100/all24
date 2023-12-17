@@ -15,7 +15,66 @@
       }
     },
     "combined": true,
+    "drive": {
+      "simulated_motor": {
+        "open": true
+      }
+    },
+    "field": {
+      "double[]##v_/field/robot": {
+        "open": true
+      }
+    },
+    "planner": {
+      "current state": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true
+    },
     "precision": 3,
+    "pursuit_planner": {
+      "current state": {
+        "open": true
+      },
+      "error": {
+        "open": true,
+        "rotation": {
+          "open": true
+        },
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true
+    },
+    "ramsete_planner": {
+      "current state": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "error": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true,
+      "setpoint": {
+        "open": true,
+        "posestate": {
+          "pose": {
+            "rotation": {
+              "open": true
+            }
+          }
+        }
+      }
+    },
     "retained": {
       "Holonomic3": {
         "error": {
@@ -26,6 +85,17 @@
         },
         "open": true,
         "setpoint": {
+          "open": true
+        }
+      }
+    },
+    "swerve": {
+      "pose": {
+        "open": true,
+        "rotation": {
+          "open": true
+        },
+        "translation": {
           "open": true
         }
       }

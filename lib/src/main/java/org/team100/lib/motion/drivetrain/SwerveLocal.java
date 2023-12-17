@@ -189,6 +189,13 @@ public class SwerveLocal {
 
     // TODO: run this twice per cycle using TimedRobot.addPeriodic and a flag.
     private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds speeds) {
+        if (Double.isNaN(speeds.vxMetersPerSecond))
+            throw new IllegalStateException("vx is NaN");
+        if (Double.isNaN(speeds.vyMetersPerSecond))
+            throw new IllegalStateException("vy is NaN");
+        if (Double.isNaN(speeds.omegaRadiansPerSecond))
+            throw new IllegalStateException("omega is NaN");
+
         t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
         // Informs SwerveDriveKinematics of the module states.
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
@@ -196,6 +203,10 @@ public class SwerveLocal {
                 prevSetpoint,
                 speeds,
                 kDtS);
+        if (Double.isNaN(setpoint.getChassisSpeeds().vxMetersPerSecond))
+            throw new IllegalStateException("vx is NaN");
+        if (Double.isNaN(setpoint.getChassisSpeeds().vyMetersPerSecond))
+            throw new IllegalStateException("vy is NaN");
         t.log(Level.DEBUG, "/swervelocal/setpoint chassis speed", setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;

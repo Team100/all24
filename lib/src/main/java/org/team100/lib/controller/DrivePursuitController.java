@@ -1,5 +1,8 @@
 package org.team100.lib.controller;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
+
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
@@ -18,7 +21,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 /**
  * Follow a 254 trajectory using pure pursuit.
  * 
- * This originated in DriveMotionPlanner, which included several
+ * The update timestamp is ignored; the controller finds the closest point on
+ * the trajectory to the current pose and steers towards a near-future sample
+ * from there. So this controller deals with disturbance differently than a
+ * simple timed follower: for example, if blocked, it will keep trying to get to
+ * the next reasonable near point on the trajectory, whereas a timed follower
+ * would target far away points.
+ * 
+ * This originated in 254's DriveMotionPlanner, which included several
  * controllers.
  */
 public class DrivePursuitController implements DriveMotionController {
@@ -31,23 +41,20 @@ public class DrivePursuitController implements DriveMotionController {
     private static final double kAdaptivePathMaxLookaheadDistance = 0.1;
     private static final double kLookaheadSearchDt = 0.01;
     private static final double kMaxVelocityMetersPerSecond = 4.959668;
+    private static final double kThetakP = 3.5;
+    private static final double kPositionkP = 2.0;
 
     private boolean useDefaultCook = true;
     private Lookahead mSpeedLookahead = null;
-    // used for the "D" term of the heading controller
-    private Rotation2d mPrevHeadingError = GeometryUtil.kRotationZero;
-    private Pose2d mError = GeometryUtil.kPoseZero;
-    private TrajectoryTimeIterator mCurrentTrajectory;
+
+    private TrajectoryTimeIterator m_iter;
     private double mCurrentTrajectoryLength = 0.0;
-    private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    private double mLastTime = Double.POSITIVE_INFINITY;
     private boolean mIsReversed = false;
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
-        mCurrentTrajectory = trajectory;
-        mCurrentTrajectoryLength = mCurrentTrajectory.trajectory().getLastPoint().state().getTimeS();
-        mSetpoint = trajectory.getState();
+        m_iter = trajectory;
+        mCurrentTrajectoryLength = m_iter.trajectory().getLastPoint().state().getTimeS();
 
         for (int i = 0; i < trajectory.trajectory().length(); ++i) {
             if (trajectory.trajectory().getPoint(i).state().velocityM_S() > Math100.EPSILON) {
@@ -61,68 +68,55 @@ public class DrivePursuitController implements DriveMotionController {
         useDefaultCook = true;
         mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0,
                 kMaxVelocityMetersPerSecond);
-        mPrevHeadingError = GeometryUtil.kRotationZero;
-        mError = GeometryUtil.kPoseZero;
-        mLastTime = Double.POSITIVE_INFINITY;
-    }
-
-    @Override
-    public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
-        return updatePurePursuit(timestamp, current_state, 0.0);
     }
 
     /**
      * 
-     * @param timestamp                        seconds, use Timer.getFPGATimestamp()
-     * @param current_state                    measured pose
-     * @param feedforwardOmegaRadiansPerSecond TODO: something with this?
+     * @param timestamp        ignored
+     * @param measurement      measured pose
+     * @param current_velocity ignored
      * @return velocity control input
      */
-    public ChassisSpeeds updatePurePursuit(
-            final double timestamp,
-            final Pose2d current_state,
-            final double feedforwardOmegaRadiansPerSecond) {
-        System.out.println("DrivePursuitController.update()\n");
-        if (mCurrentTrajectory == null)
+    @Override
+    public ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d current_velocity) {
+        if (m_iter == null)
             return null;
 
-        t.log(Level.DEBUG, "/planner/current state", current_state);
+        t.log(Level.DEBUG, "/pursuit_planner/current state", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
 
-        if (!Double.isFinite(mLastTime))
-            mLastTime = timestamp;
-        final double mDt = timestamp - mLastTime;
-        mLastTime = timestamp;
+        Optional<TimedPose> mSetpoint = getSetpoint(measurement);
+        if (!mSetpoint.isPresent()) {
+            return new ChassisSpeeds();
+        }
+        t.log(Level.DEBUG, "/pursuit_planner/setpoint", mSetpoint.get());
 
-        double previewQuantity = DrivePursuitController.previewDt(mCurrentTrajectory, current_state);
-        System.out.printf("previewQuantity %5.3f\n", previewQuantity);
-        TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(previewQuantity);
-        t.log(Level.DEBUG, "/pursuit_planner/sample point", sample_point);
-        mSetpoint = sample_point.state();
-        t.log(Level.DEBUG, "/pursuit_planner/setpoint", mSetpoint);
-
-        mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
-
+        Pose2d mError = DriveMotionControllerUtil.getError(measurement, mSetpoint.get());
         t.log(Level.DEBUG, "/pursuit_planner/error", mError);
 
         double lookahead_time = kPathLookaheadTime;
 
-        TimedPose lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
+        Optional<TrajectorySamplePoint> preview = m_iter.preview(lookahead_time);
+        if (!preview.isPresent()) {
+            return new ChassisSpeeds();
+        }
+        TimedPose lookahead_state = preview.get().state();
         t.log(Level.DEBUG, "/pursuit_planner/lookahead state", lookahead_state);
-        System.out.printf("lookahead state %s\n", lookahead_state);
 
-        double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
-        double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
+        double actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
+        double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.get().velocityM_S());
         // Find the Point on the Trajectory that is Lookahead Distance Away
-        System.out.printf("adaptive lookahead %5.3f\n", adaptive_lookahead_distance);
         while (actual_lookahead_distance < adaptive_lookahead_distance &&
-                mCurrentTrajectory.getRemainingProgress() > lookahead_time) {
+                m_iter.getRemainingProgress() > lookahead_time) {
             lookahead_time += kLookaheadSearchDt;
-            System.out.printf("find trajectory point for time %5.3f\n", lookahead_time);
-            lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
-            actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
+            Optional<TrajectorySamplePoint> preview2 = m_iter.preview(lookahead_time);
+            if (!preview2.isPresent()) {
+                return new ChassisSpeeds();
+            }
+            lookahead_state = preview2.get().state();
+            actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
         }
 
         // If the Lookahead Point's Distance is less than the Lookahead Distance
@@ -143,21 +137,21 @@ public class DrivePursuitController implements DriveMotionController {
 
         // Find the vector between robot's current position and the lookahead state
         Translation2d lookaheadTranslation = lookahead_state.state().getTranslation()
-                .minus(current_state.getTranslation());
+                .minus(measurement.getTranslation());
         t.log(Level.DEBUG, "/pursuit_planner/lookahead translation", lookaheadTranslation);
 
         // Set the steering direction as the direction of the vector
         Rotation2d steeringDirection = lookaheadTranslation.getAngle();
 
         // Convert from field-relative steering direction to robot-relative
-        steeringDirection = steeringDirection.rotateBy(GeometryUtil.inverse(current_state).getRotation());
+        steeringDirection = steeringDirection.rotateBy(GeometryUtil.inverse(measurement).getRotation());
 
         // Use the Velocity Feedforward of the Closest Point on the Trajectory
-        double normalizedSpeed = Math.abs(mSetpoint.velocityM_S()) / kMaxVelocityMetersPerSecond;
+        double normalizedSpeed = Math.abs(mSetpoint.get().velocityM_S()) / kMaxVelocityMetersPerSecond;
 
         // The Default Cook is the minimum speed to use. So if a feedforward speed is
         // less than defaultCook, the robot will drive at the defaultCook speed
-        if (normalizedSpeed > defaultCook || mSetpoint.getTimeS() > (mCurrentTrajectoryLength / 2.0)) {
+        if (normalizedSpeed > defaultCook || mSetpoint.get().getTimeS() > (mCurrentTrajectoryLength / 2.0)) {
             useDefaultCook = false;
         }
         if (useDefaultCook) {
@@ -171,88 +165,125 @@ public class DrivePursuitController implements DriveMotionController {
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
                 steeringVector.getX() * kMaxVelocityMetersPerSecond,
                 steeringVector.getY() * kMaxVelocityMetersPerSecond,
-                feedforwardOmegaRadiansPerSecond);
+                0.0);
 
         t.log(Level.DEBUG, "/pursuit_planner/pursuit speeds", chassisSpeeds);
-
-        // Use the PD-Controller for To Follow the Time-Parametrized Heading
-        final double kThetakP = 3.5;
-        final double kThetakD = 0.0;
-        final double kPositionkP = 2.0;
 
         chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond
                 + kPositionkP * mError.getTranslation().getX();
         chassisSpeeds.vyMetersPerSecond = chassisSpeeds.vyMetersPerSecond
                 + kPositionkP * mError.getTranslation().getY();
         chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond
-                + (kThetakP * mError.getRotation().getRadians())
-                + kThetakD * ((mError.getRotation().getRadians() - mPrevHeadingError.getRadians()) / mDt);
+                + (kThetakP * mError.getRotation().getRadians());
 
-        // save rotation error for next iteration
-        mPrevHeadingError = mError.getRotation();
+        if (Double.isNaN(chassisSpeeds.omegaRadiansPerSecond))
+            throw new IllegalStateException("omega is NaN");
 
         return chassisSpeeds;
     }
 
+    /**
+     * Return the trajectory sample closest to the given pose. Returns empty if
+     * something goes wrong.
+     */
+    Optional<TimedPose> getSetpoint(final Pose2d measuredPose) {
+        // time to get to the trajectory point closest to the current pose
+        OptionalDouble previewQuantity = previewDt(m_iter, measuredPose);
+        if (!previewQuantity.isPresent()) {
+            return Optional.empty();
+        }
+
+        Optional<TrajectorySamplePoint> sample_point = m_iter.advance(previewQuantity.getAsDouble());
+        if (!sample_point.isPresent()) {
+            return Optional.empty();
+        }
+        t.log(Level.DEBUG, "/pursuit_planner/sample point", sample_point.get());
+        return Optional.of(sample_point.get().state());
+    }
+
     @Override
     public boolean isDone() {
-        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
-    }
-
-    // for testing
-    TimedPose getSetpoint() {
-        return mSetpoint;
-    }
-
-    // for testing
-    Pose2d getError() {
-        return mError;
+        return m_iter != null && m_iter.isDone();
     }
 
     /**
-     * Distance from the current state to the a state along the trajectory in the
-     * future
-     * 
-     * @param current_state       current actual pose
-     * @param additional_progress how far from the current *trajectory* state to
-     *                            look, in seconds
+     * Length of a constant-twist path between the current measured pose and a
+     * sample point.
      */
-    private static double distance(
-            TrajectoryTimeIterator mCurrentTrajectory,
-            Pose2d current_state,
-            double additional_progress) {
-        System.out.printf("DrivePursuitController.distance %5.3f\n", additional_progress);
-        return GeometryUtil.distance(mCurrentTrajectory.preview(additional_progress).state().state().getPose(),
-                current_state);
+    private static double distance(Pose2d pose, TrajectorySamplePoint preview) {
+        Pose2d previewPose = preview.state().state().getPose();
+        return GeometryUtil.distance(previewPose, pose);
+    }
+
+    private static OptionalDouble initialDir(TrajectoryTimeIterator iter, Pose2d pose) {
+        Optional<TrajectorySamplePoint> fwdPreview = iter.preview(1.0);
+        if (!fwdPreview.isPresent()) {
+            return OptionalDouble.empty();
+        }
+        double fwd = distance(pose, fwdPreview.get());
+        Optional<TrajectorySamplePoint> revPreview = iter.preview(-1.0);
+        if (!revPreview.isPresent()) {
+            return OptionalDouble.empty();
+        }
+        double rev = distance(pose, revPreview.get());
+        // search the closer end first
+        return OptionalDouble.of(Math.signum(rev - fwd));
     }
 
     /**
+     * Find the preview time to reach the point on the trajectory closest to the
+     * given pose. This doesn't require that the given pose be on the trajectory at
+     * all, it just picks the nearest point.
      * 
-     * @param mCurrentTrajectory
-     * @param current_state measured pose
+     * Note if the probe is at the end, we return some time that is past the end
+     * rather than the end arrival time. TODO: this seems like a bug.
+     * 
+     * @param iter
+     * @param pose probe pose
      * @return preview time in seconds
      */
-    private static double previewDt(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state) {
-        System.out.println("DrivePursuitController.previewDt()");
-        double searchStepSize = 1.0;
-        double previewQuantity = 0.0;
-        double forwardDistance = distance(mCurrentTrajectory, current_state, previewQuantity + searchStepSize);
-        double reverseDistance = distance(mCurrentTrajectory, current_state, previewQuantity - searchStepSize);
-        double searchDirection = Math.signum(reverseDistance - forwardDistance);
-        while (searchStepSize > 0.001) {
-            System.out.printf("searchStepSize %5.3f\n", searchStepSize);
-            if (Math100.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01))
-                break;
-            while (/* next point is closer than current point */ distance(mCurrentTrajectory, current_state,
-                    previewQuantity + searchStepSize * searchDirection) < distance(mCurrentTrajectory, current_state,
-                            previewQuantity)) {
-                /* move to next point */
-                previewQuantity += searchStepSize * searchDirection;
-                System.out.printf("previewQuantity %5.3f\n", previewQuantity);
+    static OptionalDouble previewDt(TrajectoryTimeIterator iter, Pose2d pose) {
+        OptionalDouble initialDir = initialDir(iter, pose);
+        if (!initialDir.isPresent())
+            return OptionalDouble.empty();
+        double dir = initialDir.getAsDouble();
+
+        double step = 1.0;
+        double dt = 0.0;
+        while (step > 0.001) {
+            Optional<TrajectorySamplePoint> dtPreview = iter.preview(dt);
+            if (!dtPreview.isPresent()) {
+                return OptionalDouble.empty();
             }
-            searchStepSize /= 10.0;
-            searchDirection *= -1;
+            if (Math100.epsilonEquals(distance(pose, dtPreview.get()), 0.0, 0.01))
+                break; // found the pose exactly
+            while (true) {
+                double probe = dt + step * dir;
+
+                Optional<TrajectorySamplePoint> probePreview = iter.preview(probe);
+                if (!probePreview.isPresent()) {
+                    return OptionalDouble.empty();
+                }
+                double probeDist = distance(pose, probePreview.get());
+
+                Optional<TrajectorySamplePoint> preview = iter.preview(dt);
+                if (!preview.isPresent()) {
+                    return OptionalDouble.empty();
+                }
+                double dtDist = distance(pose, preview.get());
+
+                if (probeDist < dtDist) {
+                    // probe is closer than current point, use the probe
+                    dt = probe;
+                } else {
+                    // probe is worse
+                    break;
+                }
+            }
+            // try the other way, slower
+            step /= 10.0;
+            dir *= -1;
         }
-        return previewQuantity;
+        return OptionalDouble.of(dt);
     }
 }

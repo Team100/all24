@@ -1,27 +1,25 @@
 package org.team100.lib.trajectory;
 
+import java.util.Optional;
+
 import org.team100.lib.timing.TimedPose;
 
-/** 
- * Allows iterating over the schedule of a trajectory. 
- * */
+import edu.wpi.first.math.MathUtil;
+
+/**
+ * Allows iterating over the schedule of a trajectory.
+ */
 public class TrajectoryTimeIterator {
-    protected final TrajectoryTimeSampler view_;
+    private final TrajectoryTimeSampler m_sampler;
     /** progress along the trajectory in seconds */
-    protected double progress_ = 0.0;
-    protected TrajectorySamplePoint current_sample_;
+    private double m_timeS = 0.0;
+    private Optional<TrajectorySamplePoint> m_current;
 
-    public TrajectoryTimeIterator() {
-        view_=null;
-    }
-
-    public TrajectoryTimeIterator(final TrajectoryTimeSampler view) {
-        view_ = view;
-        System.out.printf("Time iterator with view: %s\n", view_);
-
+    public TrajectoryTimeIterator(TrajectoryTimeSampler sampler) {
+        m_sampler = sampler;
         // No effect if view is empty.
-        current_sample_ = view_.sample(view_.getStartTimeS());
-        progress_ = view_.getStartTimeS();
+        m_current = m_sampler.sample(m_sampler.getStartS());
+        m_timeS = m_sampler.getStartS();
     }
 
     public boolean isDone() {
@@ -29,44 +27,51 @@ public class TrajectoryTimeIterator {
     }
 
     public double getProgress() {
-        return progress_;
+        return m_timeS;
     }
 
     public double getRemainingProgress() {
-        return Math.max(0.0, view_.getEndTimeS() - progress_);
+        return Math.max(0.0, m_sampler.getEndS() - m_timeS);
     }
 
-    public TrajectorySamplePoint getSample() {
-        return current_sample_;
+    public Optional<TrajectorySamplePoint> getSample() {
+        return m_current;
     }
 
-    public TimedPose getState() {
-        return getSample().state();
+    public Optional<TimedPose> getState() {
+        Optional<TrajectorySamplePoint> sample = getSample();
+        if (sample.isPresent())
+            return Optional.of(sample.get().state());
+        return Optional.empty();
     }
 
-    /** Sample the trajectory and update the iterator state.
-     * @param additional_progress in seconds
-     */
-    public TrajectorySamplePoint advance(double additional_progress) {
-        System.out.printf("sample additional progress (sec) %5.3f\n", additional_progress);
-        progress_ = Math.max(view_.getStartTimeS(),
-                Math.min(view_.getEndTimeS(), progress_ + additional_progress));
-        current_sample_ = view_.sample(progress_);
-        return current_sample_;
-    }
-
-    /** Sample the trajectory without changing the iterator state.
+    /**
+     * Sample the trajectory and update the iterator state.
      * 
      * @param additional_progress in seconds
+     * @return a sample point, or empty if something went wrong.
      */
-    public TrajectorySamplePoint preview(double additional_progress) {
-        System.out.printf("preview additional progress (sec) %5.3f\n", additional_progress);
-        final double progress = Math.max(view_.getStartTimeS(),
-                Math.min(view_.getEndTimeS(), progress_ + additional_progress));
-        return view_.sample(progress);
+    public Optional<TrajectorySamplePoint> advance(double additional_progress) {
+        m_timeS = MathUtil.clamp(m_timeS + additional_progress, m_sampler.getStartS(), m_sampler.getEndS());
+        m_current = m_sampler.sample(m_timeS);
+        return m_current;
+    }
+
+    /**
+     * Sample the trajectory without changing the iterator state.
+     * 
+     * @param additional_progress in seconds
+     * @return a sample point, or empty if something went wrong.
+     */
+    public Optional<TrajectorySamplePoint> preview(double additional_progress) {
+        if (Double.isNaN(additional_progress))
+            throw new IllegalArgumentException("additional_progress is NaN");
+        final double progress = Math.max(m_sampler.getStartS(),
+                Math.min(m_sampler.getEndS(), m_timeS + additional_progress));
+        return m_sampler.sample(progress);
     }
 
     public Trajectory100 trajectory() {
-        return view_.trajectory();
+        return m_sampler.trajectory();
     }
 }

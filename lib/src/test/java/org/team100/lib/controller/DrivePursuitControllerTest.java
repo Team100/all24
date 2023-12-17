@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
@@ -17,13 +19,14 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
 
 class DrivePursuitControllerTest {
+    private static final double kDelta = 0.001;
 
     private static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
     private static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
@@ -109,8 +112,9 @@ class DrivePursuitControllerTest {
 
         {
             // System.out.println("============4 sec============");
+            Pose2d current_state = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0,
-                    new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69)),
+                    current_state,
                     new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
             // but actually it's default cook.
@@ -119,50 +123,163 @@ class DrivePursuitControllerTest {
             // turning slowly to the left
             // i think pure pursuit might ignore omega
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
-            Translation2d translational_error = new Translation2d(
-                controller.getError().getTranslation().getX(),
-                controller.getError().getTranslation().getY());
-            assertEquals(0, translational_error.getX(), 0.05);
-            assertEquals(0, translational_error.getY(), 0.05);
-            Rotation2d heading_error = controller.getError().getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.05);
-            TimedPose path_setpoint = controller.getSetpoint();
+
+            TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
             assertEquals(1.69, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
             assertEquals(4, path_setpoint.getTimeS(), 0.05);
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
-            // Rotation2d heading_setpoint = mMotionPlanner.getHeadingSetpoint();
-            // assertEquals(0, heading_setpoint.getRadians(), 0.001);
+
+            Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
+            Translation2d translational_error = error.getTranslation();
+            assertEquals(0, translational_error.getX(), 0.05);
+            assertEquals(0, translational_error.getY(), 0.05);
+            Rotation2d heading_error = error.getRotation();
+            assertEquals(0, heading_error.getRadians(), 0.05);
         }
         {
             // System.out.println("============8 sec============");
+            Pose2d current_state = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0,
-                    new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22)),
+                    current_state,
                     new Twist2d());
             // this is default cook again
             assertEquals(-2.5, output.vxMetersPerSecond, 0.05);
             // this is more Y than PID because it looks ahead
             assertEquals(-0.15, output.vyMetersPerSecond, 0.05);
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
-            Translation2d translational_error = new Translation2d(
-                controller.getError().getTranslation().getX(),
-                controller.getError().getTranslation().getY());
-            assertEquals(0, translational_error.getX(), 0.05);
-            assertEquals(0, translational_error.getY(), 0.01);
-            Rotation2d heading_error = controller.getError().getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.01);
-            TimedPose path_setpoint = controller.getSetpoint();
+           
+            TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
             assertEquals(8, path_setpoint.getTimeS(), 0.05);
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
-            // Rotation2d heading_setpoint = mMotionPlanner.getHeadingSetpoint();
-            // assertEquals(0, heading_setpoint.getRadians(), 0.001);
+
+            Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
+            Translation2d translational_error = error.getTranslation();
+            assertEquals(0, translational_error.getX(), 0.05);
+            assertEquals(0, translational_error.getY(), 0.01);
+            Rotation2d heading_error = error.getRotation();
+            assertEquals(0, heading_error.getRadians(), 0.01);
         }
+    }
+
+    @Test
+    void testPreviewDt() {
+        SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+        Pose2d start = GeometryUtil.kPoseZero;
+        double startVelocity = 0;
+        Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
+        double endVelocity = 0;
+
+        Translation2d currentTranslation = start.getTranslation();
+        Translation2d goalTranslation = end.getTranslation();
+        Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
+        Rotation2d angleToGoal = translationToGoal.getAngle();
+        List<Pose2d> waypointsM = List.of(
+                new Pose2d(currentTranslation, angleToGoal),
+                new Pose2d(goalTranslation, angleToGoal));
+
+        List<Rotation2d> headings = List.of(
+                start.getRotation(),
+                end.getRotation());
+
+        List<TimingConstraint> constraints = List.of(
+                new CentripetalAccelerationConstraint(60));
+
+        double kMaxVelM_S = 4;
+        double kMaxAccelM_S_S = 2;
+        double kMaxVoltage = 9.0;
+
+        Trajectory100 trajectory = planner
+                .generateTrajectory(
+                        false,
+                        waypointsM,
+                        headings,
+                        constraints,
+                        startVelocity,
+                        endVelocity,
+                        kMaxVelM_S,
+                        kMaxAccelM_S_S,
+                        kMaxVoltage);
+
+        TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
+
+        TrajectoryTimeIterator iter = new TrajectoryTimeIterator(sampler);
+
+        // iter is at zero so time is zero
+        assertEquals(0, DrivePursuitController.previewDt(iter,
+                new Pose2d(0, 0, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
+        // 0.828 is 1 second along the trajectory
+        assertEquals(1, DrivePursuitController.previewDt(iter,
+                new Pose2d(0.828, 0, GeometryUtil.kRotationZero)).getAsDouble(),
+                kDelta);
+        // the whole trajectory takes 1.414 seconds, but the
+        // preview finds the "off the end" time instead.
+        // this seems like a bug.
+        assertEquals(2, DrivePursuitController.previewDt(iter,
+                new Pose2d(1, 0, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
+
+    }
+
+    @Test
+    void testNearPreviewDt() {
+        SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+        Pose2d start = GeometryUtil.kPoseZero;
+        double startVelocity = 0;
+        Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
+        double endVelocity = 0;
+
+        Translation2d currentTranslation = start.getTranslation();
+        Translation2d goalTranslation = end.getTranslation();
+        Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
+        Rotation2d angleToGoal = translationToGoal.getAngle();
+        List<Pose2d> waypointsM = List.of(
+                new Pose2d(currentTranslation, angleToGoal),
+                new Pose2d(goalTranslation, angleToGoal));
+
+        List<Rotation2d> headings = List.of(
+                start.getRotation(),
+                end.getRotation());
+
+        List<TimingConstraint> constraints = List.of(
+                new CentripetalAccelerationConstraint(60));
+
+        double kMaxVelM_S = 4;
+        double kMaxAccelM_S_S = 2;
+        double kMaxVoltage = 9.0;
+
+        Trajectory100 trajectory = planner
+                .generateTrajectory(
+                        false,
+                        waypointsM,
+                        headings,
+                        constraints,
+                        startVelocity,
+                        endVelocity,
+                        kMaxVelM_S,
+                        kMaxAccelM_S_S,
+                        kMaxVoltage);
+
+        TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
+
+        TrajectoryTimeIterator iter = new TrajectoryTimeIterator(sampler);
+
+        // for a pose that isn't on the trajectory at all, it picks the nearest point
+        assertEquals(0, DrivePursuitController.previewDt(iter,
+                new Pose2d(0, 1, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
+        assertEquals(1, DrivePursuitController.previewDt(iter,
+                new Pose2d(0.828, 1, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
+        assertEquals(2, DrivePursuitController.previewDt(iter,
+                new Pose2d(1, 1, GeometryUtil.kRotation90)).getAsDouble(), kDelta);
     }
 
 }

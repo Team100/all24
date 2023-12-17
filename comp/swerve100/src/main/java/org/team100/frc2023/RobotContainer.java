@@ -27,10 +27,10 @@ import org.team100.lib.commands.simple.SimpleManualMode;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveFeedforwardController;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDController;
+import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
+import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -279,15 +279,16 @@ public class RobotContainer implements Testable {
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         control.never().whileTrue(follower);
 
-        // 254 PID follower
         SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
-        DriveMotionController drivePID = new DrivePIDController();
+
+        // 254 PID follower
+        DriveMotionController drivePID = new DrivePIDFController(false);
         control.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID));
 
         // 254 FF follower
-        DriveMotionController driveFF = new DriveFeedforwardController();
+        DriveMotionController driveFF = new DrivePIDFController(true);
         control.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, driveFF));
 
@@ -295,6 +296,12 @@ public class RobotContainer implements Testable {
         DriveMotionController drivePP = new DrivePursuitController();
         control.actualCircle().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP));
+
+        // 254 Ramsete follower
+        // this one seems to have a pretty high tolerance?
+        DriveMotionController driveRam = new DriveRamseteController();
+        control.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam));
 
         ///////////////////////
         //
