@@ -4,6 +4,11 @@
       "window": {
         "visible": false
       }
+    },
+    "Timing": {
+      "window": {
+        "visible": false
+      }
     }
   },
   "NTProvider": {
@@ -22,23 +27,6 @@
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
-    },
-    "windows": {
-      "/SmartDashboard/SideView": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Telemetry Level": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/elevator": {
-        "window": {
-          "visible": true
-        }
-      }
     }
   },
   "NetworkTables": {
@@ -65,5 +53,8 @@
         }
       }
     }
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

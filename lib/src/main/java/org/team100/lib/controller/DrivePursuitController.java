@@ -71,9 +71,18 @@ public class DrivePursuitController implements DriveMotionController {
         return updatePurePursuit(timestamp, current_state, 0.0);
     }
 
-    public ChassisSpeeds updatePurePursuit(final double timestamp,
+    /**
+     * 
+     * @param timestamp                        seconds, use Timer.getFPGATimestamp()
+     * @param current_state                    measured pose
+     * @param feedforwardOmegaRadiansPerSecond TODO: something with this?
+     * @return velocity control input
+     */
+    public ChassisSpeeds updatePurePursuit(
+            final double timestamp,
             final Pose2d current_state,
             final double feedforwardOmegaRadiansPerSecond) {
+        System.out.println("DrivePursuitController.update()\n");
         if (mCurrentTrajectory == null)
             return null;
 
@@ -88,7 +97,7 @@ public class DrivePursuitController implements DriveMotionController {
         mLastTime = timestamp;
 
         double previewQuantity = DrivePursuitController.previewDt(mCurrentTrajectory, current_state);
-
+        System.out.printf("previewQuantity %5.3f\n", previewQuantity);
         TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(previewQuantity);
         t.log(Level.DEBUG, "/pursuit_planner/sample point", sample_point);
         mSetpoint = sample_point.state();
@@ -102,13 +111,16 @@ public class DrivePursuitController implements DriveMotionController {
 
         TimedPose lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
         t.log(Level.DEBUG, "/pursuit_planner/lookahead state", lookahead_state);
+        System.out.printf("lookahead state %s\n", lookahead_state);
 
         double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
         // Find the Point on the Trajectory that is Lookahead Distance Away
+        System.out.printf("adaptive lookahead %5.3f\n", adaptive_lookahead_distance);
         while (actual_lookahead_distance < adaptive_lookahead_distance &&
                 mCurrentTrajectory.getRemainingProgress() > lookahead_time) {
             lookahead_time += kLookaheadSearchDt;
+            System.out.printf("find trajectory point for time %5.3f\n", lookahead_time);
             lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
             actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         }
@@ -197,20 +209,38 @@ public class DrivePursuitController implements DriveMotionController {
         return mError;
     }
 
-    private static double distance(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state,
+    /**
+     * Distance from the current state to the a state along the trajectory in the
+     * future
+     * 
+     * @param current_state       current actual pose
+     * @param additional_progress how far from the current *trajectory* state to
+     *                            look, in seconds
+     */
+    private static double distance(
+            TrajectoryTimeIterator mCurrentTrajectory,
+            Pose2d current_state,
             double additional_progress) {
+        System.out.printf("DrivePursuitController.distance %5.3f\n", additional_progress);
         return GeometryUtil.distance(mCurrentTrajectory.preview(additional_progress).state().state().getPose(),
                 current_state);
     }
 
+    /**
+     * 
+     * @param mCurrentTrajectory
+     * @param current_state measured pose
+     * @return preview time in seconds
+     */
     private static double previewDt(TrajectoryTimeIterator mCurrentTrajectory, Pose2d current_state) {
+        System.out.println("DrivePursuitController.previewDt()");
         double searchStepSize = 1.0;
         double previewQuantity = 0.0;
-        double searchDirection = 1.0;
         double forwardDistance = distance(mCurrentTrajectory, current_state, previewQuantity + searchStepSize);
         double reverseDistance = distance(mCurrentTrajectory, current_state, previewQuantity - searchStepSize);
-        searchDirection = Math.signum(reverseDistance - forwardDistance);
+        double searchDirection = Math.signum(reverseDistance - forwardDistance);
         while (searchStepSize > 0.001) {
+            System.out.printf("searchStepSize %5.3f\n", searchStepSize);
             if (Math100.epsilonEquals(distance(mCurrentTrajectory, current_state, previewQuantity), 0.0, 0.01))
                 break;
             while (/* next point is closer than current point */ distance(mCurrentTrajectory, current_state,
@@ -218,6 +248,7 @@ public class DrivePursuitController implements DriveMotionController {
                             previewQuantity)) {
                 /* move to next point */
                 previewQuantity += searchStepSize * searchDirection;
+                System.out.printf("previewQuantity %5.3f\n", previewQuantity);
             }
             searchStepSize /= 10.0;
             searchDirection *= -1;

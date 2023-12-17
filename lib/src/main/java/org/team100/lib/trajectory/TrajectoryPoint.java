@@ -7,6 +7,7 @@ import org.team100.lib.timing.TimedPose;
  */
 public class TrajectoryPoint {
     private final TimedPose state_;
+
     private final int index_;
 
     public TrajectoryPoint(final TimedPose state, int index) {
@@ -20,5 +21,10 @@ public class TrajectoryPoint {
 
     public int index() {
         return index_;
+    }
+
+    @Override
+    public String toString() {
+        return "TrajectoryPoint [state_=" + state_ + ", index_=" + index_ + "]";
     }
 }

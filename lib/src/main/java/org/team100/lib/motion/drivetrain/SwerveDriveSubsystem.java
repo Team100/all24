@@ -65,7 +65,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     @Override
     public void periodic() {
         updateOdometry();
-        m_field.setRobotPose(getPose());
+        Pose2d pose = getPose();
+        t.log(Level.DEBUG, "/swerve/pose", pose);
+        m_field.setRobotPose(pose);
     }
 
     /** The speed implied by the module states. */

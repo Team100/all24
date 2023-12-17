@@ -12,6 +12,9 @@
       }
     },
     "transitory": {
+      "FMSInfo": {
+        "open": false
+      },
       "Holonomic3": {
         "error": {
           "open": true

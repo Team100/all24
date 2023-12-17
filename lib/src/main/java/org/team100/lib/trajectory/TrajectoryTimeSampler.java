@@ -29,16 +29,21 @@ public class TrajectoryTimeSampler {
      * @param timeS seconds
      */
     public TrajectorySamplePoint sample(double timeS) {
+        System.out.printf("TrajectoryTimeSampler.Sample for time %f\n", timeS);
+
         if (timeS >= endTimeS) {
+            System.out.println("off the end");
             TrajectoryPoint point = trajectory_.getPoint(trajectory_.length() - 1);
             return new TrajectorySamplePoint(point.state(), point.index(), point.index());
         }
         if (timeS <= startTimeS) {
+            System.out.println("at the start");
             TrajectoryPoint point = trajectory_.getPoint(0);
             return new TrajectorySamplePoint(point.state(), point.index(), point.index());
         }
         for (int i = 1; i < trajectory_.length(); ++i) {
             final TrajectoryPoint point = trajectory_.getPoint(i);
+            System.out.printf("timeS %5.3f i %d: %s\n", timeS, i, point);
             if (point.state().getTimeS() >= timeS) {
                 final TrajectoryPoint prev_s = trajectory_.getPoint(i - 1);
                 if (Math.abs(point.state().getTimeS() - prev_s.state().getTimeS()) <= 1e-12) {
@@ -56,5 +61,11 @@ public class TrajectoryTimeSampler {
 
     public Trajectory100 trajectory() {
         return trajectory_;
+    }
+
+        @Override
+    public String toString() {
+        return "TrajectoryTimeSampler [trajectory_=" + trajectory_ + ", startTimeS=" + startTimeS + ", endTimeS="
+                + endTimeS + "]";
     }
 }
