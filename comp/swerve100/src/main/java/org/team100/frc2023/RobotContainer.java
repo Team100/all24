@@ -11,6 +11,8 @@ import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawCircle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
+import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ManualMode;
@@ -25,6 +27,10 @@ import org.team100.lib.commands.simple.SimpleManualMode;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
+import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.controller.DrivePIDFController;
+import org.team100.lib.controller.DrivePursuitController;
+import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -59,13 +65,17 @@ import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -260,7 +270,38 @@ public class RobotContainer implements Testable {
                         x -> TrajectoryMaker.square(m_kinematics, x)));
 
         // trying the new ChoreoLib
-        control.actualCircle().whileTrue(CommandMaker.choreo(m_drive));
+        control.never().whileTrue(CommandMaker.choreo(m_drive));
+
+        // playing with trajectory followers
+        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        StraightLineTrajectory maker = new StraightLineTrajectory(experiments, config);
+        Pose2d goal = new Pose2d(8, 4, new Rotation2d()); // field center, roughly
+        Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
+        control.never().whileTrue(follower);
+
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+
+        // 254 PID follower
+        DriveMotionController drivePID = new DrivePIDFController(false);
+        control.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, planner, drivePID));
+
+        // 254 FF follower
+        DriveMotionController driveFF = new DrivePIDFController(true);
+        control.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, planner, driveFF));
+
+        // 254 Pursuit follower
+        DriveMotionController drivePP = new DrivePursuitController();
+        control.actualCircle().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, planner, drivePP));
+
+        // 254 Ramsete follower
+        // this one seems to have a pretty high tolerance?
+        DriveMotionController driveRam = new DriveRamseteController();
+        control.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam));
 
         ///////////////////////
         //

@@ -1,9 +1,8 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.DriveFeedforwardController;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDController;
+import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.geometry.GeometryUtil;
@@ -28,7 +27,7 @@ class DriveToWaypoint100Test {
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
         SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
-        DriveMotionController controller = new DrivePIDController();
+        DriveMotionController controller = new DrivePIDFController(false);
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
 
         // TODO: add some assertions
@@ -73,7 +72,7 @@ class DriveToWaypoint100Test {
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
         SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
-        DriveMotionController controller = new DriveFeedforwardController();
+        DriveMotionController controller = new DrivePIDFController(true);
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
 
         // TODO: add some assertions

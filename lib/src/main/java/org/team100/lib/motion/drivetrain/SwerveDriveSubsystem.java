@@ -65,7 +65,14 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     @Override
     public void periodic() {
         updateOdometry();
-        m_field.setRobotPose(getPose());
+        Pose2d pose = getPose();
+        if (Double.isNaN(pose.getX()))
+            throw new IllegalStateException();
+        if (Double.isNaN(pose.getY()))
+            throw new IllegalStateException();
+
+        t.log(Level.DEBUG, "/swerve/pose", pose);
+        m_field.setRobotPose(pose);
     }
 
     /** The speed implied by the module states. */
@@ -116,6 +123,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     //
     /**
      * Scales the supplied twist by the "speed" driver control modifier.
+     * 
      * @param twist Field coordinate velocities in meters and radians per second.
      */
     public void driveInFieldCoords(Twist2d twist) {

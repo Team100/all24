@@ -27,6 +27,8 @@ public class SwerveModule100 {
 
     /** This is for testing only, it does not optimize. */
     public void setRawDesiredState(SwerveModuleState state) {
+        if (Double.isNaN(state.speedMetersPerSecond))
+            throw new IllegalArgumentException("speed is NaN");
         m_driveServo.setVelocity(state.speedMetersPerSecond);
         m_turningServo.setPosition(state.angle.getRadians());
     }

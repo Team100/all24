@@ -65,7 +65,8 @@ public class TimingUtil {
                         Math.sqrt(predecessor.max_velocity * predecessor.max_velocity
                                 + 2.0 * predecessor.max_acceleration * ds));
                 if (Double.isNaN(constraint_state.max_velocity)) {
-                    throw new RuntimeException();
+                    return new Trajectory100();
+                    // throw new RuntimeException();
                 }
                 // Enforce global max absolute acceleration.
                 constraint_state.min_acceleration = -max_abs_acceleration;
@@ -81,7 +82,8 @@ public class TimingUtil {
                 }
                 if (constraint_state.max_velocity < 0.0) {
                     // This should never happen if constraints are well-behaved.
-                    throw new RuntimeException();
+                    return new Trajectory100();
+                    // throw new RuntimeException();
                 }
 
                 // Now enforce all acceleration constraints.
@@ -91,7 +93,8 @@ public class TimingUtil {
                             (reverse ? -1.0 : 1.0) * constraint_state.max_velocity);
                     if (!min_max_accel.valid()) {
                         // This should never happen if constraints are well-behaved.
-                        throw new RuntimeException();
+                        return new Trajectory100();
+                        // throw new RuntimeException();
                     }
                     constraint_state.min_acceleration = Math.max(constraint_state.min_acceleration,
                             reverse ? -min_max_accel.max_acceleration() : min_max_accel.min_acceleration());
@@ -100,7 +103,8 @@ public class TimingUtil {
                 }
                 if (constraint_state.min_acceleration > constraint_state.max_acceleration) {
                     // This should never happen if constraints are well-behaved.
-                    throw new RuntimeException();
+                    return new Trajectory100();
+                    // throw new RuntimeException();
                 }
 
                 if (ds < kEpsilon) {
@@ -149,7 +153,8 @@ public class TimingUtil {
                 }
                 constraint_state.max_velocity = new_max_velocity;
                 if (Double.isNaN(constraint_state.max_velocity)) {
-                    throw new RuntimeException();
+                    return new Trajectory100();
+                    // throw new RuntimeException();
                 }
 
                 // Now check all acceleration constraints with the lower max velocity.
@@ -158,7 +163,8 @@ public class TimingUtil {
                             constraint_state.state,
                             (reverse ? -1.0 : 1.0) * constraint_state.max_velocity);
                     if (!min_max_accel.valid()) {
-                        throw new RuntimeException();
+                        return new Trajectory100();
+                        // throw new RuntimeException();
                     }
                     constraint_state.min_acceleration = Math.max(constraint_state.min_acceleration,
                             reverse ? -min_max_accel.max_acceleration() : min_max_accel.min_acceleration());
@@ -166,7 +172,8 @@ public class TimingUtil {
                             reverse ? -min_max_accel.min_acceleration() : min_max_accel.max_acceleration());
                 }
                 if (constraint_state.min_acceleration > constraint_state.max_acceleration) {
-                    throw new RuntimeException();
+                    return new Trajectory100();
+                    // throw new RuntimeException();
                 }
 
                 if (ds > kEpsilon) {
@@ -205,12 +212,14 @@ public class TimingUtil {
                 } else if (Math.abs(v) > kEpsilon) {
                     dt = ds / v;
                 } else {
-                    throw new RuntimeException();
+                    return new Trajectory100();
+                    // throw new RuntimeException();
                 }
             }
             t += dt;
             if (Double.isNaN(t) || Double.isInfinite(t)) {
-                throw new RuntimeException();
+                return new Trajectory100();
+                // throw new RuntimeException();
             }
 
             v = constrained_state.max_velocity;

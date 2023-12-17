@@ -43,6 +43,8 @@ public class SimulatedMotor<T> implements Motor100<T> {
 
     @Override
     public void setVelocity(double velocity, double accel) {
+        if (Double.isNaN(velocity))
+            throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
         // ignore accel
         t.log(Level.DEBUG, m_name + "/velocity", m_velocity);

@@ -13,7 +13,13 @@ public interface DriveMotionController {
 
     void setTrajectory(TrajectoryTimeIterator trajectory);
 
-    ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity);
+    /** 
+     * @param timestamp in seconds, use Timer.getFPGATimestamp()
+     * @param measurement measured pose
+     * @param current_velocity measured speed
+     * @return velocity control input
+     */
+    ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d current_velocity);
 
     boolean isDone();
 }

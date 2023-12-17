@@ -94,7 +94,7 @@ class DriveMotionPlannerTest {
         // System.out.println(timed_trajectory.getPoint(i).index());
         // }
 
-        DriveMotionController controller = new DrivePIDController();
+        DriveMotionController controller = new DrivePIDFController(false);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         controller.setTrajectory(traj_iterator);
@@ -125,7 +125,7 @@ class DriveMotionPlannerTest {
     void testAllTrajectories() {
         SwerveDriveKinematics kinematics = kKinematics;
         SwerveKinematicLimits limits = kSmoothKinematicLimits;
-        DrivePIDController controller = new DrivePIDController();
+        DrivePIDFController controller = new DrivePIDFController(false);
         TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
         generator.generateTrajectories();
@@ -179,7 +179,7 @@ class DriveMotionPlannerTest {
                 // System.out.println("Setpoint:" + planner.getSetpoint());
                 // Inches and degrees
                 Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose),
-                        controller.getSetpoint().state().getPose());
+                        controller.getSetpoint(time).get().state().getPose());
                 // System.out.println("Setpoint: " + planner.getSetpoint());
                 // System.out.println("Error: " + error);
                 Assertions.assertEquals(0.0, error.getTranslation().getX(), 0.0508);

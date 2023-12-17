@@ -103,6 +103,12 @@ public class DriveToWaypoint100 extends Command {
                 currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
+        if (Double.isNaN(output.vxMetersPerSecond))
+            throw new IllegalStateException("vx is NaN");
+        if (Double.isNaN(output.vyMetersPerSecond))
+            throw new IllegalStateException("vy is NaN");
+        if (Double.isNaN(output.omegaRadiansPerSecond))
+            throw new IllegalStateException("omega is NaN");
         m_swerve.setChassisSpeeds(output);
     }
 

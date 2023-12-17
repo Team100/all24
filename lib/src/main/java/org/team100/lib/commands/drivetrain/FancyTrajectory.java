@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.List;
 
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDController;
+import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
@@ -52,7 +52,7 @@ public class FancyTrajectory extends Command {
         m_robotDrive = robotDrive;
         // TODO: try the other follower types.
         // TODO: move this constructor out of here
-        m_controller = new DrivePIDController();
+        m_controller = new DrivePIDFController(false);
         m_planner = new TrajectoryPlanner(kinematics, limits);
         SwerveDriveSubsystem swerveDriveSubsystem = m_robotDrive.get();
         if (swerveDriveSubsystem != null) {
