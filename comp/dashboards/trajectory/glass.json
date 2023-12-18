@@ -23,7 +23,8 @@
     "field": {
       "double[]##v_/field/robot": {
         "open": true
-      }
+      },
+      "open": true
     },
     "planner": {
       "current state": {
@@ -48,7 +49,18 @@
           "open": true
         }
       },
-      "open": true
+      "lookahead state": {
+        "open": true
+      },
+      "lookahead translation": {
+        "open": true
+      },
+      "pursuit speeds": {
+        "open": true
+      },
+      "updated lookahead state": {
+        "open": true
+      }
     },
     "ramsete_planner": {
       "current state": {
@@ -168,6 +180,21 @@
         }
       },
       "/field": {
+        "robot": {
+          "selectable": false
+        },
+        "trajectory": {
+          "arrows": false,
+          "color": [
+            255.0,
+            152.10525512695313,
+            0.0,
+            255.0
+          ],
+          "selectable": false,
+          "style": "Line",
+          "weight": 1.0
+        },
         "window": {
           "visible": true
         }

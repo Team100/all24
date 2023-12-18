@@ -1,5 +1,8 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -7,9 +10,11 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -35,7 +40,7 @@ public class DriveInACircle extends Command {
     private double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
 
-    private Pose2d m_center;
+    private Translation2d m_center;
     private double m_initialRotation;
     private double m_speedRad_S;
     private double m_angleRad;
@@ -66,10 +71,11 @@ public class DriveInACircle extends Command {
     public void initialize() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
-        m_center = currentPose.transformBy(new Transform2d(0, kRadiusM, GeometryUtil.kRotationZero));
         m_initialRotation = currentPose.getRotation().getRadians();
+        m_center = getCenter(currentPose, kRadiusM);
         m_speedRad_S = 0;
         m_angleRad = 0;
+        visualize();
     }
 
     @Override
@@ -82,12 +88,14 @@ public class DriveInACircle extends Command {
         }
         m_angleRad += m_speedRad_S * kDtS;
 
-        State100 rotation = new State100(
-                m_initialRotation + m_turnRatio * m_angleRad,
-                m_turnRatio * m_speedRad_S,
-                m_turnRatio * accelRad_S_S);
-
-        SwerveState reference = getReference(m_center, kRadiusM, m_angleRad, m_speedRad_S, accelRad_S_S, rotation);
+        SwerveState reference = getReference(
+                m_center,
+                kRadiusM,
+                m_angleRad,
+                m_speedRad_S,
+                accelRad_S_S,
+                m_initialRotation,
+                m_turnRatio);
 
         Twist2d fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
@@ -98,34 +106,61 @@ public class DriveInACircle extends Command {
         t.log(Level.DEBUG, "/circle/target", fieldRelativeTarget);
     }
 
-    static Pose2d getCenter(Pose2d currentPose, double radiusM) {
-        return currentPose.transformBy(new Transform2d(0, radiusM, GeometryUtil.kRotationZero));
+    static Translation2d getCenter(Pose2d currentPose, double radiusM) {
+        return currentPose.transformBy(new Transform2d(0, radiusM, GeometryUtil.kRotationZero)).getTranslation();
     }
 
     static SwerveState getReference(
-            Pose2d center,
-            double radiusM,
-            double angleRad,
-            double speedRad_S,
-            double accelRad_S_S,
-            State100 rotation) {
+            final Translation2d center,
+            final double radiusM,
+            final double angleRad,
+            final double speedRad_S,
+            final double accelRad_S_S,
+            final double initialRotation,
+            final double turnRatio) {
+
+        State100 rotation = new State100(
+                initialRotation + turnRatio * angleRad,
+                turnRatio * speedRad_S,
+                turnRatio * accelRad_S_S);
+
+        double sin = Math.sin(initialRotation + angleRad);
+        double cos = Math.cos(initialRotation + angleRad);
         // centripetal acceleration is omega^2*r
         // pathwise acceleration is whatever the accel parameter says
         State100 xState = new State100(
-                center.getX() + Math.sin(angleRad) * radiusM,
-                speedRad_S * Math.cos(angleRad) * radiusM,
-                -1.0 * speedRad_S * speedRad_S * Math.sin(angleRad) * radiusM + accelRad_S_S * Math.cos(angleRad));
+                center.getX() + sin * radiusM,
+                speedRad_S * cos * radiusM,
+                -1.0 * speedRad_S * speedRad_S * sin * radiusM + accelRad_S_S * cos);
         State100 yState = new State100(
-                center.getY() - Math.cos(angleRad) * radiusM,
-                speedRad_S * Math.sin(angleRad) * radiusM,
-                speedRad_S * speedRad_S * Math.cos(angleRad) * kRadiusM + accelRad_S_S * Math.sin(angleRad));
+                center.getY() - cos * radiusM,
+                speedRad_S * sin * radiusM,
+                speedRad_S * speedRad_S * cos * radiusM + accelRad_S_S * sin);
         t.log(Level.DEBUG, "/circle/x_state", xState);
         t.log(Level.DEBUG, "/circle/y_state", yState);
         return new SwerveState(xState, yState, rotation);
     }
 
+    private void visualize() {
+        // these poses are only used for visualization
+        List<Pose2d> poses = new ArrayList<>();
+        for (double angleRad = 0; angleRad < 2 * Math.PI; angleRad += 0.1) {
+            SwerveState s = getReference(
+                    m_center,
+                    kRadiusM,
+                    angleRad,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0);
+            poses.add(s.pose());
+        }
+        TrajectoryVisualization.setViz(poses);
+    }
+
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        TrajectoryVisualization.clear();
     }
 }

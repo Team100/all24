@@ -11,10 +11,15 @@
       "userScale": "1",
       "width": "853",
       "xpos": "92",
-      "ypos": "105"
+      "ypos": "104"
     }
   },
   "Window": {
+    "###/field": {
+      "Collapsed": "0",
+      "Pos": "133,133",
+      "Size": "266,133"
+    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "3,360",

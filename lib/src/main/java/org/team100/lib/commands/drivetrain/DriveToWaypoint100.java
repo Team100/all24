@@ -12,6 +12,7 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,13 +32,20 @@ public class DriveToWaypoint100 extends Command {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
     private static final double kMaxVoltage = 9.0;
+    private static final Telemetry t = Telemetry.get();
 
-    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystemInterface m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
 
+    /**
+     * @param goal
+     * @param drivetrain
+     * @param planner
+     * @param controller
+     * @param viz        ok to be null
+     */
     public DriveToWaypoint100(
             Pose2d goal,
             SwerveDriveSubsystemInterface drivetrain,
@@ -86,6 +94,8 @@ public class DriveToWaypoint100 extends Command {
                         kMaxAccelM_S_S,
                         kMaxVoltage);
 
+        TrajectoryVisualization.setViz(trajectory);
+
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
 
@@ -120,6 +130,7 @@ public class DriveToWaypoint100 extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        TrajectoryVisualization.clear();
     }
 
 }

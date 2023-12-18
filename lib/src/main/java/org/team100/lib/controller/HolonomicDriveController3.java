@@ -43,7 +43,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         x.setTolerance(cartesianPosition, cartesianVelocity);
         PIDController y = cartesian();
         y.setTolerance(cartesianPosition, cartesianVelocity);
-        PIDController theta = cartesian();
+        PIDController theta = theta();
         theta.setTolerance(rotationPosition, rotationVelocity);
         return new HolonomicDriveController3(x, y, theta);
     }
@@ -131,6 +131,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         PIDController pid = new PIDController(3.5, 0, 0);
         pid.setIntegratorRange(-0.01, 0.01);
         pid.setTolerance(0.01); // 0.5 degrees
+        pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
         return pid;
     }
 }

@@ -31,6 +31,10 @@ public class SwerveState {
                 new State100(p.getRotation().getRadians(), t.dtheta, 0));
     }
 
+    public Pose2d pose() {
+        return new Pose2d(m_x.x(), m_y.x(), new Rotation2d(m_theta.x()));
+    }
+
     public Translation2d translation() {
         return new Translation2d(m_x.x(), m_y.x());
     }
@@ -76,8 +80,7 @@ public class SwerveState {
     }
 
     public String toString() {
-        String ret_string = "SwerveState(" + m_x + ", " + m_y + ", " + m_theta + ")";
-        return ret_string;
+        return "SwerveState(" + m_x + ", " + m_y + ", " + m_theta + ")";
     }
 
 }
