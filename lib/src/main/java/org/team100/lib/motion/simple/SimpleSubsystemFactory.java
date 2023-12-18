@@ -43,15 +43,15 @@ public class SimpleSubsystemFactory {
     }
 
     private SimpleSubsystem getDefault() {
-        FalconDriveMotor motor = new FalconDriveMotor("/drive", 1, 10, 1, 1);
-        Encoder100<Distance> encoder = new FalconDriveEncoder("/encoder", motor, 1);
+        FalconDriveMotor motor = new FalconDriveMotor("simple/drive", 1, 10, 1, 1);
+        Encoder100<Distance> encoder = new FalconDriveEncoder("simple/encoder", motor, 1);
 
         PIDController velocityController = new PIDController(1, 0, 0);
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.06, 0.3, 0.025);
 
         VelocityServo<Distance> velocityServo = new VelocityServo<>(
                 m_experiments,
-                "/velocity",
+                "simple/velocity",
                 motor,
                 encoder,
                 velocityController,
@@ -59,7 +59,7 @@ public class SimpleSubsystemFactory {
         PIDController positionController = new PIDController(1, 0, 0);
 
         PositionServo<Distance> actuator = new PositionServo<>(
-                "/position",
+                "simple/position",
                 velocityServo,
                 encoder,
                 10,
@@ -70,15 +70,15 @@ public class SimpleSubsystemFactory {
     }
 
     private SimpleSubsystem simulated() {
-        SimulatedMotor<Distance> motor = new SimulatedMotor<>("/drive");
+        SimulatedMotor<Distance> motor = new SimulatedMotor<>("simple/drive");
         Encoder100<Distance> encoder = new SimulatedEncoder<>(
-                Distance.instance, "/encoder", motor, 1);
+                Distance.instance, "simple/encoder", motor, 1);
                 
         PIDController velocityController = new PIDController(1, 0, 0);
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.06, 0.3, 0.025);
         VelocityServo<Distance> velocityServo = new VelocityServo<>(
                 m_experiments,
-                "/velocity",
+                "simple/velocity",
                 motor,
                 encoder,
                 velocityController,
@@ -86,7 +86,7 @@ public class SimpleSubsystemFactory {
 
         PIDController positionController = new PIDController(1, 0, 0);
         PositionServo<Distance> actuator = new PositionServo<>(
-                "/position",
+                "simple/position",
                 velocityServo,
                 encoder,
                 10,

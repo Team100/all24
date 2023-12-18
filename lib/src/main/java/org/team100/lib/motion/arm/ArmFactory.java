@@ -13,9 +13,9 @@ import org.team100.lib.units.Angle;
  * Produces real or simulated arm subsystems depending on identity.
  */
 public class ArmFactory {
-    private static final String kArm = "/arm";
-    private static final String kLower = "/arm/lower";
-    private static final String kUpper = "/arm/upper";
+    private static final String kArm = "arm";
+    private static final String kLower = "arm/lower";
+    private static final String kUpper = "arm/upper";
 
     public static ArmSubsystem get() {
         Identity identity = Identity.get();

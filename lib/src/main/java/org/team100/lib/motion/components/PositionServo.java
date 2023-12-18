@@ -17,7 +17,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  */
 public class PositionServo<T> {
     private static final double kDeadband = 0.03;
-    
+
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
@@ -35,6 +35,7 @@ public class PositionServo<T> {
     private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
 
     /**
+     * @param name    may not start with a slash
      * @param modulus wrap the measurement if desired
      */
     public PositionServo(
@@ -45,6 +46,8 @@ public class PositionServo<T> {
             PIDController controller,
             ChoosableProfile profile,
             DoubleUnaryOperator modulus) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_servo = servo;
         m_encoder = encoder;
         m_maxVel = maxVel;
@@ -57,7 +60,7 @@ public class PositionServo<T> {
             m_maximumInput = Double.MAX_VALUE;
         }
         m_period = controller.getPeriod();
-        m_name = String.format("/%s/position servo", name);
+        m_name = String.format("/%s/Position Servo", name);
         m_profile = profile;
         m_modulus = modulus;
     }

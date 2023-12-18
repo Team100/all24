@@ -38,6 +38,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
     private Double prevTime = null;
 
     /**
+     * @param name        may not start with a slash
      * @param inputOffset unit = turns, i.e. [0,1]
      */
     public AnalogTurningEncoder(
@@ -46,6 +47,9 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
             double inputOffset,
             double gearRatio,
             Drive drive) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
+
         m_input = new AnalogInput(channel);
         m_encoder = new AnalogEncoder(m_input);
         m_encoder.setPositionOffset(inputOffset);

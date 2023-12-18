@@ -180,6 +180,13 @@ public class SwerveLocal {
         prevSetpoint = setpoint;
     }
 
+    /**
+     * This is for visualization only.
+     */
+    public void periodic() {
+        m_modules.periodic();
+    }
+
     ///////////////////////////////////////////////////////////
 
     private void setChassisSpeedsNormally(ChassisSpeeds speeds) {

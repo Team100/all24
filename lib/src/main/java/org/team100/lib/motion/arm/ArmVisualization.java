@@ -14,10 +14,8 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
  * It's in a separate class to avoid clutter.
  */
 public class ArmVisualization {
-
     private final ArmSubsystem m_armSubsystem;
-
-    private final Mechanism2d m_sideView;
+    private final Mechanism2d m_mechanism;
     private final MechanismLigament2d m_boomLigament;
     private final MechanismLigament2d m_stickLigament;
 
@@ -26,9 +24,9 @@ public class ArmVisualization {
 
         ArmAngles angles = m_armSubsystem.getPosition();
 
-        m_sideView = new Mechanism2d(100, 100);
+        m_mechanism = new Mechanism2d(100, 100);
 
-        MechanismRoot2d m_sideRoot = m_sideView.getRoot("SideRoot", 50, 50);
+        MechanismRoot2d root = m_mechanism.getRoot("SideRoot", 50, 50);
 
         m_boomLigament = new MechanismLigament2d("Boom",
                 25, boomAngleDeg(angles), 5, new Color8Bit(Color.kWhite));
@@ -36,9 +34,9 @@ public class ArmVisualization {
         m_stickLigament = new MechanismLigament2d("Stick",
                 25, stickAngleDeg(angles), 5, new Color8Bit(Color.kLightGreen));
 
-        m_sideRoot.append(m_boomLigament).append(m_stickLigament);
+        root.append(m_boomLigament).append(m_stickLigament);
 
-        SmartDashboard.putData("SideView", m_sideView);
+        SmartDashboard.putData("SideView", m_mechanism);
     }
 
     public void periodic() {

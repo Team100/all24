@@ -10,13 +10,10 @@ import org.team100.lib.experiments.Experiments;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Just exercises some code. */
 class SwerveLocalTest {
-    SwerveModuleState[] m_targetModuleStates;
-    boolean stopped = false;
 
     @Test
     void testSimple() {
@@ -27,55 +24,13 @@ class SwerveLocalTest {
                 new Translation2d(0.1, -0.1),
                 new Translation2d(-0.1, 0.1),
                 new Translation2d(-0.1, -0.1));
-        SwerveModuleCollectionInterface modules = new SwerveModuleCollectionInterface() {
-
-            @Override
-            public void setDesiredStates(SwerveModuleState[] targetModuleStates) {
-                m_targetModuleStates = targetModuleStates;
-            }
-
-            @Override
-            public SwerveModulePosition[] positions() {
-                return new SwerveModulePosition[] {
-                        new SwerveModulePosition(),
-                        new SwerveModulePosition(),
-                        new SwerveModulePosition(),
-                        new SwerveModulePosition()
-                };
-            }
-
-            @Override
-            public SwerveModuleState[] states() {
-                return m_targetModuleStates;
-            }
-
-            @Override
-            public boolean[] atSetpoint() {
-                return new boolean[] { true, true, true, true };
-            }
-
-            @Override
-            public void stop() {
-                stopped = true;
-            }
-
-            @Override
-            public void close() {
-                //
-            }
-
-            @Override
-            public void setRawDesiredStates(SwerveModuleState[] targetModuleStates) {
-                m_targetModuleStates = targetModuleStates;
-
-            }
-        };
+        MockSwerveModuleCollection modules = new MockSwerveModuleCollection();
         SwerveLocal local = new SwerveLocal(experiments, speedLimits, kinematics, modules);
         local.setChassisSpeeds(new ChassisSpeeds());
-        assertEquals(0, m_targetModuleStates[0].speedMetersPerSecond, 0.001);
+        assertEquals(0, modules.m_targetModuleStates[0].speedMetersPerSecond, 0.001);
         local.defense();
         local.stop();
-        assertTrue(stopped);
+        assertTrue(modules.stopped);
         local.setRawModuleStates(new SwerveModuleState[] {
                 new SwerveModuleState(),
                 new SwerveModuleState(),

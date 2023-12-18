@@ -16,7 +16,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 class SwerveDriveSubsystemTest {
     @Test
@@ -42,10 +41,9 @@ class SwerveDriveSubsystemTest {
         FrameTransform frameTransform = new FrameTransform();
         MockExperiments experiments = new MockExperiments();
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        SwerveModuleCollectionInterface modules = new SwerveModuleCollection.Noop();
+        SwerveModuleCollectionInterface modules = new NullSwerveModuleCollection();
 
         SwerveLocal swerveLocal = new SwerveLocal(experiments, speedLimits, kinematics, modules);
-        Field2d field = new Field2d();
 
         SwerveDriveSubsystem drive = new SwerveDriveSubsystem(
                 heading,

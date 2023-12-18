@@ -17,9 +17,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSubsystemInterface {
     // multiply field-relative speeds for medium and slow modes.
@@ -68,6 +67,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         if (Double.isNaN(pose.getY()))
             throw new IllegalStateException();
         t.log(Level.DEBUG, "/swerve/pose", pose);
+        m_swerveLocal.periodic();
     }
 
     /** The speed implied by the module states. */

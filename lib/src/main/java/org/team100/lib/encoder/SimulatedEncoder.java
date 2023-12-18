@@ -19,13 +19,22 @@ public class SimulatedEncoder<T extends Measure> implements Encoder100<T> {
     private double m_position = 0;
     private double m_time = Timer.getFPGATimestamp();
 
+    /**
+     * @param measure
+     * @param name may not start with a slash
+     * @param motor
+     * @param reduction
+     */
     public SimulatedEncoder(
             T measure,
             String name,
             SimulatedMotor<T> motor,
             double reduction) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
+
         m_measure = measure;
-        m_name = name + "/simulated_encoder";
+        m_name = String.format("/%s/Simulated Encoder", name);
         m_motor = motor;
         m_reduction = reduction;
     }

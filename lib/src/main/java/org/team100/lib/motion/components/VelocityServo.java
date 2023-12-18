@@ -31,6 +31,14 @@ public class VelocityServo<T> {
     // for calculating acceleration
     private double previousSetpoint = 0;
 
+    /**
+     * @param experiments
+     * @param name        may not start with slash
+     * @param motor
+     * @param encoder
+     * @param controller
+     * @param feedforward
+     */
     public VelocityServo(
             Experiments experiments,
             String name,
@@ -38,13 +46,15 @@ public class VelocityServo<T> {
             Encoder100<T> encoder,
             PIDController controller,
             SimpleMotorFeedforward feedforward) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_experiments = experiments;
         m_motor = motor;
         m_encoder = encoder;
         m_controller = controller;
         m_period = controller.getPeriod();
         m_feedforward = feedforward;
-        m_name = String.format("/%s/velocity servo", name);
+        m_name = String.format("/%s/Velocity Servo", name);
     }
 
     /**
