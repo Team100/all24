@@ -68,6 +68,9 @@ import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
+import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -265,7 +268,8 @@ public class RobotContainer implements Testable {
                         x -> TrajectoryMaker.square(m_kinematics, x)));
 
         // trying the new ChoreoLib
-        control.never().whileTrue(CommandMaker.choreo(m_drive));
+        ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
+        control.actualCircle().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
@@ -289,7 +293,7 @@ public class RobotContainer implements Testable {
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController();
-        control.actualCircle().whileTrue(
+        control.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP));
 
         // 254 Ramsete follower

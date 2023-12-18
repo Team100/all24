@@ -7,6 +7,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -62,6 +63,7 @@ public class DriveToWaypoint3 extends Command {
     public void initialize() {
         m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
+        TrajectoryVisualization.setViz(m_trajectory);
         // System.out.println(m_trajectory);
         m_timer.stop();
         m_timer.reset();
@@ -116,5 +118,6 @@ public class DriveToWaypoint3 extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        TrajectoryVisualization.clear();
     }
 }

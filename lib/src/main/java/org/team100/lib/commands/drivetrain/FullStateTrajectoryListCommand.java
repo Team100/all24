@@ -8,6 +8,7 @@ import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -61,6 +62,7 @@ public class FullStateTrajectoryListCommand extends Command {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
                 m_currentTrajectory = m_trajectoryIter.next();
+                TrajectoryVisualization.setViz(m_currentTrajectory);
                 m_timer.restart();
                 // TODO: wheel alignment here
             } else {
@@ -91,5 +93,6 @@ public class FullStateTrajectoryListCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        TrajectoryVisualization.clear();
     }
 }

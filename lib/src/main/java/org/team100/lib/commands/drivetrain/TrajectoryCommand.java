@@ -5,6 +5,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -39,6 +40,7 @@ public class TrajectoryCommand extends Command {
         m_timer.stop();
         m_timer.reset();
         m_timer.start();
+        TrajectoryVisualization.setViz(m_trajectory);
     }
 
     @Override
@@ -72,6 +74,7 @@ public class TrajectoryCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        TrajectoryVisualization.clear();
     }
 
 }

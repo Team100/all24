@@ -1,6 +1,5 @@
 package org.team100.lib.commands.drivetrain;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.team100.lib.controller.DriveMotionController;
@@ -11,9 +10,9 @@ import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
-import org.team100.lib.trajectory.TrajectoryPoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,7 +20,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -34,14 +32,12 @@ public class DriveToWaypoint100 extends Command {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
     private static final double kMaxVoltage = 9.0;
+    private static final Telemetry t = Telemetry.get();
 
-    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystemInterface m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-
-    private Trajectory100 m_trajectory;
 
     /**
      * @param goal
@@ -86,7 +82,7 @@ public class DriveToWaypoint100 extends Command {
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
-        m_trajectory = m_planner
+        Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
@@ -97,25 +93,13 @@ public class DriveToWaypoint100 extends Command {
                         kMaxVelM_S,
                         kMaxAccelM_S_S,
                         kMaxVoltage);
-        setViz();
+
+        TrajectoryVisualization.setViz(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
-                new TrajectoryTimeSampler(m_trajectory));
+                new TrajectoryTimeSampler(trajectory));
 
         m_controller.setTrajectory(iter);
-    }
-
-    private void setViz() {
-        double[] arr = new double[m_trajectory.length() * 3];
-        int ndx = 0;
-        for (TrajectoryPoint p : m_trajectory.getPoints()) {
-            Pose2d pose = p.state().state().getPose();
-            arr[ndx+0] = pose.getTranslation().getX();
-            arr[ndx+1] = pose.getTranslation().getY();
-            arr[ndx+2] = pose.getRotation().getDegrees();
-            ndx+=3;
-        }
-        t.log(Level.DEBUG, "/field/trajectory", arr);
     }
 
     @Override
@@ -146,7 +130,7 @@ public class DriveToWaypoint100 extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
-        t.log(Level.DEBUG, "/field/trajectory", new double[0]);
+        TrajectoryVisualization.clear();
     }
 
 }

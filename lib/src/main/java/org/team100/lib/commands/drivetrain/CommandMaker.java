@@ -4,13 +4,16 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.StraightLineTrajectory;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
 /**
  * Utility class to produce commands.
@@ -35,16 +38,30 @@ public class CommandMaker {
      * 
      * see https://github.com/SleipnirGroup/Choreo/wiki/ChoreoLib-Java-Usage
      */
-    public static Command choreo(SwerveDriveSubsystem drivetrain) {
-        return Choreo.choreoSwerveCommand(
-                Choreo.getTrajectory("test"),
-                drivetrain::getPose,
-                new PIDController(1, 0.0, 0.0),
-                new PIDController(1, 0.0, 0.0),
-                new PIDController(1, 0.0, 0.0),
-                drivetrain::setChassisSpeeds,
-                false,
-                drivetrain);
+    public static Command choreo(ChoreoTrajectory trajectory, SwerveDriveSubsystem drivetrain) {
+        return new WrapperCommand(
+                Choreo.choreoSwerveCommand(
+                        trajectory,
+                        drivetrain::getPose,
+                        new PIDController(1, 0.0, 0.0),
+                        new PIDController(1, 0.0, 0.0),
+                        new PIDController(1, 0.0, 0.0),
+                        drivetrain::setChassisSpeeds,
+                        false,
+                        drivetrain)) {
+
+            @Override
+            public void initialize() {
+                super.initialize();
+                TrajectoryVisualization.setViz(trajectory);
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                super.end(interrupted);
+                TrajectoryVisualization.clear();
+            }
+        };
     }
 
     private CommandMaker() {
