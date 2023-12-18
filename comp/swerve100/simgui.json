@@ -1,16 +1,4 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "window": {
-        "visible": false
-      }
-    },
-    "Timing": {
-      "window": {
-        "visible": false
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -19,6 +7,10 @@
       "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Simple Manual Mode": "String Chooser",
+      "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -27,41 +19,6 @@
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
-    },
-    "windows": {
-      "/field": {
-        "window": {
-          "visible": true
-        }
-      }
     }
-  },
-  "NetworkTables": {
-    "retained": {
-      "arm position": {
-        "cartesian_measurement": {
-          "open": true
-        },
-        "error": {
-          "open": true
-        },
-        "input": {
-          "open": true
-        },
-        "measurement": {
-          "open": true
-        },
-        "open": true,
-        "output": {
-          "open": true
-        },
-        "setpoint": {
-          "open": true
-        }
-      }
-    }
-  },
-  "NetworkTables View": {
-    "visible": false
   }
 }

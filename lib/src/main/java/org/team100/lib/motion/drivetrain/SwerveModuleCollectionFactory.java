@@ -6,10 +6,11 @@ import org.team100.lib.encoder.turning.AnalogTurningEncoder.Drive;
 
 /** Creates collections according to Identity. */
 public class SwerveModuleCollectionFactory {
-    private static final String kFrontLeft = "/Front Left";
-    private static final String kFrontRight = "/Front Right";
-    private static final String kRearLeft = "/Rear Left";
-    private static final String kRearRight = "/Rear Right";
+    // these should not have slashes
+    private static final String kFrontLeft = "Front Left";
+    private static final String kFrontRight = "Front Right";
+    private static final String kRearLeft = "Rear Left";
+    private static final String kRearRight = "Rear Right";
     private final Identity m_identity;
     private final SwerveModuleFactory m_factory;
 
@@ -49,7 +50,7 @@ public class SwerveModuleCollectionFactory {
                         m_factory.SimulatedModule(kRearLeft),
                         m_factory.SimulatedModule(kRearRight));
             default:
-                return new SwerveModuleCollection.Noop();
+                return new NullSwerveModuleCollection();
         }
     }
 }

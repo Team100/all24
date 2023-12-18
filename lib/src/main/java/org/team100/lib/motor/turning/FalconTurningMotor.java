@@ -27,6 +27,8 @@ public class FalconTurningMotor implements Motor100<Angle> {
     private final String m_name;
 
     public FalconTurningMotor(String name, int canId) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_motor = new WPI_TalonFX(canId);
         m_motor.configFactoryDefault();
         m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);

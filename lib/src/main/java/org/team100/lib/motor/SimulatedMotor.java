@@ -14,8 +14,13 @@ public class SimulatedMotor<T> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
 
+    /**
+     * @param name may not start with slash
+     */
     public SimulatedMotor(String name) {
-        m_name = name + "/simulated_motor";
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
+        m_name = String.format("/%s/Simulated Motor", name);
     }
 
     private double m_velocity = 0;

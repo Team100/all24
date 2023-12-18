@@ -13,28 +13,60 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * Feedforward and feedback control of a single module.
  */
 public class SwerveModule100 {
+    private final String m_name;
     private final VelocityServo<Distance> m_driveServo;
     private final PositionServo<Angle> m_turningServo;
+    private final SwerveModuleVisualization m_viz;
 
-    public SwerveModule100(VelocityServo<Distance> driveServo, PositionServo<Angle> turningServo) {
+    /**
+     * @param name         may not contain slashes
+     * @param driveServo
+     * @param turningServo
+     */
+    public SwerveModule100(
+            String name,
+            VelocityServo<Distance> driveServo,
+            PositionServo<Angle> turningServo) {
+        if (name.contains("/"))
+            throw new IllegalArgumentException();
+        m_name = name;
         m_driveServo = driveServo;
         m_turningServo = turningServo;
+        m_viz = new SwerveModuleVisualization(this);
     }
 
-    public void setDesiredState(SwerveModuleState desiredState) {
+    /**
+     * Only SwerveModuleCollection calls this.
+     */
+    void setDesiredState(SwerveModuleState desiredState) {
         setRawDesiredState(SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningServo.getPosition())));
     }
 
-    /** This is for testing only, it does not optimize. */
-    public void setRawDesiredState(SwerveModuleState state) {
+    /**
+     * Only SwerveModuleCollection calls this.
+     * 
+     * This is for testing only, it does not optimize.
+     */
+    void setRawDesiredState(SwerveModuleState state) {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
         m_driveServo.setVelocity(state.speedMetersPerSecond);
         m_turningServo.setPosition(state.angle.getRadians());
     }
 
+    /**
+     * Only SwerveModuleCollection calls this.
+     */
+    void periodic() {
+        m_viz.periodic();
+    }
+
     public void close() {
         m_turningServo.close();
+    }
+
+    public String getName() {
+        return m_name;
     }
 
     /////////////////////////////////////////////////////////////

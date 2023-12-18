@@ -40,7 +40,10 @@ public class ArmSubsystem extends SubsystemBase {
             Encoder100<Angle> upperEncoder,
             double lowerEncoderZero,
             double upperEncoderZero) {
-        m_name = name;
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
+        m_name = String.format("/%s", name);
+
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
 

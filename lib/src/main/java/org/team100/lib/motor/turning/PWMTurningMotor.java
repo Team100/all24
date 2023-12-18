@@ -17,9 +17,11 @@ public class PWMTurningMotor implements Motor100<Angle> {
     private final String m_name;
 
     public PWMTurningMotor(String name, int channel) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_motor = new VictorSP(channel);
         m_motor.setInverted(true);
-        m_name = String.format("/PWM Turning Motor %s", name);
+        m_name = String.format("/%s/PWM Turning Motor", name);
         t.log(Level.DEBUG, m_name + "/Device ID", channel);
     }
 
@@ -33,12 +35,12 @@ public class PWMTurningMotor implements Motor100<Angle> {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
     }
-    
+
     @Override
     public void stop() {
         m_motor.stopMotor();
     }
-    
+
     @Override
     public void setVelocity(double outputRadiansPerSec, double Accel) {
         throw new UnsupportedOperationException("PWM turning motor does not implement closed loop velocity.");

@@ -17,8 +17,15 @@ public class JointMotor implements Motor100<Angle> {
     private final CANSparkMax m_motor;
     private final String m_name;
 
+    /**
+     * @param name may not start with a slash.
+     * @param canId
+     * @param currentLimit
+     */
     public JointMotor(String name, int canId, int currentLimit) {
-        m_name = name + "/joint motor";
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
+        m_name = String.format("/%s/Joint Motor", name);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
         m_motor.setSmartCurrentLimit(currentLimit);

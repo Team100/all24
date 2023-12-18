@@ -16,6 +16,9 @@ public interface SwerveModuleCollectionInterface {
 
     boolean[] atSetpoint();
 
+    /** Update the visualization. */
+    void periodic();
+
     void stop();
 
     void close();

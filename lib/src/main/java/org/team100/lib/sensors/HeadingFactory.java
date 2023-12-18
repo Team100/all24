@@ -19,7 +19,7 @@ public class HeadingFactory {
                 // for simulation
                 return new SimulatedHeading(kinematics, collection);
             default:
-                RedundantGyroInterface ahrsclass = new RedundantGyro.Factory(identity).get();
+                RedundantGyroInterface ahrsclass = new RedundantGyroFactory(identity).get();
                 return new Heading(ahrsclass);
         }
     }
