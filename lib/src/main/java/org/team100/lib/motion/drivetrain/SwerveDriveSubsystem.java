@@ -29,7 +29,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator m_poseEstimator;
-    private final Field2d m_field;
     private final FrameTransform m_frameTransform;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
@@ -39,13 +38,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
             SwerveDrivePoseEstimator poseEstimator,
             FrameTransform frameTransform,
             SwerveLocal swerveLocal,
-            Field2d field,
             Supplier<DriverControl.Speed> speed) {
         m_heading = heading;
         m_poseEstimator = poseEstimator;
         m_frameTransform = frameTransform;
         m_swerveLocal = swerveLocal;
-        m_field = field;
         m_speed = speed;
 
         stop();
@@ -70,9 +67,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
             throw new IllegalStateException();
         if (Double.isNaN(pose.getY()))
             throw new IllegalStateException();
-
         t.log(Level.DEBUG, "/swerve/pose", pose);
-        m_field.setRobotPose(pose);
     }
 
     /** The speed implied by the module states. */

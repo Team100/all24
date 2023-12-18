@@ -11,7 +11,6 @@ import org.team100.lib.sensors.SimulatedHeading;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class Fixture {
 
@@ -49,10 +48,8 @@ public class Fixture {
                 kinematics,
                 collection);
 
-        Field2d field = new Field2d();
-
         SwerveDriveSubsystem drive = new SwerveDriveSubsystem(heading, poseEstimator,
-                m_frameTransform, swerveLocal, field, () -> DriverControl.Speed.NORMAL);
+                m_frameTransform, swerveLocal, () -> DriverControl.Speed.NORMAL);
 
         return drive;
 

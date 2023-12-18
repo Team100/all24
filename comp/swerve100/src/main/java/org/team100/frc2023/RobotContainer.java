@@ -56,7 +56,6 @@ import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
-import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -77,7 +76,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer implements Testable {
@@ -103,7 +101,6 @@ public class RobotContainer implements Testable {
 
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
-    private final Field2d m_field;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollectionInterface m_modules;
@@ -143,7 +140,6 @@ public class RobotContainer implements Testable {
         m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
         m_heading = HeadingFactory.get(identity, m_kinematics, m_modules);
-        m_field = new Field2d();
 
         SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, SHOW_MODE);
 
@@ -194,7 +190,6 @@ public class RobotContainer implements Testable {
                 poseEstimator,
                 m_frameTransform,
                 swerveLocal,
-                m_field,
                 control::speed);
 
         ////////////////////////////

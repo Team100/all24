@@ -52,7 +52,6 @@ class SwerveDriveSubsystemTest {
                 poseEstimator,
                 frameTransform,
                 swerveLocal,
-                field,
                 () -> DriverControl.Speed.NORMAL);
         // try all the actuators
         drive.periodic();

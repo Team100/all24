@@ -27,6 +27,13 @@
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
+    },
+    "windows": {
+      "/field": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables": {
