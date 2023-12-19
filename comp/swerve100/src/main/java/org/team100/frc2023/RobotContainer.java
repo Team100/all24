@@ -259,7 +259,7 @@ public class RobotContainer implements Testable {
                         x -> List.of(TrajectoryMaker.line(m_kinematics, x))));
 
         // make a one-meter square
-        control.never().whileTrue(
+        control.actualCircle().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(m_kinematics, x)));
 
@@ -304,7 +304,7 @@ public class RobotContainer implements Testable {
                 new DriveToWaypoint100(goal, m_drive, planner, driveRam));
 
         // little square
-        control.actualCircle().whileTrue(
+        control.never().whileTrue(
                 new DriveInALittleSquare(m_drive));
 
         ///////////////////////

@@ -7,6 +7,7 @@ import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -99,17 +100,9 @@ public class SwerveLocal {
             state.speedMetersPerSecond = 0;
         }
         setModuleStates(swerveModuleStates);
-        return allAtSetpoint();
+        return Util.all(atGoal());
     }
 
-    private boolean allAtSetpoint() {
-        boolean[] atSetpoint = atSetpoint();
-        for (boolean s : atSetpoint) {
-            if (!s)
-                return false;
-        }
-        return true;
-    }
 
     /**
      * Sets the wheels to make an "X" pattern.

@@ -5,6 +5,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.profile.MotionProfileGenerator;
 import org.team100.lib.profile.MotionState;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -78,7 +79,7 @@ public class DriveInALittleSquare extends Command {
                 }
                 break;
             case STEERING:
-                if (all(m_swerve.atGoal())) {
+                if (Util.all(m_swerve.atGoal())) {
                     // we were steering, but all the setpoints have been reached, so switch to
                     // driving
                     m_state = State.DRIVING;
@@ -104,13 +105,5 @@ public class DriveInALittleSquare extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
-    }
-
-    private boolean all(boolean[] x) {
-        for (boolean b : x) {
-            if (!b)
-                return false;
-        }
-        return true;
     }
 }
