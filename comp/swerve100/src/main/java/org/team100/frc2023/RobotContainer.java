@@ -10,6 +10,7 @@ import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawCircle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
+import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
@@ -269,7 +270,7 @@ public class RobotContainer implements Testable {
 
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
-        control.actualCircle().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
+        control.never().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
@@ -301,6 +302,10 @@ public class RobotContainer implements Testable {
         DriveMotionController driveRam = new DriveRamseteController();
         control.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, driveRam));
+
+        // little square
+        control.actualCircle().whileTrue(
+                new DriveInALittleSquare(m_drive));
 
         ///////////////////////
         //

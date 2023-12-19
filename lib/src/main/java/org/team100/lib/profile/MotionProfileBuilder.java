@@ -15,7 +15,7 @@ public class MotionProfileBuilder {
      *
      * @param start start motion state
      */
-    public MotionProfileBuilder(MotionState start) {
+    MotionProfileBuilder(MotionState start) {
         currentState = start;
         segments = new ArrayList<>();
     }

@@ -218,6 +218,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         return m_swerveLocal.atSetpoint();
     }
 
+    @Override
+    public boolean[] atGoal() {
+        return m_swerveLocal.atGoal();
+    }
+
     /** for testing only */
     public SwerveModulePosition[] positions() {
         return m_swerveLocal.positions();

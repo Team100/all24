@@ -172,6 +172,10 @@ public class SwerveLocal {
         return m_modules.atSetpoint();
     }
 
+    public boolean[] atGoal() {
+        return m_modules.atGoal();
+    }
+
     public void close() {
         m_modules.close();
     }

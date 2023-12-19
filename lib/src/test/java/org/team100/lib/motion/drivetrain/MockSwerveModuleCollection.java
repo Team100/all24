@@ -33,6 +33,11 @@ public class MockSwerveModuleCollection implements SwerveModuleCollectionInterfa
     }
 
     @Override
+    public boolean[] atGoal() {
+        return new boolean[] { true, true, true, true };
+    }
+
+    @Override
     public void periodic() {
         //
     }

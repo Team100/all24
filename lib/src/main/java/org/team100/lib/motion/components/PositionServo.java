@@ -141,6 +141,10 @@ public class PositionServo<T> {
         return atSetpoint;
     }
 
+    public boolean atGoal() {
+        return atSetpoint() && m_goal.equals(m_setpoint);
+    }
+
     public void stop() {
         m_servo.stop();
     }

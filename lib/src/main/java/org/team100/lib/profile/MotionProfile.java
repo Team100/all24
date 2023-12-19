@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
  * Consists of a list of motion segments.
  */
 public class MotionProfile {
-    private final List<MotionSegment> segments;
+    private final List<MotionSegment> m_segments;
+    private final double m_duration;
 
     /**
      * Trapezoidal motion profile composed of motion segments.
@@ -20,7 +21,8 @@ public class MotionProfile {
     public MotionProfile(List<MotionSegment> segments) {
         if (segments.isEmpty())
             throw new IllegalArgumentException();
-        this.segments = segments;
+        m_segments = segments;
+        m_duration = m_segments.stream().map((it) -> it.getDt()).reduce(0.0, Double::sum);
     }
 
     /**
@@ -28,31 +30,31 @@ public class MotionProfile {
      */
     public MotionState get(double t) {
         if (t < 0.0)
-            return segments.get(0).getStart().stationary();
+            return m_segments.get(0).getStart().stationary();
 
         var remainingTime = t;
-        for (MotionSegment segment : segments) {
+        for (MotionSegment segment : m_segments) {
             if (remainingTime <= segment.getDt()) {
                 return segment.get(remainingTime);
             }
             remainingTime -= segment.getDt();
         }
 
-        return segments.get(segments.size() - 1).end().stationary();
+        return m_segments.get(m_segments.size() - 1).end().stationary();
     }
 
     /**
      * Returns the duration of the motion profile.
      */
     public double duration() {
-        return segments.stream().map((it) -> it.getDt()).reduce(0.0, Double::sum);
+        return m_duration;
     }
 
     /**
      * Returns a reversed version of the motion profile.
      */
     public MotionProfile reversed() {
-        List<MotionSegment> l = segments.stream().map((it) -> it.reversed()).collect(Collectors.toList());
+        List<MotionSegment> l = m_segments.stream().map((it) -> it.reversed()).collect(Collectors.toList());
         Collections.reverse(l);
         return new MotionProfile(l);
     }
@@ -61,21 +63,21 @@ public class MotionProfile {
      * Returns a flipped version of the motion profile.
      */
     public MotionProfile flipped() {
-        return new MotionProfile(segments.stream().map((it) -> it.flipped()).collect(Collectors.toList()));
+        return new MotionProfile(m_segments.stream().map((it) -> it.flipped()).collect(Collectors.toList()));
     }
 
     /**
      * Returns the start [MotionState].
      */
     public MotionState start() {
-        return segments.get(0).getStart();
+        return m_segments.get(0).getStart();
     }
 
     /**
      * Returns the end [MotionState].
      */
     public MotionState end() {
-        return segments.get(segments.size() - 1).end();
+        return m_segments.get(m_segments.size() - 1).end();
     }
 
     /**
@@ -88,8 +90,9 @@ public class MotionProfile {
         return builder.build();
     }
 
-    public List<MotionSegment> getSegments() {
-        return segments;
+    // for testing and building only
+    List<MotionSegment> getSegments() {
+        return m_segments;
     }
 
 }

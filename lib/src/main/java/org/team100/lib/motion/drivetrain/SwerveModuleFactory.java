@@ -325,7 +325,7 @@ public class SwerveModuleFactory {
     public SwerveModule100 SimulatedModule(String name) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive motor");
+        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(drive(name));
         // TODO: what should the reduction be here? is the drive motor velocity
         // command actually the velocity after reduction?
         SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(
@@ -345,7 +345,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name + "/Drive",
+                drive(name),
                 driveMotor,
                 driveEncoder,
                 driveController,

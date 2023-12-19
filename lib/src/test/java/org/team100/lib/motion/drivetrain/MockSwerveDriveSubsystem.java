@@ -78,6 +78,11 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
     }
 
     @Override
+    public boolean[] atGoal() {
+        return new boolean[] { true, true, true, true };
+    }
+
+    @Override
     public SwerveModuleState[] moduleStates() {
         return null;
     }

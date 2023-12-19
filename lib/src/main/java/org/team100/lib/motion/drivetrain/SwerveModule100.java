@@ -86,6 +86,10 @@ public class SwerveModule100 {
         return m_turningServo.atSetpoint();
     }
 
+    boolean atGoal() {
+        return m_turningServo.atGoal();
+    }
+
     void stop() {
         m_driveServo.stop();
         m_turningServo.stop();

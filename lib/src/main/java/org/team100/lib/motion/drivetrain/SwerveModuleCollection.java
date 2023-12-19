@@ -71,6 +71,16 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
     }
 
     @Override
+    public boolean[] atGoal() {
+        return new boolean[] {
+                m_frontLeft.atGoal(),
+                m_frontRight.atGoal(),
+                m_rearLeft.atGoal(),
+                m_rearRight.atGoal()
+        };
+    }
+
+    @Override
     public void periodic() {
         m_frontLeft.periodic();
         m_frontRight.periodic();
