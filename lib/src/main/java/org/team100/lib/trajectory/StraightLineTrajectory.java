@@ -59,14 +59,14 @@ public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, T
         m_config.setEndVelocity(0);
 
         try {
-
             return TrajectoryGenerator.generateTrajectory(
                     initial,
                     List.of(),
                     last,
                     m_config);
         } catch (TrajectoryGenerationException e) {
-            return null;
+            System.out.println("WARNING: Trajectory Generation Exception");
+            return new Trajectory();
         }
     }
 

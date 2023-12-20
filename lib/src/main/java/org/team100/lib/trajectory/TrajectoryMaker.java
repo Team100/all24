@@ -1,6 +1,7 @@
 package org.team100.lib.trajectory;
 
 import java.util.List;
+import java.util.function.Function;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,6 +30,17 @@ public class TrajectoryMaker {
                 restToRest(config, t1, t2),
                 restToRest(config, t2, t3),
                 restToRest(config, t3, t0));
+    }
+
+    /** Make a square that gets a reset starting point at each corner. */
+    public static List<Function<Pose2d, Trajectory>> permissiveSquare(SwerveDriveKinematics kinematics) {
+        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        config.setKinematics(kinematics);
+        return List.of(
+                x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(1, 0))),
+                x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(0, 1))),
+                x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(-1, 0))),
+                x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(0, -1))));
     }
 
     /** From current to x+1 */

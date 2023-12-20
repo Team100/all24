@@ -10,6 +10,7 @@ import org.team100.lib.commands.arm.Sequence;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawCircle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
+import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
@@ -17,6 +18,7 @@ import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.Oscillate;
+import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
@@ -262,6 +264,11 @@ public class RobotContainer implements Testable {
                 new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(m_kinematics, x)));
 
+        // one-meter square with reset at the corners
+        control.actualCircle().whileTrue(
+                new PermissiveTrajectoryListCommand(m_drive, controller,
+                        TrajectoryMaker.permissiveSquare(m_kinematics)));
+
         // one-meter square with position and velocity feedback control
         control.never().whileTrue(
                 new FullStateTrajectoryListCommand(m_drive,
@@ -269,7 +276,7 @@ public class RobotContainer implements Testable {
 
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
-        control.actualCircle().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
+        control.never().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
@@ -301,6 +308,10 @@ public class RobotContainer implements Testable {
         DriveMotionController driveRam = new DriveRamseteController();
         control.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, driveRam));
+
+        // little square
+        control.never().whileTrue(
+                new DriveInALittleSquare(m_drive));
 
         ///////////////////////
         //

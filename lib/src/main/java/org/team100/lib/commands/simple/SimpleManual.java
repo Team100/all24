@@ -49,7 +49,7 @@ public class SimpleManual extends Command {
                 m_simple.setPosition(kMaxPosition * m_input.getAsDouble());
                 break;
             default:
-                System.out.println("invalid manual mode: " + manualMode.name());
+                System.out.println("WARNING: invalid manual mode: " + manualMode.name());
                 break;
         }
     }

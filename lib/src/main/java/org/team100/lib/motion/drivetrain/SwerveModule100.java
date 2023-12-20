@@ -8,6 +8,7 @@ import org.team100.lib.motion.components.PositionServo;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 /**
  * Feedforward and feedback control of a single module.
@@ -54,6 +55,18 @@ public class SwerveModule100 {
         m_turningServo.setPosition(state.angle.getRadians());
     }
 
+    /** For testing */
+    SwerveModuleState getDesiredState() {
+        return new SwerveModuleState(
+                m_driveServo.getSetpoint(),
+                new Rotation2d(m_turningServo.getGoal()));
+    }
+
+    /** for testing only */
+    State getSetpoint() {
+        return m_turningServo.getSetpoint();
+    }
+
     /**
      * Only SwerveModuleCollection calls this.
      */
@@ -84,6 +97,10 @@ public class SwerveModule100 {
 
     boolean atSetpoint() {
         return m_turningServo.atSetpoint();
+    }
+
+    boolean atGoal() {
+        return m_turningServo.atGoal();
     }
 
     void stop() {

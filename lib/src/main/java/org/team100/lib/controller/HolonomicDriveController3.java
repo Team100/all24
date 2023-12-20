@@ -53,7 +53,6 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         return m_xController.atSetpoint() && m_yController.atSetpoint() && m_thetaController.atSetpoint();
     }
 
-
     @Override
     public Twist2d calculate(
             Pose2d currentPose,

@@ -38,7 +38,11 @@ public interface SwerveDriveSubsystemInterface {
 
     void resetPose(Pose2d robotPose);
 
+    /** The controllers are on the profiles. */
     boolean[] atSetpoint();
+
+    /** The profiles setpoints are at their goals. */
+    boolean[] atGoal();
 
     ChassisSpeeds speeds();
 

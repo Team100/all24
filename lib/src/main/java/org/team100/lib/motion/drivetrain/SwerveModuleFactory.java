@@ -79,7 +79,7 @@ public class SwerveModuleFactory {
         // TODO: shorter period
         PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, -Math.PI);
-        turningController2.setTolerance(0.1);
+        turningController2.setTolerance(0.1, 0.1);
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
@@ -176,7 +176,7 @@ public class SwerveModuleFactory {
         // TODO: shorter period
         PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, Math.PI);
-        turningController2.setTolerance(0.1);
+        turningController2.setTolerance(0.1, 0.1);
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
@@ -270,7 +270,7 @@ public class SwerveModuleFactory {
         // TODO: shorter period
         PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, Math.PI);
-        turningController2.setTolerance(0.1);
+        turningController2.setTolerance(0.1, 0.1);
 
         // DRIVE FF
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(//
@@ -325,7 +325,7 @@ public class SwerveModuleFactory {
     public SwerveModule100 SimulatedModule(String name) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name + "/drive motor");
+        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(drive(name));
         // TODO: what should the reduction be here? is the drive motor velocity
         // command actually the velocity after reduction?
         SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(
@@ -345,7 +345,7 @@ public class SwerveModuleFactory {
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
-                name + "/Drive",
+                drive(name),
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -373,9 +373,11 @@ public class SwerveModuleFactory {
                 turningFeedforward);
 
         // NOTE: these PID values are untuned
-        PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
+        // NOTE high P value, it's in rad/s not [-1,1]
+        PIDController turningController2 = new PIDController(20, 0, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, Math.PI);
-        turningController2.setTolerance(0.1);
+        // note low tolerance
+        turningController2.setTolerance(0.05, 0.05);
 
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI,

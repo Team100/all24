@@ -2,10 +2,10 @@ package org.team100.lib.motion.drivetrain;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
- 
 
     private final SwerveModule100 m_frontLeft;
     private final SwerveModule100 m_frontRight;
@@ -29,6 +29,26 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_frontRight.setDesiredState(swerveModuleStates[1]);
         m_rearLeft.setDesiredState(swerveModuleStates[2]);
         m_rearRight.setDesiredState(swerveModuleStates[3]);
+    }
+
+    // for testing
+    @Override
+    public SwerveModuleState[] getDesiredStates() {
+        return new SwerveModuleState[] {
+                m_frontLeft.getDesiredState(),
+                m_frontRight.getDesiredState(),
+                m_rearLeft.getDesiredState(),
+                m_rearRight.getDesiredState()
+        };
+    }
+
+    public TrapezoidProfile.State[] getSetpoint() {
+        return new TrapezoidProfile.State[] {
+                m_frontLeft.getSetpoint(),
+                m_frontRight.getSetpoint(),
+                m_rearLeft.getSetpoint(),
+                m_rearRight.getSetpoint()
+        };
     }
 
     /** For testing only */
@@ -67,6 +87,16 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
                 m_frontRight.atSetpoint(),
                 m_rearLeft.atSetpoint(),
                 m_rearRight.atSetpoint()
+        };
+    }
+
+    @Override
+    public boolean[] atGoal() {
+        return new boolean[] {
+                m_frontLeft.atGoal(),
+                m_frontRight.atGoal(),
+                m_rearLeft.atGoal(),
+                m_rearRight.atGoal()
         };
     }
 

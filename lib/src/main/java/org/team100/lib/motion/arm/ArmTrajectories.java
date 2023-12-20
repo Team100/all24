@@ -83,8 +83,8 @@ public class ArmTrajectories {
                     toPose(end, secondDegree),
                     m_trajectoryConfig);
         } catch (TrajectoryGenerationException e) {
-            e.printStackTrace();
-            return null;
+            System.out.println("WARNING Trajectory Generation Exception");
+            return new Trajectory();
         }
     }
 

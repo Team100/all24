@@ -16,7 +16,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  * Positional control on top of a velocity servo.
  */
 public class PositionServo<T> {
-    private static final double kDeadband = 0.03;
+    // NOTE: i took out the deadband because i was looking for more accuracy,
+    // but that might result in chattering, so feel free to put it back.
+    // private static final double kDeadband = 0.03;
 
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
@@ -95,9 +97,12 @@ public class PositionServo<T> {
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.position);
         double u_FF = m_setpoint.velocity;
+        // note u_FF is rad/s, so a big number, u_FB should also be a big number.
+
         double u_TOTAL = u_FB + u_FF;
-        // TODO: should there be a deadband here?
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, m_maxVel);
+        // NOTE: i took out the deadband because i was looking for more accuracy,
+        // but that might result in chattering, so feel free to put it back.
+        // u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, m_maxVel);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
@@ -141,6 +146,22 @@ public class PositionServo<T> {
         return atSetpoint;
     }
 
+    public boolean atGoal() {
+        return atSetpoint()
+                && MathUtil.isNear(
+                        m_goal.position,
+                        m_setpoint.position,
+                        m_controller.getPositionTolerance())
+                && MathUtil.isNear(
+                        m_goal.velocity,
+                        m_setpoint.velocity,
+                        m_controller.getVelocityTolerance());
+    }
+
+    public double getGoal() {
+        return m_goal.position;
+    }
+
     public void stop() {
         m_servo.stop();
     }
@@ -150,7 +171,7 @@ public class PositionServo<T> {
     }
 
     /** for testing only */
-    State getSetpoint() {
+    public State getSetpoint() {
         return m_setpoint;
     }
 }

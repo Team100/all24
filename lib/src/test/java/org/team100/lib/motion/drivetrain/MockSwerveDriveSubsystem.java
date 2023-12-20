@@ -13,9 +13,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
 
     public Pose2d pose = GeometryUtil.kPoseZero;
-    ChassisSpeeds speeds = new ChassisSpeeds();
+    public ChassisSpeeds speeds = new ChassisSpeeds();
     public Twist2d twist = new Twist2d();
     public boolean stopped = false;
+    public SwerveModuleState[] states;
+
     SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
             new Translation2d(0.1, 0.1),
             new Translation2d(0.1, -0.1),
@@ -69,11 +71,17 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
 
     @Override
     public void setRawModuleStates(SwerveModuleState[] states) {
+        this.states = states;
         this.speeds = kinematics.toChassisSpeeds(states);
     }
 
     @Override
     public boolean[] atSetpoint() {
+        return new boolean[] { true, true, true, true };
+    }
+
+    @Override
+    public boolean[] atGoal() {
         return new boolean[] { true, true, true, true };
     }
 
