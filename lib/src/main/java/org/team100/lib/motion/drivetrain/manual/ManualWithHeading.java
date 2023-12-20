@@ -20,10 +20,13 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * This is the logic from DriveWithHeading, extracted so it can be used as a
- * manual mode.
+ * Function that supports manual cartesian control, and both manual and locked
+ * rotational control.
  * 
- * TODO: add a velocity controller 
+ * Rotation uses a profile, velocity feedforward, and positional feedback.
+ * 
+ * TODO: add velocity feedback
+ * TODO: replace the PID controller with multiplication
  */
 public class ManualWithHeading {
     private final Telemetry t = Telemetry.get();
@@ -91,7 +94,7 @@ public class ManualWithHeading {
                 thetaFF + thetaFB,
                 -m_speedLimits.angleSpeedRad_S,
                 m_speedLimits.angleSpeedRad_S);
-        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx,twistM_S.dy, omega);
+        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
         double headingMeasurement = currentPose.getRotation().getRadians();
         double headingRate = m_heading.getHeadingRateNWU();
