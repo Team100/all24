@@ -48,11 +48,14 @@ public class Experiments {
     /** Starts with the config above, but can be overridden. */
     private final Map<Experiment, SendableChooser<BooleanSupplier>> m_overrides;
 
+    private final Map<Experiment, Boolean> m_testOverrides;
+
     public Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
         log();
         m_overrides = new EnumMap<>(Experiment.class);
+        m_testOverrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
             SendableChooser<BooleanSupplier> override = new NamedChooser<>(e.name());
             if (m_experiments.contains(e)) {
@@ -67,7 +70,15 @@ public class Experiments {
         }
     }
 
+    /** overrides everything. for testing only. */
+    public void testOverride(Experiment experiment, boolean state) {
+        m_testOverrides.put(experiment, state);
+    }
+
     public boolean enabled(Experiment experiment) {
+        if (m_testOverrides.containsKey(experiment)) {
+            return m_testOverrides.get(experiment);
+        }
         log();
         return m_overrides.get(experiment).getSelected().getAsBoolean();
         // return m_experiments.contains(experiment);

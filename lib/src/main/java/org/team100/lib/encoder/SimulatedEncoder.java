@@ -41,6 +41,7 @@ public class SimulatedEncoder<T extends Measure> implements Encoder100<T> {
 
     @Override
     public double getPosition() {
+        // TODO: do this calculation in periodic().
         double now = Timer.getFPGATimestamp();
         double dt = now - m_time;
         m_position += getRate() * dt;

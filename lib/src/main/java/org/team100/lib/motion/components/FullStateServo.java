@@ -14,6 +14,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 /**
  * Profiled motion with feedforward and feedback on position and velocity.
+ * 
+ * TODO: replace the PID controllers here with simple proportional feedback.
 */
 public class FullStateServo<T> {
     private static final double kDeadband = 0.03;

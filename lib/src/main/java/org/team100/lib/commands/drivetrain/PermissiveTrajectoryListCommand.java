@@ -19,19 +19,20 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Follow a list of trajectories.
- * 
- * The list can be relative to the current pose.
- * 
- * TODO: use the new holonomic trajectory type
+ * Similar to TrajectoryListCommand, but each trajectory starts wherever the
+ * robot ends up, instead of at the end of the previous trajectory. This is
+ * essentially like ignoring cross-track error.
  */
-public class TrajectoryListCommand extends Command {
-    private final Telemetry t = Telemetry.get();
+public class PermissiveTrajectoryListCommand extends Command {
+
+
+
+      private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_swerve;
     final Timer m_timer;
     private final HolonomicFieldRelativeController m_controller;
-    private final Function<Pose2d, List<Trajectory>> m_trajectories;
-    private Iterator<Trajectory> m_trajectoryIter;
+    private final List<Function<Pose2d, Trajectory>> m_trajectories;
+    private Iterator<Function<Pose2d, Trajectory>> m_trajectoryIter;
     private Trajectory m_currentTrajectory;
     private boolean done;
     // this holds the current rotation
@@ -39,10 +40,10 @@ public class TrajectoryListCommand extends Command {
     private Rotation2d m_rotation;
     private boolean m_aligned;
 
-    public TrajectoryListCommand(
+    public PermissiveTrajectoryListCommand(
             SwerveDriveSubsystemInterface swerve,
             HolonomicFieldRelativeController controller,
-            Function<Pose2d, List<Trajectory>> trajectories) {
+            List<Function<Pose2d,Trajectory>> trajectories) {
         m_swerve = swerve;
         m_controller = controller;
         m_timer = new Timer();
@@ -56,7 +57,7 @@ public class TrajectoryListCommand extends Command {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_rotation = currentPose.getRotation();
-        m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
+        m_trajectoryIter = m_trajectories.iterator();
         m_currentTrajectory = null;
         m_timer.stop();
         m_timer.reset();
@@ -69,7 +70,7 @@ public class TrajectoryListCommand extends Command {
         if (m_currentTrajectory == null || m_timer.get() > m_currentTrajectory.getTotalTimeSeconds()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
-                m_currentTrajectory = m_trajectoryIter.next();
+                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getPose());
                 TrajectoryVisualization.setViz(m_currentTrajectory);
                 m_timer.stop();
                 m_timer.reset();
@@ -112,4 +113,5 @@ public class TrajectoryListCommand extends Command {
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }
+
 }

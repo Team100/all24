@@ -58,7 +58,7 @@ public class CartesianManualPositionalArm extends Command {
 
         ArmAngles setpoint = m_kinematics.inverse(input);
         if (setpoint == null) {
-            System.out.println("ignoring infeasible input");
+            System.out.println("WARNING: ignoring infeasible input");
             return;
         }
         t.log(Level.DEBUG, "/arm position/setpoint", setpoint);

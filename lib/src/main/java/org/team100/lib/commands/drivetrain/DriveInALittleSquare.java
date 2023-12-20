@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * used.
  */
 public class DriveInALittleSquare extends Command {
-    private enum State {
+    enum State {
         DRIVING,
         STEERING
     }
@@ -35,11 +35,12 @@ public class DriveInALittleSquare extends Command {
     private static final double kMaxAccel = 1;
     private static final double kMaxJerk = 1;
     private final SwerveDriveSubsystemInterface m_swerve;
-    private final Timer m_timer;
+    final Timer m_timer;
 
-    private final MotionProfile m_driveProfile;
-    private Rotation2d m_goal;
-    private State m_state;
+    final MotionProfile m_driveProfile;
+    double speedM_S;
+    Rotation2d m_goal;
+    State m_state;
 
     public DriveInALittleSquare(SwerveDriveSubsystemInterface swerve) {
         m_swerve = swerve;
@@ -65,7 +66,6 @@ public class DriveInALittleSquare extends Command {
 
     @Override
     public void execute() {
-        double speedM_S = 0;
         switch (m_state) {
             case DRIVING:
                 if (m_timer.hasElapsed(m_driveProfile.duration())) {

@@ -30,6 +30,7 @@ public class VelocityServo<T> {
 
     // for calculating acceleration
     private double previousSetpoint = 0;
+    double m_setpoint;
 
     /**
      * @param experiments
@@ -65,6 +66,7 @@ public class VelocityServo<T> {
     public void setVelocity(Double setpoint) {
         if (Double.isNaN(setpoint))
             throw new IllegalArgumentException("setpoint is NaN");
+        m_setpoint = setpoint;
         if (m_experiments.enabled(Experiment.UseClosedLoopVelocity)) {
             offboard(setpoint);
         } else {
@@ -92,6 +94,11 @@ public class VelocityServo<T> {
 
     public double getDistance() {
         return m_encoder.getPosition();
+    }
+
+    /** For testing */
+    public double getSetpoint() {
+        return m_setpoint;
     }
 
     ////////////////////////////////////////////////

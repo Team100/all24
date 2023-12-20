@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class MockSwerveModuleCollection implements SwerveModuleCollectionInterface {
     SwerveModuleState[] m_targetModuleStates;
@@ -10,6 +11,26 @@ public class MockSwerveModuleCollection implements SwerveModuleCollectionInterfa
     @Override
     public void setDesiredStates(SwerveModuleState[] targetModuleStates) {
         m_targetModuleStates = targetModuleStates;
+    }
+
+    @Override
+    public SwerveModuleState[] getDesiredStates() {
+        return new SwerveModuleState[] {
+                new SwerveModuleState(),
+                new SwerveModuleState(),
+                new SwerveModuleState(),
+                new SwerveModuleState()
+        };
+    }
+
+    @Override
+    public TrapezoidProfile.State[] getSetpoint() {
+        return new TrapezoidProfile.State[] {
+                new TrapezoidProfile.State(),
+                new TrapezoidProfile.State(),
+                new TrapezoidProfile.State(),
+                new TrapezoidProfile.State()
+        };
     }
 
     @Override

@@ -10,26 +10,44 @@ import org.team100.lib.sensors.SimulatedHeading;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
+/**
+ * A real swerve subsystem populated with simulated motors and encoders,
+ * for testing.
+ */
 public class Fixture {
 
-    /**
-     * Make a real swerve subsystem populated with simulated motors and encoders,
-     * for testing.
-     */
-    public static SwerveDriveSubsystem realSwerve(SwerveDriveKinematics kinematics) {
+    public SwerveDriveKinematics kinematics;
+    public Experiments experiments;
+    public SwerveModuleFactory m_factory;
+    public SwerveModuleCollectionInterface collection;
+    public HeadingInterface heading;
+    public SwerveDrivePoseEstimator poseEstimator;
+    public VeeringCorrection veering;
+    public FrameTransform m_frameTransform;
+    public SpeedLimits speedLimits;
+    public SwerveLocal swerveLocal;
+    public SwerveDriveSubsystem drive;
 
-        Experiments experiments = new Experiments(Identity.BLANK);
-        SwerveModuleFactory m_factory = new SwerveModuleFactory(experiments, 40);
+    public Fixture() {
+        kinematics = new SwerveDriveKinematics(
+                new Translation2d(1, 1),
+                new Translation2d(1, -1),
+                new Translation2d(-1, 1),
+                new Translation2d(-1, -1));
 
-        SwerveModuleCollectionInterface collection = new SwerveModuleCollection(
+        experiments = new Experiments(Identity.BLANK);
+        m_factory = new SwerveModuleFactory(experiments, 40);
+
+        collection = new SwerveModuleCollection(
                 m_factory.SimulatedModule("FrontLeft"),
                 m_factory.SimulatedModule("FrontRight"),
                 m_factory.SimulatedModule("RearLeft"),
                 m_factory.SimulatedModule("RearRight"));
-        HeadingInterface heading = new SimulatedHeading(kinematics, collection);
-        SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+        heading = new SimulatedHeading(kinematics, collection);
+        poseEstimator = new SwerveDrivePoseEstimator(
                 kinematics,
                 heading.getHeadingNWU(),
                 collection.positions(),
@@ -37,21 +55,19 @@ public class Fixture {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        VeeringCorrection veering = new VeeringCorrection(heading::getHeadingRateNWU);
+        veering = new VeeringCorrection(heading::getHeadingRateNWU);
 
-        FrameTransform m_frameTransform = new FrameTransform(veering);
+        m_frameTransform = new FrameTransform(veering);
 
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        SwerveLocal swerveLocal = new SwerveLocal(
+        speedLimits = new SpeedLimits(1, 1, 1, 1);
+        swerveLocal = new SwerveLocal(
                 experiments,
                 speedLimits,
                 kinematics,
                 collection);
 
-        SwerveDriveSubsystem drive = new SwerveDriveSubsystem(heading, poseEstimator,
+        drive = new SwerveDriveSubsystem(heading, poseEstimator,
                 m_frameTransform, swerveLocal, () -> DriverControl.Speed.NORMAL);
-
-        return drive;
 
     }
 

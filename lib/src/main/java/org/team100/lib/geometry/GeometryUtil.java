@@ -147,12 +147,10 @@ public class GeometryUtil {
     public static boolean poseWithCurvatureEquals(PoseWithCurvature a, PoseWithCurvature b) {
         boolean poseEqual = a.poseMeters.equals(b.poseMeters);
         if (!poseEqual) {
-            System.out.println("pose not equal");
             return false;
         }
         boolean curvatureEqual = Math.abs(a.curvatureRadPerMeter - b.curvatureRadPerMeter) <= 1e-12;
         if (!curvatureEqual) {
-            System.out.println("curvature not equal");
             return false;
         }
         return true;

@@ -14,6 +14,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * The swerve drive in local, or robot, reference frame. This class knows
@@ -84,9 +85,11 @@ public class SwerveLocal {
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         t.log(Level.DEBUG, "/swervelocal/desired chassis speed", speeds);
         if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
+            // System.out.println("SETPOINT GENERATOR");
             setChassisSpeedsWithSetpointGenerator(speeds);
         } else {
             setChassisSpeedsNormally(speeds);
+            // System.out.println("NORMAL");
         }
     }
 
@@ -94,15 +97,22 @@ public class SwerveLocal {
      * @return true if aligned
      */
     public boolean steerAtRest(ChassisSpeeds speeds) {
+        // this indicates that during the steering the goal is fixed
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState[] swerveModuleStates = m_DriveKinematics.toSwerveModuleStates(speeds);
         for (SwerveModuleState state : swerveModuleStates) {
             state.speedMetersPerSecond = 0;
         }
         setModuleStates(swerveModuleStates);
+        // previous setpoint should be at rest with the current states
+        prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), swerveModuleStates);
+        m_DriveKinematics.resetHeadings(
+                swerveModuleStates[0].angle,
+                swerveModuleStates[1].angle,
+                swerveModuleStates[2].angle,
+                swerveModuleStates[3].angle);
         return Util.all(atGoal());
     }
-
 
     /**
      * Sets the wheels to make an "X" pattern.
@@ -142,6 +152,14 @@ public class SwerveLocal {
                 targetModuleStates[1].angle,
                 targetModuleStates[2].angle,
                 targetModuleStates[3].angle);
+    }
+
+    public SwerveModuleState[] getDesiredStates() {
+        return m_modules.getDesiredStates();
+    }
+
+    public TrapezoidProfile.State[] getSetpoints() {
+        return m_modules.getSetpoint();
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -202,6 +220,7 @@ public class SwerveLocal {
 
         t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
         // Informs SwerveDriveKinematics of the module states.
+
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
                 limits,
                 prevSetpoint,
