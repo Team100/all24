@@ -3,6 +3,8 @@ package org.team100.lib.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.wpi.first.math.MathUtil;
+
 /**
  * Various math utilities.
  */
@@ -52,5 +54,13 @@ public class Math100 {
     }
 
     private Math100() {
+    }
+
+    /**
+     * Produce an Euler angle equivalent to x but closer to measurement; might be
+     * outside [-pi,pi].
+     */
+    public static double getMinDistance(double measurement, double x) {
+        return MathUtil.angleModulus(x - measurement) + measurement;
     }
 }

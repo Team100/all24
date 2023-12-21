@@ -8,6 +8,7 @@ public class Distance implements Measure {
         //
     }
 
+    /** Distance is not periodic, so modulus is identity. */
     @Override
     public double modulus(double x) {
         return x;

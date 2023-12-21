@@ -27,8 +27,7 @@ public class SimpleSubsystemFactory {
     public SimpleSubsystemFactory(Identity identity, Experiments experiments) {
         m_identity = identity;
         m_experiments = experiments;
-
-        profile = new ChoosableProfile(2, 2, 0, ChoosableProfile.Mode.TRAPEZOID);
+        profile = new ChoosableProfile(2, 2, ChoosableProfile.Mode.TRAPEZOID);
     }
 
     public SimpleSubsystem get() {
@@ -65,7 +64,8 @@ public class SimpleSubsystemFactory {
                 10,
                 positionController,
                 profile,
-                x -> x);
+                Distance.instance);
+        actuator.reset();
         return new SimpleSubsystem(actuator);
     }
 
@@ -92,7 +92,8 @@ public class SimpleSubsystemFactory {
                 10,
                 positionController,
                 profile,
-                x -> x);
+                Distance.instance);
+        actuator.reset();
         return new SimpleSubsystem(actuator);
     }
 }

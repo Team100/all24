@@ -25,9 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class PermissiveTrajectoryListCommand extends Command {
 
-
-
-      private final Telemetry t = Telemetry.get();
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_swerve;
     final Timer m_timer;
     private final HolonomicFieldRelativeController m_controller;
@@ -43,7 +41,7 @@ public class PermissiveTrajectoryListCommand extends Command {
     public PermissiveTrajectoryListCommand(
             SwerveDriveSubsystemInterface swerve,
             HolonomicFieldRelativeController controller,
-            List<Function<Pose2d,Trajectory>> trajectories) {
+            List<Function<Pose2d, Trajectory>> trajectories) {
         m_swerve = swerve;
         m_controller = controller;
         m_timer = new Timer();
@@ -91,7 +89,7 @@ public class PermissiveTrajectoryListCommand extends Command {
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // look just one loop ahead
-            State desiredState = m_currentTrajectory.sample(m_timer.get()+0.02);
+            State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);

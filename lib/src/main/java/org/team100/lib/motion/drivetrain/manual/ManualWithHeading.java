@@ -4,9 +4,6 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
-import org.team100.lib.profile.MotionProfile;
-import org.team100.lib.profile.MotionProfileGenerator;
-import org.team100.lib.profile.MotionState;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -17,13 +14,17 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * This is the logic from DriveWithHeading, extracted so it can be used as a
- * manual mode.
+ * Function that supports manual cartesian control, and both manual and locked
+ * rotational control.
  * 
- * TODO: add a velocity controller 
+ * Rotation uses a profile, velocity feedforward, and positional feedback.
+ * 
+ * TODO: add velocity feedback
+ * TODO: replace the PID controller with multiplication
  */
 public class ManualWithHeading {
     private final Telemetry t = Telemetry.get();
@@ -36,7 +37,9 @@ public class ManualWithHeading {
     private final PIDController m_thetaController;
 
     public Rotation2d m_currentDesiredRotation = null;
-    public MotionProfile m_profile;
+    public final TrapezoidProfile m_profile;
+    TrapezoidProfile.State m_setpoint;
+    private double prevTime;
 
     public ManualWithHeading(
             SpeedLimits speedLimits,
@@ -49,12 +52,17 @@ public class ManualWithHeading {
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_latch = new HeadingLatch();
+        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
+                speedLimits.angleSpeedRad_S, speedLimits.angleAccelRad_S2);
+        m_profile = new TrapezoidProfile(c);
     }
 
-    public void reset() {
+    public void reset(Pose2d currentPose) {
         m_currentDesiredRotation = null;
         m_timer.restart();
+        prevTime = 0;
         m_latch.unlatch();
+        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(), 0);
     }
 
     public Twist2d apply(Pose2d currentPose, Twist2d twist1_1) {
@@ -71,63 +79,48 @@ public class ManualWithHeading {
         // if the desired rotation has changed, update the profile.
         if (!latchedPov.equals(m_currentDesiredRotation)) {
             m_currentDesiredRotation = latchedPov;
-            updateProfile(currentPose, latchedPov);
+            // m_profile = updateProfile(m_speedLimits, currentPose.getRotation(),
+            // m_heading.getHeadingRateNWU(),
+            // latchedPov);
             m_timer.restart();
+            prevTime = 0;
         }
 
+        double now = m_timer.get();
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
-        MotionState m_ref = m_profile.get(m_timer.get());
+        double dt = now - prevTime;
+        m_setpoint = m_profile.calculate(dt,
+                new TrapezoidProfile.State(latchedPov.getRadians(), 0),
+                m_setpoint);
+        prevTime = now;
 
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
         // the snap overrides the user input for omega.
-        double thetaFF = m_ref.getV();
+        double thetaFF = m_setpoint.velocity;
 
         Rotation2d currentRotation = currentPose.getRotation();
 
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_ref.getX());
+        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.position);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB,
                 -m_speedLimits.angleSpeedRad_S,
                 m_speedLimits.angleSpeedRad_S);
-        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx,twistM_S.dy, omega);
+        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
         double headingMeasurement = currentPose.getRotation().getRadians();
         double headingRate = m_heading.getHeadingRateNWU();
 
         t.log(Level.DEBUG, "/ManualWithHeading/mode", "snap");
-        t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_ref.getX());
-        t.log(Level.DEBUG, "/ManualWithHeading/reference/omega", m_ref.getV());
+        t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_setpoint.position);
+        t.log(Level.DEBUG, "/ManualWithHeading/reference/omega", m_setpoint.velocity);
         t.log(Level.DEBUG, "/ManualWithHeading/measurement/theta", headingMeasurement);
         t.log(Level.DEBUG, "/ManualWithHeading/measurement/omega", headingRate);
-        t.log(Level.DEBUG, "/ManualWithHeading/error/theta", m_ref.getX() - headingMeasurement);
-        t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_ref.getV() - headingRate);
+        t.log(Level.DEBUG, "/ManualWithHeading/error/theta", m_setpoint.position - headingMeasurement);
+        t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_setpoint.velocity - headingRate);
 
         return twistWithSnapM_S;
 
     }
-
-    /**
-     * if you touch the pov switch, we turn on snap mode and make a new profile
-     */
-    private void updateProfile(Pose2d currentPose, Rotation2d latchedPov) {
-
-        // the new profile starts where we are now
-        // TODO: add entry velocity
-        double currentRads = MathUtil.angleModulus(currentPose.getRotation().getRadians());
-        MotionState start = new MotionState(currentRads, m_heading.getHeadingRateNWU());
-
-        // the new goal is simply the pov rotation with zero velocity
-        MotionState m_goal = new MotionState(MathUtil.angleModulus(latchedPov.getRadians()), 0);
-
-        // new profile obeys the speed limits
-        m_profile = MotionProfileGenerator.generateSimpleMotionProfile(
-                start,
-                m_goal,
-                m_speedLimits.angleSpeedRad_S,
-                m_speedLimits.angleAccelRad_S2,
-                m_speedLimits.angleJerkRad_S3);
-    }
-
 }

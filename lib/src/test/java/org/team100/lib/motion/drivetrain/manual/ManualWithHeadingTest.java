@@ -16,6 +16,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class ManualWithHeadingTest {
@@ -31,15 +32,15 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 rotationSupplier,
                 thetaController);
-        m_manualWithHeading.reset();
-
         Pose2d currentPose = GeometryUtil.kPoseZero;
+        m_manualWithHeading.reset(currentPose);
+
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
 
         Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -65,18 +66,19 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 rotationSupplier,
                 thetaController);
 
-        m_manualWithHeading.reset();
+        Pose2d currentPose = GeometryUtil.kPoseZero;
+
+        m_manualWithHeading.reset(currentPose);
 
         // no desired rotation
         desiredRotation = null;
-        Pose2d currentPose = GeometryUtil.kPoseZero;
 
         Twist2d twist1_1 = new Twist2d(0, 0, 1);
 
@@ -104,28 +106,32 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 rotationSupplier,
                 thetaController);
 
-        m_manualWithHeading.reset();
+        // no dtheta
+        Pose2d currentPose = GeometryUtil.kPoseZero;
+        m_manualWithHeading.reset(currentPose);
 
         // face towards +y
         desiredRotation = GeometryUtil.kRotation90;
-        // no dtheta
-        Pose2d currentPose = GeometryUtil.kPoseZero;
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
 
         Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         // there should be a profile
-        assertEquals(2.571, m_manualWithHeading.m_profile.duration(), kDelta);
+        assertEquals(2.571, m_manualWithHeading.m_profile.totalTime(), kDelta);
         // but at t0 it hasn't started yet.
-        assertEquals(0, m_manualWithHeading.m_profile.get(0).getV(), kDelta);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(
+                0,
+                new TrapezoidProfile.State(0, 0),
+                new TrapezoidProfile.State(m_manualWithHeading.m_currentDesiredRotation.getRadians(), 0)).velocity,
+                kDelta);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
         // confirm t=0 implies v=0
@@ -140,7 +146,7 @@ class ManualWithHeadingTest {
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertEquals(1, m_manualWithHeading.m_setpoint.velocity, kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
@@ -150,14 +156,14 @@ class ManualWithHeadingTest {
         // almost done
         SimHooks.stepTiming(1.4);
         // mostly rotated
-        currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
+        currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertEquals(0.171, m_manualWithHeading.m_setpoint.velocity, kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
         // almost done
-        assertEquals(0.175, twistM_S.dtheta, kDelta);
+        assertEquals(0.192, twistM_S.dtheta, kDelta);
 
         SimHooks.stepTiming(100);
         // done
@@ -179,20 +185,20 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
                 rotationSupplier,
                 thetaController);
 
-        m_manualWithHeading.reset();
+        Pose2d currentPose = GeometryUtil.kPoseZero;
+        m_manualWithHeading.reset(currentPose);
 
         // face towards +y
         desiredRotation = GeometryUtil.kRotation90;
         // no dtheta
 
-        Pose2d currentPose = GeometryUtil.kPoseZero;
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
 
         Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
@@ -200,9 +206,11 @@ class ManualWithHeadingTest {
         // in snap mode
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         // there should be a profile
-        assertEquals(2.571, m_manualWithHeading.m_profile.duration(), kDelta);
+        assertEquals(2.571, m_manualWithHeading.m_profile.totalTime(), kDelta);
         // but at t0 it hasn't started yet.
-        assertEquals(0, m_manualWithHeading.m_profile.get(0).getV(), kDelta);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0,
+                new TrapezoidProfile.State(Math.PI / 2, 0),
+                new TrapezoidProfile.State(0, 0)).velocity, kDelta);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
         // confirm t=0 implies v=0
@@ -217,7 +225,7 @@ class ManualWithHeadingTest {
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertEquals(1, m_manualWithHeading.m_setpoint.velocity, kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
@@ -229,7 +237,7 @@ class ManualWithHeadingTest {
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1, m_manualWithHeading.m_profile.get(1).getV(), kDelta);
+        assertEquals(0.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
         assertNotNull(m_manualWithHeading.m_currentDesiredRotation);
         assertEquals(0, twistM_S.dx, kDelta);
         assertEquals(0, twistM_S.dy, kDelta);
@@ -245,7 +253,5 @@ class ManualWithHeadingTest {
         assertEquals(0, twistM_S.dy, kDelta);
         // there should be no more profile to follow
         assertEquals(0, twistM_S.dtheta, kDelta);
-
     }
-
 }
