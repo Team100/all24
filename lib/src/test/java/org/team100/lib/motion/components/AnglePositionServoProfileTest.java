@@ -12,6 +12,7 @@ import org.team100.lib.units.Angle;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 class AnglePositionServoProfileTest {
     private static final double kDelta = 0.001;
@@ -53,7 +54,8 @@ class AnglePositionServoProfileTest {
                 1,
                 controller2,
                 profile,
-                MathUtil::angleModulus);
+                Angle.instance);
+        servo.reset();
     }
 
     /**

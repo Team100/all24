@@ -66,8 +66,11 @@ public class DriveToRelative extends Command {
 
         profileTheta = MotionProfileGenerator.generateSimpleMotionProfile(
                 new MotionState(currentPose.getRotation().getRadians(), 0),
-                new MotionState(MathUtil.angleModulus(currentPose.getRotation().getRadians()
-                        + relative.getRotation().getRadians()), 0),
+                new MotionState(
+                        MathUtil.angleModulus(
+                                currentPose.getRotation().getRadians()
+                                        + relative.getRotation().getRadians()),
+                        0),
                 m_speedLimits.angleSpeedRad_S,
                 m_speedLimits.angleAccelRad_S2,
                 m_speedLimits.angleJerkRad_S3);

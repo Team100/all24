@@ -11,6 +11,7 @@ import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 class PositionProfileTest {
     private static final double kDelta = 0.001;
@@ -41,23 +42,24 @@ class PositionProfileTest {
     @Test
     void testTrapezoid() {
         // TODO: tune this
-        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+        PIDController vController = new PIDController(1, 0, 0, period);
+        VelocityServo<Distance> vServo = new VelocityServo<>(
                 experiments,
                 name,
                 motor,
                 encoder,
-                angleVelocityController,
+                vController,
                 feedforward);
         ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);
         servo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                vServo,
                 encoder,
                 1,
                 controller2,
                 profile,
-                x -> x);
+                Distance.instance);
+        servo.reset();
 
         verifyTrapezoid();
     }
@@ -69,23 +71,24 @@ class PositionProfileTest {
     @Test
     void testProfile() {
         // TODO: tune this
-        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+        PIDController vController = new PIDController(1, 0, 0, period);
+        VelocityServo<Distance> vServo = new VelocityServo<>(
                 experiments,
                 name,
                 motor,
                 encoder,
-                angleVelocityController,
+                vController,
                 feedforward);
         ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.MOTION_PROFILE);
         servo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                vServo,
                 encoder,
                 1,
                 controller2,
                 profile,
-                x -> x);
+                Distance.instance);
+        servo.reset();
         verifyTrapezoid();
     }
 
@@ -119,23 +122,24 @@ class PositionProfileTest {
     @Test
     void testSProfile() {
         // TODO: tune this
-        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+        PIDController vController = new PIDController(1, 0, 0, period);
+        VelocityServo<Distance> vServo = new VelocityServo<>(
                 experiments,
                 name,
                 motor,
                 encoder,
-                angleVelocityController,
+                vController,
                 feedforward);
         ChoosableProfile profile = new ChoosableProfile(1, 1, 100, ChoosableProfile.Mode.MOTION_PROFILE);
         servo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                vServo,
                 encoder,
                 1,
                 controller2,
                 profile,
-                x -> x);
+                Distance.instance);
+        servo.reset();
         verifySProfile();
     }
 
@@ -183,13 +187,17 @@ class PositionProfileTest {
                 1,
                 controller2,
                 profile,
-                x -> x);
+                Distance.instance);
+        servo.reset();
         verifySProfile();
     }
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
         servo.setPosition(1);
+        // useful to fix up the examples above
+        // System.out.printf("verify(%5.3f, %5.3f, %5.3f);\n", motorVelocity,
+        // setpointPosition, setpointVelocity);
         assertEquals(motorVelocity, motor.velocity, kDelta);
         assertEquals(setpointPosition, servo.getSetpoint().position, kDelta);
         assertEquals(setpointVelocity, servo.getSetpoint().velocity, kDelta);

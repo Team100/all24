@@ -125,8 +125,8 @@ public class SwerveModuleFactory {
                 20 * Math.PI,
                 turningController2,
                 profile,
-                MathUtil::angleModulus);
-
+                Angle.instance);
+        turningServo.reset();
         return new SwerveModule100(name, driveServo, turningServo);
     }
 
@@ -227,8 +227,8 @@ public class SwerveModuleFactory {
                 20 * Math.PI, // vel
                 turningController2,
                 profile,
-                MathUtil::angleModulus);
-
+                Angle.instance);
+        turningServo.reset();
         return new SwerveModule100(name, driveServo, turningServo);
 
     }
@@ -313,8 +313,8 @@ public class SwerveModuleFactory {
                 20 * Math.PI,
                 turningController2,
                 profile,
-                MathUtil::angleModulus);
-
+                Angle.instance);
+        turningServo.reset();
         return new SwerveModule100(name, driveServo, turningServo);
     }
 
@@ -390,8 +390,8 @@ public class SwerveModuleFactory {
                 20 * Math.PI,
                 turningController2,
                 profile,
-                MathUtil::angleModulus);
-
+                Angle.instance);
+        turningServo.reset();
         return new SwerveModule100(name, driveServo, turningServo);
     }
 

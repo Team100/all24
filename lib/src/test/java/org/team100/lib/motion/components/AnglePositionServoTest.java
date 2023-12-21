@@ -52,8 +52,8 @@ class AnglePositionServoTest {
                 1,
                 turningController2,
                 profile,
-                MathUtil::angleModulus);
-
+                Angle.instance);
+        servo.reset();
         servo.setPosition(1);
         assertEquals(0, turningMotor.output, 0.001);
         assertEquals(0.5, servo.getSetpoint().position, kDelta);
@@ -101,5 +101,7 @@ class AnglePositionServoTest {
         assertEquals(4, m_setpoint.position, kDelta);
         assertEquals(-1, m_setpoint.velocity, kDelta);
     }
+
+
 
 }

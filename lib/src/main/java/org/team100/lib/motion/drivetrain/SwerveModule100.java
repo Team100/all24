@@ -62,6 +62,11 @@ public class SwerveModule100 {
                 new Rotation2d(m_turningServo.getGoal()));
     }
 
+    /** Make sure the setpoint and measurement are the same. */
+    public void reset() {
+        m_turningServo.reset();
+    }
+
     /** for testing only */
     State getSetpoint() {
         return m_turningServo.getSetpoint();

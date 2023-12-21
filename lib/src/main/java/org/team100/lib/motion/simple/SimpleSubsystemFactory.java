@@ -65,7 +65,8 @@ public class SimpleSubsystemFactory {
                 10,
                 positionController,
                 profile,
-                x -> x);
+                Distance.instance);
+        actuator.reset();
         return new SimpleSubsystem(actuator);
     }
 
@@ -92,7 +93,8 @@ public class SimpleSubsystemFactory {
                 10,
                 positionController,
                 profile,
-                x -> x);
+                Distance.instance);
+        actuator.reset();
         return new SimpleSubsystem(actuator);
     }
 }

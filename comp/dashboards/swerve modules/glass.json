@@ -356,7 +356,6 @@
           ],
           "height": 172,
           "legend": false,
-          "legendLocation": 4,
           "lockPrevX": true,
           "name": "Steering goal and setpoint",
           "series": [

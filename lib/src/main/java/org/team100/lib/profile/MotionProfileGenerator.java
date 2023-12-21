@@ -82,8 +82,10 @@ public class MotionProfileGenerator {
             double maxAccel,
             double maxJerk,
             boolean overshoot) {
+                System.out.println("START");
         // ensure the goal is always after the start; plan the flipped profile otherwise
         if (goal.getX() < start.getX()) {
+            System.out.println("REVERSE");
             return generateSimpleMotionProfile(
                     start.flipped(),
                     goal.flipped(),
@@ -93,6 +95,7 @@ public class MotionProfileGenerator {
         }
 
         if (Math100.epsilonEquals(maxJerk, 0.0)) {
+            System.out.println("INFINITE JERK");
             // acceleration-limited profile (trapezoidal)
             double requiredAccel = (goal.getV() * goal.getV() - start.getV() * start.getV())
                     / (2 * (goal.getX() - start.getX()));

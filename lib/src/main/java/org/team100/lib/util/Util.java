@@ -8,4 +8,8 @@ public class Util {
         }
         return true;
     }
+
+    private Util() {
+        //
+    }
 }

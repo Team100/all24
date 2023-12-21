@@ -4,12 +4,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.team100.lib.units.Measure;
 /**
  * A one-dimensional motion profile.
  * 
  * Consists of a list of motion segments.
  */
-public class MotionProfile {
+public class MotionProfile/*<T extends Measure>*/ {
     private final List<MotionSegment> m_segments;
     private final double m_duration;
 
@@ -93,6 +94,19 @@ public class MotionProfile {
     // for testing and building only
     List<MotionSegment> getSegments() {
         return m_segments;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < m_segments.size(); ++i) {
+            builder.append(i);
+            builder.append(": state: ");
+            builder.append(m_segments.get(i));
+            builder.append(System.lineSeparator());
+        }
+        return builder.toString();
+
     }
 
 }

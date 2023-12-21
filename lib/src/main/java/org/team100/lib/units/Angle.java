@@ -10,6 +10,7 @@ public class Angle implements Measure {
         //
     }
 
+    /** Angle is periodic. */
     @Override
     public double modulus(double x) {
         return MathUtil.angleModulus(x);

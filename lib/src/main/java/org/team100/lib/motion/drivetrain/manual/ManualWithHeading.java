@@ -11,6 +11,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -74,7 +75,7 @@ public class ManualWithHeading {
         // if the desired rotation has changed, update the profile.
         if (!latchedPov.equals(m_currentDesiredRotation)) {
             m_currentDesiredRotation = latchedPov;
-            updateProfile(currentPose, latchedPov);
+            m_profile = updateProfile(m_speedLimits, currentPose.getRotation(), m_heading.getHeadingRateNWU(), latchedPov);
             m_timer.restart();
         }
 
@@ -113,24 +114,32 @@ public class ManualWithHeading {
 
     /**
      * if you touch the pov switch, we turn on snap mode and make a new profile
+     * 
+     * TODO: this is wrong, it goes the long way around pi.
      */
-    private void updateProfile(Pose2d currentPose, Rotation2d latchedPov) {
+    static MotionProfile updateProfile( SpeedLimits speedLimits, Rotation2d startRot, double headingRateNWU, Rotation2d endRot) {
 
         // the new profile starts where we are now
         // TODO: add entry velocity
-        double currentRads = MathUtil.angleModulus(currentPose.getRotation().getRadians());
-        MotionState start = new MotionState(currentRads, m_heading.getHeadingRateNWU());
+        double currentRads = MathUtil.angleModulus(startRot.getRadians());
+        MotionState start = new MotionState(currentRads, headingRateNWU);
+        System.out.println("start " + start);
 
         // the new goal is simply the pov rotation with zero velocity
-        MotionState m_goal = new MotionState(MathUtil.angleModulus(latchedPov.getRadians()), 0);
+        double latchedPovRad = endRot.getRadians();
 
-        // new profile obeys the speed limits
-        m_profile = MotionProfileGenerator.generateSimpleMotionProfile(
+        double goalRad = Math100.getMinDistance(currentRads, latchedPovRad);
+        MotionState goal = new MotionState(goalRad, 0);
+        System.out.println("goal " + goal);
+
+        // new profile absolutely obeys the speed limits, which means it may (see "true" below) overshoot and backtrack.
+        return MotionProfileGenerator.generateSimpleMotionProfile(
                 start,
-                m_goal,
-                m_speedLimits.angleSpeedRad_S,
-                m_speedLimits.angleAccelRad_S2,
-                m_speedLimits.angleJerkRad_S3);
+                goal,
+                speedLimits.angleSpeedRad_S,
+                speedLimits.angleAccelRad_S2,
+                speedLimits.angleJerkRad_S3,
+                true);
     }
 
 }

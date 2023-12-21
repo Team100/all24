@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.profile.MotionProfile;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
 
@@ -31,7 +32,7 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
@@ -65,7 +66,7 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
@@ -104,7 +105,7 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
@@ -179,7 +180,7 @@ class ManualWithHeadingTest {
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI,Math.PI);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 speedLimits,
                 heading,
@@ -246,6 +247,96 @@ class ManualWithHeadingTest {
         // there should be no more profile to follow
         assertEquals(0, twistM_S.dtheta, kDelta);
 
+    }
+
+    @Test
+    void testProfileRestToRest() {
+        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        MotionProfile p;
+
+        // start == end
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0, new Rotation2d());
+        assertEquals(0, p.duration(), kDelta);
+        
+        // 0.1 rad clockwise
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0, new Rotation2d(0.1));
+        assertEquals(0.632, p.duration(), kDelta);
+        
+        // 0.1 rad counterclockwise
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0, new Rotation2d(-0.1));
+        assertEquals(0.632, p.duration(), kDelta);
+        
+        // 0.1 rad across zero
+        p = ManualWithHeading.updateProfile(speedLimits,
+                new Rotation2d(-0.05), 0,
+                new Rotation2d(0.05));
+        assertEquals(0.632, p.duration(), kDelta);
+        
+        // 0.1 rad across pi
+        p = ManualWithHeading.updateProfile(speedLimits,
+                new Rotation2d(Math.PI - 0.05), 0,
+                new Rotation2d(Math.PI + 0.05));
+        assertEquals(0.632, p.duration(), kDelta);
+    }
+
+    @Test
+    void testProfileMovingTowardsGoal() {
+        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        MotionProfile p;
+
+        // start == end with positive velocity
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0.001, new Rotation2d());
+        System.out.println(p);
+        assertEquals(0, p.duration(), kDelta);
+
+        // 0.1 rad clockwise
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0.1, new Rotation2d(0.1));
+        assertEquals(0.632, p.duration(), kDelta);
+
+        // 0.1 rad counterclockwise
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), -0.1, new Rotation2d(-0.1));
+        assertEquals(0.632, p.duration(), kDelta);
+
+        // 0.1 rad across zero
+        p = ManualWithHeading.updateProfile(speedLimits,
+                new Rotation2d(-0.05), 0.1,
+                new Rotation2d(0.05));
+        assertEquals(0.632, p.duration(), kDelta);
+
+        // 0.1 rad across pi
+        p = ManualWithHeading.updateProfile(speedLimits,
+                new Rotation2d(Math.PI - 0.05), 0.1,
+                new Rotation2d(Math.PI + 0.05));
+        assertEquals(0.632, p.duration(), kDelta);
+    }
+
+    @Test
+    void testProfileMovingAwayFromGoal() {
+        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        MotionProfile p;
+        // start == end with negative velocity
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), -1, new Rotation2d());
+        assertEquals(0, p.duration(), kDelta);
+
+        // 0.1 rad clockwise
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0, new Rotation2d(0.1));
+        assertEquals(0.632, p.duration(), kDelta);
+
+        // 0.1 rad counterclockwise
+        p = ManualWithHeading.updateProfile(speedLimits, new Rotation2d(), 0, new Rotation2d(-0.1));
+        assertEquals(0.632, p.duration(), kDelta);
+
+        // 0.1 rad across zero
+        p = ManualWithHeading.updateProfile(speedLimits,
+                new Rotation2d(-0.05), 0,
+                new Rotation2d(0.05));
+        assertEquals(0.632, p.duration(), kDelta);
+
+        // 0.1 rad across pi
+        p = ManualWithHeading.updateProfile(speedLimits,
+                new Rotation2d(Math.PI - 0.05), 0,
+                new Rotation2d(Math.PI + 0.05));
+        assertEquals(0.632, p.duration(), kDelta);
     }
 
 }

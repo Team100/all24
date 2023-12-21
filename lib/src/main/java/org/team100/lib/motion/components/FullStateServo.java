@@ -6,6 +6,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Measure;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -15,11 +16,14 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 /**
  * Profiled motion with feedforward and feedback on position and velocity.
  * 
+ * It is essential to call reset() before first use and after disuse, to prevent
+ * transients.
+ * 
  * TODO: replace the PID controllers here with simple proportional feedback.
-*/
-public class FullStateServo<T> {
-    private static final double kDeadband = 0.03;
-    
+ */
+public class FullStateServo<T extends Measure> {
+    // private static final double kDeadband = 0.03;
+
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
@@ -29,7 +33,7 @@ public class FullStateServo<T> {
     private final double m_period;
     private final String m_name;
     private final ChoosableProfile m_profile;
-    private final DoubleUnaryOperator m_modulus;
+    private final T m_instance;
 
     private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
     // TODO: use a profile that exposes acceleration and use it.
@@ -46,7 +50,7 @@ public class FullStateServo<T> {
             PIDController xController,
             PIDController vController,
             ChoosableProfile profile,
-            DoubleUnaryOperator modulus) {
+            T instance) {
         m_servo = servo;
         m_encoder = encoder;
         m_maxVel = maxVel;
@@ -55,15 +59,18 @@ public class FullStateServo<T> {
         m_period = xController.getPeriod();
         m_name = String.format("/full state servo %s", name);
         m_profile = profile;
-        m_modulus = modulus;
+        m_instance = instance;
     }
 
     /**
      * @param goal For distance, use meters, For angle, use radians.
      */
     public void setPosition(double goal) {
-        double measurement = m_modulus.applyAsDouble(m_encoder.getPosition());
+        double measurement = m_instance.modulus(m_encoder.getPosition());
         m_goal = new TrapezoidProfile.State(goal, 0.0);
+
+        getSetpointMinDistance(measurement);
+        
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
         double u_XFB = m_xController.calculate(measurement, m_setpoint.position);
 
@@ -72,8 +79,8 @@ public class FullStateServo<T> {
 
         double u_FF = m_setpoint.velocity;
         double u_TOTAL = u_XFB + u_VFB + u_FF;
-        // TODO: should there be a deadband here?
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, m_maxVel);
+        // NOTE: deadband maybe bad?
+        // u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, m_maxVel);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
@@ -91,6 +98,18 @@ public class FullStateServo<T> {
         t.log(Level.DEBUG, m_name + "/Velocity", m_servo.getVelocity());
     }
 
+    /**
+     * It is essential to call this after a period of disuse, to prevent transients.
+     * 
+     * To prevent oscillation, the previous setpoint is used to compute the profile,
+     * but there needs to be an initial setpoint.
+     */
+    public void reset(TrapezoidProfile.State measurement) {
+        m_xController.reset();
+        m_vController.reset();
+        m_setpoint = measurement;
+    }
+
     /** Direct velocity control for testing */
     public void setVelocity(double velocity) {
         m_servo.setVelocity(velocity);
@@ -105,7 +124,7 @@ public class FullStateServo<T> {
      * @return For distance this is meters, for angle this is radians.
      */
     public double getPosition() {
-        return m_modulus.applyAsDouble(m_encoder.getPosition());
+        return m_instance.modulus(m_encoder.getPosition());
     }
 
     public double getVelocity() {
@@ -126,5 +145,10 @@ public class FullStateServo<T> {
 
     public State getSetpoint() {
         return m_setpoint;
+    }
+
+    private void getSetpointMinDistance(double measurement) {
+        m_goal.position = m_instance.modulus(m_goal.position - measurement) + measurement;
+        m_setpoint.position = m_instance.modulus(m_setpoint.position - measurement) + measurement;
     }
 }
