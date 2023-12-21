@@ -32,7 +32,10 @@ class DriveManuallyTest {
                 robotDrive,
                 new MockHeading(),
                 speedLimits,
-                () -> null, thetaController);
+                () -> null, 
+                thetaController,
+                () -> null,
+                () -> false);
 
         command.initialize();
 

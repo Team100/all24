@@ -47,7 +47,9 @@ public class TestRunner extends Command {
                 m_container.getHeading(),
                 new SpeedLimits(1, 1, 1, 1),
                 () -> null,
-                thetaController);
+                thetaController,
+                () -> null,
+                () -> false);
         addCase(driveManuallyTest, driveManually);
 
         // this only tests the end-state

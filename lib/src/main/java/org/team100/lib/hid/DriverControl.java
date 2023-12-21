@@ -1,6 +1,7 @@
 package org.team100.lib.hid;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -32,6 +33,14 @@ public interface DriverControl {
 
     default Rotation2d desiredRotation() {
         return null;
+    }
+
+    default Translation2d target() {
+        return null;
+    }
+
+    default boolean trigger() {
+        return false;
     }
 
     default Trigger resetPose() {

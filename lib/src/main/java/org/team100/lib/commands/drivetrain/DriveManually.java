@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.SpeedLimits;
@@ -7,6 +8,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -14,6 +16,7 @@ import org.team100.lib.swerve.SwerveSetpoint;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -41,6 +44,7 @@ public class DriveManually extends Command {
     private final ManualChassisSpeeds m_manualChassisSpeeds;
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
     private final ManualWithHeading m_manualWithHeading;
+    private final ManualWithTargetLock m_manualWithTargetLock;
 
     ManualMode.Mode currentManualMode = null;
 
@@ -51,7 +55,9 @@ public class DriveManually extends Command {
             HeadingInterface heading,
             SpeedLimits speedLimits,
             Supplier<Rotation2d> desiredRotation,
-            PIDController thetaController) {
+            PIDController thetaController,
+            Supplier<Translation2d> target,
+            BooleanSupplier trigger) {
         m_mode = mode;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -63,6 +69,11 @@ public class DriveManually extends Command {
                 heading,
                 desiredRotation,
                 thetaController);
+        m_manualWithTargetLock = new ManualWithTargetLock(
+                speedLimits,
+                target,
+                thetaController,
+                trigger);
         if (m_drive.get() != null)
             addRequirements(m_drive.get());
     }
@@ -91,27 +102,32 @@ public class DriveManually extends Command {
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
             m_manualWithHeading.reset(m_drive.getPose());
+            m_manualWithTargetLock.reset(m_drive.getPose());
         }
 
         Twist2d input = m_twistSupplier.get();
+        Pose2d currentPose = m_drive.getPose();
 
         switch (manualMode) {
             case MODULE_STATE:
-                SwerveModuleState[] states = m_manualModuleStates.apply(input);
-                m_drive.setRawModuleStates(states);
+                m_drive.setRawModuleStates(
+                        m_manualModuleStates.apply(input));
                 break;
             case ROBOT_RELATIVE_CHASSIS_SPEED:
-                ChassisSpeeds speeds = m_manualChassisSpeeds.apply(input);
-                m_drive.setChassisSpeeds(speeds);
+                m_drive.setChassisSpeeds(
+                        m_manualChassisSpeeds.apply(input));
                 break;
             case FIELD_RELATIVE_TWIST:
-                Twist2d twist = m_manualFieldRelativeSpeeds.apply(input);
-                m_drive.driveInFieldCoords(twist);
+                m_drive.driveInFieldCoords(
+                        m_manualFieldRelativeSpeeds.apply(input));
                 break;
             case SNAPS:
-                Pose2d currentPose = m_drive.getPose();
-                twist = m_manualWithHeading.apply(currentPose, input);
-                m_drive.driveInFieldCoords(twist);
+                m_drive.driveInFieldCoords(
+                        m_manualWithHeading.apply(currentPose, input));
+                break;
+            case LOCKED:
+                m_drive.driveInFieldCoords(
+                        m_manualWithTargetLock.apply(currentPose, input));
                 break;
             default:
                 // do nothing
