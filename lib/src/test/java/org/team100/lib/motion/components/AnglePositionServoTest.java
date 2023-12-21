@@ -44,7 +44,7 @@ class AnglePositionServoTest {
                 angleVelocityController,
                 turningFeedforward);
 
-        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);
+        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID);
         PositionServo<Angle> servo = new PositionServo<>(
                 name,
                 turningVelocityServo,

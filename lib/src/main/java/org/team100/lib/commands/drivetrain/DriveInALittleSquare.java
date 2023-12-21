@@ -2,13 +2,11 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
-import org.team100.lib.profile.MotionProfile;
-import org.team100.lib.profile.MotionProfileGenerator;
-import org.team100.lib.profile.MotionState;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -33,26 +31,24 @@ public class DriveInALittleSquare extends Command {
     private static final double kDriveLengthM = 1;
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
-    private static final double kMaxJerk = 1;
     private final SwerveDriveSubsystemInterface m_swerve;
     final Timer m_timer;
 
-    final MotionProfile m_driveProfile;
-    double speedM_S;
+    final TrapezoidProfile m_driveProfile;
+    TrapezoidProfile.State speedM_S;
     Rotation2d m_goal;
     State m_state;
+    private double prevTime;
+
+    final TrapezoidProfile.State start = new TrapezoidProfile.State(0, 0);
+    final TrapezoidProfile.State goal = new TrapezoidProfile.State(kDriveLengthM, 0);
 
     public DriveInALittleSquare(SwerveDriveSubsystemInterface swerve) {
         m_swerve = swerve;
         m_timer = new Timer();
-        MotionState start = new MotionState(0, 0, 0, 0);
-        MotionState goal = new MotionState(kDriveLengthM, 0, 0, 0);
-        m_driveProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-                start,
-                goal,
-                kMaxVel,
-                kMaxAccel,
-                kMaxJerk);
+
+        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(kMaxVel, kMaxAccel);
+        m_driveProfile = new TrapezoidProfile(c);
         if (m_swerve.get() != null)
             addRequirements(m_swerve.get());
     }
@@ -62,20 +58,25 @@ public class DriveInALittleSquare extends Command {
         m_goal = GeometryUtil.kRotationZero;
         m_state = State.DRIVING;
         m_timer.restart();
+        prevTime = 0;
+        speedM_S = start;
+        speedM_S = m_driveProfile.calculate(0, goal, speedM_S);
     }
 
     @Override
     public void execute() {
+        double now = m_timer.get();
+        double dt = now - prevTime;
         switch (m_state) {
             case DRIVING:
-                if (m_timer.hasElapsed(m_driveProfile.duration())) {
+                if (m_timer.hasElapsed(m_driveProfile.totalTime())) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = State.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
-                    speedM_S = 0;
+                    speedM_S = new TrapezoidProfile.State(0, 0);
                 } else {
                     // keep going
-                    speedM_S = m_driveProfile.get(m_timer.get()).getV();
+                    speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
                 }
                 break;
             case STEERING:
@@ -84,19 +85,22 @@ public class DriveInALittleSquare extends Command {
                     // driving
                     m_state = State.DRIVING;
                     m_timer.restart();
-                    speedM_S = m_driveProfile.get(m_timer.get()).getV();
+                    now = 0;
+                    speedM_S = new TrapezoidProfile.State(0, 0);
+                    speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
                 } else {
                     // wait to reach the setpoint
                 }
                 break;
         }
+        prevTime = now;
 
         // there are four states here because state is mutable :-(
         SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(speedM_S, m_goal),
-                new SwerveModuleState(speedM_S, m_goal),
-                new SwerveModuleState(speedM_S, m_goal),
-                new SwerveModuleState(speedM_S, m_goal)
+                new SwerveModuleState(speedM_S.position, m_goal),
+                new SwerveModuleState(speedM_S.position, m_goal),
+                new SwerveModuleState(speedM_S.position, m_goal),
+                new SwerveModuleState(speedM_S.position, m_goal)
         };
         m_swerve.setRawModuleStates(states);
 

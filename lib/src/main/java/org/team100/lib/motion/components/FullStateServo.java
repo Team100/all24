@@ -1,7 +1,5 @@
 package org.team100.lib.motion.components;
 
-import java.util.function.DoubleUnaryOperator;
-
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.telemetry.Telemetry;
@@ -70,7 +68,7 @@ public class FullStateServo<T extends Measure> {
         m_goal = new TrapezoidProfile.State(goal, 0.0);
 
         getSetpointMinDistance(measurement);
-        
+
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
         double u_XFB = m_xController.calculate(measurement, m_setpoint.position);
 

@@ -116,7 +116,6 @@ public class SwerveModuleFactory {
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI, // max angular speed radians/sec
                 20 * Math.PI, // max accel radians/sec/sec
-                0,
                 ChoosableProfile.Mode.TRAPEZOID);
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
@@ -218,7 +217,6 @@ public class SwerveModuleFactory {
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI, // speed rad/s
                 20 * Math.PI, // accel rad/s/sturningConstraints,
-                0, // jerk
                 ChoosableProfile.Mode.TRAPEZOID);
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
@@ -305,7 +303,7 @@ public class SwerveModuleFactory {
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI,
                 20 * Math.PI,
-                0, ChoosableProfile.Mode.TRAPEZOID);
+                ChoosableProfile.Mode.TRAPEZOID);
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
                 turningVelocityServo,
@@ -382,7 +380,7 @@ public class SwerveModuleFactory {
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI,
                 20 * Math.PI,
-                0, ChoosableProfile.Mode.TRAPEZOID);
+                ChoosableProfile.Mode.TRAPEZOID);
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
                 turningVelocityServo,

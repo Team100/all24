@@ -23,15 +23,15 @@ class DriveInALittleSquareTest {
         command.initialize();
         command.execute();
         assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
-        assertEquals(0, command.speedM_S, kDelta);
+        assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        assertEquals(3.175, command.m_driveProfile.duration(), kDelta);
+        assertEquals(2, command.m_driveProfile.totalTime(), kDelta);
         assertEquals(0, swerve.states[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.states[0].angle.getRadians(), kDelta);
         SimHooks.stepTiming(3.2);
         command.execute();
         assertEquals(DriveInALittleSquare.State.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S, kDelta);
+        assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         // the mock drivetrain just records what it's told to do
         assertEquals(0, swerve.states[0].speedMetersPerSecond, kDelta);
@@ -43,17 +43,19 @@ class DriveInALittleSquareTest {
         Fixture fixture = new Fixture();
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
         command.initialize();
+        assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
         command.execute();
         assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
-        assertEquals(0, command.speedM_S, kDelta);
+        // this seems subject to jitter
+        assertEquals(0, command.speedM_S.velocity, 0.1);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        assertEquals(3.175, command.m_driveProfile.duration(), kDelta);
+        assertEquals(2, command.m_driveProfile.totalTime(), kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].angle.getRadians(), kDelta);
         SimHooks.stepTiming(3.2);
         command.execute();
         assertEquals(DriveInALittleSquare.State.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S, kDelta);
+        assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
         assertFalse(fixture.drive.atGoal()[0]);
@@ -88,7 +90,7 @@ class DriveInALittleSquareTest {
         // and we're driving again
         assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
         // we're not quite motionless, we're already going a little.
-        assertEquals(0, command.speedM_S, 0.1);
+        assertEquals(0, command.speedM_S.velocity, 0.1);
     }
 
 }

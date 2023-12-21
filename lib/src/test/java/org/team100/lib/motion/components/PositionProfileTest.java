@@ -50,7 +50,7 @@ class PositionProfileTest {
                 encoder,
                 vController,
                 feedforward);
-        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.TRAPEZOID);
+        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID);
         servo = new PositionServo<>(
                 name,
                 vServo,
@@ -64,10 +64,6 @@ class PositionProfileTest {
         verifyTrapezoid();
     }
 
-    /**
-     * Verifies that the MotionProfile in infinite-jerk mode is the same
-     * as the WPILib trapezoid.
-     */
     @Test
     void testProfile() {
         // TODO: tune this
@@ -79,7 +75,7 @@ class PositionProfileTest {
                 encoder,
                 vController,
                 feedforward);
-        ChoosableProfile profile = new ChoosableProfile(1, 1, 0, ChoosableProfile.Mode.MOTION_PROFILE);
+        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID);
         servo = new PositionServo<>(
                 name,
                 vServo,
@@ -116,57 +112,6 @@ class PositionProfileTest {
         verify(-0.017, 1.000, 0.0);
     }
 
-    /**
-     * With finite jerk, it's different.
-     */
-    @Test
-    void testSProfile() {
-        // TODO: tune this
-        PIDController vController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
-                experiments,
-                name,
-                motor,
-                encoder,
-                vController,
-                feedforward);
-        ChoosableProfile profile = new ChoosableProfile(1, 1, 100, ChoosableProfile.Mode.MOTION_PROFILE);
-        servo = new PositionServo<>(
-                name,
-                vServo,
-                encoder,
-                1,
-                controller2,
-                profile,
-                Distance.instance);
-        servo.reset();
-        verifySProfile();
-    }
-
-    private void verifySProfile() {
-        verify(0.099, 0.004, 0.095);
-        verify(0.198, 0.018, 0.190);
-        verify(0.297, 0.042, 0.285);
-        verify(0.395, 0.075, 0.380);
-        verify(0.493, 0.117, 0.475);
-        verify(0.591, 0.170, 0.570);
-        verify(0.688, 0.231, 0.665);
-        verify(0.785, 0.302, 0.760);
-        verify(0.882, 0.383, 0.855);
-        verify(0.979, 0.473, 0.950);
-        verify(0.956, 0.568, 0.928);
-        verify(0.848, 0.656, 0.828);
-        verify(0.741, 0.734, 0.728);
-        verify(0.635, 0.802, 0.628);
-        verify(0.529, 0.860, 0.528);
-        verify(0.424, 0.908, 0.428);
-        verify(0.319, 0.946, 0.328);
-        verify(0.215, 0.973, 0.228);
-        verify(0.112, 0.992, 0.128);
-        verify(0.008, 0.999, 0.028);
-        verify(-0.020, 1.000, 0.000);
-    }
-
     // TODO: make this pass
     // @Test
     void testExponential() {
@@ -179,7 +124,7 @@ class PositionProfileTest {
                 encoder,
                 angleVelocityController,
                 feedforward);
-        ChoosableProfile profile = new ChoosableProfile(1, 1, 100, ChoosableProfile.Mode.EXPONENTIAL);
+        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.EXPONENTIAL);
         servo = new PositionServo<>(
                 name,
                 turningVelocityServo,
@@ -189,7 +134,7 @@ class PositionProfileTest {
                 profile,
                 Distance.instance);
         servo.reset();
-        verifySProfile();
+        // verifySProfile();
     }
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {

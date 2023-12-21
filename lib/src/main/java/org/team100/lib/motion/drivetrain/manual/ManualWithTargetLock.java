@@ -2,11 +2,8 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.profile.MotionProfile;
-import org.team100.lib.profile.MotionState;
 import org.team100.lib.telemetry.Telemetry;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -46,7 +43,6 @@ public class ManualWithTargetLock {
         // MotionState goal = new MotionState(MathUtil.angleModulus(latchedPov.getRadians()), 0);
 
 
-        MotionProfile profile;
 
 
         return null;

@@ -90,7 +90,7 @@ public class DriveManually extends Command {
         if (manualMode != currentManualMode) {
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
-            m_manualWithHeading.reset();
+            m_manualWithHeading.reset(m_drive.getPose());
         }
 
         Twist2d input = m_twistSupplier.get();
