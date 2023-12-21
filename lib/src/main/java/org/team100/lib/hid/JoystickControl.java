@@ -7,6 +7,7 @@ import static org.team100.lib.hid.ControlUtil.expo;
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -54,12 +55,14 @@ public class JoystickControl implements DriverControl {
 
     @Override
     public Trigger resetRotation180() {
-        return button(3);
+        return new Trigger(() -> false);
+        // return button(3);
     }
 
     @Override
     public Trigger resetPose() {
-        return button(4);
+        return new Trigger(() -> false);
+        // return button(4);
     }
 
     @Override
@@ -78,6 +81,27 @@ public class JoystickControl implements DriverControl {
         }
         previousRotation = Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
         return previousRotation;
+    }
+
+    /**
+     * For now, this knows the field-relative target.
+     * 
+     * TODO: some other kind of target-picker.
+     */
+    @Override
+    public Translation2d target() {
+        if (m_controller.getHID().getRawButton(3)) {
+            // alternate target is closer to the left side
+            return new Translation2d(6, 4);
+        } else {
+            // default target is kinda mid-field
+            return new Translation2d(8, 4);
+        }
+    }
+
+    @Override
+    public boolean trigger() {
+        return m_controller.getHID().getRawButton(4);
     }
 
     private JoystickButton button(int button) {

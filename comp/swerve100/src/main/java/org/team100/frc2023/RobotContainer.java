@@ -368,7 +368,9 @@ public class RobotContainer implements Testable {
                         m_heading,
                         speedLimits,
                         control::desiredRotation,
-                        thetaController));
+                        thetaController,
+                        control::target,
+                        control::trigger));
 
         // } else {
         // m_drive.setDefaultCommand(
