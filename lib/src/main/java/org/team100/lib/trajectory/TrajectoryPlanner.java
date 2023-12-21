@@ -22,6 +22,9 @@ public class TrajectoryPlanner {
     private static final double kMaxDx = 0.0127; // m
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
+    private static final double kMaxYawRateRadS = 3.0;
+    private static final double kMaxCentripetalAccel = 10.0;// 1.524; // m/s^2
+
 
     private final SwerveDriveKinematics m_kinematics;
     private final SwerveKinematicLimits m_limits;
@@ -88,9 +91,8 @@ public class TrajectoryPlanner {
         // TODO: move these constant constraints to the constructor
         final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_kinematics,
                 m_limits);
-        final double kMaxYawRateRadS = 3.0;
         final YawRateConstraint yaw_constraint = new YawRateConstraint(kMaxYawRateRadS);
-        final double kMaxCentripetalAccel = 10.0;// 1.524; // m/s^2
+
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
                 kMaxCentripetalAccel);
 

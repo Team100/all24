@@ -11,13 +11,9 @@ import org.team100.lib.geometry.Pose2dWithMotion;
  */
 public class TimedPose {
     private final Pose2dWithMotion state_;
-    protected double timeS; // Time we achieve this state.
-    protected double velocityM_S; // ds/dt
-    protected double accelM_S_S; // d^2s/dt^2
-
-    public TimedPose(final Pose2dWithMotion state) {
-        this(state, 0, 0, 0);
-    }
+    private final double timeS; // Time we achieve this state.
+    private final double velocityM_S; // ds/dt
+    private double accelM_S_S; // d^2s/dt^2
 
     public TimedPose(final Pose2dWithMotion state, double t, double velocity, double acceleration) {
         state_ = state;
@@ -30,23 +26,16 @@ public class TimedPose {
         return state_;
     }
 
-    public void setTimeS(double t) {
-        timeS = t;
-    }
-
     public double getTimeS() {
         return timeS;
-    }
-
-    public void set_velocity(double velocity) {
-        velocityM_S = velocity;
     }
 
     public double velocityM_S() {
         return velocityM_S;
     }
 
-    public void set_acceleration(double acceleration) {
+    /** accel is set based on the velocity of the next state, so we set it here. */
+    void set_acceleration(double acceleration) {
         accelM_S_S = acceleration;
     }
 

@@ -24,21 +24,24 @@ public class Pose2dWithMotion {
     protected final Pose2d pose_;
 
     // Even though this Twist provides scalar values for dx, dy, and dtheta,
-    // Pose2dWithMotion is purely a spatial construct -
-    // it has no sense of time. So rather than being in units of distance-per-time
-    // (or radians-per-time), the denominator here is
-    // actually distance as well. Thus, it isn't really meaningful to look at dx or
-    // dy directly - what is meaningful is:
+    // Pose2dWithMotion is purely a spatial construct. It has no sense of time. So
+    // rather than being in units of distance-per-time (or radians-per-time), the
+    // denominator here is actually distance as well. Thus, it isn't really
+    // meaningful to look at dx or dy directly - what is meaningful is:
+    //
     // a) whether or not they are both zero (in which case this is a stationary or
     // turn-in-place motion)
+    //
     // b) the angle formed by them, which is the direction of translation (in the
     // same coordinate frame as pose_).
+    //
     // Additionally, this means dtheta is in radians-per-distance if there is
     // translation, or radians-per-radian otherwise.
     protected final Twist2d motion_direction_;
 
-    protected final double curvature_;
-    protected final double dcurvature_ds_;
+    // radians per meter
+    private final double curvature_;
+    private final double dcurvature_ds_;
 
     public Pose2dWithMotion() {
         pose_ = GeometryUtil.kPoseZero;
@@ -105,6 +108,7 @@ public class Pose2dWithMotion {
                 -getCurvature(), -getDCurvatureDs());
     }
 
+    /** Radians per meter. */
     public double getCurvature() {
         return curvature_;
     }
@@ -128,6 +132,10 @@ public class Pose2dWithMotion {
                 Math100.interpolate(getDCurvatureDs(), other.getDCurvatureDs(), x));
     }
 
+    /**
+     * Distance along the arc between the two poses (in either order) produced by a
+     * constant twist.
+     */
     public double distance(final Pose2dWithMotion other) {
         return GeometryUtil.distance(getPose(), other.getPose());
     }
@@ -167,6 +175,7 @@ public class Pose2dWithMotion {
         return Optional.of(getRotation().unaryMinus().rotateBy(course.get()));
     }
 
+    /** direction of the translational part of the twist */
     public Optional<Rotation2d> getCourse() {
         return GeometryUtil.getCourse(motion_direction_);
     }

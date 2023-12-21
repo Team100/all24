@@ -1,5 +1,7 @@
 package org.team100.lib.timing;
 
+import java.util.Optional;
+
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
@@ -8,6 +10,7 @@ import org.team100.lib.swerve.SwerveKinematicLimits;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * This is based on 254 2023 version.
@@ -20,26 +23,40 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
 
     protected final AsymSwerveSetpointGenerator setpoint_generator_;
 
-    public SwerveDriveDynamicsConstraint(final SwerveDriveKinematics kinematics, final SwerveKinematicLimits limits) {
+    public SwerveDriveDynamicsConstraint(SwerveDriveKinematics kinematics,
+            SwerveKinematicLimits limits) {
         kinematics_ = kinematics;
         limits_ = limits;
         setpoint_generator_ = new AsymSwerveSetpointGenerator(kinematics);
     }
 
+    /**
+     * what this appears to do is assume you want to go 1 m/s in the direction
+     * indicated, and you want the spin rate indicated, and it produces the maximum
+     * actual linear speed that maintains the drive/spin ratio, which again is
+     * calculated as if you wanted to go 1 m/s.
+     * 
+     * this seems like a pretty weird thing to do. what if you actually want to go
+     * faster than 1 m/s? this will favor spinning too much.
+     * 
+     * it does the same thing as desaturation.
+     */
     @Override
     public double getMaxVelocity(Pose2dWithMotion state) {
         // First check instantaneous velocity and compute a limit based on drive
         // velocity.
-        var course = state.getCourse();
+        Optional<Rotation2d> course = state.getCourse();
         Rotation2d course_local = state.getPose().getRotation().unaryMinus()
                 .rotateBy(course.isPresent() ? course.get() : GeometryUtil.kRotationZero);
         double vx = course_local.getCos();
         double vy = course_local.getSin();
         double vtheta = state.getHeadingRate();
         // double curvature = state.getCurvature();
+
+        // this is a "speed" based on the course only.
         ChassisSpeeds chassis_speeds = new ChassisSpeeds(vx, vy, vtheta);
 
-        var module_states = kinematics_.toSwerveModuleStates(chassis_speeds);
+        SwerveModuleState[] module_states = kinematics_.toSwerveModuleStates(chassis_speeds);
         double max_vel = Double.POSITIVE_INFINITY;
         for (var module : module_states) {
             max_vel = Math.min(max_vel, limits_.kMaxDriveVelocity / Math.abs(module.speedMetersPerSecond));

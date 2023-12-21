@@ -4,12 +4,18 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
+/**
+ *  A constant velocity limit within a rectangle; no limit outside.
+ */
 public class VelocityLimitRegionConstraint implements TimingConstraint {
-    protected final Translation2d min_corner_;
-    protected final Translation2d max_corner_;
-    protected final double velocity_limit_;
+    private final Translation2d min_corner_;
+    private final Translation2d max_corner_;
+    private final double velocity_limit_;
 
-    public VelocityLimitRegionConstraint(Translation2d min_corner, Translation2d max_corner, double velocity_limit) {
+    public VelocityLimitRegionConstraint(
+            Translation2d min_corner,
+            Translation2d max_corner,
+            double velocity_limit) {
         min_corner_ = min_corner;
         max_corner_ = max_corner;
         velocity_limit_ = velocity_limit;

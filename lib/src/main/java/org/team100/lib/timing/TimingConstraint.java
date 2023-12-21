@@ -8,18 +8,19 @@ public interface TimingConstraint {
     MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity);
 
     class MinMaxAcceleration {
-        protected final double min_acceleration_;
-        protected final double max_acceleration_;
+        public static final MinMaxAcceleration kNoLimits = new MinMaxAcceleration();
 
-        public static MinMaxAcceleration kNoLimits = new MinMaxAcceleration();
+        private final double min_acceleration_;
+        private final double max_acceleration_;
 
-        public MinMaxAcceleration() {
-            // No limits.
-            min_acceleration_ = Double.NEGATIVE_INFINITY;
-            max_acceleration_ = Double.POSITIVE_INFINITY;
+        private MinMaxAcceleration() {
+            this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
 
         public MinMaxAcceleration(double min_acceleration, double max_acceleration) {
+            if (min_acceleration() > max_acceleration()) {
+                throw new IllegalArgumentException();
+            }
             min_acceleration_ = min_acceleration;
             max_acceleration_ = max_acceleration;
         }
@@ -30,10 +31,6 @@ public interface TimingConstraint {
 
         public double max_acceleration() {
             return max_acceleration_;
-        }
-
-        public boolean valid() {
-            return min_acceleration() <= max_acceleration();
         }
     }
 }

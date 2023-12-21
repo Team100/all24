@@ -156,6 +156,7 @@ public class GeometryUtil {
         return true;
     }
 
+    /** direction of the translational part of the twist */
     public static Optional<Rotation2d> getCourse(Twist2d t) {
         if (norm(t) > 1e-12) {
             return Optional.of(new Rotation2d(t.dx, t.dy));
