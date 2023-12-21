@@ -41,6 +41,7 @@ public class ManualWithTargetLock {
     Translation2d m_ball;
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
+    Pose2d m_prevPose;
 
     public ManualWithTargetLock(
             SpeedLimits speedLimits,
@@ -60,6 +61,7 @@ public class ManualWithTargetLock {
         // TODO: include omega
         m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(), 0);
         m_ball = null;
+        m_prevPose = currentPose;
     }
 
     public Twist2d apply(Pose2d currentPose, Twist2d twist1_1) {
@@ -106,7 +108,8 @@ public class ManualWithTargetLock {
         // this is just for simulation
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
-            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation);
+            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
+                    .plus(currentPose.minus(m_prevPose).getTranslation());
         }
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
@@ -116,6 +119,7 @@ public class ManualWithTargetLock {
                     0 });
         }
 
+        m_prevPose = currentPose;
         return twistWithLockM_S;
     }
 
