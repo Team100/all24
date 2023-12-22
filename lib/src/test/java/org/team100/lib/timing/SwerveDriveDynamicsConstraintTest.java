@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.swerve.SwerveKinematicLimits;
+import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,7 +26,7 @@ class SwerveDriveDynamicsConstraintTest {
             new Translation2d(-0.5, -0.5));
 
     @Test
-    void testSimple() {
+    void testVelocity() {
         SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 10);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
 
@@ -50,6 +51,48 @@ class SwerveDriveDynamicsConstraintTest {
         assertEquals(0.929, m, kDelta);
     }
 
+    /**
+     * The SwerveDriveDynamicsConstraint does not know about centripetal
+     * acceleration.
+     */
+    @Test
+    void testCurve() {
+        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 10);
+        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
+
+        // motionless
+        double m = c.getMaxVelocity(Pose2dWithMotion.kIdentity);
+        assertEquals(4, m, kDelta);
+
+        // moving in +x, curvature to the left
+        m = c.getMaxVelocity(new Pose2dWithMotion(
+                new Pose2d(),
+                new Twist2d(1, 0, 0),
+                1, 0));
+        // max allowed velocity is full speed, which is wrong
+        // FIXME
+        assertEquals(4, m, kDelta);
+
+        // moving in +x, quite a sharp corner indeed
+        m = c.getMaxVelocity(new Pose2dWithMotion(
+                new Pose2d(),
+                new Twist2d(1, 0, 0),
+                10, 0));  // <== ten rad/m!
+        // max allowed velocity is full speed, which is wrong
+        // FIXME
+        assertEquals(4, m, kDelta);
+    }
+
+    @Test
+    void testAccel() {
+        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 10);
+        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
+        // this is constant
+        MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);
+        assertEquals(-2, m.getMinAccel(), kDelta);
+        assertEquals(2, m.getMaxAccel(), kDelta);
+    }
+
     @Test
     void testDesaturation() {
         // this is for comparison to the above case.
@@ -58,7 +101,7 @@ class SwerveDriveDynamicsConstraintTest {
         // rotational speed in rad/s is double translation speed.
         // since it's a square, the numbers aren't the same.
 
-        // start with too-fast speed.  this is 5 rad/m, as above,
+        // start with too-fast speed. this is 5 rad/m, as above,
         // with 1 m/s linear speed, so also 5 rad/s.
         ChassisSpeeds s = new ChassisSpeeds(1, 0, 5);
         SwerveModuleState[] ms = k.toSwerveModuleStates(s);
@@ -74,7 +117,7 @@ class SwerveDriveDynamicsConstraintTest {
         assertEquals(2.711, ms[2].speedMetersPerSecond, kDelta);
         assertEquals(4, ms[3].speedMetersPerSecond, kDelta);
 
-        // the resulting chassis speeds.  This maintains 5 rad/m
+        // the resulting chassis speeds. This maintains 5 rad/m
         // and slows down to achieve it.
         ChassisSpeeds implied = k.toChassisSpeeds(ms);
         assertEquals(0.929, implied.vxMetersPerSecond, kDelta);
@@ -82,7 +125,7 @@ class SwerveDriveDynamicsConstraintTest {
         assertEquals(4.649, implied.omegaRadiansPerSecond, kDelta);
     }
 
-        @Test
+    @Test
     void testDesaturation2() {
         // 0.62 m/s is pretty close to the maximum speed
         // possible at 5 rad/s; this is about 8 rad/m.

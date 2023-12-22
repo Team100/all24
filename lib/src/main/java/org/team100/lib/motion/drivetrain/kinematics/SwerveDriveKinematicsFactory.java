@@ -50,4 +50,8 @@ public class SwerveDriveKinematicsFactory {
                 new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
     }
 
+    private SwerveDriveKinematicsFactory() {
+        //
+    }
+
 }

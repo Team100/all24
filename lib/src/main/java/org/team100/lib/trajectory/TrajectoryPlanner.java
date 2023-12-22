@@ -25,11 +25,12 @@ public class TrajectoryPlanner {
     private static final double kMaxYawRateRadS = 3.0;
     private static final double kMaxCentripetalAccel = 10.0;// 1.524; // m/s^2
 
-
     private final SwerveDriveKinematics m_kinematics;
     private final SwerveKinematicLimits m_limits;
 
-    public TrajectoryPlanner(SwerveDriveKinematics kinematics, SwerveKinematicLimits limits) {
+    public TrajectoryPlanner(
+            SwerveDriveKinematics kinematics,
+            SwerveKinematicLimits limits) {
         m_kinematics = kinematics;
         m_limits = limits;
     }
@@ -88,9 +89,7 @@ public class TrajectoryPlanner {
         // without ever applying more
         // than the specified voltage.
 
-        // TODO: move these constant constraints to the constructor
-        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_kinematics,
-                m_limits);
+        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_kinematics,   m_limits);
         final YawRateConstraint yaw_constraint = new YawRateConstraint(kMaxYawRateRadS);
 
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(

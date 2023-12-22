@@ -63,12 +63,7 @@ public class SwerveLocal {
         m_modules = modules;
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics);
 
-        limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        // TODO: put these magic numbers into config
-        limits.kMaxDriveVelocity = 4;
-        limits.kMaxDriveAcceleration = 2;
-        limits.kMaxDriveDecceleration = 4;
-        limits.kMaxSteeringVelocity = 10;
+        limits = new AsymSwerveSetpointGenerator.KinematicLimits(4, 2, 4, 10);
 
         prevSetpoint = new SwerveSetpoint();
     }

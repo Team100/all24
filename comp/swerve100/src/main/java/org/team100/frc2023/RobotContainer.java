@@ -248,7 +248,11 @@ public class RobotContainer implements Testable {
         m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics, controller);
         control.circle().whileTrue(m_drawCircle);
 
-        control.driveWithFancyTrajec().whileTrue(new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive));
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+
+        control.driveWithFancyTrajec().whileTrue(
+                new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive, planner));
 
         control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
         control.never().whileTrue(new Spin(m_drive, controller));
@@ -284,9 +288,6 @@ public class RobotContainer implements Testable {
         Pose2d goal = new Pose2d(8, 4, new Rotation2d()); // field center, roughly
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         control.never().whileTrue(follower);
-
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
-        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
 
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);

@@ -150,7 +150,7 @@ class DrivePursuitControllerTest {
             // this is more Y than PID because it looks ahead
             assertEquals(-0.15, output.vyMetersPerSecond, 0.05);
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
-           
+
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);

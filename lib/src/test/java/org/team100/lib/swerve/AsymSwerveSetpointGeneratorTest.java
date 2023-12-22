@@ -27,18 +27,14 @@ class AsymSwerveSetpointGeneratorTest {
             // Back right
             new Translation2d(-kRobotSide / 2.0, -kRobotSide / 2.0)
     };
-    protected final static SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
+    private final static SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
             moduleTranslations);
-    protected final static AsymSwerveSetpointGenerator.KinematicLimits kKinematicLimits = new AsymSwerveSetpointGenerator.KinematicLimits();
-    static {
-        kKinematicLimits.kMaxDriveVelocity = 5.0; // m/s
-        kKinematicLimits.kMaxDriveAcceleration = 10.0; // m/s^2
-        kKinematicLimits.kMaxDriveDecceleration = 10.0;
-        kKinematicLimits.kMaxSteeringVelocity = Math.toRadians(1500.0); // rad/s
-    };
-    protected final static double kDt = 0.01; // s
-    protected final static double kMaxSteeringVelocityError = Math.toRadians(2.0); // rad/s
-    protected final static double kMaxAccelerationError = 0.1; // m/s^2
+    private final static AsymSwerveSetpointGenerator.KinematicLimits kKinematicLimits = new AsymSwerveSetpointGenerator.KinematicLimits(
+            5, 10, 10, Math.toRadians(1500));
+
+    private final static double kDt = 0.01; // s
+    private final static double kMaxSteeringVelocityError = Math.toRadians(2.0); // rad/s
+    private final static double kMaxAccelerationError = 0.1; // m/s^2
 
     public void SatisfiesConstraints(SwerveSetpoint prev, SwerveSetpoint next) {
         for (int i = 0; i < prev.getModuleStates().length; ++i) {
@@ -126,10 +122,7 @@ class AsymSwerveSetpointGeneratorTest {
         };
         SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics);
-        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        limits.kMaxDriveVelocity = 5;
-        limits.kMaxDriveAcceleration = 10;
-        limits.kMaxSteeringVelocity = 5;
+        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits(5, 10, 10, 5);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -173,10 +166,7 @@ class AsymSwerveSetpointGeneratorTest {
         };
         SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics);
-        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        limits.kMaxDriveVelocity = 5;
-        limits.kMaxDriveAcceleration = 10;
-        limits.kMaxSteeringVelocity = 5;
+        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits(5, 10, 10, 5);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -211,10 +201,7 @@ class AsymSwerveSetpointGeneratorTest {
         };
         SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics);
-        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        limits.kMaxDriveVelocity = 5;
-        limits.kMaxDriveAcceleration = 10;
-        limits.kMaxSteeringVelocity = 5;
+        AsymSwerveSetpointGenerator.KinematicLimits limits = new AsymSwerveSetpointGenerator.KinematicLimits(5, 10, 10, 5);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
