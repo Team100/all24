@@ -17,8 +17,8 @@ import edu.wpi.first.math.geometry.Twist2d;
         CentripetalAccelerationConstraint c = new CentripetalAccelerationConstraint(1);
          Pose2dWithMotion p = new Pose2dWithMotion(
                 new Pose2d(), new Twist2d(0, 0, 0), 1, 0);
-        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).min_acceleration(), kDelta);
-        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).max_acceleration(), kDelta);
+        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
+        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
         assertEquals(1, c.getMaxVelocity(p), kDelta);
     }
 
@@ -28,8 +28,8 @@ import edu.wpi.first.math.geometry.Twist2d;
         CentripetalAccelerationConstraint c = new CentripetalAccelerationConstraint(2);
          Pose2dWithMotion p = new Pose2dWithMotion(
                 new Pose2d(), new Twist2d(0, 0, 0), 1, 0);
-        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).min_acceleration(), kDelta);
-        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).max_acceleration(), kDelta);
+        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
+        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
         assertEquals(1.414, c.getMaxVelocity(p), kDelta);
     }
     

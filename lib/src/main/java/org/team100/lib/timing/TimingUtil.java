@@ -19,13 +19,18 @@ public class TimingUtil {
             double end_velocity,
             double max_velocity,
             double max_abs_acceleration) {
-        final int num_states = (int) Math.ceil(distance_view.last_interpolant() / step_size + 1);
-        List<Pose2dWithMotion> states = new ArrayList<>(num_states);
-        for (int i = 0; i < num_states; ++i) {
-            states.add(distance_view.sample(Math.min(i * step_size, distance_view.last_interpolant())).state());
+        try {
+            final int num_states = (int) Math.ceil(distance_view.getMaxDistance() / step_size + 1);
+            List<Pose2dWithMotion> states = new ArrayList<>(num_states);
+            for (int i = 0; i < num_states; ++i) {
+                states.add(distance_view.sample(Math.min(i * step_size, distance_view.getMaxDistance())).state());
+            }
+            return timeParameterizeTrajectory(reverse, states, constraints, start_velocity, end_velocity,
+                    max_velocity, max_abs_acceleration);
+        } catch (TimingException e) {
+            System.out.println("WARNING: timing exception");
+            return new Trajectory100();
         }
-        return timeParameterizeTrajectory(reverse, states, constraints, start_velocity, end_velocity,
-                max_velocity, max_abs_acceleration);
     }
 
     private static Trajectory100 timeParameterizeTrajectory(
@@ -35,34 +40,28 @@ public class TimingUtil {
             double start_velocity,
             double end_velocity,
             double max_velocity,
-            double max_abs_acceleration) {
-        try {
+            double max_abs_acceleration) throws TimingException {
 
-            List<ConstrainedState> constraint_states = forwardPass(
-                    reverse,
-                    states,
-                    constraints,
-                    start_velocity,
-                    max_velocity,
-                    max_abs_acceleration);
+        List<ConstrainedState> constraint_states = forwardPass(
+                reverse,
+                states,
+                constraints,
+                start_velocity,
+                max_velocity,
+                max_abs_acceleration);
 
-            backwardsPass(
-                    reverse,
-                    states,
-                    constraints,
-                    end_velocity,
-                    max_abs_acceleration,
-                    constraint_states);
+        backwardsPass(
+                reverse,
+                states,
+                constraints,
+                end_velocity,
+                max_abs_acceleration,
+                constraint_states);
 
-            return integrate(
-                    reverse,
-                    states,
-                    constraint_states);
-        } catch (TimingException e) {
-            System.out.println("WARNING: timing exception");
-            return new Trajectory100();
-
-        }
+        return integrate(
+                reverse,
+                states,
+                constraint_states);
     }
 
     /**
@@ -289,9 +288,9 @@ public class TimingUtil {
                     constraint_state.state,
                     (reverse ? -1.0 : 1.0) * constraint_state.max_velocity);
             constraint_state.min_acceleration = Math.max(constraint_state.min_acceleration,
-                    reverse ? -min_max_accel.max_acceleration() : min_max_accel.min_acceleration());
+                    reverse ? -min_max_accel.getMaxAccel() : min_max_accel.getMinAccel());
             constraint_state.max_acceleration = Math.min(constraint_state.max_acceleration,
-                    reverse ? -min_max_accel.min_acceleration() : min_max_accel.max_acceleration());
+                    reverse ? -min_max_accel.getMinAccel() : min_max_accel.getMaxAccel());
         }
         if (constraint_state.min_acceleration > constraint_state.max_acceleration) {
             throw new TimingException();
@@ -357,7 +356,7 @@ public class TimingUtil {
         }
     }
 
-    private static class TimingException extends Exception {
+    public static class TimingException extends Exception {
 
     }
 

@@ -10,38 +10,38 @@ import org.team100.lib.geometry.Pose2dWithMotion;
  * Timed Pose now includes the heading part, timed rotation is gone.
  */
 public class TimedPose {
-    private final Pose2dWithMotion state_;
-    private final double timeS; // Time we achieve this state.
-    private final double velocityM_S; // ds/dt
-    private double accelM_S_S; // d^2s/dt^2
+    private final Pose2dWithMotion m_state;
+    private final double m_timeS; // Time we achieve this state.
+    private final double m_velocityM_S; // ds/dt
+    private double m_accelM_S_S; // d^2s/dt^2
 
     public TimedPose(final Pose2dWithMotion state, double t, double velocity, double acceleration) {
-        state_ = state;
-        timeS = t;
-        velocityM_S = velocity;
-        accelM_S_S = acceleration;
+        m_state = state;
+        m_timeS = t;
+        m_velocityM_S = velocity;
+        m_accelM_S_S = acceleration;
     }
 
     public Pose2dWithMotion state() {
-        return state_;
+        return m_state;
     }
 
     public double getTimeS() {
-        return timeS;
+        return m_timeS;
     }
 
     public double velocityM_S() {
-        return velocityM_S;
+        return m_velocityM_S;
     }
 
     /** accel is set based on the velocity of the next state, so we set it here. */
     void set_acceleration(double acceleration) {
-        accelM_S_S = acceleration;
+        m_accelM_S_S = acceleration;
     }
 
     /** this means acceleration along the path, not centripetal acceleration. */
     public double acceleration() {
-        return accelM_S_S;
+        return m_accelM_S_S;
     }
 
     @Override

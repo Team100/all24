@@ -22,8 +22,8 @@ class VelocityLimitRegionConstraintTest {
                 new Pose2d(-1, -1, new Rotation2d()),
                 new Twist2d(0, 0, 0), // spatial, so rad/m
                 0, 0);
-        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).min_acceleration(), kDelta);
-        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).max_acceleration(), kDelta);
+        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
+        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMaxVelocity(p), kDelta);
     }
 
@@ -36,8 +36,8 @@ class VelocityLimitRegionConstraintTest {
                 new Pose2d(0.5, 0.5, new Rotation2d()),
                 new Twist2d(0, 0, 0), // spatial, so rad/m
                 0, 0);
-        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).min_acceleration(), kDelta);
-        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).max_acceleration(), kDelta);
+        assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
+        assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
         assertEquals(1, c.getMaxVelocity(p), kDelta);
     }
 

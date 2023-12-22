@@ -127,7 +127,7 @@ class DrivePursuitControllerTest {
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
-            assertEquals(1.69, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
+            assertEquals(1.69, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(4, path_setpoint.getTimeS(), 0.05);
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
@@ -154,7 +154,7 @@ class DrivePursuitControllerTest {
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
-            assertEquals(2.22, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
+            assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(8, path_setpoint.getTimeS(), 0.05);
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);

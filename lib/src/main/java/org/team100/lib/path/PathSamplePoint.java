@@ -4,27 +4,31 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 
 /**
  * Represents a sample of a 2d path with heading.
+ * 
+ * Includes the interpolation index bounds, for testing.
  */
 public class PathSamplePoint {
-    private final Pose2dWithMotion state_;
-    private final int index_floor_;
-    private final int index_ceil_;
+    private final Pose2dWithMotion m_state;
+    private final int m_indexFloor;
+    private final int m_IndexCeil;
 
     public PathSamplePoint(Pose2dWithMotion state, int index_floor, int index_ceil) {
-        state_ = state;
-        index_floor_ = index_floor;
-        index_ceil_ = index_ceil;
+        m_state = state;
+        m_indexFloor = index_floor;
+        m_IndexCeil = index_ceil;
     }
 
     public Pose2dWithMotion state() {
-        return state_;
+        return m_state;
     }
 
-    public int index_floor() {
-        return index_floor_;
+    /** for testing */
+    int getIndexFloor() {
+        return m_indexFloor;
     }
 
-    public int index_ceil() {
-        return index_ceil_;
+    /** for testing */
+    int getIndexCeil() {
+        return m_IndexCeil;
     }
 }
