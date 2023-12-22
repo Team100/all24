@@ -50,6 +50,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
                 .rotateBy(course.isPresent() ? course.get() : GeometryUtil.kRotationZero);
         double vx = course_local.getCos();
         double vy = course_local.getSin();
+        // rad/m
         double vtheta = state.getHeadingRate();
         // double curvature = state.getCurvature();
 

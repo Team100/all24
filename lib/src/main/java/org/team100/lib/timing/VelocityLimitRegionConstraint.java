@@ -5,7 +5,7 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /**
- *  A constant velocity limit within a rectangle; no limit outside.
+ * A constant velocity limit within a rectangle; no limit outside.
  */
 public class VelocityLimitRegionConstraint implements TimingConstraint {
     private final Translation2d min_corner_;
