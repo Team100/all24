@@ -1,8 +1,7 @@
 package org.team100.lib.hid;
 
-import org.team100.lib.geometry.GeometryUtil;
-
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -13,6 +12,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Implementations should do their own deadbanding, scaling, expo, etc.
  */
 public interface DriverControl {
+    public enum Speed {
+        SLOW,
+        MEDIUM,
+        NORMAL
+    }
 
     default String getHIDName() {
         return "No HID Found!!";
@@ -28,7 +32,15 @@ public interface DriverControl {
     }
 
     default Rotation2d desiredRotation() {
-        return GeometryUtil.kRotationZero;
+        return null;
+    }
+
+    default Translation2d target() {
+        return null;
+    }
+
+    default boolean trigger() {
+        return false;
     }
 
     default Trigger resetPose() {
@@ -49,6 +61,10 @@ public interface DriverControl {
 
     default Trigger driveMedium() {
         return new Trigger(() -> false);
+    }
+
+    default Speed speed() {
+        return Speed.NORMAL;
     }
 
     default Trigger defense() {
@@ -73,5 +89,15 @@ public interface DriverControl {
 
     default Trigger circle() {
         return new Trigger(() -> false);
+    }
+
+    default Trigger actualCircle() {
+        return new Trigger(()->false);
+    }
+
+    // this exists to bind to commands we don't want to run,
+    // but we don't want them to rot either.
+    default Trigger never() {
+        return new Trigger(()->false);
     }
 }

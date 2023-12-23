@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.swerve.SwerveKinematicLimits;
+import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -19,13 +20,15 @@ class FancyTrajectoryTest {
                 new Translation2d(-0.1, 0.1),
                 new Translation2d(-0.1, -0.1));
 
-        SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
+        SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
         MockSwerveDriveSubsystem drive = new MockSwerveDriveSubsystem();
+        TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, kSmoothKinematicLimits);
         FancyTrajectory command = new FancyTrajectory(
                 kinematics,
                 kSmoothKinematicLimits,
-                drive);
+                drive,
+                planner);
 
         command.initialize();
         command.execute();

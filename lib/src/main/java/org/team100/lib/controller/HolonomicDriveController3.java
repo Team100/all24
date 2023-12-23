@@ -1,5 +1,6 @@
 package org.team100.lib.controller;
 
+import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -9,35 +10,50 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
-public class HolonomicDriveController3 {
+/**
+ * Drivetrain control with three independent PID controllers.
+ * 
+ * TODO: make a full-state version.
+ */
+public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
     private final Telemetry t = Telemetry.get();
-
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
 
-    public HolonomicDriveController3(DriveControllers controllers) {
-        m_xController = controllers.xController;
-        m_yController = controllers.yController;
-        m_thetaController = controllers.thetaController;
+    public HolonomicDriveController3() {
+        this(cartesian(), cartesian(), theta());
     }
 
-    /**
-     * This uses the tolerances in the controllers, see PidGains for config.
-     * 
-     * @return True if the pose error is within tolerance of the reference.
-     */
+    private HolonomicDriveController3(
+            PIDController xController,
+            PIDController yController,
+            PIDController thetaController) {
+        m_xController = xController;
+        m_yController = yController;
+        m_thetaController = thetaController;
+    }
+
+    public static HolonomicDriveController3 withTolerance(
+            double cartesianPosition,
+            double cartesianVelocity,
+            double rotationPosition,
+            double rotationVelocity) {
+        PIDController x = cartesian();
+        x.setTolerance(cartesianPosition, cartesianVelocity);
+        PIDController y = cartesian();
+        y.setTolerance(cartesianPosition, cartesianVelocity);
+        PIDController theta = theta();
+        theta.setTolerance(rotationPosition, rotationVelocity);
+        return new HolonomicDriveController3(x, y, theta);
+    }
+
+    @Override
     public boolean atReference() {
         return m_xController.atSetpoint() && m_yController.atSetpoint() && m_thetaController.atSetpoint();
     }
 
-    /**
-     * TODO make currentPose a state as well.
-     * 
-     * @param currentPose  robot's current pose in field coordinates
-     * @param desiredState reference state
-     * @return field-relative twist, meters and radians per second
-     */
+    @Override
     public Twist2d calculate(
             Pose2d currentPose,
             SwerveState desiredState) {
@@ -68,29 +84,53 @@ public class HolonomicDriveController3 {
         t.log(Level.DEBUG, "/Holonomic3/error/y", m_yController.getPositionError());
         t.log(Level.DEBUG, "/Holonomic3/error/theta", m_thetaController.getPositionError());
 
-        // return new Twist2d(xFF, yFF, thetaFF);
-
         return new Twist2d(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }
 
-    public void setGains(PidGains cartesian, PidGains rotation) {
-        m_xController.setPID(cartesian.p, cartesian.i, cartesian.d);
-        m_yController.setPID(cartesian.p, cartesian.i, cartesian.d);
-        m_thetaController.setPID(rotation.p, rotation.i, rotation.d);
+    @Override
+    public void reset() {
+        m_xController.reset();
+        m_yController.reset();
+        m_thetaController.reset();
     }
 
-    public void setIRange(double cartesian) {
-        m_xController.setIntegratorRange(-1.0 * cartesian, cartesian);
-        m_yController.setIntegratorRange(-1.0 * cartesian, cartesian);
+    private static PIDController cartesian() {
+        Identity identity = Identity.get();
+        PIDController pid;
+        switch (identity) {
+            case COMP_BOT:
+                pid = new PIDController(3, 2, 0);
+                pid.setIntegratorRange(-0.1, 0.1);
+                pid.setTolerance(0.01); // 1 cm
+                return pid;
+            case SWERVE_ONE:
+                pid = new PIDController(0.15, 0, 0);
+                pid.setIntegratorRange(-0.1, 0.1);
+                pid.setTolerance(0.01); // 1 cm
+                return pid;
+            case SWERVE_TWO:
+                pid = new PIDController(2, 0.1, 0.15);
+                pid.setIntegratorRange(-0.1, 0.1);
+                pid.setTolerance(0.01); // 1 cm
+                return pid;
+            case BLANK:
+                // for testing
+                pid = new PIDController(3, 1, 0);
+                pid.setIntegratorRange(-0.1, 0.1);
+                pid.setTolerance(0.01); // 1 cm
+                return pid;
+            default:
+                // these RoboRIO's are have no drivetrains
+                return new PIDController(1, 0.0, 0.0);
+        }
+
     }
 
-    public void setTolerance(
-            double cartesianPosition,
-            double cartesianVelocity,
-            double rotationPosition,
-            double rotationVelocity) {
-        m_xController.setTolerance(cartesianPosition, cartesianVelocity);
-        m_yController.setTolerance(cartesianPosition, cartesianVelocity);
-        m_thetaController.setTolerance(rotationPosition, rotationVelocity);
+    private static PIDController theta() {
+        PIDController pid = new PIDController(3.5, 0, 0);
+        pid.setIntegratorRange(-0.01, 0.01);
+        pid.setTolerance(0.01); // 0.5 degrees
+        pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
+        return pid;
     }
 }

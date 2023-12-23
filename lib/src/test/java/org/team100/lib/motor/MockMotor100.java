@@ -15,8 +15,18 @@ public class MockMotor100<T> implements Motor100<T> {
     }
 
     @Override
+    public void stop() {
+        this.output = 0;
+    }
+
+    @Override
     public void setVelocity(double velocity, double accel) {
         this.velocity = velocity;
+    }
+
+    @Override
+    public void close() {
+        //
     }
 
 }

@@ -8,13 +8,12 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.profile.MotionProfile;
-import org.team100.lib.profile.MotionProfileGenerator;
-import org.team100.lib.profile.MotionState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 class HolonomicDriveRegulatorTest {
     private static final double kDelta = .01;
@@ -36,43 +35,63 @@ class HolonomicDriveRegulatorTest {
 
     @Test
     void driveOneMeter() {
-        double kDtSec = 0.02;
+        final double kDtSec = 0.02;
         Pose2d startingPose = GeometryUtil.kPoseZero;
         Pose2d goalPose = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         SpeedLimits speedLimits = new SpeedLimits(5, 2, 2, 2);
         Pose2d currentPose = startingPose;
         Twist2d currentTwist = new Twist2d(); // start at rest
         double time = 0;
-        MotionProfile profileX = MotionProfileGenerator.generateSimpleMotionProfile(
-                new MotionState(startingPose.getX(), 0),
-                new MotionState(goalPose.getX(), 0),
-                speedLimits.speedM_S,
-                speedLimits.accelM_S2,
-                speedLimits.jerkM_S3);
-        MotionProfile profileY = MotionProfileGenerator.generateSimpleMotionProfile(
-                new MotionState(startingPose.getY(), 0),
-                new MotionState(goalPose.getY(), 0),
-                speedLimits.speedM_S,
-                speedLimits.accelM_S2,
-                speedLimits.jerkM_S3);
-        MotionProfile profileTheta = MotionProfileGenerator.generateSimpleMotionProfile(
-                new MotionState(startingPose.getRotation().getRadians(), 0),
-                new MotionState(goalPose.getRotation().getRadians(), 0),
-                speedLimits.angleSpeedRad_S,
-                speedLimits.angleAccelRad_S2,
-                speedLimits.angleJerkRad_S3);
+        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(speedLimits.speedM_S, speedLimits.accelM_S2);
+        TrapezoidProfile profileX = new TrapezoidProfile(c);
+        TrapezoidProfile profileY = new TrapezoidProfile(c);
+        TrapezoidProfile profileTheta = new TrapezoidProfile(c);
 
-        double duration = Math.max(profileX.duration(), Math.max(profileY.duration(), profileTheta.duration()));
+        profileX.calculate(kDtSec,
+                new TrapezoidProfile.State(goalPose.getX(), 0),
+                new TrapezoidProfile.State(startingPose.getX(), 0));
+        double duration = Math.max(profileX.totalTime(), Math.max(profileY.totalTime(), profileTheta.totalTime()));
         assertEquals(1.414, duration, kDelta);
 
-        SwerveState desiredState = new SwerveState(new State100(0, 0, 0), new State100(0, 0, 0), new State100(0, 0, 0));
+        SwerveState desiredState = new SwerveState(new State100(0, 0, 0),
+                new State100(0, 0, 0),
+                new State100(0, 0, 0));
         HolonomicDriveRegulator regulator = new HolonomicDriveRegulator();
         // past the end to get the end state
+        double xv = 0;
+        double yv = 0;
+        double thetav = 0;
         while (time < duration + 0.1) {
+
+            State desiredX = profileX.calculate(
+                    kDtSec,
+                    new TrapezoidProfile.State(goalPose.getX(), 0),
+                    new TrapezoidProfile.State(desiredState.x().x(), desiredState.x().v()));
+            double xaccel = (desiredX.velocity - xv) / kDtSec;
+            xv = desiredX.velocity;
+            State desiredY = profileY.calculate(
+                    kDtSec,
+                    new TrapezoidProfile.State(goalPose.getY(), 0),
+                    new TrapezoidProfile.State(desiredState.y().x(), desiredState.y().v()));
+            double yaccel = (desiredY.velocity - yv) / kDtSec;
+            yv = desiredY.velocity;
+            State desiredTheta = profileTheta.calculate(
+                    kDtSec,
+                    new TrapezoidProfile.State(goalPose.getRotation().getRadians(), 0),
+                    new TrapezoidProfile.State(desiredState.theta().x(), desiredState.theta().v()));
+            double thetaaccel = (desiredTheta.velocity - thetav) / kDtSec;
+            thetav = desiredTheta.velocity;
+
             desiredState = new SwerveState(
-                    new State100(profileX.get(time)),
-                    new State100(profileY.get(time)),
-                    new State100(profileTheta.get(time)));
+                    new State100(
+                            desiredX,
+                            xaccel),
+                    new State100(
+                            desiredY,
+                            yaccel),
+                    new State100(
+                            desiredTheta,
+                            thetaaccel));
             Twist2d output = regulator.calculate(currentPose, desiredState);
 
             currentPose = new Pose2d(
@@ -84,18 +103,18 @@ class HolonomicDriveRegulatorTest {
             currentTwist = new Twist2d(currentTwist.dx + output.dx * kDtSec,
                     currentTwist.dy + output.dy * kDtSec,
                     currentTwist.dtheta + output.dtheta * kDtSec);
-
-            // System.out.printf("t: %f, sample [[%f %f %f][%f %f %f][%f %f %f]]"
-            //         + " current [%f %f %f]"
-            //         + " u [%f %f %f]\n",
-            //         time,
-            //         desiredState.x().x(), desiredState.x().v(), desiredState.x().a(),
-            //         desiredState.y().x(), desiredState.y().v(), desiredState.y().a(),
-            //         desiredState.theta().x(), desiredState.theta().v(), desiredState.theta().a(),
-            //         currentPose.getX(), currentPose.getY(), currentPose.getRotation().getRadians(),
-            //         output.dx,
-            //         output.dy,
-            //         output.dtheta);
+            System.out.printf("t: %f, sample [[%f %f %f][%f %f %f][%f %f %f]]"
+                    + " current [%f %f %f]"
+                    + " u [%f %f %f]\n",
+                    time,
+                    desiredState.x().x(), desiredState.x().v(), desiredState.x().a(),
+                    desiredState.y().x(), desiredState.y().v(), desiredState.y().a(),
+                    desiredState.theta().x(), desiredState.theta().v(), desiredState.theta().a(),
+                    currentPose.getX(), currentPose.getY(),
+                    currentPose.getRotation().getRadians(),
+                    output.dx,
+                    output.dy,
+                    output.dtheta);
             time += kDtSec;
         }
 
@@ -103,10 +122,9 @@ class HolonomicDriveRegulatorTest {
         assertEquals(0, desiredState.y().x(), kDelta);
         assertEquals(0, desiredState.theta().x(), kDelta);
 
-        // a bit of overshoot
-        assertEquals(1.035, currentPose.getX(), kDelta);
-        assertEquals(0.047, currentPose.getY(), kDelta);
-        assertEquals(0.047, currentPose.getRotation().getRadians(), kDelta);
+        assertEquals(1.005, currentPose.getX(), kDelta);
+        assertEquals(0, currentPose.getY(), kDelta);
+        assertEquals(0, currentPose.getRotation().getRadians(), kDelta);
 
         assertEquals(1, goalPose.getX(), kDelta);
         assertEquals(0, goalPose.getY(), kDelta);
@@ -121,19 +139,18 @@ class HolonomicDriveRegulatorTest {
         assertEquals(0, regulator.r_theta.get(1, 0), kDelta);
 
         // estimate
-        assertEquals(1.037, regulator.xhat_x.x.get(0, 0), kDelta);
-        assertEquals(0.027, regulator.xhat_x.x.get(1, 0), kDelta);
-        // maybe this isn't zero because of noise
-        assertEquals(0.047, regulator.xhat_y.x.get(0, 0), kDelta);
-        assertEquals(0.023, regulator.xhat_y.x.get(1, 0), kDelta);
+        assertEquals(1.007, regulator.xhat_x.x.get(0, 0), kDelta);
+        assertEquals(0.001, regulator.xhat_x.x.get(1, 0), kDelta);
+        assertEquals(0, regulator.xhat_y.x.get(0, 0), kDelta);
+        assertEquals(0, regulator.xhat_y.x.get(1, 0), kDelta);
 
-        assertEquals(0.047, regulator.xhat_theta.x.get(0, 0), kDelta);
-        assertEquals(0.023, regulator.xhat_theta.x.get(1, 0), kDelta);
+        assertEquals(0, regulator.xhat_theta.x.get(0, 0), kDelta);
+        assertEquals(0, regulator.xhat_theta.x.get(1, 0), kDelta);
 
         // this should be zero
-        assertEquals(0.046, regulator.xhat_x.x.minus(regulator.r_x).normF(), kDelta);
-        assertEquals(0.052, regulator.xhat_y.x.minus(regulator.r_y).normF(), kDelta);
-        assertEquals(0.052, regulator.xhat_theta.x.minus(regulator.r_theta).normF(), kDelta);
+        assertEquals(0.007, regulator.xhat_x.x.minus(regulator.r_x).normF(), kDelta);
+        assertEquals(0, regulator.xhat_y.x.minus(regulator.r_y).normF(), kDelta);
+        assertEquals(0, regulator.xhat_theta.x.minus(regulator.r_theta).normF(), kDelta);
 
         assertTrue(regulator.atReference());
     }

@@ -44,6 +44,8 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        // System.out.println("WARNING: FLUSHING EVERY LOOP, DO NOT USE IN COMP");
+        // NetworkTableInstance.getDefault().flush();
     }
 
     @Override
@@ -75,6 +77,7 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
+        CommandScheduler.getInstance().clearComposedCommands();
         CommandScheduler.getInstance().schedule(new TestRunner(m_robotContainer));
     }
 

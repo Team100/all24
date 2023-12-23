@@ -9,10 +9,7 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveControllers;
-import org.team100.lib.controller.DriveControllersFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.controller.PidGains;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -35,12 +32,7 @@ class DriveToWaypoint3Test {
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
         BiFunction<SwerveState, Pose2d, Trajectory> trajectories = (x, y) -> new Trajectory(List.of(new Trajectory.State()));
 
-        Identity identity = Identity.get();
-
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-
-        HolonomicDriveController3 controller = new HolonomicDriveController3(controllers);
-        controller.setTolerance(0.1, 0.1, 0.1, 0.1);
+        HolonomicDriveController3 controller = new HolonomicDriveController3();
 
         DriveToWaypoint3 command = new DriveToWaypoint3(
                 goal,
@@ -77,17 +69,7 @@ class DriveToWaypoint3Test {
         Optional<Pose2d> goal = Target.goal(layout, 1, transform);
         assertTrue(goal.isPresent());
 
-        Identity identity = Identity.get();
-
-        DriveControllers controllers = new DriveControllersFactory().get(identity);
-
-        HolonomicDriveController3 m_controller = new HolonomicDriveController3(controllers);
-        m_controller.setTolerance(0.1, 0.1, 0.1, 0.1);
-        m_controller.setGains(
-                new PidGains(2, 0, 0, 0, 0.01, false),
-                new PidGains(6.5, 0, 1, 0, 0.01, true));
-        m_controller.setIRange(0.3);
-        m_controller.setTolerance(0.00000001,0.00000001, Math.PI / 180, 1.0);
+        HolonomicDriveController3 m_controller = new HolonomicDriveController3();
 
         DriveToWaypoint3 command = new DriveToWaypoint3(goal.get(), drivetrain, maker, m_controller);
 

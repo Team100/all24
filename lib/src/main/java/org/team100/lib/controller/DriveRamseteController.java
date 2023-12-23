@@ -3,7 +3,6 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -18,74 +17,66 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
+ * Follow a 254 trajectory using a Ramsete controller.
+ * 
+ * This seems to have a large tolerance value? Or doesn't care about hitting the
+ * endpoint?
+ * 
  * This originated in DriveMotionPlanner, which included several
  * controllers.
  */
 public class DriveRamseteController implements DriveMotionController {
+    private static final double kThetaKp = 5.0; // Units are rad/s per rad of error.
+    private static final double kBeta = 2.0; // >0.
+    private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
     private static final double kLooperDt = 0.02;
     private static final Telemetry t = Telemetry.get();
 
-    private TrajectoryTimeIterator mCurrentTrajectory;
-    private TimedPose mSetpoint = new TimedPose(new Pose2dWithMotion());
-    private Pose2d mError = GeometryUtil.kPoseZero;
+    private TrajectoryTimeIterator m_iter;
     private double mLastTime = Double.POSITIVE_INFINITY;
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
-        mCurrentTrajectory = trajectory;
-        mSetpoint = trajectory.getState();
-        mError = GeometryUtil.kPoseZero;
+        m_iter = trajectory;
         mLastTime = Double.POSITIVE_INFINITY;
     }
 
+    /**
+     * Implements eq. 5.12 from
+     * https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
+     */
     @Override
-    public ChassisSpeeds update(double timestamp, Pose2d current_state, Twist2d current_velocity) {
-        return updateRamsete(timestamp, current_state, current_velocity);
-    }
-
-    private ChassisSpeeds updateRamsete(final double timestamp, final Pose2d current_state,
-            final Twist2d currentVelocity) {
-        if (mCurrentTrajectory == null)
+    public ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d measurementV) {
+        if (m_iter == null)
             return null;
 
-        t.log(Level.DEBUG, "/ramsete_planner/current state", current_state);
+        t.log(Level.DEBUG, "/ramsete_planner/current state", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
 
-        if (!Double.isFinite(mLastTime))
-            mLastTime = timestamp;
-        final double mDt = timestamp - mLastTime;
-        mLastTime = timestamp;
+        Optional<TimedPose> setpoint = getSetpoint(timestamp);
+        if (!setpoint.isPresent()) {
+            return new ChassisSpeeds();
+        }
+        t.log(Level.DEBUG, "/ramsete_planner/setpoint", setpoint.get());
 
-        TrajectorySamplePoint sample_point = mCurrentTrajectory.advance(mDt);
-        t.log(Level.DEBUG, "/ramsete_planner/sample point", sample_point);
-        mSetpoint = sample_point.state();
-        t.log(Level.DEBUG, "/ramsete_planner/setpoint", mSetpoint);
-
-        TimedPose fieldToGoal = mSetpoint;
-        Pose2d fieldToRobot = current_state;
-
-        mError = GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
-
-        // Implements eqn. 5.12 from
-        // https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
-        final double kBeta = 2.0; // >0.
-        final double kZeta = 0.7; // Damping coefficient, [0, 1].
+        Pose2d mError = DriveMotionControllerUtil.getError(measurement, setpoint.get());
+        t.log(Level.DEBUG, "/ramsete_planner/error", mError);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
-        Optional<Rotation2d> maybe_robot_to_course = GeometryUtil.getCourse(currentVelocity);
+        Optional<Rotation2d> maybe_robot_to_course = GeometryUtil.getCourse(measurementV);
         if (maybe_robot_to_course.isPresent()) {
             // Course is robot_to_course, we want to be field_to_course.
             // field_to_course = field_to_robot * robot_to_course
-            maybe_field_to_course = Optional.of(fieldToRobot.getRotation().rotateBy(maybe_robot_to_course.get()));
+            maybe_field_to_course = Optional.of(measurement.getRotation().rotateBy(maybe_robot_to_course.get()));
         }
 
         // Convert goal into a desired course (in robot frame).
-        double goal_linear_velocity = fieldToGoal.velocityM_S();
-        double goal_angular_velocity = goal_linear_velocity * fieldToGoal.state().getCurvature();
-        Optional<Rotation2d> maybe_field_to_goal = fieldToGoal.state().getCourse();
+        double goal_linear_velocity = setpoint.get().velocityM_S();
+        double goal_angular_velocity = goal_linear_velocity * setpoint.get().state().getCurvature();
+        Optional<Rotation2d> maybe_field_to_goal = setpoint.get().state().getCourse();
 
         // Deal with lack of course data by always being optimistic.
         if (maybe_field_to_course.isEmpty()) {
@@ -96,10 +87,12 @@ public class DriveRamseteController implements DriveMotionController {
         }
         if (maybe_field_to_goal.isEmpty() && maybe_field_to_course.isEmpty()) {
             // Course doesn't matter.
-            maybe_field_to_course = maybe_field_to_goal = Optional.of(GeometryUtil.kRotationZero);
+            maybe_field_to_course = Optional.of(GeometryUtil.kRotationZero);
+            maybe_field_to_goal = Optional.of(GeometryUtil.kRotationZero);
         }
         Rotation2d field_to_course = maybe_field_to_course.get();
-        Rotation2d robot_to_course = fieldToRobot.getRotation().unaryMinus().rotateBy(field_to_course);
+
+        Rotation2d robot_to_course = measurement.getRotation().unaryMinus().rotateBy(field_to_course);
 
         // Convert goal course to be relative to current course.
         // course_to_goal = course_to_field * field_to_goal
@@ -124,23 +117,22 @@ public class DriveRamseteController implements DriveMotionController {
         double adjusted_angular_velocity = goal_angular_velocity + k * angle_error_rads
                 + goal_linear_velocity * kBeta * sin_x_over_x * linear_error_course_relative.getY();
 
-        final double kThetaKp = 5.0; // Units are rad/s per rad of error.
-        double heading_rate = goal_linear_velocity * fieldToGoal.state().getHeadingRate()
+        double heading_rate = goal_linear_velocity * setpoint.get().state().getHeadingRate()
                 + kThetaKp * mError.getRotation().getRadians();
 
         // Create a course-relative Twist2d.
         Twist2d adjusted_course_relative_velocity = new Twist2d(adjusted_linear_velocity, 0.0,
                 adjusted_angular_velocity - heading_rate);
+
         // See where that takes us in one dt.
-        final double kNominalDt = kLooperDt;
         Pose2d adjusted_course_to_goal = GeometryUtil.kPoseZero
-                .exp(GeometryUtil.scale(adjusted_course_relative_velocity, kNominalDt));
+                .exp(GeometryUtil.scale(adjusted_course_relative_velocity, kLooperDt));
 
         // Now rotate to be robot-relative.
         // robot_to_goal = robot_to_course * course_to_goal
         Translation2d adjusted_robot_to_goal = GeometryUtil
                 .transformBy(GeometryUtil.fromRotation(robot_to_course), adjusted_course_to_goal).getTranslation()
-                .times(1.0 / kNominalDt);
+                .times(1.0 / kLooperDt);
 
         return new ChassisSpeeds(
                 adjusted_robot_to_goal.getX(),
@@ -148,21 +140,24 @@ public class DriveRamseteController implements DriveMotionController {
                 heading_rate);
     }
 
+    Optional<TimedPose> getSetpoint(final double timestamp) {
+        if (!Double.isFinite(mLastTime))
+            mLastTime = timestamp;
+        final double mDt = timestamp - mLastTime;
+        mLastTime = timestamp;
 
+        Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
+        if (!sample_point.isPresent()) {
+            System.out.println("WARNING failed to advance");
+            return Optional.empty();
+        }
+
+        t.log(Level.DEBUG, "/ramsete_planner/sample point", sample_point.get());
+        return Optional.of(sample_point.get().state());
+    }
 
     @Override
     public boolean isDone() {
-        return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
+        return m_iter != null && m_iter.isDone();
     }
-    
-    // for testing
-    TimedPose getSetpoint() {
-        return mSetpoint;
-    }
-
-    // for testing
-    Pose2d getError() {
-        return mError;
-    }
-
 }

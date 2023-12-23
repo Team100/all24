@@ -11,10 +11,13 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 
+/**
+ * Lots of utility functions.
+ */
 public class GeometryUtil {
 
     public static final Rotation2d kRotationZero = new Rotation2d();
-    public static final Rotation2d kRotation90 = new Rotation2d(Math.PI/2);
+    public static final Rotation2d kRotation90 = new Rotation2d(Math.PI / 2);
     public static final Rotation2d kRotation180 = new Rotation2d(Math.PI);
     public static final Pose2d kPoseZero = new Pose2d();
     public static final Translation2d kTranslation2dIdentity = new Translation2d();
@@ -113,6 +116,10 @@ public class GeometryUtil {
         return norm(slog(transformBy(inverse(a.poseMeters), b.poseMeters)));
     }
 
+    /**
+     * Distance along the arc between the two poses (in either order) produced by a
+     * constant twist.
+     */
     public static double distance(Pose2d a, Pose2d b) {
         return norm(slog(transformBy(inverse(a), b)));
     }
@@ -140,17 +147,16 @@ public class GeometryUtil {
     public static boolean poseWithCurvatureEquals(PoseWithCurvature a, PoseWithCurvature b) {
         boolean poseEqual = a.poseMeters.equals(b.poseMeters);
         if (!poseEqual) {
-            System.out.println("pose not equal");
             return false;
         }
         boolean curvatureEqual = Math.abs(a.curvatureRadPerMeter - b.curvatureRadPerMeter) <= 1e-12;
         if (!curvatureEqual) {
-            System.out.println("curvature not equal");
             return false;
         }
         return true;
     }
 
+    /** direction of the translational part of the twist */
     public static Optional<Rotation2d> getCourse(Twist2d t) {
         if (norm(t) > 1e-12) {
             return Optional.of(new Rotation2d(t.dx, t.dy));
@@ -164,7 +170,11 @@ public class GeometryUtil {
     }
 
     public static Pose2d mirror(Pose2d p) {
-        return new Pose2d(new Translation2d(p.getTranslation().getX(), -p.getTranslation().getY()), p.getRotation().unaryMinus());
+        return new Pose2d(
+                new Translation2d(
+                        p.getTranslation().getX(),
+                        -p.getTranslation().getY()),
+                p.getRotation().unaryMinus());
     }
 
     public static Twist2d toTwist2d(ChassisSpeeds x) {

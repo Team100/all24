@@ -1,8 +1,13 @@
 package org.team100.lib.motion.drivetrain;
 
+import java.util.function.Supplier;
+
 import org.team100.lib.commands.InitCommand;
+import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -12,29 +17,32 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSubsystemInterface {
+    // multiply field-relative speeds for medium and slow modes.
+    private static final double kMedium = 0.5;
+    private static final double kSlow = 0.1;
+
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator m_poseEstimator;
-    private final Field2d m_field;
     private final FrameTransform m_frameTransform;
     private final SwerveLocal m_swerveLocal;
+    private final Supplier<DriverControl.Speed> m_speed;
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
             SwerveDrivePoseEstimator poseEstimator,
             FrameTransform frameTransform,
             SwerveLocal swerveLocal,
-            Field2d field) {
+            Supplier<DriverControl.Speed> speed) {
         m_heading = heading;
         m_poseEstimator = poseEstimator;
         m_frameTransform = frameTransform;
         m_swerveLocal = swerveLocal;
-        m_field = field;
+        m_speed = speed;
 
         stop();
         t.log(Level.INFO, "/field/.type", "Field2d");
@@ -53,12 +61,26 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     @Override
     public void periodic() {
         updateOdometry();
-        m_field.setRobotPose(getPose());
+        Pose2d pose = getPose();
+        if (Double.isNaN(pose.getX()))
+            throw new IllegalStateException();
+        if (Double.isNaN(pose.getY()))
+            throw new IllegalStateException();
+        t.log(Level.DEBUG, "/swerve/pose", pose);
+        m_swerveLocal.periodic();
     }
 
     /** The speed implied by the module states. */
     public ChassisSpeeds speeds() {
         return m_swerveLocal.speeds();
+    }
+
+    public SwerveModuleState[] moduleStates() {
+        return m_swerveLocal.states();
+    }
+
+    public void resetSetpoint(SwerveSetpoint setpoint) {
+        m_swerveLocal.resetSetpoint(setpoint);
     }
 
     // this is for testing
@@ -95,9 +117,24 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     // ACTUATORS
     //
     /**
+     * Scales the supplied twist by the "speed" driver control modifier.
+     * 
      * @param twist Field coordinate velocities in meters and radians per second.
      */
     public void driveInFieldCoords(Twist2d twist) {
+        DriverControl.Speed speed = m_speed.get();
+        t.log(Level.DEBUG, "/chassis/control_speed", speed.name());
+        switch (speed) {
+            case SLOW:
+                twist = GeometryUtil.scale(twist, kSlow);
+                break;
+            case MEDIUM:
+                twist = GeometryUtil.scale(twist, kMedium);
+                break;
+            default:
+                break;
+        }
+
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
         t.log(Level.DEBUG, "/chassis/x m", twist.dx);
@@ -113,7 +150,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
      */
     @Override
     public boolean steerAtRest(Twist2d twist) {
-        System.out.println("steering ....");
+        // System.out.println("steering ....");
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds);
@@ -179,6 +216,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
     @Override
     public boolean[] atSetpoint() {
         return m_swerveLocal.atSetpoint();
+    }
+
+    @Override
+    public boolean[] atGoal() {
+        return m_swerveLocal.atGoal();
     }
 
     /** for testing only */

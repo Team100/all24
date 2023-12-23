@@ -79,10 +79,12 @@
       "/SmartDashboard/Drive Subsystem": "Subsystem",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/field": "Field2d"
     },
@@ -110,9 +112,8 @@
     }
   },
   "NetworkTables Settings": {
-    "dsClient": false,
     "mode": "Client (NT4)",
-    "serverTeam": "100"
+    "serverTeam": "localhost"
   },
   "Plots": {
     "Plot <0>": {
@@ -129,7 +130,7 @@
             0.9399999976158142,
             1.0
           ],
-          "height": 424,
+          "height": -6,
           "series": [
             {
               "color": [

@@ -1,0 +1,344 @@
+{
+  "NetworkTables": {
+    "retained": {
+      "SmartDashboard": {
+        "Manual Drive Mode": {
+          "open": true
+        },
+        "Telemetry Level": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "transitory": {
+      "FMSInfo": {
+        "open": false
+      },
+      "Holonomic3": {
+        "error": {
+          "open": true
+        },
+        "measurement": {
+          "open": true
+        },
+        "open": true,
+        "setpoint": {
+          "open": true
+        },
+        "u_FB": {
+          "open": true
+        },
+        "u_FF": {
+          "open": true
+        }
+      },
+      "SmartDashboard": {
+        "Swerve Module Front Left": {
+          "open": true
+        },
+        "Swerve Module Front Right": {
+          "open": true
+        }
+      },
+      "center": {
+        "open": true
+      },
+      "circle": {
+        "center": {
+          "open": true
+        },
+        "open": true,
+        "reference": {
+          "open": true,
+          "theta": {
+            "open": true
+          }
+        },
+        "target": {
+          "open": true
+        },
+        "x_state": {
+          "open": true
+        },
+        "y_state": {
+          "open": true
+        }
+      },
+      "current pose": {
+        "open": true
+      },
+      "experiments": {
+        "string[]##v_/experiments/enabled": {
+          "open": true
+        }
+      },
+      "position servo Front Left": {
+        "open": true
+      },
+      "position servo Front Right": {
+        "open": true
+      },
+      "position servo Rear Left": {
+        "open": true
+      },
+      "position servo Rear Right": {
+        "open": true
+      },
+      "robot": {
+        "open": false
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Manipulator": "Subsystem",
+      "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/Talon FX [1]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [2]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [3]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [4]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon SRX [3]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Victor SPX [6]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Victor SPX [7]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Victor SPX [8]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Victor SPX [9]": "Motor Controller",
+      "/LiveWindow/Ungrouped/navX-Sensor[2]": "Gyro",
+      "/SmartDashboard/Arm": "Subsystem",
+      "/SmartDashboard/Drive Subsystem": "Subsystem",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "robot": {
+          "style": "Box/Image"
+        },
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": -6,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/u_FB/theta"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/u_FF/theta"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 2,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/setpoint/x"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/measurement/x"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/x"
+            }
+          ]
+        },
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 2,
+          "lockPrevX": true,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/setpoint/y"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/measurement/y"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/y"
+            }
+          ]
+        },
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 2,
+          "lockPrevX": true,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/setpoint/theta"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/measurement/theta"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Holonomic3/error/theta"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "name": "Holonomic Controller"
+      }
+    }
+  }
+}

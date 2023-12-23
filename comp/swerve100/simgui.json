@@ -4,25 +4,21 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
+      "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
-    },
-    "windows": {
-      "/SmartDashboard/Telemetry Level": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/field": {
-        "window": {
-          "visible": true
-        }
-      }
     }
   }
 }

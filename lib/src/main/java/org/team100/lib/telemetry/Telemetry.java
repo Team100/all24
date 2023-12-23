@@ -5,7 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.arm.ArmAngles;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 
@@ -99,6 +102,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             BooleanTopic t = inst.getBooleanTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, BooleanPublisher.class).set(val);
@@ -111,6 +115,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             DoubleTopic t = inst.getDoubleTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, DoublePublisher.class).set(val);
@@ -123,6 +128,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             DoubleArrayTopic t = inst.getDoubleArrayTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, DoubleArrayPublisher.class).set(val);
@@ -135,6 +141,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             IntegerTopic t = inst.getIntegerTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, IntegerPublisher.class).set(val);
@@ -147,6 +154,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             StringTopic t = inst.getStringTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, StringPublisher.class).set(val);
@@ -159,6 +167,7 @@ public class Telemetry {
             System.out.println(key + ": " + val);
         pub(key, k -> {
             StringArrayTopic t = inst.getStringArrayTopic(k);
+            t.publish();
             t.setRetained(true);
             return t.publish();
         }, StringArrayPublisher.class).set(val);
@@ -211,6 +220,23 @@ public class Telemetry {
         log(level, key + "/vx m_s", val.vxMetersPerSecond);
         log(level, key + "/vy m_s", val.vyMetersPerSecond);
         log(level, key + "/omega rad_s", val.omegaRadiansPerSecond);
+    }
+
+    public void log(Level level, String key, State100 state) {
+        log(level, key + "/x", state.x());
+        log(level, key + "/v", state.v());
+        log(level, key + "/a", state.a());
+    }
+
+    public void log(Level level, String key, SwerveState state) {
+        log(level, key + "/x", state.x());
+        log(level, key + "/y", state.y());
+        log(level, key + "/theta", state.theta());
+    }
+
+    public void log(Level level, String key, ArmAngles angles) {
+        log(level, key + "/th1", angles.th1);
+        log(level, key + "/th2", angles.th2);
     }
 
     private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {

@@ -1,56 +1,59 @@
 package org.team100.lib.path;
 
+import org.team100.lib.timing.TimingUtil;
+
 /**
  * Allows sampling a path by distance along it.
  */
 public class PathDistanceSampler {
-    private final Path100 trajectory_;
-    private final double[] distances_;
+    private final Path100 m_trajectory;
+    /** in meters */
+    private final double[] m_distances;
 
     public PathDistanceSampler(final Path100 trajectory) {
-        trajectory_ = trajectory;
-        distances_ = new double[trajectory_.length()];
-        distances_[0] = 0.0;
-        for (int i = 1; i < trajectory_.length(); ++i) {
-            distances_[i] = distances_[i - 1]
-                    + trajectory_.getPoint(i - 1).state().distance(trajectory_.getPoint(i).state());
+        m_trajectory = trajectory;
+        m_distances = new double[m_trajectory.length()];
+        m_distances[0] = 0.0;
+        for (int i = 1; i < m_trajectory.length(); ++i) {
+            m_distances[i] = m_distances[i - 1]
+                    + m_trajectory.getPoint(i - 1).state().distance(m_trajectory.getPoint(i).state());
         }
     }
 
     /**
-     * @param distance TODO what is the unit here?
+     * @param distance in meters
      */
-    public PathSamplePoint sample(double distance) {
-        if (distance >= last_interpolant()) {
-            PathPoint point = trajectory_.getPoint(trajectory_.length() - 1);
+    public PathSamplePoint sample(double distance) throws TimingUtil.TimingException {
+        if (distance >= getMaxDistance()) {
+            PathPoint point = m_trajectory.getPoint(m_trajectory.length() - 1);
             return new PathSamplePoint(point.state(), point.index(), point.index());
         }
         if (distance <= 0.0) {
-            PathPoint point = trajectory_.getPoint(0);
+            PathPoint point = m_trajectory.getPoint(0);
             return new PathSamplePoint(point.state(), point.index(), point.index());
         }
-        for (int i = 1; i < distances_.length; ++i) {
-            final PathPoint point = trajectory_.getPoint(i);
-            if (distances_[i] >= distance) {
-                final PathPoint prev_s = trajectory_.getPoint(i - 1);
-                if (Math.abs(distances_[i] - distances_[i - 1]) <= 1e-12) {
+        for (int i = 1; i < m_distances.length; ++i) {
+            final PathPoint point = m_trajectory.getPoint(i);
+            if (m_distances[i] >= distance) {
+                final PathPoint prev_s = m_trajectory.getPoint(i - 1);
+                if (Math.abs(m_distances[i] - m_distances[i - 1]) <= 1e-12) {
                     return new PathSamplePoint(point.state(), point.index(), point.index());
                 } else {
                     return new PathSamplePoint(
                             prev_s.state().interpolate(point.state(),
-                                    (distance - distances_[i - 1]) / (distances_[i] - distances_[i - 1])),
+                                    (distance - m_distances[i - 1]) / (m_distances[i] - m_distances[i - 1])),
                             i - 1, i);
                 }
             }
         }
-        throw new RuntimeException();
+        throw new TimingUtil.TimingException();
     }
 
-    public double last_interpolant() {
-        return distances_[distances_.length - 1];
+    public double getMaxDistance() {
+        return m_distances[m_distances.length - 1];
     }
 
-    public double first_interpolant() {
+    public double getMinDistance() {
         return 0.0;
     }
 }

@@ -7,6 +7,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -15,6 +16,15 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Drive from the current state to a field-relative goal.
+ * 
+ * The trajectory is supplied; the supplier is free to ignore the current state.
+ * 
+ * Steering is aligned to prevent startup errors, but this isn't working right yet.
+ * 
+ * TODO: fix it and/or hide it behind an experiment.
+ */
 public class DriveToWaypoint3 extends Command {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
@@ -51,8 +61,10 @@ public class DriveToWaypoint3 extends Command {
 
     @Override
     public void initialize() {
+        m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
-        System.out.println(m_trajectory);
+        TrajectoryVisualization.setViz(m_trajectory);
+        // System.out.println(m_trajectory);
         m_timer.stop();
         m_timer.reset();
         m_steeringAligned = false;
@@ -106,5 +118,6 @@ public class DriveToWaypoint3 extends Command {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        TrajectoryVisualization.clear();
     }
 }

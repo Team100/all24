@@ -7,11 +7,21 @@ import org.team100.lib.telemetry.NamedChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * Modes for manual drivetrain control.
+ */
 public class ManualMode implements Supplier<ManualMode.Mode> {
     public enum Mode {
+        /** Control module speed and direction directly */
         MODULE_STATE,
+        /** Robot-relative dx, dy, and omega */
         ROBOT_RELATIVE_CHASSIS_SPEED,
-        FIELD_RELATIVE_TWIST
+        /** Field-relative dx, dy, and omega */
+        FIELD_RELATIVE_TWIST,
+        /** Field-relative dx and dy, rotational feedback control */
+        SNAPS,
+        /** Field-relative dx and dy, rotational target lock */
+        LOCKED
     }
     private final SendableChooser<Mode> m_manualModeChooser;
 
@@ -21,8 +31,8 @@ public class ManualMode implements Supplier<ManualMode.Mode> {
             m_manualModeChooser.addOption(mode.name(), mode);
         }
         m_manualModeChooser.setDefaultOption(
-                Mode.FIELD_RELATIVE_TWIST.name(),
-                Mode.FIELD_RELATIVE_TWIST);
+                Mode.SNAPS.name(),
+                Mode.SNAPS);
         SmartDashboard.putData(m_manualModeChooser);
     }
 

@@ -17,8 +17,13 @@ public interface Motor100<T> {
     /**
      * Closed-loop velocity control.
      * 
-     * @param velocity in T
-     * @param accel in T/s.  TODO: make the implementations actually use accel.
+     * @param velocity in T/s
+     * @param accel in T/s/s.  TODO: make the implementations actually use accel.
      */
     void setVelocity(double velocity, double accel);
+
+    void stop();
+
+    /** For test cleanup */
+    void close();
 }

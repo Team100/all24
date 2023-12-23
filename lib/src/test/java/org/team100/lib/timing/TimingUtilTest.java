@@ -71,13 +71,18 @@ public class TimingUtilTest {
                 assertTrue(state.velocityM_S() - kTestEpsilon <= constraint.getMaxVelocity(state.state()));
                 final MinMaxAcceleration accel_limits = constraint.getMinMaxAcceleration(state.state(),
                         state.velocityM_S());
-                assertTrue(state.acceleration() - kTestEpsilon <= accel_limits.max_acceleration());
-                assertTrue(state.acceleration() + kTestEpsilon >= accel_limits.min_acceleration());
+                assertTrue(state.acceleration() - kTestEpsilon <= accel_limits.getMaxAccel(),
+                        String.format("%f %f", state.acceleration(), accel_limits.getMaxAccel()));
+                assertTrue(state.acceleration() + kTestEpsilon >= accel_limits.getMinAccel(),
+                        String.format("%f %f", state.acceleration(), accel_limits.getMinAccel()));
+
             }
             if (i > 0) {
                 final TimedPose prev_state = traj.getPoint(i - 1).state();
                 assertEquals(state.velocityM_S(),
-                        prev_state.velocityM_S() + (state.getTimeS() - prev_state.getTimeS()) * prev_state.acceleration(), kTestEpsilon);
+                        prev_state.velocityM_S()
+                                + (state.getTimeS() - prev_state.getTimeS()) * prev_state.acceleration(),
+                        kTestEpsilon);
             }
         }
     }
@@ -112,7 +117,7 @@ public class TimingUtilTest {
         class ConditionalTimingConstraint implements TimingConstraint {
             @Override
             public double getMaxVelocity(Pose2dWithMotion state) {
-                if (state.getPose().getTranslation().getX() >= 24.0) {
+                if (state.getTranslation().getX() >= 24.0) {
                     return 5.0;
                 } else {
                     return Double.POSITIVE_INFINITY;

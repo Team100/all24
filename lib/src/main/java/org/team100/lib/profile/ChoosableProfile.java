@@ -7,13 +7,13 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/** Contains a few motion profiles to choose from. */
+/**
+ * Contains a few motion profiles to choose from.
+ */
 public class ChoosableProfile {
     public enum Mode {
         /** The WPILib trapezoidal profile with infinite jerk */
         TRAPEZOID,
-        /** Alternate profile with configurable jerk */
-        MOTION_PROFILE,
         /** Preview from 2024, takes motor EMF into account */
         EXPONENTIAL
     }
@@ -22,7 +22,6 @@ public class ChoosableProfile {
 
     private final double m_maxVel;
     private final double m_maxAccel;
-    private final double m_maxJerk;
     // the profile class is both a stateful follower and
     // a stateless calculator. we use the stateless one so we can make
     // the profile object once.
@@ -32,12 +31,10 @@ public class ChoosableProfile {
     public ChoosableProfile(
             double maxVel,
             double maxAccel,
-            double maxJerk,
             Mode defaultMode) {
         m_chooser = new NamedChooser<>("Motion Profile");
         m_maxVel = maxVel;
         m_maxAccel = maxAccel;
-        m_maxJerk = maxJerk;
         for (Mode mode : Mode.values()) {
             m_chooser.addOption(mode.name(), mode);
         }
@@ -51,15 +48,6 @@ public class ChoosableProfile {
         switch (m_chooser.getSelected()) {
             case TRAPEZOID:
                 return m_trapezoid.calculate(t, goal, current);
-            case MOTION_PROFILE:
-                MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
-                        new MotionState(current),
-                        new MotionState(goal),
-                        m_maxVel,
-                        m_maxAccel,
-                        m_maxJerk);
-                MotionState state = profile.get(t);
-                return new State(state.getX(), state.getV());
             case EXPONENTIAL:
                 // TODO: figure out what these inputs mean.
                 ExponentialProfile.Constraints constraints = ExponentialProfile.Constraints.fromStateSpace(1, 1, 1);
@@ -72,10 +60,6 @@ public class ChoosableProfile {
                 return new State();
         }
     }
-
-    // public void set(Mode mode) {
-    // m_chooser.
-    // }
 
     public Mode getSelected() {
         return m_chooser.getSelected();

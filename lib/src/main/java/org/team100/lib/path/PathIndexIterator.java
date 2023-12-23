@@ -6,16 +6,16 @@ import org.team100.lib.geometry.Pose2dWithMotion;
  * Allows iterating over the index points of a path.
  */
 public class PathIndexIterator {
-    protected final PathIndexSampler view_;
-    protected double progress_ = 0.0;
-    protected PathSamplePoint current_sample_;
+    private final PathIndexSampler m_sampler;
+    private double m_progress = 0.0;
+    private PathSamplePoint m_sample;
 
     public PathIndexIterator(final PathIndexSampler view) {
-        view_ = view;
+        m_sampler = view;
 
         // No effect if view is empty.
-        current_sample_ = view_.sample(view_.first_interpolant());
-        progress_ = view_.first_interpolant();
+        m_sample = m_sampler.sample(m_sampler.getMinIndex());
+        m_progress = m_sampler.getMinIndex();
     }
 
     public boolean isDone() {
@@ -23,15 +23,15 @@ public class PathIndexIterator {
     }
 
     public double getProgress() {
-        return progress_;
+        return m_progress;
     }
 
     public double getRemainingProgress() {
-        return Math.max(0.0, view_.last_interpolant() - progress_);
+        return Math.max(0.0, m_sampler.getMaxIndex() - m_progress);
     }
 
     public PathSamplePoint getSample() {
-        return current_sample_;
+        return m_sample;
     }
 
     public Pose2dWithMotion getState() {
@@ -39,15 +39,15 @@ public class PathIndexIterator {
     }
 
     public PathSamplePoint advance(double additional_progress) {
-        progress_ = Math.max(view_.first_interpolant(),
-                Math.min(view_.last_interpolant(), progress_ + additional_progress));
-        current_sample_ = view_.sample(progress_);
-        return current_sample_;
+        m_progress = Math.max(m_sampler.getMinIndex(),
+                Math.min(m_sampler.getMaxIndex(), m_progress + additional_progress));
+        m_sample = m_sampler.sample(m_progress);
+        return m_sample;
     }
 
     public PathSamplePoint preview(double additional_progress) {
-        final double progress = Math.max(view_.first_interpolant(),
-                Math.min(view_.last_interpolant(), progress_ + additional_progress));
-        return view_.sample(progress);
+        final double progress = Math.max(m_sampler.getMinIndex(),
+                Math.min(m_sampler.getMaxIndex(), m_progress + additional_progress));
+        return m_sampler.sample(progress);
     }
 }

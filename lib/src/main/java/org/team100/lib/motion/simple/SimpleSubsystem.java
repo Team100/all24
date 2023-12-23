@@ -5,13 +5,23 @@ import org.team100.lib.units.Distance;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/** Represents a simple one-dimensional mechanism. */
+/**
+ * Represents a simple one-dimensional mechanism.
+ */
 public class SimpleSubsystem extends SubsystemBase {
 
     private final PositionServo<Distance> m_actuator;
+    private final SimpleVisualization m_viz;
 
-    public SimpleSubsystem(PositionServo<Distance> actuator) {
+    // use the factory to instantiate
+    SimpleSubsystem(PositionServo<Distance> actuator) {
         m_actuator = actuator;
+        m_viz = new SimpleVisualization(this);
+    }
+
+    @Override
+    public void periodic() {
+        m_viz.periodic();
     }
 
     public double getPosition() {

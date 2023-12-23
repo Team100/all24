@@ -33,12 +33,12 @@ public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, T
         if (m_experiments.enabled(Experiment.UseInitialVelocity))
             return movingToRest(startState, end);
         else
-            return restToRest(startState, end);
+            return TrajectoryMaker.restToRest(m_config, startState.translation(), end.getTranslation());
     }
 
     private Trajectory movingToRest(SwerveState startState, Pose2d end) {
         if (Math.abs(startState.twist().dx) < 1e-6 && Math.abs(startState.twist().dy) < 1e-6)
-            return restToRest(startState, end);
+            return TrajectoryMaker.restToRest(m_config, startState.translation(), end.getTranslation());
         Translation2d currentTranslation = startState.translation();
         Twist2d currentSpeed = startState.twist();
         Translation2d goalTranslation = end.getTranslation();
@@ -59,33 +59,16 @@ public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, T
         m_config.setEndVelocity(0);
 
         try {
-
             return TrajectoryGenerator.generateTrajectory(
                     initial,
                     List.of(),
                     last,
                     m_config);
         } catch (TrajectoryGenerationException e) {
-            return null;
+            System.out.println("WARNING: Trajectory Generation Exception");
+            return new Trajectory();
         }
     }
 
-    private Trajectory restToRest(SwerveState startState, Pose2d end) {
-        Translation2d currentTranslation = startState.translation();
-        Translation2d goalTranslation = end.getTranslation();
-        Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
-        Rotation2d angleToGoal = translationToGoal.getAngle();
 
-        m_config.setStartVelocity(0);
-        m_config.setEndVelocity(0);
-        try {
-            return TrajectoryGenerator.generateTrajectory(
-                    new Pose2d(currentTranslation, angleToGoal),
-                    List.of(),
-                    new Pose2d(goalTranslation, angleToGoal),
-                    m_config);
-        } catch (TrajectoryGenerationException e) {
-            return null;
-        }
-    }
 }

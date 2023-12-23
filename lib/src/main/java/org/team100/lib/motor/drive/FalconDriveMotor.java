@@ -51,8 +51,21 @@ public class FalconDriveMotor implements Motor100<Distance> {
     private final double m_wheelDiameter;
     private final String m_name;
 
-
-    public FalconDriveMotor(String name, int canId, double currentLimit, double kDriveReduction, double wheelDiameter) {
+    /**
+     * @param name may not contain slashes
+     * @param canId
+     * @param currentLimit
+     * @param kDriveReduction
+     * @param wheelDiameter
+     */
+    public FalconDriveMotor(
+            String name,
+            int canId,
+            double currentLimit,
+            double kDriveReduction,
+            double wheelDiameter) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
         m_motor = new WPI_TalonFX(canId);
@@ -99,6 +112,11 @@ public class FalconDriveMotor implements Motor100<Distance> {
     }
 
     @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
+    @Override
     public void setVelocity(double outputMetersPerSec, double accelM_S_S) {
         double Kn = 0.11106;
         double Ks = 0.001515;
@@ -106,7 +124,7 @@ public class FalconDriveMotor implements Motor100<Distance> {
         double revolutionsPerSec = outputMetersPerSec / (m_wheelDiameter * Math.PI);
         double revsPer100ms = revolutionsPerSec / 10;
         double ticksPer100ms = revsPer100ms * ticksPerRevolution;
-        if (this.getVelocityRot_S() < .575) { //TODO TUNE THISSSS
+        if (this.getVelocityRot_S() < .575) { // TODO TUNE THISSSS
             Ks = .03;
         }
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
@@ -143,5 +161,10 @@ public class FalconDriveMotor implements Motor100<Distance> {
      */
     public void resetPosition() {
         require(m_motor.setSelectedSensorPosition(0));
+    }
+
+    @Override
+    public void close() {
+        m_motor.close();
     }
 }

@@ -1,0 +1,242 @@
+{
+  "Docking": {
+    "Data": [
+      "DockNode      ID=0x00000001 Pos=22,168 Size=200,48",
+      "DockNode      ID=0x00000002 Pos=417,209 Size=190,189 Split=Y",
+      "DockNode    ID=0x00000003 Parent=0x00000002 SizeRef=200,100 Split=X Selected=0x9698D817",
+      "DockNode  ID=0x00000005 Parent=0x00000003 SizeRef=177,187 Selected=0x9698D817",
+      "DockNode  ID=0x00000009 Parent=0x00000003 SizeRef=174,187 Selected=0xEC5E699D",
+      "DockNode    ID=0x00000004 Parent=0x00000002 SizeRef=200,98 Split=X Selected=0x685782FF",
+      "DockNode  ID=0x00000007 Parent=0x00000004 SizeRef=86,179 Selected=0x65402E70",
+      "DockNode  ID=0x00000008 Parent=0x00000004 SizeRef=90,179 Selected=0x685782FF",
+      "DockSpace     ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,16 Size=1078,576 CentralNode=1"
+    ]
+  },
+  "MainWindow": {
+    "GLOBAL": {
+      "fps": "120",
+      "height": "645",
+      "maximized": "0",
+      "style": "0",
+      "userScale": "2",
+      "width": "1080",
+      "xpos": "800",
+      "ypos": "230"
+    }
+  },
+  "Table": {
+    "0x542B5671,2": {
+      "Column 0  Width": "221",
+      "Column 1  Width": "105",
+      "RefScale": "10"
+    },
+    "0xE56EC1C2,4": {
+      "Column 0  Weight": "1.0000",
+      "Column 1  Weight": "1.0000",
+      "Column 2  Weight": "1.0000",
+      "Column 3  Weight": "1.0000"
+    }
+  },
+  "Window": {
+    "###/SmartDashboard//Front Left": {
+      "Collapsed": "0",
+      "Pos": "757,85",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Front Left": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Manual Drive Mode": {
+      "Collapsed": "0",
+      "DockId": "0x00000001,0",
+      "Pos": "22,168",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Module/Front Left": {
+      "Collapsed": "0",
+      "Pos": "948,35",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Module/Front Right": {
+      "Collapsed": "0",
+      "Pos": "950,236",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Module/Rear Left": {
+      "Collapsed": "0",
+      "Pos": "746,36",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Module/Rear Right": {
+      "Collapsed": "0",
+      "Pos": "746,238",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Module0": {
+      "Collapsed": "0",
+      "Pos": "721,72",
+      "Size": "103,107"
+    },
+    "###/SmartDashboard/Module1": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Motion Profile": {
+      "Collapsed": "0",
+      "Pos": "21,220",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/OscillateDirect": {
+      "Collapsed": "0",
+      "Pos": "23,270",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/SideView": {
+      "Collapsed": "0",
+      "Pos": "727,370",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Simple Manual Mode": {
+      "Collapsed": "0",
+      "Pos": "24,321",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Swerve Viz/Front Left": {
+      "Collapsed": "0",
+      "DockId": "0x00000009,0",
+      "Pos": "514,209",
+      "Size": "93,94"
+    },
+    "###/SmartDashboard/Swerve Viz/Front Right": {
+      "Collapsed": "0",
+      "DockId": "0x00000008,0",
+      "Pos": "511,305",
+      "Size": "96,93"
+    },
+    "###/SmartDashboard/Swerve Viz/Rear Left": {
+      "Collapsed": "0",
+      "DockId": "0x00000005,0",
+      "Pos": "417,209",
+      "Size": "95,94"
+    },
+    "###/SmartDashboard/Swerve Viz/Rear Right": {
+      "Collapsed": "0",
+      "DockId": "0x00000007,0",
+      "Pos": "417,305",
+      "Size": "92,93"
+    },
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "23,372",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopDrive": {
+      "Collapsed": "0",
+      "Pos": "23,424",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopSteering": {
+      "Collapsed": "0",
+      "Pos": "22,474",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopVelocity": {
+      "Collapsed": "0",
+      "Pos": "23,525",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseInitialVelocity": {
+      "Collapsed": "0",
+      "Pos": "23,572",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseSetpointGenerator": {
+      "Collapsed": "0",
+      "Pos": "22,572",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/elevator": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/swerve/Front Left": {
+      "Collapsed": "0",
+      "Pos": "736,136",
+      "Size": "200,200"
+    },
+    "###/field": {
+      "Collapsed": "0",
+      "Pos": "280,20",
+      "Size": "342,186"
+    },
+    "###NetworkTables": {
+      "Collapsed": "0",
+      "Pos": "248,415",
+      "Size": "377,204"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "70,197",
+      "Size": "475,145"
+    },
+    "###NetworkTables Log": {
+      "Collapsed": "0",
+      "Pos": "49,385",
+      "Size": "600,130"
+    },
+    "###NetworkTables Settings": {
+      "Collapsed": "0",
+      "Pos": "14,20",
+      "Size": "258,148"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "631,35",
+      "Size": "442,582"
+    },
+    "About": {
+      "Collapsed": "0",
+      "Pos": "87,237",
+      "Size": "233,112"
+    },
+    "Dear ImGui Debug Log": {
+      "Collapsed": "0",
+      "Pos": "78,96",
+      "Size": "503,480"
+    },
+    "Dear ImGui Demo": {
+      "Collapsed": "0",
+      "Pos": "650,20",
+      "Size": "550,680"
+    },
+    "Dear ImGui Metrics/Debugger": {
+      "Collapsed": "0",
+      "Pos": "788,72",
+      "Size": "361,471"
+    },
+    "Debug##Default": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "400,400"
+    },
+    "DockSpaceViewport_11111111": {
+      "Collapsed": "0",
+      "Pos": "0,16",
+      "Size": "1078,576"
+    },
+    "Example: Console": {
+      "Collapsed": "0",
+      "Pos": "755,49",
+      "Size": "520,523"
+    },
+    "Example: Log": {
+      "Collapsed": "0",
+      "Pos": "80,153",
+      "Size": "500,400"
+    }
+  }
+}

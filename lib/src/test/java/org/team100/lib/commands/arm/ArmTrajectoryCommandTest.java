@@ -1,6 +1,7 @@
 package org.team100.lib.commands.arm;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 
@@ -11,7 +12,7 @@ class ArmTrajectoryCommandTest {
     @Test
     void testSimple() {
         HAL.initialize(500, 0);
-        ArmSubsystem armSubSystem = new ArmSubsystem();
+        ArmSubsystem armSubSystem = ArmFactory.get();
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
 

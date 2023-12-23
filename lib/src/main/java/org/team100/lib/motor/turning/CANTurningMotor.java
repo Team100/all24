@@ -13,14 +13,17 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+/**
+ * Swerve steering motor using TalonSRX.
+ */
 public class CANTurningMotor implements Motor100<Angle> {
-    private final Telemetry t = Telemetry.get();
+    private static final double m_gearRatio = 355 / 6;
+    private static final double ticksPerRevolution = 28;
+    private static final double kTurningCurrentLimit = 7;
 
-    private final double m_gearRatio = 355 / 6;
+    private final Telemetry t = Telemetry.get();
     private final WPI_TalonSRX m_motor;
-    private final double ticksPerRevolution = 28;
     private final int canID;
-    public static final double kTurningCurrentLimit = 7;
     private final AnalogTurningEncoder m_encoder;
     private final String m_name;
 
@@ -74,6 +77,11 @@ public class CANTurningMotor implements Motor100<Angle> {
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
     public void setVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
         // TODO fix this
@@ -91,5 +99,10 @@ public class CANTurningMotor implements Motor100<Angle> {
         double VSat = 11;
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);
+    }
+
+    @Override
+    public void close() {
+        m_motor.close();
     }
 }

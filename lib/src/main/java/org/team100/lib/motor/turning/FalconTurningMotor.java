@@ -14,29 +14,30 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+/**
+ * Swerve steering motor using Falcon 500.
+ */
 public class FalconTurningMotor implements Motor100<Angle> {
     private static final double ticksPerRevolution = 2048;
     private static final double gearRatio = 10.29;
+    private static final double kCurrentLimit = 40;
 
-    public static class Config {
-        public int kCurrentLimit = 40;
-    }
-
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
     private final WPI_TalonFX m_motor;
     private final String m_name;
 
     public FalconTurningMotor(String name, int canId) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_motor = new WPI_TalonFX(canId);
         m_motor.configFactoryDefault();
         m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
         m_motor.setNeutralMode(NeutralMode.Brake);
         m_motor.setInverted(InvertType.InvertMotorOutput);
         m_motor.configStatorCurrentLimit(
-                new StatorCurrentLimitConfiguration(true, m_config.kCurrentLimit, m_config.kCurrentLimit, 0));
+                new StatorCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
         m_motor.configSupplyCurrentLimit(
-                new SupplyCurrentLimitConfiguration(true, m_config.kCurrentLimit, m_config.kCurrentLimit, 0));
+                new SupplyCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
         m_motor.configNominalOutputForward(0);
         m_motor.configNominalOutputReverse(0);
         m_motor.config_kF(0, 0);
@@ -85,9 +86,19 @@ public class FalconTurningMotor implements Motor100<Angle> {
         log();
     }
 
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
     private void log() {
         t.log(Level.DEBUG, m_name + "/Output", get());
         t.log(Level.DEBUG, m_name + "/Error", m_motor.getClosedLoopError() / (ticksPerRevolution / 10));
+    }
+
+    @Override
+    public void close() {
+        m_motor.close();
     }
 
 }

@@ -1,0 +1,166 @@
+{
+  "Docking": {
+    "Data": [
+      "DockNode  ID=0x00000001 Pos=22,168 Size=200,48",
+      "DockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,16 Size=1078,693 CentralNode=1"
+    ]
+  },
+  "MainWindow": {
+    "GLOBAL": {
+      "fps": "120",
+      "height": "709",
+      "maximized": "0",
+      "style": "0",
+      "userScale": "2",
+      "width": "1078",
+      "xpos": "838",
+      "ypos": "303"
+    }
+  },
+  "Table": {
+    "0x542B5671,2": {
+      "Column 0  Width": "221",
+      "Column 1  Width": "105",
+      "RefScale": "10"
+    },
+    "0xE56EC1C2,4": {
+      "Column 0  Weight": "1.0000",
+      "Column 1  Weight": "1.0000",
+      "Column 2  Weight": "1.0000",
+      "Column 3  Weight": "1.0000"
+    }
+  },
+  "Window": {
+    "###/SmartDashboard/Manual Drive Mode": {
+      "Collapsed": "0",
+      "DockId": "0x00000001,0",
+      "Pos": "22,168",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Motion Profile": {
+      "Collapsed": "0",
+      "Pos": "21,220",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/OscillateDirect": {
+      "Collapsed": "0",
+      "Pos": "23,270",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/SideView": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Simple Manual Mode": {
+      "Collapsed": "0",
+      "Pos": "24,321",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "23,372",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopDrive": {
+      "Collapsed": "0",
+      "Pos": "23,424",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopSteering": {
+      "Collapsed": "0",
+      "Pos": "22,474",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopVelocity": {
+      "Collapsed": "0",
+      "Pos": "23,525",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseInitialVelocity": {
+      "Collapsed": "0",
+      "Pos": "23,577",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseSetpointGenerator": {
+      "Collapsed": "0",
+      "Pos": "22,630",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/elevator": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
+    "###/field": {
+      "Collapsed": "0",
+      "Pos": "398,21",
+      "Size": "413,219"
+    },
+    "###NetworkTables": {
+      "Collapsed": "0",
+      "Pos": "401,256",
+      "Size": "432,437"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "70,197",
+      "Size": "475,145"
+    },
+    "###NetworkTables Log": {
+      "Collapsed": "0",
+      "Pos": "49,385",
+      "Size": "600,130"
+    },
+    "###NetworkTables Settings": {
+      "Collapsed": "0",
+      "Pos": "20,20",
+      "Size": "258,148"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "255,21",
+      "Size": "372,172"
+    },
+    "About": {
+      "Collapsed": "0",
+      "Pos": "87,237",
+      "Size": "233,112"
+    },
+    "Dear ImGui Debug Log": {
+      "Collapsed": "0",
+      "Pos": "78,96",
+      "Size": "503,480"
+    },
+    "Dear ImGui Demo": {
+      "Collapsed": "0",
+      "Pos": "650,20",
+      "Size": "550,680"
+    },
+    "Dear ImGui Metrics/Debugger": {
+      "Collapsed": "0",
+      "Pos": "788,72",
+      "Size": "361,471"
+    },
+    "Debug##Default": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "400,400"
+    },
+    "DockSpaceViewport_11111111": {
+      "Collapsed": "0",
+      "Pos": "0,16",
+      "Size": "1078,693"
+    },
+    "Example: Console": {
+      "Collapsed": "0",
+      "Pos": "755,49",
+      "Size": "520,523"
+    },
+    "Example: Log": {
+      "Collapsed": "0",
+      "Pos": "80,153",
+      "Size": "500,400"
+    }
+  }
+}

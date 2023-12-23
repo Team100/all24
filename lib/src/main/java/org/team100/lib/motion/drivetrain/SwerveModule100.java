@@ -8,25 +8,83 @@ import org.team100.lib.motion.components.PositionServo;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
-/** Feedforward and feedback control of a single module. */
+/**
+ * Feedforward and feedback control of a single module.
+ */
 public class SwerveModule100 {
+    private final String m_name;
     private final VelocityServo<Distance> m_driveServo;
     private final PositionServo<Angle> m_turningServo;
+    private final SwerveModuleVisualization m_viz;
 
-    public SwerveModule100(VelocityServo<Distance> driveServo, PositionServo<Angle> turningServo) {
+    /**
+     * @param name         may not contain slashes
+     * @param driveServo
+     * @param turningServo
+     */
+    public SwerveModule100(
+            String name,
+            VelocityServo<Distance> driveServo,
+            PositionServo<Angle> turningServo) {
+        if (name.contains("/"))
+            throw new IllegalArgumentException();
+        m_name = name;
         m_driveServo = driveServo;
         m_turningServo = turningServo;
+        m_viz = new SwerveModuleVisualization(this);
     }
 
-    public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningServo.getPosition()));
+    /**
+     * Only SwerveModuleCollection calls this.
+     */
+    void setDesiredState(SwerveModuleState desiredState) {
+        setRawDesiredState(SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningServo.getPosition())));
+    }
+
+    /**
+     * Only SwerveModuleCollection calls this.
+     * 
+     * This is for testing only, it does not optimize.
+     */
+    void setRawDesiredState(SwerveModuleState state) {
+        if (Double.isNaN(state.speedMetersPerSecond))
+            throw new IllegalArgumentException("speed is NaN");
         m_driveServo.setVelocity(state.speedMetersPerSecond);
         m_turningServo.setPosition(state.angle.getRadians());
     }
 
+    /** For testing */
+    SwerveModuleState getDesiredState() {
+        return new SwerveModuleState(
+                m_driveServo.getSetpoint(),
+                new Rotation2d(m_turningServo.getGoal()));
+    }
+
+    /** Make sure the setpoint and measurement are the same. */
+    public void reset() {
+        m_turningServo.reset();
+    }
+
+    /** for testing only */
+    State getSetpoint() {
+        return m_turningServo.getSetpoint();
+    }
+
+    /**
+     * Only SwerveModuleCollection calls this.
+     */
+    void periodic() {
+        m_viz.periodic();
+    }
+
     public void close() {
         m_turningServo.close();
+    }
+
+    public String getName() {
+        return m_name;
     }
 
     /////////////////////////////////////////////////////////////
@@ -44,6 +102,10 @@ public class SwerveModule100 {
 
     boolean atSetpoint() {
         return m_turningServo.atSetpoint();
+    }
+
+    boolean atGoal() {
+        return m_turningServo.atGoal();
     }
 
     void stop() {

@@ -14,6 +14,15 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * Controls Experiment enablement.
+ * 
+ * There are three methods of enablement:
+ * 
+ * -- global: enabled for all robots
+ * -- per-identity: enabled for specific RoboRIO serial numbers
+ * -- override: using a Sendable Chooser in a dashboard, e.g. glass.
+ */
 public class Experiments {
     private final Telemetry t = Telemetry.get();
 
@@ -23,7 +32,8 @@ public class Experiments {
             Experiment.UseClosedLoopSteering,
             Experiment.UseClosedLoopVelocity,
             Experiment.UseSetpointGenerator,
-            Experiment.UseInitialVelocity);
+            Experiment.UseInitialVelocity,
+            Experiment.OscillateDirect);
 
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(
@@ -38,11 +48,14 @@ public class Experiments {
     /** Starts with the config above, but can be overridden. */
     private final Map<Experiment, SendableChooser<BooleanSupplier>> m_overrides;
 
+    private final Map<Experiment, Boolean> m_testOverrides;
+
     public Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
         log();
         m_overrides = new EnumMap<>(Experiment.class);
+        m_testOverrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
             SendableChooser<BooleanSupplier> override = new NamedChooser<>(e.name());
             if (m_experiments.contains(e)) {
@@ -57,7 +70,15 @@ public class Experiments {
         }
     }
 
+    /** overrides everything. for testing only. */
+    public void testOverride(Experiment experiment, boolean state) {
+        m_testOverrides.put(experiment, state);
+    }
+
     public boolean enabled(Experiment experiment) {
+        if (m_testOverrides.containsKey(experiment)) {
+            return m_testOverrides.get(experiment);
+        }
         log();
         return m_overrides.get(experiment).getSelected().getAsBoolean();
         // return m_experiments.contains(experiment);

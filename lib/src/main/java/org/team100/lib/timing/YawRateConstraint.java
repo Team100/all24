@@ -1,31 +1,37 @@
 package org.team100.lib.timing;
 
+import java.util.Optional;
+
 import org.team100.lib.geometry.Pose2dWithMotion;
 
-public class YawRateConstraint implements TimingConstraint {
-    final double mMaxYawRate;
+import edu.wpi.first.math.geometry.Rotation2d;
 
-    public YawRateConstraint(final double max_yaw_rate) {
-        // rad/s
-        mMaxYawRate = max_yaw_rate;
+/**
+ * Linear velocity limit based on spatial yaw rate and omega limit.
+ */
+public class YawRateConstraint implements TimingConstraint {
+    private final double m_maxOmegaRad_S;
+
+    public YawRateConstraint(final double maxOmegaRad_S) {
+        m_maxOmegaRad_S = maxOmegaRad_S;
     }
 
     @Override
-    public double getMaxVelocity(final Pose2dWithMotion state) {
-        var course = state.getCourse();
+    public double getMaxVelocity(Pose2dWithMotion state) {
+        Optional<Rotation2d> course = state.getCourse();
         if (course.isEmpty()) {
             // This is turn in place.
             return Double.MAX_VALUE;
         } else {
             // Heading rate in rad/m
             final double heading_rate = state.getHeadingRate();
-            // Return max velocity in m/s.
-            return mMaxYawRate / Math.abs(heading_rate);
+            // rad/s / rad/m => m/s.
+            return m_maxOmegaRad_S / Math.abs(heading_rate);
         }
     }
 
     @Override
-    public MinMaxAcceleration getMinMaxAcceleration(final Pose2dWithMotion state, final double velocity) {
+    public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return MinMaxAcceleration.kNoLimits;
     }
 }

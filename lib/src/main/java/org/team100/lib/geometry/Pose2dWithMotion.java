@@ -1,6 +1,5 @@
 package org.team100.lib.geometry;
 
-
 import java.text.DecimalFormat;
 import java.util.Optional;
 
@@ -11,114 +10,121 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
-/** This is from 254 2023 motion planning; the main reason to include it
- * is because it separates heading and course.
+/**
+ * This is from 254 2023 motion planning; the main reason to include it
+ * is because it represents both heading and course, whereas the WPI equivalent
+ * represents only course.
  */
 public class Pose2dWithMotion {
-    protected static final Pose2dWithMotion kIdentity = new Pose2dWithMotion();
+    public static final Pose2dWithMotion kIdentity = new Pose2dWithMotion();
 
-    public static Pose2dWithMotion identity() {
-        return kIdentity;
+    private final Pose2d m_pose;
+
+    /**
+     * Even though this Twist provides scalar values for dx, dy, and dtheta,
+     * Pose2dWithMotion is purely a spatial construct. It has no sense of time. So
+     * rather than being in units of distance-per-time (or radians-per-time), the
+     * denominator here is actually distance as well. Thus, it isn't really
+     * meaningful to look at dx or dy directly - what is meaningful is:
+     *
+     * a) whether or not they are both zero (in which case this is a stationary or
+     * turn-in-place motion)
+     *
+     * b) the angle formed by them, which is the direction of translation (in the
+     * same coordinate frame as pose_).
+     *
+     * Additionally, this means dtheta is in radians-per-distance if there is
+     * translation, or radians-per-radian otherwise.
+     * 
+     * TODO: i think that dx and dy are actually constrained to the unit circle,
+     * or must both be zero, so this representation maybe not the ideal way to
+     * do it. use an alternate representation that fits what's happening here.
+     */
+    private final Twist2d m_motionDirection;
+
+    /**
+     * Curvature is change in angle per change in distance, rad/m.
+     */
+    private final double m_curvatureRad_M;
+
+    /**
+     * DCurvatureDs is change in curvature per meter, rad/m^2
+     */
+    private final double m_dCurvatureDsRad_M2;
+
+    /** Motionless. */
+    private Pose2dWithMotion() {
+        this(GeometryUtil.kPoseZero, 0);
     }
 
-    protected final Pose2d pose_;
-
-    // Even though this Twist provides scalar values for dx, dy, and dtheta, Pose2dWithMotion is purely a spatial construct -
-    // it has no sense of time. So rather than being in units of distance-per-time (or radians-per-time), the denominator here is
-    // actually distance as well. Thus, it isn't really meaningful to look at dx or dy directly - what is meaningful is:
-    //  a) whether or not they are both zero (in which case this is a stationary or turn-in-place motion)
-    //  b) the angle formed by them, which is the direction of translation (in the same coordinate frame as pose_).
-    // Additionally, this means dtheta is in radians-per-distance if there is translation, or radians-per-radian otherwise.
-    protected final Twist2d motion_direction_;
-
-    protected final double curvature_;
-    protected final double dcurvature_ds_;
-
-    public Pose2dWithMotion() {
-        pose_ = GeometryUtil.kPoseZero;
-        motion_direction_ = new Twist2d(0.0, 0.0, 0.0);
-        curvature_ = 0.0;
-        dcurvature_ds_ = 0.0;
+    public Pose2dWithMotion(Pose2d pose, double curvatureRad_M) {
+        this(pose, curvatureRad_M, 0);
     }
 
-    public Pose2dWithMotion(final Pose2d pose, double curvature) {
-        pose_ = pose;
-        motion_direction_ = new Twist2d(0.0, 0.0, 0.0);
-        curvature_  = curvature;
-        dcurvature_ds_ = 0.0;
+    public Pose2dWithMotion(Pose2d pose, double curvatureRad_M, double dCurvatureDsRad_M2) {
+        this(pose, new Twist2d(0.0, 0.0, 0.0), curvatureRad_M, dCurvatureDsRad_M2);
     }
 
-    public Pose2dWithMotion(final Pose2d pose, double curvature, double dcurvature_ds) {
-        pose_ = pose;
-        motion_direction_ = new Twist2d(0.0, 0.0, 0.0);
-        curvature_ = curvature;
-        dcurvature_ds_ = dcurvature_ds;
-    }
-
-
-    public Pose2dWithMotion(final Pose2d pose, final Twist2d motion_direction, double curvature, double dcurvature_ds) {
-        pose_ = pose;
-        motion_direction_ = motion_direction;
-        curvature_ = curvature;
-        dcurvature_ds_ = dcurvature_ds;
-    }
-
-    public Pose2dWithMotion(final Translation2d translation, final Rotation2d rotation, double curvature) {
-        pose_ = new Pose2d(translation, rotation);
-        motion_direction_ = new Twist2d(0.0, 0.0, 0.0);
-        curvature_  = curvature;
-        dcurvature_ds_ = 0.0;
-    }
-
-    public Pose2dWithMotion(final Translation2d translation, final Rotation2d rotation, double curvature, double dcurvature_ds) {
-        pose_ = new Pose2d(translation, rotation);
-        motion_direction_ = new Twist2d(0.0, 0.0, 0.0);
-        curvature_ = curvature;
-        dcurvature_ds_ = dcurvature_ds;
-    }
-
-    public Pose2dWithMotion(final Translation2d translation, final Rotation2d rotation, final Twist2d motion_direction, double curvature, double dcurvature_ds) {
-        pose_ = new Pose2d(translation, rotation);
-        motion_direction_ = motion_direction;
-        curvature_ = curvature;
-        dcurvature_ds_ = dcurvature_ds;
+    /**
+     * 
+     * @param pose
+     * @param motion_direction   dtheta is rad/meter
+     * @param curvatureRad_M
+     * @param dCurvatureDsRad_M2
+     */
+    public Pose2dWithMotion(
+            Pose2d pose,
+            Twist2d motion_direction,
+            double curvatureRad_M,
+            double dCurvatureDsRad_M2) {
+        m_pose = pose;
+        m_motionDirection = motion_direction;
+        m_curvatureRad_M = curvatureRad_M;
+        m_dCurvatureDsRad_M2 = dCurvatureDsRad_M2;
     }
 
     public final Pose2d getPose() {
-        return pose_;
-    }
-
-    public Pose2dWithMotion transformBy(Pose2d transform) {
-        return new Pose2dWithMotion(GeometryUtil.transformBy(getPose(), transform), motion_direction_, getCurvature(), getDCurvatureDs());
+        return m_pose;
     }
 
     public Pose2dWithMotion mirror() {
-        return new Pose2dWithMotion(GeometryUtil.mirror(getPose()), GeometryUtil.mirror(motion_direction_), -getCurvature(), -getDCurvatureDs());
+        return new Pose2dWithMotion(
+                GeometryUtil.mirror(getPose()), GeometryUtil.mirror(m_motionDirection),
+                -getCurvature(), -getDCurvatureDs());
     }
 
+    /** Radians per meter. */
     public double getCurvature() {
-        return curvature_;
+        return m_curvatureRad_M;
     }
 
+    /** Radians per meter squared */
     public double getDCurvatureDs() {
-        return dcurvature_ds_;
+        return m_dCurvatureDsRad_M2;
     }
 
     public final Translation2d getTranslation() {
         return getPose().getTranslation();
     }
 
-    public final Rotation2d getRotation() {
+    public final Rotation2d getHeading() {
         return getPose().getRotation();
     }
 
+    // i think the interpolation of motion direction is invalid; it would yield
+    // results not on the unit circle, which makes no sense. maybe the consumers of
+    // motion direction always derive the angle anyway?
     public Pose2dWithMotion interpolate(final Pose2dWithMotion other, double x) {
         return new Pose2dWithMotion(getPose().interpolate(other.getPose(), x),
-                GeometryUtil.interpolate(motion_direction_, other.motion_direction_, x),
+                GeometryUtil.interpolate(m_motionDirection, other.m_motionDirection, x),
                 Math100.interpolate(getCurvature(), other.getCurvature(), x),
                 Math100.interpolate(getDCurvatureDs(), other.getDCurvatureDs(), x));
     }
 
+    /**
+     * Distance in meters along the arc between the two poses (in either order)
+     * produced by a constant twist.
+     */
     public double distance(final Pose2dWithMotion other) {
         return GeometryUtil.distance(getPose(), other.getPose());
     }
@@ -130,36 +136,30 @@ public class Pose2dWithMotion {
 
         Pose2dWithMotion p2dwc = (Pose2dWithMotion) other;
         return getPose().equals(p2dwc.getPose()) &&
-            motion_direction_.equals(p2dwc.motion_direction_) &&
-            Math100.epsilonEquals(getCurvature(), p2dwc.getCurvature()) &&
-            Math100.epsilonEquals(getDCurvatureDs(), p2dwc.getDCurvatureDs());
+                m_motionDirection.equals(p2dwc.m_motionDirection) &&
+                Math100.epsilonEquals(getCurvature(), p2dwc.getCurvature()) &&
+                Math100.epsilonEquals(getDCurvatureDs(), p2dwc.getDCurvatureDs());
     }
 
     public String toString() {
         final DecimalFormat fmt = new DecimalFormat("#0.000");
-        return getPose().toString() + ", twist: " + motion_direction_ + ", curvature: " + fmt.format(getCurvature()) + ", dcurvature_ds: " + fmt.format(getDCurvatureDs());
+        return getPose().toString() + ", twist: " + m_motionDirection + ", curvature: " + fmt.format(getCurvature())
+                + ", dcurvature_ds: " + fmt.format(getDCurvatureDs());
     }
 
-    public Pose2dWithMotion rotateBy(Rotation2d other) {
-        // motion direction is always relative to pose, so it gets rotated "for free".
-        return new Pose2dWithMotion(getPose().rotateBy(other), getCurvature(), getDCurvatureDs());
-    }
-
-    public Pose2dWithMotion add(Pose2dWithMotion other) {
-        return this.transformBy(other.getPose());   // todo make work
-    }
-
-    public Optional<Rotation2d> getCourseLocalFrame() {
-        var course = getCourse();
-        if (course.isEmpty()) { return course; }
-        return Optional.of(getRotation().unaryMinus().rotateBy(course.get()));
-    }
-
+    /**
+     * Direction of the translational part of the motion, or empty if motionless.
+     */
     public Optional<Rotation2d> getCourse() {
-        return GeometryUtil.getCourse(motion_direction_);
+        return GeometryUtil.getCourse(m_motionDirection);
     }
 
+    /**
+     * Heading rate is radians per meter.
+     * 
+     * If you want radians per second, multiply by velocity (meters per second).
+     */
     public double getHeadingRate() {
-        return motion_direction_.dtheta;
+        return m_motionDirection.dtheta;
     }
 }

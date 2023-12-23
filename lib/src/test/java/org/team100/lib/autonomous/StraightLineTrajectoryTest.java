@@ -17,7 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
-public class StraightLineTrajectoryTest {
+class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
 
     @Test
@@ -43,7 +43,6 @@ public class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, GeometryUtil.kTwist2dIdentity);
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
-        System.out.println(traj);
         assertEquals(1.414, traj.getTotalTimeSeconds(), kDelta);
     }
 
@@ -70,7 +69,6 @@ public class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(1,0,0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
-        System.out.println(traj);
         assertEquals(1.082, traj.getTotalTimeSeconds(), kDelta);
     }
 
@@ -97,7 +95,6 @@ public class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(-1,0,0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
-        System.out.println(traj);
         // it can't do this because the spline generator gets confused
         assertEquals(0, traj.getTotalTimeSeconds(), kDelta);
     }
@@ -125,7 +122,6 @@ public class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(0,1,0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
-        System.out.println(traj);
         assertEquals(1.241, traj.getTotalTimeSeconds(), kDelta);
     }
 }

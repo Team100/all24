@@ -1,0 +1,315 @@
+{
+  "NetworkTables": {
+    "Front Left": {
+      "Drive": {
+        "open": true
+      },
+      "Turning": {
+        "Position Servo": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "Holonomic3": {
+      "error": {
+        "open": true
+      },
+      "measurement": {
+        "open": true
+      },
+      "open": true
+    },
+    "Rear Right": {
+      "drive velocity servo": {
+        "open": true,
+        "velocity servo": {
+          "open": true
+        }
+      }
+    },
+    "SmartDashboard": {
+      "Module": {
+        "Front Left": {
+          "Front Left": {
+            "drive": {
+              "open": true
+            },
+            "open": true,
+            "steer": {
+              "open": true
+            }
+          }
+        },
+        "open": true
+      },
+      "Rear Right": {
+        "Rear Right": {
+          "drive": {
+            "open": true
+          }
+        },
+        "open": true
+      },
+      "SideView": {
+        "SideRoot": {
+          "Boom": {
+            "open": true
+          }
+        }
+      }
+    },
+    "arm": {
+      "lower": {
+        "Simulated Encoder": {
+          "open": true
+        },
+        "open": true
+      },
+      "upper": {
+        "open": true
+      }
+    },
+    "combined": true,
+    "drive": {
+      "open": true,
+      "simulated_motor": {
+        "open": true
+      }
+    },
+    "encoder": {
+      "Simulated Encoder": {
+        "open": true
+      },
+      "open": true
+    },
+    "field": {
+      "double[]##v_/field/robot": {
+        "open": true
+      }
+    },
+    "planner": {
+      "current state": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true
+    },
+    "precision": 3,
+    "pursuit_planner": {
+      "current state": {
+        "open": true
+      },
+      "error": {
+        "open": true,
+        "rotation": {
+          "open": true
+        },
+        "translation": {
+          "open": true
+        }
+      },
+      "lookahead state": {
+        "open": true
+      },
+      "lookahead translation": {
+        "open": true
+      },
+      "pursuit speeds": {
+        "open": true
+      },
+      "updated lookahead state": {
+        "open": true
+      }
+    },
+    "ramsete_planner": {
+      "current state": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "error": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true,
+      "setpoint": {
+        "open": true,
+        "posestate": {
+          "pose": {
+            "rotation": {
+              "open": true
+            }
+          }
+        }
+      }
+    },
+    "retained": {
+      "Holonomic3": {
+        "error": {
+          "open": true
+        },
+        "measurement": {
+          "open": true
+        },
+        "open": true,
+        "setpoint": {
+          "open": true
+        }
+      }
+    },
+    "swerve": {
+      "pose": {
+        "open": true,
+        "rotation": {
+          "open": true
+        },
+        "translation": {
+          "open": true
+        }
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard//Front Left": "Mechanism2d",
+      "/SmartDashboard//Front Right": "Mechanism2d",
+      "/SmartDashboard//Rear Left": "Mechanism2d",
+      "/SmartDashboard//Rear Right": "Mechanism2d",
+      "/SmartDashboard/Front Left": "Mechanism2d",
+      "/SmartDashboard/Front Right": "Mechanism2d",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/Module/Front Left": "Mechanism2d",
+      "/SmartDashboard/Module/Front Right": "Mechanism2d",
+      "/SmartDashboard/Module/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Module/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Module0": "Mechanism2d",
+      "/SmartDashboard/Module1": "Mechanism2d",
+      "/SmartDashboard/Module2": "Mechanism2d",
+      "/SmartDashboard/Module3": "Mechanism2d",
+      "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Rear Right": "Mechanism2d",
+      "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
+      "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/elevator": "Mechanism2d",
+      "/SmartDashboard/swerve/Front Left": "Mechanism2d",
+      "/SmartDashboard/swerve/Front Right": "Mechanism2d",
+      "/SmartDashboard/swerve/Rear Left": "Mechanism2d",
+      "/SmartDashboard/swerve/Rear Right": "Mechanism2d",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Motion Profile": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/OscillateDirect": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Simple Manual Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopDrive": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopSteering": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseInitialVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "ball": {
+          "arrows": false,
+          "length": 0.25,
+          "style": "Box/Image",
+          "weight": 1.0,
+          "width": 0.25
+        },
+        "robot": {
+          "selectable": false
+        },
+        "target": {
+          "arrows": false,
+          "color": [
+            0.0,
+            255.0,
+            0.0,
+            255.0
+          ],
+          "length": 0.5,
+          "selectable": false,
+          "weight": 1.0,
+          "width": 0.5
+        },
+        "trajectory": {
+          "arrows": false,
+          "color": [
+            255.0,
+            152.10525512695313,
+            0.0,
+            255.0
+          ],
+          "selectable": false,
+          "style": "Line",
+          "weight": 1.0
+        },
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
+  }
+}

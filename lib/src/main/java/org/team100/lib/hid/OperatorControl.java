@@ -15,4 +15,22 @@ public interface OperatorControl {
     default Trigger doSomething() {
         return new Trigger(() -> false);
     }
+
+    default double lower() {
+        return 0;
+    }
+
+    default double upper() {
+        return 0;
+    }
+
+    default double elevator() {
+        return 0;
+    }
+
+    // this exists to bind to commands we don't want to run,
+    // but we don't want them to rot either.
+    default Trigger never() {
+        return new Trigger(() -> false);
+    }
 }

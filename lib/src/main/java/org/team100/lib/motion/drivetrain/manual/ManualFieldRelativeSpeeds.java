@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import java.util.function.Supplier;
-
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -14,19 +12,15 @@ import edu.wpi.first.math.geometry.Twist2d;
  * 
  * The input is a twist, so the output is just scaled.
  */
-public class ManualFieldRelativeSpeeds implements Supplier<Twist2d> {
+public class ManualFieldRelativeSpeeds {
     private final Telemetry t = Telemetry.get();
-    private final Supplier<Twist2d> m_input;
     private final SpeedLimits m_speedLimits;
 
-    public ManualFieldRelativeSpeeds(Supplier<Twist2d> input, SpeedLimits speedLimits) {
-        m_input = input;
+    public ManualFieldRelativeSpeeds(SpeedLimits speedLimits) {
         m_speedLimits = speedLimits;
     }
 
-    @Override
-    public Twist2d get() {
-        Twist2d input = m_input.get();
+    public Twist2d apply(Twist2d input) {
         Twist2d twistM_S = DriveUtil.scale(
                 input,
                 m_speedLimits.speedM_S,

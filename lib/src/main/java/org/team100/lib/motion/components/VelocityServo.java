@@ -16,11 +16,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
  * closed-loop velocity control. There's also a PIDF, selected via experiment.
  */
 public class VelocityServo<T> {
-    public static class Config {
-        public double kDeadband = 0.03;
-    }
+    private static final double kDeadband = 0.03;
 
-    private final Config m_config = new Config();
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
@@ -33,7 +30,16 @@ public class VelocityServo<T> {
 
     // for calculating acceleration
     private double previousSetpoint = 0;
+    double m_setpoint;
 
+    /**
+     * @param experiments
+     * @param name        may not start with slash
+     * @param motor
+     * @param encoder
+     * @param controller
+     * @param feedforward
+     */
     public VelocityServo(
             Experiments experiments,
             String name,
@@ -41,13 +47,15 @@ public class VelocityServo<T> {
             Encoder100<T> encoder,
             PIDController controller,
             SimpleMotorFeedforward feedforward) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         m_experiments = experiments;
         m_motor = motor;
         m_encoder = encoder;
         m_controller = controller;
         m_period = controller.getPeriod();
         m_feedforward = feedforward;
-        m_name = String.format("/%s/velocity servo", name);
+        m_name = String.format("/%s/Velocity Servo", name);
     }
 
     /**
@@ -56,6 +64,9 @@ public class VelocityServo<T> {
      * @param setpoint velocity
      */
     public void setVelocity(Double setpoint) {
+        if (Double.isNaN(setpoint))
+            throw new IllegalArgumentException("setpoint is NaN");
+        m_setpoint = setpoint;
         if (m_experiments.enabled(Experiment.UseClosedLoopVelocity)) {
             offboard(setpoint);
         } else {
@@ -78,16 +89,23 @@ public class VelocityServo<T> {
     }
 
     public void stop() {
-        m_motor.setDutyCycle(0);
+        m_motor.stop();
     }
 
     public double getDistance() {
         return m_encoder.getPosition();
     }
 
+    /** For testing */
+    public double getSetpoint() {
+        return m_setpoint;
+    }
+
     ////////////////////////////////////////////////
 
     private void offboard(double setpoint) {
+        if (Double.isNaN(setpoint))
+            throw new IllegalArgumentException("setpoint is NaN");
         m_motor.setVelocity(setpoint, 0);
     }
 
@@ -95,7 +113,7 @@ public class VelocityServo<T> {
         double u_FB = m_controller.calculate(getVelocity(), setpoint);
         double u_FF = m_feedforward.calculate(setpoint, accel(setpoint));
         double u_TOTAL = u_FB + u_FF;
-        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, m_config.kDeadband, 1);
+        u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, 1);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
         m_motor.setDutyCycle(u_TOTAL);
         t.log(Level.DEBUG, m_name + "/Controller Output", u_FB);

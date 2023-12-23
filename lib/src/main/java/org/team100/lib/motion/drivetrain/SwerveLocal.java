@@ -4,22 +4,24 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
+import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * The swerve drive in local, or robot, reference frame. This class knows
  * nothing about the outside world, it just accepts chassis speeds.
  */
 public class SwerveLocal {
-    private static final double kDtS = .020;
     private static final SwerveModuleState[] states0 = new SwerveModuleState[] {
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
@@ -33,10 +35,11 @@ public class SwerveLocal {
             new SwerveModuleState(0, new Rotation2d(Math.PI / 2))
     };
     private static final SwerveModuleState[] statesX = new SwerveModuleState[] {
+            // note range is [-pi,pi]
             new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
-            new SwerveModuleState(0, new Rotation2d(7 * Math.PI / 4)),
+            new SwerveModuleState(0, new Rotation2d(-1 * Math.PI / 4)),
             new SwerveModuleState(0, new Rotation2d(3 * Math.PI / 4)),
-            new SwerveModuleState(0, new Rotation2d(5 * Math.PI / 4))
+            new SwerveModuleState(0, new Rotation2d(-3 * Math.PI / 4))
     };
 
     private final Telemetry t = Telemetry.get();
@@ -46,7 +49,7 @@ public class SwerveLocal {
     private final SwerveDriveKinematics m_DriveKinematics;
     private final SwerveModuleCollectionInterface m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
-    private final AsymSwerveSetpointGenerator.KinematicLimits limits;
+    private final SwerveKinematicLimits limits;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
@@ -58,14 +61,9 @@ public class SwerveLocal {
         m_speedLimits = speedLimits;
         m_DriveKinematics = driveKinematics;
         m_modules = modules;
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics);
+        limits = new SwerveKinematicLimits(4, 2, 4, 10, 7);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics, limits);
 
-        limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        // TODO: put these magic numbers into config
-        limits.kMaxDriveVelocity = 4;
-        limits.kMaxDriveAcceleration = 2;
-        limits.kMaxDriveDecceleration = 4;
-        limits.kMaxSteeringVelocity = 10;
 
         prevSetpoint = new SwerveSetpoint();
     }
@@ -82,29 +80,33 @@ public class SwerveLocal {
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         t.log(Level.DEBUG, "/swervelocal/desired chassis speed", speeds);
         if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
+            // System.out.println("SETPOINT GENERATOR");
             setChassisSpeedsWithSetpointGenerator(speeds);
         } else {
             setChassisSpeedsNormally(speeds);
+            // System.out.println("NORMAL");
         }
     }
 
-    /** @return true if aligned */
+    /**
+     * @return true if aligned
+     */
     public boolean steerAtRest(ChassisSpeeds speeds) {
+        // this indicates that during the steering the goal is fixed
+        // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState[] swerveModuleStates = m_DriveKinematics.toSwerveModuleStates(speeds);
         for (SwerveModuleState state : swerveModuleStates) {
             state.speedMetersPerSecond = 0;
         }
         setModuleStates(swerveModuleStates);
-        return allAtSetpoint();
-    }
-
-    private boolean allAtSetpoint() {
-        boolean[] atSetpoint = atSetpoint();
-        for (boolean s : atSetpoint) {
-            if (!s)
-                return false;
-        }
-        return true;
+        // previous setpoint should be at rest with the current states
+        prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), swerveModuleStates);
+        m_DriveKinematics.resetHeadings(
+                swerveModuleStates[0].angle,
+                swerveModuleStates[1].angle,
+                swerveModuleStates[2].angle,
+                swerveModuleStates[3].angle);
+        return Util.all(atGoal());
     }
 
     /**
@@ -136,9 +138,23 @@ public class SwerveLocal {
     /**
      * Set the module states without desaturating.
      * You had better know what you're doing if you call this method.
+     * Resets the kinematics headings, which affects what
+     * kinematics.toSwerveModuleStates does when the desired speed is zero.
      */
     public void setRawModuleStates(SwerveModuleState[] targetModuleStates) {
-        m_modules.setDesiredStates(targetModuleStates);
+        m_modules.setRawDesiredStates(targetModuleStates);
+        m_DriveKinematics.resetHeadings(targetModuleStates[0].angle,
+                targetModuleStates[1].angle,
+                targetModuleStates[2].angle,
+                targetModuleStates[3].angle);
+    }
+
+    public SwerveModuleState[] getDesiredStates() {
+        return m_modules.getDesiredStates();
+    }
+
+    public TrapezoidProfile.State[] getSetpoints() {
+        return m_modules.getSetpoint();
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -162,24 +178,51 @@ public class SwerveLocal {
         return m_modules.atSetpoint();
     }
 
+    public boolean[] atGoal() {
+        return m_modules.atGoal();
+    }
+
     public void close() {
         m_modules.close();
+    }
+
+    public void resetSetpoint(SwerveSetpoint setpoint) {
+        prevSetpoint = setpoint;
+    }
+
+    /**
+     * This is for visualization only.
+     */
+    public void periodic() {
+        m_modules.periodic();
     }
 
     ///////////////////////////////////////////////////////////
 
     private void setChassisSpeedsNormally(ChassisSpeeds speeds) {
+        // Informs SwerveDriveKinematics of the module states.
         setModuleStates(m_DriveKinematics.toSwerveModuleStates(speeds));
     }
 
     // TODO: run this twice per cycle using TimedRobot.addPeriodic and a flag.
     private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds speeds) {
+        if (Double.isNaN(speeds.vxMetersPerSecond))
+            throw new IllegalStateException("vx is NaN");
+        if (Double.isNaN(speeds.vyMetersPerSecond))
+            throw new IllegalStateException("vy is NaN");
+        if (Double.isNaN(speeds.omegaRadiansPerSecond))
+            throw new IllegalStateException("omega is NaN");
+
         t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
+        // Informs SwerveDriveKinematics of the module states.
+
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
-                limits,
                 prevSetpoint,
-                speeds,
-                kDtS);
+                speeds);
+        if (Double.isNaN(setpoint.getChassisSpeeds().vxMetersPerSecond))
+            throw new IllegalStateException("vx is NaN");
+        if (Double.isNaN(setpoint.getChassisSpeeds().vyMetersPerSecond))
+            throw new IllegalStateException("vy is NaN");
         t.log(Level.DEBUG, "/swervelocal/setpoint chassis speed", setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;
@@ -188,7 +231,8 @@ public class SwerveLocal {
     private void setModuleStates(SwerveModuleState[] states) {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, m_speedLimits.speedM_S);
         logImpliedChassisSpeeds(states);
-        setRawModuleStates(states);
+        // all the callers of setModuleStates inform kinematics.
+        m_modules.setDesiredStates(states);
     }
 
     /**

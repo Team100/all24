@@ -6,6 +6,9 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
 
+/**
+ * The built-in encoder in Falcon motors.
+ */
 public class FalconDriveEncoder implements Encoder100<Distance> {
     private final Telemetry t = Telemetry.get();
 
@@ -13,10 +16,16 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
     private final double m_distancePerPulse;
     private final String m_name;
 
-    /** @param distancePerTurn in meters */
-    public FalconDriveEncoder(String name,
+    /**
+     * @param name            do not use a leading slash.
+     * @param distancePerTurn in meters
+     */
+    public FalconDriveEncoder(
+            String name,
             FalconDriveMotor motor,
             double distancePerTurn) {
+        if (name.startsWith("/"))
+            throw new IllegalArgumentException();
         this.m_motor = motor;
         this.m_distancePerPulse = distancePerTurn / 2048;
         m_name = String.format("/%s/Falcon Drive Encoder", name);
@@ -43,5 +52,10 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
     @Override
     public void close() {
         //
+    }
+
+    @Override
+    public double getAbsolutePosition() {
+        throw new UnsupportedOperationException();
     }
 }

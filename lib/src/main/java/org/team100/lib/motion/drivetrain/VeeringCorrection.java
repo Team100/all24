@@ -21,14 +21,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * TODO: WPILib supports veering correction now; try their version of it.
  */
 public class VeeringCorrection {
-    public static class Config {
-        /**
-         * Delay in seconds.
-         */
-        public double kVeeringCorrection = 0.15;
-    }
-
-    private final Config m_config = new Config();
+    /**
+     * Delay in seconds.
+     */
+    private static final double kVeeringCorrection = 0.15;
 
     private final DoubleSupplier m_gyroRateRadSNWU;
 
@@ -50,7 +46,7 @@ public class VeeringCorrection {
      * @return future rotation
      */
     public Rotation2d correct(Rotation2d in) {
-        return in.plus(new Rotation2d(m_gyroRateRadSNWU.getAsDouble() * m_config.kVeeringCorrection));
+        return in.plus(new Rotation2d(m_gyroRateRadSNWU.getAsDouble() * kVeeringCorrection));
     }
 
 }

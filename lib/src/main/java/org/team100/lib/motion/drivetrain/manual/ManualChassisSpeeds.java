@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import java.util.function.Supplier;
-
 import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -16,19 +14,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The twist components, x, y, and theta, are mapped directly to the
  * corresponding ChassisSpeeds components (and scaled).
  */
-public class ManualChassisSpeeds implements Supplier<ChassisSpeeds> {
+public class ManualChassisSpeeds {
     private final Telemetry t = Telemetry.get();
-    private final Supplier<Twist2d> m_input;
     private final SpeedLimits m_speedLimits;
 
-    public ManualChassisSpeeds(Supplier<Twist2d> input, SpeedLimits speedLimits) {
-        m_input = input;
+    public ManualChassisSpeeds(SpeedLimits speedLimits) {
         m_speedLimits = speedLimits;
     }
 
-    @Override
-    public ChassisSpeeds get() {
-        Twist2d input = m_input.get();
+    public ChassisSpeeds apply(Twist2d input) {
         ChassisSpeeds speeds = DriveUtil.scaleChassisSpeeds(
                 input,
                 m_speedLimits.speedM_S,

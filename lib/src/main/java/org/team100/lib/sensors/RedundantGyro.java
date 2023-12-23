@@ -1,6 +1,5 @@
 package org.team100.lib.sensors;
 
-import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -11,57 +10,12 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 
-// TODO: figure out why we disabled this mechanism during the 2023 season
+/**
+ * Combine two NavX AHRS to increase reliability.
+ * 
+ * TODO: figure out why we disabled this mechanism during the 2023 season
+ */
 public class RedundantGyro implements RedundantGyroInterface {
-
-    /** For robots without a gyro. */
-    private static class Noop implements RedundantGyroInterface {
-
-        @Override
-        public float getRedundantGyroRateNED() {
-            return 0;
-        }
-
-        @Override
-        public float getRedundantGyroZ() {
-            return 0;
-        }
-
-        @Override
-        public float getRedundantPitch() {
-            return 0;
-        }
-
-        @Override
-        public float getRedundantRoll() {
-            return 0;
-        }
-
-        @Override
-        public float getRedundantYawNED() {
-            return 0;
-        }
-    }
-
-    public static class Factory {
-        private final Identity m_identity;
-
-        public Factory(Identity identity) {
-            m_identity = identity;
-        }
-
-        public RedundantGyroInterface get() {
-            switch (m_identity) {
-                case COMP_BOT:
-                case SWERVE_ONE:
-                case SWERVE_TWO:
-                    return new RedundantGyro();
-                default:
-                    return new Noop();
-            }
-        }
-    }
-
     private final Telemetry t = Telemetry.get();
 
     private final AHRS m_gyro1;

@@ -11,6 +11,9 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
 import edu.wpi.first.math.util.Units;
 
+/**
+ * Various ways to create arm trajectories.
+ */
 public class ArmTrajectories {
     private final TrajectoryConfig m_trajectoryConfig;
 
@@ -80,8 +83,8 @@ public class ArmTrajectories {
                     toPose(end, secondDegree),
                     m_trajectoryConfig);
         } catch (TrajectoryGenerationException e) {
-            e.printStackTrace();
-            return null;
+            System.out.println("WARNING Trajectory Generation Exception");
+            return new Trajectory();
         }
     }
 

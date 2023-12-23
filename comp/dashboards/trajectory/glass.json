@@ -1,0 +1,209 @@
+{
+  "NetworkTables": {
+    "Holonomic3": {
+      "measurement": {
+        "open": true
+      },
+      "open": true
+    },
+    "Rear Right": {
+      "drive velocity servo": {
+        "open": true,
+        "velocity servo": {
+          "open": true
+        }
+      }
+    },
+    "combined": true,
+    "drive": {
+      "simulated_motor": {
+        "open": true
+      }
+    },
+    "field": {
+      "double[]##v_/field/robot": {
+        "open": true
+      },
+      "open": true
+    },
+    "planner": {
+      "current state": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true
+    },
+    "precision": 3,
+    "pursuit_planner": {
+      "current state": {
+        "open": true
+      },
+      "error": {
+        "open": true,
+        "rotation": {
+          "open": true
+        },
+        "translation": {
+          "open": true
+        }
+      },
+      "lookahead state": {
+        "open": true
+      },
+      "lookahead translation": {
+        "open": true
+      },
+      "pursuit speeds": {
+        "open": true
+      },
+      "updated lookahead state": {
+        "open": true
+      }
+    },
+    "ramsete_planner": {
+      "current state": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "error": {
+        "open": true,
+        "translation": {
+          "open": true
+        }
+      },
+      "open": true,
+      "setpoint": {
+        "open": true,
+        "posestate": {
+          "pose": {
+            "rotation": {
+              "open": true
+            }
+          }
+        }
+      }
+    },
+    "retained": {
+      "Holonomic3": {
+        "error": {
+          "open": true
+        },
+        "measurement": {
+          "open": true
+        },
+        "open": true,
+        "setpoint": {
+          "open": true
+        }
+      }
+    },
+    "swerve": {
+      "pose": {
+        "open": true,
+        "rotation": {
+          "open": true
+        },
+        "translation": {
+          "open": true
+        }
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/elevator": "Mechanism2d",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Motion Profile": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/OscillateDirect": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Simple Manual Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopDrive": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopSteering": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseInitialVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "robot": {
+          "selectable": false
+        },
+        "trajectory": {
+          "arrows": false,
+          "color": [
+            255.0,
+            152.10525512695313,
+            0.0,
+            255.0
+          ],
+          "selectable": false,
+          "style": "Line",
+          "weight": 1.0
+        },
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
+  }
+}

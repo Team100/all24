@@ -98,6 +98,10 @@ public class ControlFactory {
             // TODO: make a class for it
             return kNoOperator;
         }
+        // TODO: make a class for simulation keyboard control
+        if (operatorName.contains("Keyboard")) {
+            return new OperatorXboxControl();
+        }
         System.out.println("Unrecognized driver control name: " + operatorHID.getName());
         return kNoOperator;
     }

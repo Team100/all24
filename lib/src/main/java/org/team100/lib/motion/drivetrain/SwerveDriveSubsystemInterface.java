@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.swerve.SwerveSetpoint;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -36,9 +38,17 @@ public interface SwerveDriveSubsystemInterface {
 
     void resetPose(Pose2d robotPose);
 
+    /** The controllers are on the profiles. */
     boolean[] atSetpoint();
 
+    /** The profiles setpoints are at their goals. */
+    boolean[] atGoal();
+
     ChassisSpeeds speeds();
+
+    SwerveModuleState[] moduleStates();
+
+    void resetSetpoint(SwerveSetpoint setpoint);
 
     /** Because Subsystem is now concrete, it needs an accessor. */
     SwerveDriveSubsystem get();

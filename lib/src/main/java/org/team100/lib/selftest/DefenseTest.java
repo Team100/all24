@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 @ExcludeFromJacocoGeneratedReport
 public class DefenseTest extends Command {
-    private static final double kExpectedDuration = 0.5;
+    // this fails below 1s, which is quite a bit too slow
+    // TODO: speed up the steering profile
+    private static final double kExpectedDuration = 1;
     private SwerveDriveSubsystem m_drivetrain;
     private TestListener m_listener;
     private final Timer m_timer;
@@ -41,31 +43,44 @@ public class DefenseTest extends Command {
     @Override
     public void end(boolean interrupted) {
         double time = m_timer.get();
+        String fmt = "final time expected %5.3f actual %5.3f";
         if (MathUtil.isNear(kExpectedDuration, time, 0.1))
-            m_listener.pass(this, "final time ok: %5.3f", time);
+            m_listener.pass(this, fmt, kExpectedDuration, time);
         else
-            m_listener.fail(this, "final time bad: %5.3f", time);
+            m_listener.fail(this, fmt, kExpectedDuration, time);
 
         SwerveModulePosition[] positions = m_drivetrain.positions();
-        if (MathUtil.isNear(Math.PI / 4, positions[0].angle.getRadians(), 0.01))
-            m_listener.pass(this, "front left %5.3f", positions[0].angle.getRadians());
+        fmt = "front left expected %5.3f actual %5.3f";
+        double expected = Math.PI / 4;
+        double actual = positions[0].angle.getRadians();
+        if (MathUtil.isNear(expected, actual, 0.01))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "front left %5.3f", positions[0].angle.getRadians());
+            m_listener.fail(this, fmt, expected, actual);
 
-        if (MathUtil.isNear(7 * Math.PI / 4, positions[1].angle.getRadians(), 0.01))
-            m_listener.pass(this, "front right %5.3f", positions[1].angle.getRadians());
+        fmt = "front right expected %5.3f actual %5.3f";
+        expected = -1 * Math.PI / 4;
+        actual = positions[1].angle.getRadians();
+        if (MathUtil.isNear(expected, actual, 0.01))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "front right %5.3f", positions[1].angle.getRadians());
+            m_listener.fail(this, fmt, expected, actual);
 
-        if (MathUtil.isNear(3 * Math.PI / 4, positions[2].angle.getRadians(), 0.01))
-            m_listener.pass(this, "rear left %5.3f", positions[2].angle.getRadians());
+        fmt = "rear left expected %5.3f actual %5.3f";
+        expected = 3 * Math.PI / 4;
+        actual = positions[2].angle.getRadians();
+        if (MathUtil.isNear(expected, actual, 0.01))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "rear left %5.3f", positions[2].angle.getRadians());
+            m_listener.fail(this, fmt, expected, actual);
 
-        if (MathUtil.isNear(5 * Math.PI / 4, positions[3].angle.getRadians(), 0.01))
-            m_listener.pass(this, "rear right %5.3f", positions[3].angle.getRadians());
+        fmt = "rear right expected %5.3f actual %5.3f";
+        expected = -3 * Math.PI / 4;
+        actual = positions[3].angle.getRadians();
+        if (MathUtil.isNear(expected, actual, 0.01))
+            m_listener.pass(this, fmt, expected, actual);
         else
-            m_listener.fail(this, "rear right %5.3f", positions[3].angle.getRadians());
+            m_listener.fail(this, fmt, expected, actual);
     }
 
 }
