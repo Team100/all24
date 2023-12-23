@@ -27,7 +27,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testVelocity() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 10);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 2, 10, 7);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
 
         // motionless
@@ -57,7 +57,7 @@ class SwerveDriveDynamicsConstraintTest {
      */
     @Test
     void testCurve() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 10);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 2, 10, 7);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
 
         // motionless
@@ -85,7 +85,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testAccel() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 10);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 2, 10, 5);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);

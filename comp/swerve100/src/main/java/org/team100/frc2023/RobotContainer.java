@@ -150,7 +150,7 @@ public class RobotContainer implements Testable {
 
         // TODO replace with SpeedLimits.
         // TODO: fix these limits
-        SwerveKinematicLimits m_kinematicLimits = new SwerveKinematicLimits(4, 2, 13);
+        SwerveKinematicLimits swerveKinematicLimits = new SwerveKinematicLimits(4, 2, 2, 13, 5);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
@@ -248,11 +248,10 @@ public class RobotContainer implements Testable {
         m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics, controller);
         control.circle().whileTrue(m_drawCircle);
 
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
-        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, swerveKinematicLimits);
 
         control.driveWithFancyTrajec().whileTrue(
-                new FancyTrajectory(m_kinematics, m_kinematicLimits, m_drive, planner));
+                new FancyTrajectory(m_kinematics, swerveKinematicLimits, m_drive, planner));
 
         control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
         control.never().whileTrue(new Spin(m_drive, controller));

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
+import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +22,7 @@ class SwerveSetpointGeneratorConstraintTest {
 
     @Test
     void testSpin() {
-        AsymSwerveSetpointGenerator.KinematicLimits l = new AsymSwerveSetpointGenerator.KinematicLimits(4, 2, 5, 10);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(4, 2, 5, 10, 7);
         SwerveSetpointGeneratorConstraint c = new SwerveSetpointGeneratorConstraint(k, l);
 
         double m = c.getMaxVelocity(Pose2dWithMotion.kIdentity);
@@ -50,7 +50,7 @@ class SwerveSetpointGeneratorConstraintTest {
     // enforce centripetal acceleration limit?
     @Test
     void testCurve() {
-        AsymSwerveSetpointGenerator.KinematicLimits l = new AsymSwerveSetpointGenerator.KinematicLimits(4, 2, 5, 10);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(4, 2, 5, 10, 5);
         SwerveSetpointGeneratorConstraint c = new SwerveSetpointGeneratorConstraint(k, l);
 
         double m = c.getMaxVelocity(Pose2dWithMotion.kIdentity);
@@ -78,7 +78,7 @@ class SwerveSetpointGeneratorConstraintTest {
 
     @Test
     void testAccel() {
-        AsymSwerveSetpointGenerator.KinematicLimits l = new AsymSwerveSetpointGenerator.KinematicLimits(4, 2, 5, 10);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(4, 2, 5, 10, 7);
         SwerveSetpointGeneratorConstraint c = new SwerveSetpointGeneratorConstraint(k, l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);

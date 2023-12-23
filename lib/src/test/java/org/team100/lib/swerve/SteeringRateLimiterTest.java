@@ -1,0 +1,79 @@
+package org.team100.lib.swerve;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+
+class SteeringRateLimiterTest {
+    private static final double kDelta = 0.001;
+
+    @Test
+    void testUnconstrained() {
+        SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
+        SteeringRateLimiter c = new SteeringRateLimiter(l);
+
+        SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        };
+        SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        };
+        boolean need_to_steer = true;
+        double[] prev_vx = new double[] { 0 };
+        double[] prev_vy = new double[] { 0 };
+        Rotation2d[] prev_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
+        double[] desired_vx = new double[] { 0 };
+        double[] desired_vy = new double[] { 0 };
+        Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
+        double min_s = 1;
+        List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
+
+        double s = c.enforceSteeringLimit(desiredModuleStates,
+                prevModuleStates, need_to_steer, prev_vx,
+                prev_vy, prev_heading, desired_vx, desired_vy,
+                desired_heading, min_s, overrideSteering);
+
+        assertEquals(1.0, s, kDelta);
+    }
+
+    @Test
+    void testConstrained() {
+        SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
+        SteeringRateLimiter c = new SteeringRateLimiter(l);
+
+        SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
+                new SwerveModuleState(1, GeometryUtil.kRotation90)
+        };
+        SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
+                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        };
+        boolean need_to_steer = true;
+        double[] prev_vx = new double[] { 0 };
+        double[] prev_vy = new double[] { 0 };
+        Rotation2d[] prev_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
+        double[] desired_vx = new double[] { 0 };
+        double[] desired_vy = new double[] { 1 };
+        Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotation90 };
+        double min_s = 1;
+        List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
+
+        double s = c.enforceSteeringLimit(desiredModuleStates,
+                prevModuleStates, need_to_steer, prev_vx,
+                prev_vy, prev_heading, desired_vx, desired_vy,
+                desired_heading, min_s, overrideSteering);
+
+        // s = 0 stops the drive motors
+        assertEquals(0, s, kDelta);
+        assertEquals(1, overrideSteering.size());
+        // limit is 1 radian per second, time step is 0.02 sec, so 0.02 radians
+        assertEquals(0.02, overrideSteering.get(0).get().getRadians(), kDelta);
+    }
+}

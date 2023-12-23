@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
+import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,17 +20,17 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class SwerveSetpointGeneratorConstraint implements TimingConstraint {
     private static final double kDt = 0.02;
     private final SwerveDriveKinematics m_kinematics;
-    private final AsymSwerveSetpointGenerator.KinematicLimits m_limits;
+    private final SwerveKinematicLimits m_limits;
 
     private final AsymSwerveSetpointGenerator setpoint_generator_;
 
     public SwerveSetpointGeneratorConstraint(
             SwerveDriveKinematics kinematics,
-            AsymSwerveSetpointGenerator.KinematicLimits limits) {
+            SwerveKinematicLimits limits) {
         m_kinematics = kinematics;
         m_limits = limits;
 
-        setpoint_generator_ = new AsymSwerveSetpointGenerator(kinematics);
+        setpoint_generator_ = new AsymSwerveSetpointGenerator(kinematics, limits);
     }
 
     @Override
@@ -72,10 +73,8 @@ public class SwerveSetpointGeneratorConstraint implements TimingConstraint {
                 course_local.getSin(),
                 vtheta);
         SwerveSetpoint nextSetpoint = setpoint_generator_.generateSetpoint(
-                m_limits,
                 setpoint,
-                nextSpatialSpeed,
-                kDt);
+                nextSpatialSpeed);
         double nextSetpointSpeed = GeometryUtil.norm(GeometryUtil.toTwist2d(nextSetpoint.getChassisSpeeds()));
         double ratio = nextSetpointSpeed /
                 GeometryUtil.norm(GeometryUtil.toTwist2d(nextSpatialSpeed));
@@ -92,7 +91,7 @@ public class SwerveSetpointGeneratorConstraint implements TimingConstraint {
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocityM_S) {
         return new MinMaxAcceleration(
-                -m_limits.kMaxDriveDecceleration,
+                -m_limits.kMaxDriveDeceleration,
                 m_limits.kMaxDriveAcceleration);
     }
 

@@ -46,7 +46,7 @@ class DriveMotionPlannerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testTrajectory() {

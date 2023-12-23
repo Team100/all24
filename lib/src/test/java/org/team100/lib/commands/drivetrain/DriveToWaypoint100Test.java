@@ -25,7 +25,7 @@ class DriveToWaypoint100Test {
     void testWithPID() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DrivePIDFController(false);
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
@@ -40,7 +40,7 @@ class DriveToWaypoint100Test {
     void testWithPursuit() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DrivePursuitController();
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
@@ -55,7 +55,7 @@ class DriveToWaypoint100Test {
     void testWithRamsete() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DriveRamseteController();
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
@@ -70,7 +70,7 @@ class DriveToWaypoint100Test {
     void testWithFF() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DrivePIDFController(true);
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);

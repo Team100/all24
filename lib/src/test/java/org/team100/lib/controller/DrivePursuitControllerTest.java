@@ -44,7 +44,7 @@ class DrivePursuitControllerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testPursuit() {
@@ -171,7 +171,7 @@ class DrivePursuitControllerTest {
     @Test
     void testPreviewDt() {
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
@@ -231,7 +231,7 @@ class DrivePursuitControllerTest {
     @Test
     void testNearPreviewDt() {
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
