@@ -3,37 +3,40 @@ package org.team100.lib.timing;
 import org.team100.lib.geometry.Pose2dWithMotion;
 
 public interface TimingConstraint {
+    /**
+     * Maximum allowed velocity m/s.
+     */
     double getMaxVelocity(Pose2dWithMotion state);
 
-    MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity);
+    /** 
+     * Minimum and maximum allowed acceleration m/s^2.
+     */
+    MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocityM_S);
 
     class MinMaxAcceleration {
-        protected final double min_acceleration_;
-        protected final double max_acceleration_;
+        public static final MinMaxAcceleration kNoLimits = new MinMaxAcceleration();
 
-        public static MinMaxAcceleration kNoLimits = new MinMaxAcceleration();
+        private final double m_minAccel;
+        private final double m_maxAccel;
 
-        public MinMaxAcceleration() {
-            // No limits.
-            min_acceleration_ = Double.NEGATIVE_INFINITY;
-            max_acceleration_ = Double.POSITIVE_INFINITY;
+        private MinMaxAcceleration() {
+            this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
 
-        public MinMaxAcceleration(double min_acceleration, double max_acceleration) {
-            min_acceleration_ = min_acceleration;
-            max_acceleration_ = max_acceleration;
+        public MinMaxAcceleration(double minAccel, double maxAccel) {
+            if (getMinAccel() > getMaxAccel()) {
+                throw new IllegalArgumentException();
+            }
+            m_minAccel = minAccel;
+            m_maxAccel = maxAccel;
         }
 
-        public double min_acceleration() {
-            return min_acceleration_;
+        public double getMinAccel() {
+            return m_minAccel;
         }
 
-        public double max_acceleration() {
-            return max_acceleration_;
-        }
-
-        public boolean valid() {
-            return min_acceleration() <= max_acceleration();
+        public double getMaxAccel() {
+            return m_maxAccel;
         }
     }
 }

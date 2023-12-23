@@ -25,7 +25,7 @@ class TrajectoryTimeIteratorTest {
     void testPreviewAndAdvance() {
 
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;

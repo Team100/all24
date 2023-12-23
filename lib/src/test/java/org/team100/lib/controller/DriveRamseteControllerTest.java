@@ -40,7 +40,7 @@ class DriveRamseteControllerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testRamsete() {
@@ -118,7 +118,7 @@ class DriveRamseteControllerTest {
             TimedPose path_setpoint = controller.getSetpoint(4).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
-            assertEquals(1.69, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
+            assertEquals(1.69, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(4, path_setpoint.getTimeS(), 0.01);
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
@@ -141,7 +141,7 @@ class DriveRamseteControllerTest {
             TimedPose path_setpoint = controller.getSetpoint(8).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
-            assertEquals(2.22, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
+            assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(8, path_setpoint.getTimeS(), 0.001);
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);

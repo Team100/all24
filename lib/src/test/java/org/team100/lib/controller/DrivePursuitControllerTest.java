@@ -44,7 +44,7 @@ class DrivePursuitControllerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testPursuit() {
@@ -127,7 +127,7 @@ class DrivePursuitControllerTest {
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
-            assertEquals(1.69, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
+            assertEquals(1.69, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(4, path_setpoint.getTimeS(), 0.05);
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
@@ -150,11 +150,11 @@ class DrivePursuitControllerTest {
             // this is more Y than PID because it looks ahead
             assertEquals(-0.15, output.vyMetersPerSecond, 0.05);
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
-           
+
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
-            assertEquals(2.22, path_setpoint.state().getPose().getRotation().getRadians(), 0.01);
+            assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(8, path_setpoint.getTimeS(), 0.05);
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
@@ -171,7 +171,7 @@ class DrivePursuitControllerTest {
     @Test
     void testPreviewDt() {
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
@@ -231,7 +231,7 @@ class DrivePursuitControllerTest {
     @Test
     void testNearPreviewDt() {
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 10);
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;

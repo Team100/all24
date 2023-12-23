@@ -1,24 +1,26 @@
 package org.team100.lib.path;
 
 /**
- * Allows sampling a path by the index of points that make up a path.
+ * Allows sampling a path by index.
  */
 public class PathIndexSampler {
-    private final Path100 trajectory;
+    private final Path100 m_trajectory;
 
     public PathIndexSampler(Path100 trajectory) {
-        this.trajectory = trajectory;
+        m_trajectory = trajectory;
     }
 
     public PathSamplePoint sample(double index) {
-        return trajectory.getInterpolated(index);
+        return m_trajectory.getInterpolated(index);
     }
 
-    public double last_interpolant() {
-        return Math.max(0.0, trajectory.length() - 1);
+    public double getMaxIndex() {
+        if (m_trajectory.isEmpty())
+            return 0.0;
+        return m_trajectory.length() - 1.0;
     }
 
-    public double first_interpolant() {
+    public double getMinIndex() {
         return 0.0;
     }
 }

@@ -8,19 +8,19 @@ import org.team100.lib.geometry.Pose2dWithMotion;
  * There's no timing data here; for that, see TrajectoryPoint.
  */
 public class PathPoint {
-    private final Pose2dWithMotion state_;
-    private final int index_;
+    private final Pose2dWithMotion m_state;
+    private final int m_index;
 
     public PathPoint(final Pose2dWithMotion state, int index) {
-        state_ = state;
-        index_ = index;
+        m_state = state;
+        m_index = index;
     }
 
     public Pose2dWithMotion state() {
-        return state_;
+        return m_state;
     }
 
     public int index() {
-        return index_;
+        return m_index;
     }
 }

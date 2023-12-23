@@ -32,6 +32,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * controllers.
  */
 public class DrivePursuitController implements DriveMotionController {
+    public static final double EPSILON = 1e-6;
     public static final Telemetry t = Telemetry.get();
 
     private static final double defaultCook = 0.5;
@@ -57,10 +58,10 @@ public class DrivePursuitController implements DriveMotionController {
         mCurrentTrajectoryLength = m_iter.trajectory().getLastPoint().state().getTimeS();
 
         for (int i = 0; i < trajectory.trajectory().length(); ++i) {
-            if (trajectory.trajectory().getPoint(i).state().velocityM_S() > Math100.EPSILON) {
+            if (trajectory.trajectory().getPoint(i).state().velocityM_S() > EPSILON) {
                 mIsReversed = false;
                 break;
-            } else if (trajectory.trajectory().getPoint(i).state().velocityM_S() < -Math100.EPSILON) {
+            } else if (trajectory.trajectory().getPoint(i).state().velocityM_S() < -EPSILON) {
                 mIsReversed = true;
                 break;
             }

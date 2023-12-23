@@ -46,14 +46,15 @@ public class FancyTrajectory extends Command {
     public FancyTrajectory(
             SwerveDriveKinematics kinematics,
             SwerveKinematicLimits limits,
-            SwerveDriveSubsystemInterface robotDrive) {
+            SwerveDriveSubsystemInterface robotDrive,
+            TrajectoryPlanner planner            ) {
         // m_kinematics = kinematics;
         // m_limits = limits;
         m_robotDrive = robotDrive;
         // TODO: try the other follower types.
         // TODO: move this constructor out of here
         m_controller = new DrivePIDFController(false);
-        m_planner = new TrajectoryPlanner(kinematics, limits);
+        m_planner = planner;
         SwerveDriveSubsystem swerveDriveSubsystem = m_robotDrive.get();
         if (swerveDriveSubsystem != null) {
             // it's null in tests.

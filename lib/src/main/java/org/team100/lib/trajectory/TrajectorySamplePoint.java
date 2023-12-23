@@ -4,32 +4,34 @@ import org.team100.lib.timing.TimedPose;
 
 /** Represents a sample of a 2d path including heading and a schedule. */
 public class TrajectorySamplePoint {
-    protected final TimedPose state_;
-    protected final int index_floor_;
-    protected final int index_ceil_;
+    private final TimedPose m_state;
+    private final int m_indexFloor;
+    private final int m_indexCeil;
 
     public TrajectorySamplePoint(final TimedPose state, int index_floor, int index_ceil) {
-        state_ = state;
-        index_floor_ = index_floor;
-        index_ceil_ = index_ceil;
+        m_state = state;
+        m_indexFloor = index_floor;
+        m_indexCeil = index_ceil;
     }
 
     public TimedPose state() {
-        return state_;
+        return m_state;
     }
 
-    public int index_floor() {
-        return index_floor_;
+    /** For testing */
+    int getIndexFloor() {
+        return m_indexFloor;
     }
 
-    public int index_ceil() {
-        return index_ceil_;
+    /** For testing */
+    int getIndexCeil() {
+        return m_indexCeil;
     }
 
     @Override
     public String toString() {
-        return "TrajectorySamplePoint [state_=" + state_
-                + ", index_floor_=" + index_floor_
-                + ", index_ceil_=" + index_ceil_ + "]";
+        return "TrajectorySamplePoint [state_=" + m_state
+                + ", index_floor_=" + m_indexFloor
+                + ", index_ceil_=" + m_indexCeil + "]";
     }
 }

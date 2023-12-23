@@ -4,6 +4,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
+import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -21,7 +22,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * nothing about the outside world, it just accepts chassis speeds.
  */
 public class SwerveLocal {
-    private static final double kDtS = 0.020;
     private static final SwerveModuleState[] states0 = new SwerveModuleState[] {
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
@@ -49,7 +49,7 @@ public class SwerveLocal {
     private final SwerveDriveKinematics m_DriveKinematics;
     private final SwerveModuleCollectionInterface m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
-    private final AsymSwerveSetpointGenerator.KinematicLimits limits;
+    private final SwerveKinematicLimits limits;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
@@ -61,14 +61,9 @@ public class SwerveLocal {
         m_speedLimits = speedLimits;
         m_DriveKinematics = driveKinematics;
         m_modules = modules;
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics);
+        limits = new SwerveKinematicLimits(4, 2, 4, 10, 7);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics, limits);
 
-        limits = new AsymSwerveSetpointGenerator.KinematicLimits();
-        // TODO: put these magic numbers into config
-        limits.kMaxDriveVelocity = 4;
-        limits.kMaxDriveAcceleration = 2;
-        limits.kMaxDriveDecceleration = 4;
-        limits.kMaxSteeringVelocity = 10;
 
         prevSetpoint = new SwerveSetpoint();
     }
@@ -222,10 +217,8 @@ public class SwerveLocal {
         // Informs SwerveDriveKinematics of the module states.
 
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
-                limits,
                 prevSetpoint,
-                speeds,
-                kDtS);
+                speeds);
         if (Double.isNaN(setpoint.getChassisSpeeds().vxMetersPerSecond))
             throw new IllegalStateException("vx is NaN");
         if (Double.isNaN(setpoint.getChassisSpeeds().vyMetersPerSecond))

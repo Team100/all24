@@ -46,7 +46,7 @@ class DriveMotionPlannerTest {
             // Back right
             new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 13);
+    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testTrajectory() {
@@ -66,14 +66,14 @@ class DriveMotionPlannerTest {
 
         Path100 traj = new Path100();
         Assertions.assertTrue(traj.isEmpty());
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).first_interpolant(), 0.2);
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).last_interpolant(), 0.2);
+        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
+        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMaxIndex(), 0.2);
         Assertions.assertEquals(0, traj.length());
 
         // Set states at construction time.
         traj = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(waypoints, headings, 2, 0.25, 0.1);
         Assertions.assertFalse(traj.isEmpty());
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).first_interpolant(), 0.2);
+        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
         // Assertions.assertEquals(3.0, traj.getIndexView().last_interpolant(), 0.2);
         // Assertions.assertEquals(3, traj.length());
 
