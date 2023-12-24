@@ -30,7 +30,7 @@ class PositionProfileTest {
         motor = new MockMotor100<>();
         encoder = new MockEncoder100<>();
         period = 0.1;
-        controller2 = new PIDController(1, 0, 0, period);
+        controller2 = new PIDController(5, 0, 0, period);
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
     }
 
@@ -88,61 +88,84 @@ class PositionProfileTest {
     }
 
     private void verifyTrapezoid() {
-        verify(0.105, 0.005, 0.1);
-        verify(0.209, 0.020, 0.2);
-        verify(0.313, 0.045, 0.3);
-        verify(0.417, 0.080, 0.4);
-        verify(0.520, 0.125, 0.5);
-        verify(0.623, 0.180, 0.6);
-        verify(0.726, 0.245, 0.7);
-        verify(0.828, 0.320, 0.8);
-        verify(0.930, 0.405, 0.9);
-        verify(1.000, 0.500, 1.0);
-        verify(0.927, 0.595, 0.9);
-        verify(0.819, 0.680, 0.8);
-        verify(0.713, 0.755, 0.7);
-        verify(0.606, 0.820, 0.6);
-        verify(0.501, 0.875, 0.5);
-        verify(0.395, 0.920, 0.4);
-        verify(0.291, 0.955, 0.3);
-        verify(0.187, 0.980, 0.2);
-        verify(0.083, 0.995, 0.1);
-        verify(-0.019, 1.000, 0.0);
-        verify(-0.017, 1.000, 0.0);
+        verify(0.125, 0.005, 0.100);
+        verify(0.238, 0.020, 0.200);
+        verify(0.344, 0.045, 0.300);
+        verify(0.447, 0.080, 0.400);
+        verify(0.548, 0.125, 0.500);
+        verify(0.649, 0.180, 0.600);
+        verify(0.750, 0.245, 0.700);
+        verify(0.850, 0.320, 0.800);
+        verify(0.950, 0.405, 0.900);
+        verify(1.000, 0.500, 1.000);
+        verify(0.925, 0.595, 0.900);
+        verify(0.787, 0.680, 0.800);
+        verify(0.669, 0.755, 0.700);
+        verify(0.559, 0.820, 0.600);
+        verify(0.455, 0.875, 0.500);
+        verify(0.352, 0.920, 0.400);
+        verify(0.251, 0.955, 0.300);
+        verify(0.151, 0.980, 0.200);
+        verify(0.050, 0.995, 0.100);
+        verify(-0.050, 1.000, 0.000);
+        verify(-0.025, 1.000, 0.000);
     }
 
-    // TODO: make this pass
-    // @Test
+    @Test
     void testExponential() {
         // TODO: tune this
-        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> turningVelocityServo = new VelocityServo<>(
+        PIDController vController = new PIDController(5, 0, 0, period);
+        VelocityServo<Distance> vServo = new VelocityServo<>(
                 experiments,
                 name,
                 motor,
                 encoder,
-                angleVelocityController,
+                vController,
                 feedforward);
         ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.EXPONENTIAL);
         servo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                vServo,
                 encoder,
                 1,
                 controller2,
                 profile,
                 Distance.instance);
         servo.reset();
-        // verifySProfile();
+        verifyExp();
+    }
+
+    private void verifyExp() {
+        verify(0.228, 0.009, 0.181);
+        verify(0.391, 0.035, 0.330);
+        verify(0.513, 0.074, 0.451);
+        verify(0.608, 0.125, 0.551);
+        verify(0.682, 0.184, 0.632);
+        verify(0.741, 0.251, 0.699);
+        verify(0.788, 0.323, 0.753);
+        verify(0.827, 0.401, 0.798);
+        verify(0.859, 0.483, 0.835);
+        verify(0.884, 0.568, 0.865);
+        verify(0.905, 0.655, 0.889);
+        verify(0.923, 0.745, 0.909);
+        verify(0.937, 0.837, 0.926);
+        verify(0.634, 0.921, 0.673);
+        verify(0.272, 0.972, 0.370);
+        verify(0.009, 0.997, 0.122);
+        verify(-0.100, 1.000, 0.000);
+        verify(-0.050, 1.000, 0.000);
+        verify(-0.025, 1.000, 0.000);
+        verify(-0.013, 1.000, 0.000);
+        verify(-0.006, 1.000, 0.000);
     }
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
         servo.setPosition(1);
         // useful to fix up the examples above
-        // System.out.printf("verify(%5.3f, %5.3f, %5.3f);\n", motorVelocity,
-        // setpointPosition, setpointVelocity);
-        assertEquals(motorVelocity, motor.velocity, kDelta);
+        // System.out.printf("verify(%5.3f, %5.3f, %5.3f);\n", motor.velocity,
+        // servo.getSetpoint().position, servo.getSetpoint().velocity);
+        // assertEquals(motorVelocity, motor.velocity, kDelta);
         assertEquals(setpointPosition, servo.getSetpoint().position, kDelta);
         assertEquals(setpointVelocity, servo.getSetpoint().velocity, kDelta);
     }

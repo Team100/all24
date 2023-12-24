@@ -81,9 +81,6 @@ public class SteeringRateLimiter {
                 continue;
             }
 
-            // System.out.println("desired heading " + desired_heading[i]);
-
-            // TODO(add range reduction trick)
             double s = SwerveUtil.findSteeringMaxS(
                     prev_vx[i],
                     prev_vy[i],
@@ -94,7 +91,6 @@ public class SteeringRateLimiter {
                     max_theta_step,
                     kMaxIterations);
             min_s = Math.min(min_s, s);
-            // System.out.println("min s " + min_s);
         }
         return min_s;
     }
