@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 class SwerveUtilTest {
     private static final double kDelta = 0.001;
@@ -129,7 +130,7 @@ class SwerveUtilTest {
     @Test
     void testGetMaxVelStep() {
         // large difference in accel and decel so we can see it
-        SwerveKinodynamics l = new SwerveKinodynamics(1,1,1,1,4, 1, 10, 5, 7);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.highAccelLowDecel();
         // say this is the start of the path from (1,0) to (0,1),
         boolean isAccel = SwerveUtil.getIsAccel(1, 0, 0, 1);
         assertTrue(isAccel);
@@ -141,7 +142,7 @@ class SwerveUtilTest {
     @Test
     void testGetMaxVelStep2() {
         // large difference in accel and decel so we can see it
-        SwerveKinodynamics l = new SwerveKinodynamics(1,1,1,1,4, 1, 10, 5, 7);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.highAccelLowDecel();
         // say this is the start of the path from (1,0) to (0,1),
         boolean isAccel = SwerveUtil.getIsAccel2(1, 0, 0, 1);
         assertFalse(isAccel);

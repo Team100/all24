@@ -3,8 +3,10 @@ package org.team100.lib.timing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
@@ -23,7 +25,7 @@ class SwerveDriveDynamicsConstraintTest {
     
     @Test
     void testVelocity() {
-        SwerveKinodynamics l = new SwerveKinodynamics(1,1,1,1,maxV, 2, 2, 10, 7);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
 
         // motionless
@@ -49,7 +51,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testAccel() {
-        SwerveKinodynamics l = new SwerveKinodynamics(1,1,1,1,maxV, 2, 3, 10, 5);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);

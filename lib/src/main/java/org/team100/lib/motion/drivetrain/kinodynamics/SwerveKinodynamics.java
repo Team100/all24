@@ -7,21 +7,27 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * 
  * Includes speed limits, dynamic constraints, and kinematics.
  * 
- * Motors are motors are better at slowing down than speeding up, so drive accel and decel are included separately.
+ * Motors are motors are better at slowing down than speeding up, so drive accel
+ * and decel are included separately.
  * 
  * The capsize limit is also a separate acceleration.
  * 
  * TODO: calculate angular accel/speed based on wheelbase.
  * 
- *   TODO make this center of gravity height instead, use wheelbase and track and gravity to produce *capsize* accel limit, sincei t applies in line not just cross track
+ * TODO make this center of gravity height instead, use wheelbase and track and
+ * gravity to produce *capsize* accel limit, sincei t applies in line not just
+ * cross track
  * 
- *  TODO make a drvedynamics class that also includes kinematics and whelbase and the other speedlimits thing
+ * TODO make a drvedynamics class that also includes kinematics and whelbase and
+ * the other speedlimits thing
  */
 public class SwerveKinodynamics {
 
     private final double m_maxSpeedM_S;
     private final double m_maxAccelM_S2;
+    // TODO: derive this from dimensions
     private final double m_maxAngleSpeedRad_S;
+    // TODO: derive this from mass and dimensions
     private final double m_maxAngleAccelRad_S2;
 
     // TODO: dedupe these
@@ -34,9 +40,8 @@ public class SwerveKinodynamics {
 
     // TODO: add show mode here as a multiplier.
 
-
     /** Use the factory */
-    public SwerveKinodynamics(
+    SwerveKinodynamics(
             double maxSpeedM_S,
             double maxAccelM_S2,
             double maxAngleSpeedRad_S,
@@ -47,8 +52,8 @@ public class SwerveKinodynamics {
             double maxDriveDeceleration,
             double maxSteeringVelocity,
             double maxCapsizeAccel
-            
-            ) {
+
+    ) {
         m_maxSpeedM_S = maxSpeedM_S;
         m_maxAccelM_S2 = maxAccelM_S2;
         m_maxAngleSpeedRad_S = maxAngleSpeedRad_S;
@@ -108,6 +113,5 @@ public class SwerveKinodynamics {
     public double getMaxCapsizeAccel() {
         return m_MaxCapsizeAccel;
     }
-
 
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
@@ -28,7 +29,7 @@ class TrajectoryTimeIteratorTest {
     void testPreviewAndAdvance() {
 
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
-        SwerveKinodynamics limits = new SwerveKinodynamics(1,1,1,1,4, 2, 2, 10, 7);
+        SwerveKinodynamics limits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;

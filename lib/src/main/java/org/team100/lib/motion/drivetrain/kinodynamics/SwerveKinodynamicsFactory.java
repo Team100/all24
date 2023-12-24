@@ -20,14 +20,14 @@ public class SwerveKinodynamicsFactory {
         switch (identity) {
             case COMP_BOT:
                 if (showMode)
-                    return new SwerveKinodynamics(5, 10, 1, 1, 4, 2, 2, 13, 5);
-                return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 2, 13, 5);
+                    return new SwerveKinodynamics(5, 10, 1, 1, 4, 2, 3, 13, 5);
+                return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 3, 13, 5);
             case SWERVE_TWO:
                 return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 2, 13, 5);
             case SWERVE_ONE:
                 return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 2, 13, 5);
             case BLANK:
-                return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 2, 13, 5);
+                return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 3, 13, 5);
             case CAMERA_DOLLY:
                 return new SwerveKinodynamics(5, 10, 5, 5, 4, 2, 2, 13, 5);
             default:
@@ -62,6 +62,11 @@ public class SwerveKinodynamicsFactory {
 
     public static SwerveKinodynamics limiting() {
         return new SwerveKinodynamics(1,1,1,1,        5, 10, 10, 5, 7);
+    }
+
+    public static SwerveKinodynamics highAccelLowDecel() {
+return new SwerveKinodynamics(1,1,1,1,4, 1, 10, 5, 7);
+
 
     }
 
