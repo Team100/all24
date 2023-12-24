@@ -7,7 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +24,7 @@ class RotateTest {
         MockSwerveDriveSubsystem swerveDriveSubsystem = new MockSwerveDriveSubsystem();
         swerveDriveSubsystem.pose = GeometryUtil.kPoseZero;
         MockHeading heading = new MockHeading();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         double targetAngle = Math.PI / 2;
 
 

@@ -2,9 +2,9 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -28,7 +28,7 @@ public class Rotate extends Command {
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final HeadingInterface m_heading;
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_speedLimits;
     private final Timer m_timer;
     private final TrapezoidProfile.State m_goalState;
     private final HolonomicDriveController3 m_controller;
@@ -40,7 +40,7 @@ public class Rotate extends Command {
     public Rotate(
             SwerveDriveSubsystemInterface drivetrain,
             HeadingInterface heading,
-            SpeedLimits speedLimits,
+            SwerveKinodynamics speedLimits,
             double targetAngleRadians) {
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
@@ -63,8 +63,8 @@ public class Rotate extends Command {
             m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                m_speedLimits.angleSpeedRad_S,
-                m_speedLimits.angleAccelRad_S2);
+                m_speedLimits.getMaxAngleSpeedRad_S(),
+                m_speedLimits.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
         m_timer.restart();
         prevTime = 0;

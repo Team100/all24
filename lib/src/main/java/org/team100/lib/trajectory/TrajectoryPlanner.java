@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.SwerveDriveDynamicsConstraint;
 import org.team100.lib.timing.TimingConstraint;
@@ -26,11 +26,11 @@ public class TrajectoryPlanner {
     private static final double kMaxCentripetalAccel = 10.0;// 1.524; // m/s^2
 
     private final SwerveDriveKinematics m_kinematics;
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
     public TrajectoryPlanner(
             SwerveDriveKinematics kinematics,
-            SwerveKinematicLimits limits) {
+            SwerveKinodynamics limits) {
         m_kinematics = kinematics;
         m_limits = limits;
     }

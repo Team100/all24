@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -35,16 +36,16 @@ public class AsymSwerveSetpointGenerator {
     private static final Telemetry t = Telemetry.get();
 
     private final SwerveDriveKinematics mKinematics;
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
-    private final CentripetalAccelerationLimiter m_centripetalLimiter;
+    private final CapsizeAccelerationLimiter m_centripetalLimiter;
     private final SteeringRateLimiter m_steeringRateLimiter;
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
 
-    public AsymSwerveSetpointGenerator(SwerveDriveKinematics kinematics, SwerveKinematicLimits limits) {
+    public AsymSwerveSetpointGenerator(SwerveDriveKinematics kinematics, SwerveKinodynamics limits) {
         mKinematics = kinematics;
         m_limits = limits;
-        m_centripetalLimiter = new CentripetalAccelerationLimiter(limits);
+        m_centripetalLimiter = new CapsizeAccelerationLimiter(limits);
         m_steeringRateLimiter = new SteeringRateLimiter(limits);
         m_DriveAccelerationLimiter = new DriveAccelerationLimiter(limits);
     }
@@ -198,8 +199,8 @@ public class AsymSwerveSetpointGenerator {
     private ChassisSpeeds desaturate(
             ChassisSpeeds desiredState,
             SwerveModuleState[] desiredModuleStates) {
-        if (m_limits.kMaxDriveVelocity > 0.0) {
-            SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.kMaxDriveVelocity);
+        if (m_limits.getMaxDriveVelocity() > 0.0) {
+            SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.getMaxDriveVelocity());
             desiredState = mKinematics.toChassisSpeeds(desiredModuleStates);
         }
         return desiredState;

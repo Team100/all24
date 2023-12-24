@@ -8,7 +8,8 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
 
@@ -27,7 +28,7 @@ class ManualWithHeadingTest {
     @Test
     void testModeSwitching() {
         HeadingInterface heading = new MockHeading();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -61,7 +62,7 @@ class ManualWithHeadingTest {
     @Test
     void testNotSnapMode() {
         HeadingInterface heading = new MockHeading();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -101,7 +102,7 @@ class ManualWithHeadingTest {
     @Test
     void testSnapMode() {
         HeadingInterface heading = new MockHeading();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
@@ -190,7 +191,7 @@ class ManualWithHeadingTest {
     @Test
     void testSnapHeld() {
         HeadingInterface heading = new MockHeading();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);

@@ -46,8 +46,6 @@ import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
-import org.team100.lib.motion.drivetrain.SpeedLimitsFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveModuleCollectionFactory;
@@ -56,12 +54,13 @@ import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.selftest.Testable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
@@ -146,11 +145,7 @@ public class RobotContainer implements Testable {
 
         m_heading = HeadingFactory.get(identity, m_kinematics, m_modules);
 
-        SpeedLimits speedLimits = SpeedLimitsFactory.get(identity, SHOW_MODE);
-
-        // TODO replace with SpeedLimits.
-        // TODO: fix these limits
-        SwerveKinematicLimits swerveKinematicLimits = new SwerveKinematicLimits(4, 2, 2, 13, 5);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.get(identity, SHOW_MODE);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
@@ -248,7 +243,7 @@ public class RobotContainer implements Testable {
         m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics, controller);
         control.circle().whileTrue(m_drawCircle);
 
-        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, swerveKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, speedLimits);
 
         control.driveWithFancyTrajec().whileTrue(
                 new FancyTrajectory(m_drive, planner));

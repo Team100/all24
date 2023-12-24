@@ -3,8 +3,8 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -53,7 +53,7 @@ public class DriveManually extends Command {
             Supplier<Twist2d> twistSupplier,
             SwerveDriveSubsystemInterface robotDrive,
             HeadingInterface heading,
-            SpeedLimits speedLimits,
+            SwerveKinodynamics speedLimits,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController,
             Supplier<Translation2d> target,

@@ -6,6 +6,8 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -37,7 +39,7 @@ class SwerveDriveSubsystemTest {
 
         FrameTransform frameTransform = new FrameTransform();
         MockExperiments experiments = new MockExperiments();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         SwerveModuleCollectionInterface modules = new NullSwerveModuleCollection();
 
         SwerveLocal swerveLocal = new SwerveLocal(experiments, speedLimits, kinematics, modules);

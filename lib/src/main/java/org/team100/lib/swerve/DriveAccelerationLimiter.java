@@ -1,5 +1,7 @@
 package org.team100.lib.swerve;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
@@ -8,9 +10,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class DriveAccelerationLimiter {
     private static final int kMaxIterations = 10;
 
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
-    public DriveAccelerationLimiter(SwerveKinematicLimits limits) {
+    public DriveAccelerationLimiter(SwerveKinodynamics limits) {
         m_limits = limits;
     }
 

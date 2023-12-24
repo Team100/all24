@@ -7,8 +7,9 @@ import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +23,7 @@ class DriveToWaypoint100Test {
     void testWithPID() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DrivePIDFController(false);
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
@@ -37,7 +38,7 @@ class DriveToWaypoint100Test {
     void testWithPursuit() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DrivePursuitController();
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
@@ -52,7 +53,7 @@ class DriveToWaypoint100Test {
     void testWithRamsete() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DriveRamseteController();
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
@@ -67,7 +68,7 @@ class DriveToWaypoint100Test {
     void testWithFF() {
         Pose2d goal = GeometryUtil.kPoseZero;
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveKinematicLimits limits = new SwerveKinematicLimits(4, 2, 2, 10, 7);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, limits);
         DriveMotionController controller = new DrivePIDFController(true);
         DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);

@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
@@ -27,7 +29,7 @@ class DriveFeedforwardControllerTest {
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
     private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
+    private static final SwerveKinodynamics kSmoothKinematicLimits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
 
     @Test
     void testFeedforwardOnly() {

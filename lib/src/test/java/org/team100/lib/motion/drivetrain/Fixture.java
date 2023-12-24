@@ -6,6 +6,8 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
 
@@ -27,7 +29,7 @@ public class Fixture {
     public SwerveDrivePoseEstimator poseEstimator;
     public VeeringCorrection veering;
     public FrameTransform m_frameTransform;
-    public SpeedLimits speedLimits;
+    public SwerveKinodynamics speedLimits;
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
 
@@ -55,7 +57,7 @@ public class Fixture {
 
         m_frameTransform = new FrameTransform(veering);
 
-        speedLimits = new SpeedLimits(1, 1, 1, 1);
+        speedLimits = SwerveKinodynamicsFactory.forTest();
         swerveLocal = new SwerveLocal(
                 experiments,
                 speedLimits,

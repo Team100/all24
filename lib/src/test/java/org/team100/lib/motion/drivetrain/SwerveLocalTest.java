@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,7 +20,7 @@ class SwerveLocalTest {
     @Test
     void testSimple() {
         Experiments experiments = new Experiments(Identity.BLANK);
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.2, 0.2);
         MockSwerveModuleCollection modules = new MockSwerveModuleCollection();
         SwerveLocal local = new SwerveLocal(experiments, speedLimits, kinematics, modules);

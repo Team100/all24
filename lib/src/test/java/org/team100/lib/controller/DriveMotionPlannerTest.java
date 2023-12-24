@@ -8,12 +8,14 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
@@ -35,8 +37,9 @@ class DriveMotionPlannerTest {
     private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(
             0.52705, 0.52705);
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
-
+    private static final SwerveKinodynamics kSmoothKinematicLimits = 
+      SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+      
     @Test
     void testTrajectory() {
         List<Pose2d> waypoints = new ArrayList<>();
@@ -93,7 +96,7 @@ class DriveMotionPlannerTest {
     @Test
     void testAllTrajectories() {
         SwerveDriveKinematics kinematics = kKinematics;
-        SwerveKinematicLimits limits = kSmoothKinematicLimits;
+        SwerveKinodynamics limits = kSmoothKinematicLimits;
         DrivePIDFController controller = new DrivePIDFController(false);
         TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);

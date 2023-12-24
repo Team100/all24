@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -19,9 +20,9 @@ public class SteeringRateLimiter {
     private static final double kDtSec = 0.02;
     private static final int kMaxIterations = 10;
 
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
-    public SteeringRateLimiter(SwerveKinematicLimits limits) {
+    public SteeringRateLimiter(SwerveKinodynamics limits) {
         m_limits = limits;
     }
 
@@ -38,7 +39,7 @@ public class SteeringRateLimiter {
             double min_s,
             List<Optional<Rotation2d>> overrideSteering) {
 
-        final double max_theta_step = kDtSec * m_limits.kMaxSteeringVelocity;
+        final double max_theta_step = kDtSec * m_limits.getMaxSteeringVelocity();
         for (int i = 0; i < prevModuleStates.length; ++i) {
             if (!need_to_steer) {
                 overrideSteering.add(Optional.of(prevModuleStates[i].angle));

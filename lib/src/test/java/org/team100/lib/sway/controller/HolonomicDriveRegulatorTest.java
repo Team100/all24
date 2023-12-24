@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.SwerveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -38,11 +40,12 @@ class HolonomicDriveRegulatorTest {
         final double kDtSec = 0.02;
         Pose2d startingPose = GeometryUtil.kPoseZero;
         Pose2d goalPose = new Pose2d(1, 0, GeometryUtil.kRotationZero);
-        SpeedLimits speedLimits = new SpeedLimits(5, 2, 2, 2);
+        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
         Pose2d currentPose = startingPose;
         Twist2d currentTwist = new Twist2d(); // start at rest
         double time = 0;
-        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(speedLimits.speedM_S, speedLimits.accelM_S2);
+        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
+            speedLimits.getMaxSpeedM_S(), speedLimits.getMaxAccelM_S2());
         TrapezoidProfile profileX = new TrapezoidProfile(c);
         TrapezoidProfile profileY = new TrapezoidProfile(c);
         TrapezoidProfile profileTheta = new TrapezoidProfile(c);
@@ -51,7 +54,7 @@ class HolonomicDriveRegulatorTest {
                 new TrapezoidProfile.State(goalPose.getX(), 0),
                 new TrapezoidProfile.State(startingPose.getX(), 0));
         double duration = Math.max(profileX.totalTime(), Math.max(profileY.totalTime(), profileTheta.totalTime()));
-        assertEquals(1.414, duration, kDelta);
+        assertEquals(2, duration, kDelta);
 
         SwerveState desiredState = new SwerveState(new State100(0, 0, 0),
                 new State100(0, 0, 0),

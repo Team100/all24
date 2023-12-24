@@ -3,8 +3,8 @@ package org.team100.lib.motion.drivetrain;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -45,24 +45,22 @@ public class SwerveLocal {
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_speedLimits;
     private final SwerveDriveKinematics m_DriveKinematics;
     private final SwerveModuleCollectionInterface m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
-    private final SwerveKinematicLimits limits;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
             Experiments experiments,
-            SpeedLimits speedLimits,
+            SwerveKinodynamics speedLimits,
             SwerveDriveKinematics driveKinematics,
             SwerveModuleCollectionInterface modules) {
         m_experiments = experiments;
         m_speedLimits = speedLimits;
         m_DriveKinematics = driveKinematics;
         m_modules = modules;
-        limits = new SwerveKinematicLimits(4, 2, 4, 10, 7);
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics, limits);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics, m_speedLimits);
 
 
         prevSetpoint = new SwerveSetpoint();
@@ -229,7 +227,7 @@ public class SwerveLocal {
     }
 
     private void setModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, m_speedLimits.speedM_S);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, m_speedLimits.getMaxSpeedM_S());
         logImpliedChassisSpeeds(states);
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);

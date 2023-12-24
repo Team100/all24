@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.swerve.SwerveKinematicLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -18,9 +18,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  */
 public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     private final SwerveDriveKinematics m_kinematics;
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
-    public SwerveDriveDynamicsConstraint(SwerveDriveKinematics kinematics, SwerveKinematicLimits limits) {
+    public SwerveDriveDynamicsConstraint(SwerveDriveKinematics kinematics, SwerveKinodynamics limits) {
         m_kinematics = kinematics;
         m_limits = limits;
     }
@@ -54,7 +54,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         SwerveModuleState[] module_states = m_kinematics.toSwerveModuleStates(chassis_speeds);
         double max_vel = Double.POSITIVE_INFINITY;
         for (var module : module_states) {
-            max_vel = Math.min(max_vel, m_limits.kMaxDriveVelocity / Math.abs(module.speedMetersPerSecond));
+            max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocity() / Math.abs(module.speedMetersPerSecond));
         }
         return max_vel;
     }
@@ -65,7 +65,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return new MinMaxAcceleration(
-                -m_limits.kMaxDriveDeceleration,
-                m_limits.kMaxDriveAcceleration);
+                -m_limits.getMaxDriveDeceleration(),
+                m_limits.getMaxDriveAcceleration());
     }
 }

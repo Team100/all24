@@ -3,15 +3,17 @@ package org.team100.lib.swerve;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
-class CentripetalAccelerationLimiterTest {
+class CapsizeAccelerationLimiterTest {
     private static final double kDelta = 0.001;
 
     /** zero delta v => no constraint */
     @Test
     void testUnconstrained() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
-        CentripetalAccelerationLimiter c = new CentripetalAccelerationLimiter(l);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
+        CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter(l);
         double s = c.enforceCentripetalLimit(0, 0, 1);
         assertEquals(1, s, kDelta);
     }
@@ -22,8 +24,8 @@ class CentripetalAccelerationLimiterTest {
      */
     @Test
     void testConstrained() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
-        CentripetalAccelerationLimiter c = new CentripetalAccelerationLimiter(l);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
+        CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter(l);
         double s = c.enforceCentripetalLimit(-1, 1, 1);
         assertEquals(0.014, s, kDelta);
     }

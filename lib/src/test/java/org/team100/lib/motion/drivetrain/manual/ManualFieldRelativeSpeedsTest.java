@@ -3,7 +3,8 @@ package org.team100.lib.motion.drivetrain.manual;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 import edu.wpi.first.math.geometry.Twist2d;
 
@@ -12,7 +13,7 @@ public class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistZero() {
-        SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(limits);
         Twist2d input = new Twist2d();
         Twist2d twist = manual.apply(input);
@@ -23,7 +24,7 @@ public class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistNonzero() {
-        SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(limits);
         Twist2d input = new Twist2d(1, 2, 3);
         Twist2d twist = manual.apply(input);

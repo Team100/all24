@@ -3,7 +3,7 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -32,7 +32,7 @@ public class ManualWithTargetLock {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     private final Telemetry t = Telemetry.get();
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_speedLimits;
 
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
@@ -44,7 +44,7 @@ public class ManualWithTargetLock {
     Pose2d m_prevPose;
 
     public ManualWithTargetLock(
-            SpeedLimits speedLimits,
+            SwerveKinodynamics speedLimits,
             Supplier<Translation2d> target,
             PIDController thetaController,
             BooleanSupplier trigger) {
@@ -53,7 +53,8 @@ public class ManualWithTargetLock {
         m_thetaController = thetaController;
         m_trigger = trigger;
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                speedLimits.angleSpeedRad_S, speedLimits.angleAccelRad_S2);
+                speedLimits.getMaxAngleSpeedRad_S(),
+                speedLimits.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
     }
 
@@ -85,7 +86,10 @@ public class ManualWithTargetLock {
                 m_setpoint);
 
         // this is user input
-        Twist2d twistM_S = DriveUtil.scale(twist1_1, m_speedLimits.speedM_S, m_speedLimits.angleSpeedRad_S);
+        Twist2d twistM_S = DriveUtil.scale(
+                twist1_1,
+                m_speedLimits.getMaxSpeedM_S(),
+                m_speedLimits.getMaxAngleSpeedRad_S());
 
         double thetaFF = m_setpoint.velocity;
 
@@ -93,8 +97,8 @@ public class ManualWithTargetLock {
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB,
-                -m_speedLimits.angleSpeedRad_S,
-                m_speedLimits.angleSpeedRad_S);
+                -m_speedLimits.getMaxAngleSpeedRad_S(),
+                m_speedLimits.getMaxAngleSpeedRad_S());
         Twist2d twistWithLockM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
         t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.position);

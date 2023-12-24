@@ -5,9 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 class SwerveUtilTest {
     private static final double kDelta = 0.001;
+
+    @Test
+    void testFindDriveMaxS() {
+        double x_0 = -1;
+        double y_0 = 0;
+        double f_0 = 1; // abs speed
+        double x_1 = 1;
+        double y_1 = 0;
+        double f_1 = 1;
+        double max_deviation = 0.1;
+        int max_iterations = 1000;
+
+        // since f0 = f1, there's nothing to do.
+        double s = SwerveUtil.findDriveMaxS(
+                x_0, y_0, f_0,
+                x_1, y_1, f_1,
+                max_deviation, max_iterations);
+
+        assertEquals(1, s, kDelta);
+    }
 
     @Test
     void testFindDriveMaxS2() {
@@ -108,7 +129,7 @@ class SwerveUtilTest {
     @Test
     void testGetMaxVelStep() {
         // large difference in accel and decel so we can see it
-        SwerveKinematicLimits l = new SwerveKinematicLimits(4, 1, 10, 5, 7);
+        SwerveKinodynamics l = new SwerveKinodynamics(1,1,1,1,4, 1, 10, 5, 7);
         // say this is the start of the path from (1,0) to (0,1),
         boolean isAccel = SwerveUtil.getIsAccel(1, 0, 0, 1);
         assertTrue(isAccel);
@@ -120,7 +141,7 @@ class SwerveUtilTest {
     @Test
     void testGetMaxVelStep2() {
         // large difference in accel and decel so we can see it
-        SwerveKinematicLimits l = new SwerveKinematicLimits(4, 1, 10, 5, 7);
+        SwerveKinodynamics l = new SwerveKinodynamics(1,1,1,1,4, 1, 10, 5, 7);
         // say this is the start of the path from (1,0) to (0,1),
         boolean isAccel = SwerveUtil.getIsAccel2(1, 0, 0, 1);
         assertFalse(isAccel);
@@ -136,4 +157,6 @@ class SwerveUtilTest {
         assertEquals(0.02, step, kDelta);
 
     }
+
+
 }

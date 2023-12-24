@@ -140,24 +140,6 @@ class Math100Test {
         assertEquals(0.091, s, kDelta);
     }
 
-    @Test
-    void testFindDriveMaxS() {
-        double x_0 = -1;
-        double y_0 = 0;
-        double f_0 = 1; // abs speed
-        double x_1 = 1;
-        double y_1 = 0;
-        double f_1 = 1;
-        double max_deviation = 0.1;
-        int max_iterations = 1000;
 
-        // since f0 = f1, there's nothing to do.
-        double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
-                max_deviation, max_iterations);
-
-        assertEquals(1, s, kDelta);
-    }
 
 }
