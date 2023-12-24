@@ -1,6 +1,5 @@
 package org.team100.lib.motor.turning;
 
-import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -17,19 +16,17 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
  * Swerve steering motor using TalonSRX.
  */
 public class CANTurningMotor implements Motor100<Angle> {
-    private static final double m_gearRatio = 355 / 6;
+    private static final double m_gearRatio = 355.0 / 6;
     private static final double ticksPerRevolution = 28;
     private static final double kTurningCurrentLimit = 7;
 
     private final Telemetry t = Telemetry.get();
     private final WPI_TalonSRX m_motor;
     private final int canID;
-    private final AnalogTurningEncoder m_encoder;
     private final String m_name;
 
     // TODO fix this
-    public CANTurningMotor(String name, int channel, AnalogTurningEncoder encoder) {
-        m_encoder = encoder;
+    public CANTurningMotor(String name, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setSelectedSensorPosition(0);

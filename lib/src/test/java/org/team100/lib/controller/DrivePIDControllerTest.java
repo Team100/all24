@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
@@ -24,31 +25,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DrivePIDControllerTest {
 
-    private static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
-    private static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
+    private static final double kMaxVel = 1.0;
+    private static final double kMaxAccel = 1.0;
 
-    private static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
-    private static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
-
-    private static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
-            // Front left
-            new Translation2d(kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
-            // Front right
-            new Translation2d(kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0),
-            // Back left
-            new Translation2d(-kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
-            // Back right
-            new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
-
+    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testPIDControl() {
-        final double kMaxVel = 1.0;
-        final double kMaxAccel = 1.0;
-        // this doesn't actually do anything.
-        final double kMaxVoltage = 9.0;
-
         // first right and then ahead
         List<Pose2d> waypoints = List.of(
                 new Pose2d(0, 0, Rotation2d.fromDegrees(270)),
@@ -76,10 +60,8 @@ class DrivePIDControllerTest {
                 start_vel,
                 end_vel,
                 kMaxVel,
-                kMaxAccel,
-                kMaxVoltage);
-        // System.out.println(trajectory);
-        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
+                kMaxAccel);
+
         // why is this so large?
         assertEquals(1300, trajectory.length());
 
@@ -98,9 +80,7 @@ class DrivePIDControllerTest {
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
-            assertEquals(0, output.vxMetersPerSecond, 0.001);
-            assertEquals(0, output.vyMetersPerSecond, 0.001);
-            assertEquals(0, output.omegaRadiansPerSecond, 0.001);
+            verify(0, 0, 0, output);
         }
 
         {
@@ -108,10 +88,8 @@ class DrivePIDControllerTest {
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
-            assertEquals(-1, output.vxMetersPerSecond, 0.05);
-            assertEquals(-0.1, output.vyMetersPerSecond, 0.05);
             // turning slowly to the left
-            assertEquals(0.1, output.omegaRadiansPerSecond, 0.05);
+            verify(-1,-0.1, 0.1, output);
 
             TimedPose path_setpoint = controller.getSetpoint(4).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
@@ -132,9 +110,7 @@ class DrivePIDControllerTest {
             // System.out.println("============8 sec============");
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new Twist2d());
-            assertEquals(-0.96, output.vxMetersPerSecond, 0.05);
-            assertEquals(-0.05, output.vyMetersPerSecond, 0.05);
-            assertEquals(0.18, output.omegaRadiansPerSecond, 0.05);
+            verify(-0.96,-0.05,0.18, output);
 
             TimedPose path_setpoint = controller.getSetpoint(8).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.01);
@@ -152,5 +128,10 @@ class DrivePIDControllerTest {
             assertEquals(0, heading_error.getRadians(), 0.01);
         }
     }
-
+    
+    void verify(double vx, double vy, double omega, ChassisSpeeds output) {
+        assertEquals(vx, output.vxMetersPerSecond, 0.05);
+        assertEquals(vy, output.vyMetersPerSecond, 0.05);
+        assertEquals(omega, output.omegaRadiansPerSecond, 0.05);
+    }
 }

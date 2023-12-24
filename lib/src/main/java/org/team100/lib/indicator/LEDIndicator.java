@@ -1,7 +1,6 @@
 package org.team100.lib.indicator;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.AddressableLED;

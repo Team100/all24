@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * Linear velocity limit based on spatial yaw rate and omega limit.
+ * 
+ * Slows the path velocity to accommodate the desired yaw rate.
  */
 public class YawRateConstraint implements TimingConstraint {
     private final double m_maxOmegaRad_S;

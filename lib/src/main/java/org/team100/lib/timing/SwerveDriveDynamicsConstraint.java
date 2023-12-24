@@ -12,7 +12,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
- * This is based on 254 2023 version.
+ * Note this does not handle centripetal acceleration or steering rate.
+ * 
+ * TODO: maybe it's not worth keeping?
  */
 public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     private final SwerveDriveKinematics m_kinematics;
@@ -26,6 +28,10 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     /**
      * Given a target spatial heading rate (rad/m), return the maximum translational
      * speed allowed (m/s) that maintains the target spatial heading rate.
+     * 
+     * Note the setpoint generator respects acceleration limits so this is likely to
+     * do the wrong thing, if the "entry speed" (1m/s) is faster than the allowed
+     * speed.
      */
     @Override
     public double getMaxVelocity(Pose2dWithMotion state) {
@@ -42,6 +48,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         // first compute the effect of heading rate
 
         // this is a "spatial speed," direction and rad/m
+        // which is like moving 1 m/s.
         ChassisSpeeds chassis_speeds = new ChassisSpeeds(vx, vy, vtheta);
 
         SwerveModuleState[] module_states = m_kinematics.toSwerveModuleStates(chassis_speeds);
@@ -53,12 +60,12 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     }
 
     /**
-     * Apply drive acceleration limits.
+     * Simply provide the configured drive acceleration limits.
      */
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return new MinMaxAcceleration(
-                -m_limits.kMaxDriveAcceleration,
+                -m_limits.kMaxDriveDeceleration,
                 m_limits.kMaxDriveAcceleration);
     }
 }

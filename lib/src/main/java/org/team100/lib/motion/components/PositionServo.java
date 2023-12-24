@@ -4,7 +4,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Measure;
+import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -14,7 +14,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 /**
  * Positional control on top of a velocity servo.
  */
-public class PositionServo<T extends Measure> {
+public class PositionServo<T extends Measure100> {
     // NOTE: i took out the deadband because i was looking for more accuracy,
     // but that might result in chattering, so feel free to put it back.
     // private static final double kDeadband = 0.03;

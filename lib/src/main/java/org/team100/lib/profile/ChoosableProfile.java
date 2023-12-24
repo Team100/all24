@@ -2,6 +2,7 @@ package org.team100.lib.profile;
 
 import org.team100.lib.telemetry.NamedChooser;
 
+import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -14,18 +15,20 @@ public class ChoosableProfile {
     public enum Mode {
         /** The WPILib trapezoidal profile with infinite jerk */
         TRAPEZOID,
-        /** Preview from 2024, takes motor EMF into account */
+        /**
+         * New for 2024, takes motor EMF into account.
+         * This should be considered experimental.
+         */
         EXPONENTIAL
     }
 
     private final SendableChooser<Mode> m_chooser;
 
-    private final double m_maxVel;
-    private final double m_maxAccel;
     // the profile class is both a stateful follower and
     // a stateless calculator. we use the stateless one so we can make
     // the profile object once.
     private final TrapezoidProfile m_trapezoid;
+    private final ExponentialProfile eprofile;
 
     /** The default is specifiable mostly for testing. */
     public ChoosableProfile(
@@ -33,15 +36,19 @@ public class ChoosableProfile {
             double maxAccel,
             Mode defaultMode) {
         m_chooser = new NamedChooser<>("Motion Profile");
-        m_maxVel = maxVel;
-        m_maxAccel = maxAccel;
         for (Mode mode : Mode.values()) {
             m_chooser.addOption(mode.name(), mode);
         }
         m_chooser.setDefaultOption(defaultMode.name(), defaultMode);
         SmartDashboard.putData(m_chooser);
 
-        m_trapezoid = new TrapezoidProfile(new TrapezoidProfile.Constraints(maxVel, maxAccel));
+        m_trapezoid = new TrapezoidProfile(
+                new TrapezoidProfile.Constraints(maxVel, maxAccel));
+                
+        // TODO: tune the exponential constraints
+        eprofile = new ExponentialProfile(
+                ExponentialProfile.Constraints.fromCharacteristics(
+                        10, 10, 5));
     }
 
     public State calculate(double t, State goal, State current) {
@@ -49,12 +56,9 @@ public class ChoosableProfile {
             case TRAPEZOID:
                 return m_trapezoid.calculate(t, goal, current);
             case EXPONENTIAL:
-                // TODO: figure out what these inputs mean.
-                ExponentialProfile.Constraints constraints = ExponentialProfile.Constraints.fromStateSpace(1, 1, 1);
-                ExponentialProfile eprofile = new ExponentialProfile(constraints);
                 ExponentialProfile.State estate = eprofile.calculate(t,
-                        new ExponentialProfile.State(goal.position, goal.velocity),
-                        new ExponentialProfile.State(current.position, current.velocity));
+                        new ExponentialProfile.State(current.position, current.velocity),
+                        new ExponentialProfile.State(goal.position, goal.velocity));
                 return new State(estate.position, estate.velocity);
             default:
                 return new State();

@@ -22,6 +22,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 class TrajectoryTimeSamplerTest {
     private static final double kDelta = 0.001;
 
+    private static final double kMaxVelM_S = 4;
+    private static final double kMaxAccelM_S_S = 2;
+
     @Test
     void testSample() {
         SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
@@ -47,10 +50,6 @@ class TrajectoryTimeSamplerTest {
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
-        double kMaxVelM_S = 4;
-        double kMaxAccelM_S_S = 2;
-        double kMaxVoltage = 9.0;
-
         Trajectory100 trajectory = planner
                 .generateTrajectory(
                         false,
@@ -60,8 +59,7 @@ class TrajectoryTimeSamplerTest {
                         startVelocity,
                         endVelocity,
                         kMaxVelM_S,
-                        kMaxAccelM_S_S,
-                        kMaxVoltage);
+                        kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
         assertEquals(0, sampler.getStartS(), kDelta);

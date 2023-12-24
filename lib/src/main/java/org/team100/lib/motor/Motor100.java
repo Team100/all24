@@ -1,6 +1,8 @@
 package org.team100.lib.motor;
 
-public interface Motor100<T> {
+import org.team100.lib.units.Measure100;
+
+public interface Motor100<T extends Measure100> {
 
     /**
      * @return output in range [-1, 1]

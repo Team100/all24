@@ -1,5 +1,7 @@
 package org.team100.lib.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
@@ -27,24 +30,10 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 
 class DriveMotionPlannerTest {
-    private static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
-    private static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
-
-    private static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
-    private static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
-
-    private static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
-            // Front left
-            new Translation2d(kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
-            // Front right
-            new Translation2d(kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0),
-            // Back left
-            new Translation2d(-kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
-            // Back right
-            new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
+    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(
+            0.52705, 0.52705);
 
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
@@ -74,25 +63,9 @@ class DriveMotionPlannerTest {
         traj = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(waypoints, headings, 2, 0.25, 0.1);
         Assertions.assertFalse(traj.isEmpty());
         Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
-        // Assertions.assertEquals(3.0, traj.getIndexView().last_interpolant(), 0.2);
-        // Assertions.assertEquals(3, traj.length());
-
-        // for(int i = 0; i < traj.length(); i++) {
-        // System.out.println(traj.getPoint(i).toString());
-        // System.out.println(traj.getPoint(i).state().toString());
-        // System.out.println(traj.getPoint(i).index());
-        // }
 
         Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(false, new PathDistanceSampler(traj), 2,
                 Arrays.asList(), start_vel, end_vel, max_vel, max_accel);
-
-        // System.out.println("\n\n\n\n\n\n\n");
-
-        // for(int i = 0; i < timed_trajectory.length(); i++) {
-        // System.out.println(timed_trajectory.getPoint(i).toString());
-        // System.out.println(timed_trajectory.getPoint(i).state().state().toString());
-        // System.out.println(timed_trajectory.getPoint(i).index());
-        // }
 
         DriveMotionController controller = new DrivePIDFController(false);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
@@ -110,10 +83,6 @@ class DriveMotionPlannerTest {
                     speeds.omegaRadiansPerSecond * mDt);
             velocity = GeometryUtil.toTwist2d(speeds);
             pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
-            // System.out.println("\n\n\n\n-----t="+time);
-            // System.out.println(speeds);
-            // System.out.println(pose);
-            // System.out.println("Pathsetpoint:" + planner.getSetpoint());
             time += mDt;
         }
         Assertions.assertEquals(196, pose.getTranslation().getX(), 0.2);
@@ -129,13 +98,9 @@ class DriveMotionPlannerTest {
         TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
         generator.generateTrajectories();
-        var trajectories = generator.getTrajectorySet().getAllTrajectories();
-
-        // AsymSwerveSetpointGenerator setpoint_generator = new
-        // AsymSwerveSetpointGenerator(kinematics);
+        List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 
         for (var traj : trajectories) {
-            // System.out.println("\n" + traj.toString());
             TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                     new TrajectoryTimeSampler(traj));
             controller.setTrajectory(traj_iterator);
@@ -149,7 +114,6 @@ class DriveMotionPlannerTest {
             double mDt = 0.005;
             boolean error_injected = false;
             while (!controller.isDone()) {
-                // System.out.println("\n\n-----t=" + time);
                 if (!error_injected && time >= kInjectionTime) {
                     pose = GeometryUtil.transformBy(pose, kInjectedError);
                     velocity = new Twist2d(velocity.dx + kInjectedVelocityError.dx,
@@ -162,8 +126,7 @@ class DriveMotionPlannerTest {
                     SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
                     setpoint = new SwerveSetpoint(speeds, states);
                 }
-                // setpoint = setpoint_generator.generateSetpoint(limits, setpoint, speeds,
-                // mDt);
+
                 // Don't use a twist here (assume Drive compensates for that)
                 Pose2d delta = new Pose2d(
                         new Translation2d(
@@ -173,18 +136,13 @@ class DriveMotionPlannerTest {
                 pose = GeometryUtil.transformBy(pose, delta);
                 velocity = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
 
-                // System.out.println("\n\n-----t="+time);
-                // System.out.println(speeds);
-                // System.out.println(pose);
-                // System.out.println("Setpoint:" + planner.getSetpoint());
                 // Inches and degrees
                 Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose),
                         controller.getSetpoint(time).get().state().getPose());
-                // System.out.println("Setpoint: " + planner.getSetpoint());
-                // System.out.println("Error: " + error);
-                Assertions.assertEquals(0.0, error.getTranslation().getX(), 0.0508);
-                Assertions.assertEquals(0.0, error.getTranslation().getY(), 0.0508);
-                Assertions.assertEquals(0.0, error.getRotation().getDegrees(), 5.0);
+
+                assertEquals(0.0, error.getTranslation().getX(), 0.0508);
+                assertEquals(0.0, error.getTranslation().getY(), 0.0508);
+                assertEquals(0.0, error.getRotation().getDegrees(), 5.0);
 
                 time += mDt;
             }

@@ -16,6 +16,7 @@ import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,11 +51,7 @@ class DriveToWaypoint3Test {
     @Test
     void testAprilTag() throws IOException {
         MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-                new Translation2d(0.1, 0.1),
-                new Translation2d(0.1, -0.1),
-                new Translation2d(-0.1, 0.1),
-                new Translation2d(-0.1, -0.1));
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.2, 0.2);
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .blueLayout("2023-chargedup.json");
 

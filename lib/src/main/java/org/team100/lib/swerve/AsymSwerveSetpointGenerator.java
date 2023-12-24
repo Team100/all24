@@ -19,9 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * This version uses different limits for acceleration and for deceleration,
  * which better matches real robot behavior.
  * 
- * TODO: use a more realistic centripetal acceleration limit, and a better way
- * to manage it.
- * 
  * Takes a prior setpoint (ChassisSpeeds), a desired setpoint (from a driver, or
  * from a path follower), and outputs a new setpoint that respects all of the
  * kinematic constraints on module rotation speed and wheel velocity and
@@ -112,8 +109,7 @@ public class AsymSwerveSetpointGenerator {
         // we are at desiredState.
         double min_s = 1.0;
 
-        min_s = m_centripetalLimiter.enforceCentripetalLimit(
-                prev_vx, prev_vy, desired_vx, desired_vy, min_s);
+        min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, min_s);
 
         // In cases where an individual module is stopped, we want to remember the right
         // steering angle to command (since
@@ -175,7 +171,6 @@ public class AsymSwerveSetpointGenerator {
             prev_vy[i] = prevModuleStates[i].angle.getSin() * prevModuleStates[i].speedMetersPerSecond;
             prev_heading[i] = prevModuleStates[i].angle;
             if (prevModuleStates[i].speedMetersPerSecond < 0.0) {
-                // System.out.println("as;lkjasdfkj");
                 prev_heading[i] = GeometryUtil.flip(prev_heading[i]);
             }
 
@@ -184,13 +179,11 @@ public class AsymSwerveSetpointGenerator {
             desired_heading[i] = desiredModuleStates[i].angle;
 
             if (desiredModuleStates[i].speedMetersPerSecond < 0.0) {
-                // System.out.println("asdffssdfsfdsfdsfd");
                 desired_heading[i] = GeometryUtil.flip(desired_heading[i]);
             }
             if (all_modules_should_flip) {
                 double required_rotation_rad = Math
                         .abs(prev_heading[i].unaryMinus().rotateBy(desired_heading[i]).getRadians());
-                // System.out.println("req rot " + required_rotation_rad);
                 if (required_rotation_rad < flipLimit) {
                     all_modules_should_flip = false;
                 }

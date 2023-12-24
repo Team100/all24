@@ -40,11 +40,16 @@ public class TrajectoryPlanner {
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
             final List<TimingConstraint> constraints,
-            double max_vel, // m/s
-            double max_accel, // m/s^2
-            double max_voltage) {
-        return generateTrajectory(reversed, waypoints, headings, constraints, 0.0, 0.0, max_vel, max_accel,
-                max_voltage);
+            double max_vel,
+            double max_accel) {
+        return generateTrajectory(
+                reversed, waypoints,
+                headings,
+                constraints,
+                0.0,
+                0.0,
+                max_vel,
+                max_accel);
     }
 
     public Trajectory100 generateTrajectory(
@@ -54,9 +59,8 @@ public class TrajectoryPlanner {
             final List<TimingConstraint> constraints,
             double start_vel,
             double end_vel,
-            double max_vel, // m/s
-            double max_accel, // m/s^2
-            double max_voltage) {
+            double max_vel,
+            double max_accel) {
         List<Pose2d> waypoints_maybe_flipped = waypoints;
         List<Rotation2d> headings_maybe_flipped = headings;
         final Pose2d flip = GeometryUtil.fromRotation(new Rotation2d(-1, 0));
@@ -85,11 +89,8 @@ public class TrajectoryPlanner {
             trajectory = new Path100(flipped_points);
         }
 
-        // Create the constraint that the robot must be able to traverse the trajectory
-        // without ever applying more
-        // than the specified voltage.
-
-        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_kinematics,   m_limits);
+        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_kinematics,
+                m_limits);
         final YawRateConstraint yaw_constraint = new YawRateConstraint(kMaxYawRateRadS);
 
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
@@ -105,7 +106,14 @@ public class TrajectoryPlanner {
 
         // Generate the timed trajectory.
         PathDistanceSampler distance_view = new PathDistanceSampler(trajectory);
-        return TimingUtil.timeParameterizeTrajectory(reversed,
-                distance_view, kMaxDx, all_constraints, start_vel, end_vel, max_vel, max_accel);
+        return TimingUtil.timeParameterizeTrajectory(
+                reversed,
+                distance_view,
+                kMaxDx,
+                all_constraints,
+                start_vel,
+                end_vel,
+                max_vel,
+                max_accel);
     }
 }

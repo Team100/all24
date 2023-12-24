@@ -5,12 +5,12 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 /**
@@ -32,12 +32,8 @@ public class Fixture {
     public SwerveDriveSubsystem drive;
 
     public Fixture() {
-        kinematics = new SwerveDriveKinematics(
-                new Translation2d(1, 1),
-                new Translation2d(1, -1),
-                new Translation2d(-1, 1),
-                new Translation2d(-1, -1));
-
+        kinematics = SwerveDriveKinematicsFactory.get(2,2);
+        
         experiments = new Experiments(Identity.BLANK);
         m_factory = new SwerveModuleFactory(experiments, 40);
 

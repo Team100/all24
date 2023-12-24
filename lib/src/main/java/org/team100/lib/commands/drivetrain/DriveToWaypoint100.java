@@ -31,7 +31,6 @@ public class DriveToWaypoint100 extends Command {
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-    private static final double kMaxVoltage = 9.0;
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
@@ -91,8 +90,7 @@ public class DriveToWaypoint100 extends Command {
                         startVelocity,
                         endVelocity,
                         kMaxVelM_S,
-                        kMaxAccelM_S_S,
-                        kMaxVoltage);
+                        kMaxAccelM_S_S);
 
         TrajectoryVisualization.setViz(trajectory);
 

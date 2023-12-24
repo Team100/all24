@@ -2,6 +2,14 @@ package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.config.Identity;
 
+/**
+ * Each drivetrain should be tuned, and the values here should be the physical
+ * maxima.
+ * 
+ * FYI according to their 2022 code, 254's max speed in 2022 was 5.05 m/s, which
+ * is about the same as ours, but their max acceleration was 4.4 m/s^2, which is
+ * crazy quick.
+ */
 public class SpeedLimitsFactory {
     /**
      * @param showMode is for younger drivers to drive the robot slowly.
@@ -21,10 +29,12 @@ public class SpeedLimitsFactory {
             case CAMERA_DOLLY:
                 return new SpeedLimits(5, 10, 5, 5);
             default:
+                System.out.println("WARNING: using default speed limits");
                 return new SpeedLimits(1, 1, 1, 1);
-            // previously this would throw
-            // throw new IllegalStateException("Identity is not swerve: " +
-            // Identity.get().name());
         }
+    }
+
+    private SpeedLimitsFactory() {
+        //
     }
 }

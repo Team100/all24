@@ -12,11 +12,7 @@ class CentripetalAccelerationLimiterTest {
     void testUnconstrained() {
         SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
         CentripetalAccelerationLimiter c = new CentripetalAccelerationLimiter(l);
-        double[] prev_vx = new double[] { 1 };
-        double[] prev_vy = new double[] { 1 };
-        double[] desired_vx = new double[] { 1 };
-        double[] desired_vy = new double[] { 1 };
-        double s = c.enforceCentripetalLimit(prev_vx, prev_vy, desired_vx, desired_vy, 1);
+        double s = c.enforceCentripetalLimit(0, 0, 1);
         assertEquals(1, s, kDelta);
     }
 
@@ -28,11 +24,7 @@ class CentripetalAccelerationLimiterTest {
     void testConstrained() {
         SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
         CentripetalAccelerationLimiter c = new CentripetalAccelerationLimiter(l);
-        double[] prev_vx = new double[] { 1 };
-        double[] prev_vy = new double[] { 0 };
-        double[] desired_vx = new double[] { 0 };
-        double[] desired_vy = new double[] { 1 };
-        double s = c.enforceCentripetalLimit(prev_vx, prev_vy, desired_vx, desired_vy, 1);
+        double s = c.enforceCentripetalLimit(-1, 1, 1);
         assertEquals(0.014, s, kDelta);
     }
 }

@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Twist2d;
  * This is from 254 2023 motion planning; the main reason to include it
  * is because it represents both heading and course, whereas the WPI equivalent
  * represents only course.
+ * 
+ * Note, Pose2dWithMotion is a purely spatial construct.
  */
 public class Pose2dWithMotion {
     public static final Pose2dWithMotion kIdentity = new Pose2dWithMotion();

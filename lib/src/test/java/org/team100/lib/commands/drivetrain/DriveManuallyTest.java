@@ -11,7 +11,6 @@ import org.team100.lib.sensors.MockHeading;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj.Timer;
 
 class DriveManuallyTest {
     ManualMode.Mode desiredMode = null;
