@@ -8,6 +8,7 @@ import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -86,6 +87,7 @@ public class TrajectoryListCommand extends Command {
             State desiredState = m_currentTrajectory.sample(m_timer.get());
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
+            t.log(Level.DEBUG, "/trajectory list/reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
@@ -93,6 +95,7 @@ public class TrajectoryListCommand extends Command {
             State desiredState = m_currentTrajectory.sample(m_timer.get()+0.02);
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
+            t.log(Level.DEBUG, "/trajectory list/reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
             if (aligned) {

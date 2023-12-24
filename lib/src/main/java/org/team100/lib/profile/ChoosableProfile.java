@@ -20,8 +20,6 @@ public class ChoosableProfile {
 
     private final SendableChooser<Mode> m_chooser;
 
-    private final double m_maxVel;
-    private final double m_maxAccel;
     // the profile class is both a stateful follower and
     // a stateless calculator. we use the stateless one so we can make
     // the profile object once.
@@ -33,8 +31,6 @@ public class ChoosableProfile {
             double maxAccel,
             Mode defaultMode) {
         m_chooser = new NamedChooser<>("Motion Profile");
-        m_maxVel = maxVel;
-        m_maxAccel = maxAccel;
         for (Mode mode : Mode.values()) {
             m_chooser.addOption(mode.name(), mode);
         }

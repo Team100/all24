@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -17,20 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 class AsymSwerveSetpointGeneratorTest {
     private static final double kDelta = 0.001;
     private final static double kDt = 0.02; // s
-
-    protected final static double kRobotSide = 0.616; // m
-    static final Translation2d[] moduleTranslations = new Translation2d[] {
-            // Front left
-            new Translation2d(kRobotSide / 2.0, kRobotSide / 2.0),
-            // Front right
-            new Translation2d(kRobotSide / 2.0, -kRobotSide / 2.0),
-            // Back left
-            new Translation2d(-kRobotSide / 2.0, kRobotSide / 2.0),
-            // Back right
-            new Translation2d(-kRobotSide / 2.0, -kRobotSide / 2.0)
-    };
-    private final static SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
-            moduleTranslations);
+    private final static SwerveDriveKinematics kKinematics =  SwerveDriveKinematicsFactory.get(0.616, 0.616);
     private final static SwerveKinematicLimits kKinematicLimits = new SwerveKinematicLimits(
             5, 10, 10, Math.toRadians(1500), 7);
 
@@ -112,16 +99,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testLimiting() {
-        // like 2023 comp bot
-        double kTrackWidth = 0.491;
-        double kWheelBase = 0.765;
-        final Translation2d[] moduleTranslations = new Translation2d[] {
-                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
-        };
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491,0.765);
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 7);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics, limits);
@@ -138,7 +116,6 @@ class AsymSwerveSetpointGeneratorTest {
 
         // desired speed is very fast
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(10, 10, 10);
-        double dt = 0.02;
 
         // initially it's not moving fast at all
         setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
@@ -157,16 +134,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testNotLimiting() {
-        // like 2023 comp bot
-        double kTrackWidth = 0.491;
-        double kWheelBase = 0.765;
-        final Translation2d[] moduleTranslations = new Translation2d[] {
-                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
-        };
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491,0.765);
         // high centripetal limit to stay out of the way
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 20);
@@ -193,16 +161,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testLimitingALittle() {
-        // like 2023 comp bot
-        double kTrackWidth = 0.491;
-        double kWheelBase = 0.765;
-        final Translation2d[] moduleTranslations = new Translation2d[] {
-                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
-        };
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491,0.765);
         // high centripetal limit to stay out of the way
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 20);
@@ -221,7 +180,6 @@ class AsymSwerveSetpointGeneratorTest {
         // desired speed is double the feasible accel so we should reach it in two
         // iterations.
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(0.4, 0, 0);
-        double dt = 0.02;
 
         setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
         assertEquals(0.2, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
@@ -236,16 +194,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testLowCentripetal() {
-        // like 2023 comp bot
-        double kTrackWidth = 0.491;
-        double kWheelBase = 0.765;
-        final Translation2d[] moduleTranslations = new Translation2d[] {
-                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
-        };
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        SwerveDriveKinematics kinematics =  SwerveDriveKinematicsFactory.get(0.491, 0.765);
         // very low centripetal limit so we can see it
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 2);
@@ -283,15 +232,7 @@ class AsymSwerveSetpointGeneratorTest {
      */
     @Test
     void testCentripetal() {
-        final double kTrackWidth = 0.491;
-        final double kWheelBase = 0.765;
-        final Translation2d[] moduleTranslations = new Translation2d[] {
-                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
-        };
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
         final double velocityLimit = 5; // m/s
         final double accelLimit = 8; // m/s^2
         final double decelLimit = 10; // m/s^2
@@ -353,15 +294,7 @@ class AsymSwerveSetpointGeneratorTest {
     @Test
     void testCase4() {
         // this corresponds to the "4" cases in Math100Test.
-        final double kTrackWidth = 0.491;
-        final double kWheelBase = 0.765;
-        final Translation2d[] moduleTranslations = new Translation2d[] {
-                new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
-        };
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
         final double velocityLimit = 5; // m/s
         final double accelLimit = 8; // m/s^2
         final double decelLimit = 10; // m/s^2

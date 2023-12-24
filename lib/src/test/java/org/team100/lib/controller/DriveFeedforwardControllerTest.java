@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
@@ -23,23 +24,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DriveFeedforwardControllerTest {
-
-    private static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
-    private static final double kMaxAccelerationMetersPerSecondSquared = 4.4;
-
-    private static final double kDriveTrackwidthMeters = 0.52705; // DONE Measure and set trackwidth
-    private static final double kDriveWheelbaseMeters = 0.52705; // DONE Measure and set wheelbase
-
-    private static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
-            // Front left
-            new Translation2d(kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
-            // Front right
-            new Translation2d(kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0),
-            // Back left
-            new Translation2d(-kDriveTrackwidthMeters / 2.0, kDriveWheelbaseMeters / 2.0),
-            // Back right
-            new Translation2d(-kDriveTrackwidthMeters / 2.0, -kDriveWheelbaseMeters / 2.0));
-
+    private static final SwerveDriveKinematics kKinematics =  SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
+    
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
@@ -67,6 +53,7 @@ class DriveFeedforwardControllerTest {
         TrajectoryPlanner planner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
         double start_vel = 0;
         double end_vel = 0;
+
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
         Trajectory100 trajectory = planner.generateTrajectory(
                 false,
@@ -78,9 +65,6 @@ class DriveFeedforwardControllerTest {
                 kMaxVel,
                 kMaxAccel,
                 kMaxVoltage);
-        // System.out.println(trajectory);
-        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
-        // why is this so large?
         assertEquals(1300, trajectory.length());
 
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);
@@ -127,9 +111,6 @@ class DriveFeedforwardControllerTest {
             assertEquals(0, translational_error.getY(), 0.05);
             Rotation2d heading_error = error.getRotation();
             assertEquals(0, heading_error.getRadians(), 0.05);
-
-            // Rotation2d heading_setpoint = mMotionPlanner.getHeadingSetpoint();
-            // assertEquals(0, heading_setpoint.getRadians(), 0.001);
         }
         {
             // System.out.println("============8 sec============");
@@ -153,10 +134,6 @@ class DriveFeedforwardControllerTest {
             assertEquals(0, translational_error.getY(), 0.01);
             Rotation2d heading_error = error.getRotation();
             assertEquals(0, heading_error.getRadians(), 0.01);
-
-            // Rotation2d heading_setpoint = mMotionPlanner.getHeadingSetpoint();
-            // assertEquals(0, heading_setpoint.getRadians(), 0.001);
         }
     }
-
 }

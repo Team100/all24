@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -19,11 +19,7 @@ class SwerveLocalTest {
     void testSimple() {
         Experiments experiments = new Experiments(Identity.BLANK);
         SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-                new Translation2d(0.1, 0.1),
-                new Translation2d(0.1, -0.1),
-                new Translation2d(-0.1, 0.1),
-                new Translation2d(-0.1, -0.1));
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.2, 0.2);
         MockSwerveModuleCollection modules = new MockSwerveModuleCollection();
         SwerveLocal local = new SwerveLocal(experiments, speedLimits, kinematics, modules);
         local.setChassisSpeeds(new ChassisSpeeds());

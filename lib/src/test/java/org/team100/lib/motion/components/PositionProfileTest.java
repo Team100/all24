@@ -11,7 +11,6 @@ import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 class PositionProfileTest {
     private static final double kDelta = 0.001;

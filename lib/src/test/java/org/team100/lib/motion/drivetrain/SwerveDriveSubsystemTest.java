@@ -5,12 +5,12 @@ import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.sensors.MockHeading;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -21,11 +21,8 @@ class SwerveDriveSubsystemTest {
     @Test
     void testSimple() {
         MockHeading heading = new MockHeading();
-        SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-                new Translation2d(0.1, 0.1),
-                new Translation2d(0.1, -0.1),
-                new Translation2d(-0.1, 0.1),
-                new Translation2d(-0.1, -0.1));
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.2, 0.2);
+        
         Rotation2d gyroAngle = GeometryUtil.kRotationZero;
         SwerveModulePosition[] modulePositions = new SwerveModulePosition[] {
                 new SwerveModulePosition(),

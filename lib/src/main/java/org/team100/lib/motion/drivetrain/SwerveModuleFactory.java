@@ -15,7 +15,6 @@ import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 

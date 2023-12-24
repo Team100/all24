@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -19,12 +19,8 @@ class SwerveDriveDynamicsConstraintTest {
     // the free speed of a module, which is also the free speed
     // of the robot going in a straight line without rotating.
     private static final double maxV = 4;
-    private static final SwerveDriveKinematics k = new SwerveDriveKinematics(
-            new Translation2d(0.5, 0.5),
-            new Translation2d(0.5, -0.5),
-            new Translation2d(-0.5, 0.5),
-            new Translation2d(-0.5, -0.5));
-
+    private static final SwerveDriveKinematics k = SwerveDriveKinematicsFactory.get(1,1);
+    
     @Test
     void testVelocity() {
         SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 2, 10, 7);

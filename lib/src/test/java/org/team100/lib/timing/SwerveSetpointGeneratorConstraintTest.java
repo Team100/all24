@@ -4,22 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class SwerveSetpointGeneratorConstraintTest {
     private static final double kDelta = 0.001;
-    private static final SwerveDriveKinematics k = new SwerveDriveKinematics(
-            new Translation2d(0.5, 0.5),
-            new Translation2d(0.5, -0.5),
-            new Translation2d(-0.5, 0.5),
-            new Translation2d(-0.5, -0.5));
-
+    private static final SwerveDriveKinematics k =  SwerveDriveKinematicsFactory.get(1,1);
+    
     @Test
     void testSpin() {
         SwerveKinematicLimits l = new SwerveKinematicLimits(4, 2, 5, 10, 7);

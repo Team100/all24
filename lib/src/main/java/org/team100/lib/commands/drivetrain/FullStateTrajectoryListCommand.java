@@ -8,6 +8,7 @@ import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -73,6 +74,7 @@ public class FullStateTrajectoryListCommand extends Command {
 
         // now there is a trajectory to follow
         State desiredState = m_currentTrajectory.sample(m_timer.get());
+        t.log(Level.DEBUG, "/full state trajectory list/desired state", desiredState);
         SwerveState measurement = m_swerve.getState();
 
         // this uses the fixed rotation.

@@ -174,7 +174,6 @@ public class AsymSwerveSetpointGenerator {
             prev_vy[i] = prevModuleStates[i].angle.getSin() * prevModuleStates[i].speedMetersPerSecond;
             prev_heading[i] = prevModuleStates[i].angle;
             if (prevModuleStates[i].speedMetersPerSecond < 0.0) {
-                // System.out.println("as;lkjasdfkj");
                 prev_heading[i] = GeometryUtil.flip(prev_heading[i]);
             }
 
@@ -183,13 +182,11 @@ public class AsymSwerveSetpointGenerator {
             desired_heading[i] = desiredModuleStates[i].angle;
 
             if (desiredModuleStates[i].speedMetersPerSecond < 0.0) {
-                // System.out.println("asdffssdfsfdsfdsfd");
                 desired_heading[i] = GeometryUtil.flip(desired_heading[i]);
             }
             if (all_modules_should_flip) {
                 double required_rotation_rad = Math
                         .abs(prev_heading[i].unaryMinus().rotateBy(desired_heading[i]).getRadians());
-                // System.out.println("req rot " + required_rotation_rad);
                 if (required_rotation_rad < flipLimit) {
                     all_modules_should_flip = false;
                 }

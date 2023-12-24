@@ -1,10 +1,10 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.swerve.SwerveSetpoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,11 +18,7 @@ public class MockSwerveDriveSubsystem implements SwerveDriveSubsystemInterface {
     public boolean stopped = false;
     public SwerveModuleState[] states;
 
-    SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-            new Translation2d(0.1, 0.1),
-            new Translation2d(0.1, -0.1),
-            new Translation2d(-0.1, 0.1),
-            new Translation2d(-0.1, -0.1));
+    SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.2, 0.2);
 
     @Override
     public Pose2d getPose() {

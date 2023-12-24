@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.spline.PoseWithCurvature;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -237,6 +238,13 @@ public class Telemetry {
     public void log(Level level, String key, ArmAngles angles) {
         log(level, key + "/th1", angles.th1);
         log(level, key + "/th2", angles.th2);
+    }
+
+    public void log(Level level, String key, State state) {
+        log(level, key + "/pose", state.poseMeters);
+        log(level, key + "/curvature", state.curvatureRadPerMeter);
+        log(level, key + "/velocity", state.velocityMetersPerSecond);
+        log(level, key + "/accel", state.accelerationMetersPerSecondSq);
     }
 
     private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {

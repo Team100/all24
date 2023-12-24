@@ -18,13 +18,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * This is a Logitech F310 or similar.
  */
 public class DriverXboxControl implements DriverControl {
-
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
-    private static final double kTriggerThreshold = .5;
-
     private final Telemetry t = Telemetry.get();
-
     private final CommandXboxController m_controller;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
@@ -94,32 +90,18 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger defense() {
-        // return new JoystickButton(m_controller.getHID(), 2);
-        return new Trigger(() -> false);
-    }
-
-    @Override
     public Trigger steer0() {
-        // TODO: which button?
         return new JoystickButton(m_controller.getHID(), 3);
     }
 
     @Override
     public Trigger steer90() {
-        // TODO: which button?
         return new JoystickButton(m_controller.getHID(), 4);
     }
 
     @Override
     public Trigger rotate0() {
         return new JoystickButton(m_controller.getHID(), 9);
-    }
-
-    @Override
-    public Trigger driveWithFancyTrajec() {
-        // controller0.a().whileTrue(command);
-        return new Trigger(() -> false);
     }
 
     @Override
