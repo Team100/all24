@@ -24,14 +24,14 @@ class RotateTest {
         MockSwerveDriveSubsystem swerveDriveSubsystem = new MockSwerveDriveSubsystem();
         swerveDriveSubsystem.pose = GeometryUtil.kPoseZero;
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         double targetAngle = Math.PI / 2;
 
 
         Rotate rotate = new Rotate(
                 swerveDriveSubsystem,
                 heading,
-                speedLimits,
+                swerveKinodynamics,
                 targetAngle);
 
         SimHooks.stepTiming(100); // initial time is not zero

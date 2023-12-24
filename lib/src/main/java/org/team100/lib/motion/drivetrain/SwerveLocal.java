@@ -45,22 +45,19 @@ public class SwerveLocal {
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
-    private final SwerveKinodynamics m_speedLimits;
-    private final SwerveDriveKinematics m_DriveKinematics;
+    private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollectionInterface m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
             Experiments experiments,
-            SwerveKinodynamics speedLimits,
-            SwerveDriveKinematics driveKinematics,
+            SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollectionInterface modules) {
         m_experiments = experiments;
-        m_speedLimits = speedLimits;
-        m_DriveKinematics = driveKinematics;
+        m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_DriveKinematics, m_speedLimits);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_swerveKinodynamics);
 
 
         prevSetpoint = new SwerveSetpoint();
@@ -92,14 +89,14 @@ public class SwerveLocal {
     public boolean steerAtRest(ChassisSpeeds speeds) {
         // this indicates that during the steering the goal is fixed
         // Informs SwerveDriveKinematics of the module states.
-        SwerveModuleState[] swerveModuleStates = m_DriveKinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState[] swerveModuleStates = m_swerveKinodynamics.getKinematics().toSwerveModuleStates(speeds);
         for (SwerveModuleState state : swerveModuleStates) {
             state.speedMetersPerSecond = 0;
         }
         setModuleStates(swerveModuleStates);
         // previous setpoint should be at rest with the current states
         prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), swerveModuleStates);
-        m_DriveKinematics.resetHeadings(
+        m_swerveKinodynamics.getKinematics().resetHeadings(
                 swerveModuleStates[0].angle,
                 swerveModuleStates[1].angle,
                 swerveModuleStates[2].angle,
@@ -141,7 +138,7 @@ public class SwerveLocal {
      */
     public void setRawModuleStates(SwerveModuleState[] targetModuleStates) {
         m_modules.setRawDesiredStates(targetModuleStates);
-        m_DriveKinematics.resetHeadings(targetModuleStates[0].angle,
+        m_swerveKinodynamics.getKinematics().resetHeadings(targetModuleStates[0].angle,
                 targetModuleStates[1].angle,
                 targetModuleStates[2].angle,
                 targetModuleStates[3].angle);
@@ -165,7 +162,7 @@ public class SwerveLocal {
     /** The speed implied by the module states. */
     public ChassisSpeeds speeds() {
         SwerveModuleState[] states = states();
-        return m_DriveKinematics.toChassisSpeeds(states);
+        return m_swerveKinodynamics.getKinematics().toChassisSpeeds(states);
     }
 
     public SwerveModulePosition[] positions() {
@@ -199,7 +196,7 @@ public class SwerveLocal {
 
     private void setChassisSpeedsNormally(ChassisSpeeds speeds) {
         // Informs SwerveDriveKinematics of the module states.
-        setModuleStates(m_DriveKinematics.toSwerveModuleStates(speeds));
+        setModuleStates(m_swerveKinodynamics.getKinematics().toSwerveModuleStates(speeds));
     }
 
     // TODO: run this twice per cycle using TimedRobot.addPeriodic and a flag.
@@ -227,7 +224,7 @@ public class SwerveLocal {
     }
 
     private void setModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, m_speedLimits.getMaxSpeedM_S());
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxSpeedM_S());
         logImpliedChassisSpeeds(states);
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
@@ -238,7 +235,7 @@ public class SwerveLocal {
      * the desired speed might be caused by, for example, desaturation.
      */
     private void logImpliedChassisSpeeds(SwerveModuleState[] states) {
-        ChassisSpeeds speeds = m_DriveKinematics.toChassisSpeeds(states);
+        ChassisSpeeds speeds = m_swerveKinodynamics.getKinematics().toChassisSpeeds(states);
         t.log(Level.DEBUG, "/swervelocal/implied speed", speeds);
         t.log(Level.DEBUG, "/swervelocal/moving", isMoving(speeds));
     }

@@ -40,12 +40,12 @@ class HolonomicDriveRegulatorTest {
         final double kDtSec = 0.02;
         Pose2d startingPose = GeometryUtil.kPoseZero;
         Pose2d goalPose = new Pose2d(1, 0, GeometryUtil.kRotationZero);
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Pose2d currentPose = startingPose;
         Twist2d currentTwist = new Twist2d(); // start at rest
         double time = 0;
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-            speedLimits.getMaxSpeedM_S(), speedLimits.getMaxAccelM_S2());
+            swerveKinodynamics.getMaxSpeedM_S(), swerveKinodynamics.getMaxAccelM_S2());
         TrapezoidProfile profileX = new TrapezoidProfile(c);
         TrapezoidProfile profileY = new TrapezoidProfile(c);
         TrapezoidProfile profileTheta = new TrapezoidProfile(c);

@@ -16,17 +16,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 public class ManualChassisSpeeds {
     private final Telemetry t = Telemetry.get();
-    private final SwerveKinodynamics m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public ManualChassisSpeeds(SwerveKinodynamics speedLimits) {
-        m_speedLimits = speedLimits;
+    public ManualChassisSpeeds(SwerveKinodynamics swerveKinodynamics) {
+        m_swerveKinodynamics = swerveKinodynamics;
     }
 
     public ChassisSpeeds apply(Twist2d input) {
         ChassisSpeeds speeds = DriveUtil.scaleChassisSpeeds(
                 input,
-                m_speedLimits.getMaxSpeedM_S(),
-                m_speedLimits.getMaxAngleSpeedRad_S());
+                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         t.log(Level.DEBUG, "/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
         t.log(Level.DEBUG, "/manual robot relative/vy m_s", speeds.vyMetersPerSecond);
         return speeds;

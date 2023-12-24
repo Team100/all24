@@ -5,7 +5,6 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -13,7 +12,6 @@ import org.team100.lib.sensors.SimulatedHeading;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 /**
  * A real swerve subsystem populated with simulated motors and encoders,
@@ -21,7 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
  */
 public class Fixture {
 
-    public SwerveDriveKinematics kinematics;
     public Experiments experiments;
     public SwerveModuleFactory m_factory;
     public SwerveModuleCollectionInterface collection;
@@ -29,12 +26,12 @@ public class Fixture {
     public SwerveDrivePoseEstimator poseEstimator;
     public VeeringCorrection veering;
     public FrameTransform m_frameTransform;
-    public SwerveKinodynamics speedLimits;
+    public SwerveKinodynamics swerveKinodynamics;
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
 
     public Fixture() {
-        kinematics = SwerveDriveKinematicsFactory.get(2,2);
+        swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         
         experiments = new Experiments(Identity.BLANK);
         m_factory = new SwerveModuleFactory(experiments, 40);
@@ -44,9 +41,9 @@ public class Fixture {
                 m_factory.SimulatedModule("FrontRight"),
                 m_factory.SimulatedModule("RearLeft"),
                 m_factory.SimulatedModule("RearRight"));
-        heading = new SimulatedHeading(kinematics, collection);
+        heading = new SimulatedHeading(swerveKinodynamics.getKinematics(), collection);
         poseEstimator = new SwerveDrivePoseEstimator(
-                kinematics,
+                swerveKinodynamics.getKinematics(),
                 heading.getHeadingNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
@@ -57,11 +54,9 @@ public class Fixture {
 
         m_frameTransform = new FrameTransform(veering);
 
-        speedLimits = SwerveKinodynamicsFactory.forTest();
         swerveLocal = new SwerveLocal(
                 experiments,
-                speedLimits,
-                kinematics,
+                swerveKinodynamics,
                 collection);
 
         drive = new SwerveDriveSubsystem(heading, poseEstimator,

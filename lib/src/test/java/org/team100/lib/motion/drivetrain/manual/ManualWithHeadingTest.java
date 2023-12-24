@@ -28,13 +28,13 @@ class ManualWithHeadingTest {
     @Test
     void testModeSwitching() {
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                speedLimits,
+                swerveKinodynamics,
                 heading,
                 rotationSupplier,
                 thetaController);
@@ -62,13 +62,13 @@ class ManualWithHeadingTest {
     @Test
     void testNotSnapMode() {
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                speedLimits,
+                swerveKinodynamics,
                 heading,
                 rotationSupplier,
                 thetaController);
@@ -102,13 +102,13 @@ class ManualWithHeadingTest {
     @Test
     void testSnapMode() {
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                speedLimits,
+                swerveKinodynamics,
                 heading,
                 rotationSupplier,
                 thetaController);
@@ -191,13 +191,13 @@ class ManualWithHeadingTest {
     @Test
     void testSnapHeld() {
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                speedLimits,
+                swerveKinodynamics,
                 heading,
                 rotationSupplier,
                 thetaController);

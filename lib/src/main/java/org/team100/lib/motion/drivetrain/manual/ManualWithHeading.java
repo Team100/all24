@@ -30,7 +30,7 @@ public class ManualWithHeading {
     private final Telemetry t = Telemetry.get();
 
     private final HeadingInterface m_heading;
-    private final SwerveKinodynamics m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
     private final PIDController m_thetaController;
@@ -40,17 +40,17 @@ public class ManualWithHeading {
     TrapezoidProfile.State m_setpoint;
 
     public ManualWithHeading(
-            SwerveKinodynamics speedLimits,
+            SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController) {
         m_heading = heading;
-        m_speedLimits = speedLimits;
+        m_swerveKinodynamics = swerveKinodynamics;
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_latch = new HeadingLatch();
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                speedLimits.getMaxAngleSpeedRad_S(), speedLimits.getMaxAngleAccelRad_S2());
+                swerveKinodynamics.getMaxAngleSpeedRad_S(), swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
     }
 
@@ -74,8 +74,8 @@ public class ManualWithHeading {
             t.log(Level.DEBUG, "/ManualWithHeading/mode", "free");
             return DriveUtil.scale(
                     twist1_1,
-                    m_speedLimits.getMaxSpeedM_S(),
-                    m_speedLimits.getMaxAngleSpeedRad_S());
+                    m_swerveKinodynamics.getMaxSpeedM_S(),
+                    m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         }
 
         // take the short path
@@ -93,8 +93,8 @@ public class ManualWithHeading {
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(
                 twist1_1,
-                m_speedLimits.getMaxSpeedM_S(),
-                m_speedLimits.getMaxAngleSpeedRad_S());
+                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         // the snap overrides the user input for omega.
         double thetaFF = m_setpoint.velocity;
 
@@ -102,8 +102,8 @@ public class ManualWithHeading {
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB,
-                -m_speedLimits.getMaxAngleSpeedRad_S(),
-                m_speedLimits.getMaxAngleSpeedRad_S());
+                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
         double headingMeasurement = currentRotation.getRadians();

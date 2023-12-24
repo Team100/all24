@@ -22,7 +22,7 @@ class DriveManuallyTest {
         Supplier<ManualMode.Mode> mode = () -> desiredMode;
         Supplier<Twist2d> twistSupplier = () -> desiredTwist;
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -31,7 +31,7 @@ class DriveManuallyTest {
                 twistSupplier,
                 robotDrive,
                 new MockHeading(),
-                speedLimits,
+                swerveKinodynamics,
                 () -> null, 
                 thetaController,
                 () -> null,

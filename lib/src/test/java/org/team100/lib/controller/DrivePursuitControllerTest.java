@@ -9,7 +9,6 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
@@ -24,7 +23,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DrivePursuitControllerTest {
     private static final double kDelta = 0.001;
@@ -32,7 +30,7 @@ class DrivePursuitControllerTest {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
-    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
+
     private static final SwerveKinodynamics kSmoothKinematicLimits = 
     SwerveKinodynamicsFactory.get(Identity.BLANK, false);
 
@@ -54,7 +52,7 @@ class DrivePursuitControllerTest {
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
@@ -133,10 +131,10 @@ class DrivePursuitControllerTest {
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
-            assertEquals(-7.09, path_setpoint.state().getPose().getY(), 0.01);
+            assertEquals(-7.10, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(2.88, path_setpoint.getTimeS(), 0.05);
-            assertEquals(3.810, path_setpoint.velocityM_S(), 0.001);
+            assertEquals(3.819, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0.002, path_setpoint.acceleration(), 0.001);
 
             Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
@@ -150,10 +148,9 @@ class DrivePursuitControllerTest {
 
     @Test
     void testPreviewDt() {
-        SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
         SwerveKinodynamics limits = 
           SwerveKinodynamicsFactory.get(Identity.BLANK, false);
-                  TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+                  TrajectoryPlanner planner = new TrajectoryPlanner(limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -206,9 +203,8 @@ class DrivePursuitControllerTest {
 
     @Test
     void testNearPreviewDt() {
-        SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
-        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));

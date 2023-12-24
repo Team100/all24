@@ -16,7 +16,6 @@ import org.team100.lib.timing.YawRateConstraint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public class TrajectoryPlanner {
     private static final double kMaxDx = 0.0127; // m
@@ -25,13 +24,9 @@ public class TrajectoryPlanner {
     private static final double kMaxYawRateRadS = 3.0;
     private static final double kMaxCentripetalAccel = 10.0;// 1.524; // m/s^2
 
-    private final SwerveDriveKinematics m_kinematics;
     private final SwerveKinodynamics m_limits;
 
-    public TrajectoryPlanner(
-            SwerveDriveKinematics kinematics,
-            SwerveKinodynamics limits) {
-        m_kinematics = kinematics;
+    public TrajectoryPlanner(SwerveKinodynamics limits) {
         m_limits = limits;
     }
 
@@ -89,8 +84,7 @@ public class TrajectoryPlanner {
             trajectory = new Path100(flipped_points);
         }
 
-        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_kinematics,
-                m_limits);
+        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_limits);
         final YawRateConstraint yaw_constraint = new YawRateConstraint(kMaxYawRateRadS);
 
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(

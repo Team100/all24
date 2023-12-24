@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
@@ -38,6 +39,8 @@ public class SwerveKinodynamics {
     private final double m_MaxSteeringVelocity; // rad/s
     private final double m_MaxCapsizeAccel; // m/s^2
 
+    private final SwerveDriveKinematics m_kinematics;
+
     // TODO: add show mode here as a multiplier.
 
     /** Use the factory */
@@ -51,7 +54,9 @@ public class SwerveKinodynamics {
             double maxDriveAcceleration,
             double maxDriveDeceleration,
             double maxSteeringVelocity,
-            double maxCapsizeAccel
+            double maxCapsizeAccel,
+
+            SwerveDriveKinematics kinematics
 
     ) {
         m_maxSpeedM_S = maxSpeedM_S;
@@ -64,6 +69,8 @@ public class SwerveKinodynamics {
         m_MaxDriveDeceleration = maxDriveDeceleration;
         m_MaxSteeringVelocity = maxSteeringVelocity;
         m_MaxCapsizeAccel = maxCapsizeAccel;
+
+        m_kinematics = kinematics;
     }
 
     public TrapezoidProfile.Constraints getAngleConstraints() {
@@ -112,6 +119,10 @@ public class SwerveKinodynamics {
 
     public double getMaxCapsizeAccel() {
         return m_MaxCapsizeAccel;
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return m_kinematics;
     }
 
 }

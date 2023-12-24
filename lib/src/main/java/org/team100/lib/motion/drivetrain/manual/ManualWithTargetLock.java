@@ -32,7 +32,7 @@ public class ManualWithTargetLock {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     private final Telemetry t = Telemetry.get();
-    private final SwerveKinodynamics m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
 
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
@@ -44,17 +44,17 @@ public class ManualWithTargetLock {
     Pose2d m_prevPose;
 
     public ManualWithTargetLock(
-            SwerveKinodynamics speedLimits,
+            SwerveKinodynamics swerveKinodynamics,
             Supplier<Translation2d> target,
             PIDController thetaController,
             BooleanSupplier trigger) {
-        m_speedLimits = speedLimits;
+        m_swerveKinodynamics = swerveKinodynamics;
         m_target = target;
         m_thetaController = thetaController;
         m_trigger = trigger;
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                speedLimits.getMaxAngleSpeedRad_S(),
-                speedLimits.getMaxAngleAccelRad_S2());
+                swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
     }
 
@@ -88,8 +88,8 @@ public class ManualWithTargetLock {
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(
                 twist1_1,
-                m_speedLimits.getMaxSpeedM_S(),
-                m_speedLimits.getMaxAngleSpeedRad_S());
+                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         double thetaFF = m_setpoint.velocity;
 
@@ -97,8 +97,8 @@ public class ManualWithTargetLock {
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB,
-                -m_speedLimits.getMaxAngleSpeedRad_S(),
-                m_speedLimits.getMaxAngleSpeedRad_S());
+                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithLockM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
         t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.position);

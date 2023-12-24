@@ -53,7 +53,6 @@ import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
 import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.simple.SimpleSubsystem;
@@ -108,7 +107,6 @@ public class RobotContainer implements Testable {
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollectionInterface m_modules;
-    private final SwerveDriveKinematics m_kinematics;
     private final Command m_auton;
     private final FrameTransform m_frameTransform;
 
@@ -137,22 +135,20 @@ public class RobotContainer implements Testable {
 
         Identity identity = Identity.get();
 
-        m_kinematics = SwerveDriveKinematicsFactory.get(identity);
         Experiments experiments = new Experiments(identity);
 
         SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, kDriveCurrentLimit);
         m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
-        m_heading = HeadingFactory.get(identity, m_kinematics, m_modules);
-
-        SwerveKinodynamics speedLimits = SwerveKinodynamicsFactory.get(identity, SHOW_MODE);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(identity, SHOW_MODE);
+        m_heading = HeadingFactory.get(identity, swerveKinodynamics.getKinematics(), m_modules);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);
 
         SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-                m_kinematics,
+                swerveKinodynamics.getKinematics(),
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
@@ -173,11 +169,7 @@ public class RobotContainer implements Testable {
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(
-                experiments,
-                speedLimits,
-                m_kinematics,
-                m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(experiments, swerveKinodynamics, m_modules);
 
         // control = new JoystickControl();
         // control = new DriverXboxControl();
@@ -212,38 +204,18 @@ public class RobotContainer implements Testable {
 
         ManualMode manualMode = new ManualMode();
 
-        // slow/medium mode are now modifiers in SwerveDriveSubsystem.
-        // SpeedLimits slow = new SpeedLimits(0.4, 1.0, 0.5, 1.0);
-        // control.driveSlow().whileTrue(
-        // new DriveManually(manualMode,
-        // control::twist,
-        // m_drive,
-        // m_heading,
-        // slow,
-        // control::desiredRotation,
-        // thetaController));
-        // SpeedLimits medium = new SpeedLimits(2.0, 2.0, 0.5, 1.0);
-        // control.driveMedium().whileTrue(
-        // new DriveManually(manualMode,
-        // control::twist,
-        // m_drive,
-        // m_heading,
-        // medium,
-        // control::desiredRotation,
-        // thetaController));
-
         // TODO: make the reset configurable
         // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
-        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, speedLimits, 0));
+        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawCircle(experiments, m_drive, m_kinematics, controller);
+        m_drawCircle = new DrawCircle(experiments, m_drive, swerveKinodynamics.getKinematics(), controller);
         control.circle().whileTrue(m_drawCircle);
 
-        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, speedLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
 
         control.driveWithFancyTrajec().whileTrue(
                 new FancyTrajectory(m_drive, planner));
@@ -255,22 +227,22 @@ public class RobotContainer implements Testable {
         // make a one-meter line
         control.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> List.of(TrajectoryMaker.line(m_kinematics, x))));
+                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics.getKinematics(), x))));
 
         // make a one-meter square
         control.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> TrajectoryMaker.square(m_kinematics, x)));
+                        x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
 
         // one-meter square with reset at the corners
         control.actualCircle().whileTrue(
                 new PermissiveTrajectoryListCommand(m_drive, controller,
-                        TrajectoryMaker.permissiveSquare(m_kinematics)));
+                        TrajectoryMaker.permissiveSquare(swerveKinodynamics.getKinematics())));
 
         // one-meter square with position and velocity feedback control
         control.never().whileTrue(
                 new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(m_kinematics, x)));
+                        x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
 
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
@@ -353,30 +325,17 @@ public class RobotContainer implements Testable {
         // DRIVE
         //
 
-        // if (m_config.SHOW_MODE) {
-
         m_drive.setDefaultCommand(
                 new DriveManually(
                         manualMode,
                         control::twist,
                         m_drive,
                         m_heading,
-                        speedLimits,
+                        swerveKinodynamics,
                         control::desiredRotation,
                         thetaController,
                         control::target,
                         control::trigger));
-
-        // } else {
-        // m_drive.setDefaultCommand(
-        // new DriveWithHeading(
-        // control::twist,
-        // m_drive,
-        // m_heading,
-        // speedLimits,
-        // control::desiredRotation,
-        // thetaController));
-        // }
 
         /////////////////////////////////
         //

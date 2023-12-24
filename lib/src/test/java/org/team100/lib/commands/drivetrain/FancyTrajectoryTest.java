@@ -6,20 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
-
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class FancyTrajectoryTest {
 
     @Test
     void testSimple() {
-        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.2, 0.2);
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
-
         MockSwerveDriveSubsystem drive = new MockSwerveDriveSubsystem();
-        TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
         FancyTrajectory command = new FancyTrajectory(drive, planner);
 
         command.initialize();

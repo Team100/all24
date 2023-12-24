@@ -9,7 +9,6 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
@@ -23,12 +22,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DriveFeedforwardControllerTest {
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
-    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
     private static final SwerveKinodynamics kSmoothKinematicLimits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
 
     @Test
@@ -49,7 +46,7 @@ class DriveFeedforwardControllerTest {
                 new CentripetalAccelerationConstraint(60));
 
         // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
         double start_vel = 0;
         double end_vel = 0;
 

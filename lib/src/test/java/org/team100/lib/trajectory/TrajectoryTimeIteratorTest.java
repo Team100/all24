@@ -9,7 +9,6 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 
@@ -17,7 +16,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class TrajectoryTimeIteratorTest {
     private static final double kDelta = 0.001;
@@ -28,9 +26,8 @@ class TrajectoryTimeIteratorTest {
     @Test
     void testPreviewAndAdvance() {
 
-        SwerveDriveKinematics m_kinematics = SwerveDriveKinematicsFactory.get(Identity.BLANK);
         SwerveKinodynamics limits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
-        TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));

@@ -28,7 +28,7 @@ public class Rotate extends Command {
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final HeadingInterface m_heading;
-    private final SwerveKinodynamics m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
     private final Timer m_timer;
     private final TrapezoidProfile.State m_goalState;
     private final HolonomicDriveController3 m_controller;
@@ -40,13 +40,13 @@ public class Rotate extends Command {
     public Rotate(
             SwerveDriveSubsystemInterface drivetrain,
             HeadingInterface heading,
-            SwerveKinodynamics speedLimits,
+            SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
         m_controller = HolonomicDriveController3.withTolerance(0.1, 0.1, kXToleranceRad, kVToleranceRad_S);
         m_heading = heading;
-        m_speedLimits = speedLimits;
+        m_swerveKinodynamics = swerveKinodynamics;
         m_timer = new Timer();
         m_goalState = new TrapezoidProfile.State(targetAngleRadians, 0);
         refTheta = new TrapezoidProfile.State(0, 0);
@@ -63,8 +63,8 @@ public class Rotate extends Command {
             m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                m_speedLimits.getMaxAngleSpeedRad_S(),
-                m_speedLimits.getMaxAngleAccelRad_S2());
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
         m_timer.restart();
         prevTime = 0;
