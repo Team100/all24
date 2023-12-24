@@ -51,7 +51,7 @@ class DriveRamseteControllerTest {
         TrajectoryPlanner planner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
         double start_vel = 0;
         double end_vel = 0;
-        
+
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
         Trajectory100 trajectory = planner.generateTrajectory(
                 false,
@@ -81,9 +81,7 @@ class DriveRamseteControllerTest {
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
-            assertEquals(0, output.vxMetersPerSecond, 0.001);
-            assertEquals(0, output.vyMetersPerSecond, 0.001);
-            assertEquals(0, output.omegaRadiansPerSecond, 0.001);
+            verify(0, 0,0, output);
         }
 
         {
@@ -91,10 +89,8 @@ class DriveRamseteControllerTest {
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
-            assertEquals(-1, output.vxMetersPerSecond, 0.05);
-            assertEquals(-0.1, output.vyMetersPerSecond, 0.05);
             // turning slowly to the left
-            assertEquals(0.1, output.omegaRadiansPerSecond, 0.05);
+            verify(-1,-0.1, 0.1, output);
 
             TimedPose path_setpoint = controller.getSetpoint(4).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
@@ -115,9 +111,7 @@ class DriveRamseteControllerTest {
             // System.out.println("============8 sec============");
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new Twist2d());
-            assertEquals(-0.96, output.vxMetersPerSecond, 0.05);
-            assertEquals(-0.05, output.vyMetersPerSecond, 0.05);
-            assertEquals(0.18, output.omegaRadiansPerSecond, 0.05);
+            verify(-0.96,-0.05, 0.18, output);
 
             TimedPose path_setpoint = controller.getSetpoint(8).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.01);
@@ -135,5 +129,12 @@ class DriveRamseteControllerTest {
             assertEquals(0, heading_error.getRadians(), 0.01);
         }
     }
+
+    void verify(double vx, double vy, double omega, ChassisSpeeds output) {
+        assertEquals(vx, output.vxMetersPerSecond, 0.05);
+        assertEquals(vy, output.vyMetersPerSecond, 0.05);
+        assertEquals(omega, output.omegaRadiansPerSecond, 0.05);
+    }
+
 
 }

@@ -19,9 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * This version uses different limits for acceleration and for deceleration,
  * which better matches real robot behavior.
  * 
- * TODO: use a more realistic centripetal acceleration limit, and a better way
- * to manage it.
- * 
  * Takes a prior setpoint (ChassisSpeeds), a desired setpoint (from a driver, or
  * from a path follower), and outputs a new setpoint that respects all of the
  * kinematic constraints on module rotation speed and wheel velocity and

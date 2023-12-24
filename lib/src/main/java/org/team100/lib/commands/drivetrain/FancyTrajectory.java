@@ -40,19 +40,11 @@ public class FancyTrajectory extends Command {
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final DriveMotionController m_controller;
     private final TrajectoryPlanner m_planner;
-    // private final SwerveDriveKinematics m_kinematics;
-    // private final SwerveKinematicLimits m_limits;
 
     public FancyTrajectory(
-            SwerveDriveKinematics kinematics,
-            SwerveKinematicLimits limits,
             SwerveDriveSubsystemInterface robotDrive,
             TrajectoryPlanner planner) {
-        // m_kinematics = kinematics;
-        // m_limits = limits;
         m_robotDrive = robotDrive;
-        // TODO: try the other follower types.
-        // TODO: move this constructor out of here
         m_controller = new DrivePIDFController(false);
         m_planner = planner;
         SwerveDriveSubsystem swerveDriveSubsystem = m_robotDrive.get();
@@ -75,8 +67,6 @@ public class FancyTrajectory extends Command {
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
-        // note there are static constraints in here.
-        // mMotionPlanner = new DriveMotionPlanner();
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
@@ -89,9 +79,6 @@ public class FancyTrajectory extends Command {
                 end_vel,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        // System.out.println(trajectory);
-        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
-        // assertEquals(10, trajectory.length());
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(trajectory));
 
@@ -103,12 +90,7 @@ public class FancyTrajectory extends Command {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getPose();
         ChassisSpeeds currentSpeed = m_robotDrive.speeds();
-        // NOTE(joel): none of the controller implementations actually use the magnitude
-        // of the velocity so i'm not sure what unit they expect.
-        Twist2d velocity = new Twist2d(
-                currentSpeed.vxMetersPerSecond,
-                currentSpeed.vyMetersPerSecond,
-                currentSpeed.omegaRadiansPerSecond);
+        Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output);

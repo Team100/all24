@@ -19,11 +19,7 @@ class FancyTrajectoryTest {
 
         MockSwerveDriveSubsystem drive = new MockSwerveDriveSubsystem();
         TrajectoryPlanner planner = new TrajectoryPlanner(kinematics, kSmoothKinematicLimits);
-        FancyTrajectory command = new FancyTrajectory(
-                kinematics,
-                kSmoothKinematicLimits,
-                drive,
-                planner);
+        FancyTrajectory command = new FancyTrajectory(drive, planner);
 
         command.initialize();
         command.execute();

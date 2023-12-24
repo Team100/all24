@@ -44,9 +44,10 @@ public class SwerveModuleFactory {
             double turningOffset) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        final double kWheelDiameterMeters = 0.1015; // WCP 4 inch wheel
-        // TODO: verify the drive ratio
-        final double kDriveReduction = 5.50; // see wcproducts.com, this is the "fast" ratio.
+        // WCP 4 inch wheel
+        final double kWheelDiameterMeters = 0.1015; 
+        // see wcproducts.com, this is the "fast" ratio.
+        final double kDriveReduction = 5.50; 
         final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
         final double turningGearRatio = 1.0;
 
@@ -75,7 +76,6 @@ public class SwerveModuleFactory {
                 0.0); // kD
         driveController.setIntegratorRange(-0.01, 0.01); // Note very low windup limit.
 
-        // TODO: shorter period
         PIDController turningController2 = new PIDController(2.86, 0.06, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, -Math.PI);
         turningController2.setTolerance(0.1, 0.1);
@@ -140,13 +140,15 @@ public class SwerveModuleFactory {
             AnalogTurningEncoder.Drive turningDrive) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        final double kWheelDiameterMeters = 0.1016; // AndyMark Swerve & Steer has 4 inch wheel
-        // TODO: verify the wheel diameter
-        final double kDriveReduction = 6.67 * 9 / 10; // see andymark.com/products/swerve-and-steer
-        // TODO Temperarely added a modifyer to make this more realistic through some
-        // testing, we will need to make this a real value
+        // AndyMark Swerve & Steer has 4 inch wheel
+        final double kWheelDiameterMeters = 0.1016;
+        // see andymark.com/products/swerve-and-steer
+        // the true value is 6.67 but the measured value is 90% of that,
+        // maybe because the wheel measurement is wrong.
+        final double kDriveReduction = 6.67 * 9 / 10;
         final double driveEncoderDistancePerTurn = kWheelDiameterMeters * Math.PI / kDriveReduction;
-        final double turningGearRatio = 1.0; // andymark ma3 encoder is 1:1
+        // andymark ma3 encoder is 1:1
+        final double turningGearRatio = 1.0;
 
         FalconDriveMotor driveMotor = new FalconDriveMotor(
                 name,
@@ -163,7 +165,7 @@ public class SwerveModuleFactory {
                 turningOffset,
                 turningGearRatio, turningDrive);
 
-        CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId, turningEncoder);
+        CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId);
 
         // DRIVE PID
         PIDController driveController = new PIDController( //
@@ -171,7 +173,6 @@ public class SwerveModuleFactory {
                 0, // kI
                 0); // kD
 
-        // TODO: shorter period
         PIDController turningController2 = new PIDController(5, 0, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, Math.PI);
         turningController2.setTolerance(0.1, 0.1);
@@ -185,13 +186,6 @@ public class SwerveModuleFactory {
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
                 .25, // kS
                 0.015); // kV
-
-        // TODO: what is this?
-        // SimpleMotorFeedforward headingDriveFeedForward = new SimpleMotorFeedforward(
-        // //
-        // 0.05, // kS: friction is unimportant
-        // 0.35, // kV: from experiment; higher than AM modules, less reduction gear
-        // 0.08); // kA: I have no idea what this value should be
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
                 experiments,
@@ -212,7 +206,6 @@ public class SwerveModuleFactory {
                 turningFeedforward);
 
         // TURNING PID
-
         ChoosableProfile profile = new ChoosableProfile(
                 20 * Math.PI, // speed rad/s
                 20 * Math.PI, // accel rad/s/sturningConstraints,
@@ -259,12 +252,11 @@ public class SwerveModuleFactory {
                 AnalogTurningEncoder.Drive.DIRECT);
 
         // DRIVE PID
-        PIDController driveController = new PIDController(//
+        PIDController driveController = new PIDController(
                 0.1, // kP
                 0, // kI
                 0);// kD
 
-        // TODO: shorter period
         PIDController turningController2 = new PIDController(0.5, 0, 0, 0.02);
         turningController2.enableContinuousInput(-Math.PI, Math.PI);
         turningController2.setTolerance(0.1, 0.1);
@@ -323,8 +315,6 @@ public class SwerveModuleFactory {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(drive(name));
-        // TODO: what should the reduction be here? is the drive motor velocity
-        // command actually the velocity after reduction?
         SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(
                 Distance.instance,
                 drive(name),
@@ -349,13 +339,12 @@ public class SwerveModuleFactory {
                 driveFeedforward);
 
         SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(turning(name));
-        // TODO: what should the reduction be here? is the turning motor velocity
-        // command actually the velocity after reduction?
+
         SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(
-                Angle.instance, 
+                Angle.instance,
                 turning(name),
-                 turningMotor,
-                  1);
+                turningMotor,
+                1);
         PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(//
                 0.05, // kS

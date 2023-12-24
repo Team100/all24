@@ -100,11 +100,9 @@ class DrivePursuitControllerTest {
                     new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
             // but actually it's default cook.
-            assertEquals(-3.96, output.vxMetersPerSecond, 0.05);
-            assertEquals(-0.43, output.vyMetersPerSecond, 0.05);
             // turning slowly to the left
             // i think pure pursuit might ignore omega
-            assertEquals(0, output.omegaRadiansPerSecond, 0.05);
+            verify(-3.96,-0.43, 0, output);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
@@ -128,10 +126,8 @@ class DrivePursuitControllerTest {
                     current_state,
                     new Twist2d());
             // this is default cook again
-            assertEquals(-4, output.vxMetersPerSecond, 0.05);
             // this is more Y than PID because it looks ahead
-            assertEquals(-0.43, output.vyMetersPerSecond, 0.05);
-            assertEquals(0, output.omegaRadiansPerSecond, 0.05);
+            verify(-4, -0.43, 0, output);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
@@ -252,6 +248,12 @@ class DrivePursuitControllerTest {
                 new Pose2d(0.828, 1, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
         assertEquals(2, DrivePursuitController.previewDt(iter,
                 new Pose2d(1, 1, GeometryUtil.kRotation90)).getAsDouble(), kDelta);
+    }
+
+    void verify(double vx, double vy, double omega, ChassisSpeeds output) {
+        assertEquals(vx, output.vxMetersPerSecond, 0.05);
+        assertEquals(vy, output.vyMetersPerSecond, 0.05);
+        assertEquals(omega, output.omegaRadiansPerSecond, 0.05);
     }
 
 }

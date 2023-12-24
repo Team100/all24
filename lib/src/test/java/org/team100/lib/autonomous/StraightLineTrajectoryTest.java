@@ -12,7 +12,6 @@ import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory
 import org.team100.lib.trajectory.StraightLineTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;

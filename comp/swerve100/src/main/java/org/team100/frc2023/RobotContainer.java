@@ -251,7 +251,7 @@ public class RobotContainer implements Testable {
         TrajectoryPlanner planner = new TrajectoryPlanner(m_kinematics, swerveKinematicLimits);
 
         control.driveWithFancyTrajec().whileTrue(
-                new FancyTrajectory(m_kinematics, swerveKinematicLimits, m_drive, planner));
+                new FancyTrajectory(m_drive, planner));
 
         control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
         control.never().whileTrue(new Spin(m_drive, controller));
