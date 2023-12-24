@@ -26,14 +26,14 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Follow a fixed trajectory, using the new 254-derived trajectory and follower types.
+ * Follow a fixed trajectory, using the new 254-derived trajectory and follower
+ * types.
  * 
  * This is an experiment.
  */
 public class FancyTrajectory extends Command {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-    private static final double kMaxVoltage = 9.0;
 
     private final Telemetry t = Telemetry.get();
 
@@ -47,7 +47,7 @@ public class FancyTrajectory extends Command {
             SwerveDriveKinematics kinematics,
             SwerveKinematicLimits limits,
             SwerveDriveSubsystemInterface robotDrive,
-            TrajectoryPlanner planner            ) {
+            TrajectoryPlanner planner) {
         // m_kinematics = kinematics;
         // m_limits = limits;
         m_robotDrive = robotDrive;
@@ -80,17 +80,15 @@ public class FancyTrajectory extends Command {
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory100 trajectory = m_planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        constraints,
-                        start_vel,
-                        end_vel,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S,
-                        kMaxVoltage);
+        Trajectory100 trajectory = m_planner.generateTrajectory(
+                false,
+                waypointsM,
+                headings,
+                constraints,
+                start_vel,
+                end_vel,
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
         // System.out.println(trajectory);
         // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
         // assertEquals(10, trajectory.length());

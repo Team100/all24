@@ -24,16 +24,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DriveFeedforwardControllerTest {
-    private static final SwerveDriveKinematics kKinematics =  SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
-    
+    private static final double kMaxVel = 1.0;
+    private static final double kMaxAccel = 1.0;
+    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testFeedforwardOnly() {
-        final double kMaxVel = 1.0;
-        final double kMaxAccel = 1.0;
-        // this doesn't actually do anything.
-        final double kMaxVoltage = 9.0;
 
         // first right and then ahead
         List<Pose2d> waypoints = List.of(
@@ -63,8 +60,7 @@ class DriveFeedforwardControllerTest {
                 start_vel,
                 end_vel,
                 kMaxVel,
-                kMaxAccel,
-                kMaxVoltage);
+                kMaxAccel);
         assertEquals(1300, trajectory.length());
 
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);

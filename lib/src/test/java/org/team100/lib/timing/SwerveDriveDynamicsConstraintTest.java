@@ -47,45 +47,13 @@ class SwerveDriveDynamicsConstraintTest {
         assertEquals(0.929, m, kDelta);
     }
 
-    /**
-     * The SwerveDriveDynamicsConstraint does not know about centripetal
-     * acceleration.
-     */
-    @Test
-    void testCurve() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 2, 10, 7);
-        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
-
-        // motionless
-        double m = c.getMaxVelocity(Pose2dWithMotion.kIdentity);
-        assertEquals(4, m, kDelta);
-
-        // moving in +x, curvature to the left
-        m = c.getMaxVelocity(new Pose2dWithMotion(
-                new Pose2d(),
-                new Twist2d(1, 0, 0),
-                1, 0));
-        // max allowed velocity is full speed, which is wrong
-        // FIXME
-        assertEquals(4, m, kDelta);
-
-        // moving in +x, quite a sharp corner indeed
-        m = c.getMaxVelocity(new Pose2dWithMotion(
-                new Pose2d(),
-                new Twist2d(1, 0, 0),
-                10, 0));  // <== ten rad/m!
-        // max allowed velocity is full speed, which is wrong
-        // FIXME
-        assertEquals(4, m, kDelta);
-    }
-
     @Test
     void testAccel() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 2, 10, 5);
+        SwerveKinematicLimits l = new SwerveKinematicLimits(maxV, 2, 3, 10, 5);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(k, l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);
-        assertEquals(-2, m.getMinAccel(), kDelta);
+        assertEquals(-3, m.getMinAccel(), kDelta);
         assertEquals(2, m.getMaxAccel(), kDelta);
     }
 

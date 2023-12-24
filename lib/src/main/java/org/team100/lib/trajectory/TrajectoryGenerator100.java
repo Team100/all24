@@ -12,11 +12,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/** This is from 254 2023.  I commented out the ones that seem unused. */
+/**
+ * This is from 254 2023.
+ */
 public class TrajectoryGenerator100 {
     private static final double kMaxAccel = 2.54;
-    private static final double kMaxVoltage = 9.0;
-    public static final double kMaxVelocityMetersPerSecond = 5.05; //Calibrated 3/12 on Comp Bot
+    public static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
 
     private final TrajectoryPlanner mMotionPlanner;
     private TrajectorySet mTrajectorySet = null;
@@ -27,16 +28,12 @@ public class TrajectoryGenerator100 {
 
     public void generateTrajectories() {
         if (mTrajectorySet == null) {
-            // System.out.println("Generating trajectories...");
             mTrajectorySet = new TrajectorySet();
-            // System.out.println("Finished trajectory generation");
         }
     }
 
     public void forceRegenerateTrajectories() {
-        // System.out.println("Generating trajectories...");
         mTrajectorySet = new TrajectorySet();
-        // System.out.println("Finished trajectory generation");
     }
 
     public TrajectorySet getTrajectorySet() {
@@ -48,10 +45,15 @@ public class TrajectoryGenerator100 {
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
             final List<TimingConstraint> constraints,
-            double max_vel,  // m/s
-            double max_accel,  // m/s^2
-            double max_voltage) {
-        return mMotionPlanner.generateTrajectory(reversed, waypoints, headings, constraints, max_vel, max_accel, max_voltage);
+            double max_vel,
+            double max_accel) {
+        return mMotionPlanner.generateTrajectory(
+                reversed,
+                waypoints,
+                headings,
+                constraints,
+                max_vel,
+                max_accel);
     }
 
     public Trajectory100 generateTrajectory(
@@ -59,12 +61,19 @@ public class TrajectoryGenerator100 {
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
             final List<TimingConstraint> constraints,
-            double start_vel,  // m/s
-            double end_vel,  // m/s
-            double max_vel,  // m/s
-            double max_accel,  // m/s^2
-            double max_voltage) {
-        return mMotionPlanner.generateTrajectory(reversed, waypoints, headings, constraints, start_vel, end_vel, max_vel, max_accel, max_voltage);
+            double start_vel,
+            double end_vel,
+            double max_vel,
+            double max_accel) {
+        return mMotionPlanner.generateTrajectory(
+                reversed,
+                waypoints,
+                headings,
+                constraints,
+                start_vel,
+                end_vel,
+                max_vel,
+                max_accel);
     }
 
     public class TrajectorySet {
@@ -93,10 +102,8 @@ public class TrajectoryGenerator100 {
         public final Trajectory100 cpOutsidePickupToThirdScore;
         public final Trajectory100 cpThirdScoreToBackoff;
 
-
         public final VelocityLimitRegionConstraint center_outbound_charging_station_constraint;
         public final VelocityLimitRegionConstraint center_inbound_charging_station_constraint;
-
 
         private List<Trajectory100> allTrajectories;
 
@@ -106,18 +113,15 @@ public class TrajectoryGenerator100 {
 
         private TrajectorySet() {
 
-
             center_outbound_charging_station_constraint = new VelocityLimitRegionConstraint(
                     new Translation2d(1.0, -1.27),
                     new Translation2d(3.0, 1.27),
-                    1.25
-            );
+                    1.25);
 
             center_inbound_charging_station_constraint = new VelocityLimitRegionConstraint(
                     new Translation2d(0.0, -1.27),
                     new Translation2d(4.5, 1.27),
-                    1.25
-            );
+                    1.25);
 
             allTrajectories = new ArrayList<>();
             testTrajectory = getTestTrajectory();
@@ -167,18 +171,6 @@ public class TrajectoryGenerator100 {
             ncpThirdScoreToBackoff = getNcpThirdScoreToBackoff();
             allTrajectories.add(ncpThirdScoreToBackoff);
         }
-
-        // private void convertToM(List<Pose2d> waypoints, List<Rotation2d> headings) {
-        //     for (int i = 0; i < waypoints.size(); ++i) {
-        //         System.out.println("waypoints.add(new Pose2d(" + Units.inchesToMeters(waypoints.get(i).getTranslation().getX())
-        //                 + ", " + Units.inchesToMeters(waypoints.get(i).getTranslation().getY())
-        //                 + ", Rotation2d.fromDegrees(" + waypoints.get(i).getRotation().getDegrees()
-        //                 + ")));");
-        //         System.out.println("headings.add(Rotation2d.fromDegrees("
-        //         + headings.get(i).getDegrees()+"));");
-        //     }
-        //     System.out.println("\n\n");
-        // }
 
         private Trajectory100 getTestTrajectory() {
             List<Pose2d> waypoints = new ArrayList<>();
@@ -266,7 +258,7 @@ public class TrajectoryGenerator100 {
 
             waypoints.add(new Pose2d(1.9176, -0.762, Rotation2d.fromDegrees(180.0)));
             headings.add(Rotation2d.fromDegrees(180));
-            
+
             waypoints.add(new Pose2d(0.8176, -0.762, Rotation2d.fromDegrees(180.0)));
             headings.add(Rotation2d.fromDegrees(180));
 
@@ -404,19 +396,33 @@ public class TrajectoryGenerator100 {
             return generate(waypoints, headings, List.of(), false, 1.0, 2.0);
         }
 
-        private Trajectory100 generate(List<Pose2d> waypoints, List<Rotation2d> headings, List<TimingConstraint> constraints, boolean reversed, double percentSpeed, double percentAccel) {
+        private Trajectory100 generate(
+                List<Pose2d> waypoints,
+                List<Rotation2d> headings,
+                List<TimingConstraint> constraints,
+                boolean reversed,
+                double percentSpeed,
+                double percentAccel) {
             handleAllianceFlip(waypoints, headings);
 
-            return generateTrajectory(reversed, waypoints, headings, constraints,
-                    percentSpeed * kMaxVelocityMetersPerSecond, percentAccel * kMaxAccel, kMaxVoltage);
+            return generateTrajectory(
+                    reversed,
+                    waypoints,
+                    headings,
+                    constraints,
+                    percentSpeed * kMaxVelocityMetersPerSecond,
+                    percentAccel * kMaxAccel);
         }
-
 
         private void handleAllianceFlip(List<Pose2d> waypoints, List<Rotation2d> headings) {
             SmartDashboard.putString("Alliance", DriverStation.getAlliance().toString());
-            if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue) {    
+            if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue) {
                 for (int i = 0; i < waypoints.size(); i++) {
-                    waypoints.set(i, new Pose2d(new Translation2d(waypoints.get(i).getTranslation().getX(), -waypoints.get(i).getTranslation().getY()), waypoints.get(i).getRotation().unaryMinus()));
+                    waypoints.set(i,
+                            new Pose2d(
+                                    new Translation2d(waypoints.get(i).getTranslation().getX(),
+                                            -waypoints.get(i).getTranslation().getY()),
+                                    waypoints.get(i).getRotation().unaryMinus()));
                 }
                 for (int i = 0; i < headings.size(); i++) {
                     headings.set(i, headings.get(i).unaryMinus());
@@ -435,7 +441,8 @@ public class TrajectoryGenerator100 {
             headings.add(Rotation2d.fromDegrees(90.0));
             waypoints.add(new Pose2d(6.0, 0.20, Rotation2d.fromDegrees(0.0)));
             headings.add(Rotation2d.fromDegrees(0.0));
-            return generate(waypoints, headings, List.of(center_outbound_charging_station_constraint), false, 0.8, 1.375);
+            return generate(waypoints, headings, List.of(center_outbound_charging_station_constraint), false, 0.8,
+                    1.375);
         }
 
         private Trajectory100 getCoopFirstPickupToCoopSecondScore() {
@@ -449,7 +456,8 @@ public class TrajectoryGenerator100 {
             headings.add(Rotation2d.fromDegrees(180.0));
             waypoints.add(new Pose2d(0.2, -0.40, Rotation2d.fromDegrees(180.0)));
             headings.add(Rotation2d.fromDegrees(180.0));
-            return generate(waypoints, headings, List.of(center_inbound_charging_station_constraint), false, 0.8, 1.375);
+            return generate(waypoints, headings, List.of(center_inbound_charging_station_constraint), false, 0.8,
+                    1.375);
         }
 
         public Trajectory100 getNcpThirdScoreToBackoff() {
@@ -485,23 +493,6 @@ public class TrajectoryGenerator100 {
             headings.add(Rotation2d.fromDegrees(180.0));
             return generate(waypoints, headings, List.of(center_outbound_charging_station_constraint), false, 0.8, 1.0);
         }
-
-        // private Trajectory getRedNoTurnNCPRightScoringPositionToNCPFirstPickup() {
-        //     List<Pose2d> waypoints = new ArrayList<>();
-        //     List<Rotation2d> headings = new ArrayList<>();
-        //     waypoints.add(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0)));
-        //     headings.add(Rotation2d.fromDegrees(180));
-        //     waypoints.add(new Pose2d(92.5, 10, Rotation2d.fromDegrees(0)));
-        //     headings.add(Rotation2d.fromDegrees(90));
-        //     waypoints.add(new Pose2d(185, 25, Rotation2d.fromDegrees(0)));
-        //     headings.add(Rotation2d.fromDegrees(0));
-        //     System.out.println(new Object() {}
-        //             .getClass()
-        //             .getEnclosingMethod()
-        //             .getName());
-        //     convertToM(waypoints, headings);
-        //     return generate(waypoints, headings, List.of(), false, 0.5, 1.0);
-        // }
 
         private Trajectory100 getNCPScoringtoCubePickup() {
             List<Pose2d> waypoints = new ArrayList<>();

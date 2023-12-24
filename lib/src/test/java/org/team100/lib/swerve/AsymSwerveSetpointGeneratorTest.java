@@ -17,7 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 class AsymSwerveSetpointGeneratorTest {
     private static final double kDelta = 0.001;
     private final static double kDt = 0.02; // s
-    private final static SwerveDriveKinematics kKinematics =  SwerveDriveKinematicsFactory.get(0.616, 0.616);
+    private final static SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.616, 0.616);
     private final static SwerveKinematicLimits kKinematicLimits = new SwerveKinematicLimits(
             5, 10, 10, Math.toRadians(1500), 7);
 
@@ -99,7 +99,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testLimiting() {
-        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491,0.765);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 7);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics, limits);
@@ -134,7 +134,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testNotLimiting() {
-        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491,0.765);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
         // high centripetal limit to stay out of the way
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 20);
@@ -161,7 +161,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testLimitingALittle() {
-        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491,0.765);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
         // high centripetal limit to stay out of the way
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 20);
@@ -194,7 +194,7 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testLowCentripetal() {
-        SwerveDriveKinematics kinematics =  SwerveDriveKinematicsFactory.get(0.491, 0.765);
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
         // very low centripetal limit so we can see it
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 2);
@@ -323,6 +323,71 @@ class AsymSwerveSetpointGeneratorTest {
         // where the governing constraint was the steering one, s = 0.048.
         assertEquals(0.048, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
         assertEquals(0.476, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+    }
+
+    /**
+     * What happens when the setpoint is too fast, the setpoint generator tries to
+     * slow down without violating the decel and centripetal constraints.
+     */
+    @Test
+    void testOverspeed() {
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
+        // very high decel and centripetal limit allows immediate reduction to max
+        // allowed speed.
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(
+                5, 2, 300, 5, 300);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics, limits);
+
+        // initial speed is faster than possible.
+        ChassisSpeeds initialSpeeds = new ChassisSpeeds(10, 0, 0);
+        SwerveModuleState[] initialStates = new SwerveModuleState[] {
+                new SwerveModuleState(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState(10, GeometryUtil.kRotationZero)
+        };
+        SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
+
+        // desired speed is faster than possible.
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(10, 0, 0);
+
+        setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
+        assertEquals(5, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+    }
+
+    /**
+     * A linear setpoint that's fine, but a lot of curvature. In this case, the
+     * centripetal constraint means the robot should slow down, but the same
+     * centripetal constraint also limits the deceleration.
+     */
+    @Test
+    void testOverspeedCentripetal() {
+        SwerveDriveKinematics kinematics = SwerveDriveKinematicsFactory.get(0.491, 0.765);
+        // very high decel and centripetal limit allows immediate reduction to max
+        // allowed speed.
+        SwerveKinematicLimits limits = new SwerveKinematicLimits(
+                5, 2000, 3000, 5, 3);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics, limits);
+
+        // initial speed is faster than possible.
+        ChassisSpeeds initialSpeeds = new ChassisSpeeds(5, 0, 0);
+        SwerveModuleState[] initialStates = new SwerveModuleState[] {
+                new SwerveModuleState(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState(10, GeometryUtil.kRotationZero)
+        };
+        SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
+
+        // desired speed is faster than possible.
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(0, 5, 0);
+
+        setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
+        assertEquals(4.957, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0.042, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
         assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
     }
 }

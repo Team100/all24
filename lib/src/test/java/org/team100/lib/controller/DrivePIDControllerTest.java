@@ -24,16 +24,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DrivePIDControllerTest {
-    private static final SwerveDriveKinematics kKinematics =  SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
+
+    private static final double kMaxVel = 1.0;
+    private static final double kMaxAccel = 1.0;
+
+    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testPIDControl() {
-        final double kMaxVel = 1.0;
-        final double kMaxAccel = 1.0;
-        // this doesn't actually do anything.
-        final double kMaxVoltage = 9.0;
-
         // first right and then ahead
         List<Pose2d> waypoints = List.of(
                 new Pose2d(0, 0, Rotation2d.fromDegrees(270)),
@@ -61,10 +60,8 @@ class DrivePIDControllerTest {
                 start_vel,
                 end_vel,
                 kMaxVel,
-                kMaxAccel,
-                kMaxVoltage);
-        // System.out.println(trajectory);
-        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
+                kMaxAccel);
+
         // why is this so large?
         assertEquals(1300, trajectory.length());
 

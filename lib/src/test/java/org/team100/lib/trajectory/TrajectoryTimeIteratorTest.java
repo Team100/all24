@@ -21,6 +21,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 class TrajectoryTimeIteratorTest {
     private static final double kDelta = 0.001;
 
+    private static final double kMaxVelM_S = 4;
+    private static final double kMaxAccelM_S_S = 2;
+
     @Test
     void testPreviewAndAdvance() {
 
@@ -47,10 +50,6 @@ class TrajectoryTimeIteratorTest {
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
-        double kMaxVelM_S = 4;
-        double kMaxAccelM_S_S = 2;
-        double kMaxVoltage = 9.0;
-
         Trajectory100 trajectory = planner
                 .generateTrajectory(
                         false,
@@ -60,8 +59,7 @@ class TrajectoryTimeIteratorTest {
                         startVelocity,
                         endVelocity,
                         kMaxVelM_S,
-                        kMaxAccelM_S_S,
-                        kMaxVoltage);
+                        kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 

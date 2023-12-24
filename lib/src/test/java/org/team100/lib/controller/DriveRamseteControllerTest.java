@@ -24,16 +24,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DriveRamseteControllerTest {
+    private static final double kMaxVel = 1.0;
+    private static final double kMaxAccel = 1.0;
+
     private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testRamsete() {
-        // i don't understand how ramsete is relevant here
-        final double kMaxVel = 1.0;
-        final double kMaxAccel = 1.0;
-        // this doesn't actually do anything.
-        final double kMaxVoltage = 9.0;
 
         // first right and then ahead
         List<Pose2d> waypoints = List.of(
@@ -53,6 +51,7 @@ class DriveRamseteControllerTest {
         TrajectoryPlanner planner = new TrajectoryPlanner(kKinematics, kSmoothKinematicLimits);
         double start_vel = 0;
         double end_vel = 0;
+        
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
         Trajectory100 trajectory = planner.generateTrajectory(
                 false,
@@ -62,10 +61,8 @@ class DriveRamseteControllerTest {
                 start_vel,
                 end_vel,
                 kMaxVel,
-                kMaxAccel,
-                kMaxVoltage);
-        // System.out.println(trajectory);
-        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
+                kMaxAccel);
+
         // why is this so large?
         assertEquals(1300, trajectory.length());
 

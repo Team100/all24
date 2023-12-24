@@ -27,15 +27,15 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 class DrivePursuitControllerTest {
     private static final double kDelta = 0.001;
-    private static final SwerveDriveKinematics kKinematics =  SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
+
+    private static final double kMaxVelM_S = 4;
+    private static final double kMaxAccelM_S_S = 2;
+
+    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(0.52705, 0.52705);
     private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
 
     @Test
     void testPursuit() {
-        final double kMaxVel = 1.0;
-        final double kMaxAccel = 1.0;
-        // this doesn't actually do anything.
-        final double kMaxVoltage = 9.0;
 
         // first right and then ahead
         List<Pose2d> waypoints = List.of(
@@ -63,11 +63,9 @@ class DrivePursuitControllerTest {
                 constraints,
                 start_vel,
                 end_vel,
-                kMaxVel,
-                kMaxAccel,
-                kMaxVoltage);
-        // System.out.println(trajectory);
-        // System.out.println("TRAJECTORY LENGTH: " + trajectory.length());
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
+
         // why is this so large?
         assertEquals(1300, trajectory.length());
 
@@ -102,8 +100,8 @@ class DrivePursuitControllerTest {
                     new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
             // but actually it's default cook.
-            assertEquals(-2.48, output.vxMetersPerSecond, 0.05);
-            assertEquals(-0.15, output.vyMetersPerSecond, 0.05);
+            assertEquals(-3.96, output.vxMetersPerSecond, 0.05);
+            assertEquals(-0.43, output.vyMetersPerSecond, 0.05);
             // turning slowly to the left
             // i think pure pursuit might ignore omega
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
@@ -112,9 +110,9 @@ class DrivePursuitControllerTest {
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
             assertEquals(1.69, path_setpoint.state().getHeading().getRadians(), 0.01);
-            assertEquals(4, path_setpoint.getTimeS(), 0.05);
-            assertEquals(1, path_setpoint.velocityM_S(), 0.01);
-            assertEquals(0, path_setpoint.acceleration(), 0.001);
+            assertEquals(1.87, path_setpoint.getTimeS(), 0.05);
+            assertEquals(3.74, path_setpoint.velocityM_S(), 0.01);
+            assertEquals(2, path_setpoint.acceleration(), 0.001);
 
             Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
             Translation2d translational_error = error.getTranslation();
@@ -130,17 +128,17 @@ class DrivePursuitControllerTest {
                     current_state,
                     new Twist2d());
             // this is default cook again
-            assertEquals(-2.5, output.vxMetersPerSecond, 0.05);
+            assertEquals(-4, output.vxMetersPerSecond, 0.05);
             // this is more Y than PID because it looks ahead
-            assertEquals(-0.15, output.vyMetersPerSecond, 0.05);
+            assertEquals(-0.43, output.vyMetersPerSecond, 0.05);
             assertEquals(0, output.omegaRadiansPerSecond, 0.05);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
-            assertEquals(8, path_setpoint.getTimeS(), 0.05);
-            assertEquals(1, path_setpoint.velocityM_S(), 0.001);
+            assertEquals(2.88, path_setpoint.getTimeS(), 0.05);
+            assertEquals(4, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
 
             Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
@@ -177,10 +175,6 @@ class DrivePursuitControllerTest {
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
-        double kMaxVelM_S = 4;
-        double kMaxAccelM_S_S = 2;
-        double kMaxVoltage = 9.0;
-
         Trajectory100 trajectory = planner
                 .generateTrajectory(
                         false,
@@ -190,8 +184,7 @@ class DrivePursuitControllerTest {
                         startVelocity,
                         endVelocity,
                         kMaxVelM_S,
-                        kMaxAccelM_S_S,
-                        kMaxVoltage);
+                        kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 
@@ -237,10 +230,6 @@ class DrivePursuitControllerTest {
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(60));
 
-        double kMaxVelM_S = 4;
-        double kMaxAccelM_S_S = 2;
-        double kMaxVoltage = 9.0;
-
         Trajectory100 trajectory = planner
                 .generateTrajectory(
                         false,
@@ -250,8 +239,7 @@ class DrivePursuitControllerTest {
                         startVelocity,
                         endVelocity,
                         kMaxVelM_S,
-                        kMaxAccelM_S_S,
-                        kMaxVoltage);
+                        kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 
