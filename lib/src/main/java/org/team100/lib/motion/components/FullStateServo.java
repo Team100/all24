@@ -4,7 +4,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Measure;
+import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -19,7 +19,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  * 
  * TODO: replace the PID controllers here with simple proportional feedback.
  */
-public class FullStateServo<T extends Measure> {
+public class FullStateServo<T extends Measure100> {
     // private static final double kDeadband = 0.03;
 
     private final Telemetry t = Telemetry.get();

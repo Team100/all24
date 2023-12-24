@@ -2,6 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -10,7 +11,7 @@ import edu.wpi.first.math.MathUtil;
  * 
  * TODO: make it more realistic.
  */
-public class SimulatedMotor<T> implements Motor100<T> {
+public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
 

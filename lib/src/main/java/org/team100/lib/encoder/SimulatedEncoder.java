@@ -3,14 +3,14 @@ package org.team100.lib.encoder;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Measure;
+import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Simulated encoder that integrates motor velocity to get position.
  */
-public class SimulatedEncoder<T extends Measure> implements Encoder100<T> {
+public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     private final Telemetry t = Telemetry.get();
     private final T m_measure;
     private final String m_name;

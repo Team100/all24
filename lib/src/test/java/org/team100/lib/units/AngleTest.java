@@ -10,7 +10,7 @@ class AngleTest {
     /** Modulus is periodic. */
     @Test
     void testModulus() {
-        Measure m = Angle.instance;
+        Measure100 m = Angle.instance;
         assertEquals(0, m.modulus(0), kDelta);
         assertEquals(Math.PI, m.modulus(Math.PI), kDelta);
         assertEquals(0, m.modulus(2 * Math.PI), kDelta);

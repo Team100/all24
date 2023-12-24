@@ -1,11 +1,13 @@
 package org.team100.lib.encoder;
 
+import org.team100.lib.units.Measure100;
+
 /**
  * Used for both angle and length.
  * 
  * @param <T> unit, angle or distance
  */
-public interface Encoder100<T> {
+public interface Encoder100<T extends Measure100> {
 
     /**
      * Angle or distance depending on parameter.

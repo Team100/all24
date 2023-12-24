@@ -10,7 +10,7 @@ class DistanceTest {
     /** Modulus is identity */
     @Test
     void testModulus() {
-        Measure m = Distance.instance;
+        Measure100 m = Distance.instance;
         assertEquals(0, m.modulus(0), kDelta);
         assertEquals(1, m.modulus(1), kDelta);
         assertEquals(2, m.modulus(2), kDelta);
