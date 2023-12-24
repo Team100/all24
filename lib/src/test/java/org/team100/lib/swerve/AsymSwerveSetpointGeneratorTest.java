@@ -167,9 +167,9 @@ class AsymSwerveSetpointGeneratorTest {
                 new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
         };
         SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
- //  high centripetal limit to stay out of the way
+        // high centripetal limit to stay out of the way
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
-                5, 10, 10, 5, 20); 
+                5, 10, 10, 5, 20);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics, limits);
 
         // initially at rest.
@@ -203,7 +203,7 @@ class AsymSwerveSetpointGeneratorTest {
                 new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
         };
         SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
-        //  high centripetal limit to stay out of the way
+        // high centripetal limit to stay out of the way
         SwerveKinematicLimits limits = new SwerveKinematicLimits(
                 5, 10, 10, 5, 20);
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(kinematics, limits);
@@ -234,7 +234,7 @@ class AsymSwerveSetpointGeneratorTest {
         assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
     }
 
-      @Test
+    @Test
     void testLowCentripetal() {
         // like 2023 comp bot
         double kTrackWidth = 0.491;
@@ -264,7 +264,6 @@ class AsymSwerveSetpointGeneratorTest {
         // desired speed is double the feasible accel so we should reach it in two
         // iterations.
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(0.4, 0, 0);
-        double dt = 0.02;
 
         setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
         assertEquals(0.04, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
@@ -280,20 +279,10 @@ class AsymSwerveSetpointGeneratorTest {
     /**
      * This starts full speed +x, and wants full speed +y.
      * 
-     * The optimal behavior is to apply maximum acceleration at 45 degrees.
-     * 
-     * This illustrates what the setpoint generator does, which is
-     * 
-     * (a) slow to a stop
-     * (b) turn the wheels
-     * (c) speed up again
-     * 
-     * This is obviously not what we want, but here it is.
+     * The main purpose of this test is to print the path.
      */
     @Test
     void testCentripetal() {
-        final double dt = 0.02;
-        // like 2023 comp bot
         final double kTrackWidth = 0.491;
         final double kWheelBase = 0.765;
         final Translation2d[] moduleTranslations = new Translation2d[] {
@@ -330,27 +319,20 @@ class AsymSwerveSetpointGeneratorTest {
         final ChassisSpeeds desiredSpeeds = new ChassisSpeeds(0, 4, 0);
 
         SwerveSetpoint prev = setpoint;
-
-        // track where we're going
-
         Pose2d currentPose = GeometryUtil.kPoseZero;
-
         System.out.printf("i     x     y    vx    vy drive steer     ax    ay      a\n");
 
-
         // first slow from 4 m/s to 0 m/s stop at 10 m/s^2, so 0.4s
-        for (int i = 0; i < 20; ++i) {
+        for (int i = 0; i < 40; ++i) {
             Twist2d twist = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
-            currentPose = currentPose.exp(GeometryUtil.scale(twist, dt));
+            currentPose = currentPose.exp(GeometryUtil.scale(twist, kDt));
             setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
 
             double ax = (setpoint.getChassisSpeeds().vxMetersPerSecond - prev.getChassisSpeeds().vxMetersPerSecond)
-                    / dt;
+                    / kDt;
             double ay = (setpoint.getChassisSpeeds().vyMetersPerSecond - prev.getChassisSpeeds().vyMetersPerSecond)
-                    / dt;
+                    / kDt;
             double a = Math.hypot(ax, ay);
-            // assertEquals(10, a, kDelta);
-            // assertEquals(-10, ax, kDelta);
 
             System.out.printf("%d %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
                     i, currentPose.getX(), currentPose.getY(),
@@ -362,60 +344,7 @@ class AsymSwerveSetpointGeneratorTest {
             prev = setpoint;
         }
 
-        // then turn the wheels at 5 rad/s, 1.57rad so about 0.3s
-        double prevAngle = 0;
-        for (int i = 0; i < 15; ++i) {
-            Twist2d twist = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
-            currentPose = currentPose.exp(GeometryUtil.scale(twist, dt));
-            setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
-
-            double ax = (setpoint.getChassisSpeeds().vxMetersPerSecond - prev.getChassisSpeeds().vxMetersPerSecond)
-                    / dt;
-            double ay = (setpoint.getChassisSpeeds().vyMetersPerSecond - prev.getChassisSpeeds().vyMetersPerSecond)
-                    / dt;
-            double a = Math.hypot(ax, ay);
-
-            double angle = setpoint.getModuleStates()[0].angle.getRadians();
-
-            double omega = (angle - prevAngle) / dt;
-            prevAngle = angle;
-            // assertEquals(5, omega, kDelta);
-
-            System.out.printf("%d %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
-                    i, currentPose.getX(), currentPose.getY(),
-                    setpoint.getChassisSpeeds().vxMetersPerSecond,
-                    setpoint.getChassisSpeeds().vyMetersPerSecond,
-                    setpoint.getModuleStates()[0].speedMetersPerSecond,
-                    setpoint.getModuleStates()[0].angle.getRadians(),
-                    ax, ay, a);
-            prev = setpoint;
-        }
-
-        // then accelerate in the new direction.
-        for (int i = 0; i < 25; ++i) {
-            Twist2d twist = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
-            currentPose = currentPose.exp(GeometryUtil.scale(twist, dt));
-            setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
-
-            double ax = (setpoint.getChassisSpeeds().vxMetersPerSecond - prev.getChassisSpeeds().vxMetersPerSecond)
-                    / dt;
-            double ay = (setpoint.getChassisSpeeds().vyMetersPerSecond - prev.getChassisSpeeds().vyMetersPerSecond)
-                    / dt;
-            double a = Math.hypot(ax, ay);
-            // assertEquals(8, a, kDelta);
-            // assertEquals(8, ay, kDelta);
-
-            System.out.printf("%d %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
-                    i, currentPose.getX(), currentPose.getY(),
-                    setpoint.getChassisSpeeds().vxMetersPerSecond,
-                    setpoint.getChassisSpeeds().vyMetersPerSecond,
-                    setpoint.getModuleStates()[0].speedMetersPerSecond,
-                    setpoint.getModuleStates()[0].angle.getRadians(),
-                    ax, ay, a);
-            prev = setpoint;
-        }
-
-        // at least we're going the right way now
+        // we end up going the right way
         assertEquals(0, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
         assertEquals(4, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
         assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);

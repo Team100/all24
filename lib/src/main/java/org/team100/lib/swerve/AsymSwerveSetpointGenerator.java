@@ -112,8 +112,7 @@ public class AsymSwerveSetpointGenerator {
         // we are at desiredState.
         double min_s = 1.0;
 
-        min_s = m_centripetalLimiter.enforceCentripetalLimit(
-                prev_vx, prev_vy, desired_vx, desired_vy, min_s);
+        min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, min_s);
 
         // In cases where an individual module is stopped, we want to remember the right
         // steering angle to command (since
