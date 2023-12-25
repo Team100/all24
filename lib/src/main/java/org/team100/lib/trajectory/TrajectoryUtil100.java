@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
-import org.team100.lib.spline.PoseSpline;
 import org.team100.lib.spline.QuinticHermitePoseSplineHolonomic;
 import org.team100.lib.spline.QuinticHermitePoseSplineNonholonomic;
 import org.team100.lib.spline.SplineGenerator;
@@ -26,7 +25,7 @@ public class TrajectoryUtil100 {
         return trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
     }
 
-    public static Path100 trajectoryFromSplines(final List<? extends PoseSpline> splines, double maxDx, double maxDy,
+    public static Path100 trajectoryFromSplines(final List<? extends QuinticHermitePoseSplineNonholonomic> splines, double maxDx, double maxDy,
             double maxDTheta) {
         List<Pose2dWithMotion> points = SplineGenerator.parameterizeSplines(splines, maxDx, maxDy, maxDTheta);
         return new Path100(points);

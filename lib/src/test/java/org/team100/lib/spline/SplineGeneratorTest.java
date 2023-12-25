@@ -18,7 +18,7 @@ class SplineGeneratorTest {
     void test() {
         Pose2d p1 = new Pose2d(new Translation2d(0, 0), GeometryUtil.kRotationZero);
         Pose2d p2 = new Pose2d(new Translation2d(15, 10), new Rotation2d(1, -5));
-        PoseSpline s = new QuinticHermitePoseSplineNonholonomic(p1, p2);
+        QuinticHermitePoseSplineNonholonomic s = new QuinticHermitePoseSplineNonholonomic(p1, p2);
 
         List<Pose2dWithMotion> samples = SplineGenerator.parameterizeSpline(s);
 

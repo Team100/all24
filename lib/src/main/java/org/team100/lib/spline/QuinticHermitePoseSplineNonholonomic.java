@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 
-public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
+public class QuinticHermitePoseSplineNonholonomic {
     private static final double kEpsilon = 1e-5;
     private static final double kStepSize = 1.0;
     private static final double kMinDelta = 0.001;
@@ -47,6 +49,42 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         this.y = y;
     }
 
+    /**
+     * Change in heading per distance traveled, i.e. spatial change in heading.
+     * dtheta/ds (radians/meter).
+     */
+    private double getDHeadingDs(double p) {
+        return getDHeading(p) / getVelocity(p);
+    }
+
+    /**
+     * DCurvatureDs is the change in curvature per distance traveled, i.e. the
+     * "spatial change in curvature"
+     * 
+     * dk/dp / ds/dp = dk/ds
+     * rad/mp / m/p = rad/m^2
+     */
+    private double getDCurvatureDs(double p) {
+        return getDCurvature(p) / getVelocity(p);
+    }
+
+    Pose2d getPose2d(double p) {
+        return new Pose2d(getPoint(p), getHeading(p));
+    }
+
+    public Pose2dWithMotion getPose2dWithMotion(double p) {
+        Optional<Rotation2d> course = getCourse(p);
+        double dx = course.isPresent() ? course.get().getCos() : 0.0;
+        double dy = course.isPresent() ? course.get().getSin() : 0.0;
+        double dtheta = course.isPresent() ? getDHeadingDs(p) : getDHeading(p);
+
+        return new Pose2dWithMotion(
+                getPose2d(p),
+                new Twist2d(dx, dy, dtheta),
+                getCurvature(p),
+                getDCurvatureDs(p));
+    }
+
     // Return a new spline that is a copy of this one, but with adjustments to
     // second derivatives.
     protected QuinticHermitePoseSplineNonholonomic adjustSecondDerivatives(double ddx0_adjustment,
@@ -71,10 +109,11 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
     }
 
     /**
+     * Cartesian coordinate in meters at p.
+     * 
      * @param t ranges from 0 to 1
      * @return the point on the spline for that t value
      */
-    @Override
     public Translation2d getPoint(double t) {
         return new Translation2d(x.getPosition(t), y.getPosition(t));
     }
@@ -103,24 +142,43 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         return y.getJerk(t);
     }
 
-    @Override
+    /**
+     * Velocity is the change in position per parameter, p: ds/dp (meters per p).
+     * Since p is not time, it is not "velocity" in the usual sense.
+     */
     public double getVelocity(double t) {
         return Math.hypot(dx(t), dy(t));
     }
 
-    /** For nonholonomic splines, the heading is always the course. */
-    @Override
+    /**
+     *
+     * 
+     * DHeading is the change in heading per parameter, p.
+     * dtheta/dp (radians per p).
+     * If you want radians per meter, use getDHeadingDs.
+     * 
+     * 
+     * For nonholonomic splines, the heading is always the course.
+     */
     public double getDHeading(double t) {
         return getCurvature(t);
     }
 
-    @Override
+    /**
+     * Curvature is the change in motion direction per distance traveled.
+     * rad/m.
+     * Note the denominator is distance in this case, not the parameter, p.
+     */
     public double getCurvature(double t) {
         return (dx(t) * ddy(t) - ddx(t) * dy(t))
                 / ((dx(t) * dx(t) + dy(t) * dy(t)) * Math.sqrt((dx(t) * dx(t) + dy(t) * dy(t))));
     }
 
-    @Override
+    /**
+     * DCurvature is the change in curvature per change in p.
+     * dk/dp (rad/m per p)
+     * If you want change in curvature per meter, use getDCurvatureDs.
+     */
     public double getDCurvature(double t) {
         double dx2dy2 = (dx(t) * dx(t) + dy(t) * dy(t));
         double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2
@@ -135,14 +193,24 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
     }
 
-    /** For nonholonomic splines, the heading is always the course. */
-    @Override
+    /**
+     *
+     * Heading is the direction the robot is facing, regardless of the direction of
+     * motion (course).
+     * 
+     * For nonholonomic splines, the heading is always the course.
+     */
     public Rotation2d getHeading(double t) {
         return new Rotation2d(dx(t), dy(t));
     }
 
-    /** Course is the same for holonomic and nonholonomic splines. */
-    @Override
+    /**
+     * /**
+     * Course is the direction of motion, regardless of the direction the robot is
+     * facing (heading). It's optional to account for the motionless case.
+     *
+     * Course is the same for holonomic and nonholonomic splines.
+     */
     public Optional<Rotation2d> getCourse(double t) {
         if (Math100.epsilonEquals(dx(t), 0.0) && Math100.epsilonEquals(dy(t), 0.0)) {
             return Optional.empty();
