@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
@@ -38,7 +38,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveManually extends Command {
     private final Supplier<ManualMode.Mode> m_mode;
     private final Supplier<Twist2d> m_twistSupplier;
-    private final SwerveDriveSubsystemInterface m_drive;
+    private final SwerveDriveSubsystem m_drive;
 
     private final SimpleManualModuleStates m_manualModuleStates;
     private final ManualChassisSpeeds m_manualChassisSpeeds;
@@ -51,7 +51,7 @@ public class DriveManually extends Command {
     public DriveManually(
             Supplier<ManualMode.Mode> mode,
             Supplier<Twist2d> twistSupplier,
-            SwerveDriveSubsystemInterface robotDrive,
+            SwerveDriveSubsystem robotDrive,
             HeadingInterface heading,
             SwerveKinodynamics swerveKinodynamics,
             Supplier<Rotation2d> desiredRotation,
@@ -74,8 +74,7 @@ public class DriveManually extends Command {
                 target,
                 thetaController,
                 trigger);
-        if (m_drive.get() != null)
-            addRequirements(m_drive.get());
+        addRequirements(m_drive);
     }
 
     @Override

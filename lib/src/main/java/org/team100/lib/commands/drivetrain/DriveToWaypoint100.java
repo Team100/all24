@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.List;
 
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -34,7 +34,7 @@ public class DriveToWaypoint100 extends Command {
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
 
@@ -47,15 +47,14 @@ public class DriveToWaypoint100 extends Command {
      */
     public DriveToWaypoint100(
             Pose2d goal,
-            SwerveDriveSubsystemInterface drivetrain,
+            SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override

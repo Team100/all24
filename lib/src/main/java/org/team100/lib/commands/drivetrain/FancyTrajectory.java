@@ -6,7 +6,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -36,21 +36,17 @@ public class FancyTrajectory extends Command {
 
     private final Telemetry t = Telemetry.get();
 
-    private final SwerveDriveSubsystemInterface m_robotDrive;
+    private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final TrajectoryPlanner m_planner;
 
     public FancyTrajectory(
-            SwerveDriveSubsystemInterface robotDrive,
+            SwerveDriveSubsystem robotDrive,
             TrajectoryPlanner planner) {
         m_robotDrive = robotDrive;
         m_controller = new DrivePIDFController(false);
         m_planner = planner;
-        SwerveDriveSubsystem swerveDriveSubsystem = m_robotDrive.get();
-        if (swerveDriveSubsystem != null) {
-            // it's null in tests.
-            addRequirements(swerveDriveSubsystem);
-        }
+        addRequirements(m_robotDrive);
     }
 
     @Override

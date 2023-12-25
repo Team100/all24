@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,15 +11,14 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Rotate in place at the specified speed.
  */
 public class DriveRotation extends Command {
-    private final SwerveDriveSubsystemInterface m_robotDrive;
+    private final SwerveDriveSubsystem m_robotDrive;
     private final Supplier<Double> m_rotSpeed;
 
-    public DriveRotation(SwerveDriveSubsystemInterface robotDrive,
+    public DriveRotation(SwerveDriveSubsystem robotDrive,
             Supplier<Double> rot) {
         m_robotDrive = robotDrive;
         m_rotSpeed = rot;
-        if (m_robotDrive.get() != null)
-            addRequirements(m_robotDrive.get());
+        addRequirements(m_robotDrive);
     }
 
     @Override

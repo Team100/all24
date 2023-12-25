@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +23,7 @@ public class Spin extends Command {
     private static final double kMaxSpeed = 0.5;
     private static final double kAccel = 0.5;
 
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController3 m_controller;
 
     private Translation2d m_center;
@@ -31,11 +31,10 @@ public class Spin extends Command {
     private double m_speedRad_S;
     private double m_angleRad;
 
-    public Spin(SwerveDriveSubsystemInterface swerve, HolonomicDriveController3 controller) {
+    public Spin(SwerveDriveSubsystem swerve, HolonomicDriveController3 controller) {
         m_swerve = swerve;
         m_controller = controller;
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override

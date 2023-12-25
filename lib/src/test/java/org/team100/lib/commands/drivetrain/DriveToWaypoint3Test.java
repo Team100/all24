@@ -14,7 +14,8 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
-import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -27,11 +28,15 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 class DriveToWaypoint3Test {
+
+    Fixture fixture = new Fixture();
+
     @Test
     void testSimple() {
         Pose2d goal = GeometryUtil.kPoseZero;
-        MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
-        BiFunction<SwerveState, Pose2d, Trajectory> trajectories = (x, y) -> new Trajectory(List.of(new Trajectory.State()));
+        SwerveDriveSubsystem drivetrain = fixture.drive;
+        BiFunction<SwerveState, Pose2d, Trajectory> trajectories = (x,
+                y) -> new Trajectory(List.of(new Trajectory.State()));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -50,7 +55,7 @@ class DriveToWaypoint3Test {
     /** Demonstrate how to use DriveToWaypoing to go to apriltags. */
     @Test
     void testAprilTag() throws IOException {
-        MockSwerveDriveSubsystem drivetrain = new MockSwerveDriveSubsystem();
+        SwerveDriveSubsystem drivetrain = fixture.drive;
         SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .blueLayout("2023-chargedup.json");

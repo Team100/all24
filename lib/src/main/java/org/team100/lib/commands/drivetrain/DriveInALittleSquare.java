@@ -1,7 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,7 +31,7 @@ public class DriveInALittleSquare extends Command {
     private static final double kDriveLengthM = 1;
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     final Timer m_timer;
 
     final TrapezoidProfile m_driveProfile;
@@ -43,14 +43,13 @@ public class DriveInALittleSquare extends Command {
     final TrapezoidProfile.State start = new TrapezoidProfile.State(0, 0);
     final TrapezoidProfile.State goal = new TrapezoidProfile.State(kDriveLengthM, 0);
 
-    public DriveInALittleSquare(SwerveDriveSubsystemInterface swerve) {
+    public DriveInALittleSquare(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
         m_timer = new Timer();
 
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(kMaxVel, kMaxAccel);
         m_driveProfile = new TrapezoidProfile(c);
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override

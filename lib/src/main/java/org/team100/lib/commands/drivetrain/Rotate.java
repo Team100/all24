@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
@@ -27,7 +27,7 @@ public class Rotate extends Command {
     private static final double kVToleranceRad_S = 0.003;
 
     private final Telemetry t = Telemetry.get();
-    private final SwerveDriveSubsystemInterface m_robotDrive;
+    private final SwerveDriveSubsystem m_robotDrive;
     private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Timer m_timer;
@@ -38,7 +38,7 @@ public class Rotate extends Command {
     TrapezoidProfile.State refTheta; // updated in execute(), package private for testing.
 
     public Rotate(
-            SwerveDriveSubsystemInterface drivetrain,
+            SwerveDriveSubsystem drivetrain,
             HeadingInterface heading,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
@@ -51,8 +51,7 @@ public class Rotate extends Command {
         m_goalState = new TrapezoidProfile.State(targetAngleRadians, 0);
         refTheta = new TrapezoidProfile.State(0, 0);
 
-        if (drivetrain.get() != null)
-            addRequirements(drivetrain.get());
+        addRequirements(drivetrain);
     }
 
     @Override

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixture;
-import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
@@ -15,10 +15,13 @@ import edu.wpi.first.wpilibj.simulation.SimHooks;
 class DriveInALittleSquareTest {
     private static final double kDelta = 0.001;
 
+    Fixture fixture = new Fixture();
+
+
     /** Confirm that the steering commands are simple steps. */
     @Test
     void testSteering() {
-        MockSwerveDriveSubsystem swerve = new MockSwerveDriveSubsystem();
+        SwerveDriveSubsystem swerve = fixture.drive;
         DriveInALittleSquare command = new DriveInALittleSquare(swerve);
         command.initialize();
         command.execute();
@@ -26,21 +29,19 @@ class DriveInALittleSquareTest {
         assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(2, command.m_driveProfile.totalTime(), kDelta);
-        assertEquals(0, swerve.states[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, swerve.states[0].angle.getRadians(), kDelta);
+        assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
         SimHooks.stepTiming(3.2);
         command.execute();
         assertEquals(DriveInALittleSquare.State.STEERING, command.m_state);
         assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
-        // the mock drivetrain just records what it's told to do
-        assertEquals(0, swerve.states[0].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 2, swerve.states[0].angle.getRadians(), kDelta);
+        assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(Math.PI / 2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
     }
 
     @Test
     void testLowLevel() {
-        Fixture fixture = new Fixture();
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
         command.initialize();
         assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
@@ -62,9 +63,6 @@ class DriveInALittleSquareTest {
         // the modules have not moved yet.
         assertEquals(0, fixture.drive.moduleStates()[0].angle.getRadians(), 0.01);
 
-        // SimHooks.stepTiming(0.02);
-        // command.execute();
-        // assertEquals(0, fixture.drive.moduleStates()[0].angle.getRadians(), kDelta);
 
         // wait a half second.
         // this duration matches the profile and the feedback settings
