@@ -1,6 +1,5 @@
 package org.team100.lib.spline;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -48,25 +47,27 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         this.y = y;
     }
 
-    // Return a new spline that is a copy of this one, but with adjustments to second derivatives.
-    protected QuinticHermitePoseSplineNonholonomic adjustSecondDerivatives(double ddx0_adjustment, double ddx1_adjustment, double ddy0_adjustment, double ddy1_adjustment) {
+    // Return a new spline that is a copy of this one, but with adjustments to
+    // second derivatives.
+    protected QuinticHermitePoseSplineNonholonomic adjustSecondDerivatives(double ddx0_adjustment,
+            double ddx1_adjustment, double ddy0_adjustment, double ddy1_adjustment) {
         return new QuinticHermitePoseSplineNonholonomic(
-            x.addCoefs(new QuinticHermiteSpline1d(0, 0, 0, 0, ddx0_adjustment, ddx1_adjustment)),
-            y.addCoefs(new QuinticHermiteSpline1d(0, 0, 0, 0, ddy0_adjustment, ddy1_adjustment)));
+                x.addCoefs(new QuinticHermiteSpline1d(0, 0, 0, 0, ddx0_adjustment, ddx1_adjustment)),
+                y.addCoefs(new QuinticHermiteSpline1d(0, 0, 0, 0, ddy0_adjustment, ddy1_adjustment)));
     }
 
+    /** Returns pose in the nonholonomic sense, where the rotation is the course */
     public Pose2d getStartPose() {
         return new Pose2d(
-            getPoint(0),
-            getHeading(0)
-        );
+                getPoint(0),
+                new Rotation2d(dx(0), dy(0)));
     }
 
+    /** Returns pose in the nonholonomic sense, where the rotation is the course */
     public Pose2d getEndPose() {
         return new Pose2d(
-            getPoint(1),
-            getHeading(1)
-        );
+                getPoint(1),
+                new Rotation2d(dx(1), dy(1)));
     }
 
     /**
@@ -78,11 +79,11 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         return new Translation2d(x.getPosition(t), y.getPosition(t));
     }
 
-    private double dx(double t) {
+    protected double dx(double t) {
         return x.getVelocity(t);
     }
 
-    private double dy(double t) {
+    protected double dy(double t) {
         return y.getVelocity(t);
     }
 
@@ -107,6 +108,7 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         return Math.hypot(dx(t), dy(t));
     }
 
+    /** For nonholonomic splines, the heading is always the course. */
     @Override
     public double getDHeading(double t) {
         return getCurvature(t);
@@ -114,34 +116,38 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
 
     @Override
     public double getCurvature(double t) {
-        return (dx(t) * ddy(t) - ddx(t) * dy(t)) / ((dx(t) * dx(t) + dy(t) * dy(t)) * Math.sqrt((dx(t) * dx(t) + dy
-                (t) * dy(t))));
+        return (dx(t) * ddy(t) - ddx(t) * dy(t))
+                / ((dx(t) * dx(t) + dy(t) * dy(t)) * Math.sqrt((dx(t) * dx(t) + dy(t) * dy(t))));
     }
 
     @Override
     public double getDCurvature(double t) {
         double dx2dy2 = (dx(t) * dx(t) + dy(t) * dy(t));
-        double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2 - 3 * (dx(t) * ddy(t) - ddx(t) * dy(t)) * (dx(t) * ddx(t) + dy(t) * ddy(t));
+        double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2
+                - 3 * (dx(t) * ddy(t) - ddx(t) * dy(t)) * (dx(t) * ddx(t) + dy(t) * ddy(t));
         return num / (dx2dy2 * dx2dy2 * Math.sqrt(dx2dy2));
     }
 
     private double dCurvature2(double t) {
         double dx2dy2 = (dx(t) * dx(t) + dy(t) * dy(t));
-        double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2 - 3 * (dx(t) * ddy(t) - ddx(t) * dy(t)) * (dx(t) * ddx(t) + dy(t) * ddy(t));
+        double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2
+                - 3 * (dx(t) * ddy(t) - ddx(t) * dy(t)) * (dx(t) * ddx(t) + dy(t) * ddy(t));
         return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
     }
 
+    /** For nonholonomic splines, the heading is always the course. */
     @Override
     public Rotation2d getHeading(double t) {
         return new Rotation2d(dx(t), dy(t));
     }
 
+    /** Course is the same for holonomic and nonholonomic splines. */
     @Override
     public Optional<Rotation2d> getCourse(double t) {
-        if (Math100.epsilonEquals(x.getVelocity(t), 0.0) && Math100.epsilonEquals(y.getVelocity(t), 0.0)) {
+        if (Math100.epsilonEquals(dx(t), 0.0) && Math100.epsilonEquals(dy(t), 0.0)) {
             return Optional.empty();
         }
-        return Optional.of(getHeading(t));
+        return Optional.of(new Rotation2d(dx(t), dy(t)));
     }
 
     /**
@@ -175,7 +181,8 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
     }
 
     /**
-     * Finds the optimal second derivative values for a set of splines to reduce the sum of the change in curvature
+     * Finds the optimal second derivative values for a set of splines to reduce the
+     * sum of the change in curvature
      * squared over the path
      *
      * @param splines the list of splines to optimize
@@ -195,12 +202,11 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         return prev;
     }
 
-
     /**
      * Runs a single optimization iteration
      */
     private static void runOptimizationIteration(List<QuinticHermitePoseSplineNonholonomic> splines) {
-        //can't optimize anything with less than 2 splines
+        // can't optimize anything with less than 2 splines
         if (splines.size() <= 1) {
             return;
         }
@@ -209,76 +215,101 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
         double magnitude = 0;
 
         for (int i = 0; i < splines.size() - 1; ++i) {
-            //don't try to optimize colinear points
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose()) || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+            // don't try to optimize colinear points
+            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
                 continue;
             }
             double original = sumDCurvature2(splines);
-            QuinticHermitePoseSplineNonholonomic temp, temp1;
 
-            temp = splines.get(i);
-            temp1 = splines.get(i + 1);
-            controlPoints[i] = new ControlPoint(); //holds the gradient at a control point
+            // holds the gradient at a control point
+            controlPoints[i] = new ControlPoint();
 
-            //calculate partial derivatives of sumDCurvature2
-            splines.set(i, temp.adjustSecondDerivatives(0, kEpsilon, 0, 0));
-            splines.set(i + 1, temp1.adjustSecondDerivatives(kEpsilon, 0, 0, 0));
+            // calculate partial derivatives of sumDCurvature2
+            splines.set(i, splines.get(i).adjustSecondDerivatives(0, kEpsilon, 0, 0));
+            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(kEpsilon, 0, 0, 0));
             controlPoints[i].ddx = (sumDCurvature2(splines) - original) / kEpsilon;
-            splines.set(i, temp.adjustSecondDerivatives(0, 0, 0, kEpsilon));
-            splines.set(i + 1, temp1.adjustSecondDerivatives(0, 0, kEpsilon, 0));
+
+            splines.set(i, splines.get(i).adjustSecondDerivatives(0, 0, 0, kEpsilon));
+            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(0, 0, kEpsilon, 0));
             controlPoints[i].ddy = (sumDCurvature2(splines) - original) / kEpsilon;
 
-            splines.set(i, temp);
-            splines.set(i + 1, temp1);
+            splines.set(i, splines.get(i));
+            splines.set(i + 1, splines.get(i + 1));
             magnitude += controlPoints[i].ddx * controlPoints[i].ddx + controlPoints[i].ddy * controlPoints[i].ddy;
         }
 
         magnitude = Math.sqrt(magnitude);
 
-        //minimize along the direction of the gradient
-        //first calculate 3 points along the direction of the gradient
-        Translation2d p1, p2, p3;
-        p2 = new Translation2d(0, sumDCurvature2(splines)); //middle point is at the current location
+        // minimize along the direction of the gradient
+        // first calculate 3 points along the direction of the gradient
 
-        for (int i = 0; i < splines.size() - 1; ++i) { //first point is offset from the middle location by -stepSize
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose()) || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+        // middle point is at the current location
+        Translation2d p2 = new Translation2d(0, sumDCurvature2(splines));
+
+        // first point is offset from the middle location by -stepSize
+        for (int i = 0; i < splines.size() - 1; ++i) {
+            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
                 continue;
             }
-            //normalize to step size
+
+            // why would this happen?
+            if (controlPoints[i] == null)
+                continue;
+
+            // normalize to step size
             controlPoints[i].ddx *= kStepSize / magnitude;
             controlPoints[i].ddy *= kStepSize / magnitude;
 
-            //move opposite the gradient by step size amount
+            // move opposite the gradient by step size amount
             splines.set(i, splines.get(i).adjustSecondDerivatives(0, -controlPoints[i].ddx, 0, -controlPoints[i].ddy));
-            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(-controlPoints[i].ddx, 0, -controlPoints[i].ddy, 0));
+            splines.set(i + 1,
+                    splines.get(i + 1).adjustSecondDerivatives(-controlPoints[i].ddx, 0, -controlPoints[i].ddy, 0));
         }
-        p1 = new Translation2d(-kStepSize, sumDCurvature2(splines));
 
-        for (int i = 0; i < splines.size() - 1; ++i) { //last point is offset from the middle location by +stepSize
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose()) || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+        // last point is offset from the middle location by +stepSize
+        Translation2d p1 = new Translation2d(-kStepSize, sumDCurvature2(splines));
+        for (int i = 0; i < splines.size() - 1; ++i) {
+            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
                 continue;
             }
-            //move along the gradient by 2 times the step size amount (to return to original location and move by 1
-            // step)
-            splines.set(i, splines.get(i).adjustSecondDerivatives(0, 2 * controlPoints[i].ddx, 0, 2 * controlPoints[i].ddy));
-            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(2 * controlPoints[i].ddx, 0, 2 * controlPoints[i].ddy, 0));
+
+            // why would this happen?
+            if (controlPoints[i] == null)
+                continue;
+
+            // move along the gradient by 2 times the step size amount (to return to
+            // original location and move by 1 step)
+            splines.set(i,
+                    splines.get(i).adjustSecondDerivatives(0, 2 * controlPoints[i].ddx, 0, 2 * controlPoints[i].ddy));
+            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(2 * controlPoints[i].ddx, 0,
+                    2 * controlPoints[i].ddy, 0));
         }
 
-        p3 = new Translation2d(kStepSize, sumDCurvature2(splines));
-
-        double stepSize = fitParabola(p1, p2, p3); //approximate step size to minimize sumDCurvature2 along the gradient
+        Translation2d p3 = new Translation2d(kStepSize, sumDCurvature2(splines));
+        // approximate step size to minimize sumDCurvature2 along the gradient
+        double stepSize = fitParabola(p1, p2, p3);
 
         for (int i = 0; i < splines.size() - 1; ++i) {
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose()) || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
                 continue;
             }
-            //move by the step size calculated by the parabola fit (+1 to offset for the final transformation to find
-            // p3)
+
+            // why would this happen?
+            if (controlPoints[i] == null)
+                continue;
+
+            // move by the step size calculated by the parabola fit (+1 to offset for the
+            // final transformation to find p3)
             controlPoints[i].ddx *= 1 + stepSize / kStepSize;
             controlPoints[i].ddy *= 1 + stepSize / kStepSize;
 
             splines.set(i, splines.get(i).adjustSecondDerivatives(0, controlPoints[i].ddx, 0, controlPoints[i].ddy));
-            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(controlPoints[i].ddx, 0, controlPoints[i].ddy, 0));
+            splines.set(i + 1,
+                    splines.get(i + 1).adjustSecondDerivatives(controlPoints[i].ddx, 0, controlPoints[i].ddy, 0));
         }
     }
 
@@ -288,9 +319,11 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
      * @return the x coordinate of the vertex of the parabola
      */
     private static double fitParabola(Translation2d p1, Translation2d p2, Translation2d p3) {
-        double A = (p3.getX() * (p2.getY() - p1.getY()) + p2.getX() * (p1.getY() - p3.getY()) + p1.getX() * (p3.getY() - p2.getY()));
-        double B = (p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + p2.getX() * p2.getX() * (p3.getY() - p1.getY()) + p1.getX() * p1.getX() *
-                (p2.getY() - p3.getY()));
+        double A = (p3.getX() * (p2.getY() - p1.getY()) + p2.getX() * (p1.getY() - p3.getY())
+                + p1.getX() * (p3.getY() - p2.getY()));
+        double B = (p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + p2.getX() * p2.getX() * (p3.getY() - p1.getY())
+                + p1.getX() * p1.getX() *
+                        (p2.getY() - p3.getY()));
         return -B / (2 * A);
     }
 }

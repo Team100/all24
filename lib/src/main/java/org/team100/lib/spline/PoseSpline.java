@@ -77,7 +77,8 @@ public abstract class PoseSpline {
      */
     public abstract double getVelocity(double p);
 
-    public Pose2d getPose2d(double p) {
+
+    Pose2d getPose2d(double p) {
         return new Pose2d(getPoint(p), getHeading(p));
     }
 

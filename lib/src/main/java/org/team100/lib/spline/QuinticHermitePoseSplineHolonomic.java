@@ -1,9 +1,5 @@
 package org.team100.lib.spline;
 
-import java.util.Optional;
-
-import org.team100.lib.util.Math100;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -18,9 +14,7 @@ public class QuinticHermitePoseSplineHolonomic extends QuinticHermitePoseSplineN
     public QuinticHermitePoseSplineHolonomic(Pose2d p0, Pose2d p1, Rotation2d r0, Rotation2d r1) {
         super(p0, p1);
         this.r0 = r0;
-
         double delta = r0.unaryMinus().rotateBy(r1).getRadians();
-
         theta = new QuinticHermiteSpline1d(0.0, delta, 0, 0, 0, 0);
     }
 
@@ -48,13 +42,5 @@ public class QuinticHermitePoseSplineHolonomic extends QuinticHermitePoseSplineN
     @Override
     public Rotation2d getHeading(double t) {
         return r0.rotateBy(Rotation2d.fromRadians(theta.getPosition(t)));
-    }
-
-    @Override
-    public Optional<Rotation2d> getCourse(double t) {
-        if (Math100.epsilonEquals(x.getVelocity(t), 0.0) && Math100.epsilonEquals(y.getVelocity(t), 0.0)) {
-            return Optional.empty();
-        }
-        return Optional.of(new Rotation2d(x.getVelocity(t), y.getVelocity(t)));
     }
 }
