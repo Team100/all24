@@ -11,7 +11,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathSamplePoint;
-import org.team100.lib.spline.QuinticHermitePoseSplineNonholonomic;
+import org.team100.lib.spline.QuinticHermitePoseSplineHolonomic;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 class TrajectoryUtilTest {
     @Test
     void testEmpty() {
-        List<QuinticHermitePoseSplineNonholonomic> splines = new ArrayList<>();
+        List<QuinticHermitePoseSplineHolonomic> splines = new ArrayList<>();
         double maxDx = 0.1;
         double maxDy = 0.1;
         double maxDTheta = 0.1;
@@ -31,8 +31,10 @@ class TrajectoryUtilTest {
     @Test
     void testSimple() {
         // spline is in the x direction, no curvature.
-        QuinticHermitePoseSplineNonholonomic spline = new QuinticHermitePoseSplineNonholonomic(new Pose2d(),
-                new Pose2d(1, 0, new Rotation2d())) {
+        QuinticHermitePoseSplineHolonomic spline = new QuinticHermitePoseSplineHolonomic(
+            new Pose2d(),
+                new Pose2d(1, 0, new Rotation2d()),
+                new Rotation2d(), new Rotation2d()) {
 
             @Override
             public Translation2d getPoint(double t) {
@@ -69,7 +71,7 @@ class TrajectoryUtilTest {
                 return 1;
             }
         };
-        List<QuinticHermitePoseSplineNonholonomic> splines = new ArrayList<>();
+        List<QuinticHermitePoseSplineHolonomic> splines = new ArrayList<>();
         splines.add(spline);
         double maxDx = 0.1;
         double maxDy = 0.1;
