@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -37,14 +37,14 @@ public class Oscillate extends Command {
     private final Telemetry t = Telemetry.get();
 
     private final Experiments m_experiments;
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;
     private final TriangleWave m_triangle;
     private final ParabolicWave m_parabola;
     private final Timer m_timer;
     private SwerveState m_initial;
 
-    public Oscillate(Experiments experiments, SwerveDriveSubsystemInterface swerve) {
+    public Oscillate(Experiments experiments, SwerveDriveSubsystem swerve) {
         m_experiments = experiments;
         m_swerve = swerve;
         double period = 4 * kMaxSpeed / kAccel;
@@ -52,8 +52,7 @@ public class Oscillate extends Command {
         m_triangle = new TriangleWave(kMaxSpeed, period);
         m_parabola = new ParabolicWave(kMaxSpeed * period / 4, period);
         m_timer = new Timer();
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override

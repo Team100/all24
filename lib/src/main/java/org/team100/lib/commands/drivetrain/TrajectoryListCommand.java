@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.team100.lib.controller.HolonomicFieldRelativeController;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class TrajectoryListCommand extends Command {
     private final Telemetry t = Telemetry.get();
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     final Timer m_timer;
     private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory>> m_trajectories;
@@ -41,15 +41,14 @@ public class TrajectoryListCommand extends Command {
     private boolean m_aligned;
 
     public TrajectoryListCommand(
-            SwerveDriveSubsystemInterface swerve,
+            SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
             Function<Pose2d, List<Trajectory>> trajectories) {
         m_swerve = swerve;
         m_controller = controller;
         m_timer = new Timer();
         m_trajectories = trajectories;
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override

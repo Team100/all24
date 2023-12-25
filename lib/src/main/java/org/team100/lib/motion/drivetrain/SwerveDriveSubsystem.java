@@ -20,7 +20,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSubsystemInterface {
+/**
+ * There are four mutually exclusive drive methods.
+ * We depend on CommandScheduler to enforce the mutex.
+ */
+public class SwerveDriveSubsystem extends SubsystemBase {
     // multiply field-relative speeds for medium and slow modes.
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.1;
@@ -79,13 +83,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         return m_swerveLocal.states();
     }
 
-    public void resetSetpoint(SwerveSetpoint setpoint) {
-        m_swerveLocal.resetSetpoint(setpoint);
+    public SwerveModuleState[] desiredStates() {
+        return m_swerveLocal.getDesiredStates();
     }
 
-    // this is for testing
-    public SwerveDriveSubsystem get() {
-        return this;
+    public void resetSetpoint(SwerveSetpoint setpoint) {
+        m_swerveLocal.resetSetpoint(setpoint);
     }
 
     private void updateOdometry() {
@@ -147,8 +150,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
      * steer the wheels to match the target but don't drive them. This is for the
      * beginning of trajectories, like the "square" project or any other case where
      * the new direction happens not to be aligned with the wheels.
+     * 
+     * @return true if aligned
+     * 
      */
-    @Override
     public boolean steerAtRest(Twist2d twist) {
         // System.out.println("steering ....");
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
@@ -180,7 +185,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
         m_swerveLocal.steer90();
     }
 
-    @Override
     public void stop() {
         m_swerveLocal.stop();
     }
@@ -189,7 +193,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
      * Note this doesn't include the gyro reading directly, the estimate is
      * considerably massaged by the odometry logic.
      */
-    @Override
     public Pose2d getPose() {
         return m_poseEstimator.getEstimatedPosition();
     }
@@ -203,22 +206,20 @@ public class SwerveDriveSubsystem extends SubsystemBase implements SwerveDriveSu
                 getPose().getRotation());
     }
 
-    @Override
     public SwerveState getState() {
         return new SwerveState(getPose(), getImpliedTwist2d());
     }
 
-    @Override
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
     }
 
-    @Override
+    /** The controllers are on the profiles. */
     public boolean[] atSetpoint() {
         return m_swerveLocal.atSetpoint();
     }
 
-    @Override
+    /** The profiles setpoints are at their goals. */
     public boolean[] atGoal() {
         return m_swerveLocal.atGoal();
     }

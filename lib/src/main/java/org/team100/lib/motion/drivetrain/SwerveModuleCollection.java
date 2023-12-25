@@ -5,7 +5,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /** Represents the modules in the drivetrain. */
-public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
+public class SwerveModuleCollection {
 
     private final SwerveModule100 m_frontLeft;
     private final SwerveModule100 m_frontRight;
@@ -23,7 +23,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_rearRight = rearRight;
     }
 
-    @Override
     public void setDesiredStates(SwerveModuleState[] swerveModuleStates) {
         m_frontLeft.setDesiredState(swerveModuleStates[0]);
         m_frontRight.setDesiredState(swerveModuleStates[1]);
@@ -32,7 +31,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
     }
 
     // for testing
-    @Override
     public SwerveModuleState[] getDesiredStates() {
         return new SwerveModuleState[] {
                 m_frontLeft.getDesiredState(),
@@ -52,7 +50,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
     }
 
     /** For testing only */
-    @Override
     public void setRawDesiredStates(SwerveModuleState[] swerveModuleStates) {
         m_frontLeft.setRawDesiredState(swerveModuleStates[0]);
         m_frontRight.setRawDesiredState(swerveModuleStates[1]);
@@ -60,7 +57,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_rearRight.setRawDesiredState(swerveModuleStates[3]);
     }
 
-    @Override
     public SwerveModulePosition[] positions() {
         return new SwerveModulePosition[] {
                 m_frontLeft.getPosition(),
@@ -70,7 +66,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         };
     }
 
-    @Override
     public SwerveModuleState[] states() {
         return new SwerveModuleState[] {
                 m_frontLeft.getState(),
@@ -80,7 +75,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         };
     }
 
-    @Override
     public boolean[] atSetpoint() {
         return new boolean[] {
                 m_frontLeft.atSetpoint(),
@@ -90,7 +84,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         };
     }
 
-    @Override
     public boolean[] atGoal() {
         return new boolean[] {
                 m_frontLeft.atGoal(),
@@ -100,7 +93,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         };
     }
 
-    @Override
     public void periodic() {
         m_frontLeft.periodic();
         m_frontRight.periodic();
@@ -108,7 +100,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_rearRight.periodic();
     }
 
-    @Override
     public void close() {
         m_frontLeft.close();
         m_frontRight.close();
@@ -116,7 +107,6 @@ public class SwerveModuleCollection implements SwerveModuleCollectionInterface {
         m_rearRight.close();
     }
 
-    @Override
     public void stop() {
         m_frontLeft.stop();
         m_frontRight.stop();

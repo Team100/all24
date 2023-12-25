@@ -3,17 +3,20 @@ package org.team100.lib.commands.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 class FancyTrajectoryTest {
 
+    Fixture fixture = new Fixture();
+
     @Test
     void testSimple() {
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
-        MockSwerveDriveSubsystem drive = new MockSwerveDriveSubsystem();
+        SwerveDriveSubsystem drive = fixture.drive;
         TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
         FancyTrajectory command = new FancyTrajectory(drive, planner);
 

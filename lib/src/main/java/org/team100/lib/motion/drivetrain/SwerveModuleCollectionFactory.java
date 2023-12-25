@@ -19,7 +19,7 @@ public class SwerveModuleCollectionFactory {
         m_factory = factory;
     }
 
-    public SwerveModuleCollectionInterface get() {
+    public SwerveModuleCollection get() {
         switch (m_identity) {
             case COMP_BOT:
                 System.out.println("************** WCP MODULES **************");
@@ -50,7 +50,12 @@ public class SwerveModuleCollectionFactory {
                         m_factory.SimulatedModule(kRearLeft),
                         m_factory.SimulatedModule(kRearRight));
             default:
-                return new NullSwerveModuleCollection();
+                System.out.println("WARNING: using default module collection");
+                return new SwerveModuleCollection(
+                        m_factory.SimulatedModule(kFrontLeft),
+                        m_factory.SimulatedModule(kFrontRight),
+                        m_factory.SimulatedModule(kRearLeft),
+                        m_factory.SimulatedModule(kRearRight));
         }
     }
 }

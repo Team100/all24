@@ -1,7 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -20,13 +20,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class TrajectoryCommand extends Command {
     private final Telemetry t = Telemetry.get();
     private final Trajectory m_trajectory;
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
 
     public TrajectoryCommand(
             Trajectory trajectory,
-            SwerveDriveSubsystemInterface swerve,
+            SwerveDriveSubsystem swerve,
             HolonomicDriveController3 controller) {
         m_trajectory = trajectory;
         m_swerve = swerve;

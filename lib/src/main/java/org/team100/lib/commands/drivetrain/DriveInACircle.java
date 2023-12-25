@@ -6,7 +6,7 @@ import java.util.List;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -36,7 +36,7 @@ public class DriveInACircle extends Command {
 
     private static final Telemetry t = Telemetry.get();
 
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     private double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
 
@@ -57,14 +57,13 @@ public class DriveInACircle extends Command {
      * 
      */
     public DriveInACircle(
-            SwerveDriveSubsystemInterface drivetrain,
+            SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
             double turnRatio) {
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.BiFunction;
 
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToWaypoint3 extends Command {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
-    private final SwerveDriveSubsystemInterface m_swerve;
+    private final SwerveDriveSubsystem m_swerve;
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
     private final BiFunction<SwerveState, Pose2d, Trajectory> m_trajectories;
@@ -47,7 +47,7 @@ public class DriveToWaypoint3 extends Command {
      */
     public DriveToWaypoint3(
             Pose2d goal,
-            SwerveDriveSubsystemInterface drivetrain,
+            SwerveDriveSubsystem drivetrain,
             BiFunction<SwerveState, Pose2d, Trajectory> trajectories,
             HolonomicDriveController3 controller) {
         m_goal = goal;
@@ -55,8 +55,7 @@ public class DriveToWaypoint3 extends Command {
         m_trajectories = trajectories;
         m_controller = controller;
         m_timer = new Timer();
-        if (m_swerve.get() != null)
-            addRequirements(m_swerve.get());
+        addRequirements(m_swerve);
     }
 
     @Override
