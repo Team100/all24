@@ -57,14 +57,14 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
     }
 
     /** Returns pose in the nonholonomic sense, where the rotation is the course */
-    public Pose2d getStartPose() {
+    private Pose2d getStartPose() {
         return new Pose2d(
                 getPoint(0),
                 new Rotation2d(dx(0), dy(0)));
     }
 
     /** Returns pose in the nonholonomic sense, where the rotation is the course */
-    public Pose2d getEndPose() {
+    private Pose2d getEndPose() {
         return new Pose2d(
                 getPoint(1),
                 new Rotation2d(dx(1), dy(1)));
@@ -177,7 +177,8 @@ public class QuinticHermitePoseSplineNonholonomic extends PoseSpline {
      * Makes optimization code a little more readable
      */
     private static class ControlPoint {
-        private double ddx, ddy;
+        private double ddx;
+        private double ddy;
     }
 
     /**

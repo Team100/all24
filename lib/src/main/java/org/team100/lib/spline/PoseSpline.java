@@ -17,13 +17,13 @@ public abstract class PoseSpline {
     /**
      * Cartesian coordinate in meters at p.
      */
-    public abstract Translation2d getPoint(double p);
+    protected abstract Translation2d getPoint(double p);
 
     /**
      * Heading is the direction the robot is facing, regardless of the direction of
      * motion (course).
      */
-    public abstract Rotation2d getHeading(double p);
+    protected abstract Rotation2d getHeading(double p);
 
     /**
      * Course is the direction of motion, regardless of the direction the robot is
@@ -36,13 +36,13 @@ public abstract class PoseSpline {
      * dtheta/dp (radians per p).
      * If you want radians per meter, use getDHeadingDs.
      */
-    public abstract double getDHeading(double p);
+    protected abstract double getDHeading(double p);
 
     /**
      * Change in heading per distance traveled, i.e. spatial change in heading.
      * dtheta/ds (radians/meter).
      */
-    public double getDHeadingDs(double p) {
+    private double getDHeadingDs(double p) {
         return getDHeading(p) / getVelocity(p);
     }
 
@@ -58,7 +58,7 @@ public abstract class PoseSpline {
      * dk/dp (rad/m per p)
      * If you want change in curvature per meter, use getDCurvatureDs.
      */
-    public abstract double getDCurvature(double p);
+    protected abstract double getDCurvature(double p);
 
     /**
      * DCurvatureDs is the change in curvature per distance traveled, i.e. the
@@ -67,7 +67,7 @@ public abstract class PoseSpline {
      * dk/dp / ds/dp = dk/ds
      * rad/mp / m/p = rad/m^2
      */
-    public double getDCurvatureDs(double p) {
+    private double getDCurvatureDs(double p) {
         return getDCurvature(p) / getVelocity(p);
     }
 
@@ -75,7 +75,7 @@ public abstract class PoseSpline {
      * Velocity is the change in position per parameter, p: ds/dp (meters per p).
      * Since p is not time, it is not "velocity" in the usual sense.
      */
-    public abstract double getVelocity(double p);
+    protected abstract double getVelocity(double p);
 
 
     Pose2d getPose2d(double p) {
