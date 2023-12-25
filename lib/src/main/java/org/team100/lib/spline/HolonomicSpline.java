@@ -20,23 +20,23 @@ import edu.wpi.first.math.geometry.Twist2d;
  * Note that some nonholonomic spline consumers assume that dx carries all the
  * motion; that's not true here.
  */
-public class QuinticHermitePoseSplineHolonomic {
+public class HolonomicSpline {
     private static final double kEpsilon = 1e-5;
     private static final double kStepSize = 1.0;
     private static final double kMinDelta = 0.001;
     private static final int kSamples = 100;
     private static final int kMaxIterations = 100;
 
-    private final QuinticHermiteSpline1d x;
-    private final QuinticHermiteSpline1d y;
-    private final QuinticHermiteSpline1d theta;
+    private final Spline1d x;
+    private final Spline1d y;
+    private final Spline1d theta;
     private final Rotation2d r0;
 
     /**
      * @param p0 The starting pose of the spline
      * @param p1 The ending pose of the spline
      */
-    public QuinticHermitePoseSplineHolonomic(Pose2d p0, Pose2d p1, Rotation2d r0, Rotation2d r1) {
+    public HolonomicSpline(Pose2d p0, Pose2d p1, Rotation2d r0, Rotation2d r1) {
 
         // the 1.2 here is a magic number that makes the spline look nice.
         double scale = 1.2 * GeometryUtil.distance(p0.getTranslation(), p1.getTranslation());
@@ -53,17 +53,17 @@ public class QuinticHermitePoseSplineHolonomic {
         double ddy0 = 0;
         double ddy1 = 0;
 
-        this.x = new QuinticHermiteSpline1d(x0, x1, dx0, dx1, ddx0, ddx1);
-        this.y = new QuinticHermiteSpline1d(y0, y1, dy0, dy1, ddy0, ddy1);
+        this.x = new Spline1d(x0, x1, dx0, dx1, ddx0, ddx1);
+        this.y = new Spline1d(y0, y1, dy0, dy1, ddy0, ddy1);
         this.r0 = r0;
         double delta = r0.unaryMinus().rotateBy(r1).getRadians();
-        theta = new QuinticHermiteSpline1d(0.0, delta, 0, 0, 0, 0);
+        theta = new Spline1d(0.0, delta, 0, 0, 0, 0);
     }
 
-    private QuinticHermitePoseSplineHolonomic(
-            QuinticHermiteSpline1d x,
-            QuinticHermiteSpline1d y,
-            QuinticHermiteSpline1d theta,
+    private HolonomicSpline(
+        Spline1d x,
+        Spline1d y,
+        Spline1d theta,
             Rotation2d r0) {
         this.x = x;
         this.y = y;
@@ -105,7 +105,7 @@ public class QuinticHermitePoseSplineHolonomic {
      * @param splines the list of splines to optimize
      * @return the final sumDCurvature2
      */
-    public static double optimizeSpline(List<QuinticHermitePoseSplineHolonomic> splines) {
+    public static double optimizeSpline(List<HolonomicSpline> splines) {
         int count = 0;
         double prev = sumDCurvature2(splines);
         while (count < kMaxIterations) {
@@ -137,11 +137,11 @@ public class QuinticHermitePoseSplineHolonomic {
      * Return a new spline that is a copy of this one, but with adjustments to
      * second derivatives.
      */
-    private QuinticHermitePoseSplineHolonomic adjustSecondDerivatives(double ddx0_adjustment, double ddx1_adjustment,
+    private HolonomicSpline adjustSecondDerivatives(double ddx0_adjustment, double ddx1_adjustment,
             double ddy0_adjustment, double ddy1_adjustment) {
-        return new QuinticHermitePoseSplineHolonomic(
-                x.addCoefs(new QuinticHermiteSpline1d(0, 0, 0, 0, ddx0_adjustment, ddx1_adjustment)),
-                y.addCoefs(new QuinticHermiteSpline1d(0, 0, 0, 0, ddy0_adjustment, ddy1_adjustment)),
+        return new HolonomicSpline(
+                x.addCoefs(new Spline1d(0, 0, 0, 0, ddx0_adjustment, ddx1_adjustment)),
+                y.addCoefs(new Spline1d(0, 0, 0, 0, ddy0_adjustment, ddy1_adjustment)),
                 theta,
                 r0);
     }
@@ -265,9 +265,9 @@ public class QuinticHermitePoseSplineHolonomic {
     /**
      * @return integral of dCurvature^2 over the length of multiple splines
      */
-    private static double sumDCurvature2(List<QuinticHermitePoseSplineHolonomic> splines) {
+    private static double sumDCurvature2(List<HolonomicSpline> splines) {
         double sum = 0;
-        for (QuinticHermitePoseSplineHolonomic s : splines) {
+        for (HolonomicSpline s : splines) {
             sum += s.sumDCurvature2();
         }
         return sum;
@@ -284,7 +284,7 @@ public class QuinticHermitePoseSplineHolonomic {
     /**
      * Runs a single optimization iteration
      */
-    private static void runOptimizationIteration(List<QuinticHermitePoseSplineHolonomic> splines) {
+    private static void runOptimizationIteration(List<HolonomicSpline> splines) {
         // can't optimize anything with less than 2 splines
         if (splines.size() <= 1) {
             return;

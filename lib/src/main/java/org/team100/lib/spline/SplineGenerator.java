@@ -25,7 +25,7 @@ public class SplineGenerator {
      * @return list of Pose2dWithCurvature that approximates the original spline
      */
     public static List<Pose2dWithMotion> parameterizeSpline(
-        QuinticHermitePoseSplineHolonomic s,
+        HolonomicSpline s,
             double maxDx,
             double maxDy,
             double maxDTheta,
@@ -43,22 +43,22 @@ public class SplineGenerator {
     /**
      * Convenience function to parametrize a spline from t 0 to 1
      */
-    public static List<Pose2dWithMotion> parameterizeSpline(QuinticHermitePoseSplineHolonomic s) {
+    public static List<Pose2dWithMotion> parameterizeSpline(HolonomicSpline s) {
         return parameterizeSpline(s, kMaxDX, kMaxDY, kMaxDTheta, 0.0, 1.0);
     }
 
-    public static List<Pose2dWithMotion> parameterizeSpline(QuinticHermitePoseSplineHolonomic s, double maxDx,
+    public static List<Pose2dWithMotion> parameterizeSpline(HolonomicSpline s, double maxDx,
             double maxDy,
             double maxDTheta) {
         return parameterizeSpline(s, maxDx, maxDy, maxDTheta, 0.0, 1.0);
     }
 
-    public static List<Pose2dWithMotion> parameterizeSplines(List<QuinticHermitePoseSplineHolonomic> splines) {
+    public static List<Pose2dWithMotion> parameterizeSplines(List<HolonomicSpline> splines) {
         return parameterizeSplines(splines, kMaxDX, kMaxDY, kMaxDTheta);
     }
 
     public static List<Pose2dWithMotion> parameterizeSplines(
-            List<? extends QuinticHermitePoseSplineHolonomic> splines,
+            List<? extends HolonomicSpline> splines,
             double maxDx,
             double maxDy,
             double maxDTheta) {
@@ -67,7 +67,7 @@ public class SplineGenerator {
             return rv;
         rv.add(splines.get(0).getPose2dWithMotion(0.0));
         for (int i = 0; i < splines.size(); i++) {
-            QuinticHermitePoseSplineHolonomic s = splines.get(i);
+            HolonomicSpline s = splines.get(i);
             List<Pose2dWithMotion> samples = parameterizeSpline(s, maxDx, maxDy, maxDTheta);
             samples.remove(0);
             rv.addAll(samples);
@@ -76,7 +76,7 @@ public class SplineGenerator {
     }
 
     private static void getSegmentArc(
-        QuinticHermitePoseSplineHolonomic s,
+        HolonomicSpline s,
             List<Pose2dWithMotion> rv,
             double t0,
             double t1,
