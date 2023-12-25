@@ -4,8 +4,9 @@ import java.util.Set;
 
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -45,7 +46,7 @@ public class TestRunner extends Command {
                 driveManuallyTest::treatment,
                 drivetrain,
                 m_container.getHeading(),
-                new SpeedLimits(1, 1, 1, 1),
+                SwerveKinodynamicsFactory.forTest(),
                 () -> null,
                 thetaController,
                 () -> null,

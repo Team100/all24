@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -14,17 +14,17 @@ import edu.wpi.first.math.geometry.Twist2d;
  */
 public class ManualFieldRelativeSpeeds {
     private final Telemetry t = Telemetry.get();
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public ManualFieldRelativeSpeeds(SpeedLimits speedLimits) {
-        m_speedLimits = speedLimits;
+    public ManualFieldRelativeSpeeds(SwerveKinodynamics swerveKinodynamics) {
+        m_swerveKinodynamics = swerveKinodynamics;
     }
 
     public Twist2d apply(Twist2d input) {
         Twist2d twistM_S = DriveUtil.scale(
                 input,
-                m_speedLimits.speedM_S,
-                m_speedLimits.angleSpeedRad_S);
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         t.log(Level.DEBUG, "/manual field relative/twist x m_s", twistM_S.dx);
         t.log(Level.DEBUG, "/manual field relative/twist y m_s", twistM_S.dy);
         t.log(Level.DEBUG, "/manual field relative/twist theta rad_s", twistM_S.dtheta);

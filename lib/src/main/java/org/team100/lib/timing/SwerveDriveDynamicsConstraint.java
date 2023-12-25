@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.swerve.SwerveKinematicLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -17,11 +17,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * TODO: maybe it's not worth keeping?
  */
 public class SwerveDriveDynamicsConstraint implements TimingConstraint {
-    private final SwerveDriveKinematics m_kinematics;
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
-    public SwerveDriveDynamicsConstraint(SwerveDriveKinematics kinematics, SwerveKinematicLimits limits) {
-        m_kinematics = kinematics;
+    public SwerveDriveDynamicsConstraint( SwerveKinodynamics limits) {
         m_limits = limits;
     }
 
@@ -51,10 +49,10 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         // which is like moving 1 m/s.
         ChassisSpeeds chassis_speeds = new ChassisSpeeds(vx, vy, vtheta);
 
-        SwerveModuleState[] module_states = m_kinematics.toSwerveModuleStates(chassis_speeds);
+        SwerveModuleState[] module_states = m_limits.getKinematics().toSwerveModuleStates(chassis_speeds);
         double max_vel = Double.POSITIVE_INFINITY;
         for (var module : module_states) {
-            max_vel = Math.min(max_vel, m_limits.kMaxDriveVelocity / Math.abs(module.speedMetersPerSecond));
+            max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocityM_S() / Math.abs(module.speedMetersPerSecond));
         }
         return max_vel;
     }
@@ -65,7 +63,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return new MinMaxAcceleration(
-                -m_limits.kMaxDriveDeceleration,
-                m_limits.kMaxDriveAcceleration);
+                -m_limits.getMaxDriveDecelerationM_S2(),
+                m_limits.getMaxDriveAccelerationM_S2());
     }
 }

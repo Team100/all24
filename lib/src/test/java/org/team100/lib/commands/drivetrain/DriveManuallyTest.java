@@ -6,7 +6,8 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.MockSwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -21,7 +22,7 @@ class DriveManuallyTest {
         Supplier<ManualMode.Mode> mode = () -> desiredMode;
         Supplier<Twist2d> twistSupplier = () -> desiredTwist;
         MockSwerveDriveSubsystem robotDrive = new MockSwerveDriveSubsystem();
-        SpeedLimits speedLimits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -30,7 +31,7 @@ class DriveManuallyTest {
                 twistSupplier,
                 robotDrive,
                 new MockHeading(),
-                speedLimits,
+                swerveKinodynamics,
                 () -> null, 
                 thetaController,
                 () -> null,

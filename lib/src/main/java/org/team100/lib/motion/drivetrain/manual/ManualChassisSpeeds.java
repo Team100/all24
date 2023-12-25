@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -16,17 +16,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 public class ManualChassisSpeeds {
     private final Telemetry t = Telemetry.get();
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public ManualChassisSpeeds(SpeedLimits speedLimits) {
-        m_speedLimits = speedLimits;
+    public ManualChassisSpeeds(SwerveKinodynamics swerveKinodynamics) {
+        m_swerveKinodynamics = swerveKinodynamics;
     }
 
     public ChassisSpeeds apply(Twist2d input) {
         ChassisSpeeds speeds = DriveUtil.scaleChassisSpeeds(
                 input,
-                m_speedLimits.speedM_S,
-                m_speedLimits.angleSpeedRad_S);
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         t.log(Level.DEBUG, "/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
         t.log(Level.DEBUG, "/manual robot relative/vy m_s", speeds.vyMetersPerSecond);
         return speeds;

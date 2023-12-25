@@ -2,9 +2,9 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -22,17 +22,17 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Uses a profile with the holonomic drive controller.
  */
 public class Rotate extends Command {
+    private static final double kDtSec = 0.02;
     private static final double kXToleranceRad = 0.003;
-    private static final  double kVToleranceRad_S = 0.003;
+    private static final double kVToleranceRad_S = 0.003;
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_robotDrive;
     private final HeadingInterface m_heading;
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
     private final Timer m_timer;
     private final TrapezoidProfile.State m_goalState;
     private final HolonomicDriveController3 m_controller;
-    private double prevTime;
 
     TrapezoidProfile m_profile; // set in initialize(), package private for testing
     TrapezoidProfile.State refTheta; // updated in execute(), package private for testing.
@@ -40,13 +40,13 @@ public class Rotate extends Command {
     public Rotate(
             SwerveDriveSubsystemInterface drivetrain,
             HeadingInterface heading,
-            SpeedLimits speedLimits,
+            SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
         m_controller = HolonomicDriveController3.withTolerance(0.1, 0.1, kXToleranceRad, kVToleranceRad_S);
         m_heading = heading;
-        m_speedLimits = speedLimits;
+        m_swerveKinodynamics = swerveKinodynamics;
         m_timer = new Timer();
         m_goalState = new TrapezoidProfile.State(targetAngleRadians, 0);
         refTheta = new TrapezoidProfile.State(0, 0);
@@ -60,23 +60,19 @@ public class Rotate extends Command {
         m_controller.reset();
         ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
         refTheta = new TrapezoidProfile.State(
-            m_robotDrive.getPose().getRotation().getRadians(),
+                m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                m_speedLimits.angleSpeedRad_S,
-                m_speedLimits.angleAccelRad_S2);
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
         m_timer.restart();
-        prevTime = 0;
     }
 
     @Override
     public void execute() {
-        double now = m_timer.get();
         // reference
-        double dt = now - prevTime;
-        refTheta = m_profile.calculate(dt, m_goalState, refTheta);
-        prevTime = now;
+        refTheta = m_profile.calculate(kDtSec, m_goalState, refTheta);
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
 

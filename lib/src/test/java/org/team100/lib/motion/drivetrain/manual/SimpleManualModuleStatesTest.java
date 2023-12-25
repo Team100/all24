@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -14,7 +15,7 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testZero() {
-        SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
         Twist2d input = new Twist2d();
         SwerveModuleState[] ms = s.apply(input);
@@ -31,7 +32,7 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testAngle() {
-        SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
         Twist2d input =  new Twist2d(0, 0, 0.5);
         SwerveModuleState[] ms = s.apply(input);
@@ -48,7 +49,7 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testDrive() {
-        SpeedLimits limits = new SpeedLimits(1, 1, 1, 1);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
         Twist2d input =  new Twist2d(0.5, 0, 0);
         SwerveModuleState[] ms = s.apply(input);

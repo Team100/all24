@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -13,7 +15,7 @@ class DriveAccelerationLimiterTest {
 
     @Test
     void testUnconstrained() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         DriveAccelerationLimiter c = new DriveAccelerationLimiter(l);
         SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
@@ -29,7 +31,7 @@ class DriveAccelerationLimiterTest {
 
     @Test
     void testConstrained() {
-        SwerveKinematicLimits l = new SwerveKinematicLimits(1, 1, 1, 1, 1);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         DriveAccelerationLimiter c = new DriveAccelerationLimiter(l);
         SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)

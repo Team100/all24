@@ -8,12 +8,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.kinematics.SwerveDriveKinematicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
-import org.team100.lib.swerve.SwerveKinematicLimits;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
@@ -28,15 +29,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class DriveMotionPlannerTest {
-    private static final SwerveDriveKinematics kKinematics = SwerveDriveKinematicsFactory.get(
-            0.52705, 0.52705);
 
-    private static final SwerveKinematicLimits kSmoothKinematicLimits = new SwerveKinematicLimits(4.5, 4.4, 4.4, 13, 7);
+    private static final SwerveKinodynamics kSmoothKinematicLimits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
 
+      
     @Test
     void testTrajectory() {
         List<Pose2d> waypoints = new ArrayList<>();
@@ -92,10 +91,8 @@ class DriveMotionPlannerTest {
 
     @Test
     void testAllTrajectories() {
-        SwerveDriveKinematics kinematics = kKinematics;
-        SwerveKinematicLimits limits = kSmoothKinematicLimits;
         DrivePIDFController controller = new DrivePIDFController(false);
-        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kinematics, limits);
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kSmoothKinematicLimits);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
         generator.generateTrajectories();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
@@ -123,7 +120,7 @@ class DriveMotionPlannerTest {
                 ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
                     // Initialilze from first chassis speeds.
-                    SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+                    SwerveModuleState[] states = kSmoothKinematicLimits.getKinematics().toSwerveModuleStates(speeds);
                     setpoint = new SwerveSetpoint(speeds, states);
                 }
 

@@ -3,6 +3,7 @@ package org.team100.lib.swerve;
 import java.util.function.DoubleBinaryOperator;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
@@ -130,15 +131,15 @@ public class SwerveUtil {
      * speeding up, but this method doesn't capture that.
      */
     public static double getMaxVelStep(
-            SwerveKinematicLimits m_limits,
+        SwerveKinodynamics m_limits,
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,
             double desired_vy_i) {
         boolean isAccel = getIsAccel(prev_vx_i, prev_vy_i, desired_vx_i, desired_vy_i);
 
-        double max_vel_step = isAccel ? kDtSec * m_limits.kMaxDriveAcceleration
-                : kDtSec * m_limits.kMaxDriveDeceleration;
+        double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
+                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
         t.log(Level.DEBUG, "/setpoint_generator/max_vel_step", max_vel_step);
         return max_vel_step;
     }
@@ -161,7 +162,7 @@ public class SwerveUtil {
      * This method projects the line onto the prev state.
      */
     public static double getMaxVelStep2(
-            SwerveKinematicLimits m_limits,
+            SwerveKinodynamics m_limits,
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,
@@ -173,8 +174,8 @@ public class SwerveUtil {
                 desired_vx_i,
                 desired_vy_i);
 
-        double max_vel_step = isAccel ? kDtSec * m_limits.kMaxDriveAcceleration
-                : kDtSec * m_limits.kMaxDriveDeceleration;
+        double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
+                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
         t.log(Level.DEBUG, "/setpoint_generator/max_vel_step", max_vel_step);
         return max_vel_step;
     }

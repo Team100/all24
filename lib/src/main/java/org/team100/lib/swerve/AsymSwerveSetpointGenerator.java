@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -34,17 +35,15 @@ public class AsymSwerveSetpointGenerator {
 
     private static final Telemetry t = Telemetry.get();
 
-    private final SwerveDriveKinematics mKinematics;
-    private final SwerveKinematicLimits m_limits;
+    private final SwerveKinodynamics m_limits;
 
-    private final CentripetalAccelerationLimiter m_centripetalLimiter;
+    private final CapsizeAccelerationLimiter m_centripetalLimiter;
     private final SteeringRateLimiter m_steeringRateLimiter;
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
 
-    public AsymSwerveSetpointGenerator(SwerveDriveKinematics kinematics, SwerveKinematicLimits limits) {
-        mKinematics = kinematics;
+    public AsymSwerveSetpointGenerator(SwerveKinodynamics limits) {
         m_limits = limits;
-        m_centripetalLimiter = new CentripetalAccelerationLimiter(limits);
+        m_centripetalLimiter = new CapsizeAccelerationLimiter(limits);
         m_steeringRateLimiter = new SteeringRateLimiter(limits);
         m_DriveAccelerationLimiter = new DriveAccelerationLimiter(limits);
     }
@@ -63,7 +62,7 @@ public class AsymSwerveSetpointGenerator {
     public SwerveSetpoint generateSetpoint(
             SwerveSetpoint prevSetpoint,
             ChassisSpeeds desiredState) {
-        SwerveModuleState[] desiredModuleStates = mKinematics.toSwerveModuleStates(desiredState);
+        SwerveModuleState[] desiredModuleStates = m_limits.getKinematics().toSwerveModuleStates(desiredState);
         desiredState = desaturate(desiredState, desiredModuleStates);
         SwerveModuleState[] prevModuleStates = prevSetpoint.getModuleStates();
         boolean need_to_steer = SwerveUtil.makeStop(desiredState, desiredModuleStates, prevModuleStates);
@@ -198,9 +197,9 @@ public class AsymSwerveSetpointGenerator {
     private ChassisSpeeds desaturate(
             ChassisSpeeds desiredState,
             SwerveModuleState[] desiredModuleStates) {
-        if (m_limits.kMaxDriveVelocity > 0.0) {
-            SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.kMaxDriveVelocity);
-            desiredState = mKinematics.toChassisSpeeds(desiredModuleStates);
+        if (m_limits.getMaxDriveVelocityM_S() > 0.0) {
+            SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.getMaxDriveVelocityM_S());
+            desiredState = m_limits.getKinematics().toChassisSpeeds(desiredModuleStates);
         }
         return desiredState;
     }
@@ -219,7 +218,7 @@ public class AsymSwerveSetpointGenerator {
                 dy,
                 dtheta,
                 min_s);
-        SwerveModuleState[] retStates = mKinematics.toSwerveModuleStates(retSpeeds);
+        SwerveModuleState[] retStates = m_limits.getKinematics().toSwerveModuleStates(retSpeeds);
         flipIfRequired(prevModuleStates, overrideSteering, retStates);
         return new SwerveSetpoint(retSpeeds, retStates);
     }

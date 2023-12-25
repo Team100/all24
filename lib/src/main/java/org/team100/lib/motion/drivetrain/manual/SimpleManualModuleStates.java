@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import org.team100.lib.motion.drivetrain.SpeedLimits;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -18,16 +18,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  */
 public class SimpleManualModuleStates {
     private final Telemetry t = Telemetry.get();
-    private final SpeedLimits m_speedLimits;
+    private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public SimpleManualModuleStates(SpeedLimits speedLimits) {
-        m_speedLimits = speedLimits;
+    public SimpleManualModuleStates(SwerveKinodynamics swerveKinodynamics) {
+        m_swerveKinodynamics = swerveKinodynamics;
     }
 
     public SwerveModuleState[] apply(Twist2d input) {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.dtheta);
-        double speedM_S = m_speedLimits.speedM_S * input.dx;
+        double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.dx;
         t.log(Level.DEBUG, "/simple manual module state/v m_s", speedM_S);
         t.log(Level.DEBUG, "/simple manual module state/angle rad", angle.getRadians());
         return new SwerveModuleState[] {
