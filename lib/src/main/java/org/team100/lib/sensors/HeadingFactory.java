@@ -1,7 +1,7 @@
 package org.team100.lib.sensors;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
+import org.team100.lib.motion.drivetrain.SwerveModuleCollection;
 
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
@@ -13,7 +13,7 @@ public class HeadingFactory {
     public static HeadingInterface get(
             Identity identity,
             SwerveDriveKinematics kinematics,
-            SwerveModuleCollectionInterface collection) {
+            SwerveModuleCollection collection) {
         switch (identity) {
             case BLANK:
                 // for simulation

@@ -1,6 +1,6 @@
 package org.team100.lib.sensors;
 
-import org.team100.lib.motion.drivetrain.SwerveModuleCollectionInterface;
+import org.team100.lib.motion.drivetrain.SwerveModuleCollection;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj.Timer;
 public class SimulatedHeading implements HeadingInterface {
     private double m_heading = 0;
     private final SwerveDriveKinematics m_kinematics;
-    private final SwerveModuleCollectionInterface m_moduleCollection;
+    private final SwerveModuleCollection m_moduleCollection;
     private double m_time = Timer.getFPGATimestamp();
 
     public SimulatedHeading(
             SwerveDriveKinematics kinematics,
-            SwerveModuleCollectionInterface collection) {
+            SwerveModuleCollection collection) {
         m_kinematics = kinematics;
         m_moduleCollection = collection;
     }

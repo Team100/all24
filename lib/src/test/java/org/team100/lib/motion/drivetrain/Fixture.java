@@ -21,7 +21,7 @@ public class Fixture {
 
     public Experiments experiments;
     public SwerveModuleFactory m_factory;
-    public SwerveModuleCollectionInterface collection;
+    public SwerveModuleCollection collection;
     public HeadingInterface heading;
     public SwerveDrivePoseEstimator poseEstimator;
     public VeeringCorrection veering;

@@ -46,14 +46,14 @@ public class SwerveLocal {
 
     private final Experiments m_experiments;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final SwerveModuleCollectionInterface m_modules;
+    private final SwerveModuleCollection m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
             Experiments experiments,
             SwerveKinodynamics swerveKinodynamics,
-            SwerveModuleCollectionInterface modules) {
+            SwerveModuleCollection modules) {
         m_experiments = experiments;
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;

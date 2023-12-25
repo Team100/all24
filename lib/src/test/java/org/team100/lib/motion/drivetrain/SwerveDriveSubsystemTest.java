@@ -20,6 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 class SwerveDriveSubsystemTest {
     @Test
     void testSimple() {
+        Fixture fixture = new Fixture();
+
         MockHeading heading = new MockHeading();
         
         Rotation2d gyroAngle = GeometryUtil.kRotationZero;
@@ -38,7 +40,7 @@ class SwerveDriveSubsystemTest {
 
         FrameTransform frameTransform = new FrameTransform();
         MockExperiments experiments = new MockExperiments();
-        SwerveModuleCollectionInterface modules = new NullSwerveModuleCollection();
+        SwerveModuleCollection modules = fixture.collection;
 
         SwerveLocal swerveLocal = new SwerveLocal(experiments, swerveKinodynamics, modules);
 
