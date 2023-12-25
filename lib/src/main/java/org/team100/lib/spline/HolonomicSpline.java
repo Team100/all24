@@ -61,9 +61,9 @@ public class HolonomicSpline {
     }
 
     private HolonomicSpline(
-        Spline1d x,
-        Spline1d y,
-        Spline1d theta,
+            Spline1d x,
+            Spline1d y,
+            Spline1d theta,
             Rotation2d r0) {
         this.x = x;
         this.y = y;
@@ -291,8 +291,108 @@ public class HolonomicSpline {
         }
 
         ControlPoint[] controlPoints = new ControlPoint[splines.size() - 1];
-        double magnitude = 0;
 
+        double magnitude = getControlPoints(splines, controlPoints);
+
+        magnitude = Math.sqrt(magnitude);
+
+        // minimize along the direction of the gradient
+        // first calculate 3 points along the direction of the gradient
+
+        // middle point is at the current location
+        Translation2d p2 = new Translation2d(0, sumDCurvature2(splines));
+
+        // first point is offset from the middle location by -stepSize
+        for (int i = 0; i < splines.size() - 1; ++i) {
+            backwards(splines, controlPoints, magnitude, i);
+        }
+
+        // last point is offset from the middle location by +stepSize
+        Translation2d p1 = new Translation2d(-kStepSize, sumDCurvature2(splines));
+        for (int i = 0; i < splines.size() - 1; ++i) {
+            forwards(splines, controlPoints, i);
+        }
+
+        Translation2d p3 = new Translation2d(kStepSize, sumDCurvature2(splines));
+        // approximate step size to minimize sumDCurvature2 along the gradient
+        double stepSize = fitParabola(p1, p2, p3);
+
+        for (int i = 0; i < splines.size() - 1; ++i) {
+            finish(splines, controlPoints, stepSize, i);
+        }
+    }
+
+    private static void finish(List<HolonomicSpline> splines, ControlPoint[] controlPoints, double stepSize, int i) {
+        if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+            return;
+        }
+
+        // why would this happen?
+        if (controlPoints[i] == null)
+            return;
+
+        // move by the step size calculated by the parabola fit (+1 to offset for the
+        // final transformation to find p3)
+        controlPoints[i].ddx *= 1 + stepSize / kStepSize;
+        controlPoints[i].ddy *= 1 + stepSize / kStepSize;
+
+        splines.set(i, splines.get(i).adjustSecondDerivatives(0, controlPoints[i].ddx, 0, controlPoints[i].ddy));
+        splines.set(i + 1,
+                splines.get(i + 1).adjustSecondDerivatives(controlPoints[i].ddx, 0, controlPoints[i].ddy, 0));
+    }
+
+    private static void forwards(List<HolonomicSpline> splines, ControlPoint[] controlPoints, int i) {
+        if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+            return;
+        }
+
+        // why would this happen?
+        if (controlPoints[i] == null)
+            return;
+
+        // move along the gradient by 2 times the step size amount (to return to
+        // original location and move by 1 step)
+        splines.set(i,
+                splines.get(i).adjustSecondDerivatives(0, 2 * controlPoints[i].ddx, 0, 2 * controlPoints[i].ddy));
+        splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(2 * controlPoints[i].ddx, 0,
+                2 * controlPoints[i].ddy, 0));
+    }
+
+    private static void backwards(
+            List<HolonomicSpline> splines,
+            ControlPoint[] controlPoints,
+            double magnitude,
+            int i) {
+        if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
+                || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+            return;
+        }
+
+        // why would this happen?
+        if (controlPoints[i] == null)
+            return;
+
+        // normalize to step size
+        controlPoints[i].ddx *= kStepSize / magnitude;
+        controlPoints[i].ddy *= kStepSize / magnitude;
+
+        // move opposite the gradient by step size amount
+        splines.set(i, splines.get(i).adjustSecondDerivatives(0, -controlPoints[i].ddx, 0, -controlPoints[i].ddy));
+        splines.set(i + 1,
+                splines.get(i + 1).adjustSecondDerivatives(-controlPoints[i].ddx, 0, -controlPoints[i].ddy, 0));
+    }
+
+    /**
+     * Extract the control points from the list of splines.
+     * 
+     * @param splines       input splines
+     * @param controlPoints output control points
+     * @return sum of ddx^2+ddy^2
+     */
+    private static double getControlPoints(List<HolonomicSpline> splines, ControlPoint[] controlPoints) {
+        double magnitude = 0;
         for (int i = 0; i < splines.size() - 1; ++i) {
             // don't try to optimize colinear points
             if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
@@ -317,79 +417,7 @@ public class HolonomicSpline {
             splines.set(i + 1, splines.get(i + 1));
             magnitude += controlPoints[i].ddx * controlPoints[i].ddx + controlPoints[i].ddy * controlPoints[i].ddy;
         }
-
-        magnitude = Math.sqrt(magnitude);
-
-        // minimize along the direction of the gradient
-        // first calculate 3 points along the direction of the gradient
-
-        // middle point is at the current location
-        Translation2d p2 = new Translation2d(0, sumDCurvature2(splines));
-
-        // first point is offset from the middle location by -stepSize
-        for (int i = 0; i < splines.size() - 1; ++i) {
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
-                continue;
-            }
-
-            // why would this happen?
-            if (controlPoints[i] == null)
-                continue;
-
-            // normalize to step size
-            controlPoints[i].ddx *= kStepSize / magnitude;
-            controlPoints[i].ddy *= kStepSize / magnitude;
-
-            // move opposite the gradient by step size amount
-            splines.set(i, splines.get(i).adjustSecondDerivatives(0, -controlPoints[i].ddx, 0, -controlPoints[i].ddy));
-            splines.set(i + 1,
-                    splines.get(i + 1).adjustSecondDerivatives(-controlPoints[i].ddx, 0, -controlPoints[i].ddy, 0));
-        }
-
-        // last point is offset from the middle location by +stepSize
-        Translation2d p1 = new Translation2d(-kStepSize, sumDCurvature2(splines));
-        for (int i = 0; i < splines.size() - 1; ++i) {
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
-                continue;
-            }
-
-            // why would this happen?
-            if (controlPoints[i] == null)
-                continue;
-
-            // move along the gradient by 2 times the step size amount (to return to
-            // original location and move by 1 step)
-            splines.set(i,
-                    splines.get(i).adjustSecondDerivatives(0, 2 * controlPoints[i].ddx, 0, 2 * controlPoints[i].ddy));
-            splines.set(i + 1, splines.get(i + 1).adjustSecondDerivatives(2 * controlPoints[i].ddx, 0,
-                    2 * controlPoints[i].ddy, 0));
-        }
-
-        Translation2d p3 = new Translation2d(kStepSize, sumDCurvature2(splines));
-        // approximate step size to minimize sumDCurvature2 along the gradient
-        double stepSize = fitParabola(p1, p2, p3);
-
-        for (int i = 0; i < splines.size() - 1; ++i) {
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
-                continue;
-            }
-
-            // why would this happen?
-            if (controlPoints[i] == null)
-                continue;
-
-            // move by the step size calculated by the parabola fit (+1 to offset for the
-            // final transformation to find p3)
-            controlPoints[i].ddx *= 1 + stepSize / kStepSize;
-            controlPoints[i].ddy *= 1 + stepSize / kStepSize;
-
-            splines.set(i, splines.get(i).adjustSecondDerivatives(0, controlPoints[i].ddx, 0, controlPoints[i].ddy));
-            splines.set(i + 1,
-                    splines.get(i + 1).adjustSecondDerivatives(controlPoints[i].ddx, 0, controlPoints[i].ddy, 0));
-        }
+        return magnitude;
     }
 
     /**
