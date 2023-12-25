@@ -25,7 +25,7 @@ public class ManualChassisSpeeds {
     public ChassisSpeeds apply(Twist2d input) {
         ChassisSpeeds speeds = DriveUtil.scaleChassisSpeeds(
                 input,
-                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         t.log(Level.DEBUG, "/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
         t.log(Level.DEBUG, "/manual robot relative/vy m_s", speeds.vyMetersPerSecond);

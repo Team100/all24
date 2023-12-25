@@ -224,7 +224,7 @@ public class SwerveLocal {
     }
 
     private void setModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxSpeedM_S());
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S());
         logImpliedChassisSpeeds(states);
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);

@@ -197,8 +197,8 @@ public class AsymSwerveSetpointGenerator {
     private ChassisSpeeds desaturate(
             ChassisSpeeds desiredState,
             SwerveModuleState[] desiredModuleStates) {
-        if (m_limits.getMaxDriveVelocity() > 0.0) {
-            SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.getMaxDriveVelocity());
+        if (m_limits.getMaxDriveVelocityM_S() > 0.0) {
+            SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.getMaxDriveVelocityM_S());
             desiredState = m_limits.getKinematics().toChassisSpeeds(desiredModuleStates);
         }
         return desiredState;

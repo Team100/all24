@@ -138,8 +138,8 @@ public class SwerveUtil {
             double desired_vy_i) {
         boolean isAccel = getIsAccel(prev_vx_i, prev_vy_i, desired_vx_i, desired_vy_i);
 
-        double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAcceleration()
-                : kDtSec * m_limits.getMaxDriveDeceleration();
+        double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
+                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
         t.log(Level.DEBUG, "/setpoint_generator/max_vel_step", max_vel_step);
         return max_vel_step;
     }
@@ -174,8 +174,8 @@ public class SwerveUtil {
                 desired_vx_i,
                 desired_vy_i);
 
-        double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAcceleration()
-                : kDtSec * m_limits.getMaxDriveDeceleration();
+        double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
+                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
         t.log(Level.DEBUG, "/setpoint_generator/max_vel_step", max_vel_step);
         return max_vel_step;
     }

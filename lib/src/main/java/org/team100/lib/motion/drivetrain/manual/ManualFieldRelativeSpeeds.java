@@ -23,7 +23,7 @@ public class ManualFieldRelativeSpeeds {
     public Twist2d apply(Twist2d input) {
         Twist2d twistM_S = DriveUtil.scale(
                 input,
-                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         t.log(Level.DEBUG, "/manual field relative/twist x m_s", twistM_S.dx);
         t.log(Level.DEBUG, "/manual field relative/twist y m_s", twistM_S.dy);

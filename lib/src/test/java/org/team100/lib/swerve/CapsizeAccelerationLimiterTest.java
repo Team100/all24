@@ -19,14 +19,13 @@ class CapsizeAccelerationLimiterTest {
     }
 
     /**
-     * total delta v is 1.414 m/s, limit is 1 m/s/s, time step is 0.02 so 0.02 m/s/s
-     * per step, which is 0.014 of the way.
+     * total delta v is 1.414 m/s.
      */
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter(l);
         double s = c.enforceCentripetalLimit(-1, 1, 1);
-        assertEquals(0.014, s, kDelta);
+        assertEquals(0.115, s, kDelta);
     }
 }

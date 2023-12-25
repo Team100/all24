@@ -74,7 +74,7 @@ public class ManualWithHeading {
             t.log(Level.DEBUG, "/ManualWithHeading/mode", "free");
             return DriveUtil.scale(
                     twist1_1,
-                    m_swerveKinodynamics.getMaxSpeedM_S(),
+                    m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                     m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         }
 
@@ -93,7 +93,7 @@ public class ManualWithHeading {
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(
                 twist1_1,
-                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         // the snap overrides the user input for omega.
         double thetaFF = m_setpoint.velocity;

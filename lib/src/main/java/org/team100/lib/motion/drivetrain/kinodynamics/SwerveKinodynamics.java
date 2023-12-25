@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
@@ -8,121 +9,136 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * 
  * Includes speed limits, dynamic constraints, and kinematics.
  * 
- * Motors are motors are better at slowing down than speeding up, so drive accel
- * and decel are included separately.
+ * This class represents *absolute maxima.*
  * 
- * The capsize limit is also a separate acceleration.
+ * Do not use this class to configure driver preferences, use a command or
+ * control instead.
  * 
- * TODO: calculate angular accel/speed based on wheelbase.
- * 
- * TODO make this center of gravity height instead, use wheelbase and track and
- * gravity to produce *capsize* accel limit, sincei t applies in line not just
- * cross track
- * 
- * TODO make a drvedynamics class that also includes kinematics and whelbase and
- * the other speedlimits thing
+ * In particular, the maximum spin rate is likely to seem quite high. Do not
+ * lower it here.
  */
 public class SwerveKinodynamics {
 
-    private final double m_maxSpeedM_S;
-    private final double m_maxAccelM_S2;
-    // TODO: derive this from dimensions
+    // configured inputs
+    private final double m_MaxDriveVelocityM_S;
+    private final double m_MaxDriveAccelerationM_S2;
+    private final double m_MaxDriveDecelerationM_S2;
+    private final double m_MaxSteeringVelocityRad_S;
+
+    // calculated
     private final double m_maxAngleSpeedRad_S;
-    // TODO: derive this from mass and dimensions
     private final double m_maxAngleAccelRad_S2;
-
-    // TODO: dedupe these
-
-    private final double m_MaxDriveVelocity; // m/s
-    private final double m_MaxDriveAcceleration; // m/s^2
-    private final double m_MaxDriveDeceleration; // m/s^2
-    private final double m_MaxSteeringVelocity; // rad/s
-    private final double m_MaxCapsizeAccel; // m/s^2
-
+    private final double m_MaxCapsizeAccelM_S2;
     private final SwerveDriveKinematics m_kinematics;
 
-    // TODO: add show mode here as a multiplier.
-
-    /** Use the factory */
+    /**
+     * Use the factory
+     * 
+     * @param maxDriveVelocity     module drive speed m/s
+     * @param maxDriveAcceleration module drive accel m/s^2
+     * @param maxDriveDeceleration module drive decel m/s^2. Should be higher than
+     *                             accel limit.
+     * @param maxSteeringVelocity  module steering axis rate rad/s
+     * @param track                meters
+     * @param wheelbase            meters
+     * @param vcg                  vertical center of gravity, meters
+     */
     SwerveKinodynamics(
-            double maxSpeedM_S,
-            double maxAccelM_S2,
-            double maxAngleSpeedRad_S,
-            double maxAngleAccelRad_S2,
-
             double maxDriveVelocity,
             double maxDriveAcceleration,
             double maxDriveDeceleration,
             double maxSteeringVelocity,
-            double maxCapsizeAccel,
+            double track,
+            double wheelbase,
+            double vcg) {
 
-            SwerveDriveKinematics kinematics
+        m_MaxDriveVelocityM_S = maxDriveVelocity;
+        m_MaxDriveAccelerationM_S2 = maxDriveAcceleration;
+        m_MaxDriveDecelerationM_S2 = maxDriveDeceleration;
+        m_MaxSteeringVelocityRad_S = maxSteeringVelocity;
 
-    ) {
-        m_maxSpeedM_S = maxSpeedM_S;
-        m_maxAccelM_S2 = maxAccelM_S2;
-        m_maxAngleSpeedRad_S = maxAngleSpeedRad_S;
-        m_maxAngleAccelRad_S2 = maxAngleAccelRad_S2;
+        // distance from center to wheel
+        double radius = Math.hypot(track / 2, wheelbase / 2);
+        m_maxAngleSpeedRad_S = m_MaxDriveVelocityM_S / radius;
+        // this assumes the robot is a uniform rectangular cuboid.
+        m_maxAngleAccelRad_S2 = 12 * m_MaxDriveAccelerationM_S2 * radius
+                / (track * track + wheelbase * wheelbase);
 
-        m_MaxDriveVelocity = maxDriveVelocity;
-        m_MaxDriveAcceleration = maxDriveAcceleration;
-        m_MaxDriveDeceleration = maxDriveDeceleration;
-        m_MaxSteeringVelocity = maxSteeringVelocity;
-        m_MaxCapsizeAccel = maxCapsizeAccel;
+        // fulcrum is the distance from the center to the nearest edge.
+        double fulcrum = Math.min(track / 2, wheelbase / 2);
+        m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / vcg);
 
-        m_kinematics = kinematics;
+        m_kinematics = get(track, wheelbase);
     }
 
+    /** Cruise speed, m/s. */
+    public double getMaxDriveVelocityM_S() {
+        return m_MaxDriveVelocityM_S;
+    }
+
+    /** Motor-torque-limited acceleration rate, m/s^2 */
+    public double getMaxDriveAccelerationM_S2() {
+        return m_MaxDriveAccelerationM_S2;
+    }
+
+    /**
+     * Motor-torque-limited drive deceleration rate, m/s^2. Motors are better at
+     * slowing down than speeding up, so this should be larger than the accel rate.
+     */
+    public double getMaxDriveDecelerationM_S2() {
+        return m_MaxDriveDecelerationM_S2;
+    }
+
+    /** Cruise speed of the swerve steering axes, rad/s. */
+    public double getMaxSteeringVelocityRad_S() {
+        return m_MaxSteeringVelocityRad_S;
+    }
+
+    /** Spin cruise speed, rad/s. Computed from drive and frame size. */
+    public double getMaxAngleSpeedRad_S() {
+        return m_maxAngleSpeedRad_S;
+    }
+
+    /**
+     * Motor-torque-limited spin accel rate, rad/s^2. Computed from drive and frame
+     * size.
+     */
+    public double getMaxAngleAccelRad_S2() {
+        return m_maxAngleAccelRad_S2;
+    }
+
+    /**
+     * Acceleration which will tip the robot onto two wheels, m/s^2. Computed from
+     * vertical center of gravity and frame size.
+     */
+    public double getMaxCapsizeAccelM_S2() {
+        return m_MaxCapsizeAccelM_S2;
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return m_kinematics;
+    }
+
+    /** If you want to rotate the robot with a trapezoidal profile, use this. */
     public TrapezoidProfile.Constraints getAngleConstraints() {
         return new TrapezoidProfile.Constraints(
                 getMaxAngleSpeedRad_S(),
                 getMaxAngleAccelRad_S2());
     }
 
+    /** Trapezoidal profile for linear motion. */
     public TrapezoidProfile.Constraints getDistanceConstraints() {
         return new TrapezoidProfile.Constraints(
-                getMaxSpeedM_S(),
-                getMaxAccelM_S2());
+                getMaxDriveVelocityM_S(),
+                getMaxDriveAccelerationM_S2());
     }
 
-    public double getMaxSpeedM_S() {
-        return m_maxSpeedM_S;
-    }
-
-    public double getMaxAccelM_S2() {
-        return m_maxAccelM_S2;
-    }
-
-    public double getMaxAngleSpeedRad_S() {
-        return m_maxAngleSpeedRad_S;
-    }
-
-    public double getMaxAngleAccelRad_S2() {
-        return m_maxAngleAccelRad_S2;
-    }
-
-    public double getMaxDriveVelocity() {
-        return m_MaxDriveVelocity;
-    }
-
-    public double getMaxDriveAcceleration() {
-        return m_MaxDriveAcceleration;
-    }
-
-    public double getMaxDriveDeceleration() {
-        return m_MaxDriveDeceleration;
-    }
-
-    public double getMaxSteeringVelocity() {
-        return m_MaxSteeringVelocity;
-    }
-
-    public double getMaxCapsizeAccel() {
-        return m_MaxCapsizeAccel;
-    }
-
-    public SwerveDriveKinematics getKinematics() {
-        return m_kinematics;
+    private static SwerveDriveKinematics get(double track, double wheelbase) {
+        return new SwerveDriveKinematics(
+                new Translation2d(wheelbase / 2, track / 2),
+                new Translation2d(wheelbase / 2, -track / 2),
+                new Translation2d(-wheelbase / 2, track / 2),
+                new Translation2d(-wheelbase / 2, -track / 2));
     }
 
 }

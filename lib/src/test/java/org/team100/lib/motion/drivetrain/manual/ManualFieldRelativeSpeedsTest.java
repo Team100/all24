@@ -8,7 +8,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 import edu.wpi.first.math.geometry.Twist2d;
 
-public class ManualFieldRelativeSpeedsTest {
+class ManualFieldRelativeSpeedsTest {
     private static final double kDelta = 0.001;
 
     @Test
@@ -30,7 +30,7 @@ public class ManualFieldRelativeSpeedsTest {
         Twist2d twist = manual.apply(input);
         assertEquals(1, twist.dx, kDelta);
         assertEquals(1, twist.dy, kDelta); // speed limit
-        assertEquals(1, twist.dtheta, kDelta); // speed limit
+        assertEquals(2.828, twist.dtheta, kDelta); // speed limit
     }
 
 }

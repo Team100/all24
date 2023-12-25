@@ -52,7 +52,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         SwerveModuleState[] module_states = m_limits.getKinematics().toSwerveModuleStates(chassis_speeds);
         double max_vel = Double.POSITIVE_INFINITY;
         for (var module : module_states) {
-            max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocity() / Math.abs(module.speedMetersPerSecond));
+            max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocityM_S() / Math.abs(module.speedMetersPerSecond));
         }
         return max_vel;
     }
@@ -63,7 +63,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return new MinMaxAcceleration(
-                -m_limits.getMaxDriveDeceleration(),
-                m_limits.getMaxDriveAcceleration());
+                -m_limits.getMaxDriveDecelerationM_S2(),
+                m_limits.getMaxDriveAccelerationM_S2());
     }
 }

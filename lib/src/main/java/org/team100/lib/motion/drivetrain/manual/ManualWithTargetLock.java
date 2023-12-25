@@ -88,7 +88,7 @@ public class ManualWithTargetLock {
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(
                 twist1_1,
-                m_swerveKinodynamics.getMaxSpeedM_S(),
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         double thetaFF = m_setpoint.velocity;

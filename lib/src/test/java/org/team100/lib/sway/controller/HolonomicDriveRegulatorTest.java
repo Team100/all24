@@ -45,7 +45,7 @@ class HolonomicDriveRegulatorTest {
         Twist2d currentTwist = new Twist2d(); // start at rest
         double time = 0;
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-            swerveKinodynamics.getMaxSpeedM_S(), swerveKinodynamics.getMaxAccelM_S2());
+            swerveKinodynamics.getMaxDriveVelocityM_S(), swerveKinodynamics.getMaxDriveAccelerationM_S2());
         TrapezoidProfile profileX = new TrapezoidProfile(c);
         TrapezoidProfile profileY = new TrapezoidProfile(c);
         TrapezoidProfile profileTheta = new TrapezoidProfile(c);

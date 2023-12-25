@@ -19,7 +19,7 @@ public class CapsizeAccelerationLimiter {
 
     public double enforceCentripetalLimit(double dx, double dy, double min_s) {
         double dv = Math.hypot(dx, dy);
-        double s = kDtSec * m_limits.getMaxCapsizeAccel() / dv;
+        double s = kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
         return Math.min(min_s, s);
     }
 }

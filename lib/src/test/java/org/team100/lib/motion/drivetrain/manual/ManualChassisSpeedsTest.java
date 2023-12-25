@@ -31,6 +31,6 @@ class ManualChassisSpeedsTest {
         ChassisSpeeds speeds = manual.apply(input);
         assertEquals(1, speeds.vxMetersPerSecond, kDelta);
         assertEquals(1, speeds.vyMetersPerSecond, kDelta); // speed limit
-        assertEquals(1, speeds.omegaRadiansPerSecond, kDelta); // speed limit
+        assertEquals(2.828, speeds.omegaRadiansPerSecond, kDelta); // speed limit
     }
 }

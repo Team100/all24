@@ -22,8 +22,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Uses a profile with the holonomic drive controller.
  */
 public class Rotate extends Command {
+    private static final double kDtSec = 0.02;
     private static final double kXToleranceRad = 0.003;
-    private static final  double kVToleranceRad_S = 0.003;
+    private static final double kVToleranceRad_S = 0.003;
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystemInterface m_robotDrive;
@@ -32,7 +33,6 @@ public class Rotate extends Command {
     private final Timer m_timer;
     private final TrapezoidProfile.State m_goalState;
     private final HolonomicDriveController3 m_controller;
-    private double prevTime;
 
     TrapezoidProfile m_profile; // set in initialize(), package private for testing
     TrapezoidProfile.State refTheta; // updated in execute(), package private for testing.
@@ -60,23 +60,19 @@ public class Rotate extends Command {
         m_controller.reset();
         ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
         refTheta = new TrapezoidProfile.State(
-            m_robotDrive.getPose().getRotation().getRadians(),
+                m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
         m_timer.restart();
-        prevTime = 0;
     }
 
     @Override
     public void execute() {
-        double now = m_timer.get();
         // reference
-        double dt = now - prevTime;
-        refTheta = m_profile.calculate(dt, m_goalState, refTheta);
-        prevTime = now;
+        refTheta = m_profile.calculate(kDtSec, m_goalState, refTheta);
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
 
