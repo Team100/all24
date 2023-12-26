@@ -2,6 +2,12 @@
   "NetworkTables": {
     "Front Left": {
       "Drive": {
+        "Simulated Encoder": {
+          "open": true
+        },
+        "Simulated Motor": {
+          "open": true
+        },
         "open": true
       },
       "Turning": {
@@ -9,7 +15,8 @@
           "open": true
         },
         "open": true
-      }
+      },
+      "open": true
     },
     "Holonomic3": {
       "error": {

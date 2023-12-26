@@ -10,12 +10,12 @@ import edu.wpi.first.wpilibj2.command.Command;
  * intialize().
  */
 @ExcludeFromJacocoGeneratedReport
-public class BatteryTest extends Command {
+public class BatterySelfTest extends Command {
     final  Monitor m_monitor;
-    private final TestListener m_listener;
+    private final SelfTestListener m_listener;
 
     /** Verify battery voltage between 11 and 14 volts */
-    public BatteryTest(Monitor monitor, TestListener listener) {
+    public BatterySelfTest(Monitor monitor, SelfTestListener listener) {
         m_monitor = monitor;
         m_listener = listener;
     }

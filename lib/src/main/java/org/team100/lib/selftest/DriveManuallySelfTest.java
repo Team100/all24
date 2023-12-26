@@ -10,29 +10,33 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 @ExcludeFromJacocoGeneratedReport
-public class DriveManuallyTest extends Command {
+public class DriveManuallySelfTest extends Command {
     // two second duration
     private static final double kExpectedDuration = 2;
     private final SwerveDriveSubsystem m_drivetrain;
-    private final TestListener m_listener;
+    private final SelfTestListener m_listener;
     private final Timer m_timer;
     private boolean terminate = false;
     private Pose2d m_initial;
 
-    public DriveManuallyTest(SwerveDriveSubsystem drivetrain, TestListener listener) {
+    public DriveManuallySelfTest(SwerveDriveSubsystem drivetrain, SelfTestListener listener) {
         m_drivetrain = drivetrain;
         m_listener = listener;
         m_timer = new Timer();
-        m_initial = m_drivetrain.getPose();
     }
 
     public Twist2d treatment() {
-        // the treatment is to move in +x at 0.5 m/s for 2 s so the result should be 1m
+        // allow 0.1s to move the wheels 90 degrees; at 0.1m/s for 0.1s this should only
+        // move 0.01m.
+        if (m_timer.get() < 0.1)
+            return new Twist2d(0.1, 0, 0);
+        // then move in +x at 0.5 m/s for 2 s so the result should be about 1m
         return new Twist2d(0.5, 0, 0);
     }
 
     @Override
     public void initialize() {
+        m_initial = m_drivetrain.getPose();
         m_timer.start();
     }
 
@@ -63,6 +67,7 @@ public class DriveManuallyTest extends Command {
         expected = 1;
         double actual = state.getX() - m_initial.getX();
         fmt = "final x expected %5.3f actual %5.3f";
+        // within 10 cm.
         if (MathUtil.isNear(expected, actual, 0.1))
             m_listener.pass(this, fmt, expected, actual);
         else

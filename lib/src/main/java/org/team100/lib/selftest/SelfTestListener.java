@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** Collects test results. */
 @ExcludeFromJacocoGeneratedReport
-public class TestListener {
+public class SelfTestListener {
     private static final String kReset = "\033[0m";
     private static final String kGreen = "\033[1;92m";
     private static final String kRed = "\033[1;91m";

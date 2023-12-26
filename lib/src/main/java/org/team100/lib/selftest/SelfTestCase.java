@@ -10,14 +10,14 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /** Runs a stimulus and an observer in parallel. */
 @ExcludeFromJacocoGeneratedReport
-public class TestCase extends Command {
+public class SelfTestCase extends Command {
     private final ParallelDeadlineGroup m_group;
 
     /**
      * @param deadline the test assertions
      * @param commands the system under test.
      */
-    public TestCase(Command deadline, Command... commands) {
+    public SelfTestCase(Command deadline, Command... commands) {
         m_group = new ParallelDeadlineGroup(deadline, commands);
     }
 
