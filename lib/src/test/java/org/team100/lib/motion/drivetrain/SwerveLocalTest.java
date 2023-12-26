@@ -16,7 +16,7 @@ class SwerveLocalTest {
         SwerveModuleCollection modules = fixture.collection;
         SwerveLocal local = fixture.swerveLocal;
 
-        local.setChassisSpeeds(new ChassisSpeeds());
+        local.setChassisSpeeds(new ChassisSpeeds(), 0.02);
         assertEquals(0, modules.getDesiredStates()[0].speedMetersPerSecond, 0.001);
         local.defense();
         local.stop();

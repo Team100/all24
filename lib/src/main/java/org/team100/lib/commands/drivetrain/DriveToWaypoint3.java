@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.function.BiFunction;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -14,7 +15,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive from the current state to a field-relative goal.
@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * TODO: fix it and/or hide it behind an experiment.
  */
-public class DriveToWaypoint3 extends Command {
+public class DriveToWaypoint3 extends Command100 {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
@@ -59,7 +59,7 @@ public class DriveToWaypoint3 extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
         TrajectoryVisualization.setViz(m_trajectory);
@@ -70,7 +70,7 @@ public class DriveToWaypoint3 extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         if (m_trajectory == null)
             return;
 
@@ -84,7 +84,7 @@ public class DriveToWaypoint3 extends Command {
         if (m_steeringAligned) {
             // follow normally
             // System.out.println("aligned");
-            m_swerve.driveInFieldCoords(fieldRelativeTarget);
+            m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // not aligned yet, try aligning
             // System.out.println("aligning...");
@@ -93,7 +93,7 @@ public class DriveToWaypoint3 extends Command {
             if (aligned) {
                 m_steeringAligned = true;
                 m_timer.start();
-                m_swerve.driveInFieldCoords(fieldRelativeTarget);
+                m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
             }
         }
 

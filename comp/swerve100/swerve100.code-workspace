@@ -17,6 +17,7 @@
         "workbench.editor.revealIfOpen": true,
         "editor.minimap.enabled": false,
         "editor.inlayHints.enabled": "off",
-        "editor.detectIndentation": false
+        "editor.detectIndentation": false,
+        "java.debug.settings.onBuildFailureProceed": true
     }
 }

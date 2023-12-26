@@ -9,7 +9,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
  * TODO: make this depend on direction (e.g. CG not in center)
  */
 public class CapsizeAccelerationLimiter {
-    private static final double kDtSec = 0.02;
 
     private final SwerveKinodynamics m_limits;
 
@@ -17,7 +16,7 @@ public class CapsizeAccelerationLimiter {
         m_limits = limits;
     }
 
-    public double enforceCentripetalLimit(double dx, double dy, double min_s) {
+    public double enforceCentripetalLimit(double dx, double dy, double min_s, double kDtSec) {
         double dv = Math.hypot(dx, dy);
         double s = kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
         return Math.min(min_s, s);

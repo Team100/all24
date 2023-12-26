@@ -17,7 +17,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * minimum across all modules, since that is the active constraint.
  */
 public class SteeringRateLimiter {
-    private static final double kDtSec = 0.02;
     private static final int kMaxIterations = 10;
 
     private final SwerveKinodynamics m_limits;
@@ -37,7 +36,8 @@ public class SteeringRateLimiter {
             double[] desired_vy,
             Rotation2d[] desired_heading,
             double min_s,
-            List<Optional<Rotation2d>> overrideSteering) {
+            List<Optional<Rotation2d>> overrideSteering,
+            double kDtSec) {
 
         final double max_theta_step = kDtSec * m_limits.getMaxSteeringVelocityRad_S();
         for (int i = 0; i < prevModuleStates.length; ++i) {

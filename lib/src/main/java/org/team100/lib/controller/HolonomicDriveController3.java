@@ -8,6 +8,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 /**
@@ -25,7 +26,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         this(cartesian(), cartesian(), theta());
     }
 
-    private HolonomicDriveController3(
+    public HolonomicDriveController3(
             PIDController xController,
             PIDController yController,
             PIDController thetaController) {
@@ -51,6 +52,12 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     @Override
     public boolean atReference() {
         return m_xController.atSetpoint() && m_yController.atSetpoint() && m_thetaController.atSetpoint();
+    }
+
+    public Transform2d error() {
+        return new Transform2d(m_xController.getPositionError(),
+                m_yController.getPositionError(),
+                new Rotation2d(m_thetaController.getPositionError()));
     }
 
     @Override
@@ -94,7 +101,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_thetaController.reset();
     }
 
-    private static PIDController cartesian() {
+    public static PIDController cartesian() {
         Identity identity = Identity.get();
         PIDController pid;
         switch (identity) {
@@ -126,7 +133,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
 
     }
 
-    private static PIDController theta() {
+    public static PIDController theta() {
         PIDController pid = new PIDController(3.5, 0, 0);
         pid.setIntegratorRange(-0.01, 0.01);
         pid.setTolerance(0.01); // 0.5 degrees

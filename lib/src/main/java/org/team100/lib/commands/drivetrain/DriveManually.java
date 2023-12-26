@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
@@ -20,7 +21,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Manual drivetrain control.
@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Use the mode supplier to choose which mode to use, e.g. using a Sendable
  * Chooser.
  */
-public class DriveManually extends Command {
+public class DriveManually extends Command100 {
     private final Supplier<ManualMode.Mode> m_mode;
     private final Supplier<Twist2d> m_twistSupplier;
     private final SwerveDriveSubsystem m_drive;
@@ -78,7 +78,7 @@ public class DriveManually extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         // the setpoint generator remembers what it was doing before, but it might be
         // interrupted by some other command, so when we start, we have to tell it what
         // the real previous setpoint is.
@@ -91,7 +91,7 @@ public class DriveManually extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         ManualMode.Mode manualMode = m_mode.get();
         if (manualMode == null) {
             return;
@@ -114,19 +114,19 @@ public class DriveManually extends Command {
                 break;
             case ROBOT_RELATIVE_CHASSIS_SPEED:
                 m_drive.setChassisSpeeds(
-                        m_manualChassisSpeeds.apply(input));
+                        m_manualChassisSpeeds.apply(input), dt);
                 break;
             case FIELD_RELATIVE_TWIST:
                 m_drive.driveInFieldCoords(
-                        m_manualFieldRelativeSpeeds.apply(input));
+                        m_manualFieldRelativeSpeeds.apply(input), dt);
                 break;
             case SNAPS:
                 m_drive.driveInFieldCoords(
-                        m_manualWithHeading.apply(currentPose, input));
+                        m_manualWithHeading.apply(currentPose, input), dt);
                 break;
             case LOCKED:
                 m_drive.driveInFieldCoords(
-                        m_manualWithTargetLock.apply(currentPose, input));
+                        m_manualWithTargetLock.apply(currentPose, input), dt);
                 break;
             default:
                 // do nothing

@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -14,7 +15,6 @@ import org.team100.lib.util.TriangleWave;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive back and forth one meter in x.
@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * The output can be used to drive the {@link SwerveModuleState} directly, or at
  * the {@link ChassisSpeeds} level, using {@link Experiment.OscillateDirect}.
  */
-public class Oscillate extends Command {
+public class Oscillate extends Command100 {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
 
@@ -56,13 +56,13 @@ public class Oscillate extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_timer.restart();
         m_initial = m_swerve.getState();
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         double time = m_timer.get();
 
         double accelM_S_S = m_square.applyAsDouble(time);
@@ -80,7 +80,7 @@ public class Oscillate extends Command {
             m_swerve.setRawModuleStates(states);
         } else {
             ChassisSpeeds chassisSpeeds = new ChassisSpeeds(speedM_S, 0, 0);
-            m_swerve.setChassisSpeeds(chassisSpeeds);
+            m_swerve.setChassisSpeeds(chassisSpeeds, dt);
         }
 
         t.log(Level.DEBUG, "/oscillate/time", time);

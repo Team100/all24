@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -16,7 +17,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Define a center point 1m to the left of the starting position, and circle
@@ -28,8 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * https://www.desmos.com/calculator/3plby3pgqv
  */
-public class DriveInACircle extends Command {
-    private static final double kDtS = 0.02;
+public class DriveInACircle extends Command100 {
     private static final double kRadiusM = 1.0;
     private static final double kMaxSpeed = 0.5;
     private static final double kAccel = 0.5;
@@ -67,7 +66,7 @@ public class DriveInACircle extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_initialRotation = currentPose.getRotation().getRadians();
@@ -78,14 +77,14 @@ public class DriveInACircle extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         double accelRad_S_S = kAccel;
-        m_speedRad_S += accelRad_S_S * kDtS;
+        m_speedRad_S += accelRad_S_S * dt;
         if (m_speedRad_S > kMaxSpeed) {
             accelRad_S_S = 0;
             m_speedRad_S = kMaxSpeed;
         }
-        m_angleRad += m_speedRad_S * kDtS;
+        m_angleRad += m_speedRad_S * dt;
 
         SwerveState reference = getReference(
                 m_center,
@@ -97,7 +96,7 @@ public class DriveInACircle extends Command {
                 m_turnRatio);
 
         Twist2d fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
-        m_swerve.driveInFieldCoords(fieldRelativeTarget);
+        m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
         t.log(Level.DEBUG, "/circle/center", m_center);
         t.log(Level.DEBUG, "/circle/angle", m_angleRad);

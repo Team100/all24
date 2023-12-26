@@ -56,12 +56,14 @@ public class AsymSwerveSetpointGenerator {
      *                     measured/estimated kinematic state.
      * @param desiredState The desired state of motion, such as from the driver
      *                     sticks or a path following algorithm.
+     * @param kDtSec time in the future the setpoint should apply.
      * @return A Setpoint object that satisfies all of the KinematicLimits while
      *         converging to desiredState quickly.
      */
     public SwerveSetpoint generateSetpoint(
             SwerveSetpoint prevSetpoint,
-            ChassisSpeeds desiredState) {
+            ChassisSpeeds desiredState,
+            double kDtSec) {
         SwerveModuleState[] desiredModuleStates = m_limits.getKinematics().toSwerveModuleStates(desiredState);
         desiredState = desaturate(desiredState, desiredModuleStates);
         SwerveModuleState[] prevModuleStates = prevSetpoint.getModuleStates();
@@ -91,7 +93,7 @@ public class AsymSwerveSetpointGenerator {
                 !GeometryUtil.toTwist2d(desiredState).equals(GeometryUtil.kTwist2dIdentity)) {
             // It will (likely) be faster to stop the robot, rotate the modules in place to
             // the complement of the desired angle, and accelerate again.
-            return generateSetpoint(prevSetpoint, new ChassisSpeeds());
+            return generateSetpoint(prevSetpoint, new ChassisSpeeds(), kDtSec);
         }
 
         // Compute the deltas between start and goal. We can then interpolate from the
@@ -108,7 +110,9 @@ public class AsymSwerveSetpointGenerator {
         // we are at desiredState.
         double min_s = 1.0;
 
-        min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, min_s);
+        min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, min_s, kDtSec);
+        t.log(Level.DEBUG, "/setpoint_generator/min_s centripetal", min_s);
+
 
         // In cases where an individual module is stopped, we want to remember the right
         // steering angle to command (since
@@ -126,7 +130,8 @@ public class AsymSwerveSetpointGenerator {
                 desired_vy,
                 desired_heading,
                 min_s,
-                overrideSteering);
+                overrideSteering,
+                kDtSec);
 
         t.log(Level.DEBUG, "/setpoint_generator/min_s steering", min_s);
 
@@ -136,8 +141,9 @@ public class AsymSwerveSetpointGenerator {
                 prev_vy,
                 desired_vx,
                 desired_vy,
-                min_s);
-
+                min_s,
+                kDtSec);
+        
         t.log(Level.DEBUG, "/setpoint_generator/min_s final", min_s);
 
         return makeSetpoint(

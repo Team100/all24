@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -29,6 +30,7 @@ public class Fixture {
     public SwerveKinodynamics swerveKinodynamics;
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
+    public HolonomicDriveController3 controller;
 
     public Fixture() {
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
@@ -62,6 +64,7 @@ public class Fixture {
         drive = new SwerveDriveSubsystem(heading, poseEstimator,
                 m_frameTransform, swerveLocal, () -> DriverControl.Speed.NORMAL);
 
+        controller = new HolonomicDriveController3();
     }
 
 }

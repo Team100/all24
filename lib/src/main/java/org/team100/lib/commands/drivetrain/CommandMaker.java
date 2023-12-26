@@ -34,7 +34,9 @@ public class CommandMaker {
     }
 
     /**
-     * Try the new Choreo library
+     * Try the new Choreo library.
+     * 
+     * Note the fixed 0.02 sec dt here.
      * 
      * see https://github.com/SleipnirGroup/Choreo/wiki/ChoreoLib-Java-Usage
      */
@@ -46,7 +48,7 @@ public class CommandMaker {
                         new PIDController(1, 0.0, 0.0),
                         new PIDController(1, 0.0, 0.0),
                         new PIDController(1, 0.0, 0.0),
-                        drivetrain::setChassisSpeeds,
+                        x -> drivetrain.setChassisSpeeds(x, 0.02),
                         false,
                         drivetrain)) {
 

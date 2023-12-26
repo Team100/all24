@@ -46,7 +46,12 @@ public class SwerveKinodynamicsFactory {
         }
     }
 
-    /** This contains garbage values, not for anything real. */
+    /**
+     * This contains garbage values, not for anything real.
+     * 
+     * In particular, the steering rate is *very* slow, which might be useful if
+     * you're wanting to allow for steering delay.
+     */
     public static SwerveKinodynamics forTest() {
         return new SwerveKinodynamics(1, 1, 1, 1, 0.5, 0.5, 0.3);
     }

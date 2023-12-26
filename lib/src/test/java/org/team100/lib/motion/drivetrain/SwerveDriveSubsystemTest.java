@@ -52,10 +52,10 @@ class SwerveDriveSubsystemTest {
                 () -> DriverControl.Speed.NORMAL);
         // try all the actuators
         drive.periodic();
-        drive.driveInFieldCoords(new Twist2d(1, 1, 1));
+        drive.driveInFieldCoords(new Twist2d(1, 1, 1), 0.02);
 
         drive.periodic();
-        drive.setChassisSpeeds(new ChassisSpeeds());
+        drive.setChassisSpeeds(new ChassisSpeeds(), 0.02);
 
         drive.periodic();
         drive.setRawModuleStates(new SwerveModuleState[] {

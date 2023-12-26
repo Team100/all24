@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -17,7 +18,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Follow a list of trajectories.
@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * TODO: use the new holonomic trajectory type
  */
-public class TrajectoryListCommand extends Command {
+public class TrajectoryListCommand extends Command100 {
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     final Timer m_timer;
@@ -52,7 +52,7 @@ public class TrajectoryListCommand extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_rotation = currentPose.getRotation();
@@ -65,7 +65,7 @@ public class TrajectoryListCommand extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         if (m_currentTrajectory == null || m_timer.get() > m_currentTrajectory.getTotalTimeSeconds()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
@@ -88,7 +88,7 @@ public class TrajectoryListCommand extends Command {
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
             t.log(Level.DEBUG, "/trajectory list/reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            m_swerve.driveInFieldCoords(fieldRelativeTarget);
+            m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // look just one loop ahead
             State desiredState = m_currentTrajectory.sample(m_timer.get()+0.02);
@@ -103,6 +103,8 @@ public class TrajectoryListCommand extends Command {
             }
         }
     }
+
+
 
     @Override
     public boolean isFinished() {

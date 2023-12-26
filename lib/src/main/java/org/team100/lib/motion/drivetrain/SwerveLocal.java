@@ -71,15 +71,14 @@ public class SwerveLocal {
      * Drives the modules to produce the target chassis speed.
      * 
      * @param speeds speeds in robot coordinates.
+     * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void setChassisSpeeds(ChassisSpeeds speeds) {
+    public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         t.log(Level.DEBUG, "/swervelocal/desired chassis speed", speeds);
         if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
-            // System.out.println("SETPOINT GENERATOR");
-            setChassisSpeedsWithSetpointGenerator(speeds);
+            setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
         } else {
             setChassisSpeedsNormally(speeds);
-            // System.out.println("NORMAL");
         }
     }
 
@@ -200,7 +199,9 @@ public class SwerveLocal {
     }
 
     // TODO: run this twice per cycle using TimedRobot.addPeriodic and a flag.
-    private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds speeds) {
+    private void setChassisSpeedsWithSetpointGenerator(
+        ChassisSpeeds speeds,
+        double kDtSec) {
         if (Double.isNaN(speeds.vxMetersPerSecond))
             throw new IllegalStateException("vx is NaN");
         if (Double.isNaN(speeds.vyMetersPerSecond))
@@ -213,7 +214,8 @@ public class SwerveLocal {
 
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
                 prevSetpoint,
-                speeds);
+                speeds,
+                kDtSec);
         if (Double.isNaN(setpoint.getChassisSpeeds().vxMetersPerSecond))
             throw new IllegalStateException("vx is NaN");
         if (Double.isNaN(setpoint.getChassisSpeeds().vyMetersPerSecond))

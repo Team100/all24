@@ -34,7 +34,7 @@ class TrajectoryListCommandTest {
         assertFalse(c.isFinished());
         // the trajectory takes about 2s
         for (double t = 0; t < 2; t += kDtS) {
-            SimHooks.stepTiming(kDtS);
+            SimHooks.stepTimingAsync(kDtS);
             c.execute();
             fixture.drive.periodic(); // for updateOdometry
         }
@@ -59,7 +59,7 @@ class TrajectoryListCommandTest {
         fixture.drive.periodic();
         command.initialize();
         do {
-            SimHooks.stepTiming(0.02);
+            SimHooks.stepTimingAsync(kDtS);
             fixture.drive.periodic();
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();

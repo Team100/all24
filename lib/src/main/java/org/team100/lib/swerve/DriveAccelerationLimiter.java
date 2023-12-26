@@ -22,7 +22,8 @@ public class DriveAccelerationLimiter {
             double[] prev_vy,
             double[] desired_vx,
             double[] desired_vy,
-            double min_s) {
+            double min_s,
+            double kDtSec) {
         // Enforce drive wheel acceleration limits.
         for (int i = 0; i < prevModuleStates.length; ++i) {
             if (min_s == 0.0) {
@@ -35,7 +36,8 @@ public class DriveAccelerationLimiter {
                     prev_vx[i],
                     prev_vy[i],
                     desired_vx[i],
-                    desired_vy[i]);
+                    desired_vy[i],
+                    kDtSec);
 
             double vx_min_s = min_s == 1.0 ? desired_vx[i] : (desired_vx[i] - prev_vx[i]) * min_s + prev_vx[i];
             double vy_min_s = min_s == 1.0 ? desired_vy[i] : (desired_vy[i] - prev_vy[i]) * min_s + prev_vy[i];
