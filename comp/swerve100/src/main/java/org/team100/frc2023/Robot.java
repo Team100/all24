@@ -3,7 +3,7 @@ package org.team100.frc2023;
 import java.io.IOException;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.selftest.TestRunner;
+import org.team100.lib.selftest.SelfTestRunner;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -78,7 +78,7 @@ public class Robot extends TimedRobot {
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().clearComposedCommands();
-        CommandScheduler.getInstance().schedule(new TestRunner(m_robotContainer));
+        CommandScheduler.getInstance().schedule(new SelfTestRunner(m_robotContainer));
     }
 
     @Override

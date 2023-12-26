@@ -57,7 +57,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
-import org.team100.lib.selftest.Testable;
+import org.team100.lib.selftest.SelfTestable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
@@ -80,7 +80,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class RobotContainer implements Testable {
+public class RobotContainer implements SelfTestable {
 
     //////////////////////////////////////
     // SHOW MODE
@@ -111,6 +111,8 @@ public class RobotContainer implements Testable {
 
     private final DriverControl control;
     private final DrawCircle m_drawCircle;
+    // for SelfTest
+    private final DriveInALittleSquare m_driveInALittleSquare;
     private final Monitor m_monitor;
 
     // Identity-specific fields
@@ -234,7 +236,7 @@ public class RobotContainer implements Testable {
                         x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
 
         // one-meter square with reset at the corners
-        control.actualCircle().whileTrue(
+        control.never().whileTrue(
                 new PermissiveTrajectoryListCommand(m_drive, controller,
                         TrajectoryMaker.permissiveSquare(swerveKinodynamics.getKinematics())));
 
@@ -276,8 +278,8 @@ public class RobotContainer implements Testable {
                 new DriveToWaypoint100(goal, m_drive, planner, driveRam));
 
         // little square
-        control.never().whileTrue(
-                new DriveInALittleSquare(m_drive));
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
+        control.actualCircle().whileTrue(m_driveInALittleSquare);
 
         ///////////////////////
         //
@@ -401,10 +403,17 @@ public class RobotContainer implements Testable {
         return m_drive;
     }
 
+    @Override
     public Command getDrawCircle() {
         return m_drawCircle;
     }
 
+    @Override
+    public DriveInALittleSquare getDriveInALittleSquare() {
+        return m_driveInALittleSquare;
+    }
+
+    @Override
     public Monitor getMonitor() {
         return m_monitor;
     }

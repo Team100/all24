@@ -73,11 +73,16 @@ public class GeometryUtil {
         return radians;
     }
 
+    /**
+     * Rotations must be identical, translation is allowed along the rotational
+     * direction but not any other direction.
+     */
     public static boolean isColinear(Pose2d a, final Pose2d other) {
         if (!GeometryUtil.isParallel(a.getRotation(), other.getRotation()))
             return false;
         final Twist2d twist = slog(transformBy(inverse(a), other));
-        return (Math.abs(twist.dy - 0.0) <= 1e-12 && Math.abs(twist.dtheta - 0.0) <= 1e-12);
+        return (Math.abs(twist.dy - 0.0) <= 1e-12
+                && Math.abs(twist.dtheta - 0.0) <= 1e-12);
     }
 
     // note parallel also means antiparallel.

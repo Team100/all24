@@ -33,9 +33,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class DriveMotionPlannerTest {
 
-    private static final SwerveKinodynamics kSmoothKinematicLimits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(Identity.BLANK,
+            false);
 
-      
     @Test
     void testTrajectory() {
         List<Pose2d> waypoints = new ArrayList<>();

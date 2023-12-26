@@ -18,23 +18,24 @@ class SplineGeneratorTest {
     void test() {
         Pose2d p1 = new Pose2d(new Translation2d(0, 0), GeometryUtil.kRotationZero);
         Pose2d p2 = new Pose2d(new Translation2d(15, 10), new Rotation2d(1, -5));
-        PoseSpline s = new QuinticHermitePoseSplineNonholonomic(p1, p2);
+        HolonomicSpline s = new HolonomicSpline(
+                p1, p2, new Rotation2d(), new Rotation2d());
 
         List<Pose2dWithMotion> samples = SplineGenerator.parameterizeSpline(s);
 
         double arclength = 0;
         Pose2dWithMotion cur_pose = samples.get(0);
         for (Pose2dWithMotion sample : samples) {
-            final Twist2d twist = GeometryUtil.slog(
+            Twist2d twist = GeometryUtil.slog(
                     GeometryUtil.transformBy(
                             GeometryUtil.inverse(cur_pose.getPose()), sample.getPose()));
-            arclength += twist.dx;
+            arclength += Math.hypot(twist.dx, twist.dy);
             cur_pose = sample;
         }
 
         assertEquals(15.0, cur_pose.getTranslation().getX(), 0.001);
         assertEquals(10.0, cur_pose.getTranslation().getY(), 0.001);
-        assertEquals(-78.690, cur_pose.getHeading().getDegrees(), 0.001);
-        assertEquals(23.218, arclength, 0.001);
+        assertEquals(-78.690, cur_pose.getCourse().get().getDegrees(), 0.001);
+        assertEquals(23.202, arclength, 0.001);
     }
 }

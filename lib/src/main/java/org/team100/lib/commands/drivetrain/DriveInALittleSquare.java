@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Makes a little square.
+ * Makes a little square, one meter on a side, forever.
  * 
  * This is intended for tuning the steering control stack, because at each
  * corner of the square, the steering needs to respond quickly and precisely.
@@ -28,6 +28,7 @@ public class DriveInALittleSquare extends Command {
         STEERING
     }
 
+    /** square should be 1 m on a side. */
     private static final double kDriveLengthM = 1;
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
@@ -68,7 +69,7 @@ public class DriveInALittleSquare extends Command {
         double dt = now - prevTime;
         switch (m_state) {
             case DRIVING:
-                if (m_timer.hasElapsed(m_driveProfile.totalTime())) {
+                if (m_driveProfile.isFinished(dt)) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = State.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);

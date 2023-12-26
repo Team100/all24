@@ -12,19 +12,19 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Verify the "x" pattern.
  */
 @ExcludeFromJacocoGeneratedReport
-public class DefenseTest extends Command {
+public class DefenseSelfTest extends Command {
     // this fails below 1s, which is quite a bit too slow
     // TODO: speed up the steering profile
     private static final double kExpectedDuration = 1;
     private SwerveDriveSubsystem m_drivetrain;
-    private TestListener m_listener;
+    private SelfTestListener m_listener;
     private final Timer m_timer;
     private boolean terminate = false;
 
     /**
      * Verify the "x" pattern.
      */
-    public DefenseTest(SwerveDriveSubsystem drivetrain, TestListener listener) {
+    public DefenseSelfTest(SwerveDriveSubsystem drivetrain, SelfTestListener listener) {
         m_drivetrain = drivetrain;
         m_listener = listener;
         m_timer = new Timer();

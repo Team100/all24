@@ -5,7 +5,6 @@ import java.util.Set;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
@@ -17,27 +16,27 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /** Run all the test cases sequentially. */
 @ExcludeFromJacocoGeneratedReport
-public class TestRunner extends Command {
-    private final Testable m_container;
+public class SelfTestRunner extends Command {
+    private final SelfTestable m_container;
     private final SequentialCommandGroup m_group;
-    private final TestListener m_listener;
+    private final SelfTestListener m_listener;
 
-    public TestRunner(Testable container) {
+    public SelfTestRunner(SelfTestable container) {
         m_container = container;
         m_group = new SequentialCommandGroup();
-        m_listener = new TestListener();
+        m_listener = new SelfTestListener();
 
         // this test needs no "treatment" command
-        addCase(new BatteryTest(m_container.getMonitor(), m_listener));
+        addCase(new BatterySelfTest(m_container.getMonitor(), m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.getSwerveDriveSubsystem();
 
         // "treatment" is in situ.
         // TODO: make this command not require a particular starting position
-        // addCase(new SquareTest(drivetrain, m_listener), m_container.getDrawCircle());
+        addCase(new SquareSelfTest(drivetrain, m_listener), m_container.getDriveInALittleSquare());
 
         // treatment is a specific manual input, supplied by the test case.
-        DriveManuallyTest driveManuallyTest = new DriveManuallyTest(drivetrain, m_listener);
+        DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -54,12 +53,12 @@ public class TestRunner extends Command {
         addCase(driveManuallyTest, driveManually);
 
         // this only tests the end-state
-        addCase(new DefenseTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
+        addCase(new DefenseSelfTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
     }
 
     private void addCase(Command deadline, Command... commands) {
         m_group.addCommands(new InstantCommand(() -> System.out.println("\nRunning " + deadline.getName() + "...")));
-        m_group.addCommands(new TestCase(deadline, commands));
+        m_group.addCommands(new SelfTestCase(deadline, commands));
     }
 
     @Override

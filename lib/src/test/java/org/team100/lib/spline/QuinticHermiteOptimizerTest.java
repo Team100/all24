@@ -21,28 +21,29 @@ class QuinticHermiteOptimizerTest {
         Pose2d b = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
         Pose2d c = new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(90));
 
-        List<QuinticHermitePoseSplineNonholonomic> splines = new ArrayList<>();
-        splines.add(new QuinticHermitePoseSplineNonholonomic(a, b));
-        splines.add(new QuinticHermitePoseSplineNonholonomic(b, c));
+        List<HolonomicSpline> splines = new ArrayList<>();
+        splines.add(new HolonomicSpline(a, b, new Rotation2d(), new Rotation2d()));
+        splines.add(new HolonomicSpline(b, c, new Rotation2d(), new Rotation2d()));
 
         // long startTime = System.currentTimeMillis();
-        assertTrue(QuinticHermitePoseSplineNonholonomic.optimizeSpline(splines) < 0.014);
-        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() - startTime));
+        assertTrue(HolonomicSpline.optimizeSpline(splines) < 0.014);
+        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() -
+        // startTime));
 
         Pose2d d = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(90));
         Pose2d e = new Pose2d(new Translation2d(0, 50), Rotation2d.fromDegrees(0));
         Pose2d f = new Pose2d(new Translation2d(100, 0), Rotation2d.fromDegrees(90));
         Pose2d g = new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(0));
 
-        List<QuinticHermitePoseSplineNonholonomic> splines1 = new ArrayList<>();
-        splines1.add(new QuinticHermitePoseSplineNonholonomic(d, e));
-        splines1.add(new QuinticHermitePoseSplineNonholonomic(e, f));
-        splines1.add(new QuinticHermitePoseSplineNonholonomic(f, g));
+        List<HolonomicSpline> splines1 = new ArrayList<>();
+        splines1.add(new HolonomicSpline(d, e, new Rotation2d(), new Rotation2d()));
+        splines1.add(new HolonomicSpline(e, f, new Rotation2d(), new Rotation2d()));
+        splines1.add(new HolonomicSpline(f, g, new Rotation2d(), new Rotation2d()));
 
         // startTime = System.currentTimeMillis();
-        assertTrue(QuinticHermitePoseSplineNonholonomic.optimizeSpline(splines1) < 0.16);
-        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() - startTime));
-
+        assertTrue(HolonomicSpline.optimizeSpline(splines1) < 0.16);
+        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() -
+        // startTime));
 
         Pose2d h = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
         Pose2d i = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
@@ -50,16 +51,71 @@ class QuinticHermiteOptimizerTest {
         Pose2d k = new Pose2d(new Translation2d(150, 0), Rotation2d.fromDegrees(270));
         Pose2d l = new Pose2d(new Translation2d(150, -50), Rotation2d.fromDegrees(270));
 
-        List<QuinticHermitePoseSplineNonholonomic> splines2 = new ArrayList<>();
-        splines2.add(new QuinticHermitePoseSplineNonholonomic(h, i));
-        splines2.add(new QuinticHermitePoseSplineNonholonomic(i, j));
-        splines2.add(new QuinticHermitePoseSplineNonholonomic(j, k));
-        splines2.add(new QuinticHermitePoseSplineNonholonomic(k, l));
+        List<HolonomicSpline> splines2 = new ArrayList<>();
+        splines2.add(new HolonomicSpline(h, i, new Rotation2d(), new Rotation2d()));
+        splines2.add(new HolonomicSpline(i, j, new Rotation2d(), new Rotation2d()));
+        splines2.add(new HolonomicSpline(j, k, new Rotation2d(), new Rotation2d()));
+        splines2.add(new HolonomicSpline(k, l, new Rotation2d(), new Rotation2d()));
 
         // startTime = System.currentTimeMillis();
-        assertTrue(QuinticHermitePoseSplineNonholonomic.optimizeSpline(splines2) < 0.05);
+        assertTrue(HolonomicSpline.optimizeSpline(splines2) < 0.05);
         assertEquals(0.0, splines2.get(0).getCurvature(1.0), kEpsilon);
         assertEquals(0.0, splines2.get(2).getCurvature(1.0), kEpsilon);
-        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() - startTime));
+        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() -
+        // startTime));
     }
+
+    @Test
+    void testHolonomic() {
+        Pose2d a = new Pose2d(new Translation2d(0, 100), Rotation2d.fromDegrees(270));
+        Pose2d b = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
+        Pose2d c = new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(90));
+        Rotation2d r0 = new Rotation2d();
+        Rotation2d r1 = new Rotation2d(Math.PI / 2);
+        Rotation2d r2 = new Rotation2d(Math.PI);
+
+        List<HolonomicSpline> splines = new ArrayList<>();
+        splines.add(new HolonomicSpline(a, b, r0, r1));
+        splines.add(new HolonomicSpline(b, c, r1, r2));
+
+        // long startTime = System.currentTimeMillis();
+        assertTrue(HolonomicSpline.optimizeSpline(splines) < 0.014);
+        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() -
+        // startTime));
+
+        Pose2d d = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(90));
+        Pose2d e = new Pose2d(new Translation2d(0, 50), Rotation2d.fromDegrees(0));
+        Pose2d f = new Pose2d(new Translation2d(100, 0), Rotation2d.fromDegrees(90));
+        Pose2d g = new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(0));
+
+        List<HolonomicSpline> splines1 = new ArrayList<>();
+        splines1.add(new HolonomicSpline(d, e, r0, r1));
+        splines1.add(new HolonomicSpline(e, f, r1, r2));
+        splines1.add(new HolonomicSpline(f, g, r0, r2));
+
+        // startTime = System.currentTimeMillis();
+        assertTrue(HolonomicSpline.optimizeSpline(splines1) < 0.16);
+        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() -
+        // startTime));
+
+        Pose2d h = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        Pose2d i = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
+        Pose2d j = new Pose2d(new Translation2d(100, 50), Rotation2d.fromDegrees(45));
+        Pose2d k = new Pose2d(new Translation2d(150, 0), Rotation2d.fromDegrees(270));
+        Pose2d l = new Pose2d(new Translation2d(150, -50), Rotation2d.fromDegrees(270));
+
+        List<HolonomicSpline> splines2 = new ArrayList<>();
+        splines2.add(new HolonomicSpline(h, i, r0, r1));
+        splines2.add(new HolonomicSpline(i, j, r1, r2));
+        splines2.add(new HolonomicSpline(j, k, r0, r2));
+        splines2.add(new HolonomicSpline(k, l, r2, r0));
+
+        // startTime = System.currentTimeMillis();
+        assertTrue(HolonomicSpline.optimizeSpline(splines2) < 0.05);
+        assertEquals(0.0, splines2.get(0).getCurvature(1.0), kEpsilon);
+        assertEquals(0.0, splines2.get(2).getCurvature(1.0), kEpsilon);
+        // System.out.println("Optimization time (ms): " + (System.currentTimeMillis() -
+        // startTime));
+    }
+
 }

@@ -1,11 +1,14 @@
 package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 class GeometryUtilTest {
@@ -65,6 +68,29 @@ class GeometryUtilTest {
                         new Pose2d(1, 0, GeometryUtil.kRotation90),
                         new Pose2d(0, 1, GeometryUtil.kRotationZero)),
                 kDelta);
+
+    }
+
+    @Test
+    void testCollinear() {
+        assertTrue(GeometryUtil.isColinear(
+                new Pose2d(0, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d())));
+        assertFalse(GeometryUtil.isColinear(
+                new Pose2d(0, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d(Math.PI))));
+        assertTrue(GeometryUtil.isColinear(
+                new Pose2d(0, 0, new Rotation2d(Math.PI / 2)),
+                new Pose2d(0, 1, new Rotation2d(Math.PI / 2))));
+        assertFalse(GeometryUtil.isColinear(
+                new Pose2d(),
+                new Pose2d(1, 1, new Rotation2d())));
+    }
+
+    @Test
+    void testParallel() {
+        assertTrue(GeometryUtil.isParallel(new Rotation2d(), new Rotation2d()));
+        assertTrue(GeometryUtil.isParallel(new Rotation2d(), new Rotation2d(Math.PI)));
 
     }
 
