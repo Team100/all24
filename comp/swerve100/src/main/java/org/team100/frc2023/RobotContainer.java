@@ -221,7 +221,7 @@ public class RobotContainer implements SelfTestable {
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
 
         control.driveWithFancyTrajec().whileTrue(
-                new FancyTrajectory(m_drive, planner));
+                new FancyTrajectory(m_drive, planner, swerveKinodynamics));
 
         control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
         control.never().whileTrue(new Spin(m_drive, controller));
@@ -261,23 +261,23 @@ public class RobotContainer implements SelfTestable {
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID));
+                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF));
+                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController();
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, drivePP));
+                new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
         DriveMotionController driveRam = new DriveRamseteController();
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, driveRam));
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);

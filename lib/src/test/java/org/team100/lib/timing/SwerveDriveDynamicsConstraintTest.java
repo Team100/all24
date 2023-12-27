@@ -21,7 +21,6 @@ class SwerveDriveDynamicsConstraintTest {
     // of the robot going in a straight line without rotating.
     private static final double maxV = 4;
 
-
     @Test
     void testVelocity() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
@@ -60,7 +59,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation() {
-                SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
 
         // this is for comparison to the above case.
 
@@ -94,7 +93,6 @@ class SwerveDriveDynamicsConstraintTest {
     @Test
     void testDesaturation2() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
-
 
         // 0.62 m/s is pretty close to the maximum speed
         // possible at 5 rad/s; this is about 8 rad/m.

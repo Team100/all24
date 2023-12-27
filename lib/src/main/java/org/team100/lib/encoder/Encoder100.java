@@ -15,7 +15,6 @@ public interface Encoder100<T extends Measure100> {
      * Distance is meters
      * Angle measure is counterclockwise-positive rad, and accumulates
      * turns; use MathUtil.AngleModulus if you want.
-     * TODO: use a Measure here.
      */
     double getPosition();
 
@@ -30,7 +29,6 @@ public interface Encoder100<T extends Measure100> {
      * Distance is m/s.
      * Angle measure is counterclockwise positive, rad/s.
      * Note some rate implementations can be noisy.
-     * TODO: use a Measure here.
      */
     double getRate();
 

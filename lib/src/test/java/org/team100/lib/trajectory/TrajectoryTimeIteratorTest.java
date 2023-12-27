@@ -46,7 +46,7 @@ class TrajectoryTimeIteratorTest {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(limits));
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(

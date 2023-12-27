@@ -46,7 +46,7 @@ class DriveFeedforwardControllerTest {
         // less.
         // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(kSmoothKinematicLimits));
 
         // note there are static constraints in here.
         TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);

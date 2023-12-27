@@ -85,10 +85,10 @@ public class TrajectoryPlanner {
         }
 
         final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_limits);
-        final YawRateConstraint yaw_constraint = new YawRateConstraint(kMaxYawRateRadS);
+        final YawRateConstraint yaw_constraint = new YawRateConstraint(m_limits);
 
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
-                kMaxCentripetalAccel);
+                m_limits);
 
         List<TimingConstraint> all_constraints = new ArrayList<>();
         all_constraints.add(drive_constraints);

@@ -7,6 +7,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -37,13 +38,16 @@ public class FancyTrajectory extends Command100 {
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final TrajectoryPlanner m_planner;
+    private final SwerveKinodynamics m_limits;
 
     public FancyTrajectory(
             SwerveDriveSubsystem robotDrive,
-            TrajectoryPlanner planner) {
+            TrajectoryPlanner planner,
+            SwerveKinodynamics limits) {
         m_robotDrive = robotDrive;
         m_controller = new DrivePIDFController(false);
         m_planner = planner;
+        m_limits = limits;
         addRequirements(m_robotDrive);
     }
 
@@ -58,7 +62,7 @@ public class FancyTrajectory extends Command100 {
                 GeometryUtil.fromDegrees(0));
         // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(m_limits));
 
         double start_vel = 0;
         double end_vel = 0;

@@ -8,8 +8,6 @@ import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,10 +19,9 @@ class DriveToWaypoint100Test {
     void testWithPID() {
         Pose2d goal = GeometryUtil.kPoseZero;
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
         DriveMotionController controller = new DrivePIDFController(false);
-        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
+        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller, fixture.swerveKinodynamics);
 
         // TODO: add some assertions
         command.initialize();
@@ -36,10 +33,9 @@ class DriveToWaypoint100Test {
     void testWithPursuit() {
         Pose2d goal = GeometryUtil.kPoseZero;
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
         DriveMotionController controller = new DrivePursuitController();
-        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
+        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller, fixture.swerveKinodynamics);
 
         // TODO: add some assertions
         command.initialize();
@@ -51,10 +47,9 @@ class DriveToWaypoint100Test {
     void testWithRamsete() {
         Pose2d goal = GeometryUtil.kPoseZero;
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
         DriveMotionController controller = new DriveRamseteController();
-        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
+        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller, fixture.swerveKinodynamics);
 
         // TODO: add some assertions
         command.initialize();
@@ -66,10 +61,9 @@ class DriveToWaypoint100Test {
     void testWithFF() {
         Pose2d goal = GeometryUtil.kPoseZero;
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
         DriveMotionController controller = new DrivePIDFController(true);
-        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller);
+        DriveToWaypoint100 command = new DriveToWaypoint100(goal, drivetrain, planner, controller, fixture.swerveKinodynamics);
 
         // TODO: add some assertions
         command.initialize();

@@ -50,7 +50,7 @@ class DrivePursuitControllerTest {
         // less.
         // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(kSmoothKinematicLimits));
 
         // note there are static constraints in here.
         TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
@@ -172,7 +172,7 @@ class DrivePursuitControllerTest {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(limits));
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(
@@ -226,7 +226,7 @@ class DrivePursuitControllerTest {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(limits));
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(

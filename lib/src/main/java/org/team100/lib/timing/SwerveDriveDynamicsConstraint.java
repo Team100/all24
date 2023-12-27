@@ -8,13 +8,15 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
- * Note this does not handle centripetal acceleration or steering rate.
+ * Linear velocity limit based on spatial yaw rate and drive wheel speed limit.
  * 
- * TODO: maybe it's not worth keeping?
+ * Slows the path velocity to accommodate the desired yaw rate.
+ * 
+ * This *should* provide the same answer as the YawRateConstraint, if the
+ * omega limit calculation is correct.
  */
 public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     private final SwerveKinodynamics m_limits;
@@ -26,10 +28,6 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     /**
      * Given a target spatial heading rate (rad/m), return the maximum translational
      * speed allowed (m/s) that maintains the target spatial heading rate.
-     * 
-     * Note the setpoint generator respects acceleration limits so this is likely to
-     * do the wrong thing, if the "entry speed" (1m/s) is faster than the allowed
-     * speed.
      */
     @Override
     public double getMaxVelocity(Pose2dWithMotion state) {

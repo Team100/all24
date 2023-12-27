@@ -57,6 +57,9 @@ public class SwerveKinodynamicsFactory {
         return new SwerveKinodynamics(1, 1, 1, 1, 0.5, 0.5, 0.3);
     }
 
+    public static SwerveKinodynamics forTest2() {
+        return new SwerveKinodynamics(2, 1, 1, 1, 0.5, 0.5, 0.6);
+    }
     //////////////////////////////////////////
     //
     // below are specific test cases. try to minimize their number
