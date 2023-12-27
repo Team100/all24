@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -345,7 +344,7 @@ class AsymSwerveSetpointGeneratorTest {
     void testOverspeedCentripetal() {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
         AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
 
         // initial speed is at the limit +x

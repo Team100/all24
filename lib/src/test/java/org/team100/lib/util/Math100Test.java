@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.swerve.SwerveUtil;
 
 class Math100Test {
     private static final double kDelta = 0.001;

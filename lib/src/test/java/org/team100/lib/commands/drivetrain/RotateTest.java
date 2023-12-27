@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -19,6 +21,7 @@ class RotateTest {
 
     @Test
     void testRotate() {
+        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
         MockHeading heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
@@ -41,6 +44,7 @@ class RotateTest {
         // steering
         for (int i = 0; i < 18; ++i) {
             SimHooks.stepTimingAsync(0.02);
+            fixture.drive.periodic();
             rotate.execute();
         }
         // there's no translation
@@ -56,8 +60,8 @@ class RotateTest {
         // finished steering, start rotating
         for (int i = 0; i < 25; ++i) {
             SimHooks.stepTimingAsync(0.02);
-            rotate.execute();
             fixture.drive.periodic();
+            rotate.execute();
         }
         assertEquals(1, rotate.refTheta.position, 0.2);
         assertEquals(-0.512, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
@@ -66,8 +70,8 @@ class RotateTest {
         // should be done rotating now
         for (int i = 0; i < 25; ++i) {
             SimHooks.stepTimingAsync(0.02);
-            rotate.execute();
             fixture.drive.periodic();
+            rotate.execute();
         }
 
         assertEquals(Math.PI/2, rotate.refTheta.position, kDelta);
@@ -76,8 +80,8 @@ class RotateTest {
 
         for (int i = 0; i < 100; ++i) {
             SimHooks.stepTimingAsync(0.02);
-            rotate.execute();
             fixture.drive.periodic();
+            rotate.execute();
         }
 
         assertTrue(rotate.isFinished());

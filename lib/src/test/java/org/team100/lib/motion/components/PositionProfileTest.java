@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Distance;
@@ -17,7 +16,6 @@ class PositionProfileTest {
     boolean dump = false;
     private static final double kDelta = 0.001;
 
-    private final MockExperiments experiments;
     private final String name;
     private final MockMotor100<Distance> motor;
     private final MockEncoder100<Distance> encoder;
@@ -27,7 +25,6 @@ class PositionProfileTest {
     private PositionServo<Distance> servo;
 
     public PositionProfileTest() {
-        experiments = new MockExperiments();
         name = "test";
         motor = new MockMotor100<>();
         encoder = new MockEncoder100<>();
@@ -45,7 +42,6 @@ class PositionProfileTest {
         // TODO: tune this
         PIDController vController = new PIDController(1, 0, 0, period);
         VelocityServo<Distance> vServo = new VelocityServo<>(
-                experiments,
                 name,
                 motor,
                 encoder,
@@ -70,7 +66,6 @@ class PositionProfileTest {
         // TODO: tune this
         PIDController vController = new PIDController(1, 0, 0, period);
         VelocityServo<Distance> vServo = new VelocityServo<>(
-                experiments,
                 name,
                 motor,
                 encoder,
@@ -118,7 +113,6 @@ class PositionProfileTest {
         // TODO: tune this
         PIDController vController = new PIDController(5, 0, 0, period);
         VelocityServo<Distance> vServo = new VelocityServo<>(
-                experiments,
                 name,
                 motor,
                 encoder,

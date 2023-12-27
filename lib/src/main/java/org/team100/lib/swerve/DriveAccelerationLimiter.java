@@ -42,12 +42,7 @@ public class DriveAccelerationLimiter {
             double vx_min_s = min_s == 1.0 ? desired_vx[i] : (desired_vx[i] - prev_vx[i]) * min_s + prev_vx[i];
             double vy_min_s = min_s == 1.0 ? desired_vy[i] : (desired_vy[i] - prev_vy[i]) * min_s + prev_vy[i];
             // Find the max s for this drive wheel. Search on the interval between 0 and
-            // min_s, because we already know we can't go faster
-            // than that.
-            // TODO(for efficiency, do all this on v^2 to save a bunch of sqrts)
-            // TODO(be smarter about root finding, since this is just a quadratic in s:
-            // ((xf-x0)*s+x0)^2+((yf-y0)*s+y0)^2)
-
+            // min_s, because we already know we can't go faster than that.
             double s = min_s * SwerveUtil.findDriveMaxS(
                     prev_vx[i],
                     prev_vy[i],

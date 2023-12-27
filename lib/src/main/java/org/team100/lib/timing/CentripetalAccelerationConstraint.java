@@ -1,16 +1,18 @@
 package org.team100.lib.timing;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 /**
- *  Velocity limit based on curvature and centripetal acceleration limit.
+ * Velocity limit based on curvature and centripetal acceleration limit, which
+ * is taken to be the capsize limit.
  */
 public class CentripetalAccelerationConstraint implements TimingConstraint {
     // m/s^2
     final double mMaxCentripetalAccel;
 
-    public CentripetalAccelerationConstraint(final double max_centripetal_accel) {
-        mMaxCentripetalAccel = max_centripetal_accel;
+    public CentripetalAccelerationConstraint(SwerveKinodynamics limits) {
+        mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2();
     }
 
     @Override
@@ -18,6 +20,10 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
         return Math.sqrt(Math.abs(mMaxCentripetalAccel / state.getCurvature()));
     }
 
+    /**
+     * The capsize limit is not applied here, this just handles "cross track"
+     * acceleration.
+     */
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return MinMaxAcceleration.kNoLimits;

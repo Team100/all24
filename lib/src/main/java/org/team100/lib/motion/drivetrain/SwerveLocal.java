@@ -44,17 +44,14 @@ public class SwerveLocal {
 
     private final Telemetry t = Telemetry.get();
 
-    private final Experiments m_experiments;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollection m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
-            Experiments experiments,
             SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollection modules) {
-        m_experiments = experiments;
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_swerveKinodynamics);
@@ -75,7 +72,7 @@ public class SwerveLocal {
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         t.log(Level.DEBUG, "/swervelocal/desired chassis speed", speeds);
-        if (m_experiments.enabled(Experiment.UseSetpointGenerator)) {
+        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
         } else {
             setChassisSpeedsNormally(speeds);

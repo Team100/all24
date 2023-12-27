@@ -85,8 +85,6 @@ public class JoystickControl implements DriverControl {
 
     /**
      * For now, this knows the field-relative target.
-     * 
-     * TODO: some other kind of target-picker.
      */
     @Override
     public Translation2d target() {

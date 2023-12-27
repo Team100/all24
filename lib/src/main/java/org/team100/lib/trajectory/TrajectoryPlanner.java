@@ -21,8 +21,6 @@ public class TrajectoryPlanner {
     private static final double kMaxDx = 0.0127; // m
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
-    private static final double kMaxYawRateRadS = 3.0;
-    private static final double kMaxCentripetalAccel = 10.0;// 1.524; // m/s^2
 
     private final SwerveKinodynamics m_limits;
 
@@ -70,7 +68,8 @@ public class TrajectoryPlanner {
 
         // Create a trajectory from splines.
         Path100 trajectory = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
-                waypoints_maybe_flipped, headings_maybe_flipped, kMaxDx, kMaxDy, kMaxDTheta);
+                waypoints_maybe_flipped, headings_maybe_flipped, 
+                kMaxDx, kMaxDy, kMaxDTheta);
 
         if (reversed) {
             List<Pose2dWithMotion> flipped_points = new ArrayList<>(trajectory.length());
@@ -85,10 +84,10 @@ public class TrajectoryPlanner {
         }
 
         final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_limits);
-        final YawRateConstraint yaw_constraint = new YawRateConstraint(kMaxYawRateRadS);
+        final YawRateConstraint yaw_constraint = new YawRateConstraint(m_limits);
 
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
-                kMaxCentripetalAccel);
+                m_limits);
 
         List<TimingConstraint> all_constraints = new ArrayList<>();
         all_constraints.add(drive_constraints);

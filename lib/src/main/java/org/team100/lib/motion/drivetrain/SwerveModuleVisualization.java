@@ -1,5 +1,8 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.telemetry.TelemetryLevelChooser;
+import org.team100.lib.telemetry.Telemetry.Level;
+
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -9,8 +12,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 /**
  * Displays the module steering and velocity as a mechanism.
- * 
- * TODO: make this respect logging level.
  */
 public class SwerveModuleVisualization {
     private final SwerveModule100 m_module;
@@ -39,9 +40,11 @@ public class SwerveModuleVisualization {
     }
 
     public void periodic() {
-        m_drive.setAngle(angle());
-        m_drive.setLength(speed());
-        m_steer.setAngle(angle());
+        if (TelemetryLevelChooser.get().getSelected() == Level.DEBUG) {
+            m_drive.setAngle(angle());
+            m_drive.setLength(speed());
+            m_steer.setAngle(angle());
+        }
     }
 
     private double angle() {

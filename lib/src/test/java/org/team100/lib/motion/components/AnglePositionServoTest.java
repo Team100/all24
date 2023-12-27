@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.experiments.MockExperiments;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
@@ -23,7 +24,6 @@ class AnglePositionServoTest {
         // long period to make the output bigger
         double period = 1;
 
-        MockExperiments experiments = new MockExperiments();
         String name = "test";
         MockMotor100<Angle> turningMotor = new MockMotor100<>();
         MockEncoder100<Angle> turningEncoder = new MockEncoder100<>();
@@ -37,7 +37,6 @@ class AnglePositionServoTest {
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
                 name,
                 turningMotor,
                 turningEncoder,
@@ -60,7 +59,8 @@ class AnglePositionServoTest {
         assertEquals(1.0, servo.getSetpoint().velocity, kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);
 
-        experiments.enablement = false;
+        Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, false);
+
         servo.setPosition(1);
         assertEquals(1.0, turningMotor.output, kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);

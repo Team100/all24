@@ -20,5 +20,9 @@ public enum Experiment {
      * Flush network tables as often as possible. Do not enable this experiment in
      * competition, you'll overwhelm the network and the RIO
      */
-    FlushOften
+    FlushOften,
+    /**
+     * Show mode locks slow speed for younger drivers.
+     */
+    ShowMode
 }

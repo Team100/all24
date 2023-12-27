@@ -5,6 +5,7 @@ import java.util.List;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -37,6 +38,7 @@ public class DriveToWaypoint100 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
+    private final SwerveKinodynamics m_limits;
 
     /**
      * @param goal
@@ -49,11 +51,13 @@ public class DriveToWaypoint100 extends Command100 {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
-            DriveMotionController controller) {
+            DriveMotionController controller,
+            SwerveKinodynamics limits) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
+        m_limits = limits;
         addRequirements(m_swerve);
     }
 
@@ -78,7 +82,7 @@ public class DriveToWaypoint100 extends Command100 {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(60));
+                new CentripetalAccelerationConstraint(m_limits));
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(

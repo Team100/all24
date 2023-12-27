@@ -12,6 +12,7 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathSamplePoint;
 import org.team100.lib.spline.HolonomicSpline;
+import org.team100.lib.spline.SplineGenerator;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +25,7 @@ class TrajectoryUtilTest {
         double maxDx = 0.1;
         double maxDy = 0.1;
         double maxDTheta = 0.1;
-        Path100 path = TrajectoryUtil100.trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
+        Path100 path = new Path100(SplineGenerator.parameterizeSplines(splines, maxDx, maxDy, maxDTheta));
         assertEquals(0, path.length(), 0.001);
     }
 
@@ -76,7 +77,7 @@ class TrajectoryUtilTest {
         double maxDx = 0.1;
         double maxDy = 0.1;
         double maxDTheta = 0.1;
-        Path100 path = TrajectoryUtil100.trajectoryFromSplines(splines, maxDx, maxDy, maxDTheta);
+        Path100 path = new Path100(SplineGenerator.parameterizeSplines(splines, maxDx, maxDy, maxDTheta));
         assertEquals(2, path.length(), 0.001);
         {
             PathSamplePoint sample = path.getInterpolated(0);

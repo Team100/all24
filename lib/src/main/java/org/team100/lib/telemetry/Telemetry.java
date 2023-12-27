@@ -83,7 +83,7 @@ public class Telemetry {
     private Telemetry() {
         inst = NetworkTableInstance.getDefault();
         pubs = new HashMap<>();
-        m_levelChooser = TelemetryLevelChooser.get("Telemetry Level");
+        m_levelChooser = TelemetryLevelChooser.get();
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }

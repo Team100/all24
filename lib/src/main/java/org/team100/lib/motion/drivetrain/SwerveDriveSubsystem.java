@@ -3,6 +3,8 @@ package org.team100.lib.motion.drivetrain;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.InitCommand;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
@@ -64,7 +66,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * Updates odometry.
      * 
-     * Periodic() should not do actuation.  Let commands do that. */
+     * Periodic() should not do actuation. Let commands do that.
+     */
     @Override
     public void periodic() {
         updateOdometry();
@@ -125,11 +128,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * Scales the supplied twist by the "speed" driver control modifier.
      * 
-     * @param twist Field coordinate velocities in meters and radians per second.
+     * @param twist  Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
     public void driveInFieldCoords(Twist2d twist, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
+        if (Experiments.instance.enabled(Experiment.ShowMode))
+            speed = DriverControl.Speed.SLOW;
         t.log(Level.DEBUG, "/chassis/control_speed", speed.name());
         switch (speed) {
             case SLOW:

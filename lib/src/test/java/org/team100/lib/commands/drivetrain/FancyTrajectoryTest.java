@@ -18,7 +18,7 @@ class FancyTrajectoryTest {
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
         TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
-        FancyTrajectory command = new FancyTrajectory(drive, planner);
+        FancyTrajectory command = new FancyTrajectory(drive, planner, kSmoothKinematicLimits);
 
         command.initialize();
         command.execute();

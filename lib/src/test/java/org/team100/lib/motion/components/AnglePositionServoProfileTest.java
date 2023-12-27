@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.experiments.MockExperiments;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
@@ -15,7 +16,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 class AnglePositionServoProfileTest {
     private static final double kDelta = 0.001;
 
-    private final MockExperiments experiments;
     private final String name;
     private final MockMotor100<Angle> motor;
     private final MockEncoder100<Angle> encoder;
@@ -25,7 +25,6 @@ class AnglePositionServoProfileTest {
     private final PositionServo<Angle> servo;
 
     public AnglePositionServoProfileTest() {
-        experiments = new MockExperiments();
         name = "test";
         motor = new MockMotor100<>();
         encoder = new MockEncoder100<>();
@@ -37,7 +36,6 @@ class AnglePositionServoProfileTest {
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
                 name,
                 motor,
                 encoder,
@@ -62,6 +60,8 @@ class AnglePositionServoProfileTest {
      */
     @Test
     void testProfile() {
+        Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, true);
+
         verify(0.105, 0.005, 0.1);
         verify(0.209, 0.020, 0.2);
         verify(0.313, 0.045, 0.3);

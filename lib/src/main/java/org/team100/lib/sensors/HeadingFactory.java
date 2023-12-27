@@ -11,15 +11,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 public class HeadingFactory {
 
     public static HeadingInterface get(
-            Identity identity,
             SwerveDriveKinematics kinematics,
             SwerveModuleCollection collection) {
-        switch (identity) {
+        switch (Identity.instance) {
             case BLANK:
                 // for simulation
                 return new SimulatedHeading(kinematics, collection);
             default:
-                RedundantGyroInterface ahrsclass = new RedundantGyroFactory(identity).get();
+                RedundantGyroInterface ahrsclass = new RedundantGyroFactory(Identity.instance).get();
                 return new Heading(ahrsclass);
         }
     }

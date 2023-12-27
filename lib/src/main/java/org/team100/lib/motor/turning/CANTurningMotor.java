@@ -25,7 +25,6 @@ public class CANTurningMotor implements Motor100<Angle> {
     private final int canID;
     private final String m_name;
 
-    // TODO fix this
     public CANTurningMotor(String name, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
@@ -81,18 +80,11 @@ public class CANTurningMotor implements Motor100<Angle> {
 
     public void setVelocity(double outputRadiansPerSec, double outputRadiansPerSecPerSec) {
         double revolutionsPerSec = outputRadiansPerSec / (2 * Math.PI);
-        // TODO fix this
-        double revolutionsPerSec2 = outputRadiansPerSecPerSec / (2 * Math.PI);
         double revsPer100ms = revolutionsPerSec / 10;
         double ticksPer100ms = revsPer100ms * ticksPerRevolution;
         DemandType type = DemandType.ArbitraryFeedForward;
         double Kn = 0.1121212;
-        //Value was gotten through tunning
-        //double Kf = 0.6;
-        //Kf 
-        //double Ke = 0.068842;
         double Ks = 0.007576; 
-        //Value was gotten through tuning
         double VSat = 11;
         double kFF = (Kn * revolutionsPerSec + Ks * Math.signum(revolutionsPerSec)) * m_gearRatio / VSat;
         m_motor.set(ControlMode.Velocity, ticksPer100ms * m_gearRatio, type, kFF);

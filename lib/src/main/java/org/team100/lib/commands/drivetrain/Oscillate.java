@@ -36,7 +36,6 @@ public class Oscillate extends Command100 {
 
     private final Telemetry t = Telemetry.get();
 
-    private final Experiments m_experiments;
     private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;
     private final TriangleWave m_triangle;
@@ -44,8 +43,7 @@ public class Oscillate extends Command100 {
     private final Timer m_timer;
     private SwerveState m_initial;
 
-    public Oscillate(Experiments experiments, SwerveDriveSubsystem swerve) {
-        m_experiments = experiments;
+    public Oscillate(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
         double period = 4 * kMaxSpeed / kAccel;
         m_square = new SquareWave(kAccel, period);
@@ -69,7 +67,7 @@ public class Oscillate extends Command100 {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-        if (m_experiments.enabled(Experiment.OscillateDirect)) {
+        if (Experiments.instance.enabled(Experiment.OscillateDirect)) {
             // there are four states here because state is mutable :-(
             SwerveModuleState[] states = new SwerveModuleState[] {
                     new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),

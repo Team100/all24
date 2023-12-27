@@ -23,17 +23,9 @@ import org.team100.lib.util.Util;
  * lower it here.
  */
 public class SwerveKinodynamicsFactory {
-    /**
-     * TODO: remove show mode, use a velocity multiplier in the command or
-     * subsystem for that.
-     * 
-     * @param showMode is for younger drivers to drive the robot slowly.
-     */
-    public static SwerveKinodynamics get(Identity identity, boolean showMode) {
-        switch (identity) {
+    public static SwerveKinodynamics get() {
+        switch (Identity.instance) {
             case COMP_BOT:
-                if (showMode)
-                    return new SwerveKinodynamics(4, 2, 3, 13, 0.491, 0.765, 0.3);
                 return new SwerveKinodynamics(4, 2, 3, 13, 0.491, 0.765, 0.3);
             case SWERVE_TWO:
                 return new SwerveKinodynamics(4, 2, 2, 13, 0.380, 0.445, 0.3);
@@ -57,6 +49,9 @@ public class SwerveKinodynamicsFactory {
         return new SwerveKinodynamics(1, 1, 1, 1, 0.5, 0.5, 0.3);
     }
 
+    public static SwerveKinodynamics forTest2() {
+        return new SwerveKinodynamics(2, 1, 1, 1, 0.5, 0.5, 0.6);
+    }
     //////////////////////////////////////////
     //
     // below are specific test cases. try to minimize their number

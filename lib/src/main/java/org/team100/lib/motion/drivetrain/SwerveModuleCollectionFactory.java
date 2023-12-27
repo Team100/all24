@@ -12,16 +12,14 @@ public class SwerveModuleCollectionFactory {
     private static final String kFrontRight = "Front Right";
     private static final String kRearLeft = "Rear Left";
     private static final String kRearRight = "Rear Right";
-    private final Identity m_identity;
     private final SwerveModuleFactory m_factory;
 
-    public SwerveModuleCollectionFactory(Identity identity, SwerveModuleFactory factory) {
-        m_identity = identity;
+    public SwerveModuleCollectionFactory(SwerveModuleFactory factory) {
         m_factory = factory;
     }
 
     public SwerveModuleCollection get() {
-        switch (m_identity) {
+        switch (Identity.instance) {
             case COMP_BOT:
                 Util.println("************** WCP MODULES **************");
                 return new SwerveModuleCollection(

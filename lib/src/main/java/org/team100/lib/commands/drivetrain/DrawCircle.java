@@ -1,7 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -28,13 +27,12 @@ public class DrawCircle extends SequentialCommandGroup {
      * .Y...2---1/5
      */
     public DrawCircle(
-            Experiments experiments,
             SwerveDriveSubsystem drivetrain,
             SwerveDriveKinematics kinematics,
             HolonomicDriveController3 controller) {
         TrajectoryConfig config = new TrajectoryConfig(maxVelocityM_S, maxAccelM_S_S);
         config.setKinematics(kinematics);
-        StraightLineTrajectory maker = new StraightLineTrajectory(experiments, config);
+        StraightLineTrajectory maker = new StraightLineTrajectory(config);
         addCommands(
                 new DriveToWaypoint3(new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero), drivetrain, maker, controller),
                 new DriveToWaypoint3(new Pose2d(-0.5, 0.5, GeometryUtil.kRotationZero), drivetrain, maker, controller),

@@ -21,7 +21,6 @@ public class VelocityServo<T extends Measure100> {
 
     private final Telemetry t = Telemetry.get();
 
-    private final Experiments m_experiments;
     private final Motor100<T> m_motor;
     private final Encoder100<T> m_encoder;
     private final PIDController m_controller;
@@ -42,7 +41,6 @@ public class VelocityServo<T extends Measure100> {
      * @param feedforward
      */
     public VelocityServo(
-            Experiments experiments,
             String name,
             Motor100<T> motor,
             Encoder100<T> encoder,
@@ -50,7 +48,6 @@ public class VelocityServo<T extends Measure100> {
             SimpleMotorFeedforward feedforward) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_experiments = experiments;
         m_motor = motor;
         m_encoder = encoder;
         m_controller = controller;
@@ -68,7 +65,7 @@ public class VelocityServo<T extends Measure100> {
         if (Double.isNaN(setpoint))
             throw new IllegalArgumentException("setpoint is NaN");
         m_setpoint = setpoint;
-        if (m_experiments.enabled(Experiment.UseClosedLoopVelocity)) {
+        if (Experiments.instance.enabled(Experiment.UseClosedLoopVelocity)) {
             offboard(setpoint);
         } else {
             onboard(setpoint);
@@ -126,5 +123,9 @@ public class VelocityServo<T extends Measure100> {
         double accel = (setpoint - previousSetpoint) / m_period;
         previousSetpoint = setpoint;
         return accel;
+    }
+
+    public void periodic() {
+        m_encoder.periodic();
     }
 }

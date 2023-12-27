@@ -3,9 +3,6 @@ package org.team100.lib.autonomous;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -22,19 +19,10 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testRestToRest() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
+        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
         TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
         assertEquals(0, c.getStartVelocity(), kDelta);
-
-        Experiments e = new Experiments(Identity.BLANK) {
-
-            @Override
-            public boolean enabled(Experiment experiment) {
-                return true;
-            }
-
-        };
-        StraightLineTrajectory t = new StraightLineTrajectory(e, c);
+        StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, GeometryUtil.kTwist2dIdentity);
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
@@ -43,19 +31,10 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testMovingToRest() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
+        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
         TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
         assertEquals(0, c.getStartVelocity(), kDelta);
-
-        Experiments e = new Experiments(Identity.BLANK) {
-
-            @Override
-            public boolean enabled(Experiment experiment) {
-                return true;
-            }
-
-        };
-        StraightLineTrajectory t = new StraightLineTrajectory(e, c);
+        StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
@@ -64,19 +43,10 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testBackingUp() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
+        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
         TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
         assertEquals(0, c.getStartVelocity(), kDelta);
-
-        Experiments e = new Experiments(Identity.BLANK) {
-
-            @Override
-            public boolean enabled(Experiment experiment) {
-                return true;
-            }
-
-        };
-        StraightLineTrajectory t = new StraightLineTrajectory(e, c);
+        StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(-1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);
@@ -86,20 +56,10 @@ class StraightLineTrajectoryTest {
 
     @Test
     void test2d() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
-        
+        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
         TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
         assertEquals(0, c.getStartVelocity(), kDelta);
-
-        Experiments e = new Experiments(Identity.BLANK) {
-
-            @Override
-            public boolean enabled(Experiment experiment) {
-                return true;
-            }
-
-        };
-        StraightLineTrajectory t = new StraightLineTrajectory(e, c);
+        StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(0, 1, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory traj = t.apply(start, end);

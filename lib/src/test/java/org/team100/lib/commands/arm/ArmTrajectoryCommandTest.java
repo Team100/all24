@@ -1,5 +1,7 @@
 package org.team100.lib.commands.arm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
@@ -9,6 +11,8 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Translation2d;
 
 class ArmTrajectoryCommandTest {
+    private static final double kDelta = 0.001;
+    
     @Test
     void testSimple() {
         HAL.initialize(500, 0);
@@ -21,8 +25,8 @@ class ArmTrajectoryCommandTest {
                 armKinematicsM,
                 goal);
 
-        // TODO: add some assertions
         command.initialize();
+        assertEquals(0, armSubSystem.getPosition().th1, kDelta);
         command.execute();
         command.end(false);
         armSubSystem.close();

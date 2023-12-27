@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -8,9 +9,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
@@ -28,8 +27,9 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 class DriveToWaypoint3Test {
+    private static final double kDelta = 0.001;
 
-    Fixture fixture = new Fixture();
+    private final Fixture fixture = new Fixture();
 
     @Test
     void testSimple() {
@@ -46,24 +46,23 @@ class DriveToWaypoint3Test {
                 trajectories,
                 controller);
 
-        // TODO: add some assertions
         command.initialize();
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         command.execute();
         command.end(false);
     }
 
-    /** Demonstrate how to use DriveToWaypoing to go to apriltags. */
+    /** Demonstrate how to use DriveToWaypoint to go to apriltags. */
     @Test
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
+        SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get().getKinematics();
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .blueLayout("2023-chargedup.json");
 
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(kinematics);
 
-        Experiments e = new Experiments(Identity.BLANK);
-        StraightLineTrajectory maker = new StraightLineTrajectory(e, config);
+        StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Transform2d transform = new Transform2d(
                 new Translation2d(-1, -1),
                 GeometryUtil.kRotationZero);
@@ -75,8 +74,8 @@ class DriveToWaypoint3Test {
 
         DriveToWaypoint3 command = new DriveToWaypoint3(goal.get(), drivetrain, maker, m_controller);
 
-        // TODO: add some assertions
         command.initialize();
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         command.execute();
         command.end(false);
     }

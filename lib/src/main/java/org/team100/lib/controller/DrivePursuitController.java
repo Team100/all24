@@ -5,6 +5,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -35,27 +36,30 @@ public class DrivePursuitController implements DriveMotionController {
     public static final double EPSILON = 1e-6;
     public static final Telemetry t = Telemetry.get();
 
-    private static final double defaultCook = 0.5;
     private static final double kPathLookaheadTime = 0.25;
     private static final double kPathMinLookaheadDistance = 12.0;
     private static final double kAdaptivePathMinLookaheadDistance = 0.1;
     private static final double kAdaptivePathMaxLookaheadDistance = 0.1;
     private static final double kLookaheadSearchDt = 0.01;
-    private static final double kMaxVelocityMetersPerSecond = 4.959668;
+
+    // feedback control constants
     private static final double kThetakP = 3.5;
     private static final double kPositionkP = 2.0;
 
-    private boolean useDefaultCook = true;
+    private final SwerveKinodynamics m_limits;
+
     private Lookahead mSpeedLookahead = null;
 
     private TrajectoryTimeIterator m_iter;
-    private double mCurrentTrajectoryLength = 0.0;
     private boolean mIsReversed = false;
+
+    public DrivePursuitController(SwerveKinodynamics limits) {
+        m_limits = limits;
+    }
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         m_iter = trajectory;
-        mCurrentTrajectoryLength = m_iter.trajectory().getLastPoint().state().getTimeS();
 
         for (int i = 0; i < trajectory.trajectory().length(); ++i) {
             if (trajectory.trajectory().getPoint(i).state().velocityM_S() > EPSILON) {
@@ -66,9 +70,8 @@ public class DrivePursuitController implements DriveMotionController {
                 break;
             }
         }
-        useDefaultCook = true;
         mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0,
-                kMaxVelocityMetersPerSecond);
+             m_limits.getMaxDriveVelocityM_S());
     }
 
     /**
@@ -148,24 +151,15 @@ public class DrivePursuitController implements DriveMotionController {
         steeringDirection = steeringDirection.rotateBy(GeometryUtil.inverse(measurement).getRotation());
 
         // Use the Velocity Feedforward of the Closest Point on the Trajectory
-        double normalizedSpeed = Math.abs(mSetpoint.get().velocityM_S()) / kMaxVelocityMetersPerSecond;
-
-        // The Default Cook is the minimum speed to use. So if a feedforward speed is
-        // less than defaultCook, the robot will drive at the defaultCook speed
-        if (normalizedSpeed > defaultCook || mSetpoint.get().getTimeS() > (mCurrentTrajectoryLength / 2.0)) {
-            useDefaultCook = false;
-        }
-        if (useDefaultCook) {
-            normalizedSpeed = defaultCook;
-        }
+        double normalizedSpeed = Math.abs(mSetpoint.get().velocityM_S()) / m_limits.getMaxDriveVelocityM_S();
 
         // Convert the Polar Coordinate (speed, direction) into a Rectangular Coordinate
         // (Vx, Vy) in Robot Frame
         final Translation2d steeringVector = new Translation2d(steeringDirection.getCos() * normalizedSpeed,
                 steeringDirection.getSin() * normalizedSpeed);
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-                steeringVector.getX() * kMaxVelocityMetersPerSecond,
-                steeringVector.getY() * kMaxVelocityMetersPerSecond,
+                steeringVector.getX() * m_limits.getMaxDriveVelocityM_S(),
+                steeringVector.getY() * m_limits.getMaxDriveVelocityM_S(),
                 0.0);
 
         t.log(Level.DEBUG, "/pursuit_planner/pursuit speeds", chassisSpeeds);
@@ -237,7 +231,9 @@ public class DrivePursuitController implements DriveMotionController {
      * all, it just picks the nearest point.
      * 
      * Note if the probe is at the end, we return some time that is past the end
-     * rather than the end arrival time. TODO: this seems like a bug.
+     * rather than the end arrival time.
+     * 
+     * TODO: this seems like a bug.
      * 
      * @param iter
      * @param pose probe pose

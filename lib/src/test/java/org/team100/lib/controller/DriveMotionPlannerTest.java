@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -33,8 +32,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class DriveMotionPlannerTest {
 
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(Identity.BLANK,
-            false);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
     void testTrajectory() {

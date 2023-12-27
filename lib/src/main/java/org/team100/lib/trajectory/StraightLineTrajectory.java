@@ -21,17 +21,15 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 /** Make straight lines, rest-to-rest. */
 public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, Trajectory> {
 
-    private final Experiments m_experiments;
     private final TrajectoryConfig m_config;
 
-    public StraightLineTrajectory(Experiments experiments, TrajectoryConfig config) {
-        m_experiments = experiments;
+    public StraightLineTrajectory(TrajectoryConfig config) {
         m_config = config;
     }
 
     @Override
     public Trajectory apply(SwerveState startState, Pose2d end) {
-        if (m_experiments.enabled(Experiment.UseInitialVelocity))
+        if (Experiments.instance.enabled(Experiment.UseInitialVelocity))
             return movingToRest(startState, end);
         else
             return TrajectoryMaker.restToRest(m_config, startState.translation(), end.getTranslation());

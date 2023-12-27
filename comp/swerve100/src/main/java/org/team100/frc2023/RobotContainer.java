@@ -34,7 +34,6 @@ import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
@@ -82,26 +81,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer implements SelfTestable {
 
-    //////////////////////////////////////
-    // SHOW MODE
-    //
-    // Show mode is for younger drivers to drive the robot slowly.
-    //
-    // TODO: make a physical show mode switch.
-    // TODO: make way more noticable.
-    private static final boolean SHOW_MODE = false;
-    //
-    //////////////////////////////////////
-
-    private static final double kDriveCurrentLimit = 30;
-    // public double kDriveCurrentLimit = SHOW_MODE ? 20 : 60;
+    private static final double kDriveCurrentLimit = 60;
 
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;
     private final AllianceSelector m_allianceSelector;
-
-    final Experiments m_experiments;
 
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -136,15 +121,11 @@ public class RobotContainer implements SelfTestable {
         m_monitor = new Monitor(new Annunciator(0));
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
-        Identity identity = Identity.get();
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(kDriveCurrentLimit);
+        m_modules = new SwerveModuleCollectionFactory(moduleFactory).get();
 
-        m_experiments = new Experiments(identity);
-
-        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(m_experiments, kDriveCurrentLimit);
-        m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
-
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(identity, SHOW_MODE);
-        m_heading = HeadingFactory.get(identity, swerveKinodynamics.getKinematics(), m_modules);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_heading = HeadingFactory.get(swerveKinodynamics.getKinematics(), m_modules);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
@@ -172,7 +153,7 @@ public class RobotContainer implements SelfTestable {
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(m_experiments, swerveKinodynamics, m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
         // control = new JoystickControl();
         // control = new DriverXboxControl();
@@ -180,6 +161,7 @@ public class RobotContainer implements SelfTestable {
         // selects the correct control class for whatever is plugged in
         control = new ControlFactory().getDriverControl();
 
+        // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
@@ -199,33 +181,25 @@ public class RobotContainer implements SelfTestable {
         control.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
         control.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-        // TODO: use the same controllers as HolonomicDriveController3
-        // P is low here to avoid oscillating
-        // TODO: add a velocity control
-        PIDController thetaController = new PIDController(2, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
         ManualMode manualMode = new ManualMode();
 
-        // TODO: make the reset configurable
-        // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
         control.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawCircle(m_experiments, m_drive, swerveKinodynamics.getKinematics(), controller);
+        m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics.getKinematics(), controller);
         control.circle().whileTrue(m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
 
         control.driveWithFancyTrajec().whileTrue(
-                new FancyTrajectory(m_drive, planner));
+                new FancyTrajectory(m_drive, planner, swerveKinodynamics));
 
         control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
         control.never().whileTrue(new Spin(m_drive, controller));
-        control.never().whileTrue(new Oscillate(m_experiments, m_drive));
+        control.never().whileTrue(new Oscillate(m_drive));
 
         // make a one-meter line
         control.never().whileTrue(
@@ -253,7 +227,7 @@ public class RobotContainer implements SelfTestable {
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        StraightLineTrajectory maker = new StraightLineTrajectory(m_experiments, config);
+        StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Pose2d goal = new Pose2d(8, 4, new Rotation2d()); // field center, roughly
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         control.never().whileTrue(follower);
@@ -261,23 +235,23 @@ public class RobotContainer implements SelfTestable {
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID));
+                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF));
+                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
 
         // 254 Pursuit follower
-        DriveMotionController drivePP = new DrivePursuitController();
+        DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, drivePP));
+                new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
         DriveMotionController driveRam = new DriveRamseteController();
         control.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, driveRam));
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
@@ -319,7 +293,7 @@ public class RobotContainer implements SelfTestable {
         //
         // ELEVATOR
         //
-        m_elevator = new SimpleSubsystemFactory(identity, m_experiments).get();
+        m_elevator = new SimpleSubsystemFactory().get();
         SimpleManualMode simpleMode = new SimpleManualMode();
         m_elevator.setDefaultCommand(new SimpleManual(simpleMode, m_elevator, operatorControl::elevator));
 
@@ -327,6 +301,9 @@ public class RobotContainer implements SelfTestable {
         //
         // DRIVE
         //
+
+        PIDController thetaController = new PIDController(2, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         m_drive.setDefaultCommand(
                 new DriveManually(
@@ -345,9 +322,8 @@ public class RobotContainer implements SelfTestable {
         // IDENTITY-SPECIFIC PARTS
         //
 
-        switch (identity) {
+        switch (Identity.instance) {
             case TEST_BOARD_6B:
-                // TODO: use the correct identity.
                 m_auton = new Sequence(m_armSubsystem, m_armKinematicsM);
                 break;
             default:

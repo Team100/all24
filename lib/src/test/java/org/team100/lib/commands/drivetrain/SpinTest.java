@@ -3,6 +3,8 @@ package org.team100.lib.commands.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
 
 import edu.wpi.first.wpilibj.simulation.SimHooks;
@@ -14,6 +16,8 @@ class SpinTest {
 
     @Test
     void testSimple() {
+        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
+
         Spin command = new Spin(fixture.drive, fixture.controller);
         command.initialize();
 

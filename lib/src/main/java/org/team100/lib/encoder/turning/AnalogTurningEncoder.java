@@ -36,6 +36,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
 
     private Double prevAngle = null;
     private Double prevTime = null;
+    private double m_rate;
 
     /**
      * @param name        may not start with a slash
@@ -83,20 +84,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
      */
     @Override
     public double getRate() {
-        double angle = getPosition();
-        double time = Timer.getFPGATimestamp();
-        if (prevAngle == null) {
-            prevAngle = angle;
-            prevTime = time;
-            return 0;
-        }
-        double dx = angle - prevAngle;
-        double dt = time - prevTime;
-
-        prevAngle = angle;
-        prevTime = time;
-
-        return dx / dt;
+        return m_rate;
     }
 
     @Override
@@ -114,5 +102,24 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
     public double getAbsolutePosition() {
         double positionTurns = m_encoder.getAbsolutePosition();
         return MathUtil.angleModulus(2 * Math.PI * positionTurns);
+    }
+
+    @Override
+    public void periodic() {
+        double angle = getPosition();
+        double time = Timer.getFPGATimestamp();
+        if (prevAngle == null) {
+            prevAngle = angle;
+            prevTime = time;
+            m_rate = 0;
+            return;
+        }
+        double dx = angle - prevAngle;
+        double dt = time - prevTime;
+
+        prevAngle = angle;
+        prevTime = time;
+
+        m_rate = dx / dt;
     }
 }
