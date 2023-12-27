@@ -16,6 +16,8 @@ public enum Experiment {
     UseInitialVelocity,
     /** For the oscillate command, drive modules directly */
     OscillateDirect,
+    /** For the oscillate command, drive rotation instead of linearly */
+    OscillateTheta,
     /**
      * Flush network tables as often as possible. Do not enable this experiment in
      * competition, you'll overwhelm the network and the RIO

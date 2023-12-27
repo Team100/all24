@@ -12,12 +12,16 @@ import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Drive back and forth one meter in x.
+ * Drive back and forth forever.
+ * 
+ * Drive x or theta via {@link Experiment.OscillateTheta}.
+ * Drive chassis speed or module state via {@link Experiment.OscillateDirect}.
  * 
  * This command is intended for calibration of the lower levels of the
  * drivetrain control stack.
@@ -26,9 +30,6 @@ import edu.wpi.first.wpilibj.Timer;
  * infinite jerk), velocity is a triangle wave, so the resulting position should
  * be a piecewise parabolic curve that looks a lot like a sine wave, though it
  * is not one.
- * 
- * The output can be used to drive the {@link SwerveModuleState} directly, or at
- * the {@link ChassisSpeeds} level, using {@link Experiment.OscillateDirect}.
  */
 public class Oscillate extends Command100 {
     private static final double kAccel = 1;
@@ -68,17 +69,35 @@ public class Oscillate extends Command100 {
         double positionM = m_parabola.applyAsDouble(time);
 
         if (Experiments.instance.enabled(Experiment.OscillateDirect)) {
-            // there are four states here because state is mutable :-(
-            SwerveModuleState[] states = new SwerveModuleState[] {
-                    new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
-                    new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
-                    new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
-                    new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero)
-            };
-            m_swerve.setRawModuleStates(states);
+            if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
+                SwerveModuleState[] states = new SwerveModuleState[] {
+                        new SwerveModuleState(speedM_S, new Rotation2d(3 * Math.PI / 4)),
+                        new SwerveModuleState(speedM_S, new Rotation2d(Math.PI / 4)),
+                        new SwerveModuleState(speedM_S, new Rotation2d(-3 * Math.PI / 4)),
+                        new SwerveModuleState(speedM_S, new Rotation2d(-1 * Math.PI / 4))
+                };
+                m_swerve.setRawModuleStates(states);
+
+            } else {
+                SwerveModuleState[] states = new SwerveModuleState[] {
+                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
+                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
+                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
+                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero)
+                };
+                m_swerve.setRawModuleStates(states);
+
+            }
         } else {
-            ChassisSpeeds chassisSpeeds = new ChassisSpeeds(speedM_S, 0, 0);
-            m_swerve.setChassisSpeeds(chassisSpeeds, dt);
+            if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
+                double speedRad_S = speedM_S;
+                ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0, 0, speedRad_S);
+                m_swerve.setChassisSpeeds(chassisSpeeds, dt);
+            } else {
+                ChassisSpeeds chassisSpeeds = new ChassisSpeeds(speedM_S, 0, 0);
+                m_swerve.setChassisSpeeds(chassisSpeeds, dt);
+            }
+
         }
 
         t.log(Level.DEBUG, "/oscillate/time", time);
@@ -88,10 +107,16 @@ public class Oscillate extends Command100 {
 
         SwerveState swerveState = m_swerve.getState();
         // TODO: the acceleration from swerve.getState() is wrong.
-        t.log(Level.DEBUG, "/oscillate/measurement/accel", "fixme" /*swerveState.x().a()*/);
-        t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.x().v());
-        t.log(Level.DEBUG, "/oscillate/measurement/position",
-                swerveState.x().x() - m_initial.x().x());
+        t.log(Level.DEBUG, "/oscillate/measurement/accel", "fixme" /* swerveState.x().a() */);
+        if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
+            t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.theta().v());
+            t.log(Level.DEBUG, "/oscillate/measurement/position",
+                    swerveState.theta().x() - m_initial.theta().x());
+        } else {
+            t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.x().v());
+            t.log(Level.DEBUG, "/oscillate/measurement/position",
+                    swerveState.x().x() - m_initial.x().x());
+        }
     }
 
     @Override

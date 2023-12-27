@@ -230,10 +230,8 @@ public class DrivePursuitController implements DriveMotionController {
      * given pose. This doesn't require that the given pose be on the trajectory at
      * all, it just picks the nearest point.
      * 
-     * Note if the probe is at the end, we return some time that is past the end
+     * NOTE: if the probe is at the end, we return a time that is past the end
      * rather than the end arrival time.
-     * 
-     * TODO: this seems like a bug.
      * 
      * @param iter
      * @param pose probe pose

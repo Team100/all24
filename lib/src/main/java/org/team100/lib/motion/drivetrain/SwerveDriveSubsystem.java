@@ -85,6 +85,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return m_swerveLocal.speeds();
     }
 
+    /** @return current measurements */
     public SwerveModuleState[] moduleStates() {
         return m_swerveLocal.states();
     }

@@ -111,7 +111,7 @@ public class PositionServo<T extends Measure100> {
     }
 
     /**
-     * @return For distance this is meters, for angle this is radians.
+     * @return Current position measurement.  For distance this is meters, for angle this is radians.
      */
     public double getPosition() {
         return m_instance.modulus(m_encoder.getPosition());

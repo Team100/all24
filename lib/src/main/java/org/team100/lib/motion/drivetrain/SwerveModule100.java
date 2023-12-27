@@ -94,6 +94,7 @@ public class SwerveModule100 {
     // Package private for SwerveModuleCollection
     //
 
+    /** @return current measurements */
     SwerveModuleState getState() {
         return new SwerveModuleState(m_driveServo.getVelocity(), new Rotation2d(m_turningServo.getPosition()));
     }

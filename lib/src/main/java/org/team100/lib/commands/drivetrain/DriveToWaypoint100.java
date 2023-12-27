@@ -63,19 +63,12 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void initialize100() {
-        Pose2d start = m_swerve.getPose();
-        double startVelocity = 0;
-        Pose2d end = m_goal;
-        double endVelocity = 0;
+        final Pose2d start = m_swerve.getPose();
+        final double startVelocity = 0;
+        final Pose2d end = m_goal;
+        final double endVelocity = 0;
 
-        // TODO: put this angle calculation in a class like StraightLineTrajectory
-        Translation2d currentTranslation = start.getTranslation();
-        Translation2d goalTranslation = end.getTranslation();
-        Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
-        Rotation2d angleToGoal = translationToGoal.getAngle();
-        List<Pose2d> waypointsM = List.of(
-                new Pose2d(currentTranslation, angleToGoal),
-                new Pose2d(goalTranslation, angleToGoal));
+        List<Pose2d> waypointsM = getWaypoints(start, end);
 
         List<Rotation2d> headings = List.of(
                 start.getRotation(),
@@ -113,6 +106,7 @@ public class DriveToWaypoint100 extends Command100 {
                 currentSpeed.vyMetersPerSecond,
                 currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+        
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
         if (Double.isNaN(output.vxMetersPerSecond))
             throw new IllegalStateException("vx is NaN");
@@ -132,6 +126,18 @@ public class DriveToWaypoint100 extends Command100 {
     public void end(boolean interrupted) {
         m_swerve.stop();
         TrajectoryVisualization.clear();
+    }
+
+    ////////////////////////////////////////////////////
+
+    /** Waypoints where the rotation points in the direction of motion. */
+    private static List<Pose2d> getWaypoints(Pose2d p0, Pose2d p1) {
+        Translation2d t0 = p0.getTranslation();
+        Translation2d t1 = p1.getTranslation();
+        Rotation2d theta = t1.minus(t0).getAngle();
+        return List.of(
+                new Pose2d(t0, theta),
+                new Pose2d(t1, theta));
     }
 
 }

@@ -81,7 +81,10 @@ public class VelocityServo<T extends Measure100> {
         m_motor.setDutyCycle(dutyCycle);
     }
 
-    /** Note this can be noisy, maybe filter it. */
+    /**
+     * @return Current velocity measurement. Note this can be noisy, maybe filter
+     *         it.
+     */
     public Double getVelocity() {
         return m_encoder.getRate();
     }

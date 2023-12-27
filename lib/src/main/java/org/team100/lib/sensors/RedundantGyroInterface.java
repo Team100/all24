@@ -6,8 +6,6 @@ package org.team100.lib.sensors;
 public interface RedundantGyroInterface {
     float getRedundantGyroRateNED();
 
-    float getRedundantGyroZ();
-
     float getRedundantPitch();
 
     float getRedundantRoll();

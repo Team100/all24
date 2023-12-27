@@ -151,6 +151,7 @@ public class SwerveLocal {
     ////////////////////////////////////////////////////////////////////
     // Getters
 
+    /** @return current measurements */
     public SwerveModuleState[] states() {
         return m_modules.states();
     }

@@ -77,6 +77,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer implements SelfTestable {
@@ -139,13 +140,11 @@ public class RobotContainer implements SelfTestable {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        // TODO: make this override work better
-        // if (m_allianceSelector.alliance() == DriverStation.Alliance.Blue) {
-        layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
-        // } else { // red
-        // layout =
-        // AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
-        // }
+        if (m_allianceSelector.alliance() == Alliance.Blue) {
+            layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
+        } else {
+            layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
+        }
 
         VisionDataProvider visionDataProvider = new VisionDataProvider(
                 layout,

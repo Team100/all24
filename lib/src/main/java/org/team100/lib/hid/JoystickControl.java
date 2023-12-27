@@ -21,14 +21,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Operator features are not implemented.
  * Command buttons are not implemented.
  */
-public class JoystickControl implements DriverControl {
+public abstract class JoystickControl implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
 
     private final CommandJoystick m_controller;
     private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
-    public JoystickControl() {
+    protected JoystickControl() {
         m_controller = new CommandJoystick(0);
     }
 
