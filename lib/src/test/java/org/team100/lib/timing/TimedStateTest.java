@@ -29,7 +29,6 @@ class TimedStateTest {
         assertEquals(start_state, i0, String.format("%s %s", start_state, i0));
         assertEquals(end_state, start_state.interpolate2(end_state, 1.0));
         assertEquals(end_state, end_state.interpolate2(start_state, 0.0));
-        // System.out.println(end_state.interpolate2(start_state, 1.0));
         assertEquals(start_state, end_state.interpolate2(start_state, 1.0));
 
         TimedPose intermediate_state = start_state.interpolate2(end_state, 0.5);

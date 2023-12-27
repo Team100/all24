@@ -1,5 +1,7 @@
 package org.team100.lib.motion.arm;
 
+import org.team100.lib.util.Util;
+
 import edu.wpi.first.math.geometry.Translation2d;
 
 /**
@@ -65,7 +67,7 @@ public class ArmKinematics {
 
     public ArmAngles inverseVel(ArmAngles pos, Translation2d vel) {
         if (pos == null) {
-            System.out.println("WARNING: NULL ARM POSITION in ArmKinematics.inverseVel()");
+            Util.warn("NULL ARM POSITION in ArmKinematics.inverseVel()");
             return new ArmAngles(0, 0);
         }
         double dx = vel.getX();
@@ -76,7 +78,7 @@ public class ArmKinematics {
         if (Math.abs(pos.th1 - pos.th2) < 0.001) {
             // when th1 and th2 are the same, the arm is straight.
             // in that case, any movement along the arm requires infinite joint velocity
-            System.out.println("WARNING: STRAIGHT ARM in ArmKinematics.inverseVel()");
+            Util.warn("STRAIGHT ARM in ArmKinematics.inverseVel()");
             return new ArmAngles(0, 0);
         }
 

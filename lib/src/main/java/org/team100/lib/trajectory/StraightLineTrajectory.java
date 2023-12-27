@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -65,7 +66,7 @@ public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, T
                     last,
                     m_config);
         } catch (TrajectoryGenerationException e) {
-            System.out.println("WARNING: Trajectory Generation Exception");
+            Util.warn("Trajectory Generation Exception");
             return new Trajectory();
         }
     }

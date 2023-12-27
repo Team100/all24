@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -20,6 +21,7 @@ import edu.wpi.first.math.system.LinearSystem;
 // magnetometer is accurate but imprecise
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class KalmanFilterTest {
+    boolean dump = false;
     public static final double DELTA = 1e-2;
 
     /**
@@ -66,9 +68,9 @@ public class KalmanFilterTest {
 
         Random r = new Random();
         // run some observations through it
-        // System.out.printf(
-        // "i position velocity positionObservation predictedPosition predictedVelocity
-        // correctedPosition correctedVelocity\n");
+        if (dump)
+            Util.printf(
+                    "i position velocity positionObservation predictedPosition predictedVelocity correctedPosition correctedVelocity\n");
         double predictedPosition = 0;
         double predictedVelocity = 0;
         double correctedPosition = 0;
@@ -88,10 +90,11 @@ public class KalmanFilterTest {
             kf.correct(controlInput, observedOutput);
             correctedPosition = kf.getXhat().get(0, 0);
             correctedVelocity = kf.getXhat().get(1, 0);
-            // System.out.printf("%d %f %f %f %f %f %f %f\n",
-            // i, position, velocity, positionObservation,
-            // predictedPosition, predictedVelocity,
-            // correctedPosition, correctedVelocity);
+            if (dump)
+                Util.printf("%d %f %f %f %f %f %f %f\n",
+                        i, position, velocity, positionObservation,
+                        predictedPosition, predictedVelocity,
+                        correctedPosition, correctedVelocity);
         }
         // System.out.flush();
         // check end values
@@ -134,9 +137,9 @@ public class KalmanFilterTest {
 
         Random r = new Random();
         // run some observations through it
-        // System.out.printf(
-        // "i position velocity positionObservation velocityObservation
-        // predictedPosition predictedVelocity correctedPosition correctedVelocity\n");
+        if (dump)
+            Util.printf(
+                    "i position velocity positionObservation velocityObservation predictedPosition predictedVelocity correctedPosition correctedVelocity\n");
         double predictedPosition = 0;
         double predictedVelocity = 0;
         double correctedPosition = 0;
@@ -156,12 +159,13 @@ public class KalmanFilterTest {
             kf.correct(controlInput, observedOutput);
             correctedPosition = kf.getXhat().get(0, 0);
             correctedVelocity = kf.getXhat().get(1, 0);
-            // System.out.printf("%d %f %f %f %f %f %f %f %f\n",
-            // i, position, velocity, positionObservation, velocityObservation,
-            // predictedPosition, predictedVelocity,
-            // correctedPosition, correctedVelocity);
+            if (dump)
+                Util.printf("%d %f %f %f %f %f %f %f %f\n",
+                        i, position, velocity, positionObservation, velocityObservation,
+                        predictedPosition, predictedVelocity,
+                        correctedPosition, correctedVelocity);
         }
-        // System.out.flush();
+        System.out.flush();
         // check end values
         assertEquals(2, predictedPosition, 0.1);
         assertEquals(1, predictedVelocity, 0.1);
@@ -188,8 +192,9 @@ public class KalmanFilterTest {
 
         Matrix<N2, N2> K = kf.getK();
         assertArrayEquals(new double[] { 0.039, 0.011, 0, 0.828 }, K.getData(), 0.001);
-        // System.out.printf("[%10.5f %10.5f \n %10.5f %10.5f]\n",
-        // K.get(0, 0), K.get(0, 1), K.get(1, 0), K.get(1, 1));
+        if (dump)
+            Util.printf("[%10.5f %10.5f \n %10.5f %10.5f]\n",
+                    K.get(0, 0), K.get(0, 1), K.get(1, 0), K.get(1, 1));
 
         kf.setXhat(Matrix.mat(Nat.N2(), Nat.N1()).fill(0, 0));
 
@@ -198,8 +203,9 @@ public class KalmanFilterTest {
         final double velocityNoiseRS = 0.05;
         final double velocityOffsetRS = 0.05;
 
-        // System.out.printf(
-        // "tSec,posTrueR,velTrueRS,posObsR,velObsRS,posPredR,velPredRS,PosCorrR,velCorrRS\n");
+        if (dump)
+            Util.printf(
+                    "tSec,posTrueR,velTrueRS,posObsR,velObsRS,posPredR,velPredRS,PosCorrR,velCorrRS\n");
         double posTrueR = 0; // radians
         double velTrueRS = 0; // radians per sec
         double accTrueRSS = 0; // radians per sec per sec
@@ -237,10 +243,11 @@ public class KalmanFilterTest {
             kf.correct(controlInput, observedOutput);
             posCorrR = kf.getXhat().get(0, 0);
             velCorrRS = kf.getXhat().get(1, 0);
-            // System.out.printf("%5.2f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
-            // tSec, posTrueR, velTrueRS, posObsR, velObsRS,
-            // posPredR, velPredRS,
-            // posCorrR, velCorrRS);
+            if (dump)
+                Util.printf("%5.2f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
+                        tSec, posTrueR, velTrueRS, posObsR, velObsRS,
+                        posPredR, velPredRS,
+                        posCorrR, velCorrRS);
         }
         // System.out.flush();
         // check end values

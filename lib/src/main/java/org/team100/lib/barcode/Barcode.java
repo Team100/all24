@@ -2,6 +2,8 @@ package org.team100.lib.barcode;
 
 import java.util.function.IntSupplier;
 
+import org.team100.lib.util.Util;
+
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,7 +47,7 @@ public class Barcode implements IntSupplier {
     }
 
     public void teleopPeriodic() {
-        System.out.printf("%d   %5.3f\n",
+        Util.printf("%d   %5.3f\n",
                 m_array.readValue().getAsInt(),
                 m_input.getAverageVoltage());
     }

@@ -94,11 +94,9 @@ public class Rotate extends Command100 {
 
         // reference
         refTheta = m_profile.calculate(dt, m_goalState, refTheta);
-        System.out.println("REF " + refTheta.position + " v " + refTheta.velocity);
         m_finished = m_profile.isFinished(dt);
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
-        System.out.println("POSE " + currentPose);
 
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose
@@ -106,12 +104,9 @@ public class Rotate extends Command100 {
                 new State100(refTheta.position, refTheta.velocity, 0)); // TODO: accel
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-        System.out.println("OUTPUT " + fieldRelativeTarget);
-        System.out.println("ERROR " + m_controller.error());
 
         if (m_steeringAligned) {
             // steer normally
-            System.out.println("aligned");
             m_robotDrive.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             boolean aligned = m_robotDrive.steerAtRest(fieldRelativeTarget);
@@ -138,8 +133,6 @@ public class Rotate extends Command100 {
 
     @Override
     public boolean isFinished() {
-        System.out.println("M_FINISHED " + m_finished);
-        System.out.println("ERR " + m_controller.error());
         return m_finished && m_controller.atReference();
     }
 

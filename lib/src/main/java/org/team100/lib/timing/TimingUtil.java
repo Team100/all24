@@ -6,6 +6,7 @@ import java.util.List;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.util.Util;
 
 public class TimingUtil {
     private static final double kEpsilon = 1e-6;
@@ -28,7 +29,7 @@ public class TimingUtil {
             return timeParameterizeTrajectory(reverse, states, constraints, start_velocity, end_velocity,
                     max_velocity, max_abs_acceleration);
         } catch (TimingException e) {
-            System.out.println("WARNING: timing exception");
+            Util.warn("Timing exception");
             return new Trajectory100();
         }
     }

@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveInALittleSquareTest {
+    boolean dump = false;
     private static final double kDelta = 0.001;
 
     Fixture fixture = new Fixture();
@@ -72,12 +74,12 @@ class DriveInALittleSquareTest {
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
             State setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
-            System.out.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
-                    // command.m_timer.get(),
-                    goal.angle.getRadians(),
-                    setpoint.position,
-                    setpoint.velocity,
-                    measurement);
+            if (dump)
+                Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
+                        goal.angle.getRadians(),
+                        setpoint.position,
+                        setpoint.velocity,
+                        measurement);
         }
         // after that time, the wheels have rotated.
         // note the controller tolerance is

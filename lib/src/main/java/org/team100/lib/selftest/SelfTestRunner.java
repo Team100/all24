@@ -7,6 +7,7 @@ import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,7 +58,7 @@ public class SelfTestRunner extends Command {
     }
 
     private void addCase(Command deadline, Command... commands) {
-        m_group.addCommands(new InstantCommand(() -> System.out.println("\nRunning " + deadline.getName() + "...")));
+        m_group.addCommands(new InstantCommand(() -> Util.println("\nRunning " + deadline.getName() + "...")));
         m_group.addCommands(new SelfTestCase(deadline, commands));
     }
 
@@ -79,7 +80,7 @@ public class SelfTestRunner extends Command {
     @Override
     public final void end(boolean interrupted) {
         m_group.end(interrupted);
-        System.out.println(m_listener.summary());
+        Util.println(m_listener.summary());
     }
 
     @Override

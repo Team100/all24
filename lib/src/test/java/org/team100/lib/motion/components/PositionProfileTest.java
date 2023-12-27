@@ -8,11 +8,13 @@ import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 class PositionProfileTest {
+    boolean dump = false;
     private static final double kDelta = 0.001;
 
     private final MockExperiments experiments;
@@ -163,9 +165,9 @@ class PositionProfileTest {
         encoder.angle += motor.velocity * period;
         servo.setPosition(1);
         // useful to fix up the examples above
-        // System.out.printf("verify(%5.3f, %5.3f, %5.3f);\n", motor.velocity,
-        // servo.getSetpoint().position, servo.getSetpoint().velocity);
-        // assertEquals(motorVelocity, motor.velocity, kDelta);
+        if (dump)
+            Util.printf("verify(%5.3f, %5.3f, %5.3f);\n", motor.velocity,
+                    servo.getSetpoint().position, servo.getSetpoint().velocity);
         assertEquals(setpointPosition, servo.getSetpoint().position, kDelta);
         assertEquals(setpointVelocity, servo.getSetpoint().velocity, kDelta);
     }

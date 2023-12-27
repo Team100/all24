@@ -3,6 +3,7 @@ package org.team100.lib.motor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -29,7 +30,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     @Override
     public double get() {
         // TODO: this is wrong
-        System.out.println("WRONG");
+        Util.warn("WRONG simulated velocity");
         return m_velocity;
     }
 

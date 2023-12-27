@@ -161,6 +161,15 @@
         "setpoint": {
           "open": true
         }
+      },
+      "SmartDashboard": {
+        "Manual Drive Mode": {
+          "open": false
+        },
+        "Telemetry Level": {
+          "open": false
+        },
+        "open": false
       }
     },
     "swerve": {
@@ -174,12 +183,91 @@
         }
       }
     },
+    "transitory": {
+      "FMSInfo": {
+        "open": false
+      },
+      "Holonomic3": {
+        "error": {
+          "open": false
+        },
+        "measurement": {
+          "open": false
+        },
+        "open": false,
+        "setpoint": {
+          "open": false
+        },
+        "u_FB": {
+          "open": false
+        },
+        "u_FF": {
+          "open": false
+        }
+      },
+      "SmartDashboard": {
+        "Swerve Module Front Left": {
+          "open": false
+        },
+        "Swerve Module Front Right": {
+          "open": false
+        }
+      },
+      "center": {
+        "open": false
+      },
+      "circle": {
+        "center": {
+          "open": false
+        },
+        "open": false,
+        "reference": {
+          "open": false,
+          "theta": {
+            "open": false
+          }
+        },
+        "target": {
+          "open": false
+        },
+        "x_state": {
+          "open": false
+        },
+        "y_state": {
+          "open": false
+        }
+      },
+      "current pose": {
+        "open": false
+      },
+      "experiments": {
+        "string[]##v_/experiments/enabled": {
+          "open": false
+        }
+      },
+      "position servo Front Left": {
+        "open": false
+      },
+      "position servo Front Right": {
+        "open": false
+      },
+      "position servo Rear Left": {
+        "open": false
+      },
+      "position servo Rear Right": {
+        "open": false
+      },
+      "robot": {
+        "open": false
+      }
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard//Front Left": "Mechanism2d",
       "/SmartDashboard//Front Right": "Mechanism2d",
       "/SmartDashboard//Rear Left": "Mechanism2d",
       "/SmartDashboard//Rear Right": "Mechanism2d",
+      "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/Front Left": "Mechanism2d",
       "/SmartDashboard/Front Right": "Mechanism2d",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
@@ -215,6 +303,11 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/FlushOften": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Manual Drive Mode": {
         "window": {
           "visible": true

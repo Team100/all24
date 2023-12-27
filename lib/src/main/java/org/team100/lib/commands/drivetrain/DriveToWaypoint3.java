@@ -63,7 +63,6 @@ public class DriveToWaypoint3 extends Command100 {
         m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
         TrajectoryVisualization.setViz(m_trajectory);
-        // System.out.println(m_trajectory);
         m_timer.stop();
         m_timer.reset();
         m_steeringAligned = false;
@@ -83,12 +82,9 @@ public class DriveToWaypoint3 extends Command100 {
 
         if (m_steeringAligned) {
             // follow normally
-            // System.out.println("aligned");
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // not aligned yet, try aligning
-            // System.out.println("aligning...");
-
             boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
             if (aligned) {
                 m_steeringAligned = true;

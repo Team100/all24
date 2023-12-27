@@ -15,5 +15,10 @@ public enum Experiment {
     /** Use initial state in trajectory generation */
     UseInitialVelocity,
     /** For the oscillate command, drive modules directly */
-    OscillateDirect
+    OscillateDirect,
+    /**
+     * Flush network tables as often as possible. Do not enable this experiment in
+     * competition, you'll overwhelm the network and the RIO
+     */
+    FlushOften
 }

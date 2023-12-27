@@ -11,12 +11,14 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class TrajectoryListCommandTest {
+    boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
 
@@ -66,12 +68,13 @@ class TrajectoryListCommandTest {
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
             State setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
-            System.out.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
-                    command.m_timer.get(),
-                    goal.angle.getRadians(),
-                    setpoint.position,
-                    setpoint.velocity,
-                    measurement);
+            if (dump)
+             Util.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
+                     command.m_timer.get(),
+                     goal.angle.getRadians(),
+                     setpoint.position,
+                     setpoint.velocity,
+                     measurement);
         } while (!command.isFinished());
 
     }

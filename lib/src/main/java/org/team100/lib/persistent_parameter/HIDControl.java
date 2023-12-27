@@ -1,5 +1,7 @@
 package org.team100.lib.persistent_parameter;
 
+import org.team100.lib.util.Util;
+
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -14,7 +16,7 @@ public class HIDControl {
 
     public HIDControl() {
         m_hid = new CommandGenericHID(0);
-        System.out.println("Found HID " + m_hid.getHID().getName());
+        Util.println("Found HID " + m_hid.getHID().getName());
     }
 
     /** Exposes knobs by id.  Knob id starts with zero. */

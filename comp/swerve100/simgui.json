@@ -17,6 +17,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",

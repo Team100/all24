@@ -8,6 +8,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -48,11 +49,8 @@ class AsymSwerveSetpointGeneratorTest {
             SwerveSetpoint prevSetpoint,
             ChassisSpeeds goal,
             AsymSwerveSetpointGenerator generator) {
-        // System.out.println("Driving to goal state " + goal);
-        // System.out.println("Initial state: " + prevSetpoint);
         while (!GeometryUtil.toTwist2d(prevSetpoint.getChassisSpeeds()).equals(GeometryUtil.toTwist2d(goal))) {
             SwerveSetpoint newsetpoint = generator.generateSetpoint(prevSetpoint, goal, 0.02);
-            // System.out.println(newsetpoint);
             SatisfiesConstraints(prevSetpoint, newsetpoint);
             prevSetpoint = newsetpoint;
         }
@@ -225,6 +223,7 @@ class AsymSwerveSetpointGeneratorTest {
      */
     @Test
     void testCentripetal() {
+        boolean dump = false;
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
 
@@ -250,7 +249,8 @@ class AsymSwerveSetpointGeneratorTest {
 
         SwerveSetpoint prev = setpoint;
         Pose2d currentPose = GeometryUtil.kPoseZero;
-        System.out.printf("i     x     y    vx    vy drive steer     ax    ay      a\n");
+        if (dump)
+            Util.printf("i     x     y    vx    vy drive steer     ax    ay      a\n");
 
         // first slow from 4 m/s to 0 m/s stop at 10 m/s^2, so 0.4s
         for (int i = 0; i < 50; ++i) {
@@ -264,13 +264,14 @@ class AsymSwerveSetpointGeneratorTest {
                     / kDt;
             double a = Math.hypot(ax, ay);
 
-            System.out.printf("%d %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
-                    i, currentPose.getX(), currentPose.getY(),
-                    setpoint.getChassisSpeeds().vxMetersPerSecond,
-                    setpoint.getChassisSpeeds().vyMetersPerSecond,
-                    setpoint.getModuleStates()[0].speedMetersPerSecond,
-                    setpoint.getModuleStates()[0].angle.getRadians(),
-                    ax, ay, a);
+            if (dump)
+             Util.printf("%d %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
+                     i, currentPose.getX(), currentPose.getY(),
+                     setpoint.getChassisSpeeds().vxMetersPerSecond,
+                     setpoint.getChassisSpeeds().vyMetersPerSecond,
+                     setpoint.getModuleStates()[0].speedMetersPerSecond,
+                     setpoint.getModuleStates()[0].angle.getRadians(),
+                     ax, ay, a);
             prev = setpoint;
         }
 

@@ -16,6 +16,7 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,14 +26,14 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DrivePursuitControllerTest {
+    boolean dump = false;
     private static final double kDelta = 0.001;
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
-
-    private static final SwerveKinodynamics kSmoothKinematicLimits = 
-    SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(Identity.BLANK,
+            false);
 
     @Test
     void testPursuit() {
@@ -80,7 +81,8 @@ class DrivePursuitControllerTest {
         // based on the trajectory itself.
 
         {
-            // System.out.println("============initialize============");
+            if (dump)
+                Util.println("============initialize============");
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
@@ -93,7 +95,8 @@ class DrivePursuitControllerTest {
         }
 
         {
-            // System.out.println("============4 sec============");
+            if (dump)
+                Util.println("============4 sec============");
             Pose2d current_state = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0,
                     current_state,
@@ -102,7 +105,7 @@ class DrivePursuitControllerTest {
             // but actually it's default cook.
             // turning slowly to the left
             // i think pure pursuit might ignore omega
-            verify(-3.96,-0.43, 0, output);
+            verify(-3.96, -0.43, 0, output);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
@@ -120,7 +123,8 @@ class DrivePursuitControllerTest {
             assertEquals(0, heading_error.getRadians(), 0.05);
         }
         {
-            // System.out.println("============8 sec============");
+            if (dump)
+                Util.println("============8 sec============");
             Pose2d current_state = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0,
                     current_state,
@@ -148,9 +152,8 @@ class DrivePursuitControllerTest {
 
     @Test
     void testPreviewDt() {
-        SwerveKinodynamics limits = 
-          SwerveKinodynamicsFactory.get(Identity.BLANK, false);
-                  TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));

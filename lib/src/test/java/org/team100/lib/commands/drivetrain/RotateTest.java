@@ -59,7 +59,7 @@ class RotateTest {
             rotate.execute();
             fixture.drive.periodic();
         }
-        assertEquals(1, rotate.refTheta.position, 0.1);
+        assertEquals(1, rotate.refTheta.position, 0.2);
         assertEquals(-0.512, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
 

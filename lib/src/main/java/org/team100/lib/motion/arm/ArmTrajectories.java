@@ -2,6 +2,8 @@ package org.team100.lib.motion.arm;
 
 import java.util.List;
 
+import org.team100.lib.util.Util;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -83,7 +85,7 @@ public class ArmTrajectories {
                     toPose(end, secondDegree),
                     m_trajectoryConfig);
         } catch (TrajectoryGenerationException e) {
-            System.out.println("WARNING Trajectory Generation Exception");
+            Util.warn("Trajectory Generation Exception");
             return new Trajectory();
         }
     }

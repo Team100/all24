@@ -16,6 +16,7 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,14 +25,14 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DrivePIDControllerTest {
+    boolean dump = false;
 
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
 
-    private static final SwerveKinodynamics kSmoothKinematicLimits =
-      SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(Identity.BLANK,
+            false);
 
-      
     @Test
     void testPIDControl() {
         // first right and then ahead
@@ -77,7 +78,8 @@ class DrivePIDControllerTest {
         // based on the trajectory itself.
 
         {
-            // System.out.println("============initialize============");
+            if (dump)
+                Util.println("============initialize============");
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
@@ -85,12 +87,13 @@ class DrivePIDControllerTest {
         }
 
         {
-            // System.out.println("============4 sec============");
+            if (dump)
+                Util.println("============4 sec============");
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
             // turning slowly to the left
-            verify(-1,-0.1, 0.1, output);
+            verify(-1, -0.1, 0.1, output);
 
             TimedPose path_setpoint = controller.getSetpoint(4).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
@@ -108,10 +111,11 @@ class DrivePIDControllerTest {
             assertEquals(0, heading_error.getRadians(), 0.05);
         }
         {
-            // System.out.println("============8 sec============");
+            if (dump)
+                Util.println("============8 sec============");
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new Twist2d());
-            verify(-0.96,-0.05,0.18, output);
+            verify(-0.96, -0.05, 0.18, output);
 
             TimedPose path_setpoint = controller.getSetpoint(8).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.01);
@@ -129,7 +133,7 @@ class DrivePIDControllerTest {
             assertEquals(0, heading_error.getRadians(), 0.01);
         }
     }
-    
+
     void verify(double vx, double vy, double omega, ChassisSpeeds output) {
         assertEquals(vx, output.vxMetersPerSecond, 0.05);
         assertEquals(vy, output.vyMetersPerSecond, 0.05);

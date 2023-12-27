@@ -41,12 +41,6 @@ class TestSE2Math {
         rot1 = Rotation2d.fromDegrees(270);
         assertEquals(0, rot1.getCos(), kTestEpsilon);
         assertEquals(-1, rot1.getSin(), kTestEpsilon);
-        // System.out.println(rot1.getTan());
-        // this test is silly
-        // assertTrue(-1 / kTestEpsilon > rot1.getTan(), String.format("%f",
-        // rot1.getTan()));
-        // this tests the angle-wrapping thing that wpi doesn't do
-        // assertEquals(-90, rot1.getDegrees(), kTestEpsilon);
         assertEquals(270, rot1.getDegrees(), kTestEpsilon);
         assertEquals(3 * Math.PI / 2, rot1.getRadians(), kTestEpsilon);
 

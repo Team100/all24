@@ -101,6 +101,8 @@ public class RobotContainer implements SelfTestable {
     private final AutonSelector m_autonSelector;
     private final AllianceSelector m_allianceSelector;
 
+    final Experiments m_experiments;
+
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
@@ -136,9 +138,9 @@ public class RobotContainer implements SelfTestable {
 
         Identity identity = Identity.get();
 
-        Experiments experiments = new Experiments(identity);
+        m_experiments = new Experiments(identity);
 
-        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(experiments, kDriveCurrentLimit);
+        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(m_experiments, kDriveCurrentLimit);
         m_modules = new SwerveModuleCollectionFactory(identity, moduleFactory).get();
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(identity, SHOW_MODE);
@@ -170,7 +172,7 @@ public class RobotContainer implements SelfTestable {
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(experiments, swerveKinodynamics, m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(m_experiments, swerveKinodynamics, m_modules);
 
         // control = new JoystickControl();
         // control = new DriverXboxControl();
@@ -213,7 +215,7 @@ public class RobotContainer implements SelfTestable {
 
         control.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawCircle(experiments, m_drive, swerveKinodynamics.getKinematics(), controller);
+        m_drawCircle = new DrawCircle(m_experiments, m_drive, swerveKinodynamics.getKinematics(), controller);
         control.circle().whileTrue(m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
@@ -223,7 +225,7 @@ public class RobotContainer implements SelfTestable {
 
         control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
         control.never().whileTrue(new Spin(m_drive, controller));
-        control.never().whileTrue(new Oscillate(experiments, m_drive));
+        control.never().whileTrue(new Oscillate(m_experiments, m_drive));
 
         // make a one-meter line
         control.never().whileTrue(
@@ -251,7 +253,7 @@ public class RobotContainer implements SelfTestable {
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        StraightLineTrajectory maker = new StraightLineTrajectory(experiments, config);
+        StraightLineTrajectory maker = new StraightLineTrajectory(m_experiments, config);
         Pose2d goal = new Pose2d(8, 4, new Rotation2d()); // field center, roughly
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         control.never().whileTrue(follower);
@@ -317,7 +319,7 @@ public class RobotContainer implements SelfTestable {
         //
         // ELEVATOR
         //
-        m_elevator = new SimpleSubsystemFactory(identity, experiments).get();
+        m_elevator = new SimpleSubsystemFactory(identity, m_experiments).get();
         SimpleManualMode simpleMode = new SimpleManualMode();
         m_elevator.setDefaultCommand(new SimpleManual(simpleMode, m_elevator, operatorControl::elevator));
 
