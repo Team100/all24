@@ -22,4 +22,8 @@ public class HeadingFactory {
                 return new Heading(ahrsclass);
         }
     }
+
+    private HeadingFactory() {
+        //
+    }
 }
