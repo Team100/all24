@@ -30,4 +30,9 @@ public class MockEncoder100<T extends Measure100> implements Encoder100<T> {
     public double getAbsolutePosition() {
         return angle;
     }
+
+    @Override
+    public void periodic() {
+        //
+    }
 }

@@ -46,6 +46,7 @@ class DriveInALittleSquareTest {
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
         command.initialize();
         assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
+        fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
         // this seems subject to jitter
@@ -55,6 +56,7 @@ class DriveInALittleSquareTest {
         assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].angle.getRadians(), kDelta);
         SimHooks.stepTimingAsync(3.2);
+        fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.State.STEERING, command.m_state);
         assertEquals(0, command.speedM_S.velocity, kDelta);
@@ -69,6 +71,7 @@ class DriveInALittleSquareTest {
         // which involve a bit of lag and overshoot.
         for (int i = 0; i < 25; i++) {
             SimHooks.stepTimingAsync(0.02);
+            fixture.drive.periodic();
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];

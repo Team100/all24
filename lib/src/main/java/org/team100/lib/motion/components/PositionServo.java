@@ -171,4 +171,8 @@ public class PositionServo<T extends Measure100> {
         m_goal.position = m_instance.modulus(m_goal.position - measurement) + measurement;
         m_setpoint.position = m_instance.modulus(m_setpoint.position - measurement) + measurement;
     }
+
+    public void periodic() {
+        m_encoder.periodic();
+    }
 }

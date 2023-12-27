@@ -41,11 +41,6 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
 
     @Override
     public double getPosition() {
-        // TODO: do this calculation in periodic().
-        double now = Timer.getFPGATimestamp();
-        double dt = now - m_time;
-        m_position += getRate() * dt;
-        m_time = now;
         t.log(Level.DEBUG, m_name + "/position", m_position);
         return m_position;
     }
@@ -75,5 +70,13 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         double absolutePosition = m_measure.modulus(getPosition());
         t.log(Level.DEBUG, m_name + "/absolute position", absolutePosition);
         return absolutePosition;
+    }
+
+    @Override
+    public void periodic() {
+        double now = Timer.getFPGATimestamp();
+        double dt = now - m_time;
+        m_position += getRate() * dt;
+        m_time = now;
     }
 }

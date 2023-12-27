@@ -76,6 +76,8 @@ public class SwerveModule100 {
      * Only SwerveModuleCollection calls this.
      */
     void periodic() {
+        m_turningServo.periodic();
+        m_driveServo.periodic();
         m_viz.periodic();
     }
 

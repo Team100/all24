@@ -41,6 +41,7 @@ class RotateTest {
         // steering
         for (int i = 0; i < 18; ++i) {
             SimHooks.stepTimingAsync(0.02);
+            fixture.drive.periodic();
             rotate.execute();
         }
         // there's no translation
@@ -56,8 +57,8 @@ class RotateTest {
         // finished steering, start rotating
         for (int i = 0; i < 25; ++i) {
             SimHooks.stepTimingAsync(0.02);
-            rotate.execute();
             fixture.drive.periodic();
+            rotate.execute();
         }
         assertEquals(1, rotate.refTheta.position, 0.2);
         assertEquals(-0.512, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
@@ -66,8 +67,8 @@ class RotateTest {
         // should be done rotating now
         for (int i = 0; i < 25; ++i) {
             SimHooks.stepTimingAsync(0.02);
-            rotate.execute();
             fixture.drive.periodic();
+            rotate.execute();
         }
 
         assertEquals(Math.PI/2, rotate.refTheta.position, kDelta);
@@ -76,8 +77,8 @@ class RotateTest {
 
         for (int i = 0; i < 100; ++i) {
             SimHooks.stepTimingAsync(0.02);
-            rotate.execute();
             fixture.drive.periodic();
+            rotate.execute();
         }
 
         assertTrue(rotate.isFinished());

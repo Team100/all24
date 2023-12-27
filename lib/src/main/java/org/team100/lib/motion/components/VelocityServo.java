@@ -127,4 +127,8 @@ public class VelocityServo<T extends Measure100> {
         previousSetpoint = setpoint;
         return accel;
     }
+
+    public void periodic() {
+        m_encoder.periodic();
+    }
 }
