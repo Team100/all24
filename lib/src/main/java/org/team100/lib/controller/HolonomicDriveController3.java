@@ -102,9 +102,8 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     }
 
     public static PIDController cartesian() {
-        Identity identity = Identity.get();
         PIDController pid;
-        switch (identity) {
+        switch (Identity.instance) {
             case COMP_BOT:
                 pid = new PIDController(3, 2, 0);
                 pid.setIntegratorRange(-0.1, 0.1);

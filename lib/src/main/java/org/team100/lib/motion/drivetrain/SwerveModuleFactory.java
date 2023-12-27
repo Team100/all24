@@ -3,7 +3,6 @@ package org.team100.lib.motion.drivetrain;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.SimulatedMotor;
@@ -19,11 +18,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class SwerveModuleFactory {
-    private final Experiments experiments;
     private final double currentLimit;
 
-    public SwerveModuleFactory(Experiments experiments, double currentLimit) {
-        this.experiments = experiments;
+    public SwerveModuleFactory(double currentLimit) {
         this.currentLimit = currentLimit;
     }
 
@@ -95,7 +92,6 @@ public class SwerveModuleFactory {
                 0); // kA: I have no idea what this value should be
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
                 drive(name),
                 driveMotor,
                 driveEncoder,
@@ -105,7 +101,6 @@ public class SwerveModuleFactory {
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(2.86, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
                 turning(name),
                 turningMotor,
                 turningEncoder,
@@ -188,7 +183,6 @@ public class SwerveModuleFactory {
                 0.015); // kV
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
                 drive(name),
                 driveMotor,
                 driveEncoder,
@@ -198,7 +192,6 @@ public class SwerveModuleFactory {
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(5, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
                 turning(name),
                 turningMotor,
                 turningEncoder,
@@ -274,7 +267,6 @@ public class SwerveModuleFactory {
                 0); // kA
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
                 drive(name),
                 driveMotor,
                 driveEncoder,
@@ -284,7 +276,6 @@ public class SwerveModuleFactory {
         // TODO: tune this
         PIDController angleVelocityController = new PIDController(0.5, 0, 0, 0.02);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
                 turning(name),
                 turningMotor,
                 turningEncoder,
@@ -331,7 +322,6 @@ public class SwerveModuleFactory {
                 0.02); // kA
 
         VelocityServo<Distance> driveServo = new VelocityServo<>(
-                experiments,
                 drive(name),
                 driveMotor,
                 driveEncoder,
@@ -351,7 +341,6 @@ public class SwerveModuleFactory {
                 0.003, // kV
                 0); // kA
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
-                experiments,
                 turning(name),
                 turningMotor,
                 turningEncoder,

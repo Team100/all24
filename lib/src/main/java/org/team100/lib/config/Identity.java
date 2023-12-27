@@ -28,7 +28,6 @@ public enum Identity {
     UNKNOWN(null);
 
     private static final Map<String, Identity> identities = new HashMap<>();
-    private static String simIdentity = "";
 
     static {
         for (Identity i : Identity.values()) {
@@ -36,13 +35,15 @@ public enum Identity {
         }
     }
 
+    public static final Identity instance = get();
+
     private final String m_serialNumber;
 
     private Identity(String serialNumber) {
         m_serialNumber = serialNumber;
     }
 
-    public static Identity get() {
+    private static Identity get() {
         String serialNumber = "";
         if (RobotBase.isReal()) {
             // Calling getSerialNumber in a vscode unit test
@@ -50,19 +51,10 @@ public enum Identity {
             // thing with JNIs, so don't do that.
             serialNumber = RobotController.getSerialNumber();
         } else {
-            serialNumber = simIdentity;
+            serialNumber = "";
         }
         if (identities.containsKey(serialNumber))
             return identities.get(serialNumber);
         return UNKNOWN;
-    }
-
-    /*
-     * For simulation and testing only.
-     */
-    static void set(String serialNumber) {
-        if (!RobotBase.isReal()) {
-            simIdentity = serialNumber;
-        }
     }
 }

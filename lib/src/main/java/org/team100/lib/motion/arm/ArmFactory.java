@@ -18,8 +18,7 @@ public class ArmFactory {
     private static final String kUpper = "arm/upper";
 
     public static ArmSubsystem get() {
-        Identity identity = Identity.get();
-        switch (identity) {
+        switch (Identity.instance) {
             case TEST_BOARD_6B:
                 // TODO: use the correct identity.
                 return real();

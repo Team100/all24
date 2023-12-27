@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -26,7 +25,7 @@ class TrajectoryTimeSamplerTest {
 
     @Test
     void testSample() {
-        SwerveKinodynamics limits =  SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics limits =  SwerveKinodynamicsFactory.get();
         TrajectoryPlanner planner = new TrajectoryPlanner(limits);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;

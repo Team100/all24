@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -30,8 +29,7 @@ class DrivePIDControllerTest {
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
 
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(Identity.BLANK,
-            false);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
     void testPIDControl() {

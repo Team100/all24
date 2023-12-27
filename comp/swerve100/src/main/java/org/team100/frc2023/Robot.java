@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.selftest.SelfTestRunner;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -27,7 +28,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         Util.printf("WPILib Version: %s\n", WPILibVersion.Version); // 2023.2.1
         Util.printf("RoboRIO serial number: %s\n", RobotController.getSerialNumber());
-        Util.printf("Identity: %s\n", Identity.get().name());
+        Util.printf("Identity: %s\n", Identity.instance.name());
         banner();
 
         // By default, LiveWindow turns off the CommandScheduler in test mode,
@@ -46,7 +47,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        if (m_robotContainer.m_experiments.enabled(Experiment.FlushOften)) {
+        if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");
             NetworkTableInstance.getDefault().flush();
         }

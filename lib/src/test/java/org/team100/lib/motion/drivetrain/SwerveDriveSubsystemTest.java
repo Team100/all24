@@ -1,7 +1,6 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.experiments.MockExperiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
@@ -39,10 +38,9 @@ class SwerveDriveSubsystemTest {
                 swerveKinodynamics.getKinematics(), gyroAngle, modulePositions, initialPoseMeters);
 
         FrameTransform frameTransform = new FrameTransform();
-        MockExperiments experiments = new MockExperiments();
         SwerveModuleCollection modules = fixture.collection;
 
-        SwerveLocal swerveLocal = new SwerveLocal(experiments, swerveKinodynamics, modules);
+        SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, modules);
 
         SwerveDriveSubsystem drive = new SwerveDriveSubsystem(
                 heading,

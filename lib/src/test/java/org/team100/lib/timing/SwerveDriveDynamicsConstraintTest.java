@@ -3,7 +3,6 @@ package org.team100.lib.timing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -23,7 +22,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testVelocity() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
 
         // motionless
@@ -49,7 +48,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testAccel() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);
@@ -59,7 +58,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         // this is for comparison to the above case.
 
@@ -92,7 +91,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation2() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(Identity.BLANK, false);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         // 0.62 m/s is pretty close to the maximum speed
         // possible at 5 rad/s; this is about 8 rad/m.

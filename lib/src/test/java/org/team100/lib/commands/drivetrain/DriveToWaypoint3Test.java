@@ -8,9 +8,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
@@ -56,14 +54,13 @@ class DriveToWaypoint3Test {
     @Test
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get(Identity.BLANK, false).getKinematics();
+        SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get().getKinematics();
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .blueLayout("2023-chargedup.json");
 
         TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(kinematics);
 
-        Experiments e = new Experiments(Identity.BLANK);
-        StraightLineTrajectory maker = new StraightLineTrajectory(e, config);
+        StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Transform2d transform = new Transform2d(
                 new Translation2d(-1, -1),
                 GeometryUtil.kRotationZero);

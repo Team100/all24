@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * -- override: using a Sendable Chooser in a dashboard, e.g. glass.
  */
 public class Experiments {
+    public static final Experiments instance = new Experiments(Identity.instance);
     private final Telemetry t = Telemetry.get();
 
     /** These experiments are enabled on every robot type. */
@@ -50,7 +51,7 @@ public class Experiments {
 
     private final Map<Experiment, Boolean> m_testOverrides;
 
-    public Experiments(Identity identity) {
+    private Experiments(Identity identity) {
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
         log();

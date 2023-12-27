@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
@@ -57,7 +58,7 @@ class TrajectoryListCommandTest {
                 fixture.drive,
                 controller,
                 x -> TrajectoryMaker.square(fixture.swerveKinodynamics.getKinematics(), x));
-        fixture.experiments.testOverride(Experiment.UseSetpointGenerator, false);
+        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, false);
         fixture.drive.periodic();
         command.initialize();
         do {
