@@ -73,7 +73,7 @@ public class FullStateServo<T extends Measure100> {
         double u_XFB = m_xController.calculate(measurement, m_setpoint.position);
 
         double velocityMeasurement = m_encoder.getRate();
-        double u_VFB = m_xController.calculate(velocityMeasurement, m_setpoint.velocity);
+        double u_VFB = m_vController.calculate(velocityMeasurement, m_setpoint.velocity);
 
         double u_FF = m_setpoint.velocity;
         double u_TOTAL = u_XFB + u_VFB + u_FF;
