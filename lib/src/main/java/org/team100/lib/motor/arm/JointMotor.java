@@ -8,6 +8,7 @@ import org.team100.lib.units.Angle;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 /**
  * Arm motor from 2023.
@@ -25,18 +26,24 @@ public class JointMotor implements Motor100<Angle> {
     public JointMotor(String name, int canId, int currentLimit) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = String.format("/%s/Joint Motor", name);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
+        
         m_motor.setSmartCurrentLimit(currentLimit);
         m_motor.setSecondaryCurrentLimit(currentLimit);
         m_motor.setIdleMode(IdleMode.kBrake);
+
+        // reduce total velocity measurement delay
+        m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
+
+        m_name = String.format("/%s/Joint Motor", name);
+
         t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceId());
     }
 
     @Override
     public double get() {
-        return 0;
+        return m_motor.getAppliedOutput();
     }
 
     @Override

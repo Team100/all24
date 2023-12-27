@@ -56,7 +56,7 @@ public class CANTurningMotor implements Motor100<Angle> {
 
     @Override
     public double get() {
-        return m_motor.get();
+        return m_motor.getMotorOutputPercent();
     }
 
     public WPI_TalonSRX getMotor() {
