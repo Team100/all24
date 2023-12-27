@@ -134,7 +134,7 @@ class SwerveUtilTest {
         // say this is the start of the path from (1,0) to (0,1),
         boolean isAccel = SwerveUtil.getIsAccel(1, 0, 0, 1);
         assertTrue(isAccel);
-        double step = SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1);
+        double step = SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02);
         // currently it thinks this is accel because the velocities are the same
         assertEquals(0.02, step, kDelta);
     }
@@ -146,14 +146,14 @@ class SwerveUtilTest {
         // say this is the start of the path from (1,0) to (0,1),
         boolean isAccel = SwerveUtil.getIsAccel2(1, 0, 0, 1);
         assertFalse(isAccel);
-        double step = SwerveUtil.getMaxVelStep2(l, 1, 0, 0, 1);
+        double step = SwerveUtil.getMaxVelStep2(l, 1, 0, 0, 1, 0.02);
         // this is actually decelerating
         assertEquals(0.2, step, kDelta);
 
         // the accel case works too
                  isAccel = SwerveUtil.getIsAccel2(0.5, 0.5, 0, 1);
         assertTrue(isAccel);
-         step = SwerveUtil.getMaxVelStep2(l, 0.5, 0.5, 0, 1);
+         step = SwerveUtil.getMaxVelStep2(l, 0.5, 0.5, 0, 1, 0.02);
         // this is actually decelerating
         assertEquals(0.02, step, kDelta);
 

@@ -83,19 +83,16 @@ public class TimedPose {
 
     @Override
     public boolean equals(final Object other) {
-        if (other == null || !(other instanceof TimedPose)) {
-            System.out.println("wrong type");
+        if (!(other instanceof TimedPose)) {
             return false;
         }
         TimedPose ts = (TimedPose) other;
         boolean stateEqual = state().equals(ts.state());
         if (!stateEqual) {
-            System.out.println("state not equal");
             return false;
         }
         boolean timeEqual = Math.abs(getTimeS() - ts.getTimeS()) <= 1e-12;
         if (!timeEqual) {
-            System.out.println("time not equal");
             return false;
         }
         return true;

@@ -2,10 +2,10 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -20,9 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Follow a fixed trajectory, using the new 254-derived trajectory and follower
@@ -30,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * This is an experiment.
  */
-public class FancyTrajectory extends Command {
+public class FancyTrajectory extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
@@ -50,7 +48,7 @@ public class FancyTrajectory extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         List<Pose2d> waypointsM = List.of(
                 new Pose2d(0, 0, Rotation2d.fromDegrees(90)),
                 new Pose2d(80, 80, Rotation2d.fromDegrees(0)));
@@ -81,14 +79,14 @@ public class FancyTrajectory extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getPose();
         ChassisSpeeds currentSpeed = m_robotDrive.speeds();
         Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
-        m_robotDrive.setChassisSpeeds(output);
+        m_robotDrive.setChassisSpeeds(output, dt);
     }
 
     @Override

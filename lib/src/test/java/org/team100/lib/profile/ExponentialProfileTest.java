@@ -1,10 +1,12 @@
 package org.team100.lib.profile;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 
 class ExponentialProfileTest {
+    boolean dump = false;
     // just to look at the output
     @Test
     void testSimple() {
@@ -18,7 +20,7 @@ class ExponentialProfileTest {
         final double goalPosition = 1;
         final double goalVelocity = 0;
         for (double t = 0; t < 2; t += 0.02) {
-            System.out.printf("%5.3f %5.3f %5.3f\n", t, position, velocity);
+            if (dump) Util.printf("%5.3f %5.3f %5.3f\n", t, position, velocity);
             ExponentialProfile.State s = eprofile.calculate(0.02,
                     new ExponentialProfile.State(position, velocity),
                     new ExponentialProfile.State(goalPosition, goalVelocity));

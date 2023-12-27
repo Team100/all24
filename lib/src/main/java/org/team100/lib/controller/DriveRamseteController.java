@@ -9,6 +9,7 @@ import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -148,7 +149,7 @@ public class DriveRamseteController implements DriveMotionController {
 
         Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
         if (!sample_point.isPresent()) {
-            System.out.println("WARNING failed to advance");
+            Util.warn("Failed to advance");
             return Optional.empty();
         }
 

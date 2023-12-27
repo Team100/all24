@@ -7,6 +7,7 @@ import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -58,7 +59,7 @@ public class CartesianManualPositionalArm extends Command {
 
         ArmAngles setpoint = m_kinematics.inverse(input);
         if (setpoint == null) {
-            System.out.println("WARNING: ignoring infeasible input");
+            Util.warn("Ignoring infeasible input");
             return;
         }
         t.log(Level.DEBUG, "/arm position/setpoint", setpoint);

@@ -9,7 +9,6 @@ public class OperatorXboxControl implements OperatorControl {
 
     public OperatorXboxControl() {
         m_controller = new CommandXboxController(1);
-        // System.out.printf("Controller1: %s\n", controller1.getHID().getName());
     }
 
     @Override

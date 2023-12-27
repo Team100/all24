@@ -1,5 +1,7 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.util.Util;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 
@@ -22,12 +24,12 @@ public class ControlFactory {
         m_DriverControl = assignDriver();
         m_OperatorControl = assignOperator();
 
-        System.out.println("********************************** CONTROLS **********************************");
-        System.out.printf("*   Driver HID: %23.23s     Control: %23.23s *\n", m_DriverControl.getHIDName(),
+        Util.println("********************************** CONTROLS **********************************");
+        Util.printf("*   Driver HID: %23.23s     Control: %23.23s *\n", m_DriverControl.getHIDName(),
                 m_DriverControl.getClass().getSimpleName());
-        System.out.printf("* Operator HID: %23.23s     Control: %23.23s *\n", m_OperatorControl.getHIDName(),
+        Util.printf("* Operator HID: %23.23s     Control: %23.23s *\n", m_OperatorControl.getHIDName(),
                 m_OperatorControl.getClass().getSimpleName());
-        System.out.println("******************************************************************************");
+        Util.println("******************************************************************************");
 
     }
 
@@ -39,14 +41,14 @@ public class ControlFactory {
             if (waitCounter > kLimit) {
                 return kNoDriver;
             }
-            System.out.println("Waiting for port zero...");
+            Util.println("Waiting for port zero...");
             sleep1();
             waitCounter += 1;
             DriverStation.refreshData();
         }
 
         String driverName = driverHID.getName();
-        System.out.println("Found driver HID: " + driverName);
+        Util.println("Found driver HID: " + driverName);
 
         // TODO: add more xbox-like controls
         if (driverName.contains("F310")) {
@@ -68,7 +70,7 @@ public class ControlFactory {
         if (driverName.contains("Keyboard")) {
             return new JoystickControl();
         }
-        System.out.println("Unrecognized driver control name: " + driverHID.getName());
+        Util.println("Unrecognized driver control name: " + driverHID.getName());
         return kNoDriver;
 
     }
@@ -81,14 +83,14 @@ public class ControlFactory {
             if (waitCounter > kLimit) {
                 return kNoOperator;
             }
-            System.out.println("Waiting for port one...");
+            Util.println("Waiting for port one...");
             sleep1();
             waitCounter += 1;
             DriverStation.refreshData();
         }
 
         String operatorName = operatorHID.getName();
-        System.out.println("Found operator HID: " + operatorName);
+        Util.println("Found operator HID: " + operatorName);
 
         if (operatorName.contains("F310")) {
             return new OperatorXboxControl();
@@ -102,7 +104,7 @@ public class ControlFactory {
         if (operatorName.contains("Keyboard")) {
             return new OperatorXboxControl();
         }
-        System.out.println("Unrecognized driver control name: " + operatorHID.getName());
+        Util.println("Unrecognized driver control name: " + operatorHID.getName());
         return kNoOperator;
     }
 

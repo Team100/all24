@@ -17,21 +17,21 @@ class DriveInACircleTest {
         double radiusM = 1.0;
 
         // start at the origin, facing +x
-        Pose2d initial = new Pose2d(); 
+        Pose2d initial = new Pose2d();
         Translation2d m_center = DriveInACircle.getCenter(initial, radiusM);
         assertEquals(0, m_center.getX(), kDelta);
         assertEquals(1, m_center.getY(), kDelta);
 
         // start at the origin, facing +y
-         initial = new Pose2d(0, 0, new Rotation2d(0, 1)); 
-         m_center = DriveInACircle.getCenter(initial, radiusM);
-         // center should be to the left of that
+        initial = new Pose2d(0, 0, new Rotation2d(0, 1));
+        m_center = DriveInACircle.getCenter(initial, radiusM);
+        // center should be to the left of that
         assertEquals(-1, m_center.getX(), kDelta);
         assertEquals(0, m_center.getY(), kDelta);
 
-         // start at the origin, facing diagonal
-         initial = new Pose2d(0, 0, new Rotation2d(Math.PI/4)); 
-         m_center = DriveInACircle.getCenter(initial, radiusM);
+        // start at the origin, facing diagonal
+        initial = new Pose2d(0, 0, new Rotation2d(Math.PI / 4));
+        m_center = DriveInACircle.getCenter(initial, radiusM);
         assertEquals(-0.707, m_center.getX(), kDelta);
         assertEquals(0.707, m_center.getY(), kDelta);
     }

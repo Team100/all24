@@ -13,7 +13,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveUtil {
-    private static final double kDtSec = 0.02;
     private static final Telemetry t = Telemetry.get();
 
     /**
@@ -135,7 +134,8 @@ public class SwerveUtil {
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,
-            double desired_vy_i) {
+            double desired_vy_i,
+            double kDtSec) {
         boolean isAccel = getIsAccel(prev_vx_i, prev_vy_i, desired_vx_i, desired_vy_i);
 
         double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
@@ -166,7 +166,8 @@ public class SwerveUtil {
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,
-            double desired_vy_i) {
+            double desired_vy_i,
+            double kDtSec) {
 
         boolean isAccel = getIsAccel2(
                 prev_vx_i,

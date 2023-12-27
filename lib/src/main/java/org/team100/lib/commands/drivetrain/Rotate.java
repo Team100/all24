@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -9,33 +10,38 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Rotate in place to the specified angle.
  * 
  * Uses a profile with the holonomic drive controller.
+ * 
+ * Note there is no allowance for steering delay, so the profile gets way ahead.
+ * :(
  */
-public class Rotate extends Command {
-    private static final double kDtSec = 0.02;
-    private static final double kXToleranceRad = 0.003;
-    private static final double kVToleranceRad_S = 0.003;
+public class Rotate extends Command100 {
+
+    private static final double kXToleranceRad = 0.02;
+    private static final double kVToleranceRad_S = 0.02;
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_robotDrive;
     private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Timer m_timer;
     private final TrapezoidProfile.State m_goalState;
-    private final HolonomicDriveController3 m_controller;
+    final HolonomicDriveController3 m_controller;
 
-    TrapezoidProfile m_profile; // set in initialize(), package private for testing
-    TrapezoidProfile.State refTheta; // updated in execute(), package private for testing.
+    private boolean m_finished = false;
+
+    TrapezoidProfile m_profile;
+    TrapezoidProfile.State refTheta;
+
+    private boolean m_steeringAligned;
 
     public Rotate(
             SwerveDriveSubsystem drivetrain,
@@ -44,10 +50,20 @@ public class Rotate extends Command {
             double targetAngleRadians) {
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
-        m_controller = HolonomicDriveController3.withTolerance(0.1, 0.1, kXToleranceRad, kVToleranceRad_S);
+
+        PIDController xc = HolonomicDriveController3.cartesian();
+        xc.setTolerance(0.1, 0.1);
+        PIDController yc = HolonomicDriveController3.cartesian();
+        yc.setTolerance(0.1, 0.1);
+        PIDController tc = HolonomicDriveController3.theta();
+        tc.setTolerance(kXToleranceRad, kVToleranceRad_S);
+        // in testing, the default theta p causes overshoot, but i think this isn't a real effect.
+        // TODO: tune this P value
+        tc.setP(1);
+
+        m_controller = new HolonomicDriveController3(xc, yc, tc);
         m_heading = heading;
         m_swerveKinodynamics = swerveKinodynamics;
-        m_timer = new Timer();
         m_goalState = new TrapezoidProfile.State(targetAngleRadians, 0);
         refTheta = new TrapezoidProfile.State(0, 0);
 
@@ -55,23 +71,30 @@ public class Rotate extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_controller.reset();
-        ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
-        refTheta = new TrapezoidProfile.State(
-                m_robotDrive.getPose().getRotation().getRadians(),
-                initialSpeeds.omegaRadiansPerSecond);
+        resetRefTheta();
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile(c);
-        m_timer.restart();
+        // first align the wheels
+        m_steeringAligned = false;
+    }
+
+    private void resetRefTheta() {
+        ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
+        refTheta = new TrapezoidProfile.State(
+                m_robotDrive.getPose().getRotation().getRadians(),
+                initialSpeeds.omegaRadiansPerSecond);
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
+
         // reference
-        refTheta = m_profile.calculate(kDtSec, m_goalState, refTheta);
+        refTheta = m_profile.calculate(dt, m_goalState, refTheta);
+        m_finished = m_profile.isFinished(dt);
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
 
@@ -81,7 +104,18 @@ public class Rotate extends Command {
                 new State100(refTheta.position, refTheta.velocity, 0)); // TODO: accel
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-        m_robotDrive.driveInFieldCoords(fieldRelativeTarget);
+
+        if (m_steeringAligned) {
+            // steer normally
+            m_robotDrive.driveInFieldCoords(fieldRelativeTarget, dt);
+        } else {
+            boolean aligned = m_robotDrive.steerAtRest(fieldRelativeTarget);
+            // while waiting for the wheels, hold the profile at the start.
+            resetRefTheta();
+            if (aligned) {
+                m_steeringAligned = true;
+            }
+        }
 
         double headingMeasurement = currentPose.getRotation().getRadians();
         // note the use of Heading here.
@@ -99,7 +133,7 @@ public class Rotate extends Command {
 
     @Override
     public boolean isFinished() {
-        return m_timer.get() > m_profile.totalTime() && m_controller.atReference();
+        return m_finished && m_controller.atReference();
     }
 
     @Override

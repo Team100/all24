@@ -1,6 +1,6 @@
 package org.team100.lib.profile;
 
-import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.telemetry.ProfileModeChooser;
 
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -35,7 +35,7 @@ public class ChoosableProfile {
             double maxVel,
             double maxAccel,
             Mode defaultMode) {
-        m_chooser = new NamedChooser<>("Motion Profile");
+        m_chooser = ProfileModeChooser.get("Motion Profile");
         for (Mode mode : Mode.values()) {
             m_chooser.addOption(mode.name(), mode);
         }

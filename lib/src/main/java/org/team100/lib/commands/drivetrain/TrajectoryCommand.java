@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -12,12 +13,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Follow a trajectory.
  */
-public class TrajectoryCommand extends Command {
+public class TrajectoryCommand extends Command100 {
     private final Telemetry t = Telemetry.get();
     private final Trajectory m_trajectory;
     private final SwerveDriveSubsystem m_swerve;
@@ -35,7 +35,7 @@ public class TrajectoryCommand extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_controller.reset();
         m_timer.stop();
         m_timer.reset();
@@ -44,7 +44,7 @@ public class TrajectoryCommand extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         double curTime = m_timer.get();
         State desiredState = m_trajectory.sample(curTime);
         Pose2d currentPose = m_swerve.getPose();
@@ -53,7 +53,7 @@ public class TrajectoryCommand extends Command {
         SwerveState reference = SwerveState.fromState(desiredState, lastState.poseMeters.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
-        m_swerve.driveInFieldCoords(fieldRelativeTarget);
+        m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
         t.log(Level.DEBUG, "/TrajectoryCommand/Desired X", desiredState.poseMeters.getX());
         t.log(Level.DEBUG, "/TrajectoryCommand/Desired Y", desiredState.poseMeters.getY());

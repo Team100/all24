@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -17,14 +18,13 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Similar to TrajectoryListCommand, but each trajectory starts wherever the
  * robot ends up, instead of at the end of the previous trajectory. This is
  * essentially like ignoring cross-track error.
  */
-public class PermissiveTrajectoryListCommand extends Command {
+public class PermissiveTrajectoryListCommand extends Command100 {
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
@@ -51,7 +51,7 @@ public class PermissiveTrajectoryListCommand extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
         m_rotation = currentPose.getRotation();
@@ -64,7 +64,7 @@ public class PermissiveTrajectoryListCommand extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         if (m_currentTrajectory == null || m_timer.get() > m_currentTrajectory.getTotalTimeSeconds()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
@@ -87,7 +87,7 @@ public class PermissiveTrajectoryListCommand extends Command {
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
             t.log(Level.DEBUG, "/permissive trajectory list/reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            m_swerve.driveInFieldCoords(fieldRelativeTarget);
+            m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // look just one loop ahead
             State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);

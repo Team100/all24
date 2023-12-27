@@ -4,6 +4,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.motion.simple.SimpleSubsystem;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -49,7 +50,7 @@ public class SimpleManual extends Command {
                 m_simple.setPosition(kMaxPosition * m_input.getAsDouble());
                 break;
             default:
-                System.out.println("WARNING: invalid manual mode: " + manualMode.name());
+                Util.warn("Invalid manual mode: " + manualMode.name());
                 break;
         }
     }

@@ -98,8 +98,6 @@ public class TimingUtilTest {
                 new ArrayList<TimingConstraint>(), 0.0, 0.0, 20.0, 5.0);
         assertNotNull(timed_traj);
 
-        // System.out.println(timed_traj);
-
         // Trapezoidal profile.
         timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint>(), 0.0, 0.0,
                 10.0, 5.0);
@@ -136,9 +134,6 @@ public class TimingUtilTest {
                 1.0,
                 Arrays.asList(new ConditionalTimingConstraint()), 0.0, 0.0, 10.0, 5.0);
         assertNotNull(timed_traj);
-
-        // System.out.println(timed_traj);
-
     }
 
     @Test
@@ -164,7 +159,6 @@ public class TimingUtilTest {
                 1.0,
                 Arrays.asList(new ConditionalTimingConstraint()), 0.0, 0.0, 10.0, 5.0);
         assertNotNull(timed_traj);
-        // System.out.println(timed_traj);
     }
 
 }

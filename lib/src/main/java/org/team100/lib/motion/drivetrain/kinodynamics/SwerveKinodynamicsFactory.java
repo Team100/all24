@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.util.Util;
 
 /**
  * Each drivetrain should be tuned, and the values here should be the physical
@@ -41,12 +42,17 @@ public class SwerveKinodynamicsFactory {
             case BLANK:
                 return new SwerveKinodynamics(4, 2, 3, 13, 0.5, 0.5, 0.3);
             default:
-                System.out.println("WARNING: using default kinodynamics");
+                Util.warn("Using default kinodynamics");
                 return new SwerveKinodynamics(4, 2, 2, 13, 0.5, 0.5, 0.3);
         }
     }
 
-    /** This contains garbage values, not for anything real. */
+    /**
+     * This contains garbage values, not for anything real.
+     * 
+     * In particular, the steering rate is *very* slow, which might be useful if
+     * you're wanting to allow for steering delay.
+     */
     public static SwerveKinodynamics forTest() {
         return new SwerveKinodynamics(1, 1, 1, 1, 0.5, 0.5, 0.3);
     }

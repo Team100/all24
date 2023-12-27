@@ -11,6 +11,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -82,7 +83,7 @@ public class Telemetry {
     private Telemetry() {
         inst = NetworkTableInstance.getDefault();
         pubs = new HashMap<>();
-        m_levelChooser = new NamedChooser<>("Telemetry Level");
+        m_levelChooser = TelemetryLevelChooser.get("Telemetry Level");
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }
@@ -100,7 +101,7 @@ public class Telemetry {
         if (!m_levelChooser.getSelected().admit(level))
             return;
         if (kAlsoPrint)
-            System.out.println(key + ": " + val);
+            Util.println(key + ": " + val);
         pub(key, k -> {
             BooleanTopic t = inst.getBooleanTopic(k);
             t.publish();
@@ -113,7 +114,7 @@ public class Telemetry {
         if (!m_levelChooser.getSelected().admit(level))
             return;
         if (kAlsoPrint)
-            System.out.println(key + ": " + val);
+            Util.println(key + ": " + val);
         pub(key, k -> {
             DoubleTopic t = inst.getDoubleTopic(k);
             t.publish();
@@ -126,7 +127,7 @@ public class Telemetry {
         if (!m_levelChooser.getSelected().admit(level))
             return;
         if (kAlsoPrint)
-            System.out.println(key + ": " + val);
+            Util.println(key + ": " + val);
         pub(key, k -> {
             DoubleArrayTopic t = inst.getDoubleArrayTopic(k);
             t.publish();
@@ -139,7 +140,7 @@ public class Telemetry {
         if (!m_levelChooser.getSelected().admit(level))
             return;
         if (kAlsoPrint)
-            System.out.println(key + ": " + val);
+            Util.println(key + ": " + val);
         pub(key, k -> {
             IntegerTopic t = inst.getIntegerTopic(k);
             t.publish();
@@ -152,7 +153,7 @@ public class Telemetry {
         if (!m_levelChooser.getSelected().admit(level))
             return;
         if (kAlsoPrint)
-            System.out.println(key + ": " + val);
+            Util.println(key + ": " + val);
         pub(key, k -> {
             StringTopic t = inst.getStringTopic(k);
             t.publish();
@@ -165,7 +166,7 @@ public class Telemetry {
         if (!m_levelChooser.getSelected().admit(level))
             return;
         if (kAlsoPrint)
-            System.out.println(key + ": " + val);
+            Util.println(key + ": " + val);
         pub(key, k -> {
             StringArrayTopic t = inst.getStringArrayTopic(k);
             t.publish();

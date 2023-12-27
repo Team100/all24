@@ -2,7 +2,7 @@ package org.team100.lib.commands.simple;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.telemetry.SimpleManualModeChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,7 +20,7 @@ public class SimpleManualMode implements Supplier<SimpleManualMode.Mode> {
     private final SendableChooser<Mode> m_manualModeChooser;
 
     public SimpleManualMode() {
-        m_manualModeChooser = new NamedChooser<>("Simple Manual Mode");
+        m_manualModeChooser = SimpleManualModeChooser.get("Simple Manual Mode");
         for (Mode mode : Mode.values()) {
             m_manualModeChooser.addOption(mode.name(), mode);
         }

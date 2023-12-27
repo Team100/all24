@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
@@ -20,13 +21,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWaypoint100 extends Command {
+public class DriveToWaypoint100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
@@ -58,7 +58,7 @@ public class DriveToWaypoint100 extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         Pose2d start = m_swerve.getPose();
         double startVelocity = 0;
         Pose2d end = m_goal;
@@ -100,7 +100,7 @@ public class DriveToWaypoint100 extends Command {
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getPose();
         ChassisSpeeds currentSpeed = m_swerve.speeds();
@@ -116,7 +116,7 @@ public class DriveToWaypoint100 extends Command {
             throw new IllegalStateException("vy is NaN");
         if (Double.isNaN(output.omegaRadiansPerSecond))
             throw new IllegalStateException("omega is NaN");
-        m_swerve.setChassisSpeeds(output);
+        m_swerve.setChassisSpeeds(output, dt);
     }
 
     @Override

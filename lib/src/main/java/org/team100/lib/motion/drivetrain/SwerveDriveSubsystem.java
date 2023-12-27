@@ -61,7 +61,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return new InitCommand(action, this);
     }
 
-    /** For now, periodic() is not doing actuation. */
+    /**
+     * Updates odometry.
+     * 
+     * Periodic() should not do actuation.  Let commands do that. */
     @Override
     public void periodic() {
         updateOdometry();
@@ -123,8 +126,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Scales the supplied twist by the "speed" driver control modifier.
      * 
      * @param twist Field coordinate velocities in meters and radians per second.
+     * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void driveInFieldCoords(Twist2d twist) {
+    public void driveInFieldCoords(Twist2d twist, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
         t.log(Level.DEBUG, "/chassis/control_speed", speed.name());
         switch (speed) {
@@ -143,7 +147,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         t.log(Level.DEBUG, "/chassis/x m", twist.dx);
         t.log(Level.DEBUG, "/chassis/y m", twist.dy);
         t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
-        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds);
+        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, kDtSec);
     }
 
     /**
@@ -155,14 +159,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * 
      */
     public boolean steerAtRest(Twist2d twist) {
-        // System.out.println("steering ....");
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds);
     }
 
-    public void setChassisSpeeds(ChassisSpeeds speeds) {
-        m_swerveLocal.setChassisSpeeds(speeds);
+    public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
+        m_swerveLocal.setChassisSpeeds(speeds, kDtSec);
     }
 
     /** Does not desaturate. */

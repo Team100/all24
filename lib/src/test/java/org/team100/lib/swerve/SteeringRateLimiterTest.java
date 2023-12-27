@@ -41,7 +41,7 @@ class SteeringRateLimiterTest {
         double s = c.enforceSteeringLimit(desiredModuleStates,
                 prevModuleStates, need_to_steer, prev_vx,
                 prev_vy, prev_heading, desired_vx, desired_vy,
-                desired_heading, min_s, overrideSteering);
+                desired_heading, min_s, overrideSteering, 0.02);
 
         assertEquals(1.0, s, kDelta);
     }
@@ -70,7 +70,7 @@ class SteeringRateLimiterTest {
         double s = c.enforceSteeringLimit(desiredModuleStates,
                 prevModuleStates, need_to_steer, prev_vx,
                 prev_vy, prev_heading, desired_vx, desired_vy,
-                desired_heading, min_s, overrideSteering);
+                desired_heading, min_s, overrideSteering, 0.02);
 
         // s = 0 stops the drive motors
         assertEquals(0, s, kDelta);
