@@ -33,7 +33,6 @@ public class SelfTestRunner extends Command {
         SwerveDriveSubsystem drivetrain = m_container.getSwerveDriveSubsystem();
 
         // "treatment" is in situ.
-        // TODO: make this command not require a particular starting position
         addCase(new SquareSelfTest(drivetrain, m_listener), m_container.getDriveInALittleSquare());
 
         // treatment is a specific manual input, supplied by the test case.

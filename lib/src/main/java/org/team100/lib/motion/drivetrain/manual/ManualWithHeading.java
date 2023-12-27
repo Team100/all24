@@ -118,6 +118,5 @@ public class ManualWithHeading {
         t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_setpoint.velocity - headingRate);
 
         return twistWithSnapM_S;
-
     }
 }

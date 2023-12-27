@@ -37,10 +37,6 @@ public class Pose2dWithMotion {
      *
      * Additionally, this means dtheta is in radians-per-distance if there is
      * translation, or radians-per-radian otherwise.
-     * 
-     * TODO: i think that dx and dy are actually constrained to the unit circle,
-     * or must both be zero, so this representation maybe not the ideal way to
-     * do it. use an alternate representation that fits what's happening here.
      */
     private final Twist2d m_motionDirection;
 
