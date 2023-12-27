@@ -20,7 +20,6 @@ public class ArmFactory {
     public static ArmSubsystem get() {
         switch (Identity.instance) {
             case TEST_BOARD_6B:
-                // TODO: use the correct identity.
                 return real();
             case BLANK:
                 // for testing

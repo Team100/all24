@@ -21,7 +21,7 @@ class SplineGeneratorTest {
         HolonomicSpline s = new HolonomicSpline(
                 p1, p2, new Rotation2d(), new Rotation2d());
 
-        List<Pose2dWithMotion> samples = SplineGenerator.parameterizeSpline(s);
+        List<Pose2dWithMotion> samples = SplineGenerator.parameterizeSpline(s, 0.05, 0.05, 0.1, 0.0, 1.0);
 
         double arclength = 0;
         Pose2dWithMotion cur_pose = samples.get(0);

@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -26,8 +27,9 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 class DriveToWaypoint3Test {
+    private static final double kDelta = 0.001;
 
-    Fixture fixture = new Fixture();
+    private final Fixture fixture = new Fixture();
 
     @Test
     void testSimple() {
@@ -44,13 +46,13 @@ class DriveToWaypoint3Test {
                 trajectories,
                 controller);
 
-        // TODO: add some assertions
         command.initialize();
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         command.execute();
         command.end(false);
     }
 
-    /** Demonstrate how to use DriveToWaypoing to go to apriltags. */
+    /** Demonstrate how to use DriveToWaypoint to go to apriltags. */
     @Test
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
@@ -72,8 +74,8 @@ class DriveToWaypoint3Test {
 
         DriveToWaypoint3 command = new DriveToWaypoint3(goal.get(), drivetrain, maker, m_controller);
 
-        // TODO: add some assertions
         command.initialize();
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         command.execute();
         command.end(false);
     }

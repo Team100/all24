@@ -97,10 +97,8 @@ public class ControlFactory {
         }
         if (operatorName.startsWith("MSP430")) {
             // the old button board
-            // TODO: make a class for it
             return kNoOperator;
         }
-        // TODO: make a class for simulation keyboard control
         if (operatorName.contains("Keyboard")) {
             return new OperatorXboxControl();
         }

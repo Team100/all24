@@ -181,16 +181,8 @@ public class RobotContainer implements SelfTestable {
         control.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
         control.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-        // TODO: use the same controllers as HolonomicDriveController3
-        // P is low here to avoid oscillating
-        // TODO: add a velocity control
-        PIDController thetaController = new PIDController(2, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
         ManualMode manualMode = new ManualMode();
 
-        // TODO: make the reset configurable
-        // control.resetPose(new ResetPose(m_robotDrive, 0, 0, 0));
         control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
@@ -251,7 +243,7 @@ public class RobotContainer implements SelfTestable {
                 new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
 
         // 254 Pursuit follower
-        DriveMotionController drivePP = new DrivePursuitController();
+        DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
         control.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
@@ -310,6 +302,9 @@ public class RobotContainer implements SelfTestable {
         // DRIVE
         //
 
+        PIDController thetaController = new PIDController(2, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
         m_drive.setDefaultCommand(
                 new DriveManually(
                         manualMode,
@@ -329,7 +324,6 @@ public class RobotContainer implements SelfTestable {
 
         switch (Identity.instance) {
             case TEST_BOARD_6B:
-                // TODO: use the correct identity.
                 m_auton = new Sequence(m_armSubsystem, m_armKinematicsM);
                 break;
             default:

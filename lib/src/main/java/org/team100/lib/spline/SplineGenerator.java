@@ -11,11 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 public class SplineGenerator {
-    private static final double kMaxDX = 0.05; // meters
-    private static final double kMaxDY = 0.05; // meters
-    private static final double kMaxDTheta = 0.1; // radians
-    private static final int kMinSampleSize = 1;
-
     /**
      * Converts a spline into a list of Twist2d's.
      *
@@ -34,27 +29,10 @@ public class SplineGenerator {
         List<Pose2dWithMotion> rv = new ArrayList<>();
         rv.add(s.getPose2dWithMotion(0.0));
         double dt = (t1 - t0);
-        for (double t = 0; t < t1; t += dt / kMinSampleSize) {
-            getSegmentArc(s, rv, t, t + dt / kMinSampleSize, maxDx, maxDy, maxDTheta);
+        for (double t = 0; t < t1; t += dt) {
+            getSegmentArc(s, rv, t, t + dt, maxDx, maxDy, maxDTheta);
         }
         return rv;
-    }
-
-    /**
-     * Convenience function to parametrize a spline from t 0 to 1
-     */
-    public static List<Pose2dWithMotion> parameterizeSpline(HolonomicSpline s) {
-        return parameterizeSpline(s, kMaxDX, kMaxDY, kMaxDTheta, 0.0, 1.0);
-    }
-
-    public static List<Pose2dWithMotion> parameterizeSpline(HolonomicSpline s, double maxDx,
-            double maxDy,
-            double maxDTheta) {
-        return parameterizeSpline(s, maxDx, maxDy, maxDTheta, 0.0, 1.0);
-    }
-
-    public static List<Pose2dWithMotion> parameterizeSplines(List<HolonomicSpline> splines) {
-        return parameterizeSplines(splines, kMaxDX, kMaxDY, kMaxDTheta);
     }
 
     public static List<Pose2dWithMotion> parameterizeSplines(
@@ -68,7 +46,7 @@ public class SplineGenerator {
         rv.add(splines.get(0).getPose2dWithMotion(0.0));
         for (int i = 0; i < splines.size(); i++) {
             HolonomicSpline s = splines.get(i);
-            List<Pose2dWithMotion> samples = parameterizeSpline(s, maxDx, maxDy, maxDTheta);
+            List<Pose2dWithMotion> samples = parameterizeSpline(s, maxDx, maxDy, maxDTheta, 0.0, 1.0);
             samples.remove(0);
             rv.addAll(samples);
         }

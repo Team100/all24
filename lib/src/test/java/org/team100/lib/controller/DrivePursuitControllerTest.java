@@ -46,7 +46,6 @@ class DrivePursuitControllerTest {
                 GeometryUtil.fromDegrees(180));
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
-        // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(kSmoothKinematicLimits));
 
@@ -72,7 +71,7 @@ class DrivePursuitControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
-        DrivePursuitController controller = new DrivePursuitController();
+        DrivePursuitController controller = new DrivePursuitController(kSmoothKinematicLimits);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -84,9 +83,8 @@ class DrivePursuitControllerTest {
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
-            // this is default cook.
-            // TODO: remove that idea.
-            assertEquals(-2.48, output.vxMetersPerSecond, 0.05);
+            // without the minimum  speed, its init speed is zero
+            assertEquals(0, output.vxMetersPerSecond, 0.05);
             assertEquals(0, output.vyMetersPerSecond, 0.05);
             // omega is NaN, i think pursuit ignores omega, it uses feedforward only.
             // assertEquals(0, output.omegaRadiansPerSecond, 0.001);
@@ -100,7 +98,6 @@ class DrivePursuitControllerTest {
                     current_state,
                     new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
-            // but actually it's default cook.
             // turning slowly to the left
             // i think pure pursuit might ignore omega
             verify(-3.96, -0.43, 0, output);
@@ -127,7 +124,6 @@ class DrivePursuitControllerTest {
             ChassisSpeeds output = controller.update(8.0,
                     current_state,
                     new Twist2d());
-            // this is default cook again
             // this is more Y than PID because it looks ahead
             verify(-3.764, -0.43, 0, output);
 
