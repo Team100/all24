@@ -20,16 +20,18 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * https://www.andymark.com/products/hex-pg-series-gearboxes-options
  * 
  * Because the number of ticks per revolution is small, the velocity measurement
- * is coarse at low speed: to measure 10 ticks takes almost 1/3 of a revolution.
+ * is coarse at low speed.
+ *
+ * One motor tick is 0.22 rad, measuring across 50ms means we'd like to have a minimum tick rate of 20hz, so 4.4 rad/s.
  * 
- * Accordingly, the velocity measurement period below is long, 50ms, which
- * creates delay in the measurement. Even so, the minimum controllable velocity
- * will be large, 4 degrees/sec.
+ * Through the gearbox, that/s 0.074 rad/s, or about 4 degrees/sec.
  * 
  * There are higher-resolution encoders available, which would solve the
  * problem, though the cost might not be worth the effort.
  * 
  * https://www.andymark.com/products/am-mag-encoder
+ * 
+ * Given the issues with feedback, this controller should rely mostly on feedforward.
  */
 public class CANTurningMotor implements Motor100<Angle> {
     /**
