@@ -47,13 +47,11 @@ import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
-import org.team100.lib.motion.drivetrain.SwerveModuleCollection;
-import org.team100.lib.motion.drivetrain.SwerveModuleCollectionFactory;
-import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.selftest.SelfTestable;
@@ -122,8 +120,7 @@ public class RobotContainer implements SelfTestable {
         m_monitor = new Monitor(new Annunciator(0));
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
-        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(kDriveCurrentLimit);
-        m_modules = new SwerveModuleCollectionFactory(moduleFactory).get();
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
         m_heading = HeadingFactory.get(swerveKinodynamics.getKinematics(), m_modules);

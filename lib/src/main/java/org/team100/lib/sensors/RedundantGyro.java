@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Combine two NavX AHRS to increase reliability.
+ * 
+ * TODO: verify that these method actually return degrees
  */
 public class RedundantGyro implements RedundantGyroInterface {
     private final Telemetry t = Telemetry.get();
@@ -47,7 +49,6 @@ public class RedundantGyro implements RedundantGyroInterface {
 
     /**
      * NOTE NOTE NOTE this is NED = clockwise positive = backwards
-     * TODO: is this really degrees?
      * 
      * @returns yaw in degrees [-180,180]
      */
@@ -78,8 +79,6 @@ public class RedundantGyro implements RedundantGyroInterface {
     }
 
     /**
-     * TODO: is this really degrees?
-     * 
      * @returns pitch in degrees [-180,180]
      */
     public float getRedundantPitch() {
@@ -111,8 +110,6 @@ public class RedundantGyro implements RedundantGyroInterface {
     }
 
     /**
-     * TODO: is this really degrees?
-     * 
      * @returns roll in degrees [-180,180]
      */
     public float getRedundantRoll() {
@@ -143,8 +140,7 @@ public class RedundantGyro implements RedundantGyroInterface {
     }
 
     /**
-     * NOTE this is NED = clockwise positive = backwards
-     * TODO: is this really deg/sec?
+     * NOTE NOTE NOTE this is NED = clockwise positive = backwards
      * 
      * @returns rate in deg/sec
      */

@@ -39,7 +39,6 @@ class PositionProfileTest {
      */
     @Test
     void testTrapezoid() {
-        // TODO: tune this
         PIDController vController = new PIDController(1, 0, 0, period);
         VelocityServo<Distance> vServo = new VelocityServo<>(
                 name,
@@ -63,7 +62,6 @@ class PositionProfileTest {
 
     @Test
     void testProfile() {
-        // TODO: tune this
         PIDController vController = new PIDController(1, 0, 0, period);
         VelocityServo<Distance> vServo = new VelocityServo<>(
                 name,
@@ -110,7 +108,6 @@ class PositionProfileTest {
 
     @Test
     void testExponential() {
-        // TODO: tune this
         PIDController vController = new PIDController(5, 0, 0, period);
         VelocityServo<Distance> vServo = new VelocityServo<>(
                 name,

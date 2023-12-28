@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle;
@@ -14,6 +14,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  * Feedforward and feedback control of a single module.
  */
 public class SwerveModule100 {
+    protected static final double dt = 0.02;
+
     private final String m_name;
     private final VelocityServo<Distance> m_driveServo;
     private final PositionServo<Angle> m_turningServo;
@@ -114,5 +116,13 @@ public class SwerveModule100 {
     void stop() {
         m_driveServo.stop();
         m_turningServo.stop();
+    }
+
+    protected static String turning(String name) {
+        return name + "/Turning";
+    }
+
+    protected static String drive(String name) {
+        return name + "/Drive";
     }
 }

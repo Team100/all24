@@ -34,7 +34,6 @@ class AnglePositionServoTest {
 
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        // TODO: tune this
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
         VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
                 name,

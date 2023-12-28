@@ -1,7 +1,7 @@
 package org.team100.lib.sensors;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.motion.drivetrain.SwerveModuleCollection;
+import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 

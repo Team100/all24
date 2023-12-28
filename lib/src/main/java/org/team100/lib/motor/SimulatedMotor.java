@@ -8,8 +8,6 @@ import edu.wpi.first.math.MathUtil;
 
 /**
  * Very simple simulated motor.
- * 
- * TODO: make it more realistic.
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();

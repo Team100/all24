@@ -12,8 +12,6 @@ public class ParameterFactory {
     private final Map<String, DoubleSupplier> m_parameters;
 
     public ParameterFactory(Map<String, PersistentParameter.HIDConfig> knobs) {
-        // TODO: in general the knob mapping will change depending on the
-        // robot identity and console identity.
         m_knobs = knobs;
         m_parameters = new ConcurrentHashMap<>();
     }

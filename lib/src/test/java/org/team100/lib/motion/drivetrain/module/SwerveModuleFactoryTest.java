@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.motion.drivetrain.module;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -12,8 +12,7 @@ class SwerveModuleFactoryTest {
     @Test
     void testWCP() {
         HAL.initialize(500, 0);
-        SwerveModuleFactory factory = new SwerveModuleFactory(10);
-        SwerveModule100 module = factory.WCPModule("test", 0, 0, 0, 0);
+        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, 0, 0, 0);
         assertNotNull(module);
         module.close();
         HAL.shutdown();
@@ -22,8 +21,7 @@ class SwerveModuleFactoryTest {
     @Test
     void testAMCAN() {
         HAL.initialize(500, 0);
-        SwerveModuleFactory factory = new SwerveModuleFactory(10);
-        SwerveModule100 module = factory.AMCANModule("test", 0, 0, 0, 0, AnalogTurningEncoder.Drive.DIRECT);
+        SwerveModule100 module = AMCANSwerveModule100.get("test", 0, 0, 0, 0, 0, AnalogTurningEncoder.Drive.DIRECT);
         assertNotNull(module);
         module.close();
         HAL.shutdown();
@@ -32,8 +30,7 @@ class SwerveModuleFactoryTest {
     @Test
     void testAM() {
         HAL.initialize(500, 0);
-        SwerveModuleFactory factory = new SwerveModuleFactory(10);
-        SwerveModule100 module = factory.AMModule("test", 0, 0, 0, 0);
+        SwerveModule100 module = AMSwerveModule100.get("test", 0, 0, 0, 0, 0);
         assertNotNull(module);
         module.close();
         HAL.shutdown();
