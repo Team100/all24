@@ -55,11 +55,6 @@ public class TalonSRXTurningEncoder implements Encoder100<Angle> {
     }
 
     @Override
-    public double getAbsolutePosition() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void periodic() {
         //
     }

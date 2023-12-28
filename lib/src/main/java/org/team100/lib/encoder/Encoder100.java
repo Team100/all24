@@ -19,11 +19,6 @@ public interface Encoder100<T extends Measure100> {
     double getPosition();
 
     /**
-     * Does not accumulate. For angles, this is measured in RADIANS.
-     */
-    double getAbsolutePosition();
-
-    /**
      * Angular or linear velocity depending on parameter.
      * 
      * Distance is m/s.

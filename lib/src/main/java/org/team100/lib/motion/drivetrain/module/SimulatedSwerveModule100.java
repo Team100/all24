@@ -22,10 +22,11 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     private static VelocityServo<Distance> simulatedDriveServo(String name) {
         SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(drive(name));
         SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(
-                Distance.instance,
                 drive(name),
                 driveMotor,
-                1);
+                1,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
         PIDController driveController = new PIDController(//
                 0.1, // kP
                 0, // kI
@@ -45,10 +46,11 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     private static PositionServo<Angle> simulatedTurningServo(String name) {
         SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(turning(name));
         SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(
-                Angle.instance,
                 turning(name),
                 turningMotor,
-                1);
+                1,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
         PIDController turningVelocityController = new PIDController(
                 0.5, // kP
                 0, // kI

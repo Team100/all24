@@ -8,6 +8,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -24,12 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
  * gravity feedforward, no inertia-dependent feedback).
  */
 public class ArmTrajectoryCommand extends Command {
-    private static final double kLowerP = 2;
-    private static final double kLowerI = 0;
-    private static final double kLowerD = 0.1;
-    private static final double kUpperP = 2;
-    private static final double kUpperI = 0;
-    private static final double kUpperD = 0.05;
     private static final double kTolerance = 0.02;
     private static final TrajectoryConfig kConf = new TrajectoryConfig(1, 1);
     private static final double kA = 0.2;
@@ -40,6 +35,7 @@ public class ArmTrajectoryCommand extends Command {
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
     private final Translation2d m_goal;
+
     private final ArmAngles m_goalAngles;
     private final Timer m_timer;
 
@@ -52,6 +48,19 @@ public class ArmTrajectoryCommand extends Command {
 
     private Trajectory m_trajectory;
 
+    private static PIDController controller(double p, double d) {
+        PIDController c = new PIDController(p, 0, d);
+        c.setTolerance(kTolerance);
+        return c;
+    }
+
+    /** Position controller is continuous. */
+    private static PIDController pController(double p, double d) {
+        PIDController c = controller(p, d);
+        c.enableContinuousInput(-Math.PI, Math.PI);
+        return c;
+    }
+
     public ArmTrajectoryCommand(
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
@@ -59,20 +68,14 @@ public class ArmTrajectoryCommand extends Command {
         m_armSubsystem = armSubSystem;
         m_armKinematicsM = armKinematicsM;
         m_goal = goal;
+
         m_goalAngles = m_armKinematicsM.inverse(m_goal);
         m_timer = new Timer();
 
-        m_lowerPosController = new PIDController(kLowerP, kLowerI, kLowerD);
-        m_upperPosController = new PIDController(kUpperP, kUpperI, kUpperD);
-        m_lowerPosController.enableContinuousInput(-Math.PI, Math.PI);
-        m_upperPosController.enableContinuousInput(-Math.PI, Math.PI);
-        m_lowerVelController = new PIDController(0.1, 0, 0);
-        m_upperVelController = new PIDController(0.1, 0, 0);
-
-        m_lowerPosController.setIntegratorRange(1, 1);
-        m_upperPosController.setIntegratorRange(1, 1);
-        m_lowerPosController.setTolerance(kTolerance);
-        m_upperPosController.setTolerance(kTolerance);
+        m_lowerPosController = pController(2, 0.1);
+        m_upperPosController = pController(2, 0.05);
+        m_lowerVelController = controller(0.1, 0);
+        m_upperVelController = controller(0.1, 0);
 
         m_trajectories = new ArmTrajectories(kConf);
 
@@ -90,78 +93,98 @@ public class ArmTrajectoryCommand extends Command {
     public void execute() {
         if (m_trajectory == null)
             return;
+        if (m_goalAngles == null)
+            return;
 
-        double curTime = m_timer.get();
-        State desiredState = m_trajectory.sample(curTime);
-        double desiredXPos = desiredState.poseMeters.getX();
-        double desiredYPos = desiredState.poseMeters.getY();
-        double desiredVecloity = desiredState.velocityMetersPerSecond;
-        double desiredAcceleration = desiredState.accelerationMetersPerSecondSq;
-        if (desiredState == m_trajectory.sample(100)) {
-            desiredAcceleration = 0;
-        }
-        double theta = desiredState.poseMeters.getRotation().getRadians();
-        double desiredXVel = desiredVecloity * Math.cos(theta);
-        // TODO: i think Math.sin is what is needed below.
-        double desiredYVel = desiredVecloity * Math.cos(Math.PI / 2 - theta);
-        double desiredXAccel = desiredAcceleration * Math.cos(theta);
-        double desiredYAccel = desiredAcceleration * Math.cos(Math.PI / 2 - theta);
-
-        Translation2d XYVelReference = new Translation2d(desiredXVel, desiredYVel);
-        Translation2d XYAccelReference = new Translation2d(desiredXAccel, desiredYAccel);
-        XYVelReference = XYVelReference.plus(XYAccelReference.times(kA));
-
-        Translation2d XYPosReference = new Translation2d(desiredXPos, desiredYPos);
-        ArmAngles thetaPosReference = m_armKinematicsM.inverse(XYPosReference);
-        ArmAngles thetaVelReference = m_armKinematicsM.inverseVel(thetaPosReference, XYVelReference);
+        State desiredState = getDesiredState();
 
         ArmAngles measurement = m_armSubsystem.getPosition();
-        double currentLower = measurement.th1;
-        double currentUpper = measurement.th2;
+        ArmAngles velocityMeasurement = m_armSubsystem.getVelocity();
 
-        double lowerPosControllerOutput = m_lowerPosController.calculate(currentLower,
-                thetaPosReference.th1);
-        double lowerVelControllerOutput = m_lowerVelController.calculate(m_armSubsystem.getVelocity().th1,
-                thetaVelReference.th1);
-        double lowerFeedForward = thetaVelReference.th1 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
-        double u1 = lowerFeedForward + lowerPosControllerOutput + lowerVelControllerOutput;
+        // position reference
+        ArmAngles r = getThetaPosReference(desiredState);
 
-        double upperPosControllerOutput = m_upperPosController.calculate(currentUpper,
-                thetaPosReference.th2);
-        double upperVelControllerOutput = m_upperVelController.calculate(m_armSubsystem.getVelocity().th2,
-                thetaVelReference.th2);
-        double upperFeedForward = thetaVelReference.th2 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
-        double u2 = upperFeedForward + upperPosControllerOutput + upperVelControllerOutput;
+        // position feedback
+        double u1_pos = m_lowerPosController.calculate(measurement.th1, r.th1);
+        double u2_pos = m_upperPosController.calculate(measurement.th2, r.th2);
+
+        // velocity reference
+        ArmAngles rdot = getThetaVelReference(desiredState, r);
+
+        // feedforward
+        double ff2 = rdot.th2 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
+        double ff1 = rdot.th1 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
+
+        // velocity feedback
+        double u1_vel = m_lowerVelController.calculate(velocityMeasurement.th1, rdot.th1);
+        double u2_vel = m_upperVelController.calculate(velocityMeasurement.th2, rdot.th2);
+
+        double u1 = ff1 + u1_pos + u1_vel;
+        double u2 = ff2 + u2_pos + u2_vel;
 
         m_armSubsystem.set(u1, u2);
 
-        t.log(Level.DEBUG, "/arm_trajectory/Lower FF ", lowerFeedForward);
-        t.log(Level.DEBUG, "/arm_trajectory/Lower Controller Output: ", lowerPosControllerOutput);
-        t.log(Level.DEBUG, "/arm_trajectory/Upper FF ", upperFeedForward);
-        t.log(Level.DEBUG, "/arm_trajectory/Upper Controller Output: ", upperPosControllerOutput);
-        t.log(Level.DEBUG, "/arm_trajectory/Lower Ref: ", thetaPosReference.th1);
-        t.log(Level.DEBUG, "/arm_trajectory/Upper Ref: ", thetaPosReference.th2);
+        t.log(Level.DEBUG, "/arm_trajectory/Lower FF ", ff1);
+        t.log(Level.DEBUG, "/arm_trajectory/Lower Controller Output: ", u1_pos);
+        t.log(Level.DEBUG, "/arm_trajectory/Upper FF ", ff2);
+        t.log(Level.DEBUG, "/arm_trajectory/Upper Controller Output: ", u2_pos);
+        t.log(Level.DEBUG, "/arm_trajectory/Lower Ref: ", r.th1);
+        t.log(Level.DEBUG, "/arm_trajectory/Upper Ref: ", r.th2);
         t.log(Level.DEBUG, "/arm_trajectory/Output Upper: ", u1);
         t.log(Level.DEBUG, "/arm_trajectory/Output Lower: ", u2);
+    }
+
+    private State getDesiredState() {
+        double curTime = m_timer.get();
+        State state = m_trajectory.sample(curTime);
+        // the last state in the trajectory includes whatever the terminal acceleration
+        // was, so if you keep sampling past the end, you'll be trying to accelerate
+        // away from the endpoint, even though the desired velocity is zero.  :-(
+        // so we just fix it here:
+        if (curTime > m_trajectory.getTotalTimeSeconds())
+            state.accelerationMetersPerSecondSq = 0;
+        return state;
+    }
+
+    ArmAngles getThetaPosReference(State desiredState) {
+        Translation2d XYPosReference = desiredState.poseMeters.getTranslation();
+        return m_armKinematicsM.inverse(XYPosReference);
+    }
+
+    ArmAngles getThetaVelReference(
+            State desiredState,
+            ArmAngles thetaPosReference) {
+        double desiredVecloity = desiredState.velocityMetersPerSecond;
+        // accounting for acceleration along the path.
+        // in general, we should also account for acceleration across the path, i.e.
+        // curvature, but in this case we know the path is a straight line,
+        // so just boost the desired velocity a little.
+        desiredVecloity += kA * desiredState.accelerationMetersPerSecondSq;
+        Rotation2d theta = desiredState.poseMeters.getRotation();
+        double desiredXVel = desiredVecloity * theta.getCos();
+        double desiredYVel = desiredVecloity * theta.getSin();
+        Translation2d XYVelReference = new Translation2d(desiredXVel, desiredYVel);
+        return m_armKinematicsM.inverseVel(thetaPosReference, XYVelReference);
+
     }
 
     @Override
     public boolean isFinished() {
         if (m_trajectory == null)
             return true;
-        return Math.abs(getTrajectoryError().th1) < kTolerance && Math.abs(getTrajectoryError().th2) < kTolerance;
+        if (m_goalAngles == null)
+            return true;
+
+        return m_timer.get() > m_trajectory.getTotalTimeSeconds()
+                && m_lowerPosController.atSetpoint()
+                && m_upperPosController.atSetpoint()
+                && m_lowerVelController.atSetpoint()
+                && m_upperVelController.atSetpoint();
     }
 
     @Override
     public void end(boolean interrupted) {
         m_armSubsystem.set(0, 0);
         m_trajectory = null;
-    }
-
-    private ArmAngles getTrajectoryError() {
-        ArmAngles position = m_armSubsystem.getPosition();
-        return new ArmAngles(
-                position.th1 - m_goalAngles.th1,
-                position.th2 - m_goalAngles.th2);
     }
 }

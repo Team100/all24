@@ -30,24 +30,33 @@ public class ArmFactory {
     }
 
     private static ArmSubsystem real() {
+        final double kLowerEncoderOffset = 0.861614;
+        final double kUpperEncoderOffset = 0.266396;
+
         Motor100<Angle> lowerMotor = new JointMotor(kLower, 4, 8);
         // NOTE: the encoder inversion used to be in the subsystem,
         // but now it is here.
         Encoder100<Angle> lowerEncoder = new AnalogTurningEncoder(
-                kLower, 1, 0, 1, AnalogTurningEncoder.Drive.INVERSE);
+                kLower, 
+                1, // analog input 1
+                 kLowerEncoderOffset,
+                 1, // encoder is 1:1 with the arm joint
+                 AnalogTurningEncoder.Drive.INVERSE);
+
         Motor100<Angle> upperMotor = new JointMotor(kUpper, 30, 1);
         Encoder100<Angle> upperEncoder = new AnalogTurningEncoder(
-                kUpper, 0, 0, 1, AnalogTurningEncoder.Drive.DIRECT);
-        double kLowerEncoderZero = 0.861614;
-        double kUpperEncoderZero = 0.266396;
+                kUpper,
+                 0, // analog input 0
+                kUpperEncoderOffset, 
+                1,// encoder is 1:1 with the arm joint
+                 AnalogTurningEncoder.Drive.DIRECT);
+
         return new ArmSubsystem(
                 kArm,
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder,
-                kLowerEncoderZero,
-                kUpperEncoderZero);
+                upperEncoder);
     }
 
     private static ArmSubsystem simulated() {
@@ -55,21 +64,17 @@ public class ArmFactory {
         // note very high reduction ratio
         SimulatedMotor<Angle> lowerMotor = new SimulatedMotor<>(kLower);
         SimulatedEncoder<Angle> lowerEncoder = new SimulatedEncoder<>(
-                Angle.instance, kLower, lowerMotor, 25);
+                kLower, lowerMotor, 200, -1, 1);
+
         SimulatedMotor<Angle> upperMotor = new SimulatedMotor<>(kUpper);
         SimulatedEncoder<Angle> upperEncoder = new SimulatedEncoder<>(
-                Angle.instance, kUpper, upperMotor, 25);
-        // simulated encoders are correctly aligned
-        double kLowerEncoderZero = 0;
-        double kUpperEncoderZero = 0;
+                kUpper, upperMotor, 200, 0.1, 2.5);
         return new ArmSubsystem(
                 kArm,
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder,
-                kLowerEncoderZero,
-                kUpperEncoderZero);
+                upperEncoder);
     }
 
     private ArmFactory() {
