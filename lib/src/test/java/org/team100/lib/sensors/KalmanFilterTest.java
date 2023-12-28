@@ -96,7 +96,6 @@ public class KalmanFilterTest {
                         predictedPosition, predictedVelocity,
                         correctedPosition, correctedVelocity);
         }
-        // System.out.flush();
         // check end values
         assertEquals(2, predictedPosition, 0.1);
         assertEquals(1, predictedVelocity, 0.1);
@@ -165,7 +164,6 @@ public class KalmanFilterTest {
                         predictedPosition, predictedVelocity,
                         correctedPosition, correctedVelocity);
         }
-        System.out.flush();
         // check end values
         assertEquals(2, predictedPosition, 0.1);
         assertEquals(1, predictedVelocity, 0.1);
@@ -249,7 +247,6 @@ public class KalmanFilterTest {
                         posPredR, velPredRS,
                         posCorrR, velCorrRS);
         }
-        // System.out.flush();
         // check end values
         assertEquals(0.6, posPredR, 0.1);
         assertEquals(0, velPredRS, 0.2);

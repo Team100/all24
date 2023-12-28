@@ -5,38 +5,46 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Simulated encoder that integrates motor velocity to get position.
+ * 
+ * Relies on Timer.getFPGATimestamp() to compute rate, which means you should
+ * use SimHooks.stepTimingAsync() in your tests.
  */
 public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     private final Telemetry t = Telemetry.get();
-    private final T m_measure;
     private final String m_name;
     private final SimulatedMotor<T> m_motor;
     private final double m_reduction;
+    private final double m_lowerLimit;
+    private final double m_upperLimit;
+    // accumulates.
     private double m_position = 0;
     private double m_time = Timer.getFPGATimestamp();
 
     /**
-     * @param measure
-     * @param name may not start with a slash
+     * @param name      may not start with a slash
      * @param motor
-     * @param reduction
+     * @param reduction ratio between motor and encoder
+     * @param lowerLimit in m or rad
+     * @param upperLimit in m or rad
      */
     public SimulatedEncoder(
-            T measure,
             String name,
             SimulatedMotor<T> motor,
-            double reduction) {
+            double reduction,
+            double lowerLimit,
+            double upperLimit) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-
-        m_measure = measure;
         m_name = String.format("/%s/Simulated Encoder", name);
         m_motor = motor;
         m_reduction = reduction;
+        m_lowerLimit = lowerLimit;
+        m_upperLimit = upperLimit;
     }
 
     @Override
@@ -62,21 +70,12 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         //
     }
 
-    /**
-     * This is measured in RADIANS
-     */
-    @Override
-    public double getAbsolutePosition() {
-        double absolutePosition = m_measure.modulus(getPosition());
-        t.log(Level.DEBUG, m_name + "/absolute position", absolutePosition);
-        return absolutePosition;
-    }
-
     @Override
     public void periodic() {
         double now = Timer.getFPGATimestamp();
         double dt = now - m_time;
         m_position += getRate() * dt;
+        m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
     }
 }

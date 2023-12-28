@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;

@@ -1,5 +1,6 @@
 package org.team100.lib.selftest;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 @ExcludeFromJacocoGeneratedReport
 public class SquareSelfTest extends Command {
     private static final double kProfileSec = 2;
+    private static final double kMaxDistance = 1.75;
     private static final double kSteerSec = 0.34;
     /** 2 s per side */
     private static final double kExpectedDuration = 4 * kProfileSec + 3 * kSteerSec;
@@ -43,6 +45,12 @@ public class SquareSelfTest extends Command {
         double x = state.getX() - m_initial.getX();
         double y = state.getY() - m_initial.getY();
         double t = m_timer.get();
+
+         if (GeometryUtil.distance(state, m_initial) > kMaxDistance) {
+            m_listener.fail(this, "Too far from initial pose");
+            terminate = true;
+            return;
+        }
 
         if (t < kProfileSec) {
             // first side takes 2 s

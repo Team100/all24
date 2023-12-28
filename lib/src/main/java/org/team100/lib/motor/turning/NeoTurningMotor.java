@@ -7,6 +7,7 @@ import org.team100.lib.units.Angle;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxPIDController;
 
 /**
@@ -24,8 +25,14 @@ public class NeoTurningMotor implements Motor100<Angle> {
 
     public NeoTurningMotor(String name, int canId) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
+        m_motor.restoreFactoryDefaults();
+
         m_motor.setInverted(true);
         m_motor.setSmartCurrentLimit(kCurrentLimit);
+
+        // reduce total velocity measurement delay
+        m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
+
         m_pidController = m_motor.getPIDController();
         m_pidController.setPositionPIDWrappingEnabled(true);
         m_pidController.setP(.1);
@@ -42,7 +49,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
 
     @Override
     public double get() {
-        return m_motor.get();
+        return m_motor.getAppliedOutput();
     }
 
     @Override

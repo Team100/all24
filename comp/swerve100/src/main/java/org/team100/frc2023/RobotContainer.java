@@ -47,13 +47,11 @@ import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
-import org.team100.lib.motion.drivetrain.SwerveModuleCollection;
-import org.team100.lib.motion.drivetrain.SwerveModuleCollectionFactory;
-import org.team100.lib.motion.drivetrain.SwerveModuleFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.selftest.SelfTestable;
@@ -77,6 +75,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer implements SelfTestable {
@@ -121,8 +120,7 @@ public class RobotContainer implements SelfTestable {
         m_monitor = new Monitor(new Annunciator(0));
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
-        SwerveModuleFactory moduleFactory = new SwerveModuleFactory(kDriveCurrentLimit);
-        m_modules = new SwerveModuleCollectionFactory(moduleFactory).get();
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
         m_heading = HeadingFactory.get(swerveKinodynamics.getKinematics(), m_modules);
@@ -139,13 +137,11 @@ public class RobotContainer implements SelfTestable {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        // TODO: make this override work better
-        // if (m_allianceSelector.alliance() == DriverStation.Alliance.Blue) {
-        layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
-        // } else { // red
-        // layout =
-        // AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
-        // }
+        if (m_allianceSelector.alliance() == Alliance.Blue) {
+            layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
+        } else {
+            layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
+        }
 
         VisionDataProvider visionDataProvider = new VisionDataProvider(
                 layout,
@@ -302,8 +298,9 @@ public class RobotContainer implements SelfTestable {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(2, 0, 0);
+        PIDController thetaController = new PIDController(1.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(0.5, 0, 0);
 
         m_drive.setDefaultCommand(
                 new DriveManually(
@@ -314,6 +311,7 @@ public class RobotContainer implements SelfTestable {
                         swerveKinodynamics,
                         control::desiredRotation,
                         thetaController,
+                        omegaController,
                         control::target,
                         control::trigger));
 

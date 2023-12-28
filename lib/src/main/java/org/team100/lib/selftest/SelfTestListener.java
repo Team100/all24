@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -18,11 +19,15 @@ public class SelfTestListener {
 
     public void fail(Command command, String format, Object... vars) {
         success = false;
-        outcomes.add(kRed + command.getName() + " FAILED: " + kReset + String.format(format, vars));
+        String msg = kRed + command.getName() + " FAILED: " + kReset + String.format(format, vars);
+        Util.println(msg);
+        outcomes.add(msg);
     }
 
     public void pass(Command command, String format, Object... vars) {
-        outcomes.add(kGreen + command.getName() + " PASSED: " + kReset + String.format(format, vars));
+        String msg = kGreen + command.getName() + " PASSED: " + kReset + String.format(format, vars);
+        Util.println(msg);
+        outcomes.add(msg);
     }
 
     public String summary() {

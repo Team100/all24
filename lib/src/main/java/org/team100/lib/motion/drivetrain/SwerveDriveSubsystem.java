@@ -85,6 +85,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return m_swerveLocal.speeds();
     }
 
+    /** @return current measurements */
     public SwerveModuleState[] moduleStates() {
         return m_swerveLocal.states();
     }
@@ -205,6 +206,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return m_poseEstimator.getEstimatedPosition();
     }
 
+    /**
+     * The omega signal here will be delayed relative to the gyro. Use the gyro if
+     * you really just want omega.
+     */
     public Twist2d getImpliedTwist2d() {
         ChassisSpeeds speeds = m_swerveLocal.speeds();
         return m_frameTransform.toFieldRelativeSpeeds(

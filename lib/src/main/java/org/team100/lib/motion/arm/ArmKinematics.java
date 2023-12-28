@@ -49,8 +49,7 @@ public class ArmKinematics {
      * It's an application of the law of cosines. For diagram, see this doc:
      * https://docs.google.com/document/d/135U309CXN29X3Oube1N1DaXPHlo6r-YdnPHMH8NBev8/edit
      * 
-     * @param x
-     * @param y
+     * @param t cartesian coordinate
      * @return absolute joint angles, null if unreachable.
      */
     public ArmAngles inverse(Translation2d t) {
@@ -65,6 +64,12 @@ public class ArmKinematics {
         return new ArmAngles(th1, th2);
     }
 
+    /**
+     * Calculate joint velocities given arm state and cartesian velocity
+     * @param pos joint positions
+     * @param vel cartesian velocity
+     * @return joint velocities, rad/s
+     */
     public ArmAngles inverseVel(ArmAngles pos, Translation2d vel) {
         if (pos == null) {
             Util.warn("NULL ARM POSITION in ArmKinematics.inverseVel()");

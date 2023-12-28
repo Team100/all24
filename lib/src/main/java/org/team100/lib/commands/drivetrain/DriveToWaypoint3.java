@@ -22,8 +22,6 @@ import edu.wpi.first.wpilibj.Timer;
  * The trajectory is supplied; the supplier is free to ignore the current state.
  * 
  * Steering is aligned to prevent startup errors, but this isn't working right yet.
- * 
- * TODO: fix it and/or hide it behind an experiment.
  */
 public class DriveToWaypoint3 extends Command100 {
     private final Telemetry t = Telemetry.get();

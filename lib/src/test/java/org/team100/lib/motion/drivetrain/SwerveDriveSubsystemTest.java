@@ -6,6 +6,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.MockHeading;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;

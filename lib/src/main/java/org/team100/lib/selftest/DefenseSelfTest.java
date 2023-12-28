@@ -5,20 +5,24 @@ import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Verify the "x" pattern.
+ * Verify the "x" pattern. The command under test never ends.
  */
 @ExcludeFromJacocoGeneratedReport
 public class DefenseSelfTest extends Command {
     // this fails below 1s, which is quite a bit too slow
-    // TODO: speed up the steering profile
+    // TODO: make the simulated steering profile match the real steering profile
     private static final double kExpectedDuration = 1;
-    private SwerveDriveSubsystem m_drivetrain;
-    private SelfTestListener m_listener;
+    private static final double kToleranceRad = 0.01;
+
+    private final SwerveDriveSubsystem m_drivetrain;
+    private final SelfTestListener m_listener;
     private final Timer m_timer;
+
     private boolean terminate = false;
 
     /**
@@ -33,6 +37,26 @@ public class DefenseSelfTest extends Command {
     @Override
     public void initialize() {
         m_timer.start();
+    }
+
+    @Override
+    public void execute() {
+        // check for progress
+        SwerveModuleState[] states = m_drivetrain.moduleStates();
+        if (!MathUtil.isNear(Math.PI / 4, states[0].angle.getRotations(), kToleranceRad)) {
+            return;
+        }
+        if (!MathUtil.isNear(-1 * Math.PI / 4, states[1].angle.getRotations(), kToleranceRad)) {
+            return;
+        }
+        if (!MathUtil.isNear(3 * Math.PI / 4, states[2].angle.getRotations(), kToleranceRad)) {
+            return;
+        }
+        if (!MathUtil.isNear(-3 * Math.PI / 4, states[3].angle.getRotations(), kToleranceRad)) {
+            return;
+        }
+        // we're all done
+        terminate = true;
     }
 
     @Override
@@ -53,7 +77,7 @@ public class DefenseSelfTest extends Command {
         fmt = "front left expected %5.3f actual %5.3f";
         double expected = Math.PI / 4;
         double actual = positions[0].angle.getRadians();
-        if (MathUtil.isNear(expected, actual, 0.01))
+        if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
             m_listener.fail(this, fmt, expected, actual);
@@ -61,7 +85,7 @@ public class DefenseSelfTest extends Command {
         fmt = "front right expected %5.3f actual %5.3f";
         expected = -1 * Math.PI / 4;
         actual = positions[1].angle.getRadians();
-        if (MathUtil.isNear(expected, actual, 0.01))
+        if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
             m_listener.fail(this, fmt, expected, actual);
@@ -69,7 +93,7 @@ public class DefenseSelfTest extends Command {
         fmt = "rear left expected %5.3f actual %5.3f";
         expected = 3 * Math.PI / 4;
         actual = positions[2].angle.getRadians();
-        if (MathUtil.isNear(expected, actual, 0.01))
+        if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
             m_listener.fail(this, fmt, expected, actual);
@@ -77,7 +101,7 @@ public class DefenseSelfTest extends Command {
         fmt = "rear right expected %5.3f actual %5.3f";
         expected = -3 * Math.PI / 4;
         actual = positions[3].angle.getRadians();
-        if (MathUtil.isNear(expected, actual, 0.01))
+        if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
             m_listener.fail(this, fmt, expected, actual);

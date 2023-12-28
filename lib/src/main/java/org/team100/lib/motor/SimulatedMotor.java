@@ -3,14 +3,11 @@ package org.team100.lib.motor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 
 /**
  * Very simple simulated motor.
- * 
- * TODO: make it more realistic.
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
@@ -29,18 +26,15 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
 
     @Override
     public double get() {
-        // TODO: this is wrong
-        Util.warn("WRONG simulated velocity");
-        return m_velocity;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setDutyCycle(double output) {
         output = MathUtil.clamp(output, -1, 1);
         t.log(Level.DEBUG, m_name + "/duty_cycle", output);
-        // this is an absurd motor model.
-        // TODO: make this mean something?
-        setVelocity(output * 20, 0);
+        // 100% output => about 6k rpm
+        setVelocity(output * 600, 0);
     }
 
     @Override

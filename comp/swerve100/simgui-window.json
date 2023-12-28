@@ -10,21 +10,11 @@
       "style": "0",
       "userScale": "1",
       "width": "853",
-      "xpos": "187",
-      "ypos": "200"
+      "xpos": "87",
+      "ypos": "100"
     }
   },
   "Window": {
-    "###Addressable LEDs": {
-      "Collapsed": "0",
-      "Pos": "193,66",
-      "Size": "86,160"
-    },
-    "###DIO": {
-      "Collapsed": "0",
-      "Pos": "313,13",
-      "Size": "97,127"
-    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "3,360",

@@ -4,9 +4,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 /**
  * Enforces a fixed limit on delta v.
- * 
- * TODO: make the limit configurable (e.g. dependent on elevator extension)
- * TODO: make this depend on direction (e.g. CG not in center)
  */
 public class CapsizeAccelerationLimiter {
 

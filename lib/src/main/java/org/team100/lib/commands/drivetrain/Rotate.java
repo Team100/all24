@@ -118,8 +118,6 @@ public class Rotate extends Command100 {
         }
 
         double headingMeasurement = currentPose.getRotation().getRadians();
-        // note the use of Heading here.
-        // TODO: extend the pose estimator to include rate.
         double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did

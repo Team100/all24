@@ -16,8 +16,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  * 
  * It is essential to call reset() before first use and after disuse, to prevent
  * transients.
- * 
- * TODO: replace the PID controllers here with simple proportional feedback.
  */
 public class FullStateServo<T extends Measure100> {
     // private static final double kDeadband = 0.03;
@@ -34,12 +32,8 @@ public class FullStateServo<T extends Measure100> {
     private final T m_instance;
 
     private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-    // TODO: use a profile that exposes acceleration and use it.
     private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
 
-    /**
-     * @param modulus wrap the measurement if desired
-     */
     public FullStateServo(
             String name,
             VelocityServo<T> servo,
@@ -73,7 +67,7 @@ public class FullStateServo<T extends Measure100> {
         double u_XFB = m_xController.calculate(measurement, m_setpoint.position);
 
         double velocityMeasurement = m_encoder.getRate();
-        double u_VFB = m_xController.calculate(velocityMeasurement, m_setpoint.velocity);
+        double u_VFB = m_vController.calculate(velocityMeasurement, m_setpoint.velocity);
 
         double u_FF = m_setpoint.velocity;
         double u_TOTAL = u_XFB + u_VFB + u_FF;
@@ -148,5 +142,9 @@ public class FullStateServo<T extends Measure100> {
     private void getSetpointMinDistance(double measurement) {
         m_goal.position = m_instance.modulus(m_goal.position - measurement) + measurement;
         m_setpoint.position = m_instance.modulus(m_setpoint.position - measurement) + measurement;
+    }
+
+    public void periodic() {
+        m_encoder.periodic();
     }
 }

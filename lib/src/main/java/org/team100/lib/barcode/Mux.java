@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj.DigitalOutput;
  * Instruments CD74HC4067.
  * 
  * https://www.sparkfun.com/products/9056
- * 
- * TODO: add partitioning, when we have anything to partition.
  */
 public class Mux {
     private static final int kSelectors = 4;

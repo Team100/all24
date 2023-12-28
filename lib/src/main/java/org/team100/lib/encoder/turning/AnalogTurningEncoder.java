@@ -5,7 +5,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -40,7 +39,11 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
 
     /**
      * @param name        may not start with a slash
-     * @param inputOffset unit = turns, i.e. [0,1]
+     * @param channel     roboRIO analog input channel
+     * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
+     *                    measurement
+     * @param gearRatio
+     * @param drive       polarity
      */
     public AnalogTurningEncoder(
             String name,
@@ -95,13 +98,6 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
     public void close() {
         m_input.close();
         m_encoder.close();
-    }
-
-    /** This is now measured in RADIANS RADIANS RADIANS */
-    @Override
-    public double getAbsolutePosition() {
-        double positionTurns = m_encoder.getAbsolutePosition();
-        return MathUtil.angleModulus(2 * Math.PI * positionTurns);
     }
 
     @Override

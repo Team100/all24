@@ -35,6 +35,7 @@ public class SwerveState {
         return new Pose2d(m_x.x(), m_y.x(), new Rotation2d(m_theta.x()));
     }
 
+    /** Translation of the pose */
     public Translation2d translation() {
         return new Translation2d(m_x.x(), m_y.x());
     }

@@ -23,17 +23,17 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  * 
  * TODO: add velocity feedback
- * TODO: replace the PID controller with multiplication
  */
 public class ManualWithHeading {
     private static final double kDtSec = 0.02;
     private final Telemetry t = Telemetry.get();
 
-    private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;
+    private final HeadingInterface m_heading;
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
     private final PIDController m_thetaController;
+    private final PIDController m_omegaController;
 
     public Rotation2d m_goal = null;
     public final TrapezoidProfile m_profile;
@@ -43,11 +43,13 @@ public class ManualWithHeading {
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation,
-            PIDController thetaController) {
-        m_heading = heading;
+            PIDController thetaController,
+            PIDController omegaController) {
         m_swerveKinodynamics = swerveKinodynamics;
+        m_heading = heading;
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
+        m_omegaController = omegaController;
         m_latch = new HeadingLatch();
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(), swerveKinodynamics.getMaxAngleAccelRad_S2());
@@ -57,8 +59,9 @@ public class ManualWithHeading {
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        // TODO: include omega
-        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(), 0);
+        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(),  m_heading.getHeadingRateNWU());
+        m_thetaController.reset();
+        m_omegaController.reset();
     }
 
     /**
@@ -66,6 +69,8 @@ public class ManualWithHeading {
      */
     public Twist2d apply(Pose2d currentPose, Twist2d twist1_1) {
         Rotation2d currentRotation = currentPose.getRotation();
+        double headingMeasurement = currentRotation.getRadians();
+        double headingRate = m_heading.getHeadingRateNWU();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(pov, twist1_1);
@@ -86,6 +91,7 @@ public class ManualWithHeading {
                 + currentRotation.getRadians();
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
+        // the omega goal in snap mode is always zero.
         m_setpoint = m_profile.calculate(kDtSec,
                 new TrapezoidProfile.State(m_goal.getRadians(), 0),
                 m_setpoint);
@@ -100,14 +106,13 @@ public class ManualWithHeading {
 
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.position);
 
+        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.velocity);
+
         double omega = MathUtil.clamp(
-                thetaFF + thetaFB,
+                thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
-
-        double headingMeasurement = currentRotation.getRadians();
-        double headingRate = m_heading.getHeadingRateNWU();
 
         t.log(Level.DEBUG, "/ManualWithHeading/mode", "snap");
         t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_setpoint.position);
@@ -118,6 +123,5 @@ public class ManualWithHeading {
         t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_setpoint.velocity - headingRate);
 
         return twistWithSnapM_S;
-
     }
 }

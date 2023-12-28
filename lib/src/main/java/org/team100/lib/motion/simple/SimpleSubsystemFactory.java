@@ -65,7 +65,11 @@ public class SimpleSubsystemFactory {
     private SimpleSubsystem simulated() {
         SimulatedMotor<Distance> motor = new SimulatedMotor<>("simple/drive");
         Encoder100<Distance> encoder = new SimulatedEncoder<>(
-                Distance.instance, "simple/encoder", motor, 1);
+                "simple/encoder", 
+                motor, 
+                1,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
                 
         PIDController velocityController = new PIDController(1, 0, 0);
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.06, 0.3, 0.025);

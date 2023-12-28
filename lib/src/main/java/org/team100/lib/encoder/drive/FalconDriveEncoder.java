@@ -55,11 +55,6 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
     }
 
     @Override
-    public double getAbsolutePosition() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void periodic() {
         //
     }

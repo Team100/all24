@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
@@ -56,6 +57,7 @@ public class DriveManually extends Command100 {
             SwerveKinodynamics swerveKinodynamics,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController,
+            PIDController omegaController,
             Supplier<Translation2d> target,
             BooleanSupplier trigger) {
         m_mode = mode;
@@ -68,11 +70,14 @@ public class DriveManually extends Command100 {
                 swerveKinodynamics,
                 heading,
                 desiredRotation,
-                thetaController);
+                thetaController,
+                omegaController);
         m_manualWithTargetLock = new ManualWithTargetLock(
                 swerveKinodynamics,
+                heading,
                 target,
                 thetaController,
+                omegaController,
                 trigger);
         addRequirements(m_drive);
     }
@@ -105,7 +110,8 @@ public class DriveManually extends Command100 {
         }
 
         Twist2d input = m_twistSupplier.get();
-        Pose2d currentPose = m_drive.getPose();
+        SwerveState state = m_drive.getState();
+        Pose2d currentPose = state.pose();
 
         switch (manualMode) {
             case MODULE_STATE:
@@ -126,7 +132,7 @@ public class DriveManually extends Command100 {
                 break;
             case LOCKED:
                 m_drive.driveInFieldCoords(
-                        m_manualWithTargetLock.apply(currentPose, input), dt);
+                        m_manualWithTargetLock.apply(state, input), dt);
                 break;
             default:
                 // do nothing

@@ -8,11 +8,6 @@ public class NullRedundantGyro implements RedundantGyroInterface {
     }
 
     @Override
-    public float getRedundantGyroZ() {
-        return 0;
-    }
-
-    @Override
     public float getRedundantPitch() {
         return 0;
     }

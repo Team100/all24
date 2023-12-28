@@ -281,8 +281,10 @@
       "/SmartDashboard/Module3": "Mechanism2d",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
       "/SmartDashboard/Rear Left": "Mechanism2d",
       "/SmartDashboard/Rear Right": "Mechanism2d",
+      "/SmartDashboard/ShowMode": "String Chooser",
       "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Simple Manual Mode": "String Chooser",
       "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
@@ -324,6 +326,26 @@
         }
       },
       "/SmartDashboard/Simple Manual Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Front Left": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Front Right": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Rear Left": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Rear Right": {
         "window": {
           "visible": true
         }

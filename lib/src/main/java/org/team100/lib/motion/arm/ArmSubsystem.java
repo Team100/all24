@@ -6,6 +6,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,22 +25,26 @@ public class ArmSubsystem extends SubsystemBase {
     private final Motor100<Angle> m_upperArmMotor;
     private final Encoder100<Angle> m_lowerArmEncoder;
     private final Encoder100<Angle> m_upperArmEncoder;
-    // zeros are measured in TURNS NOT RADIANS
-    private final double m_lowerEncoderZero;
-    private final double m_upperEncoderZero;
+
     private final ArmVisualization m_viz;
 
     private ArmAngles m_previousPosition;
 
     // use the factory to instantiate
+    /**
+     * 
+     * @param name
+     * @param lowerMotor
+     * @param lowerEncoder  Lower arm angle (radians), 0 up, positive forward.
+     * @param upperMotor
+     * @param upperEncoder Upper arm angle (radians), 0 up, positive forward.
+     */
     ArmSubsystem(
             String name,
             Motor100<Angle> lowerMotor,
             Encoder100<Angle> lowerEncoder,
             Motor100<Angle> upperMotor,
-            Encoder100<Angle> upperEncoder,
-            double lowerEncoderZero,
-            double upperEncoderZero) {
+            Encoder100<Angle> upperEncoder) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = String.format("/%s", name);
@@ -51,8 +56,7 @@ public class ArmSubsystem extends SubsystemBase {
         m_lowerArmEncoder = lowerEncoder;
         m_upperArmMotor = upperMotor;
         m_upperArmEncoder = upperEncoder;
-        m_lowerEncoderZero = lowerEncoderZero;
-        m_upperEncoderZero = upperEncoderZero;
+
 
         m_viz = new ArmVisualization(this);
 
@@ -62,13 +66,15 @@ public class ArmSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         m_viz.periodic();
+        m_lowerArmEncoder.periodic();
+        m_upperArmEncoder.periodic();
     }
 
     /** Arm angles (radians), 0 up, positive forward. */
     public ArmAngles getPosition() {
         ArmAngles result = new ArmAngles(
-                m_lowerMeasurementFilter.calculate(getLowerArmAngleRadians()),
-                m_upperMeasurementFilter.calculate(getUpperArmAngleRadians()));
+                MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(m_lowerArmEncoder.getPosition())),
+                MathUtil.angleModulus(m_upperMeasurementFilter.calculate(m_upperArmEncoder.getPosition())));
         t.log(Level.DEBUG, m_name + "/Lower Encoder Pos: ", result.th1);
         t.log(Level.DEBUG, m_name + "/Upper Encoder Pos: ", result.th2);
         return result;
@@ -103,21 +109,4 @@ public class ArmSubsystem extends SubsystemBase {
         m_lowerArmEncoder.close();
         m_upperArmEncoder.close();
     }
-
-    /** Lower arm angle (radians), 0 up, positive forward. */
-    private double getLowerArmAngleRadians() {
-        double posRad = m_lowerArmEncoder.getAbsolutePosition();
-        double posTurn = posRad / (2 * Math.PI);
-        double correctedPosTurn = (posTurn - m_lowerEncoderZero);
-        return correctedPosTurn * 2 * Math.PI;
-    }
-
-    /** Upper arm angle (radians), 0 up, positive forward. */
-    private double getUpperArmAngleRadians() {
-        double posRad = m_upperArmEncoder.getAbsolutePosition();
-        double posTurn = posRad / (2 * Math.PI);
-        double correctedPosTurn = (posTurn - m_upperEncoderZero);
-        return correctedPosTurn * 2 * Math.PI;
-    }
-
 }

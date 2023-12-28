@@ -4,12 +4,14 @@ import java.util.Set;
 
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
+import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -33,7 +35,6 @@ public class SelfTestRunner extends Command {
         SwerveDriveSubsystem drivetrain = m_container.getSwerveDriveSubsystem();
 
         // "treatment" is in situ.
-        // TODO: make this command not require a particular starting position
         addCase(new SquareSelfTest(drivetrain, m_listener), m_container.getDriveInALittleSquare());
 
         // treatment is a specific manual input, supplied by the test case.
@@ -41,6 +42,7 @@ public class SelfTestRunner extends Command {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         DriveManually driveManually = new DriveManually(
                 () -> ManualMode.Mode.MODULE_STATE,
                 driveManuallyTest::treatment,
@@ -49,12 +51,20 @@ public class SelfTestRunner extends Command {
                 SwerveKinodynamicsFactory.forTest(),
                 () -> null,
                 thetaController,
+                omegaController,
                 () -> null,
                 () -> false);
         addCase(driveManuallyTest, driveManually);
 
         // this only tests the end-state
         addCase(new DefenseSelfTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
+
+        // since we print to the console we don't want warning noise
+        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     private void addCase(Command deadline, Command... commands) {

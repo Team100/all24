@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
-class TrajectoryTest {
+class ArmTrajectoriesTest {
 
     @Test
     void testUnreachable() {
@@ -18,6 +18,13 @@ class TrajectoryTest {
         Translation2d t1 = new Translation2d(.6,.6);
         Trajectory trajectory = trajectories.makeTrajectory(t0,t1);
         assertNotNull(trajectory);
+    }
+
+    @Test
+    void testUnreachable2() {
+        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        ArmTrajectories trajectories = new ArmTrajectories(config);
+        assertNotNull(trajectories);
     }
 
 }

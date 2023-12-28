@@ -1,5 +1,6 @@
 package org.team100.lib.selftest;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
@@ -11,11 +12,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 @ExcludeFromJacocoGeneratedReport
 public class DriveManuallySelfTest extends Command {
-    // two second duration
     private static final double kExpectedDuration = 2;
+    private static final double kMaxDistance = 1.5;
+
     private final SwerveDriveSubsystem m_drivetrain;
     private final SelfTestListener m_listener;
     private final Timer m_timer;
+    
     private boolean terminate = false;
     private Pose2d m_initial;
 
@@ -42,8 +45,10 @@ public class DriveManuallySelfTest extends Command {
 
     @Override
     public void execute() {
-        // check along the way
-        // if(bad) terminate = true
+        if (GeometryUtil.distance(m_drivetrain.getPose(), m_initial) > kMaxDistance) {
+            m_listener.fail(this, "Too far from initial pose");
+            terminate = true;
+        }
     }
 
     @Override

@@ -50,15 +50,14 @@ public class ControlFactory {
         String driverName = driverHID.getName();
         Util.println("Found driver HID: " + driverName);
 
-        // TODO: add more xbox-like controls
         if (driverName.contains("F310")) {
             return new DriverXboxControl();
         }
-        // TODO: make different classes for the different types of joysticks
-        if (driverName.startsWith("VKBsim")
-                || driverName.startsWith("Logitech Extreme")
-                || driverName.contains("Sidewinder")) {
-            return new JoystickControl();
+        if (driverName.startsWith("VKBsim")) {
+            return new VKBJoystick();
+        }
+        if (driverName.startsWith("Logitech Extreme")) {
+            return new LogitechExtremeJoystick();
         }
         if (driverName.startsWith("Great Planes")) {
             return new RealFlight();
@@ -66,9 +65,8 @@ public class ControlFactory {
         if (driverName.equals("Team 100 Pilot")) {
             return new Pilot();
         }
-        // TODO: make a class for simulation keyboard control
         if (driverName.contains("Keyboard")) {
-            return new JoystickControl();
+            return new SimulatedJoystick();
         }
         Util.println("Unrecognized driver control name: " + driverHID.getName());
         return kNoDriver;
@@ -110,6 +108,7 @@ public class ControlFactory {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
+            //
         }
 
     }

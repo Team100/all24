@@ -1,19 +1,4 @@
 {
-  "HALProvider": {
-    "Addressable LEDs": {
-      "0": {
-        "columns": 12
-      },
-      "window": {
-        "visible": true
-      }
-    },
-    "DIO": {
-      "window": {
-        "visible": true
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -21,6 +6,8 @@
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
+      "/SmartDashboard/ShowMode": "String Chooser",
       "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Simple Manual Mode": "String Chooser",
       "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",

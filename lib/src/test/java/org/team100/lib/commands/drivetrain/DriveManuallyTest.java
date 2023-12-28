@@ -29,6 +29,7 @@ class DriveManuallyTest {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         DriveManually command = new DriveManually(
                 mode,
                 twistSupplier,
@@ -37,6 +38,7 @@ class DriveManuallyTest {
                 swerveKinodynamics,
                 () -> null, 
                 thetaController,
+                omegaController,
                 () -> null,
                 () -> false);
 

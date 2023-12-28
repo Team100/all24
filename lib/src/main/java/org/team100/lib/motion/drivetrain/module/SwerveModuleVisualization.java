@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain;
+package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.telemetry.TelemetryLevelChooser;
 import org.team100.lib.telemetry.Telemetry.Level;
