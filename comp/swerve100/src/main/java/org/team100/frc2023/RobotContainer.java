@@ -120,9 +120,10 @@ public class RobotContainer implements SelfTestable {
         m_monitor = new Monitor(new Annunciator(0));
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit);
-
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
+
         m_heading = HeadingFactory.get(swerveKinodynamics.getKinematics(), m_modules);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);

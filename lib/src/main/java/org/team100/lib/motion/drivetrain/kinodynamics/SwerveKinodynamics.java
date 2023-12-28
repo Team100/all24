@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import org.team100.lib.profile.ChoosableProfile;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -30,24 +32,28 @@ public class SwerveKinodynamics {
     private final double m_maxAngleAccelRad_S2;
     private final double m_MaxCapsizeAccelM_S2;
     private final SwerveDriveKinematics m_kinematics;
+    private final ChoosableProfile m_steeringProfile;
 
     /**
      * Use the factory
      * 
-     * @param maxDriveVelocity     module drive speed m/s
-     * @param maxDriveAcceleration module drive accel m/s^2
-     * @param maxDriveDeceleration module drive decel m/s^2. Should be higher than
-     *                             accel limit.
-     * @param maxSteeringVelocity  module steering axis rate rad/s
-     * @param track                meters
-     * @param wheelbase            meters
-     * @param vcg                  vertical center of gravity, meters
+     * @param maxDriveVelocity        module drive speed m/s
+     * @param maxDriveAcceleration    module drive accel m/s^2
+     * @param maxDriveDeceleration    module drive decel m/s^2. Should be higher
+     *                                than
+     *                                accel limit.
+     * @param maxSteeringVelocity     module steering axis rate rad/s
+     * @param maxSteeringAcceleration module steering axis accel rad/s^2
+     * @param track                   meters
+     * @param wheelbase               meters
+     * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
             double maxDriveVelocity,
             double maxDriveAcceleration,
             double maxDriveDeceleration,
             double maxSteeringVelocity,
+            double maxSteeringAcceleration,
             double track,
             double wheelbase,
             double vcg) {
@@ -69,6 +75,14 @@ public class SwerveKinodynamics {
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / vcg);
 
         m_kinematics = get(track, wheelbase);
+        m_steeringProfile = new ChoosableProfile(
+                maxSteeringVelocity,
+                maxSteeringAcceleration,
+                ChoosableProfile.Mode.TRAPEZOID);
+    }
+
+    public ChoosableProfile getSteeringProfile() {
+        return m_steeringProfile;
     }
 
     /** Cruise speed, m/s. */

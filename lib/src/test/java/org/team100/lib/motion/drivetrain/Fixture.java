@@ -31,7 +31,7 @@ public class Fixture {
     public Fixture() {
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 
-        collection = SwerveModuleCollection.get(10);
+        collection = SwerveModuleCollection.get(10, swerveKinodynamics);
         heading = new SimulatedHeading(swerveKinodynamics.getKinematics(), collection);
         poseEstimator = new SwerveDrivePoseEstimator(
                 swerveKinodynamics.getKinematics(),

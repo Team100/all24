@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder.Drive;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -35,43 +36,57 @@ public class SwerveModuleCollection {
     /**
      * Creates collections according to Identity.
      */
-    public static SwerveModuleCollection get(double currentLimit) {
+    public static SwerveModuleCollection get(
+            double currentLimit,
+            SwerveKinodynamics kinodynamics) {
         switch (Identity.instance) {
             case COMP_BOT:
                 Util.println("************** WCP MODULES **************");
                 return new SwerveModuleCollection(
-                        WCPSwerveModule100.get(kFrontLeft, currentLimit, 11, 30, 0, 0.708328),
-                        WCPSwerveModule100.get(kFrontRight, currentLimit, 12, 32, 1, 0.659267),
-                        WCPSwerveModule100.get(kRearLeft, currentLimit, 21, 31, 2, 0.396148),
-                        WCPSwerveModule100.get(kRearRight, currentLimit, 22, 33, 3, 0.109823));
+                        WCPSwerveModule100.get(
+                                kFrontLeft, currentLimit, 11, 30, 0, 0.708328, kinodynamics),
+                        WCPSwerveModule100.get(
+                                kFrontRight, currentLimit, 12, 32, 1, 0.659267, kinodynamics),
+                        WCPSwerveModule100.get(
+                                kRearLeft, currentLimit, 21, 31, 2, 0.396148, kinodynamics),
+                        WCPSwerveModule100.get(
+                                kRearRight, currentLimit, 22, 33, 3, 0.109823, kinodynamics));
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
-                        AMCANSwerveModule100.get(kFrontLeft, currentLimit, 3, 36, 2, 0.354994, Drive.INVERSE),
-                        AMCANSwerveModule100.get(kFrontRight, currentLimit, 12, 13, 3, 0.880423, Drive.INVERSE),
-                        AMCANSwerveModule100.get(kRearLeft, currentLimit, 22, 1, 1, 0.916801, Drive.INVERSE),
-                        AMCANSwerveModule100.get(kRearRight, currentLimit, 21, 0, 0, 0.806963, Drive.INVERSE));
+                        AMCANSwerveModule100.get(
+                                kFrontLeft, currentLimit, 3, 36, 2, 0.354994, Drive.INVERSE, kinodynamics),
+                        AMCANSwerveModule100.get(
+                                kFrontRight, currentLimit, 12, 13, 3, 0.880423, Drive.INVERSE, kinodynamics),
+                        AMCANSwerveModule100.get(
+                                kRearLeft, currentLimit, 22, 1, 1, 0.916801, Drive.INVERSE, kinodynamics),
+                        AMCANSwerveModule100.get(
+                                kRearRight, currentLimit, 21, 0, 0, 0.806963, Drive.INVERSE, kinodynamics));
             case SWERVE_ONE:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
-                        AMCANSwerveModule100.get(kFrontLeft, currentLimit, 11, 5, 2, 0.694815, Drive.DIRECT),
-                        AMCANSwerveModule100.get(kFrontRight, currentLimit, 12, 2, 0, 0.718789, Drive.DIRECT),
-                        AMCANSwerveModule100.get(kRearLeft, currentLimit, 21, 3, 3, 0.365612, Drive.DIRECT),
-                        AMCANSwerveModule100.get(kRearRight, currentLimit, 22, 1, 1, 0.942851, Drive.DIRECT));
+                        AMCANSwerveModule100.get(
+                                kFrontLeft, currentLimit, 11, 5, 2, 0.694815, Drive.DIRECT, kinodynamics),
+                        AMCANSwerveModule100.get(
+                                kFrontRight, currentLimit, 12, 2, 0, 0.718789, Drive.DIRECT, kinodynamics),
+                        AMCANSwerveModule100.get(
+                                kRearLeft, currentLimit, 21, 3, 3, 0.365612, Drive.DIRECT, kinodynamics),
+                        AMCANSwerveModule100.get(
+                                kRearRight, currentLimit, 22, 1, 1, 0.942851, Drive.DIRECT, kinodynamics));
             case BLANK:
                 Util.println("************** SIMULATED MODULES **************");
                 return new SwerveModuleCollection(
-                        SimulatedSwerveModule100.get(kFrontLeft),
-                        SimulatedSwerveModule100.get(kFrontRight),
-                        SimulatedSwerveModule100.get(kRearLeft),
-                        SimulatedSwerveModule100.get(kRearRight));
+                        SimulatedSwerveModule100.get(kFrontLeft, kinodynamics),
+                        SimulatedSwerveModule100.get(kFrontRight, kinodynamics),
+                        SimulatedSwerveModule100.get(kRearLeft, kinodynamics),
+                        SimulatedSwerveModule100.get(kRearRight, kinodynamics));
             default:
                 Util.println("WARNING: using default module collection");
                 return new SwerveModuleCollection(
-                        SimulatedSwerveModule100.get(kFrontLeft),
-                        SimulatedSwerveModule100.get(kFrontRight),
-                        SimulatedSwerveModule100.get(kRearLeft),
-                        SimulatedSwerveModule100.get(kRearRight));
+                        SimulatedSwerveModule100.get(kFrontLeft, kinodynamics),
+                        SimulatedSwerveModule100.get(kFrontRight, kinodynamics),
+                        SimulatedSwerveModule100.get(kRearLeft, kinodynamics),
+                        SimulatedSwerveModule100.get(kRearRight, kinodynamics));
         }
     }
 
