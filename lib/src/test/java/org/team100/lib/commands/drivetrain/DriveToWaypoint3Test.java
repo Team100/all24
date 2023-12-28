@@ -22,7 +22,6 @@ import org.team100.lib.trajectory.StraightLineTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
@@ -56,11 +55,10 @@ class DriveToWaypoint3Test {
     @Test
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get().getKinematics();
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .blueLayout("2023-chargedup.json");
 
-        TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(kinematics);
+        TrajectoryConfig config = SwerveKinodynamicsFactory.get().newTrajectoryConfig(4, 2);
 
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Transform2d transform = new Transform2d(

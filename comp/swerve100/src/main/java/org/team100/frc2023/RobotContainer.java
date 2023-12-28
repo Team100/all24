@@ -124,14 +124,13 @@ public class RobotContainer implements SelfTestable {
 
         m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
 
-        m_heading = HeadingFactory.get(swerveKinodynamics.getKinematics(), m_modules);
+        m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);
 
-        SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-                swerveKinodynamics.getKinematics(),
+        SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
@@ -186,7 +185,7 @@ public class RobotContainer implements SelfTestable {
 
         control.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics.getKinematics(), controller);
+        m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics, controller);
         control.circle().whileTrue(m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
@@ -201,22 +200,22 @@ public class RobotContainer implements SelfTestable {
         // make a one-meter line
         control.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics.getKinematics(), x))));
+                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
 
         // make a one-meter square
         control.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
 
         // one-meter square with reset at the corners
         control.never().whileTrue(
                 new PermissiveTrajectoryListCommand(m_drive, controller,
-                        TrajectoryMaker.permissiveSquare(swerveKinodynamics.getKinematics())));
+                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
 
         // one-meter square with position and velocity feedback control
         control.never().whileTrue(
                 new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
 
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");

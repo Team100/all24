@@ -30,7 +30,7 @@ class TrajectoryListCommandTest {
         TrajectoryListCommand c = new TrajectoryListCommand(
                 fixture.drive,
                 control,
-                x -> List.of(TrajectoryMaker.line(fixture.swerveKinodynamics.getKinematics(), x)));
+                x -> List.of(TrajectoryMaker.line(fixture.swerveKinodynamics, x)));
         c.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         c.execute();
@@ -57,7 +57,7 @@ class TrajectoryListCommandTest {
         TrajectoryListCommand command = new TrajectoryListCommand(
                 fixture.drive,
                 controller,
-                x -> TrajectoryMaker.square(fixture.swerveKinodynamics.getKinematics(), x));
+                x -> TrajectoryMaker.square(fixture.swerveKinodynamics, x));
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, false);
         fixture.drive.periodic();
         command.initialize();

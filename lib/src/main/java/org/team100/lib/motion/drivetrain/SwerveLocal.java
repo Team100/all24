@@ -76,24 +76,24 @@ public class SwerveLocal {
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
         } else {
-            setChassisSpeedsNormally(speeds);
+            setChassisSpeedsNormally(speeds, kDtSec);
         }
     }
 
     /**
      * @return true if aligned
      */
-    public boolean steerAtRest(ChassisSpeeds speeds) {
+    public boolean steerAtRest(ChassisSpeeds speeds, double kDtSec) {
         // this indicates that during the steering the goal is fixed
         // Informs SwerveDriveKinematics of the module states.
-        SwerveModuleState[] swerveModuleStates = m_swerveKinodynamics.getKinematics().toSwerveModuleStates(speeds);
+        SwerveModuleState[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, kDtSec);
         for (SwerveModuleState state : swerveModuleStates) {
             state.speedMetersPerSecond = 0;
         }
         setModuleStates(swerveModuleStates);
         // previous setpoint should be at rest with the current states
         prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), swerveModuleStates);
-        m_swerveKinodynamics.getKinematics().resetHeadings(
+        m_swerveKinodynamics.resetHeadings(
                 swerveModuleStates[0].angle,
                 swerveModuleStates[1].angle,
                 swerveModuleStates[2].angle,
@@ -135,7 +135,7 @@ public class SwerveLocal {
      */
     public void setRawModuleStates(SwerveModuleState[] targetModuleStates) {
         m_modules.setRawDesiredStates(targetModuleStates);
-        m_swerveKinodynamics.getKinematics().resetHeadings(targetModuleStates[0].angle,
+        m_swerveKinodynamics.resetHeadings(targetModuleStates[0].angle,
                 targetModuleStates[1].angle,
                 targetModuleStates[2].angle,
                 targetModuleStates[3].angle);
@@ -160,7 +160,7 @@ public class SwerveLocal {
     /** The speed implied by the module states. */
     public ChassisSpeeds speeds() {
         SwerveModuleState[] states = states();
-        return m_swerveKinodynamics.getKinematics().toChassisSpeeds(states);
+        return m_swerveKinodynamics.toChassisSpeeds(states);
     }
 
     public SwerveModulePosition[] positions() {
@@ -192,9 +192,9 @@ public class SwerveLocal {
 
     ///////////////////////////////////////////////////////////
 
-    private void setChassisSpeedsNormally(ChassisSpeeds speeds) {
+    private void setChassisSpeedsNormally(ChassisSpeeds speeds, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
-        setModuleStates(m_swerveKinodynamics.getKinematics().toSwerveModuleStates(speeds));
+        setModuleStates(m_swerveKinodynamics.toSwerveModuleStates(speeds, kDtSec));
     }
 
     private void setChassisSpeedsWithSetpointGenerator(
@@ -235,7 +235,7 @@ public class SwerveLocal {
      * the desired speed might be caused by, for example, desaturation.
      */
     private void logImpliedChassisSpeeds(SwerveModuleState[] states) {
-        ChassisSpeeds speeds = m_swerveKinodynamics.getKinematics().toChassisSpeeds(states);
+        ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
         t.log(Level.DEBUG, "/swervelocal/implied speed", speeds);
         t.log(Level.DEBUG, "/swervelocal/moving", isMoving(speeds));
     }

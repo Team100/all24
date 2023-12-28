@@ -95,7 +95,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
             t.log(Level.DEBUG, "/permissive trajectory list/reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
+            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             if (aligned) {
                 m_aligned = true;
                 m_timer.start();

@@ -83,7 +83,7 @@ public class DriveToWaypoint3 extends Command100 {
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // not aligned yet, try aligning
-            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
+            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             if (aligned) {
                 m_steeringAligned = true;
                 m_timer.start();

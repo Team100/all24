@@ -132,7 +132,7 @@ class DrivePursuitControllerTest {
             assertEquals(-7.10, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(2.88, path_setpoint.getTimeS(), 0.05);
-            assertEquals(3.819, path_setpoint.velocityM_S(), 0.001);
+            assertEquals(3.820, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0.002, path_setpoint.acceleration(), 0.001);
 
             Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);

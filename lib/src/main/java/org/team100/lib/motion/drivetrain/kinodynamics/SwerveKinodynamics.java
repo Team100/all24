@@ -2,8 +2,18 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.profile.ChoosableProfile;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
@@ -129,10 +139,6 @@ public class SwerveKinodynamics {
         return m_MaxCapsizeAccelM_S2;
     }
 
-    public SwerveDriveKinematics getKinematics() {
-        return m_kinematics;
-    }
-
     /** If you want to rotate the robot with a trapezoidal profile, use this. */
     public TrapezoidProfile.Constraints getAngleConstraints() {
         return new TrapezoidProfile.Constraints(
@@ -155,4 +161,58 @@ public class SwerveKinodynamics {
                 new Translation2d(-wheelbase / 2, -track / 2));
     }
 
+    public void resetHeadings(Rotation2d... moduleHeadings) {
+        m_kinematics.resetHeadings(moduleHeadings);
+    }
+
+    /**
+     * Inverse kinematics, chassis speeds => module states.
+     * 
+     * This version does **DISCRETIZATION** to correct for swerve veering.
+     * 
+     * The swerve veering correction should now just represent actuation delay.
+     */
+    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds, double dt) {
+        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
+        return m_kinematics.toSwerveModuleStates(descretized);
+    }
+
+    /**
+     * Forward kinematics, module states => chassis speeds.
+     */
+    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
+        return m_kinematics.toChassisSpeeds(moduleStates);
+    }
+
+    public SwerveDrivePoseEstimator newPoseEstimator(
+            Rotation2d gyroAngle,
+            SwerveModulePosition[] modulePositions,
+            Pose2d initialPoseMeters) {
+        return new SwerveDrivePoseEstimator(
+                m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
+    }
+
+    public SwerveDrivePoseEstimator newPoseEstimator(
+            Rotation2d gyroAngle,
+            SwerveModulePosition[] modulePositions,
+            Pose2d initialPoseMeters,
+            Matrix<N3, N1> stateStdDevs,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+        return new SwerveDrivePoseEstimator(
+                m_kinematics,
+                gyroAngle,
+                modulePositions,
+                initialPoseMeters,
+                stateStdDevs,
+                visionMeasurementStdDevs);
+    }
+
+    public TrajectoryConfig newTrajectoryConfig(
+            double maxVelocityMetersPerSecond, double maxAccelerationMetersPerSecondSq) {
+        TrajectoryConfig result = new TrajectoryConfig(
+                maxVelocityMetersPerSecond, maxAccelerationMetersPerSecondSq);
+        result.setKinematics(m_kinematics);
+        return result;
+
+    }
 }

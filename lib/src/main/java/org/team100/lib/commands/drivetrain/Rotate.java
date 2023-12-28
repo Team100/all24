@@ -108,7 +108,7 @@ public class Rotate extends Command100 {
             // steer normally
             m_robotDrive.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
-            boolean aligned = m_robotDrive.steerAtRest(fieldRelativeTarget);
+            boolean aligned = m_robotDrive.steerAtRest(fieldRelativeTarget, dt);
             // while waiting for the wheels, hold the profile at the start.
             resetRefTheta();
             if (aligned) {

@@ -71,9 +71,7 @@ public class SwerveUtil {
 
         double offset = f_0 + Math.signum(diff) * max_deviation;
 
-        DoubleBinaryOperator func = (x, y) -> {
-            return SwerveUtil.unwrapAngle(f_0, Math.atan2(y, x)) - offset;
-        };
+        DoubleBinaryOperator func = (x, y) -> SwerveUtil.unwrapAngle(f_0, Math.atan2(y, x)) - offset;
 
         return Math100.findRoot(
                 func,
@@ -130,7 +128,7 @@ public class SwerveUtil {
      * speeding up, but this method doesn't capture that.
      */
     public static double getMaxVelStep(
-        SwerveKinodynamics m_limits,
+            SwerveKinodynamics m_limits,
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,
