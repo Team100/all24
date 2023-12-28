@@ -90,8 +90,8 @@ public class TrajectoryListCommand extends Command100 {
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
-            // look just one loop ahead
-            State desiredState = m_currentTrajectory.sample(m_timer.get()+0.02);
+            // look one loop ahead
+            State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
             t.log(Level.DEBUG, "/trajectory list/reference", reference);
@@ -103,8 +103,6 @@ public class TrajectoryListCommand extends Command100 {
             }
         }
     }
-
-
 
     @Override
     public boolean isFinished() {

@@ -34,6 +34,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
     // this holds the current rotation
     // TODO: allow trajectory to specify it using the new type
     private Rotation2d m_rotation;
+    private boolean m_aligned;
 
     public FullStateTrajectoryListCommand(
             SwerveDriveSubsystem swerve,
@@ -54,6 +55,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
         m_timer.stop();
         m_timer.reset();
         done = false;
+        m_aligned = false;
     }
 
     @Override
@@ -63,8 +65,9 @@ public class FullStateTrajectoryListCommand extends Command100 {
             if (m_trajectoryIter.hasNext()) {
                 m_currentTrajectory = m_trajectoryIter.next();
                 TrajectoryVisualization.setViz(m_currentTrajectory);
-                m_timer.restart();
-                // TODO: wheel alignment here
+                m_timer.stop();
+                m_timer.reset();
+                m_aligned = false;
             } else {
                 done = true;
                 return;
@@ -72,17 +75,26 @@ public class FullStateTrajectoryListCommand extends Command100 {
         }
 
         // now there is a trajectory to follow
-        State desiredState = m_currentTrajectory.sample(m_timer.get());
-        t.log(Level.DEBUG, "/full state trajectory list/desired state", desiredState);
-        SwerveState measurement = m_swerve.getState();
-
-        // this uses the fixed rotation.
-        // TODO: rotation profile, use new trajectory type.
-        SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
-
-        Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
-
-        m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
+        if (m_aligned) {
+            State desiredState = m_currentTrajectory.sample(m_timer.get());
+            SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
+            SwerveState measurement = m_swerve.getState();
+            Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
+            m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
+            t.log(Level.DEBUG, "/full state trajectory list/reference", reference);
+        } else {
+            // look one loop ahead
+            State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
+            SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
+            SwerveState measurement = m_swerve.getState();
+            Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
+            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
+            if (aligned) {
+                m_aligned = true;
+                m_timer.start();
+            }
+            t.log(Level.DEBUG, "/full state trajectory list/reference", reference);
+        }
 
     }
 

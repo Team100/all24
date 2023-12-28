@@ -27,7 +27,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  * 
- * TODO: lead the target based on velocity.
+ * The targeting solution is based on bearing alone, so it won't work if the
+ * robot or target is moving.  That effect can be compensated, though.
  */
 public class ManualWithTargetLock {
     private static final double kBallVelocityM_S = 5;
