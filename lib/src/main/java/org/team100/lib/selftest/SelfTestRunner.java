@@ -42,6 +42,7 @@ public class SelfTestRunner extends Command {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         DriveManually driveManually = new DriveManually(
                 () -> ManualMode.Mode.MODULE_STATE,
                 driveManuallyTest::treatment,
@@ -50,6 +51,7 @@ public class SelfTestRunner extends Command {
                 SwerveKinodynamicsFactory.forTest(),
                 () -> null,
                 thetaController,
+                omegaController,
                 () -> null,
                 () -> false);
         addCase(driveManuallyTest, driveManually);

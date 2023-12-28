@@ -91,6 +91,10 @@ public class GeometryUtil {
                 || Math.abs(a.getRadians() - WrapRadians(b.getRadians() + Math.PI)) <= 1e-12;
     }
 
+    /**
+     * The norm of the translational part of the twist. Note this does not match the
+     * path length for nonzero omega.
+     */
     public static double norm(Twist2d a) {
         // Common case of dy == 0
         if (a.dy == 0.0)

@@ -16,8 +16,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  * 
  * It is essential to call reset() before first use and after disuse, to prevent
  * transients.
- * 
- * TODO: replace the PID controllers here with simple proportional feedback.
  */
 public class FullStateServo<T extends Measure100> {
     // private static final double kDeadband = 0.03;
@@ -34,12 +32,8 @@ public class FullStateServo<T extends Measure100> {
     private final T m_instance;
 
     private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-    // TODO: use a profile that exposes acceleration and use it.
     private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
 
-    /**
-     * @param modulus wrap the measurement if desired
-     */
     public FullStateServo(
             String name,
             VelocityServo<T> servo,

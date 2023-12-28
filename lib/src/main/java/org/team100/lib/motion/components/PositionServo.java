@@ -15,10 +15,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
  * Positional control on top of a velocity servo.
  */
 public class PositionServo<T extends Measure100> {
-    // NOTE: i took out the deadband because i was looking for more accuracy,
-    // but that might result in chattering, so feel free to put it back.
-    // private static final double kDeadband = 0.03;
-
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
@@ -30,7 +26,6 @@ public class PositionServo<T extends Measure100> {
     private final T m_instance;
 
     private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-    // TODO: use a profile that exposes acceleration and use it.
     private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
 
     /**
@@ -57,6 +52,17 @@ public class PositionServo<T extends Measure100> {
     }
 
     /**
+     * It is essential to call this after a period of disuse, to prevent transients.
+     * 
+     * To prevent oscillation, the previous setpoint is used to compute the profile,
+     * but there needs to be an initial setpoint.
+     */
+    public void reset() {
+        m_controller.reset();
+        m_setpoint = new TrapezoidProfile.State(getPosition(), getVelocity());
+    }
+
+    /**
      * @param goal For distance, use meters, For angle, use radians.
      */
     public void setPosition(double goal) {
@@ -72,9 +78,6 @@ public class PositionServo<T extends Measure100> {
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
 
         double u_TOTAL = u_FB + u_FF;
-        // NOTE: i took out the deadband because i was looking for more accuracy,
-        // but that might result in chattering, so feel free to put it back.
-        // u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, m_maxVel);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
@@ -89,17 +92,6 @@ public class PositionServo<T extends Measure100> {
         t.log(Level.DEBUG, m_name + "/Controller Velocity Error", m_controller.getVelocityError());
     }
 
-    /**
-     * It is essential to call this after a period of disuse, to prevent transients.
-     * 
-     * To prevent oscillation, the previous setpoint is used to compute the profile,
-     * but there needs to be an initial setpoint.
-     */
-    public void reset() {
-        m_controller.reset();
-        m_setpoint = new TrapezoidProfile.State(getPosition(), getVelocity());
-    }
-
     /** Direct velocity control for testing */
     public void setVelocity(double velocity) {
         m_servo.setVelocity(velocity);
@@ -111,7 +103,8 @@ public class PositionServo<T extends Measure100> {
     }
 
     /**
-     * @return Current position measurement.  For distance this is meters, for angle this is radians.
+     * @return Current position measurement. For distance this is meters, for angle
+     *         this is radians.
      */
     public double getPosition() {
         return m_instance.modulus(m_encoder.getPosition());

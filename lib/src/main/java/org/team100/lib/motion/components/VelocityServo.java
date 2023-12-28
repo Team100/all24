@@ -11,6 +11,7 @@ import org.team100.lib.units.Measure100;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * For controllers that support it, this is just a passthrough to outboard
@@ -24,12 +25,12 @@ public class VelocityServo<T extends Measure100> {
     private final Motor100<T> m_motor;
     private final Encoder100<T> m_encoder;
     private final PIDController m_controller;
-    private final double m_period;
     private final SimpleMotorFeedforward m_feedforward;
     private final String m_name;
 
     // for calculating acceleration
     private double previousSetpoint = 0;
+    private double prevTime;
     double m_setpoint;
 
     /**
@@ -51,16 +52,14 @@ public class VelocityServo<T extends Measure100> {
         m_motor = motor;
         m_encoder = encoder;
         m_controller = controller;
-        m_period = controller.getPeriod();
         m_feedforward = feedforward;
         m_name = String.format("/%s/Velocity Servo", name);
     }
 
-    /**
-     * TODO: use some sort of state here, with velocity and acceleration.
-     * 
-     * @param setpoint velocity
-     */
+    public void reset() {
+        prevTime = Timer.getFPGATimestamp();
+    }
+
     public void setVelocity(Double setpoint) {
         if (Double.isNaN(setpoint))
             throw new IllegalArgumentException("setpoint is NaN");
@@ -104,15 +103,15 @@ public class VelocityServo<T extends Measure100> {
 
     ////////////////////////////////////////////////
 
-    private void offboard(double setpoint) {
-        if (Double.isNaN(setpoint))
+    private void offboard(double velocity) {
+        if (Double.isNaN(velocity))
             throw new IllegalArgumentException("setpoint is NaN");
-        m_motor.setVelocity(setpoint, 0);
+        m_motor.setVelocity(velocity, accel(velocity));
     }
 
-    private void onboard(double setpoint) {
-        double u_FB = m_controller.calculate(getVelocity(), setpoint);
-        double u_FF = m_feedforward.calculate(setpoint, accel(setpoint));
+    private void onboard(double velocity) {
+        double u_FB = m_controller.calculate(getVelocity(), velocity);
+        double u_FF = m_feedforward.calculate(velocity, accel(velocity));
         double u_TOTAL = u_FB + u_FF;
         u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, 1);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
@@ -122,8 +121,18 @@ public class VelocityServo<T extends Measure100> {
         t.log(Level.DEBUG, m_name + "/Total Output", u_TOTAL);
     }
 
+    /**
+     * there will be some jitter in dt, which will result in a small amount of
+     * jitter in acceleration, and since this is a trailing difference there will be
+     * a tiny bit of delay, compared to the actual profile. If this is
+     * a problem, rewrite the profile class to expose the acceleration state and use
+     * that instead.
+     */
     private double accel(double setpoint) {
-        double accel = (setpoint - previousSetpoint) / m_period;
+        double now = Timer.getFPGATimestamp();
+        double dt = now - prevTime;
+        prevTime = now;
+        double accel = (setpoint - previousSetpoint) / dt;
         previousSetpoint = setpoint;
         return accel;
     }

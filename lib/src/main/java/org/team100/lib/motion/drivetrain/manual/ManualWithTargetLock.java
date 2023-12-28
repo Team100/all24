@@ -3,7 +3,10 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -15,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 
 /**
  * Manual cartesian control, with rotational control based on a target position.
@@ -24,8 +28,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  * 
- * TODO: add velocity feedback.
- * TODO: replace the PID controller with multiplication
  * TODO: lead the target based on velocity.
  */
 public class ManualWithTargetLock {
@@ -33,9 +35,10 @@ public class ManualWithTargetLock {
     private static final double kDtSec = 0.02;
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
-
+    private final HeadingInterface m_heading;
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
+    private final PIDController m_omegaController;
     private final TrapezoidProfile m_profile;
     TrapezoidProfile.State m_setpoint;
     Translation2d m_ball;
@@ -45,12 +48,16 @@ public class ManualWithTargetLock {
 
     public ManualWithTargetLock(
             SwerveKinodynamics swerveKinodynamics,
+            HeadingInterface heading,
             Supplier<Translation2d> target,
             PIDController thetaController,
+            PIDController omegaController,
             BooleanSupplier trigger) {
         m_swerveKinodynamics = swerveKinodynamics;
+        m_heading = heading;
         m_target = target;
         m_thetaController = thetaController;
+        m_omegaController = omegaController;
         m_trigger = trigger;
         TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
@@ -59,15 +66,18 @@ public class ManualWithTargetLock {
     }
 
     public void reset(Pose2d currentPose) {
-        // TODO: include omega
-        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(), 0);
+        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
+        m_thetaController.reset();
+        m_omegaController.reset();
     }
 
-    public Twist2d apply(Pose2d currentPose, Twist2d twist1_1) {
-        Rotation2d currentRotation = currentPose.getRotation();
-        Translation2d currentTranslation = currentPose.getTranslation();
+    public Twist2d apply(SwerveState state, Twist2d input) {
+        Rotation2d currentRotation = state.pose().getRotation();
+        double headingRate = m_heading.getHeadingRateNWU();
+
+        Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = m_target.get();
         Rotation2d goal = fieldRelativeAngleToTarget(
                 currentTranslation,
@@ -80,26 +90,30 @@ public class ManualWithTargetLock {
         m_setpoint.position = MathUtil.angleModulus(m_setpoint.position - currentRotation.getRadians())
                 + currentRotation.getRadians();
 
-        /** TODO: goal omega should not be zero */
+        // the goal omega should match the target's apparent motion 
+        double targetMotion = targetMotion(state, target);
+        t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
+
         m_setpoint = m_profile.calculate(kDtSec,
-                new TrapezoidProfile.State(goal.getRadians(), 0),
+                new TrapezoidProfile.State(goal.getRadians(), targetMotion),
                 m_setpoint);
 
         // this is user input
-        Twist2d twistM_S = DriveUtil.scale(
-                twist1_1,
+        Twist2d scaledInput = DriveUtil.scale(
+                input,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         double thetaFF = m_setpoint.velocity;
 
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.position);
+        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.velocity);
 
         double omega = MathUtil.clamp(
-                thetaFF + thetaFB,
+                thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        Twist2d twistWithLockM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
+        Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
 
         t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.position);
         t.log(Level.DEBUG, "/ManualWithTargetLock/reference/omega", m_setpoint.velocity);
@@ -112,8 +126,9 @@ public class ManualWithTargetLock {
         // this is just for simulation
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
+            // correct for newtonian relativity
             m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
-                    .plus(currentPose.minus(m_prevPose).getTranslation());
+                    .plus(state.pose().minus(m_prevPose).getTranslation());
         }
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
@@ -123,15 +138,25 @@ public class ManualWithTargetLock {
                     0 });
         }
 
-        m_prevPose = currentPose;
+        m_prevPose = state.pose();
         return twistWithLockM_S;
     }
 
     /** TODO: include robot velocity correction */
-    static Rotation2d fieldRelativeAngleToTarget(
-            Translation2d robot,
-            Translation2d target) {
+    static Rotation2d fieldRelativeAngleToTarget(Translation2d robot, Translation2d target) {
         return target.minus(robot).getAngle();
+    }
+
+    /** apparent rotation of the target, NWU rad/s */
+    static double targetMotion(SwerveState state, Translation2d target) {
+        Translation2d robot = state.pose().getTranslation();
+        Translation2d translation = target.minus(robot);
+        double range = translation.getNorm();
+        Rotation2d bearing = translation.getAngle();
+        Rotation2d course = state.translation().getAngle();
+        Rotation2d relativeBearing = bearing.minus(course);
+        double speed = GeometryUtil.norm(state.twist());
+        return speed * relativeBearing.getSin() / range;
     }
 
 }

@@ -298,8 +298,9 @@ public class RobotContainer implements SelfTestable {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(2, 0, 0);
+        PIDController thetaController = new PIDController(1.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(0.5, 0, 0);
 
         m_drive.setDefaultCommand(
                 new DriveManually(
@@ -310,6 +311,7 @@ public class RobotContainer implements SelfTestable {
                         swerveKinodynamics,
                         control::desiredRotation,
                         thetaController,
+                        omegaController,
                         control::target,
                         control::trigger));
 

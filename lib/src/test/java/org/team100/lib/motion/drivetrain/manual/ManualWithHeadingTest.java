@@ -33,11 +33,13 @@ class ManualWithHeadingTest {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                thetaController);
+                thetaController,
+                omegaController);
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
 
@@ -65,11 +67,13 @@ class ManualWithHeadingTest {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                thetaController);
+                thetaController,
+                omegaController);
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
 
@@ -101,11 +105,14 @@ class ManualWithHeadingTest {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        // probably P is too high here.
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                thetaController);
+                thetaController,
+                omegaController);
 
         // no dtheta
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -137,7 +144,7 @@ class ManualWithHeadingTest {
         assertEquals(0.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
 
         // and output is not zero
-        verify(0, 0, 0.175, twistM_S);
+        verify(0, 0, 0.769, twistM_S);
 
         // let go of the pov to let the profile run.
         desiredRotation = null;
@@ -151,7 +158,7 @@ class ManualWithHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
-        verify(0, 0, 1.245, twistM_S);
+        verify(0, 0, 2.828, twistM_S);
 
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
@@ -162,7 +169,7 @@ class ManualWithHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
-        verify(0, 0, 0.389, twistM_S);
+        verify(0, 0, 1.683, twistM_S);
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -184,11 +191,13 @@ class ManualWithHeadingTest {
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                thetaController);
+                thetaController,
+                omegaController);
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
@@ -205,11 +214,11 @@ class ManualWithHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be a profile
         assertEquals(0.888, m_manualWithHeading.m_profile.totalTime(), kDelta);
-        // but at t0 it hasn't started yet.
+        // at t0 there's not much position in the profile but there is velocity
         assertEquals(0, m_manualWithHeading.m_profile.calculate(0,
                 new TrapezoidProfile.State(Math.PI / 2, 0),
                 new TrapezoidProfile.State(0, 0)).velocity, kDelta);
-        verify(0, 0, 0.175, twistM_S);
+        verify(0, 0, 0.769, twistM_S);
 
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
@@ -220,7 +229,7 @@ class ManualWithHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
-        verify(0, 0, 1.245, twistM_S);
+        verify(0, 0, 2.828, twistM_S);
 
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
@@ -231,7 +240,7 @@ class ManualWithHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
-        verify(0, 0, 0.389, twistM_S);
+        verify(0, 0, 1.683, twistM_S);
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
