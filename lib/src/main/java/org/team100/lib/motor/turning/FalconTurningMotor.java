@@ -53,7 +53,6 @@ public class FalconTurningMotor implements Motor100<Angle> {
 
     /**
      * Placeholder for accel feedforward.
-     * TODO: calibrate acceleration feedforward
      */
     private static final double accelFFVoltS2_Rad = 0;
 
@@ -131,6 +130,9 @@ public class FalconTurningMotor implements Motor100<Angle> {
         t.log(Level.DEBUG, m_name + "/output [-1,1]", output);
     }
 
+    /**
+     * Supports accel feedforward.
+     */
     public void setVelocity(double outputRad_S, double accelRad_S_S) {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double motorRev_S = outputRev_S * gearRatio;

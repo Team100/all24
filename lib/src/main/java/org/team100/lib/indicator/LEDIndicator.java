@@ -18,7 +18,6 @@ public class LEDIndicator {
     /**
      * This enum exists to prepopulate the buffers, so they can be set atomically,
      * which is faster.
-     * TODO: fix these colors, i think they're all wrong now
      */
     public enum State {
         BLACK(new Color(0, 0, 0)),

@@ -58,7 +58,6 @@ public class Rotate extends Command100 {
         PIDController tc = HolonomicDriveController3.theta();
         tc.setTolerance(kXToleranceRad, kVToleranceRad_S);
         // in testing, the default theta p causes overshoot, but i think this isn't a real effect.
-        // TODO: tune this P value
         tc.setP(1);
 
         m_controller = new HolonomicDriveController3(xc, yc, tc);

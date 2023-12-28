@@ -78,23 +78,21 @@ public class ManualWithTargetLock {
 
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = m_target.get();
-        Rotation2d goal = fieldRelativeAngleToTarget(
-                currentTranslation,
-                target);
+        Rotation2d bearing = bearing(currentTranslation, target);
 
         // take the short path
-        goal = new Rotation2d(
-                MathUtil.angleModulus(goal.getRadians() - currentRotation.getRadians())
+        bearing = new Rotation2d(
+                MathUtil.angleModulus(bearing.getRadians() - currentRotation.getRadians())
                         + currentRotation.getRadians());
         m_setpoint.position = MathUtil.angleModulus(m_setpoint.position - currentRotation.getRadians())
                 + currentRotation.getRadians();
 
-        // the goal omega should match the target's apparent motion 
+        // the goal omega should match the target's apparent motion
         double targetMotion = targetMotion(state, target);
         t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
 
         m_setpoint = m_profile.calculate(kDtSec,
-                new TrapezoidProfile.State(goal.getRadians(), targetMotion),
+                new TrapezoidProfile.State(bearing.getRadians(), targetMotion),
                 m_setpoint);
 
         // this is user input
@@ -141,12 +139,25 @@ public class ManualWithTargetLock {
         return twistWithLockM_S;
     }
 
-    /** TODO: include robot velocity correction */
-    static Rotation2d fieldRelativeAngleToTarget(Translation2d robot, Translation2d target) {
+    /**
+     * Absolute bearing to the target.
+     * 
+     * The bearing is only a valid shooting solution if both the robot and the
+     * target are at rest!
+     * 
+     * If the robot and/or target is moving, then the shooting solution needs to
+     * lead or lag the target.
+     */
+    static Rotation2d bearing(Translation2d robot, Translation2d target) {
         return target.minus(robot).getAngle();
     }
 
-    /** apparent rotation of the target, NWU rad/s */
+    /**
+     * Apparent motion of the target, NWU rad/s.
+     * 
+     * The theta profile goal is to move at this rate, i.e. tracking the apparent
+     * movement.
+     */
     static double targetMotion(SwerveState state, Translation2d target) {
         Translation2d robot = state.pose().getTranslation();
         Translation2d translation = target.minus(robot);

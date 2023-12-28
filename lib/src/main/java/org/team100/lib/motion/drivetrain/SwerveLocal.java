@@ -197,7 +197,6 @@ public class SwerveLocal {
         setModuleStates(m_swerveKinodynamics.getKinematics().toSwerveModuleStates(speeds));
     }
 
-    // TODO: run this twice per cycle using TimedRobot.addPeriodic and a flag.
     private void setChassisSpeedsWithSetpointGenerator(
         ChassisSpeeds speeds,
         double kDtSec) {

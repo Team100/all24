@@ -31,7 +31,6 @@ public class Barcode implements IntSupplier {
         m_odd = new DigitalOutput(5);
         m_even = new DigitalOutput(4);
 
-        // TODO: tune the thresholds
         double[] thresholds = new double[] { 2.5, 3, 3, 2.4, 2.5 };
         m_array = new Sensor(
                 m_input,
@@ -42,7 +41,6 @@ public class Barcode implements IntSupplier {
     }
 
     public void robotInit() {
-        // TODO: represent failure in a better way than -1.
         id = m_array.readValue().orElse(-1);
     }
 

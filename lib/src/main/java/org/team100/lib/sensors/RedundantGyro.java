@@ -13,8 +13,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Combine two NavX AHRS to increase reliability.
- * 
- * TODO: verify that these method actually return degrees
  */
 public class RedundantGyro implements RedundantGyroInterface {
     private final Telemetry t = Telemetry.get();

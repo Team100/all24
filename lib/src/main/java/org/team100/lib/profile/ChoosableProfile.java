@@ -45,7 +45,9 @@ public class ChoosableProfile {
         m_trapezoid = new TrapezoidProfile(
                 new TrapezoidProfile.Constraints(maxVel, maxAccel));
                 
-        // TODO: tune the exponential constraints
+        // These constraints are completely made up.
+        // If you want to try the exponential profile, you'll have to
+        // calibrate them
         eprofile = new ExponentialProfile(
                 ExponentialProfile.Constraints.fromCharacteristics(
                         10, 10, 5));

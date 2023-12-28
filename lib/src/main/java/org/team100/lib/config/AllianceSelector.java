@@ -25,8 +25,6 @@ public class AllianceSelector {
 
     /////////////////////////////////////////////
 
-    // TODO: change the encoding so a valid result requires *some* bit to be set.
-    // otherwise "disconnected" can be read as valid input.
     private DriverStation.Alliance getAlliance() {
         // remember these inputs are inverted
         int val = 0;
