@@ -219,6 +219,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 getPose().getRotation());
     }
 
+    /**
+     * SwerveState representing the drivetrain's pose and velocity, with zero
+     * accelerations.
+     */
     public SwerveState getState() {
         return new SwerveState(getPose(), getImpliedTwist2d());
     }

@@ -24,6 +24,10 @@ public class SwerveState {
         m_theta = theta;
     }
 
+    /**
+     * SwerveState with the specified field-relative pose and field-relative
+     * velocity, and zero accelerations.
+     */
     public SwerveState(Pose2d p, Twist2d t) {
         this(
                 new State100(p.getX(), t.dx, 0),
