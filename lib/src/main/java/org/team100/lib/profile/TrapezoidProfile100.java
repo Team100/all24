@@ -33,16 +33,14 @@ public class TrapezoidProfile100 {
      * triangular profiles.
      */
     private double m_endFullSpeed;
+    
     /**
      * Time of the end of the deceleration period; also the end of the profile.
      */
     private double m_endDeccel;
 
-    /**
-     * Construct a TrapezoidProfile.
-     *
-     * @param constraints The constraints on the profile, like maximum velocity.
-     */
+    private boolean m_finished;
+
     public TrapezoidProfile100(Constraints constraints) {
         m_constraints = constraints;
     }
@@ -98,44 +96,31 @@ public class TrapezoidProfile100 {
         if (dt < m_endAccel) {
             result.velocity += dt * m_constraints.maxAcceleration;
             result.position += (m_current.velocity + dt * m_constraints.maxAcceleration / 2.0) * dt;
+            m_finished = false;
         } else if (dt < m_endFullSpeed) {
             result.velocity = m_constraints.maxVelocity;
             result.position += (m_current.velocity + m_endAccel * m_constraints.maxAcceleration / 2.0) * m_endAccel
                     + m_constraints.maxVelocity * (dt - m_endAccel);
+            m_finished = false;
         } else if (dt <= m_endDeccel) {
             result.velocity = goal.velocity + (m_endDeccel - dt) * m_constraints.maxAcceleration;
             double timeLeft = m_endDeccel - dt;
             result.position = goal.position
                     - (goal.velocity + timeLeft * m_constraints.maxAcceleration / 2.0) * timeLeft;
+            m_finished = false;
         } else {
             result = goal;
+            m_finished = true;
         }
 
         return direct(result);
     }
 
     /**
-     * Returns the total time the profile takes to reach the goal.
-     *
-     * @return The total time the profile takes to reach the goal.
+     * True if the most recent input to calculate indicates completion.
      */
-    public double totalTime() {
-        return m_endDeccel;
-    }
-
-    /**
-     * Returns true if the profile has reached the goal.
-     *
-     * <p>
-     * The profile has reached the goal if the time since the profile started has
-     * exceeded the
-     * profile's total time.
-     *
-     * @param t The time since the beginning of the profile.
-     * @return True if the profile has reached the goal.
-     */
-    public boolean isFinished(double t) {
-        return t >= totalTime();
+    public boolean isFinished() {
+        return m_finished;
     }
 
     /**

@@ -41,7 +41,9 @@ public class DriveInALittleSquare extends Command100 {
 
 
     final TrapezoidProfile100 m_driveProfile;
+    /** Current speed setpoint. */
     State speedM_S;
+    /** Current swerve steering axis goal. */
     Rotation2d m_goal;
     DriveState m_state;
 
@@ -55,21 +57,23 @@ public class DriveInALittleSquare extends Command100 {
 
     @Override
     public void initialize100() {
+        // First get the wheels pointing the right way.
+        m_state = DriveState.STEERING;
         m_goal = GeometryUtil.kRotationZero;
-        m_state = DriveState.DRIVING;
         speedM_S = start;
         speedM_S = m_driveProfile.calculate(0, goal, speedM_S);
     }
 
     @Override
     public void execute100(double dt) {
+        System.out.println(dt);
         switch (m_state) {
             case DRIVING:
-                if (m_driveProfile.isFinished(dt)) {
+                if (m_driveProfile.isFinished()) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = DriveState.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
-                    speedM_S = new State(0, 0);
+                    speedM_S = start;
                 } else {
                     // keep going
                     speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
@@ -80,7 +84,7 @@ public class DriveInALittleSquare extends Command100 {
                     // we were steering, but all the setpoints have been reached, so switch to
                     // driving
                     m_state = DriveState.DRIVING;
-                    speedM_S = new State(0, 0);
+                    speedM_S = start;
                     speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
                 } else {
                     // wait to reach the setpoint

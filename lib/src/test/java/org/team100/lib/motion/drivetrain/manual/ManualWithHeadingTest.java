@@ -129,8 +129,6 @@ class ManualWithHeadingTest {
         Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
-        // there should be a profile
-        assertEquals(0.888, m_manualWithHeading.m_profile.totalTime(), kDelta);
         // but at t0 it hasn't started yet.
         assertEquals(0, m_manualWithHeading.m_profile.calculate(
                 0,
@@ -212,8 +210,6 @@ class ManualWithHeadingTest {
 
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
-        // there should be a profile
-        assertEquals(0.888, m_manualWithHeading.m_profile.totalTime(), kDelta);
         // at t0 there's not much position in the profile but there is velocity
         assertEquals(0, m_manualWithHeading.m_profile.calculate(0,
                 new State(Math.PI / 2, 0),

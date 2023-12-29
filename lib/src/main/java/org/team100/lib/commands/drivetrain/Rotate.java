@@ -95,7 +95,7 @@ public class Rotate extends Command100 {
 
         // reference
         refTheta = m_profile.calculate(dt, m_goalState, refTheta);
-        m_finished = m_profile.isFinished(dt);
+        m_finished = m_profile.isFinished();
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
 
