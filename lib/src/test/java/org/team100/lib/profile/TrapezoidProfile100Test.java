@@ -12,55 +12,254 @@ class TrapezoidProfile100Test {
     boolean dump = true;
     private static final double kDelta = 0.001;
 
+    /**
+     * this is a normal profile from 0 to 1, rest-to-rest, it's a triangle profile.
+     */
     @Test
-    void testProfile() {
+    void testTriangle() {
         Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c);
         State sample = new State(0, 0);
         final State end = new State(1, 0);
-        for (double t = 0; t < 2; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
 
+        // the first sample is near the starting state
+        Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
+        sample = profileX.calculate(0.02, end, sample);
+        assertEquals(0, sample.position, kDelta);
+        assertEquals(0.04, sample.velocity, kDelta);
+
+        // step to the middle of the profile
+        for (double t = 0; t < 0.68; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
             Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
-            if (profileX.isFinished())
-                break;
         }
+        // halfway there, going fast
+        assertEquals(0.5, sample.position, 0.01);
+        assertEquals(1.4, sample.velocity, kDelta);
+
+        // step to the end of the profile
+        for (double t = 0; t < 0.72; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+        }
+        assertEquals(1.0, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
         assertTrue(profileX.isFinished());
     }
 
-    // heading away from the goal, overshoot works correctly.
+    /**
+     * this is an inverted profile from 0 to -1, rest-to-rest, it's a triangle
+     * profile, it's exactly the inverse of the case above.
+     */
     @Test
-    void testProfile2() {
-        Constraints c = new Constraints(5, 1);
+    void testInvertedTriangle() {
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c);
-        State sample = new State(0.1, 1);
-        final State end = new State(0, 0);
-        for (double t = 0; t < 10; t += 0.02) {
-            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
-            sample = profileX.calculate(0.02, end, sample);
+        State sample = new State(0, 0);
+        final State end = new State(-1, 0);
 
-            if (profileX.isFinished())
-                break;
+        // the first sample is near the starting state
+        Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
+        sample = profileX.calculate(0.02, end, sample);
+        assertEquals(0, sample.position, kDelta);
+        assertEquals(-0.04, sample.velocity, kDelta);
+
+        // step to the middle of the profile
+        for (double t = 0; t < 0.68; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
         }
+        // halfway there, going fast
+        assertEquals(-0.5, sample.position, 0.01);
+        assertEquals(-1.4, sample.velocity, kDelta);
+
+        // step to the end of the profile
+        for (double t = 0; t < 0.72; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+        }
+        assertEquals(-1.0, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
         assertTrue(profileX.isFinished());
     }
 
-    // heading too fast towards the goal, it jumps the position back at infinite
-    // speed and jumps the velocity down at infinite acceleration, to end at the
-    // goal.
+    /** with a lower top speed, this profile includes a cruise phase. */
     @Test
-    void testProfile3() {
-        Constraints c = new Constraints(5, 1);
+    void testCruise() {
+        Constraints c = new Constraints(1, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c);
+        State sample = new State(0, 0);
+        final State end = new State(1, 0);
+
+        // the first sample is near the starting state
+        Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
+        sample = profileX.calculate(0.02, end, sample);
+        assertEquals(0, sample.position, kDelta);
+        assertEquals(0.04, sample.velocity, kDelta);
+
+        // step to the cruise phase of the profile
+        for (double t = 0; t < 0.48; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+        }
+        assertEquals(0.25, sample.position, 0.01);
+        assertEquals(1.0, sample.velocity, kDelta);
+
+        // step to near the end of cruise
+        for (double t = 0; t < 0.5; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+        }
+        assertEquals(0.75, sample.position, 0.01);
+        assertEquals(1.0, sample.velocity, kDelta);
+
+        // step to the end of the profile
+        for (double t = 0; t < 0.5; t += 0.02) {
+            sample = profileX.calculate(0.02, end, sample);
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+        }
+        assertEquals(1.0, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
+        assertTrue(profileX.isFinished());
+    }
+
+    /**
+     * this is a "u-turn" profile, initially heading away from the goal.
+     * overshoot works correctly.
+     */
+    @Test
+    void testUTurn() {
+        Constraints c = new Constraints(5, 2);
+        TrapezoidProfile100 profileX = new TrapezoidProfile100(c);
+
+        // initially heading away from the goal
         State sample = new State(0.1, 1);
         final State end = new State(0, 0);
-        for (double t = 0; t < 10; t += 0.02) {
+
+        // the first sample is near the starting state
+        Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
+        sample = profileX.calculate(0.02, end, sample);
+        assertEquals(0.120, sample.position, kDelta);
+        assertEquals(0.96, sample.velocity, kDelta);
+
+        // step to the turn-around point
+        for (double t = 0; t < 0.48; t += 0.02) {
             Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
             sample = profileX.calculate(0.02, end, sample);
-
-            if (profileX.isFinished())
-                break;
         }
+        assertEquals(0.35, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
+
+        // the next phase is triangular, this is the point at maximum speed
+        for (double t = 0; t < 0.4; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.19, sample.position, kDelta);
+        assertEquals(-0.8, sample.velocity, kDelta);
+
+        // this is the end.
+        for (double t = 0; t < 0.44; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.0, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
+        assertTrue(profileX.isFinished());
+    }
+
+    /**
+     * the same logic should work if the starting position is *at* the goal.
+     */
+    @Test
+    void testUTurn2() {
+        Constraints c = new Constraints(5, 2);
+        TrapezoidProfile100 profileX = new TrapezoidProfile100(c);
+
+        // initially at the goal with nonzero velocity
+        State sample = new State(0, 1);
+        final State end = new State(0, 0);
+
+        // the first sample is near the starting state
+        Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
+        sample = profileX.calculate(0.02, end, sample);
+        assertEquals(0.02, sample.position, kDelta);
+        assertEquals(0.96, sample.velocity, kDelta);
+
+        // step to the turn-around point
+        // this takes the same time no matter the starting point.
+        for (double t = 0; t < 0.48; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.25, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
+
+        // the next phase is triangular, this is the point at maximum speed
+        // compared to the case above, this is a little sooner and a little slower.
+        for (double t = 0; t < 0.4; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.1, sample.position, kDelta);
+        assertEquals(-0.5, sample.velocity, kDelta);
+
+        // this is the end.
+        // also sooner than the profile above
+        for (double t = 0; t < 0.44; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.0, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
+        assertTrue(profileX.isFinished());
+    }
+
+    /**
+     * And it should work if the starting position is to the *left* of the goal, too
+     * fast to stop.
+     */
+    @Test
+    void testUTurn3() {
+        Constraints c = new Constraints(5, 2);
+        TrapezoidProfile100 profileX = new TrapezoidProfile100(c);
+
+        // behind the goal, too fast to stop.
+        State sample = new State(-0.1, 1);
+        final State end = new State(0, 0);
+
+        // the first sample is near the starting state
+        Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
+        sample = profileX.calculate(0.02, end, sample);
+        assertEquals(-0.08, sample.position, kDelta);
+        assertEquals(0.96, sample.velocity, kDelta);
+
+        // step to the turn-around point
+        // this takes the same time no matter the starting point.
+        for (double t = 0; t < 0.48; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.25, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
+
+        // the next phase is triangular, this is the point at maximum speed
+        // compared to the case above, this is a little sooner and a little slower.
+        for (double t = 0; t < 0.4; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.1, sample.position, kDelta);
+        assertEquals(-0.5, sample.velocity, kDelta);
+
+        // this is the end.
+        // also sooner than the profile above
+        for (double t = 0; t < 0.44; t += 0.02) {
+            Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
+            sample = profileX.calculate(0.02, end, sample);
+        }
+        assertEquals(0.0, sample.position, kDelta);
+        assertEquals(0.0, sample.velocity, kDelta);
         assertTrue(profileX.isFinished());
     }
 

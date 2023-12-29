@@ -15,6 +15,11 @@ public class State {
         this.position = position;
         this.velocity = velocity;
     }
+    
+    public State(State x) {
+        this.position = x.position;
+        this.velocity = x.velocity;
+    }
 
     @Override
     public boolean equals(Object other) {
