@@ -4,6 +4,8 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.State;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -37,7 +39,7 @@ public class ManualWithHeading {
 
     public Rotation2d m_goal = null;
     public final TrapezoidProfile100 m_profile;
-    TrapezoidProfile100.State m_setpoint;
+    State m_setpoint;
 
     public ManualWithHeading(
             SwerveKinodynamics swerveKinodynamics,
@@ -51,7 +53,7 @@ public class ManualWithHeading {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_latch = new HeadingLatch();
-        TrapezoidProfile100.Constraints c = new TrapezoidProfile100.Constraints(
+        Constraints c = new Constraints(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(), swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile100(c);
     }
@@ -59,7 +61,7 @@ public class ManualWithHeading {
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        m_setpoint = new TrapezoidProfile100.State(currentPose.getRotation().getRadians(),  m_heading.getHeadingRateNWU());
+        m_setpoint = new State(currentPose.getRotation().getRadians(),  m_heading.getHeadingRateNWU());
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -93,7 +95,7 @@ public class ManualWithHeading {
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
         m_setpoint = m_profile.calculate(kDtSec,
-                new TrapezoidProfile100.State(m_goal.getRadians(), 0),
+                new State(m_goal.getRadians(), 0),
                 m_setpoint);
 
         // this is user input

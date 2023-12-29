@@ -1,7 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.profile.State;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
 import org.team100.lib.motion.components.PositionServo;
@@ -70,7 +70,7 @@ public class SwerveModule100 {
     }
 
     /** for testing only */
-    TrapezoidProfile100.State getSetpoint() {
+    State getSetpoint() {
         return m_turningServo.getSetpoint();
     }
 

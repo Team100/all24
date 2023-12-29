@@ -1,6 +1,6 @@
 package org.team100.lib.controller;
 
-import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.profile.State;
 
 
 /**
@@ -23,7 +23,7 @@ public class State100 {
         m_a = a;
     }
 
-    public State100(TrapezoidProfile100.State state, double a) {
+    public State100(State state, double a) {
         m_x = state.position;
         m_v = state.velocity;
         m_a = a; 

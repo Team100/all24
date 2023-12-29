@@ -6,6 +6,8 @@ import java.util.function.Supplier;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.State;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -40,7 +42,7 @@ public class ManualWithTargetLock {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
-    TrapezoidProfile100.State m_setpoint;
+    State m_setpoint;
     Translation2d m_ball;
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
@@ -59,14 +61,14 @@ public class ManualWithTargetLock {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_trigger = trigger;
-        TrapezoidProfile100.Constraints c = new TrapezoidProfile100.Constraints(
+        Constraints c = new Constraints(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile100(c);
     }
 
     public void reset(Pose2d currentPose) {
-        m_setpoint = new TrapezoidProfile100.State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_setpoint = new State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -93,7 +95,7 @@ public class ManualWithTargetLock {
         t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
 
         m_setpoint = m_profile.calculate(kDtSec,
-                new TrapezoidProfile100.State(bearing.getRadians(), targetMotion),
+                new State(bearing.getRadians(), targetMotion),
                 m_setpoint);
 
         // this is user input

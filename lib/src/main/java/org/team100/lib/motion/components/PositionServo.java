@@ -2,7 +2,7 @@ package org.team100.lib.motion.components;
 
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
-import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.profile.State;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
@@ -24,8 +24,8 @@ public class PositionServo<T extends Measure100> {
     private final ChoosableProfile m_profile;
     private final T m_instance;
 
-    private TrapezoidProfile100.State m_goal = new TrapezoidProfile100.State();
-    private TrapezoidProfile100.State m_setpoint = new TrapezoidProfile100.State();
+    private State m_goal = new State();
+    private State m_setpoint = new State();
 
     /**
      * @param name may not start with a slash
@@ -58,7 +58,7 @@ public class PositionServo<T extends Measure100> {
      */
     public void reset() {
         m_controller.reset();
-        m_setpoint = new TrapezoidProfile100.State(getPosition(), getVelocity());
+        m_setpoint = new State(getPosition(), getVelocity());
     }
 
     /**
@@ -66,7 +66,7 @@ public class PositionServo<T extends Measure100> {
      */
     public void setPosition(double goal) {
         double measurement = m_instance.modulus(m_encoder.getPosition());
-        m_goal = new TrapezoidProfile100.State(goal, 0.0);
+        m_goal = new State(goal, 0.0);
 
         getSetpointMinDistance(measurement);
 
@@ -146,7 +146,7 @@ public class PositionServo<T extends Measure100> {
     }
 
     /** for testing only */
-    public TrapezoidProfile100.State getSetpoint() {
+    public State getSetpoint() {
         return m_setpoint;
     }
 

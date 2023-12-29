@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.profile.State;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -26,7 +26,7 @@ class DriveInALittleSquareTest {
         DriveInALittleSquare command = new DriveInALittleSquare(swerve);
         command.initialize();
         command.execute();
-        assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
+        assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(2, command.m_driveProfile.totalTime(), kDelta);
@@ -34,7 +34,7 @@ class DriveInALittleSquareTest {
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
         SimHooks.stepTimingAsync(3.2);
         command.execute();
-        assertEquals(DriveInALittleSquare.State.STEERING, command.m_state);
+        assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
@@ -45,10 +45,10 @@ class DriveInALittleSquareTest {
     void testLowLevel() {
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
         command.initialize();
-        assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
+        assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         fixture.drive.periodic();
         command.execute();
-        assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
+        assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         // this seems subject to jitter
         assertEquals(0, command.speedM_S.velocity, 0.1);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
@@ -58,7 +58,7 @@ class DriveInALittleSquareTest {
         SimHooks.stepTimingAsync(3.2);
         fixture.drive.periodic();
         command.execute();
-        assertEquals(DriveInALittleSquare.State.STEERING, command.m_state);
+        assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.speedM_S.velocity, kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
@@ -75,7 +75,7 @@ class DriveInALittleSquareTest {
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
-            TrapezoidProfile100.State setpoint = fixture.swerveLocal.getSetpoints()[0];
+            State setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
                 Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
@@ -89,7 +89,7 @@ class DriveInALittleSquareTest {
         assertEquals(Math.PI / 2, fixture.drive.moduleStates()[0].angle.getRadians(), 0.01);
         assertTrue(fixture.drive.atGoal()[0]);
         // and we're driving again
-        assertEquals(DriveInALittleSquare.State.DRIVING, command.m_state);
+        assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         // we're not quite motionless, we're already going a little.
         // there's no specific test here because the velocity seems to depend
         // on the timing in the simulation

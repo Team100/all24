@@ -8,7 +8,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
-import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.profile.State;
 import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.MathUtil;
@@ -83,8 +83,8 @@ class AnglePositionServoTest {
         // faster to go the "long way" because of the velocity.
         // but the wrapping calculation ignores velocity.
         double measurement = 4;
-        TrapezoidProfile100.State m_setpoint = new TrapezoidProfile100.State(4, -1);
-        TrapezoidProfile100.State m_goal = new TrapezoidProfile100.State();
+        State m_setpoint = new State(4, -1);
+        State m_goal = new State();
 
         double goalMinDistance = MathUtil.inputModulus(m_goal.position - measurement, -errorBound, errorBound);
         double setpointMinDistance = MathUtil.inputModulus(m_setpoint.position - measurement, -errorBound,

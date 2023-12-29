@@ -41,7 +41,7 @@ public class ChoosableProfile {
         SmartDashboard.putData(m_chooser);
 
         m_trapezoid = new TrapezoidProfile100(
-                new TrapezoidProfile100.Constraints(maxVel, maxAccel));
+                new Constraints(maxVel, maxAccel));
                 
         // These constraints are completely made up.
         // If you want to try the exponential profile, you'll have to
@@ -51,7 +51,7 @@ public class ChoosableProfile {
                         10, 10, 5));
     }
 
-    public TrapezoidProfile100.State calculate(double t, TrapezoidProfile100.State goal, TrapezoidProfile100.State current) {
+    public State calculate(double t, State goal, State current) {
         switch (m_chooser.getSelected()) {
             case TRAPEZOID:
                 return m_trapezoid.calculate(t, goal, current);
@@ -59,9 +59,9 @@ public class ChoosableProfile {
                 ExponentialProfile.State estate = eprofile.calculate(t,
                         new ExponentialProfile.State(current.position, current.velocity),
                         new ExponentialProfile.State(goal.position, goal.velocity));
-                return new TrapezoidProfile100.State(estate.position, estate.velocity);
+                return new State(estate.position, estate.velocity);
             default:
-                return new TrapezoidProfile100.State();
+                return new State();
         }
     }
 
