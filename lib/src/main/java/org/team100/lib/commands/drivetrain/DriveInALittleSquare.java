@@ -3,11 +3,11 @@ package org.team100.lib.commands.drivetrain;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * Makes a little square, one meter on a side, forever.
@@ -33,21 +33,21 @@ public class DriveInALittleSquare extends Command100 {
     private static final double kMaxAccel = 1;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final TrapezoidProfile.State start = new TrapezoidProfile.State(0, 0);
-    private final TrapezoidProfile.State goal = new TrapezoidProfile.State(kDriveLengthM, 0);
+    private final TrapezoidProfile100.State start = new TrapezoidProfile100.State(0, 0);
+    private final TrapezoidProfile100.State goal = new TrapezoidProfile100.State(kDriveLengthM, 0);
     
 
 
-    final TrapezoidProfile m_driveProfile;
-    TrapezoidProfile.State speedM_S;
+    final TrapezoidProfile100 m_driveProfile;
+    TrapezoidProfile100.State speedM_S;
     Rotation2d m_goal;
     State m_state;
 
     public DriveInALittleSquare(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
 
-        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(kMaxVel, kMaxAccel);
-        m_driveProfile = new TrapezoidProfile(c);
+        TrapezoidProfile100.Constraints c = new TrapezoidProfile100.Constraints(kMaxVel, kMaxAccel);
+        m_driveProfile = new TrapezoidProfile100(c);
         addRequirements(m_swerve);
     }
 
@@ -67,7 +67,7 @@ public class DriveInALittleSquare extends Command100 {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = State.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
-                    speedM_S = new TrapezoidProfile.State(0, 0);
+                    speedM_S = new TrapezoidProfile100.State(0, 0);
                 } else {
                     // keep going
                     speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
@@ -78,7 +78,7 @@ public class DriveInALittleSquare extends Command100 {
                     // we were steering, but all the setpoints have been reached, so switch to
                     // driving
                     m_state = State.DRIVING;
-                    speedM_S = new TrapezoidProfile.State(0, 0);
+                    speedM_S = new TrapezoidProfile100.State(0, 0);
                     speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
                 } else {
                     // wait to reach the setpoint

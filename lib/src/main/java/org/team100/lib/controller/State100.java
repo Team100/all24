@@ -1,6 +1,7 @@
 package org.team100.lib.controller;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import org.team100.lib.profile.TrapezoidProfile100;
+
 
 /**
  * One-dimensional system state, used for measurement and reference.
@@ -22,7 +23,7 @@ public class State100 {
         m_a = a;
     }
 
-    public State100(TrapezoidProfile.State state, double a) {
+    public State100(TrapezoidProfile100.State state, double a) {
         m_x = state.position;
         m_v = state.velocity;
         m_a = a; 

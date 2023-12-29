@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
 import org.team100.lib.motion.components.PositionServo;
@@ -8,7 +9,6 @@ import org.team100.lib.motion.components.PositionServo;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 /**
  * Feedforward and feedback control of a single module.
@@ -70,7 +70,7 @@ public class SwerveModule100 {
     }
 
     /** for testing only */
-    State getSetpoint() {
+    TrapezoidProfile100.State getSetpoint() {
         return m_turningServo.getSetpoint();
     }
 

@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveInALittleSquareTest {
@@ -75,7 +75,7 @@ class DriveInALittleSquareTest {
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
-            State setpoint = fixture.swerveLocal.getSetpoints()[0];
+            TrapezoidProfile100.State setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
                 Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",

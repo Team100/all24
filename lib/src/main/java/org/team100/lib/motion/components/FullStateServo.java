@@ -2,14 +2,13 @@ package org.team100.lib.motion.components;
 
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 /**
  * Profiled motion with feedforward and feedback on position and velocity.
@@ -31,8 +30,8 @@ public class FullStateServo<T extends Measure100> {
     private final ChoosableProfile m_profile;
     private final T m_instance;
 
-    private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-    private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
+    private TrapezoidProfile100.State m_goal = new TrapezoidProfile100.State();
+    private TrapezoidProfile100.State m_setpoint = new TrapezoidProfile100.State();
 
     public FullStateServo(
             String name,
@@ -59,7 +58,7 @@ public class FullStateServo<T extends Measure100> {
      */
     public void setPosition(double goal) {
         double measurement = m_instance.modulus(m_encoder.getPosition());
-        m_goal = new TrapezoidProfile.State(goal, 0.0);
+        m_goal = new TrapezoidProfile100.State(goal, 0.0);
 
         getSetpointMinDistance(measurement);
 
@@ -96,7 +95,7 @@ public class FullStateServo<T extends Measure100> {
      * To prevent oscillation, the previous setpoint is used to compute the profile,
      * but there needs to be an initial setpoint.
      */
-    public void reset(TrapezoidProfile.State measurement) {
+    public void reset(TrapezoidProfile100.State measurement) {
         m_xController.reset();
         m_vController.reset();
         m_setpoint = measurement;
@@ -135,7 +134,7 @@ public class FullStateServo<T extends Measure100> {
         m_encoder.close();
     }
 
-    public State getSetpoint() {
+    public TrapezoidProfile100.State getSetpoint() {
         return m_setpoint;
     }
 

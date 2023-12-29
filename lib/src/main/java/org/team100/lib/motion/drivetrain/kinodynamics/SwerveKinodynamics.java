@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.TrapezoidProfile100;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -14,7 +15,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -140,15 +140,15 @@ public class SwerveKinodynamics {
     }
 
     /** If you want to rotate the robot with a trapezoidal profile, use this. */
-    public TrapezoidProfile.Constraints getAngleConstraints() {
-        return new TrapezoidProfile.Constraints(
+    public TrapezoidProfile100.Constraints getAngleConstraints() {
+        return new TrapezoidProfile100.Constraints(
                 getMaxAngleSpeedRad_S(),
                 getMaxAngleAccelRad_S2());
     }
 
     /** Trapezoidal profile for linear motion. */
-    public TrapezoidProfile.Constraints getDistanceConstraints() {
-        return new TrapezoidProfile.Constraints(
+    public TrapezoidProfile100.Constraints getDistanceConstraints() {
+        return new TrapezoidProfile100.Constraints(
                 getMaxDriveVelocityM_S(),
                 getMaxDriveAccelerationM_S2());
     }

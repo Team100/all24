@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -17,7 +18,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * Manual cartesian control, with rotational control based on a target position.
@@ -39,8 +39,8 @@ public class ManualWithTargetLock {
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final TrapezoidProfile m_profile;
-    TrapezoidProfile.State m_setpoint;
+    private final TrapezoidProfile100 m_profile;
+    TrapezoidProfile100.State m_setpoint;
     Translation2d m_ball;
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
@@ -59,14 +59,14 @@ public class ManualWithTargetLock {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_trigger = trigger;
-        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
+        TrapezoidProfile100.Constraints c = new TrapezoidProfile100.Constraints(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 swerveKinodynamics.getMaxAngleAccelRad_S2());
-        m_profile = new TrapezoidProfile(c);
+        m_profile = new TrapezoidProfile100(c);
     }
 
     public void reset(Pose2d currentPose) {
-        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_setpoint = new TrapezoidProfile100.State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -93,7 +93,7 @@ public class ManualWithTargetLock {
         t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
 
         m_setpoint = m_profile.calculate(kDtSec,
-                new TrapezoidProfile.State(bearing.getRadians(), targetMotion),
+                new TrapezoidProfile100.State(bearing.getRadians(), targetMotion),
                 m_setpoint);
 
         // this is user input

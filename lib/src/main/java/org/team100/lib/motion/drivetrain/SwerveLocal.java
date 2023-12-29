@@ -5,6 +5,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
@@ -16,7 +17,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * The swerve drive in local, or robot, reference frame. This class knows
@@ -145,7 +145,7 @@ public class SwerveLocal {
         return m_modules.getDesiredStates();
     }
 
-    public TrapezoidProfile.State[] getSetpoints() {
+    public TrapezoidProfile100.State[] getSetpoints() {
         return m_modules.getSetpoint();
     }
 

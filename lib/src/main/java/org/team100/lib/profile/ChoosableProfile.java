@@ -3,8 +3,6 @@ package org.team100.lib.profile;
 import org.team100.lib.telemetry.ProfileModeChooser;
 
 import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -27,7 +25,7 @@ public class ChoosableProfile {
     // the profile class is both a stateful follower and
     // a stateless calculator. we use the stateless one so we can make
     // the profile object once.
-    private final TrapezoidProfile m_trapezoid;
+    private final TrapezoidProfile100 m_trapezoid;
     private final ExponentialProfile eprofile;
 
     /** The default is specifiable mostly for testing. */
@@ -42,8 +40,8 @@ public class ChoosableProfile {
         m_chooser.setDefaultOption(defaultMode.name(), defaultMode);
         SmartDashboard.putData(m_chooser);
 
-        m_trapezoid = new TrapezoidProfile(
-                new TrapezoidProfile.Constraints(maxVel, maxAccel));
+        m_trapezoid = new TrapezoidProfile100(
+                new TrapezoidProfile100.Constraints(maxVel, maxAccel));
                 
         // These constraints are completely made up.
         // If you want to try the exponential profile, you'll have to
@@ -53,7 +51,7 @@ public class ChoosableProfile {
                         10, 10, 5));
     }
 
-    public State calculate(double t, State goal, State current) {
+    public TrapezoidProfile100.State calculate(double t, TrapezoidProfile100.State goal, TrapezoidProfile100.State current) {
         switch (m_chooser.getSelected()) {
             case TRAPEZOID:
                 return m_trapezoid.calculate(t, goal, current);
@@ -61,9 +59,9 @@ public class ChoosableProfile {
                 ExponentialProfile.State estate = eprofile.calculate(t,
                         new ExponentialProfile.State(current.position, current.velocity),
                         new ExponentialProfile.State(goal.position, goal.velocity));
-                return new State(estate.position, estate.velocity);
+                return new TrapezoidProfile100.State(estate.position, estate.velocity);
             default:
-                return new State();
+                return new TrapezoidProfile100.State();
         }
     }
 

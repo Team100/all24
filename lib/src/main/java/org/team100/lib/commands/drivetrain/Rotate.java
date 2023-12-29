@@ -6,6 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -14,7 +15,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * Rotate in place to the specified angle.
@@ -33,13 +33,13 @@ public class Rotate extends Command100 {
     private final SwerveDriveSubsystem m_robotDrive;
     private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final TrapezoidProfile.State m_goalState;
+    private final TrapezoidProfile100.State m_goalState;
     final HolonomicDriveController3 m_controller;
 
     private boolean m_finished = false;
 
-    TrapezoidProfile m_profile;
-    TrapezoidProfile.State refTheta;
+    TrapezoidProfile100 m_profile;
+    TrapezoidProfile100.State refTheta;
 
     private boolean m_steeringAligned;
 
@@ -63,8 +63,8 @@ public class Rotate extends Command100 {
         m_controller = new HolonomicDriveController3(xc, yc, tc);
         m_heading = heading;
         m_swerveKinodynamics = swerveKinodynamics;
-        m_goalState = new TrapezoidProfile.State(targetAngleRadians, 0);
-        refTheta = new TrapezoidProfile.State(0, 0);
+        m_goalState = new TrapezoidProfile100.State(targetAngleRadians, 0);
+        refTheta = new TrapezoidProfile100.State(0, 0);
 
         addRequirements(drivetrain);
     }
@@ -73,17 +73,17 @@ public class Rotate extends Command100 {
     public void initialize100() {
         m_controller.reset();
         resetRefTheta();
-        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
+        TrapezoidProfile100.Constraints c = new TrapezoidProfile100.Constraints(
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleAccelRad_S2());
-        m_profile = new TrapezoidProfile(c);
+        m_profile = new TrapezoidProfile100(c);
         // first align the wheels
         m_steeringAligned = false;
     }
 
     private void resetRefTheta() {
         ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
-        refTheta = new TrapezoidProfile.State(
+        refTheta = new TrapezoidProfile100.State(
                 m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
     }
