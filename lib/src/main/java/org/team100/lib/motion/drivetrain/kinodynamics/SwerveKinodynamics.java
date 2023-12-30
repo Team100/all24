@@ -143,14 +143,16 @@ public class SwerveKinodynamics {
     public Constraints getAngleConstraints() {
         return new Constraints(
                 getMaxAngleSpeedRad_S(),
-                getMaxAngleAccelRad_S2());
+                getMaxAngleAccelRad_S2(),
+                Double.POSITIVE_INFINITY);
     }
 
     /** Trapezoidal profile for linear motion. */
     public Constraints getDistanceConstraints() {
         return new Constraints(
                 getMaxDriveVelocityM_S(),
-                getMaxDriveAccelerationM_S2());
+                getMaxDriveAccelerationM_S2(),
+                Double.POSITIVE_INFINITY);
     }
 
     private static SwerveDriveKinematics get(double track, double wheelbase) {

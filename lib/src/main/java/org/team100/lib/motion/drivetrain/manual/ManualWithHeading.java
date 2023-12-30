@@ -54,8 +54,10 @@ public class ManualWithHeading {
         m_omegaController = omegaController;
         m_latch = new HeadingLatch();
         Constraints c = new Constraints(
-                swerveKinodynamics.getMaxAngleSpeedRad_S(), swerveKinodynamics.getMaxAngleAccelRad_S2());
-        m_profile = new TrapezoidProfile100(c);
+                swerveKinodynamics.getMaxAngleSpeedRad_S(), 
+                swerveKinodynamics.getMaxAngleAccelRad_S2(),
+                Double.POSITIVE_INFINITY);
+        m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
     public void reset(Pose2d currentPose) {
