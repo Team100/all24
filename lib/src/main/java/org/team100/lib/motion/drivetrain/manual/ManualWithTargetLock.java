@@ -63,8 +63,7 @@ public class ManualWithTargetLock {
         m_trigger = trigger;
         Constraints c = new Constraints(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                swerveKinodynamics.getMaxAngleAccelRad_S2(),
-                Double.POSITIVE_INFINITY);
+                swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 

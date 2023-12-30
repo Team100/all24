@@ -33,7 +33,6 @@ public class DriveInALittleSquare extends Command100 {
     private static final double kDriveLengthM = 1;
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
-    private static final double kMaxJerk = Double.POSITIVE_INFINITY;
 
     private final SwerveDriveSubsystem m_swerve;
     private final State start = new State(0, 0);
@@ -51,7 +50,7 @@ public class DriveInALittleSquare extends Command100 {
     public DriveInALittleSquare(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
 
-        Constraints c = new Constraints(kMaxVel, kMaxAccel, kMaxJerk);
+        Constraints c = new Constraints(kMaxVel, kMaxAccel);
         m_driveProfile = new TrapezoidProfile100(c, 0.05);
         addRequirements(m_swerve);
     }

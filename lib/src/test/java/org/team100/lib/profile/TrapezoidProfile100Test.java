@@ -13,15 +13,177 @@ class TrapezoidProfile100Test {
     private static final double kDelta = 0.001;
 
     @Test
+    void testIntercepts() {
+        Constraints c = new Constraints(5, 0.5);
+        TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
+        State s = new State(1, 1);
+        assertEquals(0, p.c_plus(s), kDelta);
+        assertEquals(2, p.c_minus(s), kDelta);
+
+        // more accel
+        c = new Constraints(5, 1);
+        p = new TrapezoidProfile100(c, 0.01);
+        s = new State(1, 1);
+        // means less offset
+        assertEquals(0.5, p.c_plus(s), kDelta);
+        assertEquals(1.5, p.c_minus(s), kDelta);
+
+        // negative velocity, result should be the same.
+        c = new Constraints(5, 1);
+        p = new TrapezoidProfile100(c, 0.01);
+        s = new State(1, -1);
+        // means less offset
+        assertEquals(0.5, p.c_plus(s), kDelta);
+        assertEquals(1.5, p.c_minus(s), kDelta);
+    }
+
+    // see studies/rrts TestRRTStar7
+    @Test
+    void testInterceptsFromRRT() {
+        Constraints c = new Constraints(5, 1);
+        TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
+
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+
+        assertEquals(0, p.c_minus(new State(0, 0)), 0.001);
+        assertEquals(0, p.c_plus(new State(0, 0)), 0.001);
+
+        assertEquals(0.5, p.c_minus(new State(0, 1)), 0.001);
+        assertEquals(-0.5, p.c_plus(new State(0, 1)), 0.001);
+
+        assertEquals(1.5, p.c_minus(new State(1, 1)), 0.001);
+        assertEquals(0.5, p.c_plus(new State(1, 1)), 0.001);
+
+        assertEquals(-0.5, p.c_minus(new State(-1, 1)), 0.001);
+        assertEquals(-1.5, p.c_plus(new State(-1, 1)), 0.001);
+
+        assertEquals(0.5, p.c_minus(new State(0, -1)), 0.001);
+        assertEquals(-0.5, p.c_plus(new State(0, -1)), 0.001);
+
+        assertEquals(2, p.c_minus(new State(0, 2)), 0.001);
+        assertEquals(-2, p.c_plus(new State(0, 2)), 0.001);
+
+        assertEquals(0.25, p2.c_minus(new State(0, 1)), 0.001);
+        assertEquals(-0.25, p2.c_plus(new State(0, 1)), 0.001);
+
+        // these are cases for the switching point test below
+        // these curves don't intersect at all
+        assertEquals(-1, p.c_minus(new State(-3, 2)), 0.001);
+        assertEquals(0, p.c_plus(new State(2, 2)), 0.001);
+
+        // these curves intersect exactly once at the origin
+        assertEquals(0, p.c_minus(new State(-2, 2)), 0.001);
+        assertEquals(0, p.c_plus(new State(2, 2)), 0.001);
+
+        // these two curves intersect twice, once at (0.5,1) and once at (0.5,-1)
+        assertEquals(1, p.c_minus(new State(-1, 2)), 0.001);
+        assertEquals(0, p.c_plus(new State(2, 2)), 0.001);
+    }
+
+    @Test
+    void testQSwitch() {
+                Constraints c = new Constraints(5, 1);
+        TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
+
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+
+        assertEquals(0.375, p2.qSwitchIplusGminus(new State(0, 0),new State( 0.5, 1.0)), 0.001);
+        assertEquals(0.125, p2.qSwitchIminusGplus(new State(0, 0), new State(0.5, 1.0)), 0.001);
+
+        assertEquals(-0.5, p.qSwitchIplusGminus(new State(-3, 2),new State( 2, 2)), 0.001);
+        assertEquals(0, p.qSwitchIplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
+        assertEquals(0.5, p.qSwitchIplusGminus(new State(-1, 2), new State(2, 2)), 0.001);
+
+        assertEquals(-0.5, p.qSwitchIminusGplus(new State(2, -2), new State(-3, -2)), 0.001);
+        assertEquals(0.0, p.qSwitchIminusGplus(new State(2, -2),new State( -2, -2)), 0.001);
+        assertEquals(0.5, p.qSwitchIminusGplus(new State(2, -2), new State(-1, -2)), 0.001);
+
+        // these are all a little different just to avoid zero as the answer
+        assertEquals(0.5, p.qSwitchIplusGminus(new State(2, 2), new State(-1, 2)), 0.001);
+        assertEquals(0.5, p.qSwitchIplusGminus(new State(-1, 2), new State(2, -2)), 0.001);
+        assertEquals(0.5, p.qSwitchIminusGplus(new State(2, 2), new State(-1, 2)), 0.001);
+        assertEquals(0.5, p.qSwitchIminusGplus(new State(-1, 2), new State(2, -2)), 0.001);
+    }
+
+    @Test
+    void testQDotSwitch() {
+        Constraints c = new Constraints(5, 1);
+        TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
+
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+
+        assertEquals(1.224, p2.qDotSwitchIplusGminus(new State(0, 0), new State(0.5, 1.0)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(0, 0), new State(0.5, 1.0)), 0.001);
+
+        assertEquals(3.000, p.qDotSwitchIplusGminus(new State(-3, 2), new State(2, 2)), 0.001);
+        assertEquals(2.828, p.qDotSwitchIplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
+        assertEquals(2.645, p.qDotSwitchIplusGminus(new State(-1, 2), new State(2, 2)), 0.001);
+
+        assertEquals(-3.0, p.qDotSwitchIminusGplus(new State(2, -2), new State(-3, -2)), 0.001);
+        assertEquals(-2.828, p.qDotSwitchIminusGplus(new State(2, -2), new State(-2, -2)), 0.001);
+        assertEquals(-2.645, p.qDotSwitchIminusGplus(new State(2, -2), new State(-1, -2)), 0.001);
+
+        // from 2,2 to -2,2, I+G- is invalid
+        assertEquals(0, p.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
+        // from -2,2 to 2,-2 switches in the same place as -2,2->2,2
+        assertEquals(2.828, p.qDotSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
+        // from 2,2 to -2,2 switches at the bottom
+        assertEquals(-2.828, p.qDotSwitchIminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
+        // from -2,2 to 2,-2, I-G+ is invalid
+        assertEquals(0, p.qDotSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
+    }
+
+    @Test
+    void testTSwitchByPath() {
+        Constraints c = new Constraints(5, 1);
+        TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
+
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        // from -2 to 2, the 'fast' and normal way
+        assertEquals(1.656, p.tSwitchIplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
+        // this path goes from (-2,2) to (0,0) and then to (2,2)
+        assertEquals(4.000, p.tSwitchIminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
+
+        // the opposite order, 2 to -2, this is a completely invalid result,
+        // traversing Iplus backwards, and then Gminus backwards.
+        assertEquals(Double.NaN, p.tSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
+        // from 2 to -2 is the 'long way around' across the x-axis and back.
+        assertEquals(9.656, p.tSwitchIminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
+
+        // diagonal, the 'fast' and normal way
+        assertEquals(5.656, p.tSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
+        // this is completely invalid
+        assertEquals(Double.NaN, p.tSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
+        // this is invalid, it should yield like NaN or something
+        assertEquals(Double.NaN, p.tSwitchIplusGminus(new State(2, -2), new State(-2, 2)), 0.001);
+        // from 2 to -2 is the 'long way around' across the x-axis and back.
+        assertEquals(5.656, p.tSwitchIminusGplus(new State(2, -2), new State(-2, 2)), 0.001);
+
+        // another problem case
+        // this can't be done
+        assertEquals(Double.NaN, p.tSwitchIminusGplus(new State(-1, 1), new State(0, 0)), 0.001);
+        // the "normal" way
+        assertEquals(1.449, p.tSwitchIplusGminus(new State(-1, 1), new State(0, 0)), 0.001);
+
+    }
+
+
+    ///////// old tests below
+
+    @Test
     void testBangBangIntercepts() {
-        Constraints c = new Constraints(5, 0.5, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 0.5);
         TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
         State s = new State(1, 1);
         assertEquals(0, p.xplus(s, 0.5), kDelta);
         assertEquals(2, p.xminus(s, 0.5), kDelta);
 
         // more accel
-        c = new Constraints(5, 1, Double.POSITIVE_INFINITY);
+        c = new Constraints(5, 1);
         p = new TrapezoidProfile100(c, 0.01);
         s = new State(1, 1);
         // means less offset
@@ -29,7 +191,7 @@ class TrapezoidProfile100Test {
         assertEquals(1.5, p.xminus(s, 1), kDelta);
 
         // negative velocity, result should be the same.
-        c = new Constraints(5, 1, Double.POSITIVE_INFINITY);
+        c = new Constraints(5, 1);
         p = new TrapezoidProfile100(c, 0.01);
         s = new State(1, -1);
         // means less offset
@@ -39,7 +201,7 @@ class TrapezoidProfile100Test {
 
     @Test
     void testBangBangU() {
-        Constraints c = new Constraints(1, 1, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(1, 1);
         TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
         {
             // at the goal, don't do anything
@@ -91,7 +253,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testTriangle() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.1);
         State sample = new State(0, 0);
         final State end = new State(1, 0);
@@ -133,7 +295,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testInvertedTriangle() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
         State sample = new State(0, 0);
         final State end = new State(-1, 0);
@@ -166,7 +328,7 @@ class TrapezoidProfile100Test {
     /** with a lower top speed, this profile includes a cruise phase. */
     @Test
     void testCruise() {
-        Constraints c = new Constraints(1, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(1, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
         State sample = new State(0, 0);
         final State end = new State(1, 0);
@@ -218,7 +380,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testUTurn() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
 
         // initially heading away from the goal
@@ -267,7 +429,7 @@ class TrapezoidProfile100Test {
     /** Same as above but not inverted. */
     @Test
     void testUTurnNotInverted() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
 
         // initially heading away from the goal
@@ -320,7 +482,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testUTurn2() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
 
         // initially at the goal with nonzero velocity
@@ -377,7 +539,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testUTurn2NotInverted() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
 
         // initially at the goal with nonzero velocity
@@ -434,7 +596,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testUTurn3() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.01);
 
         // behind the goal, too fast to stop.
@@ -489,7 +651,7 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testUTurnWindup() {
-        Constraints c = new Constraints(5, 2, Double.POSITIVE_INFINITY);
+        Constraints c = new Constraints(5, 2);
         TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.05);
 
         // initially at rest
@@ -512,7 +674,8 @@ class TrapezoidProfile100Test {
             sample = profileX.calculate(0.02, end, sample);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
-            if (profileX.isFinished()) break;
+            if (profileX.isFinished())
+                break;
         }
         assertEquals(-0.25, sample.position, 0.01);
         assertEquals(0.02, sample.velocity, 0.01);
@@ -521,7 +684,8 @@ class TrapezoidProfile100Test {
             sample = profileX.calculate(0.02, end, sample);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
-            if (profileX.isFinished()) break;
+            if (profileX.isFinished())
+                break;
 
         }
         assertEquals(0, sample.position, 0.05);
@@ -565,7 +729,7 @@ class TrapezoidProfile100Test {
 
     @Test
     void reachesGoal() {
-        Constraints constraints = new Constraints(1.75, 0.75, Double.POSITIVE_INFINITY);
+        Constraints constraints = new Constraints(1.75, 0.75);
         State goal = new State(3, 0);
         State state = new State();
 
@@ -574,13 +738,14 @@ class TrapezoidProfile100Test {
             state = profile.calculate(kDt, goal, state);
         }
         assertEquals(goal.position, state.position, 0.05);
-        assertEquals(goal.velocity, state.velocity, 0.05);    }
+        assertEquals(goal.velocity, state.velocity, 0.05);
+    }
 
     // Tests that decreasing the maximum velocity in the middle when it is already
     // moving faster than the new max is handled correctly
     @Test
     void posContinuousUnderVelChange() {
-        Constraints constraints = new Constraints(1.75, 0.75, Double.POSITIVE_INFINITY);
+        Constraints constraints = new Constraints(1.75, 0.75);
         State goal = new State(12, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
@@ -589,7 +754,7 @@ class TrapezoidProfile100Test {
         double lastPos = state.position;
         for (int i = 0; i < 1600; ++i) {
             if (i == 400) {
-                constraints = new Constraints(0.75, 0.75, Double.POSITIVE_INFINITY);
+                constraints = new Constraints(0.75, 0.75);
                 profile = new TrapezoidProfile100(constraints, 0.01);
             }
 
@@ -608,12 +773,13 @@ class TrapezoidProfile100Test {
             lastPos = state.position;
         }
         assertEquals(goal.position, state.position, 0.05);
-        assertEquals(goal.velocity, state.velocity, 0.05);    }
+        assertEquals(goal.velocity, state.velocity, 0.05);
+    }
 
     // There is some somewhat tricky code for dealing with going backwards
     @Test
     void backwards() {
-        Constraints constraints = new Constraints(0.75, 0.75, Double.POSITIVE_INFINITY);
+        Constraints constraints = new Constraints(0.75, 0.75);
         State goal = new State(-2, 0);
         State state = new State();
 
@@ -622,11 +788,12 @@ class TrapezoidProfile100Test {
             state = profile.calculate(kDt, goal, state);
         }
         assertEquals(goal.position, state.position, 0.05);
-        assertEquals(goal.velocity, state.velocity, 0.05);    }
+        assertEquals(goal.velocity, state.velocity, 0.05);
+    }
 
     @Test
     void switchGoalInMiddle() {
-        Constraints constraints = new Constraints(0.75, 0.75, Double.POSITIVE_INFINITY);
+        Constraints constraints = new Constraints(0.75, 0.75);
         State goal = new State(-2, 0);
         State state = new State();
 
@@ -641,14 +808,14 @@ class TrapezoidProfile100Test {
         for (int i = 0; i < 600; ++i) {
             state = profile.calculate(kDt, goal, state);
         }
-        assertEquals(goal.position, state.position,0.05);
+        assertEquals(goal.position, state.position, 0.05);
         assertEquals(goal.velocity, state.velocity, 0.05);
     }
 
     // Checks to make sure that it hits top speed
     @Test
     void topSpeed() {
-        Constraints constraints = new Constraints(0.75, 0.75, Double.POSITIVE_INFINITY);
+        Constraints constraints = new Constraints(0.75, 0.75);
         State goal = new State(4, 0);
         State state = new State();
 

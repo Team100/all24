@@ -41,7 +41,7 @@ public class ChoosableProfile {
         SmartDashboard.putData(m_chooser);
 
         m_trapezoid = new TrapezoidProfile100(
-                new Constraints(maxVel, maxAccel,Double.POSITIVE_INFINITY), 0.05);
+                new Constraints(maxVel, maxAccel), 0.05);
                 
         // These constraints are completely made up.
         // If you want to try the exponential profile, you'll have to

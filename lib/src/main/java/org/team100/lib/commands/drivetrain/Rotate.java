@@ -77,8 +77,7 @@ public class Rotate extends Command100 {
         resetRefTheta();
         Constraints c = new Constraints(
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleAccelRad_S2(),
-                Double.POSITIVE_INFINITY);
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile100(c, 0.05);
         // first align the wheels
         m_steeringAligned = false;

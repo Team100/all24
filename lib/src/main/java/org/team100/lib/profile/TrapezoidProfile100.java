@@ -1,15 +1,11 @@
 package org.team100.lib.profile;
 
 /**
- * This is a bang-bang controller.
+ * This uses the approach from LaValle 2023: between any two points in phase
+ * space, the optimal acceleration-limited path is via two parabolas, perhaps
+ * with a velocity limit.
+ *
  * 
- * A trapezoid profile, calculated incrementally, is just a bang-bang controller
- * with a maximum cruise velocity, so that's what this does.
- * 
- * It does the right thing in cases where the WPILib profile fails: "u-turn"
- * profiles.
- * 
- * It chatters around the goal, which the WPILib profile doesn't do.
  */
 public class TrapezoidProfile100 {
 
@@ -26,16 +22,62 @@ public class TrapezoidProfile100 {
         m_tolerance = tolerance;
     }
 
-    /**
-     * A different approach, like a bang-bang controller. It can only do two things:
-     * full ahead or full reverse, or it can do the best it can at maximum speed
-     * 
-     * To know what to do, look at the "switching surface" of the controller --
-     * state-space trajectories that lead to the goal at maximum acceleration.
-     * 
-     * These trajectories are parabolas in state space.
-     */
-    public State calculate(double dt, final State in_goal, final State in_current) {
+    public State calculate(double dt, final State in_goal, final State in_initial) {
+
+        return null;
+    }
+
+
+    double tSwitch(State initial, State goal) {
+        double tIplusGminus = tSwitchIplusGminus(initial, goal);
+        double tIminusGplus = tSwitchIminusGplus(initial, goal);
+        return Math.min(tIplusGminus, tIminusGplus);
+    }
+    double tSwitchIplusGminus(State initial, State goal) {
+        // this is the switching velocity
+        double q_dot_switch = qDotSwitchIplusGminus( initial, goal);
+        double t_1 = (q_dot_switch - initial.velocity) / m_constraints.maxAcceleration;
+        double t_2 = (goal.velocity - q_dot_switch) / (-1.0 * m_constraints.maxAcceleration);
+        return t_1 + t_2;
+    }
+    double tSwitchIminusGplus(State initial, State goal) {
+        double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
+        double t_1 = (q_dot_switch - initial.velocity) / (-1.0 * m_constraints.maxAcceleration);
+        double t_2 = (goal.velocity - q_dot_switch) / m_constraints.maxAcceleration;
+        return t_1 + t_2;
+    }
+
+    double qDotSwitchIplusGminus(State initial, State goal) {
+        return Math.sqrt(2 * m_constraints.maxAcceleration * (qSwitchIplusGminus(initial, goal) - c_plus(initial)));    
+    }
+
+    double qDotSwitchIminusGplus(State initial, State goal) {
+        return -1.0 * Math.sqrt(
+            2 * m_constraints.maxAcceleration * (qSwitchIminusGplus(initial, goal) - c_plus(goal)));
+    }
+
+    double qSwitchIplusGminus(State initial, State goal) {
+        return (c_plus(initial) + c_minus(goal)) / 2;
+    }
+
+    double qSwitchIminusGplus(State initial, State goal) {
+        return (c_minus(initial) + c_plus(goal))/2;
+    }
+
+    /** Intercept of negative-acceleration path intersecting s */
+    double c_minus(State s) {
+        return s.position - Math.pow(s.velocity,2)/(-2.0 * m_constraints.maxAcceleration);
+    }
+
+    /** Intercept of negative-acceleration path intersecting s */
+    double c_plus(State s) {
+        return s.position - Math.pow(s.velocity, 2)/(2.0 * m_constraints.maxAcceleration);
+    }
+
+
+
+
+    public State calculate2(double dt, final State in_goal, final State in_current) {
         m_finished = false;
         double u = u(dt, in_goal, in_current);
         if (m_finished)

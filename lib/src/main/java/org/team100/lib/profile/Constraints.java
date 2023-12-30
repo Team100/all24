@@ -9,20 +9,10 @@ public class Constraints {
 
     public final double maxAcceleration;
 
-    public final double maxJerk;
-
-    /**
-     * 
-     * @param maxVelocity
-     * @param maxAcceleration
-     * @param maxJerk use Double.POSITIVE_INFINITY if you don't want to limit jerk.
-     */
     public Constraints(
             double maxVelocity,
-            double maxAcceleration,
-            double maxJerk) {
+            double maxAcceleration) {
         this.maxVelocity = maxVelocity;
         this.maxAcceleration = maxAcceleration;
-        this.maxJerk = maxJerk;
     }
 }
