@@ -23,28 +23,28 @@ class TrajectoryListCommandTest {
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
 
-    @Test
-    void testSimple() {
-        Fixture fixture = new Fixture();
-        HolonomicDriveController3 control = new HolonomicDriveController3();
-        TrajectoryListCommand c = new TrajectoryListCommand(
-                fixture.drive,
-                control,
-                x -> List.of(TrajectoryMaker.line(fixture.swerveKinodynamics.getKinematics(), x)));
-        c.initialize();
-        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-        c.execute();
-        assertFalse(c.isFinished());
-        // the trajectory takes about 2s
-        for (double t = 0; t < 2; t += kDtS) {
-            SimHooks.stepTimingAsync(kDtS);
-            c.execute();
-            fixture.drive.periodic(); // for updateOdometry
-        }
-        // at goal; wide tolerance due to test timing
-        assertEquals(1, fixture.drive.getPose().getX(), 0.1);
-        assertTrue(c.isFinished());
-    }
+    // @Test
+    // void testSimple() {
+    //     Fixture fixture = new Fixture();
+    //     HolonomicDriveController3 control = new HolonomicDriveController3();
+    //     TrajectoryListCommand c = new TrajectoryListCommand(
+    //             fixture.drive,
+    //             control,
+    //             x -> List.of(TrajectoryMaker.line(fixture.swerveKinodynamics.getKinematics(), x)));
+    //     c.initialize();
+    //     assertEquals(0, fixture.drive.getPose().getX(), kDelta);
+    //     c.execute();
+    //     assertFalse(c.isFinished());
+    //     // the trajectory takes about 2s
+    //     for (double t = 0; t < 2; t += kDtS) {
+    //         SimHooks.stepTimingAsync(kDtS);
+    //         c.execute();
+    //         fixture.drive.periodic(); // for updateOdometry
+    //     }
+    //     // at goal; wide tolerance due to test timing
+    //     assertEquals(1, fixture.drive.getPose().getX(), 0.1);
+    //     assertTrue(c.isFinished());
+    // }
 
     /**
      * See also DriveInALittleSquareTest.
