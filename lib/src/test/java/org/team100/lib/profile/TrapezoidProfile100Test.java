@@ -120,9 +120,9 @@ class TrapezoidProfile100Test {
         assertEquals(2.449, p2.qDotSwitchIplusGminus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
         // the same point
         assertEquals(2.000, p2.qDotSwitchIplusGminus(new State(0, 2), new State(0, 2)), 0.001);
-        // I+G- is negative-time here. 
+        // I+G- is negative-time here.
         assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
-        // I+G- is negative-time here. 
+        // I+G- is negative-time here.
         assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
         // no intersection
         assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
@@ -215,9 +215,9 @@ class TrapezoidProfile100Test {
         assertEquals(0.225, p2.t1IplusGminus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
         // dv = 0
         assertEquals(0.000, p2.t1IplusGminus(new State(0, 2), new State(0, 2)), 0.001);
-        // I+G- is negative-time here. 
+        // I+G- is negative-time here.
         assertEquals(Double.NaN, p2.t1IplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
-        // I+G- is negative-time here. 
+        // I+G- is negative-time here.
         assertEquals(Double.NaN, p2.t1IplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
         // no intersection
         assertEquals(Double.NaN, p2.t1IplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
@@ -297,7 +297,7 @@ class TrapezoidProfile100Test {
         assertEquals(0.732, p2.t1IminusGplus(new State(2, -2), new State(-2, 2)), 0.001);
     }
 
-       /** Verify the time to the switching point */
+    /** Verify the time to the switching point */
     @Test
     void testT1() {
         Constraints c2 = new Constraints(5, 2);
@@ -325,6 +325,86 @@ class TrapezoidProfile100Test {
         assertEquals(0.225, p2.t1(new State(0.5, -2), new State(-0.5, 2)), 0.001);
         assertEquals(0.414, p2.t1(new State(1, -2), new State(-1, 2)), 0.001);
         assertEquals(0.732, p2.t1(new State(2, -2), new State(-2, 2)), 0.001);
+    }
+
+    /** Verify paths taken */
+    @Test
+    void testCalculate() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        assertEquals(-1.959, p2.calculate(0.02, new State(-2, 2), new State(2, 2)).position, 0.001);
+        assertEquals(-0.959, p2.calculate(0.02, new State(-1, 2), new State(1, 2)).position, 0.001);
+        assertEquals(-0.459, p2.calculate(0.02, new State(-0.5, 2), new State(0.5, 2)).position, 0.001);
+        assertEquals(0.000, p2.calculate(0.02, new State(0, 2), new State(0, 2)).position, 0.001);
+        assertEquals(0.539, p2.calculate(0.02, new State(0.5, 2), new State(-0.5, 2)).position, 0.001);
+        assertEquals(1.039, p2.calculate(0.02, new State(1, 2), new State(-1, 2)).position, 0.001);
+        assertEquals(2.039, p2.calculate(0.02, new State(2, 2), new State(-2, 2)).position, 0.001);
+
+        assertEquals(2.04, p2.calculate(0.02, new State(-2, 2), new State(2, 2)).velocity, 0.001);
+        assertEquals(2.04, p2.calculate(0.02, new State(-1, 2), new State(1, 2)).velocity, 0.001);
+        assertEquals(2.04, p2.calculate(0.02, new State(-0.5, 2), new State(0.5, 2)).velocity, 0.001);
+        assertEquals(2.0, p2.calculate(0.02, new State(0, 2), new State(0, 2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(0.5, 2), new State(-0.5, 2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(1, 2), new State(-1, 2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(2, 2), new State(-2, 2)).velocity, 0.001);
+
+        assertEquals(-1.959, p2.calculate(0.02, new State(-2, 2), new State(2, -2)).position, 0.001);
+        assertEquals(-0.959, p2.calculate(0.02, new State(-1, 2), new State(1, -2)).position, 0.001);
+        assertEquals(-0.459, p2.calculate(0.02, new State(-0.5, 2), new State(0.5, -2)).position, 0.001);
+        assertEquals(0.039, p2.calculate(0.02, new State(0, 2), new State(0, -2)).position, 0.001);
+        assertEquals(0.539, p2.calculate(0.02, new State(0.5, 2), new State(-0.5, -2)).position, 0.001);
+        assertEquals(1.039, p2.calculate(0.02, new State(1, 2), new State(-1, -2)).position, 0.001);
+        assertEquals(2.039, p2.calculate(0.02, new State(2, 2), new State(-2, -2)).position, 0.001);
+
+        assertEquals(2.04, p2.calculate(0.02, new State(-2, 2), new State(2, -2)).velocity, 0.001);
+        assertEquals(2.04, p2.calculate(0.02, new State(-1, 2), new State(1, -2)).velocity, 0.001);
+        assertEquals(2.04, p2.calculate(0.02, new State(-0.5, 2), new State(0.5, -2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(0, 2), new State(0, -2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(0.5, 2), new State(-0.5, -2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(1, 2), new State(-1, -2)).velocity, 0.001);
+        assertEquals(1.96, p2.calculate(0.02, new State(2, 2), new State(-2, -2)).velocity, 0.001);
+
+        assertEquals(-2.039, p2.calculate(0.02, new State(-2, -2), new State(2, 2)).position, 0.001);
+        assertEquals(-1.039, p2.calculate(0.02, new State(-1, -2), new State(1, 2)).position, 0.001);
+        assertEquals(-0.539, p2.calculate(0.02, new State(-0.5, -2), new State(0.5, 2)).position, 0.001);
+        assertEquals(-0.039, p2.calculate(0.02, new State(0, -2), new State(0, 2)).position, 0.001);
+        assertEquals(0.459, p2.calculate(0.02, new State(0.5, -2), new State(-0.5, 2)).position, 0.001);
+        assertEquals(0.959, p2.calculate(0.02, new State(1, -2), new State(-1, 2)).position, 0.001);
+        assertEquals(1.959, p2.calculate(0.02, new State(2, -2), new State(-2, 2)).position, 0.001);
+
+        assertEquals(-1.96, p2.calculate(0.02, new State(-2, -2), new State(2, 2)).velocity, 0.001);
+        assertEquals(-1.96, p2.calculate(0.02, new State(-1, -2), new State(1, 2)).velocity, 0.001);
+        assertEquals(-1.96, p2.calculate(0.02, new State(-0.5, -2), new State(0.5, 2)).velocity, 0.001);
+        assertEquals(-1.96, p2.calculate(0.02, new State(0, -2), new State(0, 2)).velocity, 0.001);
+        assertEquals(-2.04, p2.calculate(0.02, new State(0.5, -2), new State(-0.5, 2)).velocity, 0.001);
+        assertEquals(-2.04, p2.calculate(0.02, new State(1, -2), new State(-1, 2)).velocity, 0.001);
+        assertEquals(-2.04, p2.calculate(0.02, new State(2, -2), new State(-2, 2)).velocity, 0.001);
+    }
+
+    @Test
+    void testSwitchingTime() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        // between (-2,2) and (2,2) the switching point is at (0, 3.464)
+        // at the switching point,
+        // u=-2, v=3.464, dt=0.02, dx = 0.0693 + 0.0004, dv=0.04
+
+        // 0.02s before the switching point should yield the switching point exactly
+        State s = p2.calculate(0.02, new State(-0.0693, 3.424), new State(2, 2));
+        assertEquals(0.000, s.position, 0.001);
+        assertEquals(3.464, s.velocity, 0.001);
+
+        // this is right at the switching point: the correct path is 0.02 down G-
+        s = p2.calculate(0.02, new State(0, 3.464), new State(2, 2));
+        assertEquals(0.0693, s.position, 0.001);
+        assertEquals(3.424, s.velocity, 0.001);
+
+        // split dt between I+ and G-
+        // u=-2, v=3.464, dt=0.01, dx = 0.0346 + 0.0001, dv=0.02
+        // the correct outcome is 0.01 down G-
+        s = p2.calculate(0.02, new State(-0.0346, 3.444), new State(2, 2));
+        assertEquals(0.0346, s.position, 0.001);
+        assertEquals(3.444, s.velocity, 0.001);
     }
 
     @Test

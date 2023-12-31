@@ -22,14 +22,84 @@ public class TrapezoidProfile100 {
         m_tolerance = tolerance;
     }
 
-    public State calculate(double dt, final State in_goal, final State in_initial) {
+    /** this puts  initial first because my god */
+    public State calculate(double dt,  final State in_initial, final State in_goal) {
+        if (in_goal.near(in_initial, m_tolerance)) {
+            m_finished = true;
+            return new State(in_goal);
+        }
+        double t1IplusGminus = t1IplusGminus(in_initial, in_goal);
+        double t1IminusGplus = t1IminusGplus(in_initial, in_goal);
 
-        return null;
+        if (Double.isNaN(t1IplusGminus)) {
+            // the valid path is I-G+
+            double t1 = t1IminusGplus;
+            if (t1 >= dt) {
+                // we're still on I-
+                double x = in_initial.position + in_initial.velocity * dt
+                        - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
+                double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
+                return new State(x, v);
+            }
+            // switch during dt
+            // first get to the switching point
+            double x = in_initial.position + in_initial.velocity * t1
+                    - 0.5 * m_constraints.maxAcceleration * Math.pow(t1, 2);
+            double v = in_initial.velocity - m_constraints.maxAcceleration * t1;
+            // then go the other way for the remaining time
+            double t2 = dt - t1;
+            x = x + v * t2 + 0.5 * m_constraints.maxAcceleration * Math.pow(t2, 2);
+            v = v + m_constraints.maxAcceleration * t2;
+            return new State(x, v);
+        }
+        if (Double.isNaN(t1IminusGplus)) {
+            // the valid path is I+G-
+            double t1 = t1IplusGminus;
+            if (t1 >= dt) {
+                // we're still on I+
+                double x = in_initial.position + in_initial.velocity * dt
+                        + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
+                double v = in_initial.velocity + m_constraints.maxAcceleration * dt;
+                return new State(x, v);
+            }
+            // switch during dt
+            // first get to the switching point
+            double x = in_initial.position + in_initial.velocity * t1
+                    + 0.5 * m_constraints.maxAcceleration * Math.pow(t1, 2);
+            double v = in_initial.velocity + m_constraints.maxAcceleration * t1;
+            // then go the other way for the remaining time
+            double t2 = dt - t1;
+            x = x + v * t2 - 0.5 * m_constraints.maxAcceleration * Math.pow(t2, 2);
+            v = v - m_constraints.maxAcceleration * t2;
+            return new State(x, v);
+        }
+        // this only happens when the positions are the same and the velocities are
+        // opposite, i.e. they're on the same trajectory, in which case we want to
+        // switch immediately to the goal trajectory
+        if (t1IplusGminus > t1IminusGplus) {
+            // we want G+, use positive accel
+            double x = in_initial.position + in_initial.velocity * dt
+                    + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
+            double v = in_initial.velocity + m_constraints.maxAcceleration * dt;
+            return new State(x, v);
+        } else {
+            // we want G-, use negative accel
+            double x = in_initial.position + in_initial.velocity * dt
+                    - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
+            double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
+            return new State(x, v);
+        }
+
     }
 
+    // for testing
     double t1(State initial, State goal) {
         double t1IplusGminus = t1IplusGminus(initial, goal);
         double t1IminusGplus = t1IminusGplus(initial, goal);
+        return t1(t1IplusGminus, t1IminusGplus);
+    }
+
+    double t1(double t1IplusGminus, double t1IminusGplus) {
         if (Double.isNaN(t1IplusGminus)) {
             return t1IminusGplus;
         }
