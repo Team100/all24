@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.DARE;
-import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.StateSpaceUtil;
@@ -60,8 +59,8 @@ class KTest {
     void testK() {
         Nat<N2> states = Nat.N2();
         Nat<N1> inputs = Nat.N1();
-        Matrix<N2, N2> A = MatBuilder.fill(states, states,0, 1, 0, 0);
-        Matrix<N2, N1> B = MatBuilder.fill(states, inputs,0, 1);
+        Matrix<N2, N2> A = Matrix.mat(states, states).fill(0, 1, 0, 0);
+        Matrix<N2, N1> B = Matrix.mat(states, inputs).fill(0, 1);
         Vector<N2> stateTolerance = VecBuilder.fill(0.01, 0.2);
         Vector<N1> controlTolerance = VecBuilder.fill(12.0);
         Matrix<N2, N2> Q = StateSpaceUtil.makeCostMatrix(stateTolerance);

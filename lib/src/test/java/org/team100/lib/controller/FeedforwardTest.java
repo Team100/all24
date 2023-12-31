@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
@@ -21,10 +20,10 @@ class FeedforwardTest {
     void testFeedforward() {
         double dtSeconds = 0.02;
 
-        final Matrix<N2, N2> A = MatBuilder.fill(Nat.N2(), Nat.N2(),0, 1, 0, 0);
-        final Matrix<N2, N1> B = MatBuilder.fill(Nat.N2(), Nat.N1(),0, 1);
-        final Matrix<N2, N2> C = MatBuilder.fill(Nat.N2(), Nat.N2(),1, 0, 0, 1);
-        final Matrix<N2, N1> D = MatBuilder.fill(Nat.N2(), Nat.N1(),0, 0);
+        final Matrix<N2, N2> A = Matrix.mat(Nat.N2(), Nat.N2()).fill(0, 1, 0, 0);
+        final Matrix<N2, N1> B = Matrix.mat(Nat.N2(), Nat.N1()).fill(0, 1);
+        final Matrix<N2, N2> C = Matrix.mat(Nat.N2(), Nat.N2()).fill(1, 0, 0, 1);
+        final Matrix<N2, N1> D = Matrix.mat(Nat.N2(), Nat.N1()).fill(0, 0);
 
         {
             // look at how FF works (this is copied from the FF class)
