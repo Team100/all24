@@ -1,4 +1,11 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -22,6 +29,48 @@
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Front Left": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Front Right": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Rear Left": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Rear Right": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseClosedLoopDrive": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   }
 }
