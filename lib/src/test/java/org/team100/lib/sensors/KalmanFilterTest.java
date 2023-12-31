@@ -188,8 +188,6 @@ public class KalmanFilterTest {
         final LinearSystem<N2, N1, N2> ls = new LinearSystem(A, B, C, D);
         final SteadyStateKalmanFilter<N2, N1, N2> kf = new SteadyStateKalmanFilter(Nat.N2(), Nat.N2(), ls, stateStdDevs, outputStdDevs,
                 dtSec);
-        // TODO This is likely wrong, but there is no getK function anymore, so this has
-        // been replaced with getP for now
         Matrix<N2, N2> K = kf.getK();
         assertArrayEquals(new double[] { 0.039, 0.011, 0, 0.828 }, K.getData(), 0.001);
         if (dump)
