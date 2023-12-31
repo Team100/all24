@@ -27,55 +27,115 @@ public class TrapezoidProfile100 {
         return null;
     }
 
+    double t1(State initial, State goal) {
+        double t1IplusGminus = t1IplusGminus(initial, goal);
+        double t1IminusGplus = t1IminusGplus(initial, goal);
+        if (Double.isNaN(t1IplusGminus)) {
+            return t1IminusGplus;
+        }
+        if (Double.isNaN(t1IminusGplus)) {
+            return t1IplusGminus;
+        }
+        // this only happens when the positions are the same and the velocities are
+        // opposite, i.e. they're on the same trajectory, in which case we want to
+        // switch immediately
+        return 0;
+    }
 
     double tSwitch(State initial, State goal) {
         double tIplusGminus = tSwitchIplusGminus(initial, goal);
         double tIminusGplus = tSwitchIminusGplus(initial, goal);
         return Math.min(tIplusGminus, tIminusGplus);
     }
+
     double tSwitchIplusGminus(State initial, State goal) {
         // this is the switching velocity
-        double q_dot_switch = qDotSwitchIplusGminus( initial, goal);
-        double t_1 = (q_dot_switch - initial.velocity) / m_constraints.maxAcceleration;
+        double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
+        double t_1 = t1IplusGminus(initial, goal);
         double t_2 = (goal.velocity - q_dot_switch) / (-1.0 * m_constraints.maxAcceleration);
         return t_1 + t_2;
     }
+
+    /** Time to switch point for I+G- path, or NaN if there is no path. */
+    double t1IplusGminus(State initial, State goal) {
+        double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
+        return (q_dot_switch - initial.velocity) / m_constraints.maxAcceleration;
+    }
+
     double tSwitchIminusGplus(State initial, State goal) {
         double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
-        double t_1 = (q_dot_switch - initial.velocity) / (-1.0 * m_constraints.maxAcceleration);
+        double t_1 = t1IminusGplus(initial, goal);
         double t_2 = (goal.velocity - q_dot_switch) / m_constraints.maxAcceleration;
         return t_1 + t_2;
     }
 
+    /** Time to switch point for I-G+ path, or NaN if there is no path. */
+    double t1IminusGplus(State initial, State goal) {
+        double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
+        return (q_dot_switch - initial.velocity) / (-1.0 * m_constraints.maxAcceleration);
+    }
+
+    /**
+     * Velocity of I+ at the midpoint of the "switch" path.
+     * The "switch" path always chooses a switching point that is faster than the
+     * endpoints. If there's no intersection, or if the intersection corresponds to
+     * a "limit" path, you get NaN.
+     */
     double qDotSwitchIplusGminus(State initial, State goal) {
-        return Math.sqrt(2 * m_constraints.maxAcceleration * (qSwitchIplusGminus(initial, goal) - c_plus(initial)));    
+        if (initial.equals(goal))
+            return initial.velocity;
+        // progress along I+
+        double d = qSwitchIplusGminus(initial, goal) - c_plus(initial);
+        double qdot = Math.sqrt(2 * m_constraints.maxAcceleration * d);
+        if (qdot < Math.abs(initial.velocity)
+                || qdot < Math.abs(goal.velocity))
+            return Double.NaN;
+        return qdot;
     }
 
+    /**
+     * Velocity of G+ at the midpoint of the "switch" path.
+     * The "switch" path always chooses a switching point that is faster than the
+     * endpoints. If there's no intersection, or if the intersection corresponds to
+     * a "limit" path, you get NaN.
+     */
     double qDotSwitchIminusGplus(State initial, State goal) {
-        return -1.0 * Math.sqrt(
-            2 * m_constraints.maxAcceleration * (qSwitchIminusGplus(initial, goal) - c_plus(goal)));
+        if (initial.equals(goal))
+            return goal.velocity;
+        // progress along G+
+        double d = qSwitchIminusGplus(initial, goal) - c_plus(goal);
+        double qdot = Math.sqrt(2 * m_constraints.maxAcceleration * d);
+        if (qdot < Math.abs(initial.velocity)
+                || qdot < Math.abs(goal.velocity))
+            return Double.NaN;
+        return -1.0 * qdot;
     }
 
+    /**
+     * Position at the midpoint between the intercepts of the positive-acceleration
+     * path through the initial state and the negative-acceleration path through the
+     * goal state, i.e. the I+G- path.
+     */
     double qSwitchIplusGminus(State initial, State goal) {
         return (c_plus(initial) + c_minus(goal)) / 2;
     }
 
+    /**
+     * Midpoint position for the I-G+ path.
+     */
     double qSwitchIminusGplus(State initial, State goal) {
-        return (c_minus(initial) + c_plus(goal))/2;
+        return (c_minus(initial) + c_plus(goal)) / 2;
     }
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_minus(State s) {
-        return s.position - Math.pow(s.velocity,2)/(-2.0 * m_constraints.maxAcceleration);
+        return s.position - Math.pow(s.velocity, 2) / (-2.0 * m_constraints.maxAcceleration);
     }
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_plus(State s) {
-        return s.position - Math.pow(s.velocity, 2)/(2.0 * m_constraints.maxAcceleration);
+        return s.position - Math.pow(s.velocity, 2) / (2.0 * m_constraints.maxAcceleration);
     }
-
-
-
 
     public State calculate2(double dt, final State in_goal, final State in_current) {
         m_finished = false;

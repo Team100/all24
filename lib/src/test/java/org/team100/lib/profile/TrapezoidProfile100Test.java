@@ -83,21 +83,21 @@ class TrapezoidProfile100Test {
 
     @Test
     void testQSwitch() {
-                Constraints c = new Constraints(5, 1);
+        Constraints c = new Constraints(5, 1);
         TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
 
         Constraints c2 = new Constraints(5, 2);
         TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
 
-        assertEquals(0.375, p2.qSwitchIplusGminus(new State(0, 0),new State( 0.5, 1.0)), 0.001);
+        assertEquals(0.375, p2.qSwitchIplusGminus(new State(0, 0), new State(0.5, 1.0)), 0.001);
         assertEquals(0.125, p2.qSwitchIminusGplus(new State(0, 0), new State(0.5, 1.0)), 0.001);
 
-        assertEquals(-0.5, p.qSwitchIplusGminus(new State(-3, 2),new State( 2, 2)), 0.001);
+        assertEquals(-0.5, p.qSwitchIplusGminus(new State(-3, 2), new State(2, 2)), 0.001);
         assertEquals(0, p.qSwitchIplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
         assertEquals(0.5, p.qSwitchIplusGminus(new State(-1, 2), new State(2, 2)), 0.001);
 
         assertEquals(-0.5, p.qSwitchIminusGplus(new State(2, -2), new State(-3, -2)), 0.001);
-        assertEquals(0.0, p.qSwitchIminusGplus(new State(2, -2),new State( -2, -2)), 0.001);
+        assertEquals(0.0, p.qSwitchIminusGplus(new State(2, -2), new State(-2, -2)), 0.001);
         assertEquals(0.5, p.qSwitchIminusGplus(new State(2, -2), new State(-1, -2)), 0.001);
 
         // these are all a little different just to avoid zero as the answer
@@ -105,6 +105,226 @@ class TrapezoidProfile100Test {
         assertEquals(0.5, p.qSwitchIplusGminus(new State(-1, 2), new State(2, -2)), 0.001);
         assertEquals(0.5, p.qSwitchIminusGplus(new State(2, 2), new State(-1, 2)), 0.001);
         assertEquals(0.5, p.qSwitchIminusGplus(new State(-1, 2), new State(2, -2)), 0.001);
+    }
+
+    /** Verify some switching velocity cases */
+    @Test
+    void testQDotSwitch2() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12)
+        assertEquals(3.464, p2.qDotSwitchIplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
+        // c(I)=-2, x=v^2/4, x=2, v=sqrt(8)
+        assertEquals(2.828, p2.qDotSwitchIplusGminus(new State(-1, 2), new State(1, 2)), 0.001);
+        // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6)
+        assertEquals(2.449, p2.qDotSwitchIplusGminus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        // the same point
+        assertEquals(2.000, p2.qDotSwitchIplusGminus(new State(0, 2), new State(0, 2)), 0.001);
+        // I+G- is negative-time here. 
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        // I+G- is negative-time here. 
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
+        // no intersection
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
+
+        // no intersection
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
+        // I-G+ is negative-time here
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-1, 2), new State(1, 2)), 0.001);
+        // I-G+ is negative-time here
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        // the same point
+        assertEquals(2.0, p2.qDotSwitchIminusGplus(new State(0, 2), new State(0, 2)), 0.001);
+        // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6), negative arm
+        assertEquals(-2.449, p2.qDotSwitchIminusGplus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        // c(I)=-2, x=v^2/4, x=2, v=sqrt(8), negative arm
+        assertEquals(-2.828, p2.qDotSwitchIminusGplus(new State(1, 2), new State(-1, 2)), 0.001);
+        // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
+        assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
+
+        // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12)
+        assertEquals(3.464, p2.qDotSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
+        // c(I)=-2, x=v^2/4, x=2, v=sqrt(8)
+        assertEquals(2.828, p2.qDotSwitchIplusGminus(new State(-1, 2), new State(1, -2)), 0.001);
+        assertEquals(2.449, p2.qDotSwitchIplusGminus(new State(-0.5, 2), new State(0.5, -2)), 0.001);
+        // the path switches immediately
+        assertEquals(2.000, p2.qDotSwitchIplusGminus(new State(0, 2), new State(0, -2)), 0.001);
+        // only the negative-time solution exists
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(0.5, 2), new State(-0.5, -2)), 0.001);
+        // only the negative-time solution exists
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(1, 2), new State(-1, -2)), 0.001);
+        // no intersection
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(2, 2), new State(-2, -2)), 0.001);
+
+        // no intersection
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
+        // traverses G+ backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-1, 2), new State(1, -2)), 0.001);
+        // traverses G+ backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-0.5, 2), new State(0.5, -2)), 0.001);
+        // switching at the goal
+        assertEquals(-2.000, p2.qDotSwitchIminusGplus(new State(0, 2), new State(0, -2)), 0.001);
+        // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6), negative arm
+        assertEquals(-2.449, p2.qDotSwitchIminusGplus(new State(0.5, 2), new State(-0.5, -2)), 0.001);
+        // c(I)=-2, x=v^2/4, x=2, v=sqrt(8), negative arm
+        assertEquals(-2.828, p2.qDotSwitchIminusGplus(new State(1, 2), new State(-1, -2)), 0.001);
+        // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
+        assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State(2, 2), new State(-2, -2)), 0.001);
+
+        // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12)
+        assertEquals(3.464, p2.qDotSwitchIplusGminus(new State(-2, -2), new State(2, 2)), 0.001);
+        // c(I)=-2, x=v^2/4, x=2, v=sqrt(8)
+        assertEquals(2.828, p2.qDotSwitchIplusGminus(new State(-1, -2), new State(1, 2)), 0.001);
+        // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6)
+        assertEquals(2.449, p2.qDotSwitchIplusGminus(new State(-0.5, -2), new State(0.5, 2)), 0.001);
+        // switches at G
+        assertEquals(2.000, p2.qDotSwitchIplusGminus(new State(0, -2), new State(0, 2)), 0.001);
+        // traverses G- backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(0.5, -2), new State(-0.5, 2)), 0.001);
+        // traverses G- backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(1, -2), new State(-1, 2)), 0.001);
+        // no intersection
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(2, -2), new State(-2, 2)), 0.001);
+
+        // no intersection
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-2, -2), new State(2, 2)), 0.001);
+        // traverses I- backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-1, -2), new State(1, 2)), 0.001);
+        // traverses I- backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-0.5, -2), new State(0.5, -2)), 0.001);
+        // switches at I
+        assertEquals(-2.000, p2.qDotSwitchIminusGplus(new State(0, -2), new State(0, 2)), 0.001);
+        // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6), negative arm
+        assertEquals(-2.449, p2.qDotSwitchIminusGplus(new State(0.5, -2), new State(-0.5, 2)), 0.001);
+        // c(I)=-2, x=v^2/4, x=2, v=sqrt(8), negative arm
+        assertEquals(-2.828, p2.qDotSwitchIminusGplus(new State(1, -2), new State(-1, 2)), 0.001);
+        // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
+        assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State(2, -2), new State(-2, 2)), 0.001);
+    }
+
+    /** Verify the time to the switching point via each path */
+    @Test
+    void testT() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        // dv=1.464, a=2
+        assertEquals(0.732, p2.t1IplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
+        // dv=0.828, a=2
+        assertEquals(0.414, p2.t1IplusGminus(new State(-1, 2), new State(1, 2)), 0.001);
+        // dv = 0.449, a=2
+        assertEquals(0.225, p2.t1IplusGminus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        // dv = 0
+        assertEquals(0.000, p2.t1IplusGminus(new State(0, 2), new State(0, 2)), 0.001);
+        // I+G- is negative-time here. 
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        // I+G- is negative-time here. 
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
+        // no intersection
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
+
+        // no intersection
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
+        // I-G+ is negative-time here
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-1, 2), new State(1, 2)), 0.001);
+        // I-G+ is negative-time here
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        // dv = 0
+        assertEquals(0.000, p2.t1IminusGplus(new State(0, 2), new State(0, 2)), 0.001);
+        // dv = -4.449, a=2
+        assertEquals(2.225, p2.t1IminusGplus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        // dv = -4.828, a=2
+        assertEquals(2.414, p2.t1IminusGplus(new State(1, 2), new State(-1, 2)), 0.001);
+        // dv = -5.464
+        assertEquals(2.732, p2.t1IminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
+
+        // dv=1.464
+        assertEquals(0.732, p2.t1IplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
+        // dv=0.828
+        assertEquals(0.414, p2.t1IplusGminus(new State(-1, 2), new State(1, -2)), 0.001);
+        assertEquals(0.225, p2.t1IplusGminus(new State(-0.5, 2), new State(0.5, -2)), 0.001);
+        // the path switches immediately
+        assertEquals(0.000, p2.t1IplusGminus(new State(0, 2), new State(0, -2)), 0.001);
+        // only the negative-time solution exists
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(0.5, 2), new State(-0.5, -2)), 0.001);
+        // only the negative-time solution exists
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(1, 2), new State(-1, -2)), 0.001);
+        // no intersection
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(2, 2), new State(-2, -2)), 0.001);
+
+        // no intersection
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
+        // traverses G+ backwards
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-1, 2), new State(1, -2)), 0.001);
+        // traverses G+ backwards
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-0.5, 2), new State(0.5, -2)), 0.001);
+        // switching at the goal, dv=4, a=2
+        assertEquals(2.000, p2.t1IminusGplus(new State(0, 2), new State(0, -2)), 0.001);
+        // dv=-4.449
+        assertEquals(2.225, p2.t1IminusGplus(new State(0.5, 2), new State(-0.5, -2)), 0.001);
+        // dv=-4.828
+        assertEquals(2.414, p2.t1IminusGplus(new State(1, 2), new State(-1, -2)), 0.001);
+        // dv=-5.464
+        assertEquals(2.732, p2.t1IminusGplus(new State(2, 2), new State(-2, -2)), 0.001);
+
+        // dv=5.464
+        assertEquals(2.732, p2.t1IplusGminus(new State(-2, -2), new State(2, 2)), 0.001);
+        // dv=4.828
+        assertEquals(2.414, p2.t1IplusGminus(new State(-1, -2), new State(1, 2)), 0.001);
+        // dv=4.449
+        assertEquals(2.225, p2.t1IplusGminus(new State(-0.5, -2), new State(0.5, 2)), 0.001);
+        // switches at G
+        assertEquals(2.000, p2.t1IplusGminus(new State(0, -2), new State(0, 2)), 0.001);
+        // traverses G- backwards
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(0.5, -2), new State(-0.5, 2)), 0.001);
+        // traverses G- backwards
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(1, -2), new State(-1, 2)), 0.001);
+        // no intersection
+        assertEquals(Double.NaN, p2.t1IplusGminus(new State(2, -2), new State(-2, 2)), 0.001);
+
+        // no intersection
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-2, -2), new State(2, 2)), 0.001);
+        // traverses I- backwards
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-1, -2), new State(1, 2)), 0.001);
+        // traverses I- backwards
+        assertEquals(Double.NaN, p2.t1IminusGplus(new State(-0.5, -2), new State(0.5, -2)), 0.001);
+        // switches at I, dv=0
+        assertEquals(0.000, p2.t1IminusGplus(new State(0, -2), new State(0, 2)), 0.001);
+        // dv=-0.449
+        assertEquals(0.225, p2.t1IminusGplus(new State(0.5, -2), new State(-0.5, 2)), 0.001);
+        // dv=-0.828
+        assertEquals(0.414, p2.t1IminusGplus(new State(1, -2), new State(-1, 2)), 0.001);
+        // dv=-1.464
+        assertEquals(0.732, p2.t1IminusGplus(new State(2, -2), new State(-2, 2)), 0.001);
+    }
+
+       /** Verify the time to the switching point */
+    @Test
+    void testT1() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        assertEquals(0.732, p2.t1(new State(-2, 2), new State(2, 2)), 0.001);
+        assertEquals(0.414, p2.t1(new State(-1, 2), new State(1, 2)), 0.001);
+        assertEquals(0.225, p2.t1(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        assertEquals(0.000, p2.t1(new State(0, 2), new State(0, 2)), 0.001);
+        assertEquals(2.225, p2.t1(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        assertEquals(2.414, p2.t1(new State(1, 2), new State(-1, 2)), 0.001);
+        assertEquals(2.732, p2.t1(new State(2, 2), new State(-2, 2)), 0.001);
+
+        assertEquals(0.732, p2.t1(new State(-2, 2), new State(2, -2)), 0.001);
+        assertEquals(0.414, p2.t1(new State(-1, 2), new State(1, -2)), 0.001);
+        assertEquals(0.225, p2.t1(new State(-0.5, 2), new State(0.5, -2)), 0.001);
+        assertEquals(0.000, p2.t1(new State(0, 2), new State(0, -2)), 0.001);
+        assertEquals(2.225, p2.t1(new State(0.5, 2), new State(-0.5, -2)), 0.001);
+        assertEquals(2.414, p2.t1(new State(1, 2), new State(-1, -2)), 0.001);
+        assertEquals(2.732, p2.t1(new State(2, 2), new State(-2, -2)), 0.001);
+
+        assertEquals(2.732, p2.t1(new State(-2, -2), new State(2, 2)), 0.001);
+        assertEquals(2.414, p2.t1(new State(-1, -2), new State(1, 2)), 0.001);
+        assertEquals(2.225, p2.t1(new State(-0.5, -2), new State(0.5, 2)), 0.001);
+        assertEquals(0.000, p2.t1(new State(0, -2), new State(0, 2)), 0.001);
+        assertEquals(0.225, p2.t1(new State(0.5, -2), new State(-0.5, 2)), 0.001);
+        assertEquals(0.414, p2.t1(new State(1, -2), new State(-1, 2)), 0.001);
+        assertEquals(0.732, p2.t1(new State(2, -2), new State(-2, 2)), 0.001);
     }
 
     @Test
@@ -126,7 +346,7 @@ class TrapezoidProfile100Test {
         assertEquals(-2.828, p.qDotSwitchIminusGplus(new State(2, -2), new State(-2, -2)), 0.001);
         assertEquals(-2.645, p.qDotSwitchIminusGplus(new State(2, -2), new State(-1, -2)), 0.001);
 
-        // from 2,2 to -2,2, I+G- is invalid
+        // from 2,2 to -2,2. There's no intersection between these curves
         assertEquals(0, p.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
         // from -2,2 to 2,-2 switches in the same place as -2,2->2,2
         assertEquals(2.828, p.qDotSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
@@ -170,7 +390,6 @@ class TrapezoidProfile100Test {
         assertEquals(1.449, p.tSwitchIplusGminus(new State(-1, 1), new State(0, 0)), 0.001);
 
     }
-
 
     ///////// old tests below
 
