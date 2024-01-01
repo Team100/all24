@@ -6,8 +6,6 @@ import edu.wpi.first.math.MathUtil;
  * This uses the approach from LaValle 2023: between any two points in phase
  * space, the optimal acceleration-limited path is via two parabolas, perhaps
  * with a velocity limit.
- *
- * 
  */
 public class TrapezoidProfile100 {
 
@@ -25,16 +23,6 @@ public class TrapezoidProfile100 {
      * the velocity constraint only ever clips the switch point.
      */
     public State calculate(double dt, final State initial, final State goal) {
-
-        if (Double.isNaN(initial.position))
-            throw new IllegalArgumentException();
-        if (Double.isNaN(initial.velocity))
-            throw new IllegalArgumentException();
-        if (Double.isNaN(goal.position))
-            throw new IllegalArgumentException();
-        if (Double.isNaN(goal.velocity))
-            throw new IllegalArgumentException();
-
         State in_initial = new State(initial.position,
                 MathUtil.clamp(initial.velocity, -m_constraints.maxVelocity, m_constraints.maxVelocity));
         State in_goal = new State(goal.position,
@@ -88,8 +76,9 @@ public class TrapezoidProfile100 {
         double t1IplusGminus = t1IplusGminus(in_initial, in_goal);
         double t1IminusGplus = t1IminusGplus(in_initial, in_goal);
 
+        // these should not both be NaN
         if (Double.isNaN(t1IminusGplus) && Double.isNaN(t1IplusGminus))
-            throw new IllegalStateException();
+            return in_initial;
 
         if (Double.isNaN(t1IplusGminus)) {
             // the valid path is I-G+
@@ -197,6 +186,7 @@ public class TrapezoidProfile100 {
         double dtg = Math.abs((in_initial.velocity - in_goal.velocity) / m_constraints.maxAcceleration);
         // don't overshoot the goal
         dt = Math.min(dt, dtg);
+
         if (MathUtil.isNear(0, t1IminusGplus, 1e-12)) {
             // we want G+, use positive accel
             double x = in_initial.position + in_initial.velocity * dt
@@ -211,8 +201,8 @@ public class TrapezoidProfile100 {
             double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
             return new State(x, v);
         }
+
         // if either path will work, but neither is zero, take the fast one.
-        // chose the slower one
         if (t1IminusGplus > t1IplusGminus) {
             // I-G+ is slower so use I+G-, which means positive A
             double x = in_initial.position + in_initial.velocity * dt
@@ -225,26 +215,6 @@ public class TrapezoidProfile100 {
                 - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
         double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
         return new State(x, v);
-    }
-
-    // for testing
-    double t1(State initial, State goal) {
-        double t1IplusGminus = t1IplusGminus(initial, goal);
-        double t1IminusGplus = t1IminusGplus(initial, goal);
-        return t1(t1IplusGminus, t1IminusGplus);
-    }
-
-    double t1(double t1IplusGminus, double t1IminusGplus) {
-        if (Double.isNaN(t1IplusGminus)) {
-            return t1IminusGplus;
-        }
-        if (Double.isNaN(t1IminusGplus)) {
-            return t1IplusGminus;
-        }
-        // this only happens when the positions are the same and the velocities are
-        // opposite, i.e. they're on the same trajectory, in which case we want to
-        // switch immediately
-        return 0;
     }
 
     double tSwitchIplusGminus(State initial, State goal) {
@@ -291,9 +261,6 @@ public class TrapezoidProfile100 {
 
     /**
      * Velocity of I+ at the midpoint of the "switch" path.
-     * The "switch" path always chooses a switching point that is faster than the
-     * endpoints. If there's no intersection, or if the intersection corresponds to
-     * a "limit" path, you get NaN.
      * 
      * "switch" path using I+G- means the goal has to be to the right of the "s"
      * shaped curve including I.
@@ -320,21 +287,12 @@ public class TrapezoidProfile100 {
         // progress along I+
         double d = qSwitchIplusGminus(initial, goal) - c_plus(initial);
         if (d < 0)
-            throw new IllegalStateException();
-        double qdot = Math.sqrt(2 * m_constraints.maxAcceleration * d);
-        // avoid the "tlimit" path
-        // ok actually qdot doesn't need to be less than both, it just
-        // needs to be greater than one.
-
-        return qdot;
-
+            d = 0;
+        return Math.sqrt(2 * m_constraints.maxAcceleration * d);
     }
 
     /**
      * Velocity of G+ at the midpoint of the "switch" path.
-     * The "switch" path always chooses a switching point that is faster than the
-     * endpoints. If there's no intersection, or if the intersection corresponds to
-     * a "limit" path, you get NaN.
      * 
      * "switch" path using I-G+ means the goal has to be to the left of the I- curve
      * for goal.v less than i.v, and to the left of the I+ curve for goal.v > i.v
@@ -361,10 +319,9 @@ public class TrapezoidProfile100 {
         // progress along I-
         double d = qSwitchIminusGplus(initial, goal) - c_plus(goal);
         if (d < 0)
-            throw new IllegalStateException();
-        double qdot = Math.sqrt(2 * m_constraints.maxAcceleration * d);
+            d = 0;
 
-        return -qdot;
+        return -1.0 * Math.sqrt(2 * m_constraints.maxAcceleration * d);
     }
 
     /**
@@ -393,167 +350,19 @@ public class TrapezoidProfile100 {
         return s.position - Math.pow(s.velocity, 2) / (2.0 * m_constraints.maxAcceleration);
     }
 
-    public State calculate2(double dt, final State in_goal, final State in_current) {
-        double u = u(dt, in_goal, in_current);
-        double v = in_current.velocity + u * dt;
-        if (v > m_constraints.maxVelocity) {
-            v = m_constraints.maxVelocity;
-            u = 0;
-        } else if (v < -m_constraints.maxVelocity) {
-            v = -m_constraints.maxVelocity;
-            u = 0;
+    // for testing
+    double t1(State initial, State goal) {
+        double t1IplusGminus = t1IplusGminus(initial, goal);
+        double t1IminusGplus = t1IminusGplus(initial, goal);
+        if (Double.isNaN(t1IplusGminus)) {
+            return t1IminusGplus;
         }
-        double x = in_current.position + in_current.velocity * dt + 0.5 * u * dt * dt;
-        // System.out.println("U " + u);
-        return new State(x, v);
-    }
-
-    /** Produce +maxAccel, -maxAccel, or zero. */
-    public double u(double dt, final State in_goal, final State in_current) {
-        double gain = m_constraints.maxAcceleration;
-        State error = in_goal.minus(in_current);
-        // double err = error.norm();
-        // if we're near the goal, turn down the gain in the 2nd and 4th quadrants.
-        if ((Math.abs(error.position) < 5 * m_constraints.maxVelocity * dt)
-                &&
-                (Math.abs(error.velocity) < 5 * m_constraints.maxAcceleration * dt)
-                &&
-                ((in_current.position > in_goal.position && in_current.velocity < 0)
-                        ||
-                        (in_current.position < in_goal.position && in_current.velocity > 0))) {
-            gain = 0.1 * gain;
+        if (Double.isNaN(t1IminusGplus)) {
+            return t1IplusGminus;
         }
-        // if (err < 10 * dt) {
-        // System.out.println("slow");
-        // gain = 0.1 * gain;
-        // }
-        // System.out.println("GOAL " + in_goal + " CURRENT " + in_current);
-        if (in_goal.near(in_current, m_tolerance)) {
-            return 0;
-        }
-
-        // the intercept of the forward parabola
-        double xplus = xplus(in_goal, gain);
-        // the intercept of the reverse parabola
-        double xminus = xminus(in_goal, gain);
-        // the value of the forward parabola at our velocity
-        double xplusSwitch = xplusforv(xplus, in_current.velocity, gain);
-        // the value of the reverse parabola at our velocity
-        double xminusSwitch = xminusforv(xminus, in_current.velocity, gain);
-
-        // System.out.printf("xp %5.3f xm %5.3f\n", xplusSwitch, xminusSwitch);
-
-        // which side of the switching surface are we on?
-        if (in_current.position < xminusSwitch) {
-            // System.out.println("left");
-            // to the left of the reverse parabola.
-
-            if (in_current.position > xplusSwitch) {
-                // System.out.println("center");
-                // the region in the center. in this region we're too close to get directly to
-                // the goal. instead, we back up to provide more space to accumluate speed.
-                if (in_goal.velocity > 0) {
-                    // if the goal velocity is positive, then backing is reverse.
-                    // if we're close to the boundary, then coast
-                    // use the coasting time since it's easier than calculating the parabola
-                    // intersection
-                    double coastTimeToBoundary = (in_current.position - xplusSwitch) / -in_current.velocity;
-                    // System.out.println("time " + coastTimeToBoundary);
-                    if (in_current.velocity < 0 && in_current.position - xplusSwitch < -3 * in_current.velocity * dt) {
-                        // System.out.println("coast0");
-                        // if the coast just barely intersects the switching surface, then we should
-                        // switch at dt/2.
-                        // and u = 0. so naively, use double the dt period.
-                        return gain * (1 - coastTimeToBoundary / dt);
-                        // return 0.0;
-                    }
-                    // otherwise back full speed.
-                    return -gain;
-                }
-                // if the goal velocity is negative, then backing is forward.
-                // if we're close to the boundary, then coast
-                double coastTimeToBoundary = (xminusSwitch - in_current.position) / in_current.velocity;
-                // System.out.println("lefttime " + coastTimeToBoundary);
-                if (in_current.velocity > 0 && xminusSwitch - in_current.position < 3 * in_current.velocity * dt) {
-                    // System.out.println("coast1");
-                    return gain * (coastTimeToBoundary / dt - 1);
-                    // return 0.0;
-                }
-                // otherwise ahead full
-                return gain;
-            }
-            // the rest of the left region wants forward.
-            // if we're close to the boundary, then coast
-            double coastTimeToBoundary = (xminusSwitch - in_current.position) / in_current.velocity;
-            // System.out.println("TIME " + coastTimeToBoundary);
-            if (in_current.velocity > 0 && xminusSwitch - in_current.position < 3 * in_current.velocity * dt) {
-                // System.out.println("coast2");
-                // guess at a reasonable u. if the coast time is long, then this is +u, if the
-                // coast time is short it's -u
-                return gain * (coastTimeToBoundary / dt - 1);
-                // return 0.0;
-            }
-            // otherwise ahead full
-
-            return gain;
-        }
-        if (in_current.position > xplusSwitch) {
-            // System.out.println("right");
-            // to the right of the forward parabola. since we already accounted for the
-            // overlap, we always reverse.
-            // if we're close to the boundary, then coast
-            double coastTimeToBoundary = (in_current.position - xplusSwitch) / -in_current.velocity;
-            // System.out.println("Right time " + coastTimeToBoundary);
-            if (in_current.velocity < 0 && in_current.position - xplusSwitch < -3 * in_current.velocity * dt) {
-                // System.out.println("coast3");
-                return gain * (1 - coastTimeToBoundary / dt);
-                // return 0.0;
-            }
-            // otherwise back full speed.
-            return -gain;
-        }
-        // within neither parabola, i.e. going too fast to stop, so make a u-turn.
-        if (in_current.velocity > 0) {
-            // System.out.println("u0");
-            // if we're heading forward, we need to reverse
-            return -gain;
-        }
-        // if we're heading reverse, we need to go forward
-        // System.out.println("u1");
-        return gain;
-    }
-
-    /**
-     * positive parabola value
-     * 
-     * @param x0 x intercept
-     * @param v  sample velocity
-     * @return position of the parabola for the velocity
-     */
-
-    double xplusforv(double x0, double v, double gain) {
-        return x0 + 0.5 * v * v / gain;
-    }
-
-    /**
-     * reverse parabola value
-     * 
-     * @param x0 x intercept
-     * @param v  sample velocity
-     * @return position of the parabola for the velocity
-     */
-    double xminusforv(double x0, double v, double gain) {
-        return x0 - 0.5 * v * v / gain;
-
-    }
-
-    /** The x intercept of the positive-going trajectory */
-    double xplus(State s, double gain) {
-        return s.position - 0.5 * s.velocity * s.velocity / gain;
-    }
-
-    /** The x intercept of the positive-going trajectory */
-    double xminus(State s, double gain) {
-        return s.position + 0.5 * s.velocity * s.velocity / gain;
+        // this only happens when the positions are the same and the velocities are
+        // opposite, i.e. they're on the same trajectory, in which case we want to
+        // switch immediately
+        return 0;
     }
 }
