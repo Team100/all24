@@ -58,7 +58,6 @@ public class PositionServo<T extends Measure100> {
      */
     public void reset() {
         m_controller.reset();
-        System.out.println("RESET");
         m_setpoint = new State(getPosition(), getVelocity());
     }
 
@@ -72,7 +71,6 @@ public class PositionServo<T extends Measure100> {
         getSetpointMinDistance(measurement);
 
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
-        System.out.println(m_setpoint);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.position);
         double u_FF = m_setpoint.velocity;

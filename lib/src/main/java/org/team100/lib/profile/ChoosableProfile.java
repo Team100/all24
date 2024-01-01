@@ -54,7 +54,7 @@ public class ChoosableProfile {
     public State calculate(double t, State goal, State current) {
         switch (m_chooser.getSelected()) {
             case TRAPEZOID:
-                return m_trapezoid.calculate(t, goal, current);
+                return m_trapezoid.calculate(t, current, goal);
             case EXPONENTIAL:
                 ExponentialProfile.State estate = eprofile.calculate(t,
                         new ExponentialProfile.State(current.position, current.velocity),

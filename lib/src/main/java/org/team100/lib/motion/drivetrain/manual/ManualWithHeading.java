@@ -54,7 +54,7 @@ public class ManualWithHeading {
         m_omegaController = omegaController;
         m_latch = new HeadingLatch();
         Constraints c = new Constraints(
-                swerveKinodynamics.getMaxAngleSpeedRad_S(), 
+                swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 swerveKinodynamics.getMaxAngleAccelRad_S2());
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
@@ -62,7 +62,7 @@ public class ManualWithHeading {
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        m_setpoint = new State(currentPose.getRotation().getRadians(),  m_heading.getHeadingRateNWU());
+        m_setpoint = new State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -95,9 +95,8 @@ public class ManualWithHeading {
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
-        m_setpoint = m_profile.calculate(kDtSec,
-                new State(m_goal.getRadians(), 0),
-                m_setpoint);
+        State goalState = new State(m_goal.getRadians(), 0);
+        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, goalState);
 
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(

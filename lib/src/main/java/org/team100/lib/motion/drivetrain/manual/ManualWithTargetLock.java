@@ -30,7 +30,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  * 
  * The targeting solution is based on bearing alone, so it won't work if the
- * robot or target is moving.  That effect can be compensated, though.
+ * robot or target is moving. That effect can be compensated, though.
  */
 public class ManualWithTargetLock {
     private static final double kBallVelocityM_S = 5;
@@ -94,9 +94,8 @@ public class ManualWithTargetLock {
         double targetMotion = targetMotion(state, target);
         t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
 
-        m_setpoint = m_profile.calculate(kDtSec,
-                new State(bearing.getRadians(), targetMotion),
-                m_setpoint);
+        State goal = new State(bearing.getRadians(), targetMotion);
+        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, goal);
 
         // this is user input
         Twist2d scaledInput = DriveUtil.scale(

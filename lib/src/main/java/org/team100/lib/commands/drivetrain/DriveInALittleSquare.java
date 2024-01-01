@@ -8,6 +8,7 @@ import org.team100.lib.profile.State;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -34,11 +35,12 @@ public class DriveInALittleSquare extends Command100 {
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
 
+    private static final double kXToleranceRad = 0.02;
+    private static final double kVToleranceRad_S = 0.02;
+
     private final SwerveDriveSubsystem m_swerve;
     private final State start = new State(0, 0);
     private final State goal = new State(kDriveLengthM, 0);
-    
-
 
     final TrapezoidProfile100 m_driveProfile;
     /** Current speed setpoint. */
@@ -61,22 +63,22 @@ public class DriveInALittleSquare extends Command100 {
         m_state = DriveState.STEERING;
         m_goal = GeometryUtil.kRotationZero;
         speedM_S = start;
-        speedM_S = m_driveProfile.calculate(0, goal, speedM_S);
+        speedM_S = m_driveProfile.calculate(0, speedM_S, goal);
     }
 
     @Override
     public void execute100(double dt) {
-        System.out.println(dt);
         switch (m_state) {
             case DRIVING:
-                if (m_driveProfile.isFinished()) {
+                if (MathUtil.isNear(speedM_S.position, goal.position, kXToleranceRad)
+                        && MathUtil.isNear(speedM_S.velocity, goal.velocity, kVToleranceRad_S)) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = DriveState.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
                     speedM_S = start;
                 } else {
                     // keep going
-                    speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
+                    speedM_S = m_driveProfile.calculate(dt, speedM_S, goal);
                 }
                 break;
             case STEERING:
@@ -85,7 +87,7 @@ public class DriveInALittleSquare extends Command100 {
                     // driving
                     m_state = DriveState.DRIVING;
                     speedM_S = start;
-                    speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
+                    speedM_S = m_driveProfile.calculate(dt, speedM_S, goal);
                 } else {
                     // wait to reach the setpoint
                 }

@@ -13,6 +13,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -59,7 +60,8 @@ public class Rotate extends Command100 {
         yc.setTolerance(0.1, 0.1);
         PIDController tc = HolonomicDriveController3.theta();
         tc.setTolerance(kXToleranceRad, kVToleranceRad_S);
-        // in testing, the default theta p causes overshoot, but i think this isn't a real effect.
+        // in testing, the default theta p causes overshoot, but i think this isn't a
+        // real effect.
         tc.setP(1);
 
         m_controller = new HolonomicDriveController3(xc, yc, tc);
@@ -94,8 +96,10 @@ public class Rotate extends Command100 {
     public void execute100(double dt) {
 
         // reference
-        refTheta = m_profile.calculate(dt, m_goalState, refTheta);
-        m_finished = m_profile.isFinished();
+        refTheta = m_profile.calculate(dt, refTheta, m_goalState);
+        m_finished = MathUtil.isNear(refTheta.position, m_goalState.position, kXToleranceRad)
+                && MathUtil.isNear(refTheta.velocity, m_goalState.velocity, kVToleranceRad_S);
+
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
 

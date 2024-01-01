@@ -76,7 +76,7 @@ class DriveInALittleSquareTest {
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
-        assertEquals(0.01, command.speedM_S.velocity, 0.05);
+        assertEquals(0.1, command.speedM_S.velocity, 0.05);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         // the actual speed lags slightly
         assertEquals(0.005, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);

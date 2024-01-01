@@ -130,11 +130,9 @@ class ManualWithHeadingTest {
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         // but at t0 it hasn't started yet.
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(
-                0,
-                new State(0, 0),
-                new State(m_manualWithHeading.m_goal.getRadians(), 0)).velocity,
-                kDelta);
+        State initial = new State(0, 0);
+        State goal = new State(m_manualWithHeading.m_goal.getRadians(), 0);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).velocity, kDelta);
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
@@ -211,9 +209,9 @@ class ManualWithHeadingTest {
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         // at t0 there's not much position in the profile but there is velocity
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(0,
-                new State(Math.PI / 2, 0),
-                new State(0, 0)).velocity, kDelta);
+        State initial = new State(0, 0);
+        State goal = new State(Math.PI / 2, 0);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).velocity, kDelta);
         verify(0, 0, 0.769, twistM_S);
 
         // say we've rotated a little.
