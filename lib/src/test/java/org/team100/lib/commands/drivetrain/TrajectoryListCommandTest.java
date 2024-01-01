@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
-import org.team100.lib.profile.State;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 
@@ -67,14 +67,14 @@ class TrajectoryListCommandTest {
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
-            State setpoint = fixture.swerveLocal.getSetpoints()[0];
+            State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
              Util.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
                      command.m_timer.get(),
                      goal.angle.getRadians(),
-                     setpoint.getPosition(),
-                     setpoint.getVelocity(),
+                     setpoint.x(),
+                     setpoint.v(),
                      measurement);
         } while (!command.isFinished());
 

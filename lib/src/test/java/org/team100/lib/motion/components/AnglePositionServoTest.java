@@ -3,12 +3,12 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
-import org.team100.lib.profile.State;
 import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.MathUtil;
@@ -54,8 +54,8 @@ class AnglePositionServoTest {
         servo.reset();
         servo.setPosition(1);
         assertEquals(0, turningMotor.output, 0.001);
-        assertEquals(0.5, servo.getSetpoint().getPosition(), kDelta);
-        assertEquals(1.0, servo.getSetpoint().getVelocity(), kDelta);
+        assertEquals(0.5, servo.getSetpoint().x(), kDelta);
+        assertEquals(1.0, servo.getSetpoint().v(), kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);
 
         Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, false);
@@ -71,6 +71,8 @@ class AnglePositionServoTest {
 
     /**
      * Duplicates the WPILib profile wrapping logic, and shows that it's wrong.
+     * 
+     * TODO: make an angular profile work correctly
      */
     @Test
     void testWrapping() {
@@ -83,22 +85,22 @@ class AnglePositionServoTest {
         // faster to go the "long way" because of the velocity.
         // but the wrapping calculation ignores velocity.
         double measurement = 4;
-        State m_setpoint = new State(4, -1);
-        State m_goal = new State(0,0);
+        State100 m_setpoint = new State100(4, -1);
+        State100 m_goal = new State100(0,0);
 
-        double goalMinDistance = MathUtil.inputModulus(m_goal.getPosition() - measurement, -errorBound, errorBound);
-        double setpointMinDistance = MathUtil.inputModulus(m_setpoint.getPosition() - measurement, -errorBound,
+        double goalMinDistance = MathUtil.inputModulus(m_goal.x() - measurement, -errorBound, errorBound);
+        double setpointMinDistance = MathUtil.inputModulus(m_setpoint.x() - measurement, -errorBound,
                 errorBound);
 
-        m_goal.setPosition(goalMinDistance + measurement);
-        m_setpoint.setPosition(setpointMinDistance + measurement);
+        double goalPosition = goalMinDistance + measurement;
+        double setpointPosition = setpointMinDistance + measurement;
 
         // this should be zero; trying to slow down and stop
         // is much worse than continuing the long way around.
-        assertEquals(2 * Math.PI, m_goal.getPosition(), kDelta);
-        assertEquals(0, m_goal.getVelocity(), kDelta);
-        assertEquals(4, m_setpoint.getPosition(), kDelta);
-        assertEquals(-1, m_setpoint.getVelocity(), kDelta);
+        assertEquals(2 * Math.PI, goalPosition, kDelta);
+        assertEquals(0, m_goal.v(), kDelta);
+        assertEquals(4, setpointPosition, kDelta);
+        assertEquals(-1, m_setpoint.v(), kDelta);
     }
 
 

@@ -3,11 +3,11 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints;
-import org.team100.lib.profile.State;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -42,7 +42,7 @@ public class ManualWithTargetLock {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
-    State m_setpoint;
+    State100 m_setpoint;
     Translation2d m_ball;
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
@@ -68,7 +68,7 @@ public class ManualWithTargetLock {
     }
 
     public void reset(Pose2d currentPose) {
-        m_setpoint = new State(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_setpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -87,14 +87,18 @@ public class ManualWithTargetLock {
         bearing = new Rotation2d(
                 MathUtil.angleModulus(bearing.getRadians() - currentRotation.getRadians())
                         + currentRotation.getRadians());
-        m_setpoint.setPosition(MathUtil.angleModulus(m_setpoint.getPosition() - currentRotation.getRadians())
-                + currentRotation.getRadians());
+
+        // make sure the setpoint uses the modulus close to the measurement.
+        m_setpoint = new State100(
+                MathUtil.angleModulus(m_setpoint.x() - currentRotation.getRadians())
+                        + currentRotation.getRadians(),
+                m_setpoint.v());
 
         // the goal omega should match the target's apparent motion
         double targetMotion = targetMotion(state, target);
         t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
 
-        State goal = new State(bearing.getRadians(), targetMotion);
+        State100 goal = new State100(bearing.getRadians(), targetMotion);
         m_setpoint = m_profile.calculate(kDtSec, m_setpoint, goal);
 
         // this is user input
@@ -103,10 +107,10 @@ public class ManualWithTargetLock {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        double thetaFF = m_setpoint.getVelocity();
+        double thetaFF = m_setpoint.v();
 
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.getPosition());
-        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.getVelocity());
+        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.x());
+        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.v());
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -114,8 +118,8 @@ public class ManualWithTargetLock {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
 
-        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.getPosition());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/omega", m_setpoint.getVelocity());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.x());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/omega", m_setpoint.v());
 
         t.log(Level.DEBUG, "/field/target", new double[] {
                 target.getX(),

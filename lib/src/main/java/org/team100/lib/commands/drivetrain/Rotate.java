@@ -7,7 +7,6 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints;
-import org.team100.lib.profile.State;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -36,13 +35,13 @@ public class Rotate extends Command100 {
     private final SwerveDriveSubsystem m_robotDrive;
     private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final State m_goalState;
+    private final State100 m_goalState;
     final HolonomicDriveController3 m_controller;
 
     private boolean m_finished = false;
 
     TrapezoidProfile100 m_profile;
-    State refTheta;
+    State100 refTheta;
 
     private boolean m_steeringAligned;
 
@@ -67,8 +66,8 @@ public class Rotate extends Command100 {
         m_controller = new HolonomicDriveController3(xc, yc, tc);
         m_heading = heading;
         m_swerveKinodynamics = swerveKinodynamics;
-        m_goalState = new State(targetAngleRadians, 0);
-        refTheta = new State(0, 0);
+        m_goalState = new State100(targetAngleRadians, 0);
+        refTheta = new State100(0, 0);
 
         addRequirements(drivetrain);
     }
@@ -87,7 +86,7 @@ public class Rotate extends Command100 {
 
     private void resetRefTheta() {
         ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
-        refTheta = new State(
+        refTheta = new State100(
                 m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
     }
@@ -97,8 +96,8 @@ public class Rotate extends Command100 {
 
         // reference
         refTheta = m_profile.calculate(dt, refTheta, m_goalState);
-        m_finished = MathUtil.isNear(refTheta.getPosition(), m_goalState.getPosition(), kXToleranceRad)
-                && MathUtil.isNear(refTheta.getVelocity(), m_goalState.getVelocity(), kVToleranceRad_S);
+        m_finished = MathUtil.isNear(refTheta.x(), m_goalState.x(), kXToleranceRad)
+                && MathUtil.isNear(refTheta.v(), m_goalState.v(), kVToleranceRad_S);
 
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
@@ -106,7 +105,7 @@ public class Rotate extends Command100 {
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose
                 new State100(currentPose.getY(), 0, 0),
-                new State100(refTheta.getPosition(), refTheta.getVelocity(), 0)); // TODO: accel
+                new State100(refTheta.x(), refTheta.v(), 0)); // TODO: accel
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
@@ -126,12 +125,12 @@ public class Rotate extends Command100 {
         double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did
-        t.log(Level.DEBUG, "/rotate/errorX", refTheta.getPosition() - headingMeasurement);
-        t.log(Level.DEBUG, "/rotate/errorV", refTheta.getVelocity() - headingRate);
+        t.log(Level.DEBUG, "/rotate/errorX", refTheta.x() - headingMeasurement);
+        t.log(Level.DEBUG, "/rotate/errorV", refTheta.v() - headingRate);
         t.log(Level.DEBUG, "/rotate/measurementX", headingMeasurement);
         t.log(Level.DEBUG, "/rotate/measurementV", headingRate);
-        t.log(Level.DEBUG, "/rotate/refX", refTheta.getPosition());
-        t.log(Level.DEBUG, "/rotate/refV", refTheta.getVelocity());
+        t.log(Level.DEBUG, "/rotate/refX", refTheta.x());
+        t.log(Level.DEBUG, "/rotate/refV", refTheta.v());
     }
 
     @Override

@@ -1,9 +1,9 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder.Drive;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.State;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -107,8 +107,8 @@ public class SwerveModuleCollection {
         };
     }
 
-    public State[] getSetpoint() {
-        return new State[] {
+    public State100[] getSetpoint() {
+        return new State100[] {
                 m_frontLeft.getSetpoint(),
                 m_frontRight.getSetpoint(),
                 m_rearLeft.getSetpoint(),

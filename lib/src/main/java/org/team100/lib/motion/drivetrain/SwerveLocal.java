@@ -1,11 +1,11 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.profile.State;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
@@ -145,7 +145,7 @@ public class SwerveLocal {
         return m_modules.getDesiredStates();
     }
 
-    public State[] getSetpoints() {
+    public State100[] getSetpoints() {
         return m_modules.getSetpoint();
     }
 

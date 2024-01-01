@@ -1,10 +1,10 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.profile.Constraints;
-import org.team100.lib.profile.State;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
@@ -39,12 +39,12 @@ public class DriveInALittleSquare extends Command100 {
     private static final double kVToleranceRad_S = 0.02;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final State start = new State(0, 0);
-    private final State goal = new State(kDriveLengthM, 0);
+    private final State100 start = new State100(0, 0);
+    private final State100 goal = new State100(kDriveLengthM, 0);
 
     final TrapezoidProfile100 m_driveProfile;
     /** Current speed setpoint. */
-    State speedM_S;
+    State100 speedM_S;
     /** Current swerve steering axis goal. */
     Rotation2d m_goal;
     DriveState m_state;
@@ -70,8 +70,8 @@ public class DriveInALittleSquare extends Command100 {
     public void execute100(double dt) {
         switch (m_state) {
             case DRIVING:
-                if (MathUtil.isNear(speedM_S.getPosition(), goal.getPosition(), kXToleranceRad)
-                        && MathUtil.isNear(speedM_S.getVelocity(), goal.getVelocity(), kVToleranceRad_S)) {
+                if (MathUtil.isNear(speedM_S.x(), goal.x(), kXToleranceRad)
+                        && MathUtil.isNear(speedM_S.v(), goal.v(), kVToleranceRad_S)) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = DriveState.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
@@ -96,10 +96,10 @@ public class DriveInALittleSquare extends Command100 {
 
         // there are four states here because state is mutable :-(
         SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(speedM_S.getPosition(), m_goal),
-                new SwerveModuleState(speedM_S.getPosition(), m_goal),
-                new SwerveModuleState(speedM_S.getPosition(), m_goal),
-                new SwerveModuleState(speedM_S.getPosition(), m_goal)
+                new SwerveModuleState(speedM_S.x(), m_goal),
+                new SwerveModuleState(speedM_S.x(), m_goal),
+                new SwerveModuleState(speedM_S.x(), m_goal),
+                new SwerveModuleState(speedM_S.x(), m_goal)
         };
         m_swerve.setRawModuleStates(states);
     }

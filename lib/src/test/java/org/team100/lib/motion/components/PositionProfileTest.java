@@ -158,8 +158,8 @@ class PositionProfileTest {
         // useful to fix up the examples above
         if (dump)
             Util.printf("verify(%5.3f, %5.3f, %5.3f);\n", motor.velocity,
-                    servo.getSetpoint().getPosition(), servo.getSetpoint().getVelocity());
-        assertEquals(setpointPosition, servo.getSetpoint().getPosition(), kDelta);
-        assertEquals(setpointVelocity, servo.getSetpoint().getVelocity(), kDelta);
+                    servo.getSetpoint().x(), servo.getSetpoint().v());
+        assertEquals(setpointPosition, servo.getSetpoint().x(), kDelta);
+        assertEquals(setpointVelocity, servo.getSetpoint().v(), kDelta);
     }
 }

@@ -1,5 +1,6 @@
 package org.team100.lib.profile;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.telemetry.ProfileModeChooser;
 
 import edu.wpi.first.math.trajectory.ExponentialProfile;
@@ -51,17 +52,18 @@ public class ChoosableProfile {
                         10, 10, 5));
     }
 
-    public State calculate(double t, State goal, State current) {
+    /** Note order here, initial first, goal second. */
+    public State100 calculate(double t, State100 initial, State100 goal) {
         switch (m_chooser.getSelected()) {
             case TRAPEZOID:
-                return m_trapezoid.calculate(t, current, goal);
+                return m_trapezoid.calculate(t, initial, goal);
             case EXPONENTIAL:
                 ExponentialProfile.State estate = eprofile.calculate(t,
-                        new ExponentialProfile.State(current.getPosition(), current.getVelocity()),
-                        new ExponentialProfile.State(goal.getPosition(), goal.getVelocity()));
-                return new State(estate.position, estate.velocity);
+                        new ExponentialProfile.State(initial.x(), initial.v()),
+                        new ExponentialProfile.State(goal.x(), goal.v()));
+                return new State100(estate.position, estate.velocity);
             default:
-                return new State(0,0);
+                return new State100(0,0);
         }
     }
 
