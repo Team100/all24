@@ -53,6 +53,6 @@ public class State {
 
     @Override
     public String toString() {
-        return "State [position=" + position + ", velocity=" + velocity + "]";
+        return String.format("State [position=%8.6f velocity=%8.6f]", position, velocity);
     }
 }

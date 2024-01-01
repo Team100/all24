@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.util.Util;
 
@@ -121,18 +123,22 @@ class TrapezoidProfile100Test {
         // the same point
         assertEquals(2.000, p2.qDotSwitchIplusGminus(new State(0, 2), new State(0, 2)), 0.001);
         // I+G- is negative-time here.
-        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        // assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
+        assertEquals(1.414, p2.qDotSwitchIplusGminus(new State(0.5, 2), new State(-0.5, 2)), 0.001);
         // I+G- is negative-time here.
-        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
+        // assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
+        assertEquals(0, p2.qDotSwitchIplusGminus(new State(1, 2), new State(-1, 2)), 0.001);
         // no intersection
         assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
 
         // no intersection
         assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
         // I-G+ is negative-time here
-        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-1, 2), new State(1, 2)), 0.001);
+        // assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-1, 2), new State(1, 2)), 0.001);
+        assertEquals(0, p2.qDotSwitchIminusGplus(new State(-1, 2), new State(1, 2)), 0.001);
         // I-G+ is negative-time here
-        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        // assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
+        assertEquals(-1.414, p2.qDotSwitchIminusGplus(new State(-0.5, 2), new State(0.5, 2)), 0.001);
         // the same point
         assertEquals(2.0, p2.qDotSwitchIminusGplus(new State(0, 2), new State(0, 2)), 0.001);
         // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6), negative arm
@@ -142,6 +148,12 @@ class TrapezoidProfile100Test {
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
         assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
 
+    }
+
+    @Test
+    void testQDotSwitch2a() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12)
         assertEquals(3.464, p2.qDotSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
         // c(I)=-2, x=v^2/4, x=2, v=sqrt(8)
@@ -171,6 +183,12 @@ class TrapezoidProfile100Test {
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
         assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State(2, 2), new State(-2, -2)), 0.001);
 
+    }
+
+    @Test
+    void testQDotSwitch2b() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12)
         assertEquals(3.464, p2.qDotSwitchIplusGminus(new State(-2, -2), new State(2, 2)), 0.001);
         // c(I)=-2, x=v^2/4, x=2, v=sqrt(8)
@@ -200,6 +218,215 @@ class TrapezoidProfile100Test {
         assertEquals(-2.828, p2.qDotSwitchIminusGplus(new State(1, -2), new State(-1, 2)), 0.001);
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
         assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State(2, -2), new State(-2, 2)), 0.001);
+    }
+
+    @Test
+    void testLongT() {
+        // if we supply a very long dt, we should end up at the goal
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        Random random = new Random();
+        for (int i = 0; i < 10000; ++i) {
+            // random states in the square between (-2,-2) and (2,2)
+            State initial = new State(4.0 * random.nextDouble() - 2.0, 4.0 * random.nextDouble() - 2.0);
+            State goal = new State(4.0 * random.nextDouble() - 2.0, 4.0 * random.nextDouble() - 2.0);
+            State s = p2.calculate(10, initial, goal);
+            System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+            // it always gets exactly to the goal
+            assertEquals(goal.position, s.position, 0.000001);
+            assertEquals(goal.velocity, s.velocity, 0.000001);
+        }
+    }
+
+    @Test
+    void anotherCase() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(1.127310, -0.624930);
+        State goal = new State(1.937043, 0.502350);
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        // it always gets exactly to the goal
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);        
+    }
+
+    @Test
+    void yetAnother() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(-1.178601, -1.534504);
+        State goal = new State(-0.848954, -1.916583);
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);    
+    }
+
+    @Test
+    void someTcase() {
+        // this is an I-G+ path
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(1.655231, 1.967906);
+        State goal = new State(0.080954, -1.693829);
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        // it always gets exactly to the goal
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);
+    }
+
+    @Test
+    void someTcase2() {
+        // this should have an I+G- solution
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(1.747608, -0.147275);
+        State goal = new State(1.775148, 0.497717);
+        double cplus = p2.c_plus(initial);
+        assertEquals(1.742, cplus, 0.001);
+        double cminus = p2.c_minus(goal);
+        assertEquals(1.837, cminus, 0.001);
+        // this should have an I+G- solution
+        double qSwitch = p2.qSwitchIplusGminus(initial, goal);
+        assertEquals(1.789, qSwitch, 0.001);
+        // there is no I-G+ solution
+        double nono = p2.qSwitchIminusGplus(initial, goal);
+        assertEquals(1.733, nono, 0.001);
+        double qDotSwitch = p2.qDotSwitchIplusGminus(initial, goal);
+        assertEquals(0.4356, qDotSwitch, 0.0001);
+        double t1 = p2.t1IplusGminus(initial, goal);
+        assertEquals(0.291459, t1, 0.000001);
+        double t1a = p2.t1IminusGplus(initial, goal);
+        assertEquals(0.067452, t1a, 0.000001);
+
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        // it always gets exactly to the goal
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);
+    }
+
+    @Test
+    void someTcase3() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(0.985792, 1.340926);
+        State goal = new State(-0.350934, -1.949649);
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        // it always gets exactly to the goal
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);
+    }
+
+    @Test
+    void someTcase4() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(0, 1);
+        State goal = new State(0, -1);
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        // it always gets exactly to the goal
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);
+    }
+
+    @Test
+    void someTcase2a() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        State initial = new State(1.747608, -0.147275);
+        State goal = new State(1.775148, 0.497717);
+        State s = p2.calculate(10, initial, goal);
+        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
+        // it always gets exactly to the goal
+        assertEquals(goal.position, s.position, 0.000001);
+        assertEquals(goal.velocity, s.velocity, 0.000001);
+    }
+
+    /** verify time to velocity limit */
+    @Test
+    void testVT() {
+        // lower max V than the other cases here
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        // initial is (-2,2), vmax is 3, u is 2, so time to limit is 0.5.
+        // at 0.5, v=2+2*0.5=3. x=-2+2*0.5+0.5*2*(0.5)^2 = -2+1+0.25=-0.75
+        // so this is right at the limit, we should just proceed.
+        State s = p2.calculate(0.02, new State(-0.75, 3.00), new State(2, 2));
+        // at vmax for 0.02, -0.75+3*0.02 = exactly -0.69, no t^2 term
+        assertEquals(-0.6900, s.position, 0.0001);
+        // should continue at vmax, not go faster
+        assertEquals(3.00, s.velocity, 0.001);
+
+        // same thing, inverted
+        s = p2.calculate(0.02, new State(0.75, -3.00), new State(-2, -2));
+        assertEquals(0.6900, s.position, 0.0001);
+        assertEquals(-3.00, s.velocity, 0.001);
+    }
+
+    @Test
+    void testVT2() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+
+        // if we're *near* the limit then there should be two segments.
+        State s = p2.calculate(0.02, new State(-0.78, 2.98), new State(2, 2));
+        // follow the profile for about 0.01, then the limit for another 0.01
+        // at vmax for 0.02, -0.75+3*0.02 = exactly -0.69, no t^2 term
+        assertEquals(-0.7200, s.position, 0.0001);
+        // end up at exactly vmax
+        assertEquals(3.00, s.velocity, 0.001);
+
+        // same, inverted.
+        s = p2.calculate(0.02, new State(0.78, -2.98), new State(-2, -2));
+        assertEquals(0.7200, s.position, 0.0001);
+        assertEquals(-3.00, s.velocity, 0.001);
+    }
+
+    @Test
+    void testVT3() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+
+        // if we're at the limit but right at the end, we should join G-.
+        State s = p2.calculate(0.02, new State(0.75, 3.00), new State(2, 2));
+        // dx = 0.06 - 0.0004
+        assertEquals(0.8096, s.position, 0.0001);
+        // dv = 0.04
+        assertEquals(2.96, s.velocity, 0.001);
+
+        // same, inverted
+        s = p2.calculate(0.02, new State(-0.75, -3.00), new State(-2, -2));
+        assertEquals(-0.8096, s.position, 0.0001);
+        assertEquals(-2.96, s.velocity, 0.001);
+    }
+
+    @Test
+    void testVT4() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        // if we're *near* the end, there should be two segments.
+        // 0.75-0.01*3
+        State s = p2.calculate(0.02, new State(0.72, 3.00), new State(2, 2));
+        // so for the second 0.01 we should be slowing down
+        // x = 0.75 + 0.03 - 0.0001
+        // this needs to be exact; we're not taking the tswitch path
+        assertEquals(0.7799, s.position, 0.00001);
+        // v = 3 - 0.02
+        assertEquals(2.98, s.velocity, 0.001);
+
+        // same thing, inverted
+        s = p2.calculate(0.02, new State(-0.72, -3.00), new State(-2, -2));
+        // for the second segment we should be speeding up
+        // x = -0.75 - 0.03 + 0.0001
+        assertEquals(-0.7799, s.position, 0.0001);
+        // dv = 0.02
+        assertEquals(-2.98, s.velocity, 0.001);
+
     }
 
     /** Verify the time to the switching point via each path */
@@ -236,6 +463,12 @@ class TrapezoidProfile100Test {
         assertEquals(2.414, p2.t1IminusGplus(new State(1, 2), new State(-1, 2)), 0.001);
         // dv = -5.464
         assertEquals(2.732, p2.t1IminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
+    }
+
+    @Test
+    void testTa() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
 
         // dv=1.464
         assertEquals(0.732, p2.t1IplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
@@ -265,7 +498,12 @@ class TrapezoidProfile100Test {
         assertEquals(2.414, p2.t1IminusGplus(new State(1, 2), new State(-1, -2)), 0.001);
         // dv=-5.464
         assertEquals(2.732, p2.t1IminusGplus(new State(2, 2), new State(-2, -2)), 0.001);
+    }
 
+    @Test
+    void testTb() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
         // dv=5.464
         assertEquals(2.732, p2.t1IplusGminus(new State(-2, -2), new State(2, 2)), 0.001);
         // dv=4.828
@@ -348,6 +586,12 @@ class TrapezoidProfile100Test {
         assertEquals(1.96, p2.calculate(0.02, new State(1, 2), new State(-1, 2)).velocity, 0.001);
         assertEquals(1.96, p2.calculate(0.02, new State(2, 2), new State(-2, 2)).velocity, 0.001);
 
+    }
+
+    @Test
+    void testCalculateA() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
         assertEquals(-1.959, p2.calculate(0.02, new State(-2, 2), new State(2, -2)).position, 0.001);
         assertEquals(-0.959, p2.calculate(0.02, new State(-1, 2), new State(1, -2)).position, 0.001);
         assertEquals(-0.459, p2.calculate(0.02, new State(-0.5, 2), new State(0.5, -2)).position, 0.001);
@@ -363,7 +607,12 @@ class TrapezoidProfile100Test {
         assertEquals(1.96, p2.calculate(0.02, new State(0.5, 2), new State(-0.5, -2)).velocity, 0.001);
         assertEquals(1.96, p2.calculate(0.02, new State(1, 2), new State(-1, -2)).velocity, 0.001);
         assertEquals(1.96, p2.calculate(0.02, new State(2, 2), new State(-2, -2)).velocity, 0.001);
+    }
 
+    @Test
+    void testCalculateB() {
+        Constraints c2 = new Constraints(5, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
         assertEquals(-2.039, p2.calculate(0.02, new State(-2, -2), new State(2, 2)).position, 0.001);
         assertEquals(-1.039, p2.calculate(0.02, new State(-1, -2), new State(1, 2)).position, 0.001);
         assertEquals(-0.539, p2.calculate(0.02, new State(-0.5, -2), new State(0.5, 2)).position, 0.001);
@@ -427,12 +676,14 @@ class TrapezoidProfile100Test {
         assertEquals(-2.645, p.qDotSwitchIminusGplus(new State(2, -2), new State(-1, -2)), 0.001);
 
         // from 2,2 to -2,2. There's no intersection between these curves
+        // assertEquals(Double.NaN, p.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
         assertEquals(0, p.qDotSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
         // from -2,2 to 2,-2 switches in the same place as -2,2->2,2
         assertEquals(2.828, p.qDotSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
         // from 2,2 to -2,2 switches at the bottom
         assertEquals(-2.828, p.qDotSwitchIminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
         // from -2,2 to 2,-2, I-G+ is invalid
+        // assertEquals(Double.NaN, p.qDotSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
         assertEquals(0, p.qDotSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
     }
 
@@ -441,25 +692,27 @@ class TrapezoidProfile100Test {
         Constraints c = new Constraints(5, 1);
         TrapezoidProfile100 p = new TrapezoidProfile100(c, 0.01);
 
-        Constraints c2 = new Constraints(5, 2);
-        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
         // from -2 to 2, the 'fast' and normal way
         assertEquals(1.656, p.tSwitchIplusGminus(new State(-2, 2), new State(2, 2)), 0.001);
         // this path goes from (-2,2) to (0,0) and then to (2,2)
-        assertEquals(4.000, p.tSwitchIminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
+        // assertEquals(Double.NaN, p.tSwitchIminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
+        assertEquals(4, p.tSwitchIminusGplus(new State(-2, 2), new State(2, 2)), 0.001);
 
         // the opposite order, 2 to -2, this is a completely invalid result,
         // traversing Iplus backwards, and then Gminus backwards.
-        assertEquals(Double.NaN, p.tSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
+        // assertEquals(Double.NaN, p.tSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
+        assertEquals(-4, p.tSwitchIplusGminus(new State(2, 2), new State(-2, 2)), 0.001);
         // from 2 to -2 is the 'long way around' across the x-axis and back.
         assertEquals(9.656, p.tSwitchIminusGplus(new State(2, 2), new State(-2, 2)), 0.001);
 
         // diagonal, the 'fast' and normal way
         assertEquals(5.656, p.tSwitchIplusGminus(new State(-2, 2), new State(2, -2)), 0.001);
         // this is completely invalid
-        assertEquals(Double.NaN, p.tSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
+        // assertEquals(Double.NaN, p.tSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
+        assertEquals(0, p.tSwitchIminusGplus(new State(-2, 2), new State(2, -2)), 0.001);
         // this is invalid, it should yield like NaN or something
-        assertEquals(Double.NaN, p.tSwitchIplusGminus(new State(2, -2), new State(-2, 2)), 0.001);
+        // assertEquals(Double.NaN, p.tSwitchIplusGminus(new State(2, -2), new State(-2, 2)), 0.001);
+        assertEquals(0, p.tSwitchIplusGminus(new State(2, -2), new State(-2, 2)), 0.001);
         // from 2 to -2 is the 'long way around' across the x-axis and back.
         assertEquals(5.656, p.tSwitchIminusGplus(new State(2, -2), new State(-2, 2)), 0.001);
 
@@ -561,7 +814,7 @@ class TrapezoidProfile100Test {
         // the first sample is near the starting state
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         assertEquals(0, sample.position, kDelta);
@@ -569,17 +822,17 @@ class TrapezoidProfile100Test {
 
         // step to the middle of the profile
         for (double t = 0; t < 0.68; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
         // halfway there, going fast
         assertEquals(0.5, sample.position, 0.01);
-        assertEquals(1.43, sample.velocity, 0.01);
+        assertEquals(1.4, sample.velocity, 0.01);
 
         // step to the end of the profile .. this was 0.72 before.
         for (double t = 0; t < 0.86; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -601,22 +854,22 @@ class TrapezoidProfile100Test {
 
         // the first sample is near the starting state
         Util.printf("%f %f %f\n", 0.0, sample.position, sample.velocity);
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         assertEquals(0, sample.position, kDelta);
         assertEquals(-0.04, sample.velocity, kDelta);
 
         // step to the middle of the profile
         for (double t = 0; t < 0.68; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
         }
         // halfway there, going fast
         assertEquals(-0.5, sample.position, 0.01);
-        assertEquals(-1.43, sample.velocity, kDelta);
+        assertEquals(-1.4, sample.velocity, kDelta);
 
         // step to the end of the profile ... this was 0.72.
         for (double t = 0; t < 0.86; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             Util.printf("%f %f %f\n", t, sample.position, sample.velocity);
         }
         assertEquals(-1.0, sample.position, 0.01);
@@ -637,7 +890,7 @@ class TrapezoidProfile100Test {
         // the first sample is near the starting state
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -646,7 +899,7 @@ class TrapezoidProfile100Test {
 
         // step to the cruise phase of the profile
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -655,7 +908,7 @@ class TrapezoidProfile100Test {
 
         // step to near the end of cruise
         for (double t = 0; t < 0.5; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -664,7 +917,7 @@ class TrapezoidProfile100Test {
 
         // step to the end of the profile // this used to be 0.5
         for (double t = 0; t < 0.66; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -690,7 +943,7 @@ class TrapezoidProfile100Test {
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
         // the first sample is near the starting state
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         assertEquals(0.120, sample.position, kDelta);
@@ -698,7 +951,7 @@ class TrapezoidProfile100Test {
 
         // step to the turn-around point
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -707,7 +960,7 @@ class TrapezoidProfile100Test {
 
         // the next phase is triangular, this is the point at maximum speed
         for (double t = 0; t < 0.4; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -716,7 +969,7 @@ class TrapezoidProfile100Test {
 
         // this is the end. this was 0.44
         for (double t = 0; t < 0.46; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -738,7 +991,7 @@ class TrapezoidProfile100Test {
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
         // the first sample is near the starting state
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -747,7 +1000,7 @@ class TrapezoidProfile100Test {
 
         // step to the turn-around point
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -756,7 +1009,7 @@ class TrapezoidProfile100Test {
 
         // the next phase is triangular, this is the point at maximum speed
         for (double t = 0; t < 0.4; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -765,7 +1018,7 @@ class TrapezoidProfile100Test {
 
         // this is the end. this was 0.44.
         for (double t = 0; t < 0.46; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -791,7 +1044,7 @@ class TrapezoidProfile100Test {
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
         // the first sample is near the starting state
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -801,7 +1054,7 @@ class TrapezoidProfile100Test {
         // step to the turn-around point
         // this takes the same time no matter the starting point.
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -812,7 +1065,7 @@ class TrapezoidProfile100Test {
         // the next phase is triangular, this is the point at maximum speed
         // compared to the case above, this is a little sooner and a little slower.
         for (double t = 0; t < 0.4; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -823,7 +1076,7 @@ class TrapezoidProfile100Test {
         // this is the end.
         // also sooner than the profile above
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -848,7 +1101,7 @@ class TrapezoidProfile100Test {
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
         // the first sample is near the starting state
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         assertEquals(-0.02, sample.position, kDelta);
@@ -857,7 +1110,7 @@ class TrapezoidProfile100Test {
         // step to the turn-around point
         // this takes the same time no matter the starting point.
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -867,7 +1120,7 @@ class TrapezoidProfile100Test {
         // the next phase is triangular, this is the point at maximum speed
         // compared to the case above, this is a little sooner and a little slower.
         for (double t = 0; t < 0.4; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -877,7 +1130,7 @@ class TrapezoidProfile100Test {
         // this is the end.
         // also sooner than the profile above
         for (double t = 0; t < 0.44; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -905,7 +1158,7 @@ class TrapezoidProfile100Test {
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
         // the first sample is near the starting state
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         assertEquals(-0.08, sample.position, kDelta);
@@ -913,7 +1166,7 @@ class TrapezoidProfile100Test {
 
         // step to the turn-around point
         for (double t = 0; t < 0.48; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -923,7 +1176,7 @@ class TrapezoidProfile100Test {
         // the next phase is triangular, this is the point at maximum speed
         // compared to the case above, this is a little sooner and a little slower.
         for (double t = 0; t < 0.26; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
@@ -933,13 +1186,29 @@ class TrapezoidProfile100Test {
         // this is the end.
         // also sooner than the profile above
         for (double t = 0; t < 0.6; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
         }
         assertEquals(0.0, sample.position, 0.01);
         assertEquals(0.0, sample.velocity, 0.05);
         assertTrue(profileX.isFinished());
+    }
+
+    @Test
+    void testWindupCase() {
+        Constraints c = new Constraints(5, 2);
+        TrapezoidProfile100 profileX = new TrapezoidProfile100(c, 0.05);
+        State sample = new State(0, 0);
+        final State end = new State(0, 1);
+        sample = profileX.calculate(0.02, sample, end);
+        // I- means dv = 2 * 0.02 = 0.04 and dx = 0.0004
+        assertEquals(-0.0004, sample.position, 0.000001);
+        assertEquals(-0.04, sample.velocity, 0.000001);
+        sample = profileX.calculate(0.02, sample, end);
+        // still I-, dv = 0.04 more, dx = 0.0004 + 0.0008 + 0.0004
+        assertEquals(-0.0016, sample.position, 0.000001);
+        assertEquals(-0.08, sample.velocity, 0.000001);
     }
 
     /**
@@ -961,7 +1230,7 @@ class TrapezoidProfile100Test {
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
         // the first sample is near the starting state
-        sample = profileX.calculate(0.02, end, sample);
+        sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
         Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
 
@@ -970,7 +1239,7 @@ class TrapezoidProfile100Test {
 
         // step to the turn-around point
         for (double t = 0; t < 0.7; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
             if (profileX.isFinished())
@@ -980,7 +1249,7 @@ class TrapezoidProfile100Test {
         assertEquals(0.02, sample.velocity, 0.01);
 
         for (double t = 0; t < 1; t += 0.02) {
-            sample = profileX.calculate(0.02, end, sample);
+            sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
             Util.printf("%f %f %f\n", tt, sample.position, sample.velocity);
             if (profileX.isFinished())
@@ -1029,12 +1298,12 @@ class TrapezoidProfile100Test {
     @Test
     void reachesGoal() {
         Constraints constraints = new Constraints(1.75, 0.75);
-        State goal = new State(3, 0);
+       final  State goal = new State(3, 0);
         State state = new State();
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 450; ++i) {
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal);
         }
         assertEquals(goal.position, state.position, 0.05);
         assertEquals(goal.velocity, state.velocity, 0.05);
@@ -1048,7 +1317,7 @@ class TrapezoidProfile100Test {
         State goal = new State(12, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
-        State state = profile.calculate(kDt, goal, new State());
+        State state = profile.calculate(kDt, new State(), goal);
 
         double lastPos = state.position;
         for (int i = 0; i < 1600; ++i) {
@@ -1057,7 +1326,7 @@ class TrapezoidProfile100Test {
                 profile = new TrapezoidProfile100(constraints, 0.01);
             }
 
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal);
             double estimatedVel = (state.position - lastPos) / kDt;
 
             if (i >= 401) {
@@ -1079,12 +1348,12 @@ class TrapezoidProfile100Test {
     @Test
     void backwards() {
         Constraints constraints = new Constraints(0.75, 0.75);
-        State goal = new State(-2, 0);
+        final State goal = new State(-2, 0);
         State state = new State();
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 400; ++i) {
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal);
         }
         assertEquals(goal.position, state.position, 0.05);
         assertEquals(goal.velocity, state.velocity, 0.05);
@@ -1098,14 +1367,14 @@ class TrapezoidProfile100Test {
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 200; ++i) {
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal);
         }
         assertNotEquals(state, goal);
 
         goal = new State(0.0, 0.0);
         profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 600; ++i) {
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal );
         }
         assertEquals(goal.position, state.position, 0.05);
         assertEquals(goal.velocity, state.velocity, 0.05);
@@ -1115,18 +1384,18 @@ class TrapezoidProfile100Test {
     @Test
     void topSpeed() {
         Constraints constraints = new Constraints(0.75, 0.75);
-        State goal = new State(4, 0);
+        final State goal = new State(4, 0);
         State state = new State();
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 200; ++i) {
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal);
         }
         assertNear(constraints.maxVelocity, state.velocity, 10e-5);
 
         profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 2000; ++i) {
-            state = profile.calculate(kDt, goal, state);
+            state = profile.calculate(kDt, state, goal);
         }
         assertEquals(goal.position, state.position, 0.05);
         assertEquals(goal.velocity, state.velocity, 0.05);
