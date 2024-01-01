@@ -155,7 +155,8 @@ public class RobotContainer implements SelfTestable {
         // control = new DriverXboxControl();
 
         // selects the correct control class for whatever is plugged in
-        control = new ControlFactory().getDriverControl();
+        ControlFactory controlFactory = new ControlFactory();
+        control = controlFactory.getDriverControl();
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
@@ -258,7 +259,7 @@ public class RobotContainer implements SelfTestable {
         // ARM
         //
 
-        OperatorControl operatorControl = new ControlFactory().getOperatorControl();
+        OperatorControl operatorControl = controlFactory.getOperatorControl();
 
         m_armSubsystem = ArmFactory.get();
         m_armKinematicsM = new ArmKinematics(0.93, 0.92);
