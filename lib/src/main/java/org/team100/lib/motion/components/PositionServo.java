@@ -24,8 +24,8 @@ public class PositionServo<T extends Measure100> {
     private final ChoosableProfile m_profile;
     private final T m_instance;
 
-    private State m_goal = new State();
-    private State m_setpoint = new State();
+    private State m_goal = new State(0,0);
+    private State m_setpoint = new State(0,0);
 
     /**
      * @param name may not start with a slash
@@ -72,8 +72,8 @@ public class PositionServo<T extends Measure100> {
 
         m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
 
-        double u_FB = m_controller.calculate(measurement, m_setpoint.position);
-        double u_FF = m_setpoint.velocity;
+        double u_FB = m_controller.calculate(measurement, m_setpoint.getPosition());
+        double u_FF = m_setpoint.getVelocity();
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
 
         double u_TOTAL = u_FB + u_FF;
@@ -84,9 +84,9 @@ public class PositionServo<T extends Measure100> {
         t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
         t.log(Level.DEBUG, m_name + "/u_TOTAL", u_TOTAL);
         t.log(Level.DEBUG, m_name + "/Measurement", measurement);
-        t.log(Level.DEBUG, m_name + "/Goal", m_goal.position);
-        t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.position);
-        t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.velocity);
+        t.log(Level.DEBUG, m_name + "/Goal", m_goal.getPosition());
+        t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.getPosition());
+        t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.getVelocity());
         t.log(Level.DEBUG, m_name + "/Controller Position Error", m_controller.getPositionError());
         t.log(Level.DEBUG, m_name + "/Controller Velocity Error", m_controller.getVelocityError());
     }
@@ -124,17 +124,17 @@ public class PositionServo<T extends Measure100> {
     public boolean atGoal() {
         return atSetpoint()
                 && MathUtil.isNear(
-                        m_goal.position,
-                        m_setpoint.position,
+                        m_goal.getPosition(),
+                        m_setpoint.getPosition(),
                         m_controller.getPositionTolerance())
                 && MathUtil.isNear(
-                        m_goal.velocity,
-                        m_setpoint.velocity,
+                        m_goal.getVelocity(),
+                        m_setpoint.getVelocity(),
                         m_controller.getVelocityTolerance());
     }
 
     public double getGoal() {
-        return m_goal.position;
+        return m_goal.getPosition();
     }
 
     public void stop() {
@@ -160,8 +160,8 @@ public class PositionServo<T extends Measure100> {
      * For distance measures, this doesn't so anything.
      */
     private void getSetpointMinDistance(double measurement) {
-        m_goal.position = m_instance.modulus(m_goal.position - measurement) + measurement;
-        m_setpoint.position = m_instance.modulus(m_setpoint.position - measurement) + measurement;
+        m_goal.setPosition(m_instance.modulus(m_goal.getPosition() - measurement) + measurement);
+        m_setpoint.setPosition(m_instance.modulus(m_setpoint.getPosition() - measurement) + measurement);
     }
 
     public void periodic() {

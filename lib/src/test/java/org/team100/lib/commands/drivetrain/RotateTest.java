@@ -37,7 +37,7 @@ class RotateTest {
 
         rotate.initialize();
 
-        assertEquals(0, rotate.refTheta.position, kDelta); // at start
+        assertEquals(0, rotate.refTheta.getPosition(), kDelta); // at start
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
 
@@ -52,7 +52,7 @@ class RotateTest {
         assertEquals(0, rotate.m_controller.error().getY(), kDelta);
         // the profile is held until steering is done
         assertEquals(0, rotate.m_controller.error().getRotation().getRadians(), 0.01);
-        assertEquals(0, rotate.refTheta.position, 0.01);
+        assertEquals(0, rotate.refTheta.getPosition(), 0.01);
         // now we're ready to start rotating
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
@@ -63,7 +63,7 @@ class RotateTest {
             fixture.drive.periodic();
             rotate.execute();
         }
-        assertEquals(1, rotate.refTheta.position, 0.2);
+        assertEquals(1, rotate.refTheta.getPosition(), 0.2);
         assertEquals(-0.512, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
 
@@ -74,7 +74,7 @@ class RotateTest {
             rotate.execute();
         }
 
-        assertEquals(Math.PI/2, rotate.refTheta.position, kDelta);
+        assertEquals(Math.PI/2, rotate.refTheta.getPosition(), kDelta);
         // assertEquals(-0.403, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
 

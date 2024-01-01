@@ -31,7 +31,7 @@ class DriveInALittleSquareTest {
         command.execute();
         // initially steering
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S.velocity, kDelta);
+        assertEquals(0, command.speedM_S.getVelocity(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
@@ -40,7 +40,7 @@ class DriveInALittleSquareTest {
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
-        assertEquals(0.008, command.speedM_S.velocity, 0.01);
+        assertEquals(0.008, command.speedM_S.getVelocity(), 0.01);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
@@ -54,7 +54,7 @@ class DriveInALittleSquareTest {
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S.velocity, kDelta);
+        assertEquals(0, command.speedM_S.getVelocity(), kDelta);
         assertEquals(Math.PI/2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(Math.PI/2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
@@ -76,7 +76,7 @@ class DriveInALittleSquareTest {
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
-        assertEquals(0.1, command.speedM_S.velocity, 0.05);
+        assertEquals(0.1, command.speedM_S.getVelocity(), 0.05);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         // the actual speed lags slightly
         assertEquals(0.005, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);
@@ -96,7 +96,7 @@ class DriveInALittleSquareTest {
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S.velocity, kDelta);
+        assertEquals(0, command.speedM_S.getVelocity(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
         assertFalse(fixture.drive.atGoal()[0]);
@@ -117,8 +117,8 @@ class DriveInALittleSquareTest {
                 Util.printf("t %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
                         t,
                         goal.angle.getRadians(),
-                        setpoint.position,
-                        setpoint.velocity,
+                        setpoint.getPosition(),
+                        setpoint.getVelocity(),
                         measurement);
         }
         // after that time, the wheels have rotated.
@@ -130,7 +130,7 @@ class DriveInALittleSquareTest {
         // we're not quite motionless, we're already going a little.
         // there's no specific test here because the velocity seems to depend
         // on the timing in the simulation
-        assertTrue(command.speedM_S.velocity > 0);
+        assertTrue(command.speedM_S.getVelocity() > 0);
     }
 
 }

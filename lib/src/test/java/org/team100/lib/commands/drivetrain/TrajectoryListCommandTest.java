@@ -73,8 +73,8 @@ class TrajectoryListCommandTest {
              Util.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
                      command.m_timer.get(),
                      goal.angle.getRadians(),
-                     setpoint.position,
-                     setpoint.velocity,
+                     setpoint.getPosition(),
+                     setpoint.getVelocity(),
                      measurement);
         } while (!command.isFinished());
 

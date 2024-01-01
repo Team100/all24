@@ -57,11 +57,11 @@ public class ChoosableProfile {
                 return m_trapezoid.calculate(t, current, goal);
             case EXPONENTIAL:
                 ExponentialProfile.State estate = eprofile.calculate(t,
-                        new ExponentialProfile.State(current.position, current.velocity),
-                        new ExponentialProfile.State(goal.position, goal.velocity));
+                        new ExponentialProfile.State(current.getPosition(), current.getVelocity()),
+                        new ExponentialProfile.State(goal.getPosition(), goal.getVelocity()));
                 return new State(estate.position, estate.velocity);
             default:
-                return new State();
+                return new State(0,0);
         }
     }
 

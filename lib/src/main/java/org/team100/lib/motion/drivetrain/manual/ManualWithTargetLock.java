@@ -87,8 +87,8 @@ public class ManualWithTargetLock {
         bearing = new Rotation2d(
                 MathUtil.angleModulus(bearing.getRadians() - currentRotation.getRadians())
                         + currentRotation.getRadians());
-        m_setpoint.position = MathUtil.angleModulus(m_setpoint.position - currentRotation.getRadians())
-                + currentRotation.getRadians();
+        m_setpoint.setPosition(MathUtil.angleModulus(m_setpoint.getPosition() - currentRotation.getRadians())
+                + currentRotation.getRadians());
 
         // the goal omega should match the target's apparent motion
         double targetMotion = targetMotion(state, target);
@@ -103,10 +103,10 @@ public class ManualWithTargetLock {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        double thetaFF = m_setpoint.velocity;
+        double thetaFF = m_setpoint.getVelocity();
 
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.position);
-        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.velocity);
+        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.getPosition());
+        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.getVelocity());
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -114,8 +114,8 @@ public class ManualWithTargetLock {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
 
-        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.position);
-        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/omega", m_setpoint.velocity);
+        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.getPosition());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/omega", m_setpoint.getVelocity());
 
         t.log(Level.DEBUG, "/field/target", new double[] {
                 target.getX(),

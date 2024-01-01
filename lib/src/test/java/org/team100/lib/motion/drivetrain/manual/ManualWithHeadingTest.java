@@ -118,8 +118,8 @@ class ManualWithHeadingTest {
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
         // reset means setpoint is currentpose.
-        assertEquals(0, m_manualWithHeading.m_setpoint.position, kDelta);
-        assertEquals(0, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0, m_manualWithHeading.m_setpoint.getPosition(), kDelta);
+        assertEquals(0, m_manualWithHeading.m_setpoint.getVelocity(), kDelta);
 
         // face towards +y
         desiredRotation = GeometryUtil.kRotation90;
@@ -132,12 +132,12 @@ class ManualWithHeadingTest {
         // but at t0 it hasn't started yet.
         State initial = new State(0, 0);
         State goal = new State(m_manualWithHeading.m_goal.getRadians(), 0);
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).velocity, kDelta);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).getVelocity(), kDelta);
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
-        assertEquals(0.0002, m_manualWithHeading.m_setpoint.position, kDelta);
-        assertEquals(0.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0.0002, m_manualWithHeading.m_setpoint.getPosition(), kDelta);
+        assertEquals(0.169, m_manualWithHeading.m_setpoint.getVelocity(), kDelta);
 
         // and output is not zero
         verify(0, 0, 0.769, twistM_S);
@@ -150,7 +150,7 @@ class ManualWithHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_setpoint = new State(0.5, 1);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(1.169, m_manualWithHeading.m_setpoint.getVelocity(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
@@ -161,7 +161,7 @@ class ManualWithHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_setpoint = new State(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(0.369, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0.369, m_manualWithHeading.m_setpoint.getVelocity(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
@@ -211,7 +211,7 @@ class ManualWithHeadingTest {
         // at t0 there's not much position in the profile but there is velocity
         State initial = new State(0, 0);
         State goal = new State(Math.PI / 2, 0);
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).velocity, kDelta);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).getVelocity(), kDelta);
         verify(0, 0, 0.769, twistM_S);
 
         // say we've rotated a little.
@@ -219,7 +219,7 @@ class ManualWithHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_setpoint = new State(0.5, 1);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(1.169, m_manualWithHeading.m_setpoint.getVelocity(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
@@ -230,7 +230,7 @@ class ManualWithHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_setpoint = new State(1.555, 0.2);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(0.369, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0.369, m_manualWithHeading.m_setpoint.getVelocity(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done

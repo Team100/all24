@@ -6,12 +6,9 @@ import edu.wpi.first.math.MathUtil;
 
 /** This should be replaced by State100. */
 public class State {
-    public double position;
+    private double position;
 
-    public double velocity;
-
-    public State() {
-    }
+    private double velocity;
 
     public State(double position, double velocity) {
         this.position = position;
@@ -54,5 +51,21 @@ public class State {
     @Override
     public String toString() {
         return String.format("State [position=%8.6f velocity=%8.6f]", position, velocity);
+    }
+
+    public double getPosition() {
+        return position;
+    }
+
+    public void setPosition(double position) {
+        this.position = position;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(double velocity) {
+        this.velocity = velocity;
     }
 }

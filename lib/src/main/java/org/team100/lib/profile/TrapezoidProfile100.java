@@ -23,23 +23,23 @@ public class TrapezoidProfile100 {
      * the velocity constraint only ever clips the switch point.
      */
     public State calculate(double dt, final State initial, final State goal) {
-        State in_initial = new State(initial.position,
-                MathUtil.clamp(initial.velocity, -m_constraints.maxVelocity, m_constraints.maxVelocity));
-        State in_goal = new State(goal.position,
-                MathUtil.clamp(goal.velocity, -m_constraints.maxVelocity, m_constraints.maxVelocity));
+        State in_initial = new State(initial.getPosition(),
+                MathUtil.clamp(initial.getVelocity(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
+        State in_goal = new State(goal.getPosition(),
+                MathUtil.clamp(goal.getVelocity(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
 
         if (in_goal.near(in_initial, m_tolerance)) {
             return new State(in_goal);
         }
 
-        if (MathUtil.isNear(m_constraints.maxVelocity, in_initial.velocity, 1e-12)) {
+        if (MathUtil.isNear(m_constraints.maxVelocity, in_initial.getVelocity(), 1e-12)) {
             // cruising +x which means G- is next
             // will we reach it during dt?
             double c_minus = c_minus(in_goal);
             // the G- value at vmax
             double gminus = c_minus - Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
             // distance to go
-            double dc = gminus - in_initial.position;
+            double dc = gminus - in_initial.getPosition();
             // time to go
             double dct = dc / m_constraints.maxVelocity;
             if (MathUtil.isNear(0, dct, 1e-12)) {
@@ -50,16 +50,16 @@ public class TrapezoidProfile100 {
                 return calculate(tremaining, new State(gminus, m_constraints.maxVelocity), in_goal);
             } else {
                 // we won't reach G-
-                return new State(in_initial.position + m_constraints.maxVelocity * dt, m_constraints.maxVelocity);
+                return new State(in_initial.getPosition() + m_constraints.maxVelocity * dt, m_constraints.maxVelocity);
             }
 
-        } else if (MathUtil.isNear(-m_constraints.maxVelocity, in_initial.velocity, 1e-12)) {
+        } else if (MathUtil.isNear(-m_constraints.maxVelocity, in_initial.getVelocity(), 1e-12)) {
             // cruising -x which means G+ is next
             // same logic as above, inverted.
             double c_plus = c_plus(in_goal);
             double gplus = c_plus + Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
             // negative
-            double dc = gplus - in_initial.position;
+            double dc = gplus - in_initial.getPosition();
             double dct = dc / -m_constraints.maxVelocity;
             if (MathUtil.isNear(0, dct, 1e-12)) {
                 // we're on G+ already, fall through
@@ -68,7 +68,7 @@ public class TrapezoidProfile100 {
                 return calculate(tremaining, new State(gplus, -m_constraints.maxVelocity), in_goal);
             } else {
                 // we won't reach G+
-                return new State(in_initial.position - m_constraints.maxVelocity * dt, -m_constraints.maxVelocity);
+                return new State(in_initial.getPosition() - m_constraints.maxVelocity * dt, -m_constraints.maxVelocity);
 
             }
         }
@@ -87,25 +87,25 @@ public class TrapezoidProfile100 {
             if (MathUtil.isNear(t1, 0, 1e-12)) {
                 // we're on G+
                 // time to get to the goal, positive
-                double dtg = Math.abs((in_initial.velocity - in_goal.velocity) / m_constraints.maxAcceleration);
+                double dtg = Math.abs((in_initial.getVelocity() - in_goal.getVelocity()) / m_constraints.maxAcceleration);
                 // don't overshoot the goal
                 dt = Math.min(dt, dtg);
-                double x = in_initial.position + in_initial.velocity * dt
+                double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                         + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                double v = in_initial.velocity + m_constraints.maxAcceleration * dt;
+                double v = in_initial.getVelocity() + m_constraints.maxAcceleration * dt;
                 return new State(x, v);
             } else if (t1 >= dt) {
                 // we're on I- the whole dt duration
 
-                double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
+                double v = in_initial.getVelocity() - m_constraints.maxAcceleration * dt;
 
                 if (v < -m_constraints.maxVelocity) {
                     // need to clip (this is negative)
-                    double dv = -m_constraints.maxVelocity - in_initial.velocity;
+                    double dv = -m_constraints.maxVelocity - in_initial.getVelocity();
                     // time to get to limit (positive)
                     double vt = dv / -m_constraints.maxAcceleration;
                     // location of that limit
-                    double xt = in_initial.position + in_initial.velocity * vt
+                    double xt = in_initial.getPosition() + in_initial.getVelocity() * vt
                             - 0.5 * m_constraints.maxAcceleration * Math.pow(vt, 2);
                     // remaining time
                     double vt2 = dt - vt;
@@ -116,15 +116,15 @@ public class TrapezoidProfile100 {
                     return new State(x, -m_constraints.maxVelocity);
                 }
 
-                double x = in_initial.position + in_initial.velocity * dt
+                double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                         - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
                 return new State(x, v);
             }
             // switch during dt
             // first get to the switching point
-            double x = in_initial.position + in_initial.velocity * t1
+            double x = in_initial.getPosition() + in_initial.getVelocity() * t1
                     - 0.5 * m_constraints.maxAcceleration * Math.pow(t1, 2);
-            double v = in_initial.velocity - m_constraints.maxAcceleration * t1;
+            double v = in_initial.getVelocity() - m_constraints.maxAcceleration * t1;
             // then go the other way for the remaining time
             double t2 = dt - t1;
             // just use the same method for the second part
@@ -137,26 +137,26 @@ public class TrapezoidProfile100 {
             if (MathUtil.isNear(t1, 0, 1e-12)) {
                 // we're on G-
                 // time to get to the goal, positive
-                double dtg = Math.abs((in_initial.velocity - in_goal.velocity) / m_constraints.maxAcceleration);
+                double dtg = Math.abs((in_initial.getVelocity() - in_goal.getVelocity()) / m_constraints.maxAcceleration);
                 // don't overshoot the goal
                 dt = Math.min(dt, dtg);
-                double x = in_initial.position + in_initial.velocity * dt
+                double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                         - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
+                double v = in_initial.getVelocity() - m_constraints.maxAcceleration * dt;
                 return new State(x, v);
 
             } else if (t1 >= dt) {
                 // we're on I+ the whole dt duration
 
-                double v = in_initial.velocity + m_constraints.maxAcceleration * dt;
+                double v = in_initial.getVelocity() + m_constraints.maxAcceleration * dt;
 
                 if (v > m_constraints.maxVelocity) {
                     // need to clip
-                    double dv = m_constraints.maxVelocity - in_initial.velocity;
+                    double dv = m_constraints.maxVelocity - in_initial.getVelocity();
                     // time to get to limit
                     double vt = dv / m_constraints.maxAcceleration;
                     // location of that limit
-                    double xt = in_initial.position + in_initial.velocity * vt
+                    double xt = in_initial.getPosition() + in_initial.getVelocity() * vt
                             + 0.5 * m_constraints.maxAcceleration * Math.pow(vt, 2);
                     // remaining time
                     double vt2 = dt - vt;
@@ -166,15 +166,15 @@ public class TrapezoidProfile100 {
                     double x = xt + m_constraints.maxVelocity * vt2;
                     return new State(x, m_constraints.maxVelocity);
                 }
-                double x = in_initial.position + in_initial.velocity * dt
+                double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                         + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
                 return new State(x, v);
             }
             // switch during dt
             // first get to the switching point
-            double x = in_initial.position + in_initial.velocity * t1
+            double x = in_initial.getPosition() + in_initial.getVelocity() * t1
                     + 0.5 * m_constraints.maxAcceleration * Math.pow(t1, 2);
-            double v = in_initial.velocity + m_constraints.maxAcceleration * t1;
+            double v = in_initial.getVelocity() + m_constraints.maxAcceleration * t1;
             // then go the other way for the remaining time
             double t2 = dt - t1;
             return calculate(t2, new State(x, v), goal);
@@ -183,37 +183,37 @@ public class TrapezoidProfile100 {
         // neither is NaN.
 
         // time to get to the goal, positive
-        double dtg = Math.abs((in_initial.velocity - in_goal.velocity) / m_constraints.maxAcceleration);
+        double dtg = Math.abs((in_initial.getVelocity() - in_goal.getVelocity()) / m_constraints.maxAcceleration);
         // don't overshoot the goal
         dt = Math.min(dt, dtg);
 
         if (MathUtil.isNear(0, t1IminusGplus, 1e-12)) {
             // we want G+, use positive accel
-            double x = in_initial.position + in_initial.velocity * dt
+            double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                     + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-            double v = in_initial.velocity + m_constraints.maxAcceleration * dt;
+            double v = in_initial.getVelocity() + m_constraints.maxAcceleration * dt;
             return new State(x, v);
         }
         if (MathUtil.isNear(0, t1IplusGminus, 1e-12)) {
             // we want G-, use negative accel
-            double x = in_initial.position + in_initial.velocity * dt
+            double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                     - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-            double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
+            double v = in_initial.getVelocity() - m_constraints.maxAcceleration * dt;
             return new State(x, v);
         }
 
         // if either path will work, but neither is zero, take the fast one.
         if (t1IminusGplus > t1IplusGminus) {
             // I-G+ is slower so use I+G-, which means positive A
-            double x = in_initial.position + in_initial.velocity * dt
+            double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                     + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-            double v = in_initial.velocity + m_constraints.maxAcceleration * dt;
+            double v = in_initial.getVelocity() + m_constraints.maxAcceleration * dt;
             return new State(x, v);
         }
         // I+G- is slower so use I-G+, which means negative A
-        double x = in_initial.position + in_initial.velocity * dt
+        double x = in_initial.getPosition() + in_initial.getVelocity() * dt
                 - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-        double v = in_initial.velocity - m_constraints.maxAcceleration * dt;
+        double v = in_initial.getVelocity() - m_constraints.maxAcceleration * dt;
         return new State(x, v);
     }
 
@@ -221,7 +221,7 @@ public class TrapezoidProfile100 {
         // this is the switching velocity
         double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
         double t_1 = t1IplusGminus(initial, goal);
-        double t_2 = (goal.velocity - q_dot_switch) / (-1.0 * m_constraints.maxAcceleration);
+        double t_2 = (goal.getVelocity() - q_dot_switch) / (-1.0 * m_constraints.maxAcceleration);
         return t_1 + t_2;
     }
 
@@ -229,9 +229,9 @@ public class TrapezoidProfile100 {
     double t1IplusGminus(State initial, State goal) {
         double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
         // this fixes rounding errors
-        if (MathUtil.isNear(initial.velocity, q_dot_switch, 1e-6))
+        if (MathUtil.isNear(initial.getVelocity(), q_dot_switch, 1e-6))
             return 0;
-        double t1 = (q_dot_switch - initial.velocity) / m_constraints.maxAcceleration;
+        double t1 = (q_dot_switch - initial.getVelocity()) / m_constraints.maxAcceleration;
         if (t1 < 0) {
             return Double.NaN;
         }
@@ -241,7 +241,7 @@ public class TrapezoidProfile100 {
     double tSwitchIminusGplus(State initial, State goal) {
         double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
         double t_1 = t1IminusGplus(initial, goal);
-        double t_2 = (goal.velocity - q_dot_switch) / m_constraints.maxAcceleration;
+        double t_2 = (goal.getVelocity() - q_dot_switch) / m_constraints.maxAcceleration;
         return t_1 + t_2;
     }
 
@@ -249,10 +249,10 @@ public class TrapezoidProfile100 {
     double t1IminusGplus(State initial, State goal) {
         double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
         // this fixes rounding errors
-        if (MathUtil.isNear(initial.velocity, q_dot_switch, 1e-6))
+        if (MathUtil.isNear(initial.getVelocity(), q_dot_switch, 1e-6))
             return 0;
 
-        double t1 = (q_dot_switch - initial.velocity) / (-1.0 * m_constraints.maxAcceleration);
+        double t1 = (q_dot_switch - initial.getVelocity()) / (-1.0 * m_constraints.maxAcceleration);
         if (t1 < 0) {
             return Double.NaN;
         }
@@ -267,21 +267,21 @@ public class TrapezoidProfile100 {
      */
     double qDotSwitchIplusGminus(State initial, State goal) {
         if (initial.equals(goal))
-            return initial.velocity;
+            return initial.getVelocity();
 
         // intercept of I-
         double c_minus = c_minus(initial);
         // intercept of I+
         double c_plus = c_plus(initial);
         // position of I- at the velocity of goal
-        double p_minus = c_minus - Math.pow(goal.velocity, 2) / (2 * m_constraints.maxAcceleration);
-        double p_plus = c_plus + Math.pow(goal.velocity, 2) / (2 * m_constraints.maxAcceleration);
+        double p_minus = c_minus - Math.pow(goal.getVelocity(), 2) / (2 * m_constraints.maxAcceleration);
+        double p_plus = c_plus + Math.pow(goal.getVelocity(), 2) / (2 * m_constraints.maxAcceleration);
 
         // "limit" path we don't want.
 
-        if (goal.velocity <= initial.velocity && goal.position < p_minus)
+        if (goal.getVelocity() <= initial.getVelocity() && goal.getPosition() < p_minus)
             return Double.NaN;
-        if (goal.velocity > initial.velocity && goal.position < p_plus)
+        if (goal.getVelocity() > initial.getVelocity() && goal.getPosition() < p_plus)
             return Double.NaN;
 
         // progress along I+
@@ -299,21 +299,21 @@ public class TrapezoidProfile100 {
      */
     double qDotSwitchIminusGplus(State initial, State goal) {
         if (initial.equals(goal))
-            return goal.velocity;
+            return goal.getVelocity();
 
         // intercept of I-
         double c_minus = c_minus(initial);
         // intercept of I+
         double c_plus = c_plus(initial);
         // position of I- at the velocity of goal
-        double p_minus = c_minus - Math.pow(goal.velocity, 2) / (2 * m_constraints.maxAcceleration);
-        double p_plus = c_plus + Math.pow(goal.velocity, 2) / (2 * m_constraints.maxAcceleration);
+        double p_minus = c_minus - Math.pow(goal.getVelocity(), 2) / (2 * m_constraints.maxAcceleration);
+        double p_plus = c_plus + Math.pow(goal.getVelocity(), 2) / (2 * m_constraints.maxAcceleration);
 
         // "limit" path we don't want.
 
-        if (goal.velocity <= initial.velocity && goal.position > p_minus)
+        if (goal.getVelocity() <= initial.getVelocity() && goal.getPosition() > p_minus)
             return Double.NaN;
-        if (goal.velocity > initial.velocity && goal.position > p_plus)
+        if (goal.getVelocity() > initial.getVelocity() && goal.getPosition() > p_plus)
             return Double.NaN;
 
         // progress along I-
@@ -342,12 +342,12 @@ public class TrapezoidProfile100 {
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_minus(State s) {
-        return s.position - Math.pow(s.velocity, 2) / (-2.0 * m_constraints.maxAcceleration);
+        return s.getPosition() - Math.pow(s.getVelocity(), 2) / (-2.0 * m_constraints.maxAcceleration);
     }
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_plus(State s) {
-        return s.position - Math.pow(s.velocity, 2) / (2.0 * m_constraints.maxAcceleration);
+        return s.getPosition() - Math.pow(s.getVelocity(), 2) / (2.0 * m_constraints.maxAcceleration);
     }
 
     // for testing

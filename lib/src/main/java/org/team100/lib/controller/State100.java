@@ -24,8 +24,8 @@ public class State100 {
     }
 
     public State100(State state, double a) {
-        m_x = state.position;
-        m_v = state.velocity;
+        m_x = state.getPosition();
+        m_v = state.getVelocity();
         m_a = a; 
     }
 

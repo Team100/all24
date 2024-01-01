@@ -70,8 +70,8 @@ public class DriveInALittleSquare extends Command100 {
     public void execute100(double dt) {
         switch (m_state) {
             case DRIVING:
-                if (MathUtil.isNear(speedM_S.position, goal.position, kXToleranceRad)
-                        && MathUtil.isNear(speedM_S.velocity, goal.velocity, kVToleranceRad_S)) {
+                if (MathUtil.isNear(speedM_S.getPosition(), goal.getPosition(), kXToleranceRad)
+                        && MathUtil.isNear(speedM_S.getVelocity(), goal.getVelocity(), kVToleranceRad_S)) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = DriveState.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
@@ -96,10 +96,10 @@ public class DriveInALittleSquare extends Command100 {
 
         // there are four states here because state is mutable :-(
         SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(speedM_S.position, m_goal),
-                new SwerveModuleState(speedM_S.position, m_goal),
-                new SwerveModuleState(speedM_S.position, m_goal),
-                new SwerveModuleState(speedM_S.position, m_goal)
+                new SwerveModuleState(speedM_S.getPosition(), m_goal),
+                new SwerveModuleState(speedM_S.getPosition(), m_goal),
+                new SwerveModuleState(speedM_S.getPosition(), m_goal),
+                new SwerveModuleState(speedM_S.getPosition(), m_goal)
         };
         m_swerve.setRawModuleStates(states);
     }

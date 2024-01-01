@@ -97,8 +97,8 @@ public class Rotate extends Command100 {
 
         // reference
         refTheta = m_profile.calculate(dt, refTheta, m_goalState);
-        m_finished = MathUtil.isNear(refTheta.position, m_goalState.position, kXToleranceRad)
-                && MathUtil.isNear(refTheta.velocity, m_goalState.velocity, kVToleranceRad_S);
+        m_finished = MathUtil.isNear(refTheta.getPosition(), m_goalState.getPosition(), kXToleranceRad)
+                && MathUtil.isNear(refTheta.getVelocity(), m_goalState.getVelocity(), kVToleranceRad_S);
 
         // measurement
         Pose2d currentPose = m_robotDrive.getPose();
@@ -106,7 +106,7 @@ public class Rotate extends Command100 {
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose
                 new State100(currentPose.getY(), 0, 0),
-                new State100(refTheta.position, refTheta.velocity, 0)); // TODO: accel
+                new State100(refTheta.getPosition(), refTheta.getVelocity(), 0)); // TODO: accel
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
@@ -126,12 +126,12 @@ public class Rotate extends Command100 {
         double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did
-        t.log(Level.DEBUG, "/rotate/errorX", refTheta.position - headingMeasurement);
-        t.log(Level.DEBUG, "/rotate/errorV", refTheta.velocity - headingRate);
+        t.log(Level.DEBUG, "/rotate/errorX", refTheta.getPosition() - headingMeasurement);
+        t.log(Level.DEBUG, "/rotate/errorV", refTheta.getVelocity() - headingRate);
         t.log(Level.DEBUG, "/rotate/measurementX", headingMeasurement);
         t.log(Level.DEBUG, "/rotate/measurementV", headingRate);
-        t.log(Level.DEBUG, "/rotate/refX", refTheta.position);
-        t.log(Level.DEBUG, "/rotate/refV", refTheta.velocity);
+        t.log(Level.DEBUG, "/rotate/refX", refTheta.getPosition());
+        t.log(Level.DEBUG, "/rotate/refV", refTheta.getVelocity());
     }
 
     @Override
