@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 public interface HolonomicFieldRelativeController {
 
     /**
-     * TODO make currentPose a state as well.
-     * 
      * @param currentPose  robot's current pose in field coordinates
      * @param desiredState reference state
      * @return field-relative twist, meters and radians per second

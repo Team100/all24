@@ -62,7 +62,6 @@ public class SwerveState {
 
     /**
      * turn a wpi trajectory state into a swervestate.
-     * TODO: stop using wpi trajectory state.
      */
     public static SwerveState fromState(State desiredState, Rotation2d desiredRot) {
         double xx = desiredState.poseMeters.getX();
@@ -74,8 +73,6 @@ public class SwerveState {
 
         double xa = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getCos();
         double ya = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getSin();
-
-        // TODO: thetav, thetaa.
 
         return new SwerveState(
                 new State100(xx, xv, xa),

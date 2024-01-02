@@ -62,15 +62,13 @@ public class PositionServo<T extends Measure100> {
     }
 
     /**
-     * TODO: allow nonzero goal velocity
-     * 
      * @param goal For distance, use meters, For angle, use radians.
      */
     public void setPosition(double goal) {
         double measurement = m_instance.modulus(m_encoder.getPosition());
 
         // use the modulus closest to the measurement.
-        // note zero velocity in the goal.  TODO: allow nonzero.
+        // note zero velocity in the goal.
         m_goal = new State100(m_instance.modulus(goal - measurement) + measurement, 0.0);
 
         m_setpoint = new State100(

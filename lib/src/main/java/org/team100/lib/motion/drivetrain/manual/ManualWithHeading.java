@@ -24,8 +24,6 @@ import edu.wpi.first.math.geometry.Twist2d;
  * rotational control.
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
- * 
- * TODO: add velocity feedback
  */
 public class ManualWithHeading {
     private static final double kDtSec = 0.02;

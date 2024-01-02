@@ -68,7 +68,6 @@ public class FullStateServo<T extends Measure100> {
     }
 
     /**
-     * TODO: allow nonzero goal velocity, use a State here
      * @param goal For distance, use meters, For angle, use radians.
      */
     public void setPosition(double goal) {
@@ -79,7 +78,6 @@ public class FullStateServo<T extends Measure100> {
         double measurement = m_instance.modulus(m_encoder.getPosition());
         // make sure the goal and setpoint use the modulus that's close to the
         // measurement.
-        // TODO: nonzero goal velocity
         State100 m_goal = new State100(
                 m_instance.modulus(goal - measurement) + measurement,
                 0.0);

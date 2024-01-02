@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -21,6 +22,9 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Follow a list of trajectories with the full state controller.
+ * 
+ * This just holds the starting rotation.  If you want a holonomic trajectory
+ * follower, try the {@link DriveMotionController} classes.
  */
 public class FullStateTrajectoryListCommand extends Command100 {
     private final Telemetry t = Telemetry.get();
@@ -31,8 +35,6 @@ public class FullStateTrajectoryListCommand extends Command100 {
     private Iterator<Trajectory> m_trajectoryIter;
     private Trajectory m_currentTrajectory;
     private boolean done;
-    // this holds the current rotation
-    // TODO: allow trajectory to specify it using the new type
     private Rotation2d m_rotation;
     private boolean m_aligned;
 

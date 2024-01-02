@@ -1,6 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -20,7 +21,11 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * The trajectory is supplied; the supplier is free to ignore the current state.
  * 
- * Steering is aligned to prevent startup errors, but this isn't working right yet.
+ * The goal rotation is used as the setpoint the entire time, which will put
+ * a lot of error into the rotational controller.
+ * 
+ * If you want a holonomic trajectory follower, try the
+ * {@link DriveMotionController} classes.
  */
 public class DriveToWaypoint3 extends Command100 {
     private final Telemetry t = Telemetry.get();
@@ -73,7 +78,6 @@ public class DriveToWaypoint3 extends Command100 {
         double curTime = m_timer.get();
         State desiredState = m_trajectory.sample(curTime);
         Pose2d currentPose = m_swerve.getPose();
-        // TODO: rotation profile, use new trajectory type.
         SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
