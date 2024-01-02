@@ -9,9 +9,44 @@ import edu.wpi.first.math.MathUtil;
  * This uses the approach from LaValle 2023: between any two points in phase
  * space, the optimal acceleration-limited path is via two parabolas, perhaps
  * with a velocity limit.
+ * 
+ * The notation here is from that paper. Every point in phase space is
+ * intersected with two minimum-time parabolas: one corresponding to maximum
+ * acceleration, the other to maximum deceleration. The paper was concerned with
+ * coordinating multiple axes, so there's a lot in it about non-minimum-time
+ * paths. For our purpose here, the simple minimum-time case is all that
+ * matters.
+ * 
+ * The simplest case links a state with zero velocity to another state with
+ * position to the right, and also with zero velocity: the result is a
+ * symmetrical pair of parabolas, an initial one for acceleration ("I" for
+ * "initial") and the second for deceleration to the goal ("G" for "goal"). The
+ * intersection is called the "switching point." A path with initial
+ * acceleration followed by deceleration to the goal is called "I+G-". The other
+ * pairing is also possible, for example the goal could be to the left of the
+ * initial state, so the initial acceleration to get there would be negative.
+ * 
+ * The same picture applies to nonzero-velocity cases, and to cases with
+ * velocities of opposite sign: any two states can be linked by either an I+G-
+ * or I-G+ path.
+ * 
+ * Adding a velocity limit means that the "switching point" may be clipped off,
+ * so the path is something like I+CG-, "C" for "cruise."
+ * 
+ * So there are three kinds of boundaries: I-G, I-cruise, and cruise-G.
+ * 
+ * https://arxiv.org/pdf/2210.01744.pdf
+ * 
+ * This class is different from the WPI profile class -- it keeps no state, it
+ * just takes one dt step at a time. It doesn't have the notion of a profile
+ * being "completed" -- if you want that, compare the output to the goal. The
+ * main benefit of the approach here is that it correctly handles cases
+ * involving moving end states that the WPI code does not handle correctly.
+ * 
+ * It might be slower around the switching points, since it can call itself once
+ * or twice, once per segment.
  */
 public class TrapezoidProfile100 {
-
     private final Constraints m_constraints;
     private final double m_tolerance;
 
@@ -21,232 +56,214 @@ public class TrapezoidProfile100 {
     }
 
     /**
-     * this puts initial first because my god
-     * also clamps initial and goal velocities to the constraint.
-     * the velocity constraint only ever clips the switch point.
+     * Note order of the arguments: initial state first, then goal.
+     * 
+     * Input velocities are clamped to the velocity constraint.
+     * 
      * Input accelerations are ignored: jerk is unmanaged.
+     * 
      * Output acceleration is the *profile* acceleration at dt, it is not
      * necessarily the same as the actuation required to reach the output state from
-     * the initial state. The only difference occurs at switching points, where the
-     * reported acceleration will be from the other side.
+     * the initial state. The only difference occurs when the dt period spans a
+     * boundary between accel and decel, or accel/decel and cruise. In those cases,
+     * the reported acceleration will be from the other side of the boundary.
+     * 
+     * Therefore, if you blindly use the reported acceleration as the only input to
+     * a real system, it will tend to get ahead of the profile, but only by one time
+     * period.
      */
-    public State100 calculate(double dt, final State100 initial, final State100 goal) {
-        State100 in_initial = new State100(initial.x(),
-                MathUtil.clamp(initial.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
-        State100 in_goal = new State100(goal.x(),
-                MathUtil.clamp(goal.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
+    public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
+        State100 initial = new State100(initialRaw.x(),
+                MathUtil.clamp(initialRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
+        State100 goal = new State100(goalRaw.x(),
+                MathUtil.clamp(goalRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
 
-        if (in_goal.near(in_initial, m_tolerance)) {
-            return in_goal;
+        if (goal.near(initial, m_tolerance)) {
+            return goal;
         }
 
-        if (MathUtil.isNear(m_constraints.maxVelocity, in_initial.v(), 1e-12)) {
-            // cruising +x which means G- is next
-            // will we reach it during dt?
-            double c_minus = c_minus(in_goal);
-            // the G- value at vmax
-            double gminus = c_minus - Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
-            // distance to go
-            double dc = gminus - in_initial.x();
-            // time to go
-            double dct = dc / m_constraints.maxVelocity;
-            if (MathUtil.isNear(0, dct, 1e-12)) {
-                // we're on G- already
-            } else if (dct < dt) {
-                // there are two segments
-                double tremaining = dt - dct;
-                return calculate(tremaining, new State100(gminus, m_constraints.maxVelocity), in_goal);
-            } else {
-                // we won't reach G-, so cruise for all of dt.
-                return new State100(
-                        in_initial.x() + m_constraints.maxVelocity * dt,
-                        m_constraints.maxVelocity,
-                        0);
-            }
-
-        } else if (MathUtil.isNear(-m_constraints.maxVelocity, in_initial.v(), 1e-12)) {
-            // cruising -x which means G+ is next
-            // same logic as above, inverted.
-            double c_plus = c_plus(in_goal);
-            double gplus = c_plus + Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
-            // negative
-            double dc = gplus - in_initial.x();
-            double dct = dc / -m_constraints.maxVelocity;
-            if (MathUtil.isNear(0, dct, 1e-12)) {
-                // we're on G+ already, fall through
-            } else if (dct < dt) {
-                double tremaining = dt - dct;
-                return calculate(tremaining, new State100(gplus, -m_constraints.maxVelocity), in_goal);
-            } else {
-                // we won't reach G+, so cruise for all of dt
-                return new State100(
-                        in_initial.x() - m_constraints.maxVelocity * dt,
-                        -m_constraints.maxVelocity,
-                        0);
-
-            }
+        if (MathUtil.isNear(m_constraints.maxVelocity, initial.v(), 1e-12)) {
+            return keepCruising(dt, initial, goal);
+        }
+        if (MathUtil.isNear(-m_constraints.maxVelocity, initial.v(), 1e-12)) {
+            return keepCruisingMinus(dt, initial, goal);
         }
 
-        double t1IplusGminus = t1IplusGminus(in_initial, in_goal);
-        double t1IminusGplus = t1IminusGplus(in_initial, in_goal);
+        // Calculate the ETA to each switch point, or NaN if there's no valid path.
+        double t1IplusGminus = t1IplusGminus(initial, goal);
+        double t1IminusGplus = t1IminusGplus(initial, goal);
 
-        // these should not both be NaN
         if (Double.isNaN(t1IminusGplus) && Double.isNaN(t1IplusGminus)) {
             Util.warn("Both I-G+ and I+G- are NaN, this should never happen");
-            return in_initial;
+            return initial;
         }
 
         if (Double.isNaN(t1IplusGminus)) {
-            // the valid path is I-G+
-            double t1 = t1IminusGplus;
-
-            if (MathUtil.isNear(t1, 0, 1e-12)) {
-                // we're on G+
-                // time to get to the goal, positive
-                double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_constraints.maxAcceleration);
-                // don't overshoot the goal
-                dt = Math.min(dt, dtg);
-                double x = in_initial.x() + in_initial.v() * dt
-                        + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-                double a = m_constraints.maxAcceleration;
-                return new State100(x, v, a);
-            } else if (t1 >= dt) {
-                // we're on I- the whole dt duration
-
-                double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-
-                if (v < -m_constraints.maxVelocity) {
-                    // need to clip (this is negative)
-                    double dv = -m_constraints.maxVelocity - in_initial.v();
-                    // time to get to limit (positive)
-                    double vt = dv / -m_constraints.maxAcceleration;
-                    // location of that limit
-                    double xt = in_initial.x() + in_initial.v() * vt
-                            - 0.5 * m_constraints.maxAcceleration * Math.pow(vt, 2);
-                    // remaining time
-                    double vt2 = dt - vt;
-                    // during that time, do we hit G+? i think it's not possible,
-                    // because this is the "not switching" branch.
-                    // so we just move along it
-                    double x = xt - m_constraints.maxVelocity * vt2;
-                    return new State100(x, -m_constraints.maxVelocity, 0);
-                }
-
-                double x = in_initial.x() + in_initial.v() * dt
-                        - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                double a = -1.0 * m_constraints.maxAcceleration;
-                return new State100(x, v, a);
-            }
-            // switch during dt
-            // first get to the switching point
-            double x = in_initial.x() + in_initial.v() * t1
-                    - 0.5 * m_constraints.maxAcceleration * Math.pow(t1, 2);
-            double v = in_initial.v() - m_constraints.maxAcceleration * t1;
-            // then go the other way for the remaining time
-            double t2 = dt - t1;
-            // just use the same method for the second part
-            // note this is slower than the code below so maybe put it back
-            return calculate(t2, new State100(x, v), goal);
+            // the valid path is I-G+, assume we're on I-
+            return handleIminus(dt, initial, goal, t1IminusGplus);
         }
+
         if (Double.isNaN(t1IminusGplus)) {
-            // the valid path is I+G-
-            double t1 = t1IplusGminus;
-            if (MathUtil.isNear(t1, 0, 1e-12)) {
-                // we're on G-
-                // time to get to the goal, positive
-                double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_constraints.maxAcceleration);
-                // don't overshoot the goal
-                dt = Math.min(dt, dtg);
-                double x = in_initial.x() + in_initial.v() * dt
-                        - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-                double a = -1.0 * m_constraints.maxAcceleration;
-                return new State100(x, v, a);
-
-            } else if (t1 >= dt) {
-                // we're on I+ the whole dt duration
-
-                double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-
-                if (v > m_constraints.maxVelocity) {
-                    // need to clip
-                    double dv = m_constraints.maxVelocity - in_initial.v();
-                    // time to get to limit
-                    double vt = dv / m_constraints.maxAcceleration;
-                    // location of that limit
-                    double xt = in_initial.x() + in_initial.v() * vt
-                            + 0.5 * m_constraints.maxAcceleration * Math.pow(vt, 2);
-                    // remaining time
-                    double vt2 = dt - vt;
-                    // during that time, do we hit G-? i think it's not possible,
-                    // because this is the "not switching" branch.
-                    // so we just move along it
-                    double x = xt + m_constraints.maxVelocity * vt2;
-                    return new State100(x, m_constraints.maxVelocity, 0);
-                }
-                double x = in_initial.x() + in_initial.v() * dt
-                        + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                double a = m_constraints.maxAcceleration;
-                return new State100(x, v, a);
-            }
-            // switch during dt
-            // first get to the switching point
-            double x = in_initial.x() + in_initial.v() * t1
-                    + 0.5 * m_constraints.maxAcceleration * Math.pow(t1, 2);
-            double v = in_initial.v() + m_constraints.maxAcceleration * t1;
-            // then go the other way for the remaining time
-            double t2 = dt - t1;
-            return calculate(t2, new State100(x, v), goal);
-
+            // the valid path is I+G-, assume we're on I+
+            return handleIplus(dt, initial, goal, t1IplusGminus);
         }
-        // neither is NaN.
 
-        // time to get to the goal, positive
-        double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_constraints.maxAcceleration);
-        // don't overshoot the goal
-        dt = Math.min(dt, dtg);
-
+        // There can be one path with zero duration, indicating that we're on the goal
+        // path at the switch point. In that case, we want to switch immediately and
+        // proceed to the goal.
+        dt = truncateDt(dt, initial, goal);
         if (MathUtil.isNear(0, t1IminusGplus, 1e-12)) {
-            // we want G+, use positive accel
-            double x = in_initial.x() + in_initial.v() * dt
-                    + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-            double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-            double a = m_constraints.maxAcceleration;
-            return new State100(x, v, a);
+            return full(dt, initial, 1);
         }
         if (MathUtil.isNear(0, t1IplusGminus, 1e-12)) {
-            // we want G-, use negative accel
-            double x = in_initial.x() + in_initial.v() * dt
-                    - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-            double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-            double a = -1.0 * m_constraints.maxAcceleration;
-            return new State100(x, v, a);
+            return full(dt, initial, -1);
         }
 
-        // if either path will work, but neither is zero, take the fast one.
+        // There can be two non-zero-duration paths. As above, this happens when we're
+        // on the goal path. The difference is that in this case, the goal has non-zero
+        // velocity. One path goes directly to the goal, but it's also possible to make
+        // a little loop in phase space, backing up and ending up in the same place, on
+        // the way to the goal. We want to avoid these little loops.
         if (t1IminusGplus > t1IplusGminus) {
-            // I-G+ is slower so use I+G-, which means positive A
-            double x = in_initial.x() + in_initial.v() * dt
-                    + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-            double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-            double a = m_constraints.maxAcceleration;
-            return new State100(x, v, a);
+            return full(dt, initial, 1);
         }
-        // I+G- is slower so use I-G+, which means negative A
+        return full(dt, initial, -1);
+    }
+
+    private State100 handleIplus(double dt, State100 initial, State100 goal, double t1) {
+        if (MathUtil.isNear(t1, 0, 1e-12)) {
+            // switch eta is zero: go to the goal via G-
+            return full(truncateDt(dt, initial, goal), initial, -1);
+        }
+        if (t1 < dt) {
+            // We Encounter G- during dt, so switch.
+            return traverseSwitch(dt, initial, goal, t1, 1);
+        }
+        if (initial.v() + m_constraints.maxAcceleration * dt > m_constraints.maxVelocity) {
+            // We encounter vmax, so cruise.
+            return cruise(dt, initial, 1);
+        }
+        // We will not encounter any boundary during dt
+        return full(dt, initial, 1);
+    }
+
+    private State100 handleIminus(double dt, State100 initial, State100 goal, double t1) {
+
+        if (MathUtil.isNear(t1, 0, 1e-12)) {
+            // Switch ETA is zero: go to the goal via G+
+            return full(truncateDt(dt, initial, goal), initial, 1);
+        }
+        if (t1 < dt) {
+            // We encounter G+ during dt, so switch.
+            return traverseSwitch(dt, initial, goal, t1, -1);
+        }
+        if (initial.v() - m_constraints.maxAcceleration * dt < -m_constraints.maxVelocity) {
+            // we did encounter vmax, though
+            return cruise(dt, initial, -1);
+        }
+        // We will not encounter any boundary during dt
+        return full(dt, initial, -1);
+    }
+
+    private State100 keepCruising(double dt, State100 initial, State100 goal) {
+        // We're already at positive cruising speed, which means G- is next.
+        // will we reach it during dt?
+        double c_minus = c_minus(goal);
+        // the G- value at vmax
+        double gminus = c_minus - Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
+        // distance to go
+        double dc = gminus - initial.x();
+        // time to go
+        double dct = dc / m_constraints.maxVelocity;
+        if (MathUtil.isNear(0, dct, 1e-12)) {
+            // we are at the intersection of vmax and G-, so head down G-
+            return full(truncateDt(dt, initial, goal), initial, -1);
+        }
+        if (dct < dt) {
+            // there are two segments
+            double tremaining = dt - dct;
+            return calculate(tremaining, new State100(gminus, m_constraints.maxVelocity), goal);
+        }
+        // we won't reach G-, so cruise for all of dt.
+        return new State100(
+                initial.x() + m_constraints.maxVelocity * dt,
+                m_constraints.maxVelocity,
+                0);
+    }
+
+    private State100 keepCruisingMinus(double dt, State100 initial, State100 goal) {
+        // We're already at negative cruising speed, which means G+ is next.
+        // will we reach it during dt?
+        double c_plus = c_plus(goal);
+        double gplus = c_plus + Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
+        // negative
+        double dc = gplus - initial.x();
+        double dct = dc / -m_constraints.maxVelocity;
+        if (MathUtil.isNear(0, dct, 1e-12)) {
+            // We're at the intersection of -vmax and G+, so head up G+
+            return full(truncateDt(dt, initial, goal), initial, 1);
+        }
+        if (dct < dt) {
+            double tremaining = dt - dct;
+            return calculate(tremaining, new State100(gplus, -m_constraints.maxVelocity), goal);
+        }
+        // we won't reach G+, so cruise for all of dt
+        return new State100(
+                initial.x() - m_constraints.maxVelocity * dt,
+                -m_constraints.maxVelocity,
+                0);
+    }
+
+    /**
+     * Travel to the switching point, and then the remainder of time on the goal
+     * path.
+     */
+    private State100 traverseSwitch(double dt, State100 in_initial, final State100 goal, double t1, double direction) {
+        // first get to the switching point
+        double x = in_initial.x() + in_initial.v() * t1
+                + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(t1, 2);
+        double v = in_initial.v() + direction * m_constraints.maxAcceleration * t1;
+        // then go the other way for the remaining time
+        double t2 = dt - t1;
+        // just use the same method for the second part
+        // note this is slower than the code below so maybe put it back
+        return calculate(t2, new State100(x, v), goal);
+    }
+
+    /** Returns a shorter dt to avoid overshooting the goal state. */
+    private double truncateDt(double dt, State100 in_initial, State100 in_goal) {
+        double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_constraints.maxAcceleration);
+        return Math.min(dt, dtg);
+    }
+
+    /** Return dt at full accel. */
+    private State100 full(double dt, State100 in_initial, double direction) {
         double x = in_initial.x() + in_initial.v() * dt
-                - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-        double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-        double a = -1.0 * m_constraints.maxAcceleration;
+                + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(dt, 2);
+        double v = in_initial.v() + direction * m_constraints.maxAcceleration * dt;
+        double a = direction * m_constraints.maxAcceleration;
         return new State100(x, v, a);
     }
 
-    double tSwitchIplusGminus(State100 initial, State100 goal) {
-        // this is the switching velocity
-        double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
-        double t_1 = t1IplusGminus(initial, goal);
-        double t_2 = (goal.v() - q_dot_switch) / (-1.0 * m_constraints.maxAcceleration);
-        return t_1 + t_2;
+    /**
+     * The path contains an I-cruise boundary, so proceed in I to the boundary and
+     * then at the cruise speed for the remaining time.
+     */
+    private State100 cruise(double dt, State100 in_initial, double direction) {
+        // need to clip (this is negative)
+        double dv = direction * m_constraints.maxVelocity - in_initial.v();
+        // time to get to limit (positive)
+        double vt = dv / (direction * m_constraints.maxAcceleration);
+        // location of that limit
+        double xt = in_initial.x() + in_initial.v() * vt
+                + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(vt, 2);
+        // remaining time
+        double vt2 = dt - vt;
+        // during that time, do we hit G+? i think it's not possible,
+        // because this is the "not switching" branch.
+        // so we just move along it
+        double x = xt + direction * m_constraints.maxVelocity * vt2;
+        return new State100(x, direction * m_constraints.maxVelocity, 0);
     }
 
     /** Time to switch point for I+G- path, or NaN if there is no path. */
@@ -260,13 +277,6 @@ public class TrapezoidProfile100 {
             return Double.NaN;
         }
         return t1;
-    }
-
-    double tSwitchIminusGplus(State100 initial, State100 goal) {
-        double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
-        double t_1 = t1IminusGplus(initial, goal);
-        double t_2 = (goal.v() - q_dot_switch) / m_constraints.maxAcceleration;
-        return t_1 + t_2;
     }
 
     /** Time to switch point for I-G+ path, or NaN if there is no path. */
@@ -302,7 +312,6 @@ public class TrapezoidProfile100 {
         double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_constraints.maxAcceleration);
 
         // "limit" path we don't want.
-
         if (goal.v() <= initial.v() && goal.x() < p_minus)
             return Double.NaN;
         if (goal.v() > initial.v() && goal.x() < p_plus)
@@ -310,6 +319,7 @@ public class TrapezoidProfile100 {
 
         // progress along I+
         double d = qSwitchIplusGminus(initial, goal) - c_plus(initial);
+        // prevent rounding errors
         if (d < 0)
             d = 0;
         return Math.sqrt(2 * m_constraints.maxAcceleration * d);
@@ -342,6 +352,7 @@ public class TrapezoidProfile100 {
 
         // progress along I-
         double d = qSwitchIminusGplus(initial, goal) - c_plus(goal);
+        // prevent rounding errors
         if (d < 0)
             d = 0;
 
