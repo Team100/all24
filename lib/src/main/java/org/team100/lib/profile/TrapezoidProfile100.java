@@ -1,6 +1,7 @@
 package org.team100.lib.profile;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -23,6 +24,11 @@ public class TrapezoidProfile100 {
      * this puts initial first because my god
      * also clamps initial and goal velocities to the constraint.
      * the velocity constraint only ever clips the switch point.
+     * Input accelerations are ignored: jerk is unmanaged.
+     * Output acceleration is the *profile* acceleration at dt, it is not
+     * necessarily the same as the actuation required to reach the output state from
+     * the initial state. The only difference occurs at switching points, where the
+     * reported acceleration will be from the other side.
      */
     public State100 calculate(double dt, final State100 initial, final State100 goal) {
         State100 in_initial = new State100(initial.x(),
@@ -51,8 +57,11 @@ public class TrapezoidProfile100 {
                 double tremaining = dt - dct;
                 return calculate(tremaining, new State100(gminus, m_constraints.maxVelocity), in_goal);
             } else {
-                // we won't reach G-
-                return new State100(in_initial.x() + m_constraints.maxVelocity * dt, m_constraints.maxVelocity);
+                // we won't reach G-, so cruise for all of dt.
+                return new State100(
+                        in_initial.x() + m_constraints.maxVelocity * dt,
+                        m_constraints.maxVelocity,
+                        0);
             }
 
         } else if (MathUtil.isNear(-m_constraints.maxVelocity, in_initial.v(), 1e-12)) {
@@ -69,8 +78,11 @@ public class TrapezoidProfile100 {
                 double tremaining = dt - dct;
                 return calculate(tremaining, new State100(gplus, -m_constraints.maxVelocity), in_goal);
             } else {
-                // we won't reach G+
-                return new State100(in_initial.x() - m_constraints.maxVelocity * dt, -m_constraints.maxVelocity);
+                // we won't reach G+, so cruise for all of dt
+                return new State100(
+                        in_initial.x() - m_constraints.maxVelocity * dt,
+                        -m_constraints.maxVelocity,
+                        0);
 
             }
         }
@@ -79,8 +91,10 @@ public class TrapezoidProfile100 {
         double t1IminusGplus = t1IminusGplus(in_initial, in_goal);
 
         // these should not both be NaN
-        if (Double.isNaN(t1IminusGplus) && Double.isNaN(t1IplusGminus))
+        if (Double.isNaN(t1IminusGplus) && Double.isNaN(t1IplusGminus)) {
+            Util.warn("Both I-G+ and I+G- are NaN, this should never happen");
             return in_initial;
+        }
 
         if (Double.isNaN(t1IplusGminus)) {
             // the valid path is I-G+
@@ -95,7 +109,8 @@ public class TrapezoidProfile100 {
                 double x = in_initial.x() + in_initial.v() * dt
                         + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
                 double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-                return new State100(x, v);
+                double a = m_constraints.maxAcceleration;
+                return new State100(x, v, a);
             } else if (t1 >= dt) {
                 // we're on I- the whole dt duration
 
@@ -115,12 +130,13 @@ public class TrapezoidProfile100 {
                     // because this is the "not switching" branch.
                     // so we just move along it
                     double x = xt - m_constraints.maxVelocity * vt2;
-                    return new State100(x, -m_constraints.maxVelocity);
+                    return new State100(x, -m_constraints.maxVelocity, 0);
                 }
 
                 double x = in_initial.x() + in_initial.v() * dt
                         - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                return new State100(x, v);
+                double a = -1.0 * m_constraints.maxAcceleration;
+                return new State100(x, v, a);
             }
             // switch during dt
             // first get to the switching point
@@ -145,7 +161,8 @@ public class TrapezoidProfile100 {
                 double x = in_initial.x() + in_initial.v() * dt
                         - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
                 double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-                return new State100(x, v);
+                double a = -1.0 * m_constraints.maxAcceleration;
+                return new State100(x, v, a);
 
             } else if (t1 >= dt) {
                 // we're on I+ the whole dt duration
@@ -166,11 +183,12 @@ public class TrapezoidProfile100 {
                     // because this is the "not switching" branch.
                     // so we just move along it
                     double x = xt + m_constraints.maxVelocity * vt2;
-                    return new State100(x, m_constraints.maxVelocity);
+                    return new State100(x, m_constraints.maxVelocity, 0);
                 }
                 double x = in_initial.x() + in_initial.v() * dt
                         + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
-                return new State100(x, v);
+                double a = m_constraints.maxAcceleration;
+                return new State100(x, v, a);
             }
             // switch during dt
             // first get to the switching point
@@ -194,14 +212,16 @@ public class TrapezoidProfile100 {
             double x = in_initial.x() + in_initial.v() * dt
                     + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
             double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-            return new State100(x, v);
+            double a = m_constraints.maxAcceleration;
+            return new State100(x, v, a);
         }
         if (MathUtil.isNear(0, t1IplusGminus, 1e-12)) {
             // we want G-, use negative accel
             double x = in_initial.x() + in_initial.v() * dt
                     - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
             double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-            return new State100(x, v);
+            double a = -1.0 * m_constraints.maxAcceleration;
+            return new State100(x, v, a);
         }
 
         // if either path will work, but neither is zero, take the fast one.
@@ -210,13 +230,15 @@ public class TrapezoidProfile100 {
             double x = in_initial.x() + in_initial.v() * dt
                     + 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
             double v = in_initial.v() + m_constraints.maxAcceleration * dt;
-            return new State100(x, v);
+            double a = m_constraints.maxAcceleration;
+            return new State100(x, v, a);
         }
         // I+G- is slower so use I-G+, which means negative A
         double x = in_initial.x() + in_initial.v() * dt
                 - 0.5 * m_constraints.maxAcceleration * Math.pow(dt, 2);
         double v = in_initial.v() - m_constraints.maxAcceleration * dt;
-        return new State100(x, v);
+        double a = -1.0 * m_constraints.maxAcceleration;
+        return new State100(x, v, a);
     }
 
     double tSwitchIplusGminus(State100 initial, State100 goal) {

@@ -105,7 +105,7 @@ public class Rotate extends Command100 {
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose
                 new State100(currentPose.getY(), 0, 0),
-                new State100(refTheta.x(), refTheta.v(), 0)); // TODO: accel
+                new State100(refTheta.x(), refTheta.v(), refTheta.a()));
 
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 

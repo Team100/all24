@@ -15,6 +15,48 @@ class TrapezoidProfile100Test {
     boolean dump = true;
     private static final double kDelta = 0.001;
 
+    /** Now we expose acceleration in the profile state, so make sure it's right. */
+    @Test
+    void testAccel() {
+        Constraints c2 = new Constraints(3, 2);
+        TrapezoidProfile100 p2 = new TrapezoidProfile100(c2, 0.01);
+        {
+            State100 initial = new State100(0, 0);
+            State100 goal = new State100(1, 0);
+            State100 s = p2.calculate(0.02, initial, goal);
+            // 0.5 * 2 * 0.02 * 0.02 = 0.0004
+            assertEquals(0.0004, s.x(), 0.000001);
+            // 2 * 0.02 = 0.04
+            assertEquals(0.04, s.v(), 0.000001);
+            // I+ a=2
+            assertEquals(2, s.a(), 0.000001);
+        }
+        {
+            // inverted
+            State100 initial = new State100(0, 0);
+            State100 goal = new State100(-1, 0);
+            State100 s = p2.calculate(0.02, initial, goal);
+            // 0.5 * 2 * 0.02 * 0.02 = 0.0004
+            assertEquals(-0.0004, s.x(), 0.000001);
+            // 2 * 0.02 = 0.04
+            assertEquals(-0.04, s.v(), 0.000001);
+            // I+ a=2
+            assertEquals(-2, s.a(), 0.000001);
+        }
+        {
+            // cruising
+            State100 initial = new State100(0, 3);
+            State100 goal = new State100(10, 0);
+            State100 s = p2.calculate(1, initial, goal);
+            // cruising at 3 for 1
+            assertEquals(3, s.x(), 0.000001);
+            // cruising
+            assertEquals(3, s.v(), 0.000001);
+            // cruising => zero accel
+            assertEquals(0, s.a(), 0.000001);
+        }
+    }
+
     @Test
     void testIntercepts() {
         Constraints c = new Constraints(5, 0.5);
@@ -129,7 +171,8 @@ class TrapezoidProfile100Test {
         // State(-0.5, 2)), 0.001);
         // I+G- is negative-time here.
         assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State100(1, 2), new State100(-1, 2)), 0.001);
-        // assertEquals(0, p2.qDotSwitchIplusGminus(new State100(1, 2), new State100(-1, 2)),
+        // assertEquals(0, p2.qDotSwitchIplusGminus(new State100(1, 2), new State100(-1,
+        // 2)),
         // 0.001);
         // no intersection
         assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State100(2, 2), new State100(-2, 2)), 0.001);
@@ -138,7 +181,8 @@ class TrapezoidProfile100Test {
         assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State100(-2, 2), new State100(2, 2)), 0.001);
         // I-G+ is negative-time here
         assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State100(-1, 2), new State100(1, 2)), 0.001);
-        // assertEquals(0, p2.qDotSwitchIminusGplus(new State100(-1, 2), new State100(1, 2)),
+        // assertEquals(0, p2.qDotSwitchIminusGplus(new State100(-1, 2), new State100(1,
+        // 2)),
         // 0.001);
         // I-G+ is negative-time here
         assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State100(-0.5, 2), new State100(0.5, 2)), 0.001);
@@ -759,7 +803,8 @@ class TrapezoidProfile100Test {
 
         // from 2,2 to -2,2. There's no intersection between these curves
         assertEquals(Double.NaN, p.qDotSwitchIplusGminus(new State100(2, 2), new State100(-2, 2)), 0.001);
-        // assertEquals(0, p.qDotSwitchIplusGminus(new State100(2, 2), new State100(-2, 2)),
+        // assertEquals(0, p.qDotSwitchIplusGminus(new State100(2, 2), new State100(-2,
+        // 2)),
         // 0.001);
         // from -2,2 to 2,-2 switches in the same place as -2,2->2,2
         assertEquals(2.828, p.qDotSwitchIplusGminus(new State100(-2, 2), new State100(2, -2)), 0.001);
@@ -767,7 +812,8 @@ class TrapezoidProfile100Test {
         assertEquals(-2.828, p.qDotSwitchIminusGplus(new State100(2, 2), new State100(-2, 2)), 0.001);
         // from -2,2 to 2,-2, I-G+ is invalid
         assertEquals(Double.NaN, p.qDotSwitchIminusGplus(new State100(-2, 2), new State100(2, -2)), 0.001);
-        // assertEquals(0, p.qDotSwitchIminusGplus(new State100(-2, 2), new State100(2, -2)),
+        // assertEquals(0, p.qDotSwitchIminusGplus(new State100(-2, 2), new State100(2,
+        // -2)),
         // 0.001);
     }
 
@@ -780,13 +826,15 @@ class TrapezoidProfile100Test {
         assertEquals(1.656, p.tSwitchIplusGminus(new State100(-2, 2), new State100(2, 2)), 0.001);
         // this path goes from (-2,2) to (0,0) and then to (2,2)
         assertEquals(Double.NaN, p.tSwitchIminusGplus(new State100(-2, 2), new State100(2, 2)), 0.001);
-        // assertEquals(4, p.tSwitchIminusGplus(new State100(-2, 2), new State100(2, 2)),
+        // assertEquals(4, p.tSwitchIminusGplus(new State100(-2, 2), new State100(2,
+        // 2)),
         // 0.001);
 
         // the opposite order, 2 to -2, this is a completely invalid result,
         // traversing Iplus backwards, and then Gminus backwards.
         assertEquals(Double.NaN, p.tSwitchIplusGminus(new State100(2, 2), new State100(-2, 2)), 0.001);
-        // assertEquals(-4, p.tSwitchIplusGminus(new State100(2, 2), new State100(-2, 2)),
+        // assertEquals(-4, p.tSwitchIplusGminus(new State100(2, 2), new State100(-2,
+        // 2)),
         // 0.001);
         // from 2 to -2 is the 'long way around' across the x-axis and back.
         assertEquals(9.656, p.tSwitchIminusGplus(new State100(2, 2), new State100(-2, 2)), 0.001);
@@ -795,11 +843,13 @@ class TrapezoidProfile100Test {
         assertEquals(5.656, p.tSwitchIplusGminus(new State100(-2, 2), new State100(2, -2)), 0.001);
         // this is completely invalid
         assertEquals(Double.NaN, p.tSwitchIminusGplus(new State100(-2, 2), new State100(2, -2)), 0.001);
-        // assertEquals(0, p.tSwitchIminusGplus(new State100(-2, 2), new State100(2, -2)),
+        // assertEquals(0, p.tSwitchIminusGplus(new State100(-2, 2), new State100(2,
+        // -2)),
         // 0.001);
         // this is invalid, it should yield like NaN or something
         assertEquals(Double.NaN, p.tSwitchIplusGminus(new State100(2, -2), new State100(-2, 2)), 0.001);
-        // assertEquals(0, p.tSwitchIplusGminus(new State100(2, -2), new State100(-2, 2)),
+        // assertEquals(0, p.tSwitchIplusGminus(new State100(2, -2), new State100(-2,
+        // 2)),
         // 0.001);
         // from 2 to -2 is the 'long way around' across the x-axis and back.
         assertEquals(5.656, p.tSwitchIminusGplus(new State100(2, -2), new State100(-2, 2)), 0.001);
@@ -1316,7 +1366,7 @@ class TrapezoidProfile100Test {
     void reachesGoal() {
         Constraints constraints = new Constraints(1.75, 0.75);
         final State100 goal = new State100(3, 0);
-        State100 state = new State100(0,0);
+        State100 state = new State100(0, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 450; ++i) {
@@ -1334,7 +1384,7 @@ class TrapezoidProfile100Test {
         State100 goal = new State100(12, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
-        State100 state = profile.calculate(kDt, new State100(0,0), goal);
+        State100 state = profile.calculate(kDt, new State100(0, 0), goal);
 
         double lastPos = state.x();
         for (int i = 0; i < 1600; ++i) {
@@ -1366,7 +1416,7 @@ class TrapezoidProfile100Test {
     void backwards() {
         Constraints constraints = new Constraints(0.75, 0.75);
         final State100 goal = new State100(-2, 0);
-        State100 state = new State100(0,0);
+        State100 state = new State100(0, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 400; ++i) {
@@ -1380,7 +1430,7 @@ class TrapezoidProfile100Test {
     void switchGoalInMiddle() {
         Constraints constraints = new Constraints(0.75, 0.75);
         State100 goal = new State100(-2, 0);
-        State100 state = new State100(0,0);
+        State100 state = new State100(0, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 200; ++i) {
@@ -1402,7 +1452,7 @@ class TrapezoidProfile100Test {
     void topSpeed() {
         Constraints constraints = new Constraints(0.75, 0.75);
         final State100 goal = new State100(4, 0);
-        State100 state = new State100(0,0);
+        State100 state = new State100(0, 0);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(constraints, 0.01);
         for (int i = 0; i < 200; ++i) {
