@@ -16,13 +16,13 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10 
     defaults:
       run:
         working-directory: ./comp/swerve100
 
     # This grabs the WPILib docker container
-    container: wpilib/roborio-cross-ubuntu:2023-22.04
+    container: wpilib/roborio-cross-ubuntu:2024-22.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
