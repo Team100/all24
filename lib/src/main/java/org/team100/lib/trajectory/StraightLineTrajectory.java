@@ -1,7 +1,6 @@
 package org.team100.lib.trajectory;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -19,7 +18,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
 
 /** Make straight lines, rest-to-rest. */
-public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, Trajectory> {
+public class StraightLineTrajectory {
 
     private final TrajectoryConfig m_config;
 
@@ -27,7 +26,10 @@ public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, T
         m_config = config;
     }
 
-    @Override
+    /**
+     * Return a straight line trajectory from the start state to the end pose at
+     * rest.
+     */
     public Trajectory apply(SwerveState startState, Pose2d end) {
         if (Experiments.instance.enabled(Experiment.UseInitialVelocity))
             return movingToRest(startState, end);
@@ -68,6 +70,5 @@ public class StraightLineTrajectory implements BiFunction<SwerveState, Pose2d, T
             return new Trajectory();
         }
     }
-
 
 }

@@ -10,7 +10,6 @@ import org.team100.lib.trajectory.StraightLineTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
@@ -19,8 +18,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testRestToRest() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
-        TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
+        TrajectoryConfig c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
         assertEquals(0, c.getStartVelocity(), kDelta);
         StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, GeometryUtil.kTwist2dIdentity);
@@ -31,8 +29,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testMovingToRest() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
-        TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
+        TrajectoryConfig c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
         assertEquals(0, c.getStartVelocity(), kDelta);
         StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(1, 0, 0));
@@ -43,8 +40,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testBackingUp() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
-        TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
+        TrajectoryConfig c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
         assertEquals(0, c.getStartVelocity(), kDelta);
         StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(-1, 0, 0));
@@ -56,8 +52,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void test2d() {
-        SwerveDriveKinematics k = SwerveKinodynamicsFactory.get().getKinematics();
-        TrajectoryConfig c = new TrajectoryConfig(2, 2).setKinematics(k);
+        TrajectoryConfig c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
         assertEquals(0, c.getStartVelocity(), kDelta);
         StraightLineTrajectory t = new StraightLineTrajectory(c);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(0, 1, 0));

@@ -1,13 +1,13 @@
 package org.team100.lib.commands.drivetrain;
 
-import java.util.function.BiFunction;
-
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,7 +21,11 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * The trajectory is supplied; the supplier is free to ignore the current state.
  * 
- * Steering is aligned to prevent startup errors, but this isn't working right yet.
+ * The goal rotation is used as the setpoint the entire time, which will put
+ * a lot of error into the rotational controller.
+ * 
+ * If you want a holonomic trajectory follower, try the
+ * {@link DriveMotionController} classes.
  */
 public class DriveToWaypoint3 extends Command100 {
     private final Telemetry t = Telemetry.get();
@@ -29,7 +33,7 @@ public class DriveToWaypoint3 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final Timer m_timer;
     private final HolonomicDriveController3 m_controller;
-    private final BiFunction<SwerveState, Pose2d, Trajectory> m_trajectories;
+    private final StraightLineTrajectory m_trajectories;
 
     private Trajectory m_trajectory;
     /**
@@ -46,7 +50,7 @@ public class DriveToWaypoint3 extends Command100 {
     public DriveToWaypoint3(
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
-            BiFunction<SwerveState, Pose2d, Trajectory> trajectories,
+            StraightLineTrajectory trajectories,
             HolonomicDriveController3 controller) {
         m_goal = goal;
         m_swerve = drivetrain;
@@ -74,7 +78,6 @@ public class DriveToWaypoint3 extends Command100 {
         double curTime = m_timer.get();
         State desiredState = m_trajectory.sample(curTime);
         Pose2d currentPose = m_swerve.getPose();
-        // TODO: rotation profile, use new trajectory type.
         SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
@@ -83,7 +86,7 @@ public class DriveToWaypoint3 extends Command100 {
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // not aligned yet, try aligning
-            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
+            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             if (aligned) {
                 m_steeringAligned = true;
                 m_timer.start();

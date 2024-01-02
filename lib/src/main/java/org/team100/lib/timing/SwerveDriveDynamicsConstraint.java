@@ -19,9 +19,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * omega limit calculation is correct.
  */
 public class SwerveDriveDynamicsConstraint implements TimingConstraint {
+    /** Maybe this would be better passed in to the constructor. */
+    private static final double kDtSec = 0.02;
     private final SwerveKinodynamics m_limits;
 
-    public SwerveDriveDynamicsConstraint( SwerveKinodynamics limits) {
+    public SwerveDriveDynamicsConstraint(SwerveKinodynamics limits) {
         m_limits = limits;
     }
 
@@ -47,7 +49,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         // which is like moving 1 m/s.
         ChassisSpeeds chassis_speeds = new ChassisSpeeds(vx, vy, vtheta);
 
-        SwerveModuleState[] module_states = m_limits.getKinematics().toSwerveModuleStates(chassis_speeds);
+        SwerveModuleState[] module_states = m_limits.toSwerveModuleStates(chassis_speeds, kDtSec);
         double max_vel = Double.POSITIVE_INFINITY;
         for (var module : module_states) {
             max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocityM_S() / Math.abs(module.speedMetersPerSecond));

@@ -1,10 +1,9 @@
 package org.team100.lib.profile;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.telemetry.ProfileModeChooser;
 
 import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -27,7 +26,7 @@ public class ChoosableProfile {
     // the profile class is both a stateful follower and
     // a stateless calculator. we use the stateless one so we can make
     // the profile object once.
-    private final TrapezoidProfile m_trapezoid;
+    private final TrapezoidProfile100 m_trapezoid;
     private final ExponentialProfile eprofile;
 
     /** The default is specifiable mostly for testing. */
@@ -42,26 +41,29 @@ public class ChoosableProfile {
         m_chooser.setDefaultOption(defaultMode.name(), defaultMode);
         SmartDashboard.putData(m_chooser);
 
-        m_trapezoid = new TrapezoidProfile(
-                new TrapezoidProfile.Constraints(maxVel, maxAccel));
+        m_trapezoid = new TrapezoidProfile100(
+                new Constraints(maxVel, maxAccel), 0.05);
                 
-        // TODO: tune the exponential constraints
+        // These constraints are completely made up.
+        // If you want to try the exponential profile, you'll have to
+        // calibrate them
         eprofile = new ExponentialProfile(
                 ExponentialProfile.Constraints.fromCharacteristics(
                         10, 10, 5));
     }
 
-    public State calculate(double t, State goal, State current) {
+    /** Note order here, initial first, goal second. */
+    public State100 calculate(double t, State100 initial, State100 goal) {
         switch (m_chooser.getSelected()) {
             case TRAPEZOID:
-                return m_trapezoid.calculate(t, goal, current);
+                return m_trapezoid.calculate(t, initial, goal);
             case EXPONENTIAL:
                 ExponentialProfile.State estate = eprofile.calculate(t,
-                        new ExponentialProfile.State(current.position, current.velocity),
-                        new ExponentialProfile.State(goal.position, goal.velocity));
-                return new State(estate.position, estate.velocity);
+                        new ExponentialProfile.State(initial.x(), initial.v()),
+                        new ExponentialProfile.State(goal.x(), goal.v()));
+                return new State100(estate.position, estate.velocity);
             default:
-                return new State();
+                return new State100(0,0);
         }
     }
 

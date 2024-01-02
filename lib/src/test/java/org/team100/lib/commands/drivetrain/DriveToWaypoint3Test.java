@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
@@ -22,7 +21,6 @@ import org.team100.lib.trajectory.StraightLineTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
@@ -35,8 +33,12 @@ class DriveToWaypoint3Test {
     void testSimple() {
         Pose2d goal = GeometryUtil.kPoseZero;
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        BiFunction<SwerveState, Pose2d, Trajectory> trajectories = (x,
-                y) -> new Trajectory(List.of(new Trajectory.State()));
+
+        StraightLineTrajectory trajectories = new StraightLineTrajectory(null) {
+            public Trajectory apply(SwerveState startState, Pose2d end) {
+                return new Trajectory(List.of(new Trajectory.State()));
+            }
+        };
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -56,11 +58,10 @@ class DriveToWaypoint3Test {
     @Test
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
-        SwerveDriveKinematics kinematics = SwerveKinodynamicsFactory.get().getKinematics();
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .blueLayout("2023-chargedup.json");
 
-        TrajectoryConfig config = new TrajectoryConfig(4, 2).setKinematics(kinematics);
+        TrajectoryConfig config = SwerveKinodynamicsFactory.get().newTrajectoryConfig(4, 2);
 
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Transform2d transform = new Transform2d(

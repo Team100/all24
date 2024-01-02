@@ -48,7 +48,7 @@ class SteeringRateLimiterTest {
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
         SteeringRateLimiter c = new SteeringRateLimiter(l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {

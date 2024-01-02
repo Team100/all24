@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
-public class SwerveStateTest {
+class SwerveStateTest {
     private static final double kDelta = 0.001;
     @Test
     void testTransform() {

@@ -1,8 +1,20 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.Constraints;
+
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -30,24 +42,28 @@ public class SwerveKinodynamics {
     private final double m_maxAngleAccelRad_S2;
     private final double m_MaxCapsizeAccelM_S2;
     private final SwerveDriveKinematics m_kinematics;
+    private final ChoosableProfile m_steeringProfile;
 
     /**
      * Use the factory
      * 
-     * @param maxDriveVelocity     module drive speed m/s
-     * @param maxDriveAcceleration module drive accel m/s^2
-     * @param maxDriveDeceleration module drive decel m/s^2. Should be higher than
-     *                             accel limit.
-     * @param maxSteeringVelocity  module steering axis rate rad/s
-     * @param track                meters
-     * @param wheelbase            meters
-     * @param vcg                  vertical center of gravity, meters
+     * @param maxDriveVelocity        module drive speed m/s
+     * @param maxDriveAcceleration    module drive accel m/s^2
+     * @param maxDriveDeceleration    module drive decel m/s^2. Should be higher
+     *                                than
+     *                                accel limit.
+     * @param maxSteeringVelocity     module steering axis rate rad/s
+     * @param maxSteeringAcceleration module steering axis accel rad/s^2
+     * @param track                   meters
+     * @param wheelbase               meters
+     * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
             double maxDriveVelocity,
             double maxDriveAcceleration,
             double maxDriveDeceleration,
             double maxSteeringVelocity,
+            double maxSteeringAcceleration,
             double track,
             double wheelbase,
             double vcg) {
@@ -69,6 +85,14 @@ public class SwerveKinodynamics {
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / vcg);
 
         m_kinematics = get(track, wheelbase);
+        m_steeringProfile = new ChoosableProfile(
+                maxSteeringVelocity,
+                maxSteeringAcceleration,
+                ChoosableProfile.Mode.TRAPEZOID);
+    }
+
+    public ChoosableProfile getSteeringProfile() {
+        return m_steeringProfile;
     }
 
     /** Cruise speed, m/s. */
@@ -115,20 +139,16 @@ public class SwerveKinodynamics {
         return m_MaxCapsizeAccelM_S2;
     }
 
-    public SwerveDriveKinematics getKinematics() {
-        return m_kinematics;
-    }
-
     /** If you want to rotate the robot with a trapezoidal profile, use this. */
-    public TrapezoidProfile.Constraints getAngleConstraints() {
-        return new TrapezoidProfile.Constraints(
+    public Constraints getAngleConstraints() {
+        return new Constraints(
                 getMaxAngleSpeedRad_S(),
                 getMaxAngleAccelRad_S2());
     }
 
     /** Trapezoidal profile for linear motion. */
-    public TrapezoidProfile.Constraints getDistanceConstraints() {
-        return new TrapezoidProfile.Constraints(
+    public Constraints getDistanceConstraints() {
+        return new Constraints(
                 getMaxDriveVelocityM_S(),
                 getMaxDriveAccelerationM_S2());
     }
@@ -141,4 +161,58 @@ public class SwerveKinodynamics {
                 new Translation2d(-wheelbase / 2, -track / 2));
     }
 
+    public void resetHeadings(Rotation2d... moduleHeadings) {
+        m_kinematics.resetHeadings(moduleHeadings);
+    }
+
+    /**
+     * Inverse kinematics, chassis speeds => module states.
+     * 
+     * This version does **DISCRETIZATION** to correct for swerve veering.
+     * 
+     * The swerve veering correction should now just represent actuation delay.
+     */
+    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds, double dt) {
+        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
+        return m_kinematics.toSwerveModuleStates(descretized);
+    }
+
+    /**
+     * Forward kinematics, module states => chassis speeds.
+     */
+    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
+        return m_kinematics.toChassisSpeeds(moduleStates);
+    }
+
+    public SwerveDrivePoseEstimator newPoseEstimator(
+            Rotation2d gyroAngle,
+            SwerveModulePosition[] modulePositions,
+            Pose2d initialPoseMeters) {
+        return new SwerveDrivePoseEstimator(
+                m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
+    }
+
+    public SwerveDrivePoseEstimator newPoseEstimator(
+            Rotation2d gyroAngle,
+            SwerveModulePosition[] modulePositions,
+            Pose2d initialPoseMeters,
+            Matrix<N3, N1> stateStdDevs,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+        return new SwerveDrivePoseEstimator(
+                m_kinematics,
+                gyroAngle,
+                modulePositions,
+                initialPoseMeters,
+                stateStdDevs,
+                visionMeasurementStdDevs);
+    }
+
+    public TrajectoryConfig newTrajectoryConfig(
+            double maxVelocityMetersPerSecond, double maxAccelerationMetersPerSecondSq) {
+        TrajectoryConfig result = new TrajectoryConfig(
+                maxVelocityMetersPerSecond, maxAccelerationMetersPerSecondSq);
+        result.setKinematics(m_kinematics);
+        return result;
+
+    }
 }

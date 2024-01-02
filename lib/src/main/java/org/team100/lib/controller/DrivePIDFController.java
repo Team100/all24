@@ -17,11 +17,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * feedback.
  */
 public class DrivePIDFController implements DriveMotionController {
+    private static final double kTolerance = 0.05;
     public static final Telemetry t = Telemetry.get();
     private final boolean m_feedforwardOnly;
 
     private TrajectoryTimeIterator m_iter;
     private double m_prevTimeS;
+    private Pose2d error = new Pose2d();
 
     public DrivePIDFController(boolean feedforwardOnly) {
         m_feedforwardOnly = feedforwardOnly;
@@ -48,9 +50,9 @@ public class DrivePIDFController implements DriveMotionController {
         if (!mSetpoint.isPresent()) {
             return new ChassisSpeeds();
         }
+        error = DriveMotionControllerUtil.getError(measurement, mSetpoint.get());
         t.log(Level.DEBUG, "/drive_pid_controller/setpoint", mSetpoint.get());
-        t.log(Level.DEBUG, "/drive_pid_controller/error",
-                DriveMotionControllerUtil.getError(measurement, mSetpoint.get()));
+        t.log(Level.DEBUG, "/drive_pid_controller/error", error);
 
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, mSetpoint.get());
         if (m_feedforwardOnly)
@@ -80,6 +82,6 @@ public class DrivePIDFController implements DriveMotionController {
 
     @Override
     public boolean isDone() {
-        return m_iter != null && m_iter.isDone();
+        return m_iter != null && m_iter.isDone() && error.getTranslation().getNorm() < kTolerance ;
     }
 }

@@ -64,7 +64,7 @@ public class AsymSwerveSetpointGenerator {
             SwerveSetpoint prevSetpoint,
             ChassisSpeeds desiredState,
             double kDtSec) {
-        SwerveModuleState[] desiredModuleStates = m_limits.getKinematics().toSwerveModuleStates(desiredState);
+        SwerveModuleState[] desiredModuleStates = m_limits.toSwerveModuleStates(desiredState, kDtSec);
         desiredState = desaturate(desiredState, desiredModuleStates);
         SwerveModuleState[] prevModuleStates = prevSetpoint.getModuleStates();
         boolean need_to_steer = SwerveUtil.makeStop(desiredState, desiredModuleStates, prevModuleStates);
@@ -153,7 +153,8 @@ public class AsymSwerveSetpointGenerator {
                 dy,
                 dtheta,
                 min_s,
-                overrideSteering);
+                overrideSteering,
+                kDtSec);
     }
 
     /**
@@ -205,7 +206,7 @@ public class AsymSwerveSetpointGenerator {
             SwerveModuleState[] desiredModuleStates) {
         if (m_limits.getMaxDriveVelocityM_S() > 0.0) {
             SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, m_limits.getMaxDriveVelocityM_S());
-            desiredState = m_limits.getKinematics().toChassisSpeeds(desiredModuleStates);
+            desiredState = m_limits.toChassisSpeeds(desiredModuleStates);
         }
         return desiredState;
     }
@@ -217,14 +218,15 @@ public class AsymSwerveSetpointGenerator {
             double dy,
             double dtheta,
             double min_s,
-            List<Optional<Rotation2d>> overrideSteering) {
+            List<Optional<Rotation2d>> overrideSteering,
+            double kDtSec) {
         ChassisSpeeds retSpeeds = makeSpeeds(
                 prevSetpoint.getChassisSpeeds(),
                 dx,
                 dy,
                 dtheta,
                 min_s);
-        SwerveModuleState[] retStates = m_limits.getKinematics().toSwerveModuleStates(retSpeeds);
+        SwerveModuleState[] retStates = m_limits.toSwerveModuleStates(retSpeeds, kDtSec);
         flipIfRequired(prevModuleStates, overrideSteering, retStates);
         return new SwerveSetpoint(retSpeeds, retStates);
     }

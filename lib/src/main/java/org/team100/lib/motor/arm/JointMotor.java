@@ -51,6 +51,9 @@ public class JointMotor implements Motor100<Angle> {
         m_motor.set(output);
     }
 
+    /**
+     * Velocity control is not supported.
+     */
     @Override
     public void setVelocity(double velocity, double accel) {
         throw new UnsupportedOperationException();

@@ -164,10 +164,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @return true if aligned
      * 
      */
-    public boolean steerAtRest(Twist2d twist) {
+    public boolean steerAtRest(Twist2d twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
-        return m_swerveLocal.steerAtRest(targetChassisSpeeds);
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds, kDtSec);
     }
 
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
@@ -219,6 +219,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 getPose().getRotation());
     }
 
+    /**
+     * SwerveState representing the drivetrain's pose and velocity, with zero
+     * accelerations.
+     */
     public SwerveState getState() {
         return new SwerveState(getPose(), getImpliedTwist2d());
     }

@@ -42,6 +42,10 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
         m_velocity = 0;
     }
 
+    /**
+     * Ignores accel, because the simulated motor responds instantly to the velocity
+     * command, i.e. the accel is effectively infinite.
+     */
     @Override
     public void setVelocity(double velocity, double accel) {
         if (Double.isNaN(velocity))

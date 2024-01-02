@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 @ExcludeFromJacocoGeneratedReport
 public class DefenseSelfTest extends Command {
     // this fails below 1s, which is quite a bit too slow
-    // TODO: make the simulated steering profile match the real steering profile
     private static final double kExpectedDuration = 1;
     private static final double kToleranceRad = 0.01;
 

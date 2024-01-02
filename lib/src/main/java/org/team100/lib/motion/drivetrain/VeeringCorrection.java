@@ -15,10 +15,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * * steering controller delay
  * * robot period (actuation for 20 ms in the future, not just right now)
  * 
- * This issue is discussed in this CD thread:
- * https://www.chiefdelphi.com/t/field-relative-swervedrive-drift-even-with-simulated-perfect-modules/413892
+ * The WPILib veering correction addresses the last item, about the discrete
+ * control period. This is now implemented in SwerveKinodynamics, so this
+ * correction here should only address the other sources of delay.
  * 
- * TODO: WPILib supports veering correction now; try their version of it.
+ * For more background, see CD thread:
+ * https://www.chiefdelphi.com/t/field-relative-swervedrive-drift-even-with-simulated-perfect-modules/413892
  */
 public class VeeringCorrection {
     /**
@@ -48,5 +50,4 @@ public class VeeringCorrection {
     public Rotation2d correct(Rotation2d in) {
         return in.plus(new Rotation2d(m_gyroRateRadSNWU.getAsDouble() * kVeeringCorrection));
     }
-
 }

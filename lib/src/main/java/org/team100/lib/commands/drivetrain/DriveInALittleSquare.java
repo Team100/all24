@@ -1,13 +1,16 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * Makes a little square, one meter on a side, forever.
@@ -22,7 +25,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * used.
  */
 public class DriveInALittleSquare extends Command100 {
-    enum State {
+    enum DriveState {
         DRIVING,
         STEERING
     }
@@ -32,54 +35,59 @@ public class DriveInALittleSquare extends Command100 {
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
 
+    private static final double kXToleranceRad = 0.02;
+    private static final double kVToleranceRad_S = 0.02;
+
     private final SwerveDriveSubsystem m_swerve;
-    private final TrapezoidProfile.State start = new TrapezoidProfile.State(0, 0);
-    private final TrapezoidProfile.State goal = new TrapezoidProfile.State(kDriveLengthM, 0);
-    
+    private final State100 start = new State100(0, 0);
+    private final State100 goal = new State100(kDriveLengthM, 0);
 
-
-    final TrapezoidProfile m_driveProfile;
-    TrapezoidProfile.State speedM_S;
+    final TrapezoidProfile100 m_driveProfile;
+    /** Current speed setpoint. */
+    State100 speedM_S;
+    /** Current swerve steering axis goal. */
     Rotation2d m_goal;
-    State m_state;
+    DriveState m_state;
 
     public DriveInALittleSquare(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
 
-        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(kMaxVel, kMaxAccel);
-        m_driveProfile = new TrapezoidProfile(c);
+        Constraints c = new Constraints(kMaxVel, kMaxAccel);
+        m_driveProfile = new TrapezoidProfile100(c, 0.05);
         addRequirements(m_swerve);
     }
 
     @Override
     public void initialize100() {
+        // First get the wheels pointing the right way.
+        m_state = DriveState.STEERING;
         m_goal = GeometryUtil.kRotationZero;
-        m_state = State.DRIVING;
         speedM_S = start;
-        speedM_S = m_driveProfile.calculate(0, goal, speedM_S);
+        speedM_S = m_driveProfile.calculate(0, speedM_S, goal);
     }
 
     @Override
     public void execute100(double dt) {
         switch (m_state) {
             case DRIVING:
-                if (m_driveProfile.isFinished(dt)) {
+                if (MathUtil.isNear(speedM_S.x(), goal.x(), kXToleranceRad)
+                        && MathUtil.isNear(speedM_S.v(), goal.v(), kVToleranceRad_S)) {
                     // we were driving, but the timer elapsed, so switch to steering
-                    m_state = State.STEERING;
+                    m_state = DriveState.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
-                    speedM_S = new TrapezoidProfile.State(0, 0);
+                    speedM_S = start;
                 } else {
                     // keep going
-                    speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
+                    speedM_S = m_driveProfile.calculate(dt, speedM_S, goal);
                 }
                 break;
             case STEERING:
                 if (Util.all(m_swerve.atGoal())) {
                     // we were steering, but all the setpoints have been reached, so switch to
                     // driving
-                    m_state = State.DRIVING;
-                    speedM_S = new TrapezoidProfile.State(0, 0);
-                    speedM_S = m_driveProfile.calculate(dt, goal, speedM_S);
+                    m_state = DriveState.DRIVING;
+                    speedM_S = start;
+                    speedM_S = m_driveProfile.calculate(dt, speedM_S, goal);
                 } else {
                     // wait to reach the setpoint
                 }
@@ -88,10 +96,10 @@ public class DriveInALittleSquare extends Command100 {
 
         // there are four states here because state is mutable :-(
         SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(speedM_S.position, m_goal),
-                new SwerveModuleState(speedM_S.position, m_goal),
-                new SwerveModuleState(speedM_S.position, m_goal),
-                new SwerveModuleState(speedM_S.position, m_goal)
+                new SwerveModuleState(speedM_S.x(), m_goal),
+                new SwerveModuleState(speedM_S.x(), m_goal),
+                new SwerveModuleState(speedM_S.x(), m_goal),
+                new SwerveModuleState(speedM_S.x(), m_goal)
         };
         m_swerve.setRawModuleStates(states);
     }

@@ -4,6 +4,7 @@ import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
 import org.team100.lib.profile.ChoosableProfile;
@@ -26,7 +27,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             int turningMotorCanId,
             int turningEncoderChannel,
-            double turningOffset) {
+            double turningOffset,
+            SwerveKinodynamics kinodynamics) {
 
         VelocityServo<Distance> driveServo = driveServo(
                 name,
@@ -37,7 +39,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 name,
                 turningMotorCanId,
                 turningEncoderChannel,
-                turningOffset);
+                turningOffset,
+                kinodynamics);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
@@ -78,7 +81,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             String name,
             int turningMotorCanId,
             int turningEncoderChannel,
-            double turningOffset) {
+            double turningOffset,
+            SwerveKinodynamics kinodynamics) {
         final double turningGearRatio = 1.0;
         FalconTurningMotor turningMotor = new FalconTurningMotor(
                 name,
@@ -115,15 +119,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, -Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
 
-        ChoosableProfile profile = new ChoosableProfile(
-                20 * Math.PI, // max vel rad/s
-                20 * Math.PI, // max accel rad/s/s
-                ChoosableProfile.Mode.TRAPEZOID);
+        ChoosableProfile profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
                 turningVelocityServo,
                 turningEncoder,
-                20 * Math.PI,
+                kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
                 profile,
                 Angle.instance);

@@ -120,17 +120,17 @@ public class RobotContainer implements SelfTestable {
         m_monitor = new Monitor(new Annunciator(0));
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit);
-
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
-        m_heading = HeadingFactory.get(swerveKinodynamics.getKinematics(), m_modules);
+
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
+
+        m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
         VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
 
         m_frameTransform = new FrameTransform(veering);
 
-        SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-                swerveKinodynamics.getKinematics(),
+        SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
@@ -155,7 +155,8 @@ public class RobotContainer implements SelfTestable {
         // control = new DriverXboxControl();
 
         // selects the correct control class for whatever is plugged in
-        control = new ControlFactory().getDriverControl();
+        ControlFactory controlFactory = new ControlFactory();
+        control = controlFactory.getDriverControl();
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
@@ -185,7 +186,7 @@ public class RobotContainer implements SelfTestable {
 
         control.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics.getKinematics(), controller);
+        m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics, controller);
         control.circle().whileTrue(m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
@@ -200,22 +201,22 @@ public class RobotContainer implements SelfTestable {
         // make a one-meter line
         control.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics.getKinematics(), x))));
+                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
 
         // make a one-meter square
         control.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
 
         // one-meter square with reset at the corners
         control.never().whileTrue(
                 new PermissiveTrajectoryListCommand(m_drive, controller,
-                        TrajectoryMaker.permissiveSquare(swerveKinodynamics.getKinematics())));
+                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
 
         // one-meter square with position and velocity feedback control
         control.never().whileTrue(
                 new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(swerveKinodynamics.getKinematics(), x)));
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
 
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
@@ -224,7 +225,9 @@ public class RobotContainer implements SelfTestable {
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
-        Pose2d goal = new Pose2d(8, 4, new Rotation2d()); // field center, roughly
+        
+        // field center, roughly, facing to the left.
+        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         control.never().whileTrue(follower);
 
@@ -240,7 +243,7 @@ public class RobotContainer implements SelfTestable {
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        control.never().whileTrue(
+        control.actualCircle().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
         // 254 Ramsete follower
@@ -251,14 +254,14 @@ public class RobotContainer implements SelfTestable {
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
-        control.actualCircle().whileTrue(m_driveInALittleSquare);
+        control.never().whileTrue(m_driveInALittleSquare);
 
         ///////////////////////
         //
         // ARM
         //
 
-        OperatorControl operatorControl = new ControlFactory().getOperatorControl();
+        OperatorControl operatorControl = controlFactory.getOperatorControl();
 
         m_armSubsystem = ArmFactory.get();
         m_armKinematicsM = new ArmKinematics(0.93, 0.92);
