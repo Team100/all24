@@ -121,9 +121,9 @@ class AsymSwerveSetpointGeneratorTest {
         for (int i = 0; i < 50; ++i) {
             setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds, 0.02);
         }
-        assertEquals(2.828, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
-        assertEquals(2.828, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
-        assertEquals(2.828, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+        assertEquals(3.100, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(2.534, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(2.827, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
     }
 
     @Test

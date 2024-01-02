@@ -3,10 +3,10 @@ package org.team100.lib.commands.drivetrain;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -28,10 +28,9 @@ public class DrawCircle extends SequentialCommandGroup {
      */
     public DrawCircle(
             SwerveDriveSubsystem drivetrain,
-            SwerveDriveKinematics kinematics,
+            SwerveKinodynamics kinodynamics,
             HolonomicDriveController3 controller) {
-        TrajectoryConfig config = new TrajectoryConfig(maxVelocityM_S, maxAccelM_S_S);
-        config.setKinematics(kinematics);
+        TrajectoryConfig config = kinodynamics.newTrajectoryConfig(maxVelocityM_S, maxAccelM_S_S);
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
         addCommands(
                 new DriveToWaypoint3(new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero), drivetrain, maker, controller),

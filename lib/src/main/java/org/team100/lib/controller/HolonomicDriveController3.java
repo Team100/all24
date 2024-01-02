@@ -13,8 +13,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Drivetrain control with three independent PID controllers.
- * 
- * TODO: make a full-state version.
  */
 public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
     private final Telemetry t = Telemetry.get();

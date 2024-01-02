@@ -3,10 +3,11 @@ package org.team100.lib.trajectory;
 import java.util.List;
 import java.util.function.Function;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
@@ -18,9 +19,8 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 public class TrajectoryMaker {
 
     /** A square counterclockwise starting with +x. */
-    public static List<Trajectory> square(SwerveDriveKinematics kinematics, Pose2d initialPose) {
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        config.setKinematics(kinematics);
+    public static List<Trajectory> square(SwerveKinodynamics kinodynamics, Pose2d initialPose) {
+        TrajectoryConfig config = kinodynamics.newTrajectoryConfig(1, 1);
         Translation2d t0 = initialPose.getTranslation();
         Translation2d t1 = t0.plus(new Translation2d(1, 0));
         Translation2d t2 = t0.plus(new Translation2d(1, 1));
@@ -33,9 +33,8 @@ public class TrajectoryMaker {
     }
 
     /** Make a square that gets a reset starting point at each corner. */
-    public static List<Function<Pose2d, Trajectory>> permissiveSquare(SwerveDriveKinematics kinematics) {
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        config.setKinematics(kinematics);
+    public static List<Function<Pose2d, Trajectory>> permissiveSquare(SwerveKinodynamics kinodynamics) {
+        TrajectoryConfig config = kinodynamics.newTrajectoryConfig(1, 1);
         return List.of(
                 x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(1, 0))),
                 x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(0, 1))),
@@ -44,9 +43,8 @@ public class TrajectoryMaker {
     }
 
     /** From current to x+1 */
-    public static Trajectory line(SwerveDriveKinematics kinematics, Pose2d initial) {
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        config.setKinematics(kinematics);
+    public static Trajectory line(SwerveKinodynamics kinodynamics, Pose2d initial) {
+        TrajectoryConfig config = kinodynamics.newTrajectoryConfig(1, 1);
         return restToRest(
                 config,
                 initial.getTranslation(),

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -17,7 +18,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 class ManualWithHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
@@ -118,8 +118,8 @@ class ManualWithHeadingTest {
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
         // reset means setpoint is currentpose.
-        assertEquals(0, m_manualWithHeading.m_setpoint.position, kDelta);
-        assertEquals(0, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0, m_manualWithHeading.m_setpoint.x(), kDelta);
+        assertEquals(0, m_manualWithHeading.m_setpoint.v(), kDelta);
 
         // face towards +y
         desiredRotation = GeometryUtil.kRotation90;
@@ -129,19 +129,15 @@ class ManualWithHeadingTest {
         Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
-        // there should be a profile
-        assertEquals(0.888, m_manualWithHeading.m_profile.totalTime(), kDelta);
         // but at t0 it hasn't started yet.
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(
-                0,
-                new TrapezoidProfile.State(0, 0),
-                new TrapezoidProfile.State(m_manualWithHeading.m_goal.getRadians(), 0)).velocity,
-                kDelta);
+        State100 initial = new State100(0, 0);
+        State100 goal = new State100(m_manualWithHeading.m_goal.getRadians(), 0);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).v(), kDelta);
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
-        assertEquals(0.0002, m_manualWithHeading.m_setpoint.position, kDelta);
-        assertEquals(0.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0.0002, m_manualWithHeading.m_setpoint.x(), kDelta);
+        assertEquals(0.169, m_manualWithHeading.m_setpoint.v(), kDelta);
 
         // and output is not zero
         verify(0, 0, 0.769, twistM_S);
@@ -152,9 +148,9 @@ class ManualWithHeadingTest {
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new TrapezoidProfile.State(0.5, 1);
+        m_manualWithHeading.m_setpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(1.169, m_manualWithHeading.m_setpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
@@ -163,9 +159,9 @@ class ManualWithHeadingTest {
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new TrapezoidProfile.State(1.55, 0.2);
+        m_manualWithHeading.m_setpoint = new State100(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(0.369, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0.369, m_manualWithHeading.m_setpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
@@ -173,7 +169,7 @@ class ManualWithHeadingTest {
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
-        m_manualWithHeading.m_setpoint = new TrapezoidProfile.State(Math.PI / 2, 0);
+        m_manualWithHeading.m_setpoint = new State100(Math.PI / 2, 0);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
 
@@ -212,20 +208,18 @@ class ManualWithHeadingTest {
 
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
-        // there should be a profile
-        assertEquals(0.888, m_manualWithHeading.m_profile.totalTime(), kDelta);
         // at t0 there's not much position in the profile but there is velocity
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(0,
-                new TrapezoidProfile.State(Math.PI / 2, 0),
-                new TrapezoidProfile.State(0, 0)).velocity, kDelta);
+        State100 initial = new State100(0, 0);
+        State100 goal = new State100(Math.PI / 2, 0);
+        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).v(), kDelta);
         verify(0, 0, 0.769, twistM_S);
 
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new TrapezoidProfile.State(0.5, 1);
+        m_manualWithHeading.m_setpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1.169, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(1.169, m_manualWithHeading.m_setpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
@@ -234,9 +228,9 @@ class ManualWithHeadingTest {
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new TrapezoidProfile.State(1.555, 0.2);
+        m_manualWithHeading.m_setpoint = new State100(1.555, 0.2);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(0.369, m_manualWithHeading.m_setpoint.velocity, kDelta);
+        assertEquals(0.369, m_manualWithHeading.m_setpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
@@ -244,7 +238,7 @@ class ManualWithHeadingTest {
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
-        m_manualWithHeading.m_setpoint = new TrapezoidProfile.State(Math.PI / 2, 0);
+        m_manualWithHeading.m_setpoint = new State100(Math.PI / 2, 0);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be no more profile to follow

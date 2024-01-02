@@ -15,7 +15,12 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Follow a trajectory.
+ * Follow a WPI trajectory.
+ * 
+ * This uses the end state rotation as the setpoint for the entire trajectory,
+ * which will put a lot of error into the controller.
+ * 
+ * The {@link DriveMotionController} classes are better, use them instead.
  */
 public class TrajectoryCommand extends Command100 {
     private final Telemetry t = Telemetry.get();
@@ -48,7 +53,6 @@ public class TrajectoryCommand extends Command100 {
         double curTime = m_timer.get();
         State desiredState = m_trajectory.sample(curTime);
         Pose2d currentPose = m_swerve.getPose();
-        // TODO: rotation profile, use new trajectory type.
         State lastState = m_trajectory.sample(Double.MAX_VALUE);
         SwerveState reference = SwerveState.fromState(desiredState, lastState.poseMeters.getRotation());
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);

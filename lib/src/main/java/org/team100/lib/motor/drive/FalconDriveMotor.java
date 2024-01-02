@@ -46,8 +46,6 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * 
  * Details on CAN bus status frame timing:
  * https://v5.docs.ctr-electronics.com/en/latest/ch18_CommonAPI.html#setting-status-frame-periods
- * 
- * TODO: deal with delay in velocity measurement.
  */
 public class FalconDriveMotor implements Motor100<Distance> {
 
@@ -65,6 +63,9 @@ public class FalconDriveMotor implements Motor100<Distance> {
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
+     * 
+     * This value seems very low, perhaps because the falcon closed-loop control is
+     * compensating?
      */
     private static final double dynamicFrictionFFVolts = 0.01;
 
@@ -77,7 +78,6 @@ public class FalconDriveMotor implements Motor100<Distance> {
 
     /**
      * Placeholder for accel feedforward.
-     * TODO: calibrate acceleration feedforward
      */
     private static final double accelFFVoltS2_M = 0;
 
@@ -175,6 +175,9 @@ public class FalconDriveMotor implements Motor100<Distance> {
         t.log(Level.DEBUG, m_name + "/current speed 2048ths_100ms", getVelocity2048_100());
     }
 
+    /**
+     * Supports accel feedforward.
+     */
     @Override
     public void setVelocity(double outputM_S, double accelM_S_S) {
         double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
@@ -233,7 +236,8 @@ public class FalconDriveMotor implements Motor100<Distance> {
 
     ///////////////////////////////////////////////////////////////
 
-    /** Frictional feedforward in duty cycle units [-1, 1] */
+    /**
+     * Frictional feedforward in duty cycle units [-1, 1] */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
@@ -242,14 +246,14 @@ public class FalconDriveMotor implements Motor100<Distance> {
         return dynamicFrictionFFVolts * direction / saturationVoltage;
     }
 
-    /** Velocity feedforward in duty cycle units [-1, 1] */
+    /**
+     * Velocity feedforward in duty cycle units [-1, 1] */
     private static double velocityFF(double desiredMotorRev_S) {
         return velocityFFVoltS_Rev * desiredMotorRev_S / saturationVoltage;
     }
 
     /**
-     * Acceleration feedforward in duty cycle units [-1, 1]
-     */
+     * Acceleration feedforward in duty cycle units [-1, 1] */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }

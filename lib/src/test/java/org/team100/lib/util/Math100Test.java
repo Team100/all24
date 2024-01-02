@@ -139,6 +139,12 @@ class Math100Test {
         assertEquals(0.091, s, kDelta);
     }
 
-
+    @Test
+    void testGetMinDistance() {
+        double measurement = 4;
+        double x = 0;
+        double d = Math100.getMinDistance(measurement, x);
+        assertEquals(2 * Math.PI, d, kDelta);
+    }
 
 }

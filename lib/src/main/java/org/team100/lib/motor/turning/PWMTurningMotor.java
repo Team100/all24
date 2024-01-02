@@ -41,8 +41,11 @@ public class PWMTurningMotor implements Motor100<Angle> {
         m_motor.stopMotor();
     }
 
+    /**
+     * PWM does not support closed-loop velocity control. 
+     */
     @Override
-    public void setVelocity(double outputRadiansPerSec, double Accel) {
+    public void setVelocity(double outputRad_S, double accelRad_S2) {
         throw new UnsupportedOperationException("PWM turning motor does not implement closed loop velocity.");
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -24,7 +25,8 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * The list can be relative to the current pose.
  * 
- * TODO: use the new holonomic trajectory type
+ * This just holds the starting rotation.  If you want a holonomic trajectory
+ * follower, try the {@link DriveMotionController} classes.
  */
 public class TrajectoryListCommand extends Command100 {
     private final Telemetry t = Telemetry.get();
@@ -35,8 +37,6 @@ public class TrajectoryListCommand extends Command100 {
     private Iterator<Trajectory> m_trajectoryIter;
     private Trajectory m_currentTrajectory;
     private boolean done;
-    // this holds the current rotation
-    // TODO: allow trajectory to specify it using the new type
     private Rotation2d m_rotation;
     private boolean m_aligned;
 
@@ -90,21 +90,19 @@ public class TrajectoryListCommand extends Command100 {
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
-            // look just one loop ahead
-            State desiredState = m_currentTrajectory.sample(m_timer.get()+0.02);
+            // look one loop ahead
+            State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
             t.log(Level.DEBUG, "/trajectory list/reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget);
+            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             if (aligned) {
                 m_aligned = true;
                 m_timer.start();
             }
         }
     }
-
-
 
     @Override
     public boolean isFinished() {

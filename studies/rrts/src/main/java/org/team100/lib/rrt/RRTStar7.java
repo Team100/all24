@@ -1012,9 +1012,14 @@ public class RRTStar7<T extends Arena<N4>> implements Solver<N4> {
     /**
      * Velocity at x_switch. this should be faster than idot.
      * 
+     * TODO: enforce the "faster than idot" constraint
+     * TODO: this fails if I=G.  just return idot in that case.
+     * 
      * This is for the I+G- path.
      * 
-     * For this path qDotSwitch is always positive; otherwise it's an x_limit path.
+     * For the switch path qDotSwitch is always positive; otherwise it's an x_limit path.
+     * 
+     * TODO: this yields the wrong sign for the "limit" intersection.
      */
     static double qDotSwitchIplusGminus(double i, double idot, double g, double gdot, double umax) {
         return Math.sqrt(
@@ -1024,9 +1029,14 @@ public class RRTStar7<T extends Arena<N4>> implements Solver<N4> {
     /**
      * Velocity at x_switch. this should be faster than idot.
      * 
+     * TODO: enforce the "faster than idot" constraint
+     * TODO: this fails if I=G.  just return idot in that case.
+     * 
      * This is for the I-G+ path.
      * 
-     * For this path qDotSwitch is always negative, otherwise it's an x_switch path.
+     * For the switch path qDotSwitch is always negative, otherwise it's an x_limit path.
+     *
+     * TODO: this yields the wrong sign for the "limit" intersection.
      * 
      * Note the intersection here may imply negative-time traversal of one of the
      * segments.

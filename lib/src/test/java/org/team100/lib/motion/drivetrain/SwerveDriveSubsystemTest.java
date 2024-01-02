@@ -35,8 +35,8 @@ class SwerveDriveSubsystemTest {
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 
-        SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-                swerveKinodynamics.getKinematics(), gyroAngle, modulePositions, initialPoseMeters);
+        SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
+                gyroAngle, modulePositions, initialPoseMeters);
 
         FrameTransform frameTransform = new FrameTransform();
         SwerveModuleCollection modules = fixture.collection;

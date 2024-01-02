@@ -3,26 +3,27 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.HeadingLatch;
+import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * Function that supports manual cartesian control, and both manual and locked
  * rotational control.
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
- * 
- * TODO: add velocity feedback
  */
 public class ManualWithHeading {
     private static final double kDtSec = 0.02;
@@ -36,8 +37,8 @@ public class ManualWithHeading {
     private final PIDController m_omegaController;
 
     public Rotation2d m_goal = null;
-    public final TrapezoidProfile m_profile;
-    TrapezoidProfile.State m_setpoint;
+    public final TrapezoidProfile100 m_profile;
+    State100 m_setpoint;
 
     public ManualWithHeading(
             SwerveKinodynamics swerveKinodynamics,
@@ -51,15 +52,16 @@ public class ManualWithHeading {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_latch = new HeadingLatch();
-        TrapezoidProfile.Constraints c = new TrapezoidProfile.Constraints(
-                swerveKinodynamics.getMaxAngleSpeedRad_S(), swerveKinodynamics.getMaxAngleAccelRad_S2());
-        m_profile = new TrapezoidProfile(c);
+        Constraints c = new Constraints(
+                swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                swerveKinodynamics.getMaxAngleAccelRad_S2());
+        m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        m_setpoint = new TrapezoidProfile.State(currentPose.getRotation().getRadians(),  m_heading.getHeadingRateNWU());
+        m_setpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -85,16 +87,17 @@ public class ManualWithHeading {
 
         // take the short path
         m_goal = new Rotation2d(
-                MathUtil.angleModulus(m_goal.getRadians() - currentRotation.getRadians())
-                        + currentRotation.getRadians());
-        m_setpoint.position = MathUtil.angleModulus(m_setpoint.position - currentRotation.getRadians())
-                + currentRotation.getRadians();
+                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()));
+
+        // use the modulus cloest to the measurement
+        m_setpoint = new State100(
+                Math100.getMinDistance(headingMeasurement, m_setpoint.x()),
+                m_setpoint.v());
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
-        m_setpoint = m_profile.calculate(kDtSec,
-                new TrapezoidProfile.State(m_goal.getRadians(), 0),
-                m_setpoint);
+        State100 goalState = new State100(m_goal.getRadians(), 0);
+        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, goalState);
 
         // this is user input
         Twist2d twistM_S = DriveUtil.scale(
@@ -102,11 +105,11 @@ public class ManualWithHeading {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         // the snap overrides the user input for omega.
-        double thetaFF = m_setpoint.velocity;
+        double thetaFF = m_setpoint.v();
 
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.position);
+        double thetaFB = m_thetaController.calculate(headingMeasurement, m_setpoint.x());
 
-        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.velocity);
+        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.v());
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -115,12 +118,12 @@ public class ManualWithHeading {
         Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
         t.log(Level.DEBUG, "/ManualWithHeading/mode", "snap");
-        t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_setpoint.position);
-        t.log(Level.DEBUG, "/ManualWithHeading/reference/omega", m_setpoint.velocity);
+        t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_setpoint.x());
+        t.log(Level.DEBUG, "/ManualWithHeading/reference/omega", m_setpoint.v());
         t.log(Level.DEBUG, "/ManualWithHeading/measurement/theta", headingMeasurement);
         t.log(Level.DEBUG, "/ManualWithHeading/measurement/omega", headingRate);
-        t.log(Level.DEBUG, "/ManualWithHeading/error/theta", m_setpoint.position - headingMeasurement);
-        t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_setpoint.velocity - headingRate);
+        t.log(Level.DEBUG, "/ManualWithHeading/error/theta", m_setpoint.x() - headingMeasurement);
+        t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_setpoint.v() - headingRate);
 
         return twistWithSnapM_S;
     }

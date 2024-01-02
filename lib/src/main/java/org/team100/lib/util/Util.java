@@ -1,8 +1,5 @@
 package org.team100.lib.util;
 
-import org.team100.lib.telemetry.TelemetryLevelChooser;
-import org.team100.lib.telemetry.Telemetry.Level;
-
 public class Util {
 
     public static boolean all(boolean[] x) {
@@ -13,20 +10,12 @@ public class Util {
         return true;
     }
 
-    /**
-     * Print to the console if telemetry level is DEBUG.
-     */
     public static void println(String s) {
-        if (TelemetryLevelChooser.get().getSelected() == Level.DEBUG)
-            System.out.println(s);
+        System.out.println(s);
     }
 
-    /**
-     * Print to the console if telemetry level is DEBUG.
-     */
     public static void printf(String s, Object... args) {
-        if (TelemetryLevelChooser.get().getSelected() == Level.DEBUG)
-            System.out.printf(s, args);
+        System.out.printf(s, args);
     }
 
     /**

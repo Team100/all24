@@ -1,6 +1,8 @@
 package org.team100.lib.controller;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import java.util.Objects;
+
+import edu.wpi.first.math.MathUtil;
 
 /**
  * One-dimensional system state, used for measurement and reference.
@@ -22,10 +24,8 @@ public class State100 {
         m_a = a;
     }
 
-    public State100(TrapezoidProfile.State state, double a) {
-        m_x = state.position;
-        m_v = state.velocity;
-        m_a = a; 
+    public State100(double x, double v) {
+        this(x, v, 0);
     }
 
     public double x() {
@@ -40,7 +40,28 @@ public class State100 {
         return m_a;
     }
 
+    public boolean near(State100 other, double tolerance) {
+        return MathUtil.isNear(m_x, other.m_x, tolerance) &&
+                MathUtil.isNear(m_v, other.m_v, tolerance);
+    }
+
     public String toString() {
         return String.format("State100(X: %5.3f, V: %5.3f, A: %5.3f)", m_x, m_v, m_a);
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof State100) {
+            State100 rhs = (State100) other;
+            return this.m_x == rhs.m_x && this.m_v == rhs.m_v;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(m_x, m_v);
+    }
+
 }

@@ -106,8 +106,6 @@ public class Oscillate extends Command100 {
         t.log(Level.DEBUG, "/oscillate/setpoint/position", positionM);
 
         SwerveState swerveState = m_swerve.getState();
-        // TODO: the acceleration from swerve.getState() is wrong.
-        t.log(Level.DEBUG, "/oscillate/measurement/accel", "fixme" /* swerveState.x().a() */);
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
             t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.theta().v());
             t.log(Level.DEBUG, "/oscillate/measurement/position",

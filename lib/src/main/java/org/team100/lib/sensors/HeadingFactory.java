@@ -1,9 +1,8 @@
 package org.team100.lib.sensors;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 /**
  * Produces real or simulated gyros depending on identity.
@@ -11,12 +10,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 public class HeadingFactory {
 
     public static HeadingInterface get(
-            SwerveDriveKinematics kinematics,
+            SwerveKinodynamics kinodynamics,
             SwerveModuleCollection collection) {
         switch (Identity.instance) {
             case BLANK:
                 // for simulation
-                return new SimulatedHeading(kinematics, collection);
+                return new SimulatedHeading(kinodynamics, collection);
             default:
                 RedundantGyroInterface ahrsclass = new RedundantGyroFactory(Identity.instance).get();
                 return new Heading(ahrsclass);

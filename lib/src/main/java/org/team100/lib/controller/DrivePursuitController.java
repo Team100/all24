@@ -12,6 +12,7 @@ import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -41,6 +42,8 @@ public class DrivePursuitController implements DriveMotionController {
     private static final double kAdaptivePathMinLookaheadDistance = 0.1;
     private static final double kAdaptivePathMaxLookaheadDistance = 0.1;
     private static final double kLookaheadSearchDt = 0.01;
+    // 254 calls this "default cook"
+    private static final double kMinSpeed = 0.5;
 
     // feedback control constants
     private static final double kThetakP = 3.5;
@@ -53,6 +56,9 @@ public class DrivePursuitController implements DriveMotionController {
     private TrajectoryTimeIterator m_iter;
     private boolean mIsReversed = false;
 
+    /** Min speed is used at the start of a trajectory only. */
+    private boolean useMinSpeed;
+
     public DrivePursuitController(SwerveKinodynamics limits) {
         m_limits = limits;
     }
@@ -60,6 +66,7 @@ public class DrivePursuitController implements DriveMotionController {
     @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
         m_iter = trajectory;
+        useMinSpeed = true;
 
         for (int i = 0; i < trajectory.trajectory().length(); ++i) {
             if (trajectory.trajectory().getPoint(i).state().velocityM_S() > EPSILON) {
@@ -71,7 +78,7 @@ public class DrivePursuitController implements DriveMotionController {
             }
         }
         mSpeedLookahead = new Lookahead(kAdaptivePathMinLookaheadDistance, kAdaptivePathMaxLookaheadDistance, 0.0,
-             m_limits.getMaxDriveVelocityM_S());
+                m_limits.getMaxDriveVelocityM_S());
     }
 
     /**
@@ -83,16 +90,20 @@ public class DrivePursuitController implements DriveMotionController {
      */
     @Override
     public ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d current_velocity) {
-        if (m_iter == null)
+        if (m_iter == null) {
+            Util.warn("Null iter!");
             return null;
+        }
 
         t.log(Level.DEBUG, "/pursuit_planner/current state", measurement);
         if (isDone()) {
+            Util.println("Done!");
             return new ChassisSpeeds();
         }
 
         Optional<TimedPose> mSetpoint = getSetpoint(measurement);
         if (!mSetpoint.isPresent()) {
+            Util.warn("No setpoint!");
             return new ChassisSpeeds();
         }
         t.log(Level.DEBUG, "/pursuit_planner/setpoint", mSetpoint.get());
@@ -104,6 +115,7 @@ public class DrivePursuitController implements DriveMotionController {
 
         Optional<TrajectorySamplePoint> preview = m_iter.preview(lookahead_time);
         if (!preview.isPresent()) {
+            Util.warn("No preview!");
             return new ChassisSpeeds();
         }
         TimedPose lookahead_state = preview.get().state();
@@ -117,6 +129,7 @@ public class DrivePursuitController implements DriveMotionController {
             lookahead_time += kLookaheadSearchDt;
             Optional<TrajectorySamplePoint> preview2 = m_iter.preview(lookahead_time);
             if (!preview2.isPresent()) {
+                Util.warn("No Preview2!");
                 return new ChassisSpeeds();
             }
             lookahead_state = preview2.get().state();
@@ -153,9 +166,19 @@ public class DrivePursuitController implements DriveMotionController {
         // Use the Velocity Feedforward of the Closest Point on the Trajectory
         double normalizedSpeed = Math.abs(mSetpoint.get().velocityM_S()) / m_limits.getMaxDriveVelocityM_S();
 
+        if (normalizedSpeed > kMinSpeed) {
+            // latch it off for this trajectory to avoid running off the end.
+            // min speed just affects the start.
+            useMinSpeed = false;
+        }
+        if (useMinSpeed) {
+            normalizedSpeed = Math.max(normalizedSpeed, kMinSpeed);
+        }
+
         // Convert the Polar Coordinate (speed, direction) into a Rectangular Coordinate
         // (Vx, Vy) in Robot Frame
-        final Translation2d steeringVector = new Translation2d(steeringDirection.getCos() * normalizedSpeed,
+        final Translation2d steeringVector = new Translation2d(
+                steeringDirection.getCos() * normalizedSpeed,
                 steeringDirection.getSin() * normalizedSpeed);
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
                 steeringVector.getX() * m_limits.getMaxDriveVelocityM_S(),

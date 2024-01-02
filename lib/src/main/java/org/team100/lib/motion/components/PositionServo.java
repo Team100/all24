@@ -1,5 +1,6 @@
 package org.team100.lib.motion.components;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.telemetry.Telemetry;
@@ -8,8 +9,6 @@ import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 /**
  * Positional control on top of a velocity servo.
@@ -25,8 +24,8 @@ public class PositionServo<T extends Measure100> {
     private final ChoosableProfile m_profile;
     private final T m_instance;
 
-    private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-    private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
+    private State100 m_goal = new State100(0, 0);
+    private State100 m_setpoint = new State100(0, 0);
 
     /**
      * @param name may not start with a slash
@@ -59,7 +58,7 @@ public class PositionServo<T extends Measure100> {
      */
     public void reset() {
         m_controller.reset();
-        m_setpoint = new TrapezoidProfile.State(getPosition(), getVelocity());
+        m_setpoint = new State100(getPosition(), getVelocity());
     }
 
     /**
@@ -67,14 +66,19 @@ public class PositionServo<T extends Measure100> {
      */
     public void setPosition(double goal) {
         double measurement = m_instance.modulus(m_encoder.getPosition());
-        m_goal = new TrapezoidProfile.State(goal, 0.0);
 
-        getSetpointMinDistance(measurement);
+        // use the modulus closest to the measurement.
+        // note zero velocity in the goal.
+        m_goal = new State100(m_instance.modulus(goal - measurement) + measurement, 0.0);
 
-        m_setpoint = m_profile.calculate(m_period, m_goal, m_setpoint);
+        m_setpoint = new State100(
+                m_instance.modulus(m_setpoint.x() - measurement) + measurement,
+                m_setpoint.v());
 
-        double u_FB = m_controller.calculate(measurement, m_setpoint.position);
-        double u_FF = m_setpoint.velocity;
+        m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
+
+        double u_FB = m_controller.calculate(measurement, m_setpoint.x());
+        double u_FF = m_setpoint.v();
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
 
         double u_TOTAL = u_FB + u_FF;
@@ -85,9 +89,9 @@ public class PositionServo<T extends Measure100> {
         t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
         t.log(Level.DEBUG, m_name + "/u_TOTAL", u_TOTAL);
         t.log(Level.DEBUG, m_name + "/Measurement", measurement);
-        t.log(Level.DEBUG, m_name + "/Goal", m_goal.position);
-        t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.position);
-        t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.velocity);
+        t.log(Level.DEBUG, m_name + "/Goal", m_goal.x());
+        t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.x());
+        t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.v());
         t.log(Level.DEBUG, m_name + "/Controller Position Error", m_controller.getPositionError());
         t.log(Level.DEBUG, m_name + "/Controller Velocity Error", m_controller.getVelocityError());
     }
@@ -125,17 +129,17 @@ public class PositionServo<T extends Measure100> {
     public boolean atGoal() {
         return atSetpoint()
                 && MathUtil.isNear(
-                        m_goal.position,
-                        m_setpoint.position,
+                        m_goal.x(),
+                        m_setpoint.x(),
                         m_controller.getPositionTolerance())
                 && MathUtil.isNear(
-                        m_goal.velocity,
-                        m_setpoint.velocity,
+                        m_goal.v(),
+                        m_setpoint.v(),
                         m_controller.getVelocityTolerance());
     }
 
     public double getGoal() {
-        return m_goal.position;
+        return m_goal.x();
     }
 
     public void stop() {
@@ -147,22 +151,8 @@ public class PositionServo<T extends Measure100> {
     }
 
     /** for testing only */
-    public State getSetpoint() {
+    public State100 getSetpoint() {
         return m_setpoint;
-    }
-
-    /**
-     * Recompute the profile goal with the smallest error, thus giving the shortest
-     * path. The goal may be outside the input range after this operation, but
-     * that's OK because the controller will still go there and report an error of
-     * zero. In other words, the setpoint only needs to be offset from the
-     * measurement by the input range modulus; they don't need to be equal.
-     * 
-     * For distance measures, this doesn't so anything.
-     */
-    private void getSetpointMinDistance(double measurement) {
-        m_goal.position = m_instance.modulus(m_goal.position - measurement) + measurement;
-        m_setpoint.position = m_instance.modulus(m_setpoint.position - measurement) + measurement;
     }
 
     public void periodic() {

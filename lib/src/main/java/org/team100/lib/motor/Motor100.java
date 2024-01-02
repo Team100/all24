@@ -19,8 +19,8 @@ public interface Motor100<T extends Measure100> {
     /**
      * Closed-loop velocity control.
      * 
-     * @param velocity in T/s
-     * @param accel in T/s/s.  TODO: make the implementations actually use accel.
+     * @param velocity setpoint, T/s,
+     * @param accel    used for feedforward, T/s/s
      */
     void setVelocity(double velocity, double accel);
 

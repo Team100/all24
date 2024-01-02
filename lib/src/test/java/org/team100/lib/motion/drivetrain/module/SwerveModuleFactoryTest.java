@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
 import edu.wpi.first.hal.HAL;
 
@@ -12,7 +14,8 @@ class SwerveModuleFactoryTest {
     @Test
     void testWCP() {
         HAL.initialize(500, 0);
-        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, 0, 0, 0);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forTest();
+        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, 0, 0, 0, k);
         assertNotNull(module);
         module.close();
         HAL.shutdown();
@@ -21,7 +24,8 @@ class SwerveModuleFactoryTest {
     @Test
     void testAMCAN() {
         HAL.initialize(500, 0);
-        SwerveModule100 module = AMCANSwerveModule100.get("test", 0, 0, 0, 0, 0, AnalogTurningEncoder.Drive.DIRECT);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forTest();
+        SwerveModule100 module = AMCANSwerveModule100.get("test", 0, 0, 0, 0, 0, AnalogTurningEncoder.Drive.DIRECT, k);
         assertNotNull(module);
         module.close();
         HAL.shutdown();
@@ -30,7 +34,8 @@ class SwerveModuleFactoryTest {
     @Test
     void testAM() {
         HAL.initialize(500, 0);
-        SwerveModule100 module = AMSwerveModule100.get("test", 0, 0, 0, 0, 0);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forTest();
+        SwerveModule100 module = AMSwerveModule100.get("test", 0, 0, 0, 0, 0, k);
         assertNotNull(module);
         module.close();
         HAL.shutdown();
