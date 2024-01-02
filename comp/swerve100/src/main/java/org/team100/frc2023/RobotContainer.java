@@ -225,7 +225,9 @@ public class RobotContainer implements SelfTestable {
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
-        Pose2d goal = new Pose2d(8, 4, new Rotation2d()); // field center, roughly
+        
+        // field center, roughly, facing to the left.
+        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         control.never().whileTrue(follower);
 
@@ -241,7 +243,7 @@ public class RobotContainer implements SelfTestable {
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        control.never().whileTrue(
+        control.actualCircle().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
         // 254 Ramsete follower
@@ -252,7 +254,7 @@ public class RobotContainer implements SelfTestable {
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
-        control.actualCircle().whileTrue(m_driveInALittleSquare);
+        control.never().whileTrue(m_driveInALittleSquare);
 
         ///////////////////////
         //
