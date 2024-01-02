@@ -3,7 +3,6 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -11,7 +10,6 @@ import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.units.Angle;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
@@ -68,41 +66,4 @@ class AnglePositionServoTest {
         assertEquals(0, turningMotor.output, kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);
     }
-
-    /**
-     * Duplicates the WPILib profile wrapping logic, and shows that it's wrong.
-     * 
-     * TODO: make an angular profile work correctly
-     */
-    @Test
-    void testWrapping() {
-        double m_maximumInput = 2 * Math.PI;
-        double m_minimumInput = 0;
-        double errorBound = (m_maximumInput - m_minimumInput) / 2.0;
-
-        // the measurement and setpoint are the same.
-        // the state is past 180 degrees but moving negatively, so it's
-        // faster to go the "long way" because of the velocity.
-        // but the wrapping calculation ignores velocity.
-        double measurement = 4;
-        State100 m_setpoint = new State100(4, -1);
-        State100 m_goal = new State100(0,0);
-
-        double goalMinDistance = MathUtil.inputModulus(m_goal.x() - measurement, -errorBound, errorBound);
-        double setpointMinDistance = MathUtil.inputModulus(m_setpoint.x() - measurement, -errorBound,
-                errorBound);
-
-        double goalPosition = goalMinDistance + measurement;
-        double setpointPosition = setpointMinDistance + measurement;
-
-        // this should be zero; trying to slow down and stop
-        // is much worse than continuing the long way around.
-        assertEquals(2 * Math.PI, goalPosition, kDelta);
-        assertEquals(0, m_goal.v(), kDelta);
-        assertEquals(4, setpointPosition, kDelta);
-        assertEquals(-1, m_setpoint.v(), kDelta);
-    }
-
-
-
 }

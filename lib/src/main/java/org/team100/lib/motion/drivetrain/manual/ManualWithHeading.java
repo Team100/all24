@@ -11,6 +11,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -88,13 +89,11 @@ public class ManualWithHeading {
 
         // take the short path
         m_goal = new Rotation2d(
-                MathUtil.angleModulus(m_goal.getRadians() - currentRotation.getRadians())
-                        + currentRotation.getRadians());
+                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()));
 
         // use the modulus cloest to the measurement
         m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - currentRotation.getRadians())
-                        + currentRotation.getRadians(),
+                Math100.getMinDistance(headingMeasurement, m_setpoint.x()),
                 m_setpoint.v());
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
@@ -110,7 +109,7 @@ public class ManualWithHeading {
         // the snap overrides the user input for omega.
         double thetaFF = m_setpoint.v();
 
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.x());
+        double thetaFB = m_thetaController.calculate(headingMeasurement, m_setpoint.x());
 
         double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.v());
 

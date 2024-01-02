@@ -13,6 +13,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -84,14 +85,13 @@ public class ManualWithTargetLock {
         Rotation2d bearing = bearing(currentTranslation, target);
 
         // take the short path
+        double measurement = currentRotation.getRadians();
         bearing = new Rotation2d(
-                MathUtil.angleModulus(bearing.getRadians() - currentRotation.getRadians())
-                        + currentRotation.getRadians());
+                Math100.getMinDistance(measurement, bearing.getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
         m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - currentRotation.getRadians())
-                        + currentRotation.getRadians(),
+                Math100.getMinDistance(measurement, m_setpoint.x()),
                 m_setpoint.v());
 
         // the goal omega should match the target's apparent motion
@@ -109,7 +109,7 @@ public class ManualWithTargetLock {
 
         double thetaFF = m_setpoint.v();
 
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), m_setpoint.x());
+        double thetaFB = m_thetaController.calculate(measurement, m_setpoint.x());
         double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.v());
 
         double omega = MathUtil.clamp(
