@@ -83,8 +83,8 @@ class DrivePursuitControllerTest {
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
-            // without the minimum  speed, its init speed is zero
-            assertEquals(0, output.vxMetersPerSecond, 0.05);
+            // I turned on minimum speed so it's not zero.
+            assertEquals(-2, output.vxMetersPerSecond, 0.05);
             assertEquals(0, output.vyMetersPerSecond, 0.05);
             // omega is NaN, i think pursuit ignores omega, it uses feedforward only.
             // assertEquals(0, output.omegaRadiansPerSecond, 0.001);
