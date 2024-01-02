@@ -10,9 +10,11 @@ import edu.wpi.first.wpilibj.PWM;
  */
 public class Annunciator implements BooleanConsumer {
     private final PWM m_pwm;
+    private final AnnunciatorVisualization m_viz;
 
     public Annunciator(int channel) {
         m_pwm = new PWM(channel);
+        m_viz = new AnnunciatorVisualization();
     }
 
     @Override
@@ -22,5 +24,6 @@ public class Annunciator implements BooleanConsumer {
         } else {
             m_pwm.setSpeed(0);
         }
+        m_viz.set(value);
     }
 }

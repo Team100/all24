@@ -2,6 +2,7 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.team100.lib.commands.arm.CartesianManualArm;
 import org.team100.lib.commands.arm.CartesianManualPositionalArm;
@@ -26,6 +27,7 @@ import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.commands.simple.SimpleManual;
 import org.team100.lib.commands.simple.SimpleManualMode;
+import org.team100.lib.commands.telemetry.Beep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -74,40 +76,40 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RobotContainer implements SelfTestable {
-
     private static final double kDriveCurrentLimit = 60;
-
     private final Telemetry t = Telemetry.get();
-
     private final AutonSelector m_autonSelector;
     private final AllianceSelector m_allianceSelector;
-
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollection m_modules;
+
     private final Command m_auton;
     private final FrameTransform m_frameTransform;
 
-    private final DriverControl control;
     private final DrawCircle m_drawCircle;
     // for SelfTest
     private final DriveInALittleSquare m_driveInALittleSquare;
+    private final Beep m_beep;
     private final Monitor m_monitor;
 
     // Identity-specific fields
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
-
     private final SimpleSubsystem m_elevator;
 
     public RobotContainer(TimedRobot robot) throws IOException {
+        // selects the correct control class for whatever is plugged in
+        ControlFactory controlFactory = new ControlFactory();
+        DriverControl driverControl = controlFactory.getDriverControl();
+        OperatorControl operatorControl = controlFactory.getOperatorControl();
 
         m_autonSelector = new AutonSelector();
         t.log(Level.INFO, "/Routine", getRoutine());
@@ -117,7 +119,9 @@ public class RobotContainer implements SelfTestable {
 
         m_indicator = new LEDIndicator(8);
 
-        m_monitor = new Monitor(new Annunciator(0));
+        m_beep = new Beep();
+        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getState();
+        m_monitor = new Monitor(new Annunciator(0), test);
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
@@ -151,117 +155,108 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        // control = new JoystickControl();
-        // control = new DriverXboxControl();
-
-        // selects the correct control class for whatever is plugged in
-        ControlFactory controlFactory = new ControlFactory();
-        control = controlFactory.getDriverControl();
-
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
                 m_frameTransform,
                 swerveLocal,
-                control::speed);
+                driverControl::speed);
 
         ////////////////////////////
         //
         // DRIVETRAIN COMMANDS
         //
 
-        control.defense().whileTrue(m_drive.runInit(m_drive::defense));
-        control.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
-        control.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
+        driverControl.defense().whileTrue(m_drive.runInit(m_drive::defense));
+        driverControl.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
+        driverControl.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
 
-        control.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
-        control.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+        driverControl.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        driverControl.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         ManualMode manualMode = new ManualMode();
 
-        control.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
+        driverControl.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
-        control.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
+        driverControl.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
         m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics, controller);
-        control.circle().whileTrue(m_drawCircle);
+        driverControl.circle().whileTrue(m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
 
-        control.driveWithFancyTrajec().whileTrue(
+        driverControl.driveWithFancyTrajec().whileTrue(
                 new FancyTrajectory(m_drive, planner, swerveKinodynamics));
 
-        control.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
-        control.never().whileTrue(new Spin(m_drive, controller));
-        control.never().whileTrue(new Oscillate(m_drive));
+        driverControl.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
+        driverControl.never().whileTrue(new Spin(m_drive, controller));
+        driverControl.never().whileTrue(new Oscillate(m_drive));
 
         // make a one-meter line
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
                         x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
 
         // make a one-meter square
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(swerveKinodynamics, x)));
 
         // one-meter square with reset at the corners
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new PermissiveTrajectoryListCommand(m_drive, controller,
                         TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
 
         // one-meter square with position and velocity feedback control
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new FullStateTrajectoryListCommand(m_drive,
                         x -> TrajectoryMaker.square(swerveKinodynamics, x)));
 
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
-        control.never().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
+        driverControl.never().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(1, 1);
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
-        
+
         // field center, roughly, facing to the left.
         Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
-        control.never().whileTrue(follower);
+        driverControl.never().whileTrue(follower);
 
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        control.actualCircle().whileTrue(
+        driverControl.actualCircle().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
         DriveMotionController driveRam = new DriveRamseteController();
-        control.never().whileTrue(
+        driverControl.never().whileTrue(
                 new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
-        control.never().whileTrue(m_driveInALittleSquare);
+        driverControl.never().whileTrue(m_driveInALittleSquare);
 
         ///////////////////////
         //
         // ARM
         //
-
-        OperatorControl operatorControl = controlFactory.getOperatorControl();
 
         m_armSubsystem = ArmFactory.get();
         m_armKinematicsM = new ArmKinematics(0.93, 0.92);
@@ -308,15 +303,15 @@ public class RobotContainer implements SelfTestable {
         m_drive.setDefaultCommand(
                 new DriveManually(
                         manualMode,
-                        control::twist,
+                        driverControl::twist,
                         m_drive,
                         m_heading,
                         swerveKinodynamics,
-                        control::desiredRotation,
+                        driverControl::desiredRotation,
                         thetaController,
                         omegaController,
-                        control::target,
-                        control::trigger));
+                        driverControl::target,
+                        driverControl::trigger));
 
         /////////////////////////////////
         //
@@ -331,7 +326,6 @@ public class RobotContainer implements SelfTestable {
                 m_auton = m_drive.runInit(m_drive::defense);
                 break;
         }
-
     }
 
     public void scheduleAuton() {
@@ -348,6 +342,10 @@ public class RobotContainer implements SelfTestable {
 
     public double getRoutine() {
         return m_autonSelector.routine();
+    }
+
+    public void scheduleBeep() {
+        m_beep.schedule();
     }
 
     public void ledStart() {

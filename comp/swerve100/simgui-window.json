@@ -10,11 +10,16 @@
       "style": "0",
       "userScale": "1",
       "width": "853",
-      "xpos": "87",
-      "ypos": "102"
+      "xpos": "235",
+      "ypos": "93"
     }
   },
   "Window": {
+    "###/SmartDashboard/annunciator": {
+      "Collapsed": "0",
+      "Pos": "467,32",
+      "Size": "115,121"
+    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "3,360",

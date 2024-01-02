@@ -20,8 +20,28 @@
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/annunciator": "Mechanism2d",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/annunciator": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "retained": {
+      "monitor": {
+        "open": true
+      }
+    },
+    "transitory": {
+      "SmartDashboard": {
+        "open": true
+      }
     }
   }
 }

@@ -100,4 +100,8 @@ public interface DriverControl {
     default Trigger never() {
         return new Trigger(()->false);
     }
+
+    default boolean annunicatorTest() {
+        return false;
+    }
 }
