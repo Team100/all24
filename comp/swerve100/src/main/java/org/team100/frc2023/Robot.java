@@ -2,7 +2,6 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 
-import org.team100.lib.commands.telemetry.Beep;
 import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
