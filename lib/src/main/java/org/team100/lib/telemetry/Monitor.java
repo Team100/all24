@@ -2,6 +2,7 @@ package org.team100.lib.telemetry;
 
 import java.util.function.BooleanSupplier;
 
+import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.util.function.BooleanConsumer;
@@ -33,13 +34,17 @@ public class Monitor {
 
     public void periodic() {
         m_shouldAlert = false;
-        t.log(Level.INFO, "/monitor/battery_voltage", getBatteryVoltage());
-        t.log(Level.INFO, "/monitor/bus_voltage", getBusVoltage());
-        t.log(Level.INFO, "/monitor/total_current", getTotalCurrent());
-        for (int i = 0; i < 16; ++i) {
-            t.log(Level.INFO, String.format("/monitor/channel_current_%02d", i),
-                    getChannelCurrent(i));
+        // this should test different things for different identities.
+        if (Identity.instance == Identity.COMP_BOT) {
+            t.log(Level.INFO, "/monitor/battery_voltage", getBatteryVoltage());
+            t.log(Level.INFO, "/monitor/bus_voltage", getBusVoltage());
+            t.log(Level.INFO, "/monitor/total_current", getTotalCurrent());
+            for (int i = 0; i < 16; ++i) {
+                t.log(Level.INFO, String.format("/monitor/channel_current_%02d", i),
+                        getChannelCurrent(i));
+            }
         }
+
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
         t.log(Level.INFO, "/monitor/master_warning", m_shouldAlert);
