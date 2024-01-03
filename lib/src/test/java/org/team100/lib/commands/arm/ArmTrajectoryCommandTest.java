@@ -37,7 +37,7 @@ class ArmTrajectoryCommandTest {
         assertTrue(command.isFinished());
         command.end(false);
         armSubSystem.close();
-        HAL.shutdown();
+        //HAL.shutdown();
     }
 
     @Test
@@ -70,7 +70,7 @@ class ArmTrajectoryCommandTest {
         assertEquals(Math.PI / 2, armSubSystem.getPosition().th2, 0.02);
         command.end(false);
         armSubSystem.close();
-        HAL.shutdown();
+        //HAL.shutdown();
     }
 
     @Test

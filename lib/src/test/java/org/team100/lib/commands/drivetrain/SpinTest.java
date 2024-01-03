@@ -7,6 +7,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
 
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class SpinTest {
@@ -16,6 +17,9 @@ class SpinTest {
 
     @Test
     void testSimple() {
+        // required for SimHooks.stepTiming
+        HAL.initialize(500, 0);
+
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
 
         Spin command = new Spin(fixture.drive, fixture.controller);
@@ -49,6 +53,7 @@ class SpinTest {
         assertEquals(0.176, fixture.drive.desiredStates()[3].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[3].angle.getRadians(), kDelta);
 
+        //HAL.shutdown();
     }
 
 }

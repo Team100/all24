@@ -27,7 +27,7 @@ import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.commands.simple.SimpleManual;
 import org.team100.lib.commands.simple.SimpleManualMode;
-import org.team100.lib.commands.telemetry.Beep;
+import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -97,7 +97,7 @@ public class RobotContainer implements SelfTestable {
     private final DrawCircle m_drawCircle;
     // for SelfTest
     private final DriveInALittleSquare m_driveInALittleSquare;
-    private final Beep m_beep;
+    private final MorseCodeBeep m_beep;
     private final Monitor m_monitor;
 
     // Identity-specific fields
@@ -119,8 +119,9 @@ public class RobotContainer implements SelfTestable {
 
         m_indicator = new LEDIndicator(8);
 
-        m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getState();
+        m_beep = new MorseCodeBeep(0.1);
+        // m_beep = new Beep();
+        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
         m_monitor = new Monitor(new Annunciator(0), test);
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
@@ -344,8 +345,9 @@ public class RobotContainer implements SelfTestable {
         return m_autonSelector.routine();
     }
 
-    public void scheduleBeep() {
-        m_beep.schedule();
+    @Override
+    public MorseCodeBeep getBeep() {
+        return m_beep;
     }
 
     public void ledStart() {

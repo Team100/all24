@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
@@ -22,6 +23,8 @@ class DriveInALittleSquareTest {
     /** Confirm that the steering commands are simple steps. */
     @Test
     void testSteering() {
+        // required for SimHooks.stepTiming
+        HAL.initialize(500, 0);
         SwerveDriveSubsystem swerve = fixture.drive;
         DriveInALittleSquare command = new DriveInALittleSquare(swerve);
         command.initialize();
@@ -58,10 +61,13 @@ class DriveInALittleSquareTest {
         assertEquals(Math.PI/2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(Math.PI/2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
+        //HAL.shutdown();
     }
 
     @Test
     void testLowLevel() {
+        // required for SimHooks.stepTiming
+        HAL.initialize(500, 0);
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
         command.initialize();
         // first align the wheels in case they're not already aligned.
@@ -131,6 +137,7 @@ class DriveInALittleSquareTest {
         // there's no specific test here because the velocity seems to depend
         // on the timing in the simulation
         assertTrue(command.speedM_S.v() > 0);
+        //HAL.shutdown();
     }
 
 }

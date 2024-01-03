@@ -13,6 +13,7 @@ class ArmSubsystemTest {
     // test simple direct motion
     @Test
     void testSimple() {
+        // required for SimHooks.stepTiming
         HAL.initialize(500, 0);
         ArmSubsystem armSubSystem = ArmFactory.get();
 
@@ -30,6 +31,6 @@ class ArmSubsystemTest {
         assertEquals(0.5, armSubSystem.getPosition().th2, 0.1);
 
         armSubSystem.close();
-        HAL.shutdown();
+        //HAL.shutdown();
     }
 }

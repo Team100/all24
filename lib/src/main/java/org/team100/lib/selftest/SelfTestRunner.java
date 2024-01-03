@@ -29,6 +29,14 @@ public class SelfTestRunner extends Command {
         m_group = new SequentialCommandGroup();
         m_listener = new SelfTestListener();
 
+        // a blocking beep to start the test
+        // the duration is set here to make sure it happens at the right time
+        // this is a simple beep
+        // addCase(new InstantCommand(() -> m_container.getBeep().setDuration(2)));
+        // this is morse code
+        addCase(new InstantCommand(() -> m_container.getBeep().setMessage("TEST")));
+        addCase(m_container.getBeep());
+
         // this test needs no "treatment" command
         addCase(new BatterySelfTest(m_container.getMonitor(), m_listener));
 
