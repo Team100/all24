@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
 
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class RotateTest {
@@ -21,6 +22,8 @@ class RotateTest {
 
     @Test
     void testRotate() {
+        // required for SImHooks.stepTiming
+        HAL.initialize(500, 0);
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
         MockHeading heading = new MockHeading();
@@ -90,5 +93,6 @@ class RotateTest {
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
 
+        //HAL.shutdown();
     }
 }

@@ -18,7 +18,7 @@ class SwerveModuleFactoryTest {
         SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, 0, 0, 0, k);
         assertNotNull(module);
         module.close();
-        HAL.shutdown();
+        //HAL.shutdown();
     }
 
     @Test
@@ -28,7 +28,7 @@ class SwerveModuleFactoryTest {
         SwerveModule100 module = AMCANSwerveModule100.get("test", 0, 0, 0, 0, 0, AnalogTurningEncoder.Drive.DIRECT, k);
         assertNotNull(module);
         module.close();
-        HAL.shutdown();
+        //HAL.shutdown();
     }
 
     @Test
@@ -38,6 +38,6 @@ class SwerveModuleFactoryTest {
         SwerveModule100 module = AMSwerveModule100.get("test", 0, 0, 0, 0, 0, k);
         assertNotNull(module);
         module.close();
-        HAL.shutdown();
+        //HAL.shutdown();
     }
 }

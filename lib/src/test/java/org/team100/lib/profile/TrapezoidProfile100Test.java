@@ -349,7 +349,6 @@ class TrapezoidProfile100Test {
         State100 initial = new State100(1.127310, -0.624930);
         State100 goal = new State100(1.937043, 0.502350);
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
@@ -362,7 +361,6 @@ class TrapezoidProfile100Test {
         State100 initial = new State100(-1.178601, -1.534504);
         State100 goal = new State100(-0.848954, -1.916583);
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
     }
@@ -375,7 +373,6 @@ class TrapezoidProfile100Test {
         State100 initial = new State100(1.655231, 1.967906);
         State100 goal = new State100(0.080954, -1.693829);
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
@@ -418,7 +415,6 @@ class TrapezoidProfile100Test {
         assertEquals(0.067452, t1a, 0.000001);
 
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
@@ -431,7 +427,6 @@ class TrapezoidProfile100Test {
         State100 initial = new State100(0.985792, 1.340926);
         State100 goal = new State100(-0.350934, -1.949649);
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
@@ -444,7 +439,6 @@ class TrapezoidProfile100Test {
         State100 initial = new State100(0, 1);
         State100 goal = new State100(0, -1);
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
@@ -457,7 +451,6 @@ class TrapezoidProfile100Test {
         State100 initial = new State100(1.747608, -0.147275);
         State100 goal = new State100(1.775148, 0.497717);
         State100 s = p2.calculate(10, initial, goal);
-        System.out.printf("initial %s goal %s final %s\n", initial, goal, s);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);

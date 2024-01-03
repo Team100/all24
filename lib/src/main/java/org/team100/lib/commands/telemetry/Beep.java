@@ -5,17 +5,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** Set the state for 1 sec, then unset it. */
 public class Beep extends Command {
-    private static final double kDuration = 1.0;
+    private double m_duration;
     private final Timer m_timer;
-    private  boolean m_state;
+    private boolean m_state;
 
     public Beep() {
         m_timer = new Timer();
         m_state = false;
+        m_duration = 1.0;
     }
 
-    public boolean getState() {
+    public boolean getOutput() {
         return m_state;
+    }
+
+    public void setDuration(double duration) {
+        m_duration = duration;
     }
 
     @Override
@@ -26,7 +31,7 @@ public class Beep extends Command {
 
     @Override
     public boolean isFinished() {
-        return m_timer.hasElapsed(kDuration);
+        return m_timer.hasElapsed(m_duration);
     }
 
     @Override

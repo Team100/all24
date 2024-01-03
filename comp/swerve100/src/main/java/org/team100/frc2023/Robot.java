@@ -2,6 +2,7 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 
+import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -76,8 +77,13 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        CommandScheduler.getInstance().cancelAll();
+        CommandScheduler.getInstance().clearComposedCommands();
         m_robotContainer.cancelAuton();
-        m_robotContainer.scheduleBeep();
+        MorseCodeBeep beep = m_robotContainer.getBeep();
+        // beep.setDuration(1);
+        beep.setMessage("K");
+        CommandScheduler.getInstance().schedule(beep);
     }
 
     @Override

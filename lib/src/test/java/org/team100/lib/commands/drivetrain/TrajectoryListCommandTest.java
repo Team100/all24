@@ -15,6 +15,7 @@ import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
@@ -25,6 +26,8 @@ class TrajectoryListCommandTest {
 
     @Test
     void testSimple() {
+        // required for SimHooks.StepTiming
+        HAL.initialize(500, 0);
         Fixture fixture = new Fixture();
         HolonomicDriveController3 control = new HolonomicDriveController3();
         TrajectoryListCommand c = new TrajectoryListCommand(
@@ -44,6 +47,7 @@ class TrajectoryListCommandTest {
         // at goal; wide tolerance due to test timing
         assertEquals(1, fixture.drive.getPose().getX(), 0.1);
         assertTrue(c.isFinished());
+        //HAL.shutdown();
     }
 
     /**
@@ -52,6 +56,8 @@ class TrajectoryListCommandTest {
      */
     @Test
     void testLowLevel() {
+        // required for SimHooks.stepTiming
+        HAL.initialize(500, 0);
         Fixture fixture = new Fixture();
         HolonomicDriveController3 controller = new HolonomicDriveController3();
         TrajectoryListCommand command = new TrajectoryListCommand(
@@ -77,6 +83,6 @@ class TrajectoryListCommandTest {
                      setpoint.v(),
                      measurement);
         } while (!command.isFinished());
-
+        //HAL.shutdown();
     }
 }
