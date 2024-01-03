@@ -113,4 +113,9 @@ public class DriverXboxControl implements DriverControl {
     public Trigger actualCircle() {
         return m_controller.b();
     }
+
+    @Override
+    public boolean annunicatorTest() {
+        return m_controller.getHID().getXButton();
+    }
 }

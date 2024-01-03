@@ -111,18 +111,22 @@ public class RobotContainer implements SelfTestable {
         DriverControl driverControl = controlFactory.getDriverControl();
         OperatorControl operatorControl = controlFactory.getOperatorControl();
 
+        // digital inputs 0, 1, 2, 3.
         m_autonSelector = new AutonSelector();
         t.log(Level.INFO, "/Routine", getRoutine());
 
+        // digital inputs 4, 5
         m_allianceSelector = new AllianceSelector();
         t.log(Level.INFO, "/Alliance", m_allianceSelector.alliance().name());
 
         m_indicator = new LEDIndicator(8);
 
-        m_beep = new MorseCodeBeep(0.1);
+        // 20 words per minute is 60 ms.
+        m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
-        m_monitor = new Monitor(new Annunciator(0), test);
+        // digital output 4
+        m_monitor = new Monitor(new Annunciator(6), test);
         robot.addPeriodic(m_monitor::periodic, 0.02);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();

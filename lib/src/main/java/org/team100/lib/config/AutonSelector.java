@@ -2,6 +2,7 @@ package org.team100.lib.config;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 
+/** Uses digital inputs 0, 1, 2, and 3. */
 public class AutonSelector {
     private final DigitalInput auto1;
     private final DigitalInput auto2;
