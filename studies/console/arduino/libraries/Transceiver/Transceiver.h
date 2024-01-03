@@ -83,7 +83,8 @@ public:
     ARM = 6,
     BUTTONS = 7,
     DEBUG = 8,
-    KNOBS = 9
+    KNOBS = 9,
+    MIDI = 10
   };
 
   /**
@@ -98,6 +99,7 @@ public:
       case SubConsole::BUTTONS: return "Button Board";
       case SubConsole::DEBUG: return "Debug";
       case SubConsole::KNOBS: return "Knobs";
+      case SubConsole::MIDI: return "MIDI";
       default: return "Unassigned";
     }
   }
