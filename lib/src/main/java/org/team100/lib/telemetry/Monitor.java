@@ -1,5 +1,7 @@
 package org.team100.lib.telemetry;
 
+import java.util.function.BooleanSupplier;
+
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.util.function.BooleanConsumer;
@@ -15,11 +17,17 @@ import edu.wpi.first.wpilibj.RobotController;
 public class Monitor {
     private final Telemetry t = Telemetry.get();
     private final BooleanConsumer m_annunciator;
+    private final BooleanSupplier m_test;
     private final PowerDistribution m_pdp;
     private boolean m_shouldAlert;
 
-    public Monitor(BooleanConsumer annunciator) {
+    /**
+     * @param annunciator some sort of alert.
+     * @param test        activates the annunciator, to make sure it's working.
+     */
+    public Monitor(BooleanConsumer annunciator, BooleanSupplier test) {
         m_annunciator = annunciator;
+        m_test = test;
         m_pdp = new PowerDistribution();
     }
 
@@ -32,6 +40,9 @@ public class Monitor {
             t.log(Level.INFO, String.format("/monitor/channel_current_%02d", i),
                     getChannelCurrent(i));
         }
+        if (m_test.getAsBoolean())
+            m_shouldAlert = true;
+        t.log(Level.INFO, "/monitor/master_warning", m_shouldAlert);
         m_annunciator.accept(m_shouldAlert);
     }
 

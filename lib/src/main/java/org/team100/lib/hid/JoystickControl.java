@@ -39,7 +39,8 @@ public abstract class JoystickControl implements DriverControl {
 
     @Override
     public Trigger circle() {
-        return button(1);
+        // return button(1);
+        return new Trigger(() -> false);
     }
 
     @Override
@@ -104,5 +105,10 @@ public abstract class JoystickControl implements DriverControl {
 
     private JoystickButton button(int button) {
         return new JoystickButton(m_controller.getHID(), button);
+    }
+
+    @Override
+    public boolean annunicatorTest() {
+        return m_controller.getHID().getRawButton(1);
     }
 }
