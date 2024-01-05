@@ -36,6 +36,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 public class ManualWithTargetLock {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
+    /**
+     * Relative rotational speed. Use a moderate value to trade rotation for
+     * translation
+     */
+    private static final double kRotationSpeed = 0.5;
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
@@ -43,7 +48,7 @@ public class ManualWithTargetLock {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
-    State100 m_setpoint;
+    State100 m_thetaSetpoint;
     Translation2d m_ball;
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
@@ -63,20 +68,30 @@ public class ManualWithTargetLock {
         m_omegaController = omegaController;
         m_trigger = trigger;
         Constraints c = new Constraints(
-                swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                swerveKinodynamics.getMaxAngleAccelRad_S2());
+                swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
+                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed);
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
     public void reset(Pose2d currentPose) {
-        m_setpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
         m_omegaController.reset();
     }
 
+    /**
+     * Clips the input to the unit circle, scales to maximum (not simultaneously
+     * feasible) speeds, and then desaturates to a feasible holonomic velocity.
+     * 
+     * @param state from the drivetrain
+     * @param input control units [-1,1]
+     * @return feasible field-relative velocity in m/s and rad/s
+     */
     public Twist2d apply(SwerveState state, Twist2d input) {
+        // clip the input to the unit circle
+        Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
 
@@ -90,27 +105,36 @@ public class ManualWithTargetLock {
                 Math100.getMinDistance(measurement, bearing.getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
-        m_setpoint = new State100(
-                Math100.getMinDistance(measurement, m_setpoint.x()),
-                m_setpoint.v());
+        m_thetaSetpoint = new State100(
+                Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
+                m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
         double targetMotion = targetMotion(state, target);
         t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
-        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, goal);
 
-        // this is user input
+        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+
+        // this is user input scaled to m/s and rad/s
         Twist2d scaledInput = DriveUtil.scale(
-                input,
+                clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        double thetaFF = m_setpoint.v();
+        double thetaFF = m_thetaSetpoint.v();
 
-        double thetaFB = m_thetaController.calculate(measurement, m_setpoint.x());
-        double omegaFB = m_omegaController.calculate(headingRate, m_setpoint.v());
+        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/reference", m_thetaSetpoint.x());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/measurement", measurement);
+        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/error", m_thetaController.getPositionError());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/fb", thetaFB);
+        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/reference", m_thetaSetpoint.v());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/measurement", headingRate);
+        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/error", m_omegaController.getPositionError());
+        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/fb", omegaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -118,8 +142,9 @@ public class ManualWithTargetLock {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
 
-        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/theta", m_setpoint.x());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/reference/omega", m_setpoint.v());
+        // desaturate to feasibility by preferring the rotational velocity.
+        twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
+
 
         t.log(Level.DEBUG, "/field/target", new double[] {
                 target.getX(),

@@ -129,6 +129,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * Scales the supplied twist by the "speed" driver control modifier.
      * 
+     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     * 
      * @param twist  Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
@@ -170,6 +172,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, kDtSec);
     }
 
+    /**
+     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         m_swerveLocal.setChassisSpeeds(speeds, kDtSec);
     }

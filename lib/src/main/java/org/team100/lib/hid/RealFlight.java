@@ -1,7 +1,6 @@
 package org.team100.lib.hid;
 
 import static org.team100.lib.hid.ControlUtil.clamp;
-import static org.team100.lib.hid.ControlUtil.clampTwist;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
@@ -52,11 +51,16 @@ public class RealFlight implements DriverControl {
         return hid.getHID().getName();
     }
 
+    /**
+     * Applies expo to each axis individually, works for "square" joysticks.
+     * The square response of this joystick should be clamped by the consumer.
+     */
+    @Override
     public Twist2d twist() {
         double dx = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
         double dy = expo(deadband(-1.0 * clamp(scaled(1), 1), kDeadband, 1), kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
-        return clampTwist(new Twist2d(dx, dy, dtheta), 1.0);
+        return new Twist2d(dx, dy, dtheta);
     }
 
     @Override

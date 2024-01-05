@@ -15,6 +15,7 @@ import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -108,12 +109,7 @@ public class DriveToWaypoint100 extends Command100 {
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
-        if (Double.isNaN(output.vxMetersPerSecond))
-            throw new IllegalStateException("vx is NaN");
-        if (Double.isNaN(output.vyMetersPerSecond))
-            throw new IllegalStateException("vy is NaN");
-        if (Double.isNaN(output.omegaRadiansPerSecond))
-            throw new IllegalStateException("omega is NaN");
+        DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }
 

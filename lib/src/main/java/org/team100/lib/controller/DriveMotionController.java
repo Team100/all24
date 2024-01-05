@@ -14,6 +14,8 @@ public interface DriveMotionController {
     void setTrajectory(TrajectoryTimeIterator trajectory);
 
     /** 
+     * Makes no attempt to enforce feasibility.
+     * 
      * @param timestamp in seconds, use Timer.getFPGATimestamp()
      * @param measurement measured pose
      * @param current_velocity measured speed

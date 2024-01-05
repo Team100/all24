@@ -22,13 +22,29 @@ public class ManualChassisSpeeds {
         m_swerveKinodynamics = swerveKinodynamics;
     }
 
+    /**
+     * Clips the input to the unit circle, scales to maximum (not simultaneously
+     * feasible) speeds, and then desaturates to a feasible holonomic velocity.
+     *
+     * @param input in control units, [-1,1]
+     * @return feasible chassis speeds in m/s and rad/s
+     */
     public ChassisSpeeds apply(Twist2d input) {
-        ChassisSpeeds speeds = DriveUtil.scaleChassisSpeeds(
-                input,
+        // clip the input to the unit circle
+        Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
+        // scale to max in both translation and rotation
+
+        ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
+                clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
+        // desaturate to feasibility
+        ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
+
         t.log(Level.DEBUG, "/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
         t.log(Level.DEBUG, "/manual robot relative/vy m_s", speeds.vyMetersPerSecond);
+        t.log(Level.DEBUG, "/manual robot relative/omega rad_s", speeds.omegaRadiansPerSecond);
         return speeds;
     }
 }

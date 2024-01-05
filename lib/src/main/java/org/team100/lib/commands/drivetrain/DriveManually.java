@@ -38,9 +38,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  */
 public class DriveManually extends Command100 {
     private final Supplier<ManualMode.Mode> m_mode;
+    /**
+     * Velocity control in control units, [-1,1] on all axes. This needs to be
+     * mapped to a feasible velocity control as early as possible.
+     */
     private final Supplier<Twist2d> m_twistSupplier;
     private final SwerveDriveSubsystem m_drive;
-
     private final SimpleManualModuleStates m_manualModuleStates;
     private final ManualChassisSpeeds m_manualChassisSpeeds;
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
@@ -109,10 +112,15 @@ public class DriveManually extends Command100 {
             m_manualWithTargetLock.reset(m_drive.getPose());
         }
 
+        // input in [-1,1] control units
         Twist2d input = m_twistSupplier.get();
         SwerveState state = m_drive.getState();
         Pose2d currentPose = state.pose();
 
+        /**
+         * None of these transformers pay attention to feasibility. Feasibility is
+         * enforced by the drivetrain setpoint generator and desaturator.
+         */
         switch (manualMode) {
             case MODULE_STATE:
                 m_drive.setRawModuleStates(

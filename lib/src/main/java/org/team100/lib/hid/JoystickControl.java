@@ -66,6 +66,10 @@ public abstract class JoystickControl implements DriverControl {
         // return button(4);
     }
 
+    /**
+     * Applies expo to each axis individually, works for "square" joysticks.
+     * The square response of this joystick should be clamped by the consumer.
+     */
     @Override
     public Twist2d twist() {
         double dx = expo(deadband(-1.0 * clamp(m_controller.getY(), 1), kDeadband, 1), kExpo);

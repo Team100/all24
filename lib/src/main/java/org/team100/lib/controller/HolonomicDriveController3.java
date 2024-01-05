@@ -58,6 +58,9 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
                 new Rotation2d(m_thetaController.getPositionError()));
     }
 
+    /**
+     * Makes no attempt to coordinate the axes or provide feasible output.
+     */
     @Override
     public Twist2d calculate(
             Pose2d currentPose,

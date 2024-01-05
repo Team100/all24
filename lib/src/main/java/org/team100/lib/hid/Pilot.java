@@ -46,6 +46,10 @@ public class Pilot implements DriverControl {
         return button(3);
     }
 
+    /**
+     * Applies expo to each axis individually, works for "square" joysticks.
+     * The square response of this joystick should be clamped by the consumer.
+     */
     @Override
     public Twist2d twist() {
         double dx = expo(deadband(-1.0 * clamp(axis(1), 1), kDeadband, 1), kExpo);

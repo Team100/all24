@@ -26,11 +26,12 @@ class ManualFieldRelativeSpeedsTest {
     void testTwistNonzero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(limits);
+        // these inputs are clipped and desaturated
         Twist2d input = new Twist2d(1, 2, 3);
         Twist2d twist = manual.apply(input);
-        assertEquals(1, twist.dx, kDelta);
-        assertEquals(1, twist.dy, kDelta); // speed limit
-        assertEquals(2.828, twist.dtheta, kDelta); // speed limit
+        assertEquals(0.223, twist.dx, kDelta);
+        assertEquals(0.447, twist.dy, kDelta);
+        assertEquals(1.414, twist.dtheta, kDelta);
     }
 
 }
