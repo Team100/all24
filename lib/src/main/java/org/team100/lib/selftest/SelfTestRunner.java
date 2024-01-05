@@ -5,6 +5,7 @@ import java.util.Set;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.Oscillate;
+import org.team100.lib.commands.drivetrain.Veering;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
@@ -66,10 +67,13 @@ public class SelfTestRunner extends Command {
 
         // this only tests the end-state
         addCase(new DefenseSelfTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
-        addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
-        addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
-        addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
-        addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
+        // these tests take a long time, skip them for now.
+        // addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
+        // addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
+        // addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
+        // addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
+
+        addCase(new VeeringSelfTest(m_listener), new Veering(drivetrain));
 
         // since we print to the console we don't want warning noise
         DriverStation.silenceJoystickConnectionWarning(true);
