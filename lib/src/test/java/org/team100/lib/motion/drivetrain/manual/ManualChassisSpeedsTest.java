@@ -26,11 +26,15 @@ class ManualChassisSpeedsTest {
     @Test
     void testChassisSpeedsNonzero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
+        assertEquals(1, limits.getMaxDriveVelocityM_S(), kDelta);
+        assertEquals(2.828, limits.getMaxAngleSpeedRad_S(), kDelta);
         ManualChassisSpeeds manual = new ManualChassisSpeeds(limits);
+        // clipping to the unit circle, then desaturating.
         Twist2d input = new Twist2d(1, 2, 3);
         ChassisSpeeds speeds = manual.apply(input);
-        assertEquals(1, speeds.vxMetersPerSecond, kDelta);
-        assertEquals(1, speeds.vyMetersPerSecond, kDelta); // speed limit
-        assertEquals(2.828, speeds.omegaRadiansPerSecond, kDelta); // speed limit
+
+        assertEquals(0.223, speeds.vxMetersPerSecond, kDelta);
+        assertEquals(0.447, speeds.vyMetersPerSecond, kDelta);
+        assertEquals(1.414, speeds.omegaRadiansPerSecond, kDelta);
     }
 }

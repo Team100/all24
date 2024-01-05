@@ -158,11 +158,7 @@ public class GeometryUtil {
         if (!poseEqual) {
             return false;
         }
-        boolean curvatureEqual = Math.abs(a.curvatureRadPerMeter - b.curvatureRadPerMeter) <= 1e-12;
-        if (!curvatureEqual) {
-            return false;
-        }
-        return true;
+        return Math.abs(a.curvatureRadPerMeter - b.curvatureRadPerMeter) <= 1e-12;
     }
 
     /** direction of the translational part of the twist */

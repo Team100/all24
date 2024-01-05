@@ -20,11 +20,26 @@ public class ManualFieldRelativeSpeeds {
         m_swerveKinodynamics = swerveKinodynamics;
     }
 
+    /**
+     * Clips the input to the unit circle, scales to maximum (not simultaneously
+     * feasible) speeds, and then desaturates to a feasible holonomic velocity.
+     * 
+     * @param twist in control units, [-1,1]
+     * @return feasible field-relative velocity in m/s and rad/s
+     */
     public Twist2d apply(Twist2d input) {
+        // clip the input to the unit circle
+        Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
+
+        // scale to max in both translation and rotation
         Twist2d twistM_S = DriveUtil.scale(
-                input,
+                clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
+        // desaturate to feasibility
+        twistM_S = m_swerveKinodynamics.analyticDesaturation(twistM_S);
+
         t.log(Level.DEBUG, "/manual field relative/twist x m_s", twistM_S.dx);
         t.log(Level.DEBUG, "/manual field relative/twist y m_s", twistM_S.dy);
         t.log(Level.DEBUG, "/manual field relative/twist theta rad_s", twistM_S.dtheta);

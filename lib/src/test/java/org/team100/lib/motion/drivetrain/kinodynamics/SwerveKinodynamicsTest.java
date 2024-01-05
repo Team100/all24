@@ -2,7 +2,15 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
+
+import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SwerveKinodynamicsTest {
     private static final double kDelta = 0.001;
@@ -106,4 +114,415 @@ class SwerveKinodynamicsTest {
         assertEquals(16.333, accel, kDelta);
         assertEquals(16.333, k.getMaxCapsizeAccelM_S2(), kDelta);
     }
+
+    @Test
+    void testDesaturation() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        double maxOmega = l.getMaxAngleSpeedRad_S();
+        assertEquals(4, maxV, kDelta);
+        assertEquals(11.313, maxOmega, kDelta);
+        {
+            // all translation at the limit -> no effect
+            ChassisSpeeds s = new ChassisSpeeds(4, 0, 0);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            assertEquals(4, ms[0].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(4, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(0, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            // all translation over the limit -> clip
+            ChassisSpeeds s = new ChassisSpeeds(5, 0, 0);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            assertEquals(5, ms[0].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(4, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(0, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            // all rotation at the limit -> no effect
+            ChassisSpeeds s = new ChassisSpeeds(0, 0, 11.313);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            assertEquals(4, ms[0].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(0, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(11.313, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            // all rotation over the limit -> clip
+            ChassisSpeeds s = new ChassisSpeeds(0, 0, 12);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            assertEquals(4.243, ms[0].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(0, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(11.313, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testDesaturation2() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        {
+            // half speed in both -> no effect
+            ChassisSpeeds s = new ChassisSpeeds(2, 0, 5.656);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            // not full speed because wheels are at 45 from course
+            assertEquals(1.531, ms[0].speedMetersPerSecond, kDelta);
+            assertEquals(3.695, ms[1].speedMetersPerSecond, kDelta);
+            assertEquals(1.531, ms[2].speedMetersPerSecond, kDelta);
+            assertEquals(3.695, ms[3].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(2, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(5.656, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            // half speed in both at 45 -> no effect
+            ChassisSpeeds s = new ChassisSpeeds(1.414, 1.414, 5.656);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            // "front"
+            assertEquals(2.828, ms[0].speedMetersPerSecond, kDelta);
+            // outside
+            assertEquals(4, ms[1].speedMetersPerSecond, kDelta);
+            // inside
+            assertEquals(0, ms[2].speedMetersPerSecond, kDelta);
+            assertEquals(2.828, ms[3].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(1.414, i.vxMetersPerSecond, kDelta);
+            assertEquals(1.414, i.vyMetersPerSecond, kDelta);
+            assertEquals(5.656, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            // full speed in both at 45 should be the same.
+            ChassisSpeeds s = new ChassisSpeeds(2.828, 2.828, 11.313);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            // "front"
+            assertEquals(5.656, ms[0].speedMetersPerSecond, kDelta);
+            // outside
+            assertEquals(8, ms[1].speedMetersPerSecond, kDelta);
+            // inside
+            assertEquals(0, ms[2].speedMetersPerSecond, kDelta);
+            assertEquals(5.656, ms[3].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            assertEquals(1.414, i.vxMetersPerSecond, kDelta);
+            assertEquals(1.414, i.vyMetersPerSecond, kDelta);
+            assertEquals(5.657, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testDesaturation3() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        {
+            // full translation, half rotation preserves the ratio.
+            ChassisSpeeds s = new ChassisSpeeds(2.828, 2.828, 5.656);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            // "front"
+            assertEquals(4.471, ms[0].speedMetersPerSecond, kDelta);
+            // outside
+            assertEquals(6, ms[1].speedMetersPerSecond, kDelta);
+            // inside
+            assertEquals(2, ms[2].speedMetersPerSecond, kDelta);
+            assertEquals(4.471, ms[3].speedMetersPerSecond, kDelta);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            // wanted full, 4, got 2.666 which is 2/3 of the ask, 2/3 of max
+            assertEquals(1.885, i.vxMetersPerSecond, kDelta);
+            assertEquals(1.885, i.vyMetersPerSecond, kDelta);
+            // wanted half, 5.656, got 3.771 which is 2/3 of the ask, 1/3 of max
+            assertEquals(3.771, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testAnalyticDesaturation() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        double maxOmega = l.getMaxAngleSpeedRad_S();
+        assertEquals(4, maxV, kDelta);
+        assertEquals(11.313, maxOmega, kDelta);
+        // same cases as above
+
+        {
+            ChassisSpeeds s = new ChassisSpeeds(4, 0, 0);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(4, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(0, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            ChassisSpeeds s = new ChassisSpeeds(5, 0, 0);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(4, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(0, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            ChassisSpeeds s = new ChassisSpeeds(0, 0, 11.313);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(0, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(11.313, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            ChassisSpeeds s = new ChassisSpeeds(0, 0, 12);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(0, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(11.313, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testAnalyticDesaturation2() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+
+        {
+            ChassisSpeeds s = new ChassisSpeeds(2, 0, 5.656);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(2, i.vxMetersPerSecond, kDelta);
+            assertEquals(0, i.vyMetersPerSecond, kDelta);
+            assertEquals(5.656, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            ChassisSpeeds s = new ChassisSpeeds(1.414, 1.414, 5.656);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(1.414, i.vxMetersPerSecond, kDelta);
+            assertEquals(1.414, i.vyMetersPerSecond, kDelta);
+            assertEquals(5.656, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            ChassisSpeeds s = new ChassisSpeeds(2.828, 2.828, 11.313);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(1.414, i.vxMetersPerSecond, kDelta);
+            assertEquals(1.414, i.vyMetersPerSecond, kDelta);
+            assertEquals(5.657, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testAnalyticDesaturation3() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+
+        {
+            ChassisSpeeds s = new ChassisSpeeds(2.828, 2.828, 5.656);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(1.885, i.vxMetersPerSecond, kDelta);
+            assertEquals(1.885, i.vyMetersPerSecond, kDelta);
+            assertEquals(3.771, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testAFewCases() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        double maxOmega = l.getMaxAngleSpeedRad_S();
+        assertEquals(4, maxV, kDelta);
+        assertEquals(11.313, maxOmega, kDelta);
+
+        {
+            // with no translation the wheel speed is ok
+            ChassisSpeeds s = new ChassisSpeeds(0, 0, -9.38);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            assertEquals(3.316, ms[0].speedMetersPerSecond, kDelta);
+            assertEquals(3.316, ms[1].speedMetersPerSecond, kDelta);
+            assertEquals(3.316, ms[2].speedMetersPerSecond, kDelta);
+            assertEquals(3.316, ms[3].speedMetersPerSecond, kDelta);
+            // with an extra ~2m/s, it's too fast
+            s = new ChassisSpeeds(0.13, -1.95, -9.38);
+            ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            assertEquals(4.957, ms[0].speedMetersPerSecond, kDelta);
+            assertEquals(4.832, ms[1].speedMetersPerSecond, kDelta);
+            assertEquals(2.506, ms[2].speedMetersPerSecond, kDelta);
+            assertEquals(2.250, ms[3].speedMetersPerSecond, kDelta);
+
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            ChassisSpeeds i = l.toChassisSpeeds(ms);
+            // so it slows down
+            assertEquals(0.105, i.vxMetersPerSecond, kDelta);
+            assertEquals(-1.574, i.vyMetersPerSecond, kDelta);
+            assertEquals(-7.569, i.omegaRadiansPerSecond, kDelta);
+        }
+        {
+            // the other way slows down more because it is pessimistic about theta.
+            ChassisSpeeds s = new ChassisSpeeds(0.13, -1.95, -9.38);
+            ChassisSpeeds i = l.analyticDesaturation(s);
+            assertEquals(0.098, i.vxMetersPerSecond, kDelta);
+            assertEquals(-1.480, i.vyMetersPerSecond, kDelta);
+            assertEquals(-7.118, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testEquivalentDesaturation() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        double maxOmega = l.getMaxAngleSpeedRad_S();
+        assertEquals(4, maxV, kDelta);
+        assertEquals(11.313, maxOmega, kDelta);
+        Random random = new Random();
+        for (int i = 0; i < 10000; ++i) {
+            ChassisSpeeds s = new ChassisSpeeds(
+                    random.nextDouble() * 20 - 10,
+                    random.nextDouble() * 20 - 10,
+                    random.nextDouble() * 20 - 10);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            // takes theta into account, can go faster sometimes
+            ChassisSpeeds i1 = l.toChassisSpeeds(ms);
+            // does not take theta into account
+            ChassisSpeeds i2 = l.analyticDesaturation(s);
+            // i2 should never be faster
+            double x2 = Math.abs(i2.vxMetersPerSecond);
+            double x1 = Math.abs(i1.vxMetersPerSecond);
+            if (x2 > x1 + 1e-6) {
+                System.out.printf("X high %.8f %.8f\n", x2, x1);
+                dump(i, s, i1, i2);
+            }
+            // but i1 shouldn't be *too* much faster.
+            if ((x2 - x1) / x1 > 0.1) {
+                System.out.printf("X low %.8f %.8f\n", x2, x1);
+                dump(i, s, i1, i2);
+            }
+            double y2 = Math.abs(i2.vyMetersPerSecond);
+            double y1 = Math.abs(i1.vyMetersPerSecond);
+            if (y2 > y1 + 1e-6) {
+                System.out.printf("Y high %.8f %.8f\n", y2, y1);
+                dump(i, s, i1, i2);
+            }
+            if ((y2 - y1) / y1 > 0.1) {
+                System.out.printf("Y low %.8f %.8f\n", y2, y1);
+                dump(i, s, i1, i2);
+            }
+            double o2 = Math.abs(i2.omegaRadiansPerSecond);
+            double o1 = Math.abs(i1.omegaRadiansPerSecond);
+            if (o2 > o1 + 1e-6) {
+                System.out.printf("omega high %.8f %.8f\n", o2, o1);
+                dump(i, s, i1, i2);
+            }
+            if ((o2 - o1) / o1 > 0.1) {
+                System.out.printf("omega low %.8f %.8f\n", o2, o1);
+                dump(i, s, i1, i2);
+            }
+        }
+    }
+
+    @Test
+    void testEquivalentDesaturationTwist() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        double maxV = l.getMaxDriveVelocityM_S();
+        double maxOmega = l.getMaxAngleSpeedRad_S();
+        assertEquals(4, maxV, kDelta);
+        assertEquals(11.313, maxOmega, kDelta);
+        Random random = new Random();
+        for (int i = 0; i < 10000; ++i) {
+            ChassisSpeeds s = new ChassisSpeeds(
+                    random.nextDouble() * 20 - 10,
+                    random.nextDouble() * 20 - 10,
+                    random.nextDouble() * 20 - 10);
+            SwerveModuleState[] ms = l.toSwerveModuleStatesWithoutDiscretization(s);
+            SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+            // takes theta into account, can go faster sometimes
+            ChassisSpeeds i1 = l.toChassisSpeeds(ms);
+            // does not take theta into account
+            Twist2d t = l.analyticDesaturation(GeometryUtil.toTwist2d(s));
+            ChassisSpeeds i2 = new ChassisSpeeds(t.dx, t.dy, t.dtheta);
+            // i2 should never be faster
+            double x2 = Math.abs(i2.vxMetersPerSecond);
+            double x1 = Math.abs(i1.vxMetersPerSecond);
+            if (x2 > x1 + 1e-6) {
+                System.out.printf("X high %.8f %.8f\n", x2, x1);
+                dump(i, s, i1, i2);
+            }
+            // but i1 shouldn't be *too* much faster.
+            if ((x2 - x1) / x1 > 0.1) {
+                System.out.printf("X low %.8f %.8f\n", x2, x1);
+                dump(i, s, i1, i2);
+            }
+            double y2 = Math.abs(i2.vyMetersPerSecond);
+            double y1 = Math.abs(i1.vyMetersPerSecond);
+            if (y2 > y1 + 1e-6) {
+                System.out.printf("Y high %.8f %.8f\n", y2, y1);
+                dump(i, s, i1, i2);
+            }
+            if ((y2 - y1) / y1 > 0.1) {
+                System.out.printf("Y low %.8f %.8f\n", y2, y1);
+                dump(i, s, i1, i2);
+            }
+            double o2 = Math.abs(i2.omegaRadiansPerSecond);
+            double o1 = Math.abs(i1.omegaRadiansPerSecond);
+            if (o2 > o1 + 1e-6) {
+                System.out.printf("omega high %.8f %.8f\n", o2, o1);
+                dump(i, s, i1, i2);
+            }
+            if ((o2 - o1) / o1 > 0.1) {
+                System.out.printf("omega low %.8f %.8f\n", o2, o1);
+                dump(i, s, i1, i2);
+            }
+        }
+    }
+
+    @Test
+    void testPreferRotation() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        assertEquals(11.313, l.getMaxAngleSpeedRad_S(), kDelta);
+        {
+            // trivial case works
+            Twist2d t = new Twist2d(0, 0, 0);
+            Twist2d i = l.preferRotation(t);
+            assertEquals(0, i.dx, kDelta);
+            assertEquals(0, i.dy, kDelta);
+            assertEquals(0, i.dtheta, kDelta);
+        }
+    }
+
+    @Test
+    void testPreferRotation2() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        assertEquals(11.313, l.getMaxAngleSpeedRad_S(), kDelta);
+        {
+            // inside the envelope => no change
+            Twist2d t = new Twist2d(1, 0, 1);
+            Twist2d i = l.preferRotation(t);
+            assertEquals(1, i.dx, kDelta);
+            assertEquals(0, i.dy, kDelta);
+            assertEquals(1, i.dtheta, kDelta);
+        }
+        {
+            // full v, half omega => half v
+            Twist2d t = new Twist2d(4, 0, 5.656);
+            Twist2d i = l.preferRotation(t);
+            assertEquals(2, i.dx, kDelta);
+            assertEquals(0, i.dy, kDelta);
+            assertEquals(5.656, i.dtheta, kDelta);
+        }
+                {
+            // full v, full omega => zero v, sorry
+            Twist2d t = new Twist2d(4, 0, 11.313);
+            Twist2d i = l.preferRotation(t);
+            assertEquals(0, i.dx, kDelta);
+            assertEquals(0, i.dy, kDelta);
+            assertEquals(11.313, i.dtheta, kDelta);
+        }
+    }
+
+    private void dump(int i, ChassisSpeeds s, ChassisSpeeds i1, ChassisSpeeds i2) {
+        System.out.printf("%d -- IN: %s OUT1: %s OUT2: %s\n", i, s, i1, i2);
+    }
+
 }

@@ -10,6 +10,7 @@ import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -57,7 +58,6 @@ public class SwerveLocal {
         m_modules = modules;
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_swerveKinodynamics);
 
-
         prevSetpoint = new SwerveSetpoint();
     }
 
@@ -67,6 +67,8 @@ public class SwerveLocal {
 
     /**
      * Drives the modules to produce the target chassis speed.
+     * 
+     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
      * 
      * @param speeds speeds in robot coordinates.
      * @param kDtSec time in the future for the setpoint generator to calculate
@@ -198,47 +200,34 @@ public class SwerveLocal {
     }
 
     private void setChassisSpeedsWithSetpointGenerator(
-        ChassisSpeeds speeds,
-        double kDtSec) {
-        if (Double.isNaN(speeds.vxMetersPerSecond))
-            throw new IllegalStateException("vx is NaN");
-        if (Double.isNaN(speeds.vyMetersPerSecond))
-            throw new IllegalStateException("vy is NaN");
-        if (Double.isNaN(speeds.omegaRadiansPerSecond))
-            throw new IllegalStateException("omega is NaN");
-
-        t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
+            ChassisSpeeds speeds,
+            double kDtSec) {
+        DriveUtil.checkSpeeds(speeds);
         // Informs SwerveDriveKinematics of the module states.
-
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
                 prevSetpoint,
                 speeds,
                 kDtSec);
-        if (Double.isNaN(setpoint.getChassisSpeeds().vxMetersPerSecond))
-            throw new IllegalStateException("vx is NaN");
-        if (Double.isNaN(setpoint.getChassisSpeeds().vyMetersPerSecond))
-            throw new IllegalStateException("vy is NaN");
+        DriveUtil.checkSpeeds(setpoint.getChassisSpeeds());
+        // ideally delta would be zero because our input would be feasible.
+        ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
+        t.log(Level.DEBUG, "/swervelocal/setpoint delta", delta);        
+        t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
         t.log(Level.DEBUG, "/swervelocal/setpoint chassis speed", setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;
     }
 
+    /** Desaturation mutates states. */
     private void setModuleStates(SwerveModuleState[] states) {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S());
-        logImpliedChassisSpeeds(states);
+        ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
+        t.log(Level.DEBUG, "/swervelocal/implied speed", speeds);
+        t.log(Level.DEBUG, "/swervelocal/moving", isMoving(speeds));
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
     }
 
-    /**
-     * Logs chassis speeds implied by the module settings. The difference from
-     * the desired speed might be caused by, for example, desaturation.
-     */
-    private void logImpliedChassisSpeeds(SwerveModuleState[] states) {
-        ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
-        t.log(Level.DEBUG, "/swervelocal/implied speed", speeds);
-        t.log(Level.DEBUG, "/swervelocal/moving", isMoving(speeds));
-    }
 
     private static boolean isMoving(ChassisSpeeds speeds) {
         return (speeds.vxMetersPerSecond >= 0.1

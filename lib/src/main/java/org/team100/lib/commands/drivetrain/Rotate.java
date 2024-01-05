@@ -22,9 +22,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * Rotate in place to the specified angle.
  * 
  * Uses a profile with the holonomic drive controller.
- * 
- * Note there is no allowance for steering delay, so the profile gets way ahead.
- * :(
  */
 public class Rotate extends Command100 {
 
@@ -110,7 +107,8 @@ public class Rotate extends Command100 {
         Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
         if (m_steeringAligned) {
-            // steer normally
+            // steer normally.
+            // there's no feasibility issue because cartesian speed is zero.
             m_robotDrive.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             boolean aligned = m_robotDrive.steerAtRest(fieldRelativeTarget, dt);

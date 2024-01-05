@@ -118,8 +118,8 @@ class ManualWithHeadingTest {
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
         // reset means setpoint is currentpose.
-        assertEquals(0, m_manualWithHeading.m_setpoint.x(), kDelta);
-        assertEquals(0, m_manualWithHeading.m_setpoint.v(), kDelta);
+        assertEquals(0, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
 
         // face towards +y
         desiredRotation = GeometryUtil.kRotation90;
@@ -136,11 +136,11 @@ class ManualWithHeadingTest {
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
-        assertEquals(0.0002, m_manualWithHeading.m_setpoint.x(), kDelta);
-        assertEquals(0.169, m_manualWithHeading.m_setpoint.v(), kDelta);
+        assertEquals(0.0002, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.084, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
 
         // and output is not zero
-        verify(0, 0, 0.769, twistM_S);
+        verify(0, 0, 0.384, twistM_S);
 
         // let go of the pov to let the profile run.
         desiredRotation = null;
@@ -148,9 +148,9 @@ class ManualWithHeadingTest {
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new State100(0.5, 1);
+        m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1.169, m_manualWithHeading.m_setpoint.v(), kDelta);
+        assertEquals(1.085, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
@@ -159,17 +159,17 @@ class ManualWithHeadingTest {
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new State100(1.55, 0.2);
+        m_manualWithHeading.m_thetaSetpoint = new State100(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(0.369, m_manualWithHeading.m_setpoint.v(), kDelta);
+        assertEquals(0.284, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
-        verify(0, 0, 1.683, twistM_S);
+        verify(0, 0, 1.299, twistM_S);
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
-        m_manualWithHeading.m_setpoint = new State100(Math.PI / 2, 0);
+        m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
 
@@ -212,14 +212,16 @@ class ManualWithHeadingTest {
         State100 initial = new State100(0, 0);
         State100 goal = new State100(Math.PI / 2, 0);
         assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).v(), kDelta);
-        verify(0, 0, 0.769, twistM_S);
+        // theta gets half of max
+        verify(0, 0, 0.384, twistM_S);
 
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new State100(0.5, 1);
+        m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(1.169, m_manualWithHeading.m_setpoint.v(), kDelta);
+        // profile gets half v
+        assertEquals(1.085, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still pushing since the profile isn't done
@@ -228,17 +230,18 @@ class ManualWithHeadingTest {
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_setpoint = new State100(1.555, 0.2);
+        m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
-        assertEquals(0.369, m_manualWithHeading.m_setpoint.v(), kDelta);
+        // profile gets half v
+        assertEquals(0.285, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // almost done
-        verify(0, 0, 1.683, twistM_S);
+        verify(0, 0, 1.299, twistM_S);
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
-        m_manualWithHeading.m_setpoint = new State100(Math.PI / 2, 0);
+        m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
         twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be no more profile to follow

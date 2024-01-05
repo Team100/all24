@@ -35,6 +35,7 @@ public class DrivePIDFController implements DriveMotionController {
         m_prevTimeS = Double.POSITIVE_INFINITY;
     }
 
+    /** Makes no attempt to produce feasible output. */
     @Override
     public ChassisSpeeds update(double timeS, Pose2d measurement, Twist2d current_velocity) {
         if (m_iter == null)

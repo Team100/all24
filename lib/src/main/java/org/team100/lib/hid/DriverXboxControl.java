@@ -43,10 +43,19 @@ public class DriverXboxControl implements DriverControl {
         return new JoystickButton(m_controller.getHID(), 8);
     }
 
+    /**
+     * Applies expo to the magnitude of the cartesian input, since these are "round"
+     * joysticks.
+     */
     @Override
     public Twist2d twist() {
-        double dx = expo(deadband(-1.0 * clamp(m_controller.getRightY(), 1), kDeadband, 1), kExpo);
-        double dy = expo(deadband(-1.0 * clamp(m_controller.getRightX(), 1), kDeadband, 1), kExpo);
+        double x = deadband(-1.0 * clamp(m_controller.getRightY(), 1), kDeadband, 1);
+        double y = deadband(-1.0 * clamp(m_controller.getRightX(), 1), kDeadband, 1);
+        double r = Math.hypot(x, y);
+        double expoR = expo(r, kExpo);
+        double ratio = expoR / r;
+        double dx = ratio * x;
+        double dy = ratio * y;
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
         t.log(Level.DEBUG, "/Xbox/right y", m_controller.getRightY());
         t.log(Level.DEBUG, "/Xbox/right x", m_controller.getRightX());

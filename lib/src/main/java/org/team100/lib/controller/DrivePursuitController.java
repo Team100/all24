@@ -11,6 +11,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Util;
 
@@ -194,8 +195,7 @@ public class DrivePursuitController implements DriveMotionController {
         chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond
                 + (kThetakP * mError.getRotation().getRadians());
 
-        if (Double.isNaN(chassisSpeeds.omegaRadiansPerSecond))
-            throw new IllegalStateException("omega is NaN");
+        DriveUtil.checkSpeeds(chassisSpeeds);
 
         return chassisSpeeds;
     }

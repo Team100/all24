@@ -24,6 +24,11 @@ public class SimpleManualModuleStates {
         m_swerveKinodynamics = swerveKinodynamics;
     }
 
+    /**
+     * There's no conflict between translation and rotation velocities in this mode.
+     * 
+     * @param input in control units [-1,1]
+     */
     public SwerveModuleState[] apply(Twist2d input) {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.dtheta);

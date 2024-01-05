@@ -8,6 +8,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -177,6 +178,11 @@ public class SwerveKinodynamics {
         return m_kinematics.toSwerveModuleStates(descretized);
     }
 
+    // for testing
+    SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
+        return m_kinematics.toSwerveModuleStates(speeds);
+    }
+
     /**
      * Forward kinematics, module states => chassis speeds.
      */
@@ -215,4 +221,87 @@ public class SwerveKinodynamics {
         return result;
 
     }
+
+    /**
+     * Maintain translation and rotation proportionality but slow to a feasible
+     * velocity, assuming the robot has an infinite number of wheels on a circular
+     * frame.
+     */
+    public ChassisSpeeds analyticDesaturation(ChassisSpeeds speeds) {
+        double maxV = getMaxDriveVelocityM_S();
+        double maxOmega = getMaxAngleSpeedRad_S();
+        double xySpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+        double xyAngle = Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond);
+        double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
+
+        if (xySpeed < 1e-12) {
+            return new ChassisSpeeds(0, 0, Math.signum(speeds.omegaRadiansPerSecond) * maxOmega);
+        }
+        if (Math.abs(speeds.omegaRadiansPerSecond) < 1e-12) {
+            return new ChassisSpeeds(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
+        }
+        if (Math.abs(speeds.omegaRadiansPerSecond) <= omegaForSpeed) {
+            return speeds;
+        }
+        double v = maxOmega * xySpeed * maxV / (maxOmega * xySpeed + Math.abs(speeds.omegaRadiansPerSecond) * maxV);
+
+        double vRatio = v / xySpeed;
+
+        return new ChassisSpeeds(
+                vRatio * speeds.vxMetersPerSecond,
+                vRatio * speeds.vyMetersPerSecond,
+                vRatio * speeds.omegaRadiansPerSecond);
+    }
+
+    /**
+     * Input could be field-relative or robot-relative, the math doesn't depend on
+     * theta, because it treats the robot like a circle.
+     * 
+     * Input must be full-scale, meters/sec and radians/sec, this won't work on
+     * control units [-1,1].
+     * 
+     * @param speeds twist in m/s and rad/s
+     * @return
+     */
+    public Twist2d analyticDesaturation(Twist2d speeds) {
+        double maxV = getMaxDriveVelocityM_S();
+        double maxOmega = getMaxAngleSpeedRad_S();
+        double xySpeed = Math.hypot(speeds.dx, speeds.dy);
+        double xyAngle = Math.atan2(speeds.dy, speeds.dx);
+        double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
+        if (Math.abs(speeds.dtheta) <= omegaForSpeed) {
+            return speeds;
+        }
+        if (xySpeed < 1e-12) {
+            return new Twist2d(0, 0, maxOmega);
+        }
+        if (Math.abs(speeds.dtheta) < 1e-12) {
+            return new Twist2d(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
+        }
+
+        double v = maxOmega * xySpeed * maxV / (maxOmega * xySpeed + Math.abs(speeds.dtheta) * maxV);
+
+        double vRatio = v / xySpeed;
+
+        return new Twist2d(
+                vRatio * speeds.dx,
+                vRatio * speeds.dy,
+                vRatio * speeds.dtheta);
+    }
+
+    /** Scales translation to accommodate the rotation. */
+    public Twist2d preferRotation(Twist2d speeds) {
+        double oRatio = Math.min(1, speeds.dtheta / getMaxAngleSpeedRad_S());
+        double xySpeed = Math.hypot(speeds.dx, speeds.dy);
+        double maxV = getMaxDriveVelocityM_S();
+        double xyRatio = Math.min(1, xySpeed / maxV);
+        double ratio = Math.min(1 - oRatio, xyRatio);
+        double xyAngle = Math.atan2(speeds.dy, speeds.dx);
+
+        return new Twist2d(
+                ratio * maxV * Math.cos(xyAngle),
+                ratio * maxV * Math.sin(xyAngle),
+                speeds.dtheta);
+    }
+
 }

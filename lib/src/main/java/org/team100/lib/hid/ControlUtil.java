@@ -1,7 +1,6 @@
 package org.team100.lib.hid;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Twist2d;
 
 public class ControlUtil {
     /**
@@ -21,13 +20,6 @@ public class ControlUtil {
 
     public static double clamp(double input, double clamp) {
         return MathUtil.clamp(input, -clamp, clamp);
-    }
-
-    public static Twist2d clampTwist(Twist2d input, double maxMagnitude) {
-        double hyp = Math.hypot(input.dx, input.dy);
-        double clamped = Math.min(hyp, maxMagnitude);
-        double ratio = clamped / hyp;
-        return new Twist2d(ratio * input.dx, ratio * input.dy, input.dtheta);
     }
 
     private ControlUtil() {
