@@ -186,7 +186,7 @@ public class SwerveLocal {
     }
 
     /**
-     * This is for visualization only.
+     * This is for visualization and simulation update only.
      */
     public void periodic() {
         m_modules.periodic();

@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.profile.Constraints;
 
@@ -188,6 +189,16 @@ public class SwerveKinodynamics {
      */
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
         return m_kinematics.toChassisSpeeds(moduleStates);
+    }
+
+    /**
+     * This could be used with odometry, but because odometry uses module positions
+     * instead of velocities, it is not needed.
+     */
+    public ChassisSpeeds toChassisSpeedsWithDiscretization(double dt, SwerveModuleState... moduleStates) {
+        ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
+        Pose2d deltaPose = GeometryUtil.sexp(GeometryUtil.toTwist2d(discreteSpeeds.times(dt)));
+        return new ChassisSpeeds(deltaPose.getX(), deltaPose.getY(), deltaPose.getRotation().getRadians()).div(dt);
     }
 
     public SwerveDrivePoseEstimator newPoseEstimator(
