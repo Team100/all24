@@ -37,8 +37,9 @@ public class SimulatedHeading implements HeadingInterface {
 
     @Override
     public double getHeadingRateNWU() {
-        // only used for veering, ignore for now
-        return 0;
+        SwerveModuleState[] states = m_moduleCollection.states();
+        ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
+        return speeds.omegaRadiansPerSecond;
     }
 
 }
