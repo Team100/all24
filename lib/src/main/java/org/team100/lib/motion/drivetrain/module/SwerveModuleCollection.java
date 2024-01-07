@@ -181,4 +181,11 @@ public class SwerveModuleCollection {
         m_rearLeft.stop();
         m_rearRight.stop();
     }
+
+    public void reset() {
+        m_frontLeft.reset();
+        m_frontRight.reset();
+        m_rearLeft.reset();
+        m_rearRight.reset();  
+    }
 }
