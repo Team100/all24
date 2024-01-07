@@ -49,7 +49,6 @@ import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
-import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -91,7 +90,6 @@ public class RobotContainer implements SelfTestable {
     private final SwerveModuleCollection m_modules;
 
     private final Command m_auton;
-    private final FrameTransform m_frameTransform;
 
     private final DrawCircle m_drawCircle;
     // for SelfTest
@@ -134,8 +132,6 @@ public class RobotContainer implements SelfTestable {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        m_frameTransform = new FrameTransform();
-
         SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
@@ -161,7 +157,6 @@ public class RobotContainer implements SelfTestable {
         m_drive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
-                m_frameTransform,
                 swerveLocal,
                 driverControl::speed);
 

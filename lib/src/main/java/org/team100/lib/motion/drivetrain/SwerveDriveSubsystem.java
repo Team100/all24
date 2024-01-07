@@ -7,7 +7,6 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
@@ -34,19 +33,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator m_poseEstimator;
-    private final FrameTransform m_frameTransform;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
             SwerveDrivePoseEstimator poseEstimator,
-            FrameTransform frameTransform,
             SwerveLocal swerveLocal,
             Supplier<DriverControl.Speed> speed) {
         m_heading = heading;
         m_poseEstimator = poseEstimator;
-        m_frameTransform = frameTransform;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
 
@@ -86,7 +82,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param dt for discretization
      */
     public ChassisSpeeds speeds(double dt) {
-        return m_swerveLocal.speeds(dt);
+        return m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
     }
 
     /** @return current measurements */
@@ -155,16 +151,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 break;
         }
 
-        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
+        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 twist.dx,
                 twist.dy,
                 twist.dtheta,
-                 m_heading.getHeadingRateNWU(),
-                 getPose().getRotation());
+                getPose().getRotation());
         t.log(Level.DEBUG, "/chassis/x m", twist.dx);
         t.log(Level.DEBUG, "/chassis/y m", twist.dy);
         t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
-        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, kDtSec);
+        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
     /**
@@ -176,9 +171,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * 
      */
     public boolean steerAtRest(Twist2d twist, double kDtSec) {
-        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, m_heading.getHeadingRateNWU(), getPose().getRotation());
-        return m_swerveLocal.steerAtRest(targetChassisSpeeds, kDtSec);
+        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
     /**
@@ -186,7 +181,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * desaturator.
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
-        m_swerveLocal.setChassisSpeeds(speeds, kDtSec);
+        m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
     /** Does not desaturate. */
@@ -226,13 +221,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * you really just want omega.
      */
     public Twist2d getImpliedTwist2d(double dt) {
-        ChassisSpeeds speeds = m_swerveLocal.speeds(dt);
-        return m_frameTransform.toFieldRelativeSpeeds(
+        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
+        ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
                 speeds.vxMetersPerSecond,
                 speeds.vyMetersPerSecond,
                 speeds.omegaRadiansPerSecond,
-                m_heading.getHeadingRateNWU(),
                 getPose().getRotation());
+        return new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
     }
 
     /**

@@ -57,7 +57,7 @@ class RotateTest {
         assertEquals(0, rotate.m_controller.error().getRotation().getRadians(), 0.01);
         assertEquals(0, rotate.refTheta.x(), 0.01);
         // now we're ready to start rotating
-        assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(-0.02, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
 
         // finished steering, start rotating

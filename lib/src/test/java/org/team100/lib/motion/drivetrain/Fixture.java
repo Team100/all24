@@ -3,7 +3,6 @@ package org.team100.lib.motion.drivetrain;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -22,7 +21,6 @@ public class Fixture {
     public HeadingInterface heading;
     public SwerveDrivePoseEstimator poseEstimator;
     public VeeringCorrection veering;
-    public FrameTransform m_frameTransform;
     public SwerveKinodynamics swerveKinodynamics;
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
@@ -40,12 +38,13 @@ public class Fixture {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        m_frameTransform = new FrameTransform();
-
         swerveLocal = new SwerveLocal(swerveKinodynamics, collection);
 
-        drive = new SwerveDriveSubsystem(heading, poseEstimator,
-                m_frameTransform, swerveLocal, () -> DriverControl.Speed.NORMAL);
+        drive = new SwerveDriveSubsystem(
+                heading,
+                poseEstimator,
+                swerveLocal,
+                () -> DriverControl.Speed.NORMAL);
 
         controller = new HolonomicDriveController3();
     }

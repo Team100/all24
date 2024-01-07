@@ -29,19 +29,19 @@ public class VeeringCorrection {
      * only accounts for a small amount of sensing and actuation delay, not for the
      * delay represented by the 20ms control period.
      * 
-     * The value below, 50 ms, is from preseason simulation, and it's probably too short.
+     * The value below is from preseason simulation, and it's probably too short.
      */
-    private static final double kVeeringCorrection = 0.05;
+    private static final double kVeeringCorrection = 0.025;
 
     /**
      * Extrapolates the rotation based on the current angular velocity.
      * 
-     * @param gyroRateRadSNWU rotation rate counterclockwise positive rad/s
-     * @param in past rotation
-     * @return future rotation
+     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
+     * @param accelM_S magnitude of acceleration
+     * @return correction amount
      */
-    public static Rotation2d correct(double gyroRateRad_S, Rotation2d in) {
-        return in.plus(new Rotation2d(gyroRateRad_S * kVeeringCorrection));
+    public static double correctionRad(double gyroRateRad_S) {
+        return gyroRateRad_S * kVeeringCorrection;
     }
 
     private VeeringCorrection() {

@@ -68,27 +68,31 @@ public class SwerveLocal {
     /**
      * Drives the modules to produce the target chassis speed.
      * 
-     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     * Feasibility is enforced by the setpoint generator (if enabled) and the
+     * desaturator.
      * 
-     * @param speeds speeds in robot coordinates.
-     * @param kDtSec time in the future for the setpoint generator to calculate
+     * @param speeds        speeds in robot coordinates.
+     * @param gyroRateRad_S
+     * @param kDtSec        time in the future for the setpoint generator to
+     *                      calculate
      */
-    public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
+    public void setChassisSpeeds(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         t.log(Level.DEBUG, "/swervelocal/desired chassis speed", speeds);
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
         } else {
-            setChassisSpeedsNormally(speeds, kDtSec);
+            setChassisSpeedsNormally(speeds, gyroRateRad_S, kDtSec);
         }
     }
 
     /**
      * @return true if aligned
      */
-    public boolean steerAtRest(ChassisSpeeds speeds, double kDtSec) {
+    public boolean steerAtRest(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // this indicates that during the steering the goal is fixed
         // Informs SwerveDriveKinematics of the module states.
-        SwerveModuleState[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, kDtSec);
+        SwerveModuleState[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
+                kDtSec);
         for (SwerveModuleState state : swerveModuleStates) {
             state.speedMetersPerSecond = 0;
         }
@@ -159,11 +163,13 @@ public class SwerveLocal {
         return m_modules.states();
     }
 
-    /** The speed implied by the module states. */
-    public ChassisSpeeds speeds(double dt) {
+    /**
+     * The speed implied by the module states.
+     * performs inverse discretization and extra correction
+     */
+    public ChassisSpeeds speeds(double gyroRateRad_S, double dt) {
         SwerveModuleState[] states = states();
-        // TODO: probably make this the discrete version
-        return m_swerveKinodynamics.toChassisSpeedsWithDiscretization(dt, states);
+        return m_swerveKinodynamics.toChassisSpeedsWithDiscretization(gyroRateRad_S, dt, states);
     }
 
     public SwerveModulePosition[] positions() {
@@ -195,9 +201,12 @@ public class SwerveLocal {
 
     ///////////////////////////////////////////////////////////
 
-    private void setChassisSpeedsNormally(ChassisSpeeds speeds, double kDtSec) {
+    private void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
-        setModuleStates(m_swerveKinodynamics.toSwerveModuleStates(speeds, kDtSec));
+        SwerveModuleState[] states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
+                kDtSec);
+        setModuleStates(states);
+        prevSetpoint = new SwerveSetpoint(speeds, states);
     }
 
     private void setChassisSpeedsWithSetpointGenerator(
@@ -212,7 +221,7 @@ public class SwerveLocal {
         DriveUtil.checkSpeeds(setpoint.getChassisSpeeds());
         // ideally delta would be zero because our input would be feasible.
         ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
-        t.log(Level.DEBUG, "/swervelocal/setpoint delta", delta);        
+        t.log(Level.DEBUG, "/swervelocal/setpoint delta", delta);
         t.log(Level.DEBUG, "/swervelocal/prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
         t.log(Level.DEBUG, "/swervelocal/setpoint chassis speed", setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
@@ -230,7 +239,6 @@ public class SwerveLocal {
         t.log(Level.DEBUG, "/swervelocal/implied speed", speeds);
         t.log(Level.DEBUG, "/swervelocal/moving", isMoving(speeds));
     }
-
 
     private static boolean isMoving(ChassisSpeeds speeds) {
         return (speeds.vxMetersPerSecond >= 0.1
