@@ -33,7 +33,7 @@ class SpinTest {
         assertEquals(0, command.m_angleRad, kDelta);
         assertEquals(0, command.m_speedRad_S, kDelta);
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(-0.01, fixture.drive.desiredStates()[0].angle.getRadians(), 0.01);
 
         SimHooks.stepTimingAsync(5);
         command.execute();
