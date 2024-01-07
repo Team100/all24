@@ -26,7 +26,7 @@ class SwerveLocalTest {
                 new SwerveModuleState(),
                 new SwerveModuleState(),
                 new SwerveModuleState() });
-        assertEquals(0, local.speeds().vxMetersPerSecond, 0.001);
+        assertEquals(0, local.speeds(0.02).vxMetersPerSecond, 0.001);
         assertEquals(0, local.positions()[0].distanceMeters, 0.001);
     }
 }

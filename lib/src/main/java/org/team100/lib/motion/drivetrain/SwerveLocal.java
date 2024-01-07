@@ -160,9 +160,10 @@ public class SwerveLocal {
     }
 
     /** The speed implied by the module states. */
-    public ChassisSpeeds speeds() {
+    public ChassisSpeeds speeds(double dt) {
         SwerveModuleState[] states = states();
-        return m_swerveKinodynamics.toChassisSpeeds(states);
+        // TODO: probably make this the discrete version
+        return m_swerveKinodynamics.toChassisSpeedsWithDiscretization(dt, states);
     }
 
     public SwerveModulePosition[] positions() {
@@ -221,11 +222,13 @@ public class SwerveLocal {
     /** Desaturation mutates states. */
     private void setModuleStates(SwerveModuleState[] states) {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S());
+        // all the callers of setModuleStates inform kinematics.
+        m_modules.setDesiredStates(states);
+
+        // log what we did, note this is not using discretization but it probably should
         ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
         t.log(Level.DEBUG, "/swervelocal/implied speed", speeds);
         t.log(Level.DEBUG, "/swervelocal/moving", isMoving(speeds));
-        // all the callers of setModuleStates inform kinematics.
-        m_modules.setDesiredStates(states);
     }
 
 

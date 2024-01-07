@@ -86,7 +86,7 @@ public class FancyTrajectory extends Command100 {
     public void execute100(double dt) {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getPose();
-        ChassisSpeeds currentSpeed = m_robotDrive.speeds();
+        ChassisSpeeds currentSpeed = m_robotDrive.speeds(dt);
         Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);

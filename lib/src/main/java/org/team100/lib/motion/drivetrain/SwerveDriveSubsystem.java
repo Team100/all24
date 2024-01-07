@@ -80,9 +80,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         m_swerveLocal.periodic();
     }
 
-    /** The speed implied by the module states. */
-    public ChassisSpeeds speeds() {
-        return m_swerveLocal.speeds();
+    /**
+     * The speed implied by the module states.
+     * 
+     * @param dt for discretization
+     */
+    public ChassisSpeeds speeds(double dt) {
+        return m_swerveLocal.speeds(dt);
     }
 
     /** @return current measurements */
@@ -129,7 +133,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * Scales the supplied twist by the "speed" driver control modifier.
      * 
-     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     * Feasibility is enforced by the setpoint generator (if enabled) and the
+     * desaturator.
      * 
      * @param twist  Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
@@ -173,7 +178,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     * Feasibility is enforced by the setpoint generator (if enabled) and the
+     * desaturator.
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         m_swerveLocal.setChassisSpeeds(speeds, kDtSec);
@@ -215,8 +221,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * The omega signal here will be delayed relative to the gyro. Use the gyro if
      * you really just want omega.
      */
-    public Twist2d getImpliedTwist2d() {
-        ChassisSpeeds speeds = m_swerveLocal.speeds();
+    public Twist2d getImpliedTwist2d(double dt) {
+        ChassisSpeeds speeds = m_swerveLocal.speeds(dt);
         return m_frameTransform.toFieldRelativeSpeeds(
                 speeds.vxMetersPerSecond,
                 speeds.vyMetersPerSecond,
@@ -228,8 +234,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * SwerveState representing the drivetrain's pose and velocity, with zero
      * accelerations.
      */
-    public SwerveState getState() {
-        return new SwerveState(getPose(), getImpliedTwist2d());
+    public SwerveState getState(double dt) {
+        return new SwerveState(getPose(), getImpliedTwist2d(dt));
     }
 
     public void resetPose(Pose2d robotPose) {

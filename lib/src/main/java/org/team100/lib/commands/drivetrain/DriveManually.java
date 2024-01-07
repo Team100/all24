@@ -92,7 +92,7 @@ public class DriveManually extends Command100 {
         // the real previous setpoint is.
         // Note this is not necessarily "at rest," because we might start driving
         // manually while the robot is moving.
-        ChassisSpeeds currentSpeeds = m_drive.speeds();
+        ChassisSpeeds currentSpeeds = m_drive.speeds(0.02);
         SwerveModuleState[] currentStates = m_drive.moduleStates();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
@@ -114,7 +114,7 @@ public class DriveManually extends Command100 {
 
         // input in [-1,1] control units
         Twist2d input = m_twistSupplier.get();
-        SwerveState state = m_drive.getState();
+        SwerveState state = m_drive.getState(dt);
         Pose2d currentPose = state.pose();
 
         /**

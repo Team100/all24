@@ -101,7 +101,7 @@ public class DriveToWaypoint100 extends Command100 {
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getPose();
-        ChassisSpeeds currentSpeed = m_swerve.speeds();
+        ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
         Twist2d velocity = new Twist2d(
                 currentSpeed.vxMetersPerSecond,
                 currentSpeed.vyMetersPerSecond,
