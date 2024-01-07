@@ -7,7 +7,6 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;

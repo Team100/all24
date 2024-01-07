@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-
 /**
  * Corrects the tendency of the swerve drive to veer in the direction of
  * rotation, which is caused by delay in the sense->actuate loop.
