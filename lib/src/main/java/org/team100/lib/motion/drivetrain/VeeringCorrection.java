@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -35,26 +33,18 @@ public class VeeringCorrection {
      */
     private static final double kVeeringCorrection = 0.05;
 
-    private final DoubleSupplier m_gyroRateRadSNWU;
-
-    /**
-     * Be sure to supply NWU, counterclockwise-positive, rates here. The default
-     * AHRS rate is the other way, don't use that without inverting it. Use the
-     * Heading class.
-     * 
-     * @param gyroRateRadSNWU rotation rate counterclockwise positive rad/s
-     */
-    public VeeringCorrection(DoubleSupplier gyroRateRadSNWU) {
-        m_gyroRateRadSNWU = gyroRateRadSNWU;
-    }
-
     /**
      * Extrapolates the rotation based on the current angular velocity.
      * 
+     * @param gyroRateRadSNWU rotation rate counterclockwise positive rad/s
      * @param in past rotation
      * @return future rotation
      */
-    public Rotation2d correct(Rotation2d in) {
-        return in.plus(new Rotation2d(m_gyroRateRadSNWU.getAsDouble() * kVeeringCorrection));
+    public static Rotation2d correct(double gyroRateRad_S, Rotation2d in) {
+        return in.plus(new Rotation2d(gyroRateRad_S * kVeeringCorrection));
+    }
+
+    private VeeringCorrection() {
+        //
     }
 }

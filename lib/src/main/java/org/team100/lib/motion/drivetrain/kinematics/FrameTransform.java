@@ -7,21 +7,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class FrameTransform {
-    private final VeeringCorrection m_veering;
 
-    public FrameTransform(VeeringCorrection veering) {
-        m_veering = veering;
-    }
-
-    /**
-     * Non-corrected version, identical to WPI ChassisSpeedFactory.
-     */
-    public FrameTransform() {
-        this(new VeeringCorrection(() -> 0.0));
-    }
-
-    Rotation2d correctAngle(Rotation2d robotAngle) {
-        return m_veering.correct(robotAngle);
+    Rotation2d correctAngle(double gyroRateRad_S, Rotation2d robotAngle) {
+        return VeeringCorrection.correct(gyroRateRad_S, robotAngle);
     }
 
     /**
@@ -33,9 +21,10 @@ public class FrameTransform {
             double vxMetersPerSecond,
             double vyMetersPerSecond,
             double omegaRadiansPerSecond,
+            double gyroRateRad_S,
             Rotation2d robotAngle) {
 
-        robotAngle = correctAngle(robotAngle);
+        robotAngle = correctAngle(gyroRateRad_S, robotAngle);
 
         return new ChassisSpeeds(
                 vxMetersPerSecond * robotAngle.getCos() + vyMetersPerSecond * robotAngle.getSin(),
@@ -57,11 +46,12 @@ public class FrameTransform {
             double vxMetersPerSecond,
             double vyMetersPerSecond,
             double omegaRadiansPerSecond,
+            double gyroRateRad_S,
             Rotation2d robotAngle) {
 
         // Note, I'm not really sure this makes any sense, but it does
         // make the test pass.
-        robotAngle = correctAngle(robotAngle);
+        robotAngle = correctAngle(gyroRateRad_S, robotAngle);
 
         // it's just the opposite rotation
         return new Twist2d(

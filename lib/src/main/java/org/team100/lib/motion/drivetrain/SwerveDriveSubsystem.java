@@ -156,7 +156,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
 
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+                twist.dx,
+                twist.dy,
+                twist.dtheta,
+                 m_heading.getHeadingRateNWU(),
+                 getPose().getRotation());
         t.log(Level.DEBUG, "/chassis/x m", twist.dx);
         t.log(Level.DEBUG, "/chassis/y m", twist.dy);
         t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
@@ -173,7 +177,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public boolean steerAtRest(Twist2d twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+                twist.dx, twist.dy, twist.dtheta, m_heading.getHeadingRateNWU(), getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, kDtSec);
     }
 
@@ -227,6 +231,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 speeds.vxMetersPerSecond,
                 speeds.vyMetersPerSecond,
                 speeds.omegaRadiansPerSecond,
+                m_heading.getHeadingRateNWU(),
                 getPose().getRotation());
     }
 

@@ -40,9 +40,7 @@ public class Fixture {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        veering = new VeeringCorrection(heading::getHeadingRateNWU);
-
-        m_frameTransform = new FrameTransform(veering);
+        m_frameTransform = new FrameTransform();
 
         swerveLocal = new SwerveLocal(swerveKinodynamics, collection);
 
