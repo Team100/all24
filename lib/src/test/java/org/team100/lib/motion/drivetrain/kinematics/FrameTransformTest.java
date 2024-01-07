@@ -40,8 +40,8 @@ class FrameTransformTest {
         );
         // correction is +x-in-robot-frame, (-y-in-field-frame) to counteract the
         // lag-induced error, +y-in-field-frame
-        assertEquals(0.149, chassisSpeeds.vxMetersPerSecond, kDelta);
-        assertEquals(0.98, chassisSpeeds.vyMetersPerSecond, kDelta);
+        assertEquals(0.049, chassisSpeeds.vxMetersPerSecond, kDelta);
+        assertEquals(0.999, chassisSpeeds.vyMetersPerSecond, kDelta);
         assertEquals(0.5, chassisSpeeds.omegaRadiansPerSecond, kDelta);
     }
 
@@ -57,8 +57,8 @@ class FrameTransformTest {
 
         // correction is -x-in-robot-frame, (+y-in-field-frame) to counteract the
         // lag-induced error, -y-in-field-frame
-        assertEquals(-0.149, chassisSpeeds.vxMetersPerSecond, kDelta); // sin 0.2
-        assertEquals(0.98, chassisSpeeds.vyMetersPerSecond, kDelta); // cos 0.2
+        assertEquals(-0.049, chassisSpeeds.vxMetersPerSecond, kDelta); // sin 0.2
+        assertEquals(0.999, chassisSpeeds.vyMetersPerSecond, kDelta); // cos 0.2
         assertEquals(0.5, chassisSpeeds.omegaRadiansPerSecond, kDelta);
     }
 
@@ -69,8 +69,8 @@ class FrameTransformTest {
         // driving straight ahead
         ChassisSpeeds chassisSpeeds = factory.fromFieldRelativeSpeeds(1.0, 0.0, 0.0, Rotation2d.fromDegrees(0));
         // will tend to veer to the left, so the correction would be towards the right
-        assertEquals(0.98, chassisSpeeds.vxMetersPerSecond, kDelta);
-        assertEquals(-0.149, chassisSpeeds.vyMetersPerSecond, kDelta);
+        assertEquals(0.999, chassisSpeeds.vxMetersPerSecond, kDelta);
+        assertEquals(-0.049, chassisSpeeds.vyMetersPerSecond, kDelta);
         assertEquals(0, chassisSpeeds.omegaRadiansPerSecond, kDelta);
     }
 
@@ -78,7 +78,7 @@ class FrameTransformTest {
     void testCorrectionCounterclockwise() {
         FrameTransform factory = new FrameTransform(new VeeringCorrection(() -> 1.0));
         Rotation2d angle = factory.correctAngle(Rotation2d.fromDegrees(-90.0));
-        assertEquals(-81.4, angle.getDegrees(), kDelta);
+        assertEquals(-87.135, angle.getDegrees(), kDelta);
     }
 
     @Test
@@ -174,7 +174,7 @@ class FrameTransformTest {
         ChassisSpeeds chassisSpeeds = factory.fromFieldRelativeSpeeds(
                 dx, dy, dtheta, Rotation2d.fromDegrees(theta));
         assertEquals(0.989, chassisSpeeds.vxMetersPerSecond, kDelta);
-        assertEquals(-0.149, chassisSpeeds.vyMetersPerSecond, kDelta);
+        assertEquals(-0.049, chassisSpeeds.vyMetersPerSecond, kDelta);
         assertEquals(1, chassisSpeeds.omegaRadiansPerSecond, kDelta);
 
         Twist2d twist = factory.toFieldRelativeSpeeds(
