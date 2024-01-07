@@ -67,11 +67,10 @@ public class SelfTestRunner extends Command {
 
         // this only tests the end-state
         addCase(new DefenseSelfTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
-        // these tests take a long time, skip them for now.
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
+        addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
 
         addCase(new VeeringSelfTest(m_listener), new Veering(drivetrain));
 
