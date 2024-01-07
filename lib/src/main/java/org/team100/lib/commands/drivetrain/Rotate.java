@@ -72,7 +72,7 @@ public class Rotate extends Command100 {
     @Override
     public void initialize100() {
         m_controller.reset();
-        resetRefTheta();
+        resetRefTheta(0.02);
         Constraints c = new Constraints(
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleAccelRad_S2());
@@ -81,8 +81,8 @@ public class Rotate extends Command100 {
         m_steeringAligned = false;
     }
 
-    private void resetRefTheta() {
-        ChassisSpeeds initialSpeeds = m_robotDrive.speeds();
+    private void resetRefTheta(double dt) {
+        ChassisSpeeds initialSpeeds = m_robotDrive.speeds(dt);
         refTheta = new State100(
                 m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
@@ -113,7 +113,7 @@ public class Rotate extends Command100 {
         } else {
             boolean aligned = m_robotDrive.steerAtRest(fieldRelativeTarget, dt);
             // while waiting for the wheels, hold the profile at the start.
-            resetRefTheta();
+            resetRefTheta(dt);
             if (aligned) {
                 m_steeringAligned = true;
             }

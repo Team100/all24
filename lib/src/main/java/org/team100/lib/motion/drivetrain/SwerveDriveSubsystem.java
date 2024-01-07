@@ -7,7 +7,6 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
@@ -34,19 +33,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator m_poseEstimator;
-    private final FrameTransform m_frameTransform;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
             SwerveDrivePoseEstimator poseEstimator,
-            FrameTransform frameTransform,
             SwerveLocal swerveLocal,
             Supplier<DriverControl.Speed> speed) {
         m_heading = heading;
         m_poseEstimator = poseEstimator;
-        m_frameTransform = frameTransform;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
 
@@ -80,9 +76,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         m_swerveLocal.periodic();
     }
 
-    /** The speed implied by the module states. */
-    public ChassisSpeeds speeds() {
-        return m_swerveLocal.speeds();
+    /**
+     * The speed implied by the module states.
+     * 
+     * @param dt for discretization
+     */
+    public ChassisSpeeds speeds(double dt) {
+        return m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
     }
 
     /** @return current measurements */
@@ -129,7 +129,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /**
      * Scales the supplied twist by the "speed" driver control modifier.
      * 
-     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     * Feasibility is enforced by the setpoint generator (if enabled) and the
+     * desaturator.
      * 
      * @param twist  Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
@@ -150,12 +151,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 break;
         }
 
-        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                twist.dx,
+                twist.dy,
+                twist.dtheta,
+                getPose().getRotation());
         t.log(Level.DEBUG, "/chassis/x m", twist.dx);
         t.log(Level.DEBUG, "/chassis/y m", twist.dy);
         t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
-        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, kDtSec);
+        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
     /**
@@ -167,16 +171,17 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * 
      */
     public boolean steerAtRest(Twist2d twist, double kDtSec) {
-        ChassisSpeeds targetChassisSpeeds = m_frameTransform.fromFieldRelativeSpeeds(
+        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
-        return m_swerveLocal.steerAtRest(targetChassisSpeeds, kDtSec);
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
     /**
-     * Feasibility is enforced by the setpoint generator (if enabled) and the desaturator.
+     * Feasibility is enforced by the setpoint generator (if enabled) and the
+     * desaturator.
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
-        m_swerveLocal.setChassisSpeeds(speeds, kDtSec);
+        m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
     /** Does not desaturate. */
@@ -215,21 +220,22 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * The omega signal here will be delayed relative to the gyro. Use the gyro if
      * you really just want omega.
      */
-    public Twist2d getImpliedTwist2d() {
-        ChassisSpeeds speeds = m_swerveLocal.speeds();
-        return m_frameTransform.toFieldRelativeSpeeds(
+    public Twist2d getImpliedTwist2d(double dt) {
+        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
+        ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
                 speeds.vxMetersPerSecond,
                 speeds.vyMetersPerSecond,
                 speeds.omegaRadiansPerSecond,
                 getPose().getRotation());
+        return new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
     }
 
     /**
      * SwerveState representing the drivetrain's pose and velocity, with zero
      * accelerations.
      */
-    public SwerveState getState() {
-        return new SwerveState(getPose(), getImpliedTwist2d());
+    public SwerveState getState(double dt) {
+        return new SwerveState(getPose(), getImpliedTwist2d(dt));
     }
 
     public void resetPose(Pose2d robotPose) {

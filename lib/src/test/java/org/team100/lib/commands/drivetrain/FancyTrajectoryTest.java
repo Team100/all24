@@ -23,9 +23,9 @@ class FancyTrajectoryTest {
         command.initialize();
         command.execute();
 
-        assertEquals(0, drive.speeds().vxMetersPerSecond, 0.001);
-        assertEquals(0, drive.speeds().vyMetersPerSecond, 0.001);
-        assertEquals(0, drive.speeds().omegaRadiansPerSecond, 0.001);
+        assertEquals(0, drive.speeds(0.02).vxMetersPerSecond, 0.001);
+        assertEquals(0, drive.speeds(0.02).vyMetersPerSecond, 0.001);
+        assertEquals(0, drive.speeds(0.02).omegaRadiansPerSecond, 0.001);
 
         command.end(false);
     }
