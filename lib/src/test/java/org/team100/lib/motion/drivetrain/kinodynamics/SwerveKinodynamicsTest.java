@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -524,7 +523,7 @@ class SwerveKinodynamicsTest {
     }
 
     @Test
-    void testDiscretization() {
+    void testDiscretizationNoEffect() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         {
             // pure rotation involves no discretization effect
@@ -544,6 +543,11 @@ class SwerveKinodynamicsTest {
             assertEquals(0, impliedSpeeds.vyMetersPerSecond, kDelta);
             assertEquals(0, impliedSpeeds.omegaRadiansPerSecond, kDelta);
         }
+    }
+
+    @Test
+    void testDiscretizationWithEffect() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         {
             // holonomic does have discretization effect
             ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
