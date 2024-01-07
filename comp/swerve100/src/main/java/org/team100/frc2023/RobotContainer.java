@@ -49,7 +49,6 @@ import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
-import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -135,9 +134,7 @@ public class RobotContainer implements SelfTestable {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        VeeringCorrection veering = new VeeringCorrection(m_heading::getHeadingRateNWU);
-
-        m_frameTransform = new FrameTransform(veering);
+        m_frameTransform = new FrameTransform();
 
         SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
