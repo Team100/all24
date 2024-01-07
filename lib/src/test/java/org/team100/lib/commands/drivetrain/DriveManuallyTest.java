@@ -46,7 +46,7 @@ class DriveManuallyTest {
 
         desiredMode = ManualMode.Mode.MODULE_STATE;
         command.execute();
-        assertEquals(1, robotDrive.speeds().vxMetersPerSecond, 0.001);
+        assertEquals(1, robotDrive.speeds(0.02).vxMetersPerSecond, 0.001);
 
         desiredMode = ManualMode.Mode.ROBOT_RELATIVE_CHASSIS_SPEED;
         command.execute();

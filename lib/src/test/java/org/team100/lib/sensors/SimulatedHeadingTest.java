@@ -38,7 +38,7 @@ class SimulatedHeadingTest {
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 0);
         // includes discretization
-        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 0.02);
+        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 0, 0.02);
         // go for 0.4s
         for (int i = 0; i < 20; ++i) {
             c.setDesiredStates(states);
@@ -63,7 +63,7 @@ class SimulatedHeadingTest {
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
         // includes discretization
-        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 0.02);
+        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
 
         // steering velocity is 13 rad/s, we need to go about 2 rad? so wait 0.2 sec?
         for (int i = 0; i < 20; ++i) {
@@ -90,16 +90,16 @@ class SimulatedHeadingTest {
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
         // includes discretization
-        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 0.02);
+        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
         // these are discretized so not symmetrical
-        assertEquals(0.787, states[0].speedMetersPerSecond, kDelta);
-        assertEquals(1.272, states[1].speedMetersPerSecond, kDelta);
-        assertEquals(0.793, states[2].speedMetersPerSecond, kDelta);
-        assertEquals(1.276, states[3].speedMetersPerSecond, kDelta);
-        assertEquals(0.309, states[0].angle.getRadians(), kDelta);
-        assertEquals(0.190, states[1].angle.getRadians(), kDelta);
-        assertEquals(-0.334, states[2].angle.getRadians(), kDelta);
-        assertEquals(-0.205, states[3].angle.getRadians(), kDelta);
+        assertEquals(0.779, states[0].speedMetersPerSecond, kDelta);
+        assertEquals(1.268, states[1].speedMetersPerSecond, kDelta);
+        assertEquals(0.802, states[2].speedMetersPerSecond, kDelta);
+        assertEquals(1.281, states[3].speedMetersPerSecond, kDelta);
+        assertEquals(0.279, states[0].angle.getRadians(), kDelta);
+        assertEquals(0.170, states[1].angle.getRadians(), kDelta);
+        assertEquals(-0.363, states[2].angle.getRadians(), kDelta);
+        assertEquals(-0.224, states[3].angle.getRadians(), kDelta);
 
         // steering velocity is 13 rad/s, we need to go about 2 rad? so wait 0.2 sec?
         for (int i = 0; i < 20; ++i) {
@@ -111,14 +111,14 @@ class SimulatedHeadingTest {
         SwerveModuleState[] states2 = c.states();
 
         // we get back what we put in
-        assertEquals(0.787, states2[0].speedMetersPerSecond, kDelta);
-        assertEquals(1.272, states2[1].speedMetersPerSecond, kDelta);
-        assertEquals(0.793, states2[2].speedMetersPerSecond, kDelta);
-        assertEquals(1.276, states2[3].speedMetersPerSecond, kDelta);
-        assertEquals(0.309, states2[0].angle.getRadians(), kDelta);
-        assertEquals(0.190, states2[1].angle.getRadians(), kDelta);
-        assertEquals(-0.334, states2[2].angle.getRadians(), kDelta);
-        assertEquals(-0.205, states2[3].angle.getRadians(), kDelta);
+        assertEquals(0.779, states2[0].speedMetersPerSecond, kDelta);
+        assertEquals(1.268, states2[1].speedMetersPerSecond, kDelta);
+        assertEquals(0.802, states2[2].speedMetersPerSecond, kDelta);
+        assertEquals(1.281, states2[3].speedMetersPerSecond, kDelta);
+        assertEquals(0.279, states2[0].angle.getRadians(), kDelta);
+        assertEquals(0.170, states2[1].angle.getRadians(), kDelta);
+        assertEquals(-0.363, states2[2].angle.getRadians(), kDelta);
+        assertEquals(-0.224, states2[3].angle.getRadians(), kDelta);
 
         // we wanted to turn 1 rad/s for 0.4s so this is close.
         assertEquals(0.42, h.getHeadingNWU().getRadians(), 0.03);

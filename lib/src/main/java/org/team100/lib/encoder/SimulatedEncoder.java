@@ -63,6 +63,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     @Override
     public void reset() {
         m_position = 0;
+        m_time = Timer.getFPGATimestamp();
     }
 
     @Override

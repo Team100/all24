@@ -49,7 +49,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         // which is like moving 1 m/s.
         ChassisSpeeds chassis_speeds = new ChassisSpeeds(vx, vy, vtheta);
 
-        SwerveModuleState[] module_states = m_limits.toSwerveModuleStates(chassis_speeds, kDtSec);
+        SwerveModuleState[] module_states = m_limits.toSwerveModuleStates(chassis_speeds, vtheta, kDtSec);
         double max_vel = Double.POSITIVE_INFINITY;
         for (var module : module_states) {
             max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocityM_S() / Math.abs(module.speedMetersPerSecond));

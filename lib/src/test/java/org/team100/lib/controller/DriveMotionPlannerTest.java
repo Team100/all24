@@ -117,8 +117,8 @@ class DriveMotionPlannerTest {
                 }
                 ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
-                    // Initialilze from first chassis speeds.
-                    SwerveModuleState[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds, 0.02);
+                    // Initialize from first chassis speeds.
+                    SwerveModuleState[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds, velocity.dtheta, 0.02);
                     setpoint = new SwerveSetpoint(speeds, states);
                 }
 

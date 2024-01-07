@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.profile.Constraints;
 
@@ -172,20 +173,33 @@ public class SwerveKinodynamics {
      * 
      * This version does **DISCRETIZATION** to correct for swerve veering.
      * 
-     * The swerve veering correction should now just represent actuation delay.
+     * It also does extra veering correction proportional to rotation rate and
+     * translational acceleration.
+     * @param in chassis speeds to transform
+     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
+     * @param accelM_S magnitude of acceleration
+     * @param dt time to aim for
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds, double dt) {
+    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
+        // This is the extra correction angle ...
+        Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
+        // ... which is subtracted here; this isn't really a field-relative transformation it's just a rotation.
+        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                in.vxMetersPerSecond,
+                in.vyMetersPerSecond,
+                in.omegaRadiansPerSecond,
+                angle);
         ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
         return m_kinematics.toSwerveModuleStates(descretized);
     }
 
-    // for testing
-    SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
+    public SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
         return m_kinematics.toSwerveModuleStates(speeds);
     }
 
     /**
      * Forward kinematics, module states => chassis speeds.
+     * Does not do inverse discretization.
      */
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
         return m_kinematics.toChassisSpeeds(moduleStates);
@@ -194,11 +208,26 @@ public class SwerveKinodynamics {
     /**
      * This could be used with odometry, but because odometry uses module positions
      * instead of velocities, it is not needed.
+     * 
+     * It performs inverse discretization and an extra correction.
      */
-    public ChassisSpeeds toChassisSpeedsWithDiscretization(double dt, SwerveModuleState... moduleStates) {
+    public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
+            SwerveModuleState... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
+
         Pose2d deltaPose = GeometryUtil.sexp(GeometryUtil.toTwist2d(discreteSpeeds.times(dt)));
-        return new ChassisSpeeds(deltaPose.getX(), deltaPose.getY(), deltaPose.getRotation().getRadians()).div(dt);
+        ChassisSpeeds continuousSpeeds = new ChassisSpeeds(
+                deltaPose.getX(),
+                deltaPose.getY(),
+                deltaPose.getRotation().getRadians()).div(dt);
+
+        // This is the opposite direction 
+        Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
+        return ChassisSpeeds.fromFieldRelativeSpeeds(
+                continuousSpeeds.vxMetersPerSecond,
+                continuousSpeeds.vyMetersPerSecond,
+                continuousSpeeds.omegaRadiansPerSecond,
+                angle.unaryMinus());
     }
 
     public SwerveDrivePoseEstimator newPoseEstimator(

@@ -17,7 +17,7 @@ class SwerveLocalTest {
         SwerveModuleCollection modules = fixture.collection;
         SwerveLocal local = fixture.swerveLocal;
 
-        local.setChassisSpeeds(new ChassisSpeeds(), 0.02);
+        local.setChassisSpeeds(new ChassisSpeeds(), 0, 0.02);
         assertEquals(0, modules.getDesiredStates()[0].speedMetersPerSecond, 0.001);
         local.defense();
         local.stop();
@@ -26,7 +26,7 @@ class SwerveLocalTest {
                 new SwerveModuleState(),
                 new SwerveModuleState(),
                 new SwerveModuleState() });
-        assertEquals(0, local.speeds().vxMetersPerSecond, 0.001);
+        assertEquals(0, local.speeds(0, 0.02).vxMetersPerSecond, 0.001);
         assertEquals(0, local.positions()[0].distanceMeters, 0.001);
     }
 }

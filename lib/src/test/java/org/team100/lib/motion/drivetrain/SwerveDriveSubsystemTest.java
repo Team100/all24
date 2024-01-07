@@ -3,7 +3,6 @@ package org.team100.lib.motion.drivetrain;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.kinematics.FrameTransform;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -38,7 +37,6 @@ class SwerveDriveSubsystemTest {
         SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
                 gyroAngle, modulePositions, initialPoseMeters);
 
-        FrameTransform frameTransform = new FrameTransform();
         SwerveModuleCollection modules = fixture.collection;
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, modules);
@@ -46,7 +44,6 @@ class SwerveDriveSubsystemTest {
         SwerveDriveSubsystem drive = new SwerveDriveSubsystem(
                 heading,
                 poseEstimator,
-                frameTransform,
                 swerveLocal,
                 () -> DriverControl.Speed.NORMAL);
         // try all the actuators

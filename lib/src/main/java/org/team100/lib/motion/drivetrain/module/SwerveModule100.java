@@ -67,6 +67,7 @@ public class SwerveModule100 {
     /** Make sure the setpoint and measurement are the same. */
     public void reset() {
         m_turningServo.reset();
+        m_driveServo.reset();
     }
 
     /** for testing only */

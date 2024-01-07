@@ -27,6 +27,8 @@ public class SimulatedHeading implements HeadingInterface {
     @Override
     public Rotation2d getHeadingNWU() {
         SwerveModuleState[] states = m_moduleCollection.states();
+        // discretization is not necessary here because we only use the rotation, which
+        // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
         double now = Timer.getFPGATimestamp();
         double dt = now - m_time;
@@ -38,6 +40,8 @@ public class SimulatedHeading implements HeadingInterface {
     @Override
     public double getHeadingRateNWU() {
         SwerveModuleState[] states = m_moduleCollection.states();
+        // discretization is not necessary here because we only use the rotation, which
+        // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
         return speeds.omegaRadiansPerSecond;
     }

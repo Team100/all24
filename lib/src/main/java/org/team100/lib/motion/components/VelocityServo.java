@@ -58,6 +58,7 @@ public class VelocityServo<T extends Measure100> {
 
     public void reset() {
         prevTime = Timer.getFPGATimestamp();
+        m_encoder.reset();
     }
 
     public void setVelocity(Double setpoint) {

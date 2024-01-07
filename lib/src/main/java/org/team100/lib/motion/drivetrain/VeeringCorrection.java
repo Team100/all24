@@ -1,9 +1,5 @@
 package org.team100.lib.motion.drivetrain;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-
 /**
  * Corrects the tendency of the swerve drive to veer in the direction of
  * rotation, which is caused by delay in the sense->actuate loop.
@@ -31,30 +27,22 @@ public class VeeringCorrection {
      * only accounts for a small amount of sensing and actuation delay, not for the
      * delay represented by the 20ms control period.
      * 
-     * The value below, 50 ms, is from preseason simulation, and it's probably too short.
+     * The value below is from preseason simulation, and it's probably too short.
      */
-    private static final double kVeeringCorrection = 0.05;
-
-    private final DoubleSupplier m_gyroRateRadSNWU;
-
-    /**
-     * Be sure to supply NWU, counterclockwise-positive, rates here. The default
-     * AHRS rate is the other way, don't use that without inverting it. Use the
-     * Heading class.
-     * 
-     * @param gyroRateRadSNWU rotation rate counterclockwise positive rad/s
-     */
-    public VeeringCorrection(DoubleSupplier gyroRateRadSNWU) {
-        m_gyroRateRadSNWU = gyroRateRadSNWU;
-    }
+    private static final double kVeeringCorrection = 0.025;
 
     /**
      * Extrapolates the rotation based on the current angular velocity.
      * 
-     * @param in past rotation
-     * @return future rotation
+     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
+     * @param accelM_S magnitude of acceleration
+     * @return correction amount
      */
-    public Rotation2d correct(Rotation2d in) {
-        return in.plus(new Rotation2d(m_gyroRateRadSNWU.getAsDouble() * kVeeringCorrection));
+    public static double correctionRad(double gyroRateRad_S) {
+        return gyroRateRad_S * kVeeringCorrection;
+    }
+
+    private VeeringCorrection() {
+        //
     }
 }

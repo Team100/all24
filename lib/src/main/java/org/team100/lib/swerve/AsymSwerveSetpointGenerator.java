@@ -56,7 +56,7 @@ public class AsymSwerveSetpointGenerator {
      *                     measured/estimated kinematic state.
      * @param desiredState The desired state of motion, such as from the driver
      *                     sticks or a path following algorithm.
-     * @param kDtSec time in the future the setpoint should apply.
+     * @param kDtSec       time in the future the setpoint should apply.
      * @return A Setpoint object that satisfies all of the KinematicLimits while
      *         converging to desiredState quickly.
      */
@@ -64,7 +64,8 @@ public class AsymSwerveSetpointGenerator {
             SwerveSetpoint prevSetpoint,
             ChassisSpeeds desiredState,
             double kDtSec) {
-        SwerveModuleState[] desiredModuleStates = m_limits.toSwerveModuleStates(desiredState, kDtSec);
+        SwerveModuleState[] desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
+                desiredState);
         desiredState = desaturate(desiredState, desiredModuleStates);
         SwerveModuleState[] prevModuleStates = prevSetpoint.getModuleStates();
         boolean need_to_steer = SwerveUtil.makeStop(desiredState, desiredModuleStates, prevModuleStates);
@@ -113,7 +114,6 @@ public class AsymSwerveSetpointGenerator {
         min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, min_s, kDtSec);
         t.log(Level.DEBUG, "/setpoint_generator/min_s centripetal", min_s);
 
-
         // In cases where an individual module is stopped, we want to remember the right
         // steering angle to command (since
         // inverse kinematics doesn't care about angle, we can be opportunistically
@@ -143,7 +143,7 @@ public class AsymSwerveSetpointGenerator {
                 desired_vy,
                 min_s,
                 kDtSec);
-        
+
         t.log(Level.DEBUG, "/setpoint_generator/min_s final", min_s);
 
         return makeSetpoint(
@@ -225,8 +225,14 @@ public class AsymSwerveSetpointGenerator {
                 dx,
                 dy,
                 dtheta,
-                min_s);
-        SwerveModuleState[] retStates = m_limits.toSwerveModuleStates(retSpeeds, kDtSec);
+                min_s,
+                kDtSec);
+
+        SwerveModuleState[] retStates = m_limits.toSwerveModuleStates(
+                retSpeeds,
+                retSpeeds.omegaRadiansPerSecond,
+                kDtSec);
+
         flipIfRequired(prevModuleStates, overrideSteering, retStates);
         return new SwerveSetpoint(retSpeeds, retStates);
     }
@@ -252,15 +258,34 @@ public class AsymSwerveSetpointGenerator {
         }
     }
 
+    /**
+     * Applies two transforms to the previous speed:
+     * 
+     * 1. Scales the commanded accelerations by min_s, i.e. applies the constraints
+     * calculated earlier.
+     * 
+     * 2. Transforms translations according to the rotational velocity, regardless of
+     * min_s -- essentially modeling inertia. This part was missing before, which I
+     * think must just be a mistake.
+     */
     private static ChassisSpeeds makeSpeeds(
             ChassisSpeeds prev,
             double dx,
             double dy,
             double dtheta,
-            double min_s) {
+            double min_s,
+            double kDtSec) {
+        double omega = prev.omegaRadiansPerSecond + min_s * dtheta;
+        double drift = -omega * kDtSec;
+        double vx = prev.vxMetersPerSecond * Math.cos(drift)
+                - prev.vyMetersPerSecond * Math.sin(drift)
+                + min_s * dx;
+        double vy = prev.vxMetersPerSecond * Math.sin(drift)
+                + prev.vyMetersPerSecond * Math.cos(drift)
+                + min_s * dy;
         return new ChassisSpeeds(
-                prev.vxMetersPerSecond + min_s * dx,
-                prev.vyMetersPerSecond + min_s * dy,
-                prev.omegaRadiansPerSecond + min_s * dtheta);
+                vx,
+                vy,
+                omega);
     }
 }
