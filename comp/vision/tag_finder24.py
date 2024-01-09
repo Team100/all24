@@ -15,8 +15,19 @@ import os
 from cscore import CameraServer
 # from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
-from pupil_apriltags import Detector
+# from pupil_apriltags import Detector
 
+import dataclasses
+
+import robotpy_apriltag
+from wpiutil import wpistruct
+from wpimath.geometry import Pose3d,Transform3d
+
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class Blip24:
+    id: int
+    pose: Transform3d
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
@@ -55,7 +66,23 @@ class TagFinder:
         # boundary, which in this case is 0.15 m
         self.tag_size = 0.15
         # self.circle_tag_size = 0.8
-        self.at_detector = Detector(families="tag16h5")
+
+        # self.at_detector = Detector(families="tag16h5")
+        self.at_detector = robotpy_apriltag.AprilTagDetector()
+
+        # self.at_detector.addFamily("tag36h11", 7)
+        # for testing
+        self.at_detector.addFamily("tag16h5", 3)
+
+        poseEstConfig = robotpy_apriltag.AprilTagPoseEstimator.Config(
+            0.1651,     # tagsize 6.5 inches
+            666,        # fx
+            666,        # fy
+            width / 2,  # cx
+            height / 2, # cy 
+        )
+        self.estimator = robotpy_apriltag.AprilTagPoseEstimator(poseEstConfig)
+
         # self.at_circle_detector = Detector(families="tagCircle21h7")
         # self.output_stream = CameraServer.putVideo("Processed", width, height)
         # vertical slice
@@ -116,39 +143,46 @@ class TagFinder:
         # self.vision_nt_led.set(led_on)
 
         # TODO: add big  tag detection?
-        result = self.at_detector.detect(
-            img,
-            estimate_tag_pose=True,
-            camera_params=self.camera_params,
-            tag_size=self.tag_size,
-        )
-        self.draw_result(img, result)
 
-        tags = {}
-        tags["tags"] = []
+        # result = self.at_detector.detect(
+        #     img,
+        #     estimate_tag_pose=True,
+        #     camera_params=self.camera_params,
+        #     tag_size=self.tag_size,
+        # )
+
+        result = self.at_detector.detect(img)
+
+
+        blips = []
+
+        # tags = []
+#        tags = {}
+#        tags["tags"] = []
 
         for result_item in result:
-            if result_item.hamming > 0:
+            if result_item.getHamming() > 0:
                 continue
+            # "pose" is actually a transform3d
+            pose = self.estimator.estimate(result_item)
 
-            tags["tags"].append(
-                {
-                    "id": result_item.tag_id,
-                    "pose_t": result_item.pose_t.tolist(),
-                    "pose_R": result_item.pose_R.tolist(),
-                }
-            )
+            self.draw_result(img, result_item, pose)
+
+            blips.append(Blip24(result_item.getId(), pose))
 
         current_time = time.time()
         # analysis_et = current_time - start_time
         total_et = current_time - self.frame_time
 
-        tags["et"] = total_et
+        # TODO: add a field for ET
+        # tags["et"] = total_et
         # print(tags)
 
-        posebytes = msgpack.packb(tags)
+        self.vision_nt_struct.set(blips)
 
-        self.vision_nt_msgpack.set(posebytes)
+        # posebytes = msgpack.packb(tags)
+
+        # self.vision_nt_msgpack.set(posebytes)
 
         fps = 1 / total_et
         self.frame_time = current_time
@@ -163,6 +197,7 @@ class TagFinder:
         self.draw_text(img, f"time(us) {now_us}", (5, 105))
 
         # shrink the driver view to avoid overloading the radio
+        # for now put big images
         # driver_img = cv2.resize(img, (self.view_width, self.view_height))
         # self.output_stream.putFrame(driver_img)
         self.output_stream.putFrame(img)
@@ -172,6 +207,8 @@ class TagFinder:
         # scp pi@10.1.0.11:images/* .
         # These will accumulate forever so remember to clean it out:
         # ssh pi@10.1.0.11 "rm images/img*"
+
+        # for now don't store images
         # now_s = now_us // 1000000 # once per second
         # if now_s > self.img_ts_sec:
         #     self.img_ts_sec = now_s
@@ -179,90 +216,109 @@ class TagFinder:
         #     cv2.imwrite(filename, img)
 
 
-    def draw_result(self, image, result):
-        for result_item in result:
-            if result_item.hamming > 0:
-                continue
-            (pt_a, pt_b, pt_c, pt_d) = result_item.corners
-            pt_a = (int(pt_a[0]), int(pt_a[1]))
-            pt_b = (int(pt_b[0]), int(pt_b[1]))
-            pt_c = (int(pt_c[0]), int(pt_c[1]))
-            pt_d = (int(pt_d[0]), int(pt_d[1]))
+    def draw_result(self, image, result_item, pose:Transform3d):
+    
+        # (pt_a, pt_b, pt_c, pt_d) = result_item.getCorners()
+        # pt_a = (int(pt_a[0]), int(pt_a[1]))
+        # pt_b = (int(pt_b[0]), int(pt_b[1]))
+        # pt_c = (int(pt_c[0]), int(pt_c[1]))
+        # pt_d = (int(pt_d[0]), int(pt_d[1]))
 
-            cv2.line(image, pt_a, pt_b, (255, 255, 255), 2)
-            cv2.line(image, pt_b, pt_c, (255, 255, 255), 2)
-            cv2.line(image, pt_c, pt_d, (255, 255, 255), 2)
-            cv2.line(image, pt_d, pt_a, (255, 255, 255), 2)
+        # cv2.line(image, pt_a, pt_b, (255, 255, 255), 2)
+        # cv2.line(image, pt_b, pt_c, (255, 255, 255), 2)
+        # cv2.line(image, pt_c, pt_d, (255, 255, 255), 2)
+        # cv2.line(image, pt_d, pt_a, (255, 255, 255), 2)
 
-            (c_x, c_y) = (int(result_item.center[0]), int(result_item.center[1]))
-            cv2.circle(image, (c_x, c_y), 10, (255, 255, 255), -1)
+        color = (255, 255, 255)
 
-            tag_id = result_item.tag_id
-            self.draw_text(image, f"id {tag_id}", (c_x, c_y))
-            # TODO: differentiate big (circle) and little tags?
-            # tag_family = result_item.tag_family.decode("utf-8")
-            # self.draw_text(image, f"id {tag_family}", (c_x, c_y + 40))
+        # Draw lines around the tag
+        for i in range(4):
+            j = (i + 1) % 4
+            point1 = (int(result_item.getCorner(i).x), int(result_item.getCorner(i).y))
+            point2 = (int(result_item.getCorner(j).x), int(result_item.getCorner(j).y))
+            cv2.line(image, point1, point2, color, 2)
 
-            # put the pose translation in the image
-            # the use of 'item' here is to force a scalar to format
-            float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}
-            if result_item.pose_t is not None:
-                # wpi_axes = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
-                # wpi_t = np.matmul(wpi_axes, result_item.pose_t)
-                t = result_item.pose_t
-                wpi_t = np.array([[t[2][0]], [-t[0][0]], [-t[1][0]]])
-                # R = result_item.pose_R
-                # wpi_R = np.matmul(wpi_axes, result_item.pose_R)
-                # wpi_R = np.array(
-                #     [
-                #         # [R[0][0], R[0][1], R[0][2]],
-                #         # [R[1][0], R[1][1], R[1][2]],
-                #         # [R[2][0], R[2][1], R[2][2]]
-                #         [R[2][2], -R[2][0], -R[2][1]],
-                #         [-R[0][2], R[0][0], R[0][1]],
-                #         [-R[1][2], R[1][0], R[1][1]],
-                #     ]
-                # )
 
-                # this matrix is not necessarily exactly special orthogonal
-                # this is sort of a hack to fix it.
-                # removed this for now because it's not fast
-                # wpi_RV, _ = cv2.Rodrigues(wpi_R)
-                # wpi_R, _ = cv2.Rodrigues(wpi_RV)
 
-                # self.draw_text(
-                #     image, f"X {result_item.pose_t.item(0):.2f}m", (c_x, c_y + 80)
-                # )
-                # self.draw_text(
-                #     image, f"Y {result_item.pose_t.item(1):.2f}m", (c_x, c_y + 120)
-                # )
-                # self.draw_text(
-                #     image, f"Z {result_item.pose_t.item(2):.2f}m", (c_x, c_y + 160)
-                # )
+        (c_x, c_y) = (int(result_item.getCenter().x), int(result_item.getCenter().y))
+        cv2.circle(image, (c_x, c_y), 10, (255, 255, 255), -1)
 
-                # translation vector
-                self.draw_text(
-                    image,
-                    f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}",
-                    (c_x - 50, c_y + 40),
-                )
+        tag_id = result_item.getId()
+        self.draw_text(image, f"id {tag_id}", (c_x, c_y))
+        # TODO: differentiate big (circle) and little tags?
+        # tag_family = result_item.tag_family.decode("utf-8")
+        # self.draw_text(image, f"id {tag_family}", (c_x, c_y + 40))
 
-                # rotation matrix (we don't use this so omit it)
-                # self.draw_text(
-                #     image,
-                #     f"R: [{np.array2string(wpi_R[0], formatter=float_formatter)},",
-                #     (c_x, c_y + 80),
-                # )
-                # self.draw_text(
-                #     image,
-                #     f"    {np.array2string(wpi_R[1], formatter=float_formatter)},",
-                #     (c_x, c_y + 120),
-                # )
-                # self.draw_text(
-                #     image,
-                #     f"    {np.array2string(wpi_R[2], formatter=float_formatter)}]",
-                #     (c_x, c_y + 160),
-                # )
+        # put the pose translation in the image
+        # the use of 'item' here is to force a scalar to format
+        # float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}
+        if pose is not None:
+            # wpi_axes = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
+            # wpi_t = np.matmul(wpi_axes, result_item.pose_t)
+            
+            t = pose.translation()
+
+            # wpi_t = np.array([[t[2][0]], [-t[0][0]], [-t[1][0]]])
+            
+            # R = result_item.pose_R
+            # wpi_R = np.matmul(wpi_axes, result_item.pose_R)
+            # wpi_R = np.array(
+            #     [
+            #         # [R[0][0], R[0][1], R[0][2]],
+            #         # [R[1][0], R[1][1], R[1][2]],
+            #         # [R[2][0], R[2][1], R[2][2]]
+            #         [R[2][2], -R[2][0], -R[2][1]],
+            #         [-R[0][2], R[0][0], R[0][1]],
+            #         [-R[1][2], R[1][0], R[1][1]],
+            #     ]
+            # )
+
+            # this matrix is not necessarily exactly special orthogonal
+            # this is sort of a hack to fix it.
+            # removed this for now because it's not fast
+            # wpi_RV, _ = cv2.Rodrigues(wpi_R)
+            # wpi_R, _ = cv2.Rodrigues(wpi_RV)
+
+            # self.draw_text(
+            #     image, f"X {result_item.pose_t.item(0):.2f}m", (c_x, c_y + 80)
+            # )
+            # self.draw_text(
+            #     image, f"Y {result_item.pose_t.item(1):.2f}m", (c_x, c_y + 120)
+            # )
+            # self.draw_text(
+            #     image, f"Z {result_item.pose_t.item(2):.2f}m", (c_x, c_y + 160)
+            # )
+
+            # WPI coords are not the same as camera coords
+            # we transform them in java but also here for viualization
+
+            x = t.z
+            y = -t.x
+            z = -t.y
+
+            # translation vector
+            self.draw_text(
+                image,
+                f"t: {x:4.1f},{y:4.1f},{z:4.1f}",
+                (c_x - 50, c_y + 40),
+            )
+
+            # rotation matrix (we don't use this so omit it)
+            # self.draw_text(
+            #     image,
+            #     f"R: [{np.array2string(wpi_R[0], formatter=float_formatter)},",
+            #     (c_x, c_y + 80),
+            # )
+            # self.draw_text(
+            #     image,
+            #     f"    {np.array2string(wpi_R[1], formatter=float_formatter)},",
+            #     (c_x, c_y + 120),
+            # )
+            # self.draw_text(
+            #     image,
+            #     f"    {np.array2string(wpi_R[2], formatter=float_formatter)}]",
+            #     (c_x, c_y + 160),
+            # )
 
     # these are white with black outline
     def draw_text(self, image, msg, loc):
@@ -271,20 +327,27 @@ class TagFinder:
 
     def initialize_nt(self):
         """Start NetworkTables with Rio as server, set up publisher."""
-        inst = ntcore.NetworkTableInstance.getDefault()
-        inst.startClient4("tag-finder")
+        self.inst = ntcore.NetworkTableInstance.getDefault()
+        self.inst.startClient4("tag_finder24")
         # this is always the RIO IP address; set a matching static IP on your
         # laptop if you're using this in simulation.
-        inst.setServer("10.1.0.2")
+        
+        # inst.setServer("10.1.0.2")
+        self.inst.setServer("192.168.3.18")
+
         # try faster flushing to minimize vision latency; update rate will be limited by frame rate.
         # be careful that this doesn't flood the rio with too many updates.
         # hmm... 6/22/23, seems like setUpdateRate doesn't exist.
         # inst.setUpdateRate(0.01)
         # Table for vision output information
-        self.vision_nt = inst.getTable("Vision")
-        self.vision_nt_msgpack = self.vision_nt.getRawTopic(self.topic_name).publish(
-            "msgpack"
-        )
+        # self.vision_nt = inst.getTable("Vision")
+        # self.vision_nt_msgpack = self.vision_nt.getRawTopic(self.topic_name).publish(
+        #     "msgpack"
+        # )
+        # 
+        self.inst.getStructTopic("bugfix", Blip24).publish().set(Blip24(0, Transform3d()))
+
+        self.vision_nt_struct = self.inst.getStructArrayTopic("vision/" + self.topic_name, Blip24).publish()
 
     # def reconnect_nt(self):
     #     """NT doesn't recover from network disruptions by itself, nor does it
