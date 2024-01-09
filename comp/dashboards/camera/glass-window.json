@@ -1,0 +1,124 @@
+{
+  "Docking": {
+    "Data": [
+      "DockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,16 Size=1687,711 CentralNode=1"
+    ]
+  },
+  "MainWindow": {
+    "GLOBAL": {
+      "fps": "120",
+      "height": "727",
+      "maximized": "0",
+      "style": "0",
+      "userScale": "2",
+      "width": "1687",
+      "xpos": "162",
+      "ypos": "280"
+    }
+  },
+  "Table": {
+    "0x542B5671,2": {
+      "Column 0  Width": "173",
+      "Column 1  Width": "203",
+      "RefScale": "10"
+    },
+    "0x886CDEDE,2": {
+      "Column 0  Width": "100",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "10"
+    },
+    "0x965B9C9E,2": {
+      "Column 0  Width": "100",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "10"
+    },
+    "0xD5C61D1D,2": {
+      "Column 0  Width": "100",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "10"
+    },
+    "0xE56EC1C2,4": {
+      "Column 0  Weight": "1.0000",
+      "Column 1  Weight": "1.0000",
+      "Column 2  Weight": "1.0000",
+      "Column 3  Weight": "1.0000"
+    }
+  },
+  "Window": {
+    "###NetworkTables": {
+      "Collapsed": "0",
+      "Pos": "345,33",
+      "Size": "575,471"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "126,220",
+      "Size": "475,338"
+    },
+    "###NetworkTables Log": {
+      "Collapsed": "0",
+      "Pos": "49,133",
+      "Size": "600,381"
+    },
+    "###NetworkTables Settings": {
+      "Collapsed": "0",
+      "Pos": "20,21",
+      "Size": "272,148"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "964,41",
+      "Size": "569,234"
+    },
+    "###Plot <1>": {
+      "Collapsed": "0",
+      "Pos": "964,278",
+      "Size": "546,224"
+    },
+    "###Plot <2>": {
+      "Collapsed": "0",
+      "Pos": "953,503",
+      "Size": "576,204"
+    },
+    "About": {
+      "Collapsed": "0",
+      "Pos": "87,237",
+      "Size": "233,112"
+    },
+    "Dear ImGui Debug Log": {
+      "Collapsed": "0",
+      "Pos": "78,96",
+      "Size": "503,480"
+    },
+    "Dear ImGui Demo": {
+      "Collapsed": "0",
+      "Pos": "650,20",
+      "Size": "550,680"
+    },
+    "Dear ImGui Metrics/Debugger": {
+      "Collapsed": "0",
+      "Pos": "788,72",
+      "Size": "361,471"
+    },
+    "Debug##Default": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "400,400"
+    },
+    "DockSpaceViewport_11111111": {
+      "Collapsed": "0",
+      "Pos": "0,16",
+      "Size": "1687,711"
+    },
+    "Example: Console": {
+      "Collapsed": "0",
+      "Pos": "755,49",
+      "Size": "520,523"
+    },
+    "Example: Log": {
+      "Collapsed": "0",
+      "Pos": "80,153",
+      "Size": "500,400"
+    }
+  }
+}
