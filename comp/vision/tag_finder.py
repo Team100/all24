@@ -163,20 +163,20 @@ class TagFinder:
         self.draw_text(img, f"time(us) {now_us}", (5, 105))
 
         # shrink the driver view to avoid overloading the radio
-        driver_img = cv2.resize(img, (self.view_width, self.view_height))
-        self.output_stream.putFrame(driver_img)
-        # self.output_stream.putFrame(img)
+        # driver_img = cv2.resize(img, (self.view_width, self.view_height))
+        # self.output_stream.putFrame(driver_img)
+        self.output_stream.putFrame(img)
 
         # Write some of the files for later analysis
         # To retrieve these files, use:
         # scp pi@10.1.0.11:images/* .
         # These will accumulate forever so remember to clean it out:
         # ssh pi@10.1.0.11 "rm images/img*"
-        now_s = now_us // 1000000 # once per second
-        if now_s > self.img_ts_sec:
-            self.img_ts_sec = now_s
-            filename = TagFinder.IMAGE_DIR + "/img" + str(now_s) + ".png"
-            cv2.imwrite(filename, img)
+        # now_s = now_us // 1000000 # once per second
+        # if now_s > self.img_ts_sec:
+        #     self.img_ts_sec = now_s
+        #     filename = TagFinder.IMAGE_DIR + "/img" + str(now_s) + ".png"
+        #     cv2.imwrite(filename, img)
 
 
     def draw_result(self, image, result):
