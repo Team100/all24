@@ -5,35 +5,63 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "480",
+      "height": "738",
       "maximized": "0",
       "style": "0",
-      "userScale": "1",
+      "userScale": "2",
       "width": "853",
-      "xpos": "235",
-      "ypos": "93"
+      "xpos": "237",
+      "ypos": "96"
+    }
+  },
+  "Table": {
+    "0x965B9C9E,2": {
+      "Column 0  Width": "70",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "7"
+    },
+    "0xE56EC1C2,4": {
+      "Column 0  Weight": "1.0000",
+      "Column 1  Weight": "1.0000",
+      "Column 2  Weight": "1.0000",
+      "Column 3  Weight": "1.0000"
     }
   },
   "Window": {
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "128,13",
+      "Size": "200,48"
+    },
     "###/SmartDashboard/annunciator": {
       "Collapsed": "0",
       "Pos": "467,32",
       "Size": "115,121"
     },
+    "###/field": {
+      "Collapsed": "0",
+      "Pos": "224,239",
+      "Size": "400,200"
+    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "3,360",
-      "Size": "177,110"
+      "Size": "230,128"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "166,310",
-      "Size": "436,108"
+      "Pos": "117,564",
+      "Size": "616,132"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "166,184",
-      "Size": "500,123"
+      "Pos": "247,149",
+      "Size": "500,468"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "65,63",
+      "Size": "750,145"
     },
     "###Other Devices": {
       "Collapsed": "0",
@@ -43,12 +71,12 @@
     "###System Joysticks": {
       "Collapsed": "0",
       "Pos": "3,233",
-      "Size": "111,146"
+      "Size": "151,182"
     },
     "###Timing": {
       "Collapsed": "0",
       "Pos": "3,100",
-      "Size": "98,97"
+      "Size": "116,112"
     },
     "Debug##Default": {
       "Collapsed": "0",
@@ -58,7 +86,7 @@
     "Robot State": {
       "Collapsed": "0",
       "Pos": "5,20",
-      "Size": "57,69"
+      "Size": "74,84"
     }
   }
 }

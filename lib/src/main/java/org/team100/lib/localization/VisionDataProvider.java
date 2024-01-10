@@ -34,27 +34,27 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Extracts robot pose estimates from camera input.
  */
 public class VisionDataProvider extends SubsystemBase implements TableEventListener {
-        /**
-         * If the tag is closer than this threshold, then the camera's estimate of tag
-         * rotation might be more accurate than the gyro, so we use the camera's
-         * estimate of tag rotation to update the robot pose. If the tag is further away
-         * than this, then the camera-derived rotation is probably less accurate than
-         * the gyro, so we use the gyro instead.
-         * 
-         * Set this to zero to disable tag-derived rotation and always use the gyro.
-         * 
-         * Set this to some large number (e.g. 100) to disable gyro-derived rotation and
-         * always use the camera.
-         */
+    /**
+     * If the tag is closer than this threshold, then the camera's estimate of tag
+     * rotation might be more accurate than the gyro, so we use the camera's
+     * estimate of tag rotation to update the robot pose. If the tag is further away
+     * than this, then the camera-derived rotation is probably less accurate than
+     * the gyro, so we use the gyro instead.
+     * 
+     * Set this to zero to disable tag-derived rotation and always use the gyro.
+     * 
+     * Set this to some large number (e.g. 100) to disable gyro-derived rotation and
+     * always use the camera.
+     */
     private static final double kTagRotationBeliefThresholdMeters = 0.5;
-    
+    /** Discard results further than this from the previous one. */
+    private static final double kVisionChangeToleranceMeters = 0.1;
+
     private final Telemetry t = Telemetry.get();
 
     private final Supplier<Pose2d> poseSupplier;
     private final ObjectMapper objectMapper;
     private final SwerveDrivePoseEstimator poseEstimator;
-    /** Discard results further than this from the previous one. */
-    private final double kVisionChangeToleranceMeters = 0.1;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
 
     // for blip filtering
@@ -83,8 +83,9 @@ public class VisionDataProvider extends SubsystemBase implements TableEventListe
     /**
      * Accept a NetworkTableEvent and convert it to a Blips object
      * 
-     * @param event the event to acceptx
+     * @param event the event to accept
      */
+    @Override
     public void accept(NetworkTable table, String key, NetworkTableEvent event) {
         try {
             Blips blips = objectMapper.readValue(event.valueData.value.getRaw(), Blips.class);
@@ -130,7 +131,8 @@ public class VisionDataProvider extends SubsystemBase implements TableEventListe
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
             t.log(Level.DEBUG, "/Vision Data Provider/Vision X", currentRobotinFieldCoords.getX());
             t.log(Level.DEBUG, "/Vision Data Provider/Vision Y", currentRobotinFieldCoords.getY());
-            t.log(Level.DEBUG, "/Vision Data Provider/Vision Rotation", currentRobotinFieldCoords.getRotation().getRadians());
+            t.log(Level.DEBUG, "/Vision Data Provider/Vision Rotation",
+                    currentRobotinFieldCoords.getRotation().getRadians());
 
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, "/Vision Data Provider/Tag Rotation", tagRotation.getAngle());

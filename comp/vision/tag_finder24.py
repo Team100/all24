@@ -59,10 +59,11 @@ class TagFinder:
         self.at_detector = robotpy_apriltag.AprilTagDetector()
 
         # TODO: use this
-        # self.at_detector.addFamily("tag36h11", 7)
+        self.at_detector.addFamily("tag36h11")
         # TODO: remove this
-        self.at_detector.addFamily("tag16h5", 3)
+        # self.at_detector.addFamily("tag16h5")
 
+        # TODO: calibrate the cameras, these numbers are probably wrong
         self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
             robotpy_apriltag.AprilTagPoseEstimator.Config(
                 0.1651,  # tagsize 6.5 inches
@@ -101,6 +102,8 @@ class TagFinder:
                 continue
             pose = self.estimator.estimate(result_item)
             blips.append(Blip24(result_item.getId(), pose))
+            # TODO: turn this off for prod
+            self.draw_result(img, result_item, pose)
 
         # compute time since last frame
         current_time = time.time()
@@ -123,14 +126,10 @@ class TagFinder:
         self.inst.flush()
 
         # now do the drawing (after the NT payload is written)
-        for result_item in result:
-            if result_item.getHamming() > 0:
-                continue
-            pose = self.estimator.estimate(result_item)
-            self.draw_result(img, result_item, pose)
-
-        self.draw_text(img, f"fps {fps:.1f}", (5, 65))
-        self.draw_text(img, f"latency(ms) {time_delta_ms:.0f}", (5, 105))
+        # none of this is particularly fast or important for prod,
+        # TODO: consider disabling it after dev is done
+        # self.draw_text(img, f"fps {fps:.1f}", (5, 65))
+        # self.draw_text(img, f"latency(ms) {time_delta_ms:.0f}", (5, 105))
 
         # shrink the driver view to avoid overloading the radio
         # TODO: turn this back on for prod!!
@@ -176,12 +175,14 @@ class TagFinder:
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
 
-
         # address for joel's desktop machine
+        # TODO don't use this
         # self.inst.setServer("192.168.3.18")
+
         # roboRio address. windows machines can impersonate this for simulation.
+        # TODO use for prod
         self.inst.setServer("10.1.0.2")
-        
+
         topic_name = "vision/" + self.serial
         self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
         self.vision_latency = self.inst.getDoubleTopic(
@@ -272,5 +273,6 @@ def main():
                 request.release()
     finally:
         camera.stop()
+
 
 main()

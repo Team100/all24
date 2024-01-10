@@ -186,7 +186,7 @@
   "NetworkTables Settings": {
     "dsClient": false,
     "listenAddress": "10.1.0.2",
-    "mode": "Server",
+    "mode": "Client (NT4)",
     "serverTeam": "localhost"
   },
   "Plots": {
@@ -217,11 +217,6 @@
     "Plot <1>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
           "backgroundColor": [
             0.0,
             0.0,
@@ -246,11 +241,6 @@
     "Plot <2>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
           "backgroundColor": [
             0.0,
             0.0,
