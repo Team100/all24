@@ -25,7 +25,17 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/annunciator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
         "window": {
           "visible": true
         }
@@ -39,9 +49,42 @@
       }
     },
     "transitory": {
-      "SmartDashboard": {
+      "vision": {
+        "10000000e31d4a24": {
+          "Blip24[]##v_vision/10000000e31d4a24/blips": {
+            "Blip24##v_[0]": {
+              "Transform3d##v_pose": {
+                "Translation3d##v_translation": {
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
         "open": true
       }
     }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      },
+      "open": true
+    },
+    "visible": true
   }
 }

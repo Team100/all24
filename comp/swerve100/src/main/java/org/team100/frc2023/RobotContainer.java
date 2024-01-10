@@ -43,6 +43,7 @@ import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
+import org.team100.lib.localization.Blip24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
@@ -150,6 +151,9 @@ public class RobotContainer implements SelfTestable {
                 poseEstimator,
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
+
+        Blip24ArrayListener listener = new Blip24ArrayListener();
+        listener.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
