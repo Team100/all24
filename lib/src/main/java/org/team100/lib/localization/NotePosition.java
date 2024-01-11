@@ -3,7 +3,7 @@ package org.team100.lib.localization;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class NotePosition {
-    Translation2d pose;
+    private final Translation2d pose;
     public NotePosition(Translation2d pose) {
         this.pose = pose;
     }

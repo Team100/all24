@@ -24,7 +24,7 @@ public class NotePositionStruct implements Struct<NotePosition> {
 
     @Override
     public String getSchema() {
-        return "int id;Translation2d pose";
+        return "Translation2d pose";
     }
 
     @Override

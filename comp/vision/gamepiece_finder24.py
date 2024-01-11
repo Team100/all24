@@ -49,9 +49,8 @@ class GamePieceFinder:
             NotePosition(Translation2d())
         )
 
-        # blip array topic
         self.vision_nt_struct = self.inst.getStructArrayTopic(
-            topic_name + "/NotePositions", NotePosition
+            topic_name + "/NotePosition", NotePosition
         ).publish()
 
     def find_object(self, img):
