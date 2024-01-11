@@ -21,10 +21,6 @@ class GamePieceFinder:
     def __init__(self, topic_name, camera_params):
         self.object_lower = (0 , 0, 200)
         self.object_higher = (255, 170, 255)
-        self.scale_factor = 1
-        self.width = camera_params[0]
-        self.height = camera_params[1]
-        self.object_height = .105
         self.theta = 0
         self.topic_name = topic_name
         self.initialize_nt()    
@@ -90,7 +86,7 @@ class GamePieceFinder:
 
             object = []
 
-            objects["objects"].append(
+            objects.append(
                 {NotePosition(Translation2d(cX, cY))
                 }
             )
@@ -121,13 +117,6 @@ class GamePieceFinder:
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
         objects = self.find_object(img_hsv)
-        pieces = {}
-        pieces["pieces"] = []
-        pieces["pieces"].append(
-                {
-                    "objects": objects
-                }
-            )
         self.frame_time = time.time()
         current_time = time.time()
         total_et = current_time - self.frame_time

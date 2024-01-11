@@ -48,7 +48,7 @@ public class NotePositionArrayListener {
 
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
-                new String[] { "vision" },
+                new String[] { "objectDetector" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::consumeValues);
     }
