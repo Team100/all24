@@ -3,13 +3,19 @@ import cv2
 import libcamera
 import msgpack
 import numpy as np
+import time
 
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
 from pupil_apriltags import Detector
+from wpimath.geometry import Translation2d
+
 import math
-    
+
+class NotePosition:
+    pose: Translation2d
+
 class GamePieceFinder:
 
     def __init__(self, topic_name, camera_params):
@@ -32,10 +38,21 @@ class GamePieceFinder:
         # laptop if you're using this in simulation.
         self.inst.setServer("10.1.0.2")
         # Table for vision output information
-        self.vision_nt = self.inst.getTable("Vision")
-        self.vision_nt_msgpack = self.vision_nt.getRawTopic(self.topic_name).publish(
-            "msgpack"
+        topic_name = "vision/" + self.serial
+        self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
+        self.vision_latency = self.inst.getDoubleTopic(
+            topic_name + "/latency"
+        ).publish()
+
+        # work around https://github.com/robotpy/mostrobotpy/issues/60
+        self.inst.getStructTopic("bugfix", NotePosition).publish().set(
+            NotePosition(Translation2d())
         )
+
+        # blip array topic
+        self.vision_nt_struct = self.inst.getStructArrayTopic(
+            topic_name + "/NotePositions", NotePosition
+        ).publish()
 
     def find_object(self, img):
         range = cv2.inRange(img, self.object_lower, self.object_higher)
@@ -65,23 +82,20 @@ class GamePieceFinder:
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
-            self.vision_nt_msgpack.set(cX)
-            self.vision_nt_msgpack.set(cY)
-            translation_x = (cX-self.width/2)* \
-                (self.object_height*math.cos(self.theta)/cnt_height)
-            translation_y = (cY-self.height/2) * \
-                (self.object_height*math.cos(self.theta)/cnt_height)
-            translation_z = (self.object_height*self.scale_factor*math.cos(self.theta))/(cnt_height)
+            
+            # translation_x = (cX-self.width/2)* \
+            #     (self.object_height*math.cos(self.theta)/cnt_height)
+            # translation_y = (cY-self.height/2) * \
+            #     (self.object_height*math.cos(self.theta)/cnt_height)
+            # translation_z = (self.object_height*self.scale_factor*math.cos(self.theta))/(cnt_height)
 
-            object = [translation_x, translation_y, translation_z]
+            object = []
 
             objects["objects"].append(
-                {
-                    "pose_t": object
+                {NotePosition(Translation2d(cX, cY))
                 }
             )
             self.draw_result(img_rgb, c, cX, cY, object)
-        self.inst.flush()
         self.output_stream.putFrame(img_rgb)
         return objects
 
@@ -92,9 +106,13 @@ class GamePieceFinder:
         cv2.circle(img, (int(cX), int(cY)), 7, (0, 0, 0), -1)
         cv2.putText(img, f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}", (int(cX) - 20, int(cY) - 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+        
 
     def analyze(self, request):
+        
         buffer = request.make_array("lores")
+        metadata = request.get_metadata()
+
         # img = np.frombuffer(buffer, dtype=np.uint8)
         img = buffer
         # print(buffer.shape)
@@ -111,8 +129,20 @@ class GamePieceFinder:
                     "objects": objects
                 }
             )
-        posebytes = msgpack.packb(pieces)
-        self.vision_nt_msgpack.set(posebytes)
+        self.frame_time = time.time()
+        current_time = time.time()
+        total_et = current_time - self.frame_time
+        self.frame_time = current_time
+        fps = 1 / total_et
+        self.vision_nt_struct.set(objects)
+        self.vision_fps.set(fps)
+        sensor_timestamp = metadata["SensorTimestamp"]
+        # include all the work above in the latency
+        system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+        time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
+        self.vision_latency.set(time_delta_ms)
+        self.inst.flush()
+
 
 def main():
     print("main")
