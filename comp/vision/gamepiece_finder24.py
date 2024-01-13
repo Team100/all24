@@ -10,17 +10,24 @@ from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
 from pupil_apriltags import Detector
 from wpimath.geometry import Translation2d
+import dataclasses
+from wpiutil import wpistruct
 
 import math
 
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
 class NotePosition:
     pose: Translation2d
 
 class GamePieceFinder:
 
-    def __init__(self, topic_name, camera_params):
+    def __init__(self, serial, topic_name, camera_params):
         self.object_lower = (0 , 0, 200)
+        self.serial = serial
         self.object_higher = (255, 170, 255)
+        self.width = camera_params[0]
+        self.height = camera_params[1]
         self.theta = 0
         self.topic_name = topic_name
         self.initialize_nt()    
@@ -32,6 +39,7 @@ class GamePieceFinder:
         self.inst.startClient4("retro-finder")
         # this is always the RIO IP address; set a matching static IP on your
         # laptop if you're using this in simulation.
+        # self.inst.setServer("10.107.191.21")
         self.inst.setServer("10.1.0.2")
         # Table for vision output information
         topic_name = "vision/" + self.serial
@@ -61,8 +69,7 @@ class GamePieceFinder:
         median = cv2.medianBlur(img_floodfill, 5)
         contours, hierarchy = cv2.findContours(
             median, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        objects = {}
-        objects["objects"] = []
+        objects = []
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
             if (cnt_height < 50):
@@ -83,15 +90,11 @@ class GamePieceFinder:
             # translation_y = (cY-self.height/2) * \
             #     (self.object_height*math.cos(self.theta)/cnt_height)
             # translation_z = (self.object_height*self.scale_factor*math.cos(self.theta))/(cnt_height)
-
-            object = []
-
             objects.append(
-                {NotePosition(Translation2d(cX, cY))
-                }
+                NotePosition(Translation2d(cX, cY))
             )
-            self.draw_result(img_rgb, c, cX, cY, object)
-        self.output_stream.putFrame(img_rgb)
+            # self.draw_result(img_rgb, c, cX, cY, object)
+        self.output_stream.putFrame(range)
         return objects
 
     def draw_result(self, img, cnt, cX, cY, piece):
@@ -130,7 +133,13 @@ class GamePieceFinder:
         time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
         self.vision_latency.set(time_delta_ms)
         self.inst.flush()
-
+        
+def getserial():
+    with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
+        for line in cpuinfo:
+            if line[0:6] == "Serial":
+                return line[10:26]
+    return ""
 
 def main():
     print("main")
@@ -178,8 +187,8 @@ def main():
     # Pi IP: 10.1.0.21
     camera_params = [width, 200]
     topic_name = "pieces"
-    output = GamePieceFinder(topic_name, camera_params)
-
+    serial = getserial()
+    output = GamePieceFinder(serial,topic_name, camera_params)
     camera.start()
     try:
         while True:
