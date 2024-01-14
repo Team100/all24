@@ -61,6 +61,7 @@ static const uint8_t HIDReportDescriptor[] = {
 };
 
 static const char *MANUFACTURER_DESCRIPTOR = "Team 100";
+static const char *SERIAL_NUMBER = "SerialNumber";
 
 /**
  * Sends and receives data via USB.
@@ -84,7 +85,8 @@ public:
     BUTTONS = 7,
     DEBUG = 8,
     KNOBS = 9,
-    MIDI = 10
+    MIDI = 10,
+    MIDI_DUAL = 11
   };
 
   /**
@@ -100,6 +102,7 @@ public:
       case SubConsole::DEBUG: return "Debug";
       case SubConsole::KNOBS: return "Knobs";
       case SubConsole::MIDI: return "MIDI";
+      case SubConsole::MIDI_DUAL: return "MIDI_DUAL";
       default: return "Unassigned";
     }
   }
@@ -174,7 +177,7 @@ protected:
       0x03,              // bInterfaceClass: HID (0x03)
       0x00,              // bInterfaceSubClass: No Subclass (0x00)
       0x00,              // bInterfaceProtocol: 0x00
-      0x00,              // iInterface: 0
+      0x04,              // iInterface descriptor index: 4
       // HID DESCRIPTOR
       // TODO: why this doesn't match the struct in HID.h?
       0x09,                                  // bLength: 9
@@ -237,7 +240,7 @@ protected:
   int sendUSBDeviceDescriptor() {
     const uint8_t USBDeviceDescriptor[] = {
       0x12,                                          // bLength: 18
-      0x01,                                          // bDescriptorType: 1
+      0x01,                                          // bDescriptorType: 1 (device)
       0x02, 0x00,                                    // bcdUSB: 2
       0xef,                                          // bDeviceClass: miscellaneous
       0x02,                                          // bDeviceSubClass: 2
@@ -247,9 +250,9 @@ protected:
       lowByte(static_cast<uint16_t>(subConsole_)),   // idProduct (l)
       highByte(static_cast<uint16_t>(subConsole_)),  // idProduct (h)
       0x00, 0x01,                                    // bcdDevice: 0x0100, release number
-      0x01,                                          // iManufacturer
-      0x02,                                          // iProduct
-      0x03,                                          // iSerialNumber
+      0x01,                                          // iManufacturer descriptor index = 1
+      0x02,                                          // iProduct descriptor index = 2
+      0x03,                                          // iSerialNumber descriptor index = 3
       0x01                                           // bNumConfigurations
     };
     return USB_SendControl(0, USBDeviceDescriptor, sizeof(USBDeviceDescriptor));
@@ -270,6 +273,11 @@ protected:
         if (setup.wValueL == 0x01) {       // Descriptor index = manufacturer
           return SendStringDescriptor(MANUFACTURER_DESCRIPTOR, strlen(MANUFACTURER_DESCRIPTOR));
         } else if (setup.wValueL == 0x02) {  // Descriptor index = product
+          const char *productDescriptor = getProductDescriptor();
+          return SendStringDescriptor(productDescriptor, strlen(productDescriptor));
+        } else if (setup.wValueL == 0x03) {  // Descriptor index = serial
+          return SendStringDescriptor(SERIAL_NUMBER, strlen(SERIAL_NUMBER));
+        } else if (setup.wValueL == 0x04) {  // Descriptor index = interface
           const char *productDescriptor = getProductDescriptor();
           return SendStringDescriptor(productDescriptor, strlen(productDescriptor));
         }
