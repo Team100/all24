@@ -116,7 +116,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
         double motorRad_S2 = kMotorGearing * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
         double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(m_encoder.getVelocity(),motorRevs_S);
+        double frictionFF = frictionFF(m_encoder.getVelocity()/60,motorRevs_S);
         double accelFF = accelFF(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
