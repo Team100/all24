@@ -101,7 +101,7 @@ public class RobotContainer implements SelfTestable {
     // for SelfTest
     private final DriveInALittleSquare m_driveInALittleSquare;
     private final MorseCodeBeep m_beep;
-    private final Monitor m_monitor;
+    // private final Monitor m_monitor;
 
     // Identity-specific fields
     private final ArmSubsystem m_armSubsystem;
@@ -133,8 +133,8 @@ public class RobotContainer implements SelfTestable {
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
         // digital output 4
-        m_monitor = new Monitor(new Annunciator(6), test);
-        robot.addPeriodic(m_monitor::periodic, 0.02);
+        // m_monitor = new Monitor(new Annunciator(6), test);
+        // robot.addPeriodic(m_monitor::periodic, 0.02);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
@@ -440,7 +440,7 @@ public class RobotContainer implements SelfTestable {
 
     @Override
     public Monitor getMonitor() {
-        return m_monitor;
+        return null;
     }
 
     @Override
