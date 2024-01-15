@@ -79,6 +79,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    SmartDashboard.putNumber("Motor 1 Velocity", m_encoder1.getVelocity()/60);
+    SmartDashboard.putNumber("Motor 2 Velocity", m_encoder2.getVelocity()/60);
   }
 
   @Override
@@ -115,8 +117,6 @@ public class Robot extends TimedRobot {
       }
       this.setVelocity(input);
     }
-    SmartDashboard.putNumber("Motor 1 Velocity", m_encoder1.getVelocity()/60);
-    SmartDashboard.putNumber("Motor 2 Velocity", m_encoder2.getVelocity()/60);
   }
 
   public void set(double value1,double value2) {
