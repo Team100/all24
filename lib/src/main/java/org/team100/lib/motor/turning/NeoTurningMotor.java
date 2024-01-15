@@ -20,7 +20,7 @@ import com.revrobotics.CANSparkMax.ControlType;
  */
 public class NeoTurningMotor implements Motor100<Angle> {
     private static final int kCurrentLimit = 40;
- private RelativeEncoder m_encoder;
+    private final RelativeEncoder m_encoder;
 
     private static final double  staticFrictionFFVolts = 0.1;
     /**
@@ -116,14 +116,15 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public void setVelocity(double outputRad_S, double accelRad_S2) {
         double motorRad_S = kMotorGearing * outputRad_S;
         double motorRevs_S = motorRad_S / (2*Math.PI);
+        double motorRevs_M = motorRad_S * 60;
         double motorRad_S2 = kMotorGearing * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
         double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(m_encoder.getVelocity()/60,motorRevs_S);
+        double frictionFF = frictionFF(this.getVelocity(),motorRevs_S);
         double accelFF = accelFF(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        m_pidController.setReference(motorRevs_S, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
+        m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
         t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
     }
@@ -157,5 +158,9 @@ public class NeoTurningMotor implements Motor100<Angle> {
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
+    }
+    
+    public double getVelocity() {
+        return m_encoder.getVelocity()/60;
     }
 }

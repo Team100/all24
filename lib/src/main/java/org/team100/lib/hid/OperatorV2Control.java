@@ -23,8 +23,8 @@ public class OperatorV2Control implements OperatorControl{
         JoystickButton bButton = new JoystickButton(m_controller.getHID(), 2);
         bButton.whileTrue(command);
     }
-     public void shooter(Command command) {
-        JoystickButton aButton = new JoystickButton(m_controller.getHID(), 1);
+    public void shooter(Command command) {
+    JoystickButton aButton = new JoystickButton(m_controller.getHID(), 1);
         aButton.whileTrue(command);
     }
 
