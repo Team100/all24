@@ -166,10 +166,10 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = new IntakeSubsystem("Top Roller", "Bottom Roller", 1, 2);
-        m_shooter = new ShooterSubsystem("Left Shooter", "Right Shooter", 1, 2);
+        m_intake = new IntakeSubsystem("Top Roller", "Bottom Roller", 3, 6);
+        m_shooter = new ShooterSubsystem("Left Shooter", "Right Shooter", 7, 8);
         m_indexer = new IndexerSubsystem("Indexer", 1);
-        m_climber = new ClimberSubsystem("Left Climber", "Right Climber", 1, 2);
+        m_climber = new ClimberSubsystem("Left Climber", "Right Climber", 2, 4);
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
