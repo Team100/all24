@@ -33,7 +33,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double dynamicFrictionFFVolts = 0.65;
+    private static final double dynamicFrictionFFVolts = 0.065;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
