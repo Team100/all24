@@ -20,6 +20,6 @@ public class IndexerSubsystem extends SubsystemBase {
     }
     @Override
         public void periodic() {
-            t.log(Level.DEBUG, m_nameIndexer + " Velocity (RPM)", m_motor.getVelocity());
+            t.log(Level.DEBUG, m_nameIndexer + " Velocity (RPS)", m_motor.getVelocity());
         }
 }

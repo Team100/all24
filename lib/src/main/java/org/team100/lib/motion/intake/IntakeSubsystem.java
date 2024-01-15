@@ -25,7 +25,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
     @Override
         public void periodic() {
-            t.log(Level.DEBUG, m_nameTopRoller + " Velocity (RPM)", bottomRoller.getVelocity());
-            t.log(Level.DEBUG, m_nameBottomRoller + " Velocity (RPM)", topRoller.getVelocity());
+            t.log(Level.DEBUG, m_nameTopRoller + " Velocity (RPS)", bottomRoller.getVelocity());
+            t.log(Level.DEBUG, m_nameBottomRoller + " Velocity (RPS)", topRoller.getVelocity());
         }
 }

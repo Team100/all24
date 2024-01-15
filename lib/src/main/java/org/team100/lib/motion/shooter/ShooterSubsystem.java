@@ -27,8 +27,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         @Override
         public void periodic() {
-            t.log(Level.DEBUG, m_nameLeftShooter + " Velocity (RPM)", leftShooter.getVelocity());
-            t.log(Level.DEBUG, m_nameRightShooter + " Velocity (RPM)", rightShooter.getVelocity());
+            t.log(Level.DEBUG, m_nameLeftShooter + " Velocity (RPS)", leftShooter.getVelocity());
+            t.log(Level.DEBUG, m_nameRightShooter + " Velocity (RPS)", rightShooter.getVelocity());
         }
         
 }

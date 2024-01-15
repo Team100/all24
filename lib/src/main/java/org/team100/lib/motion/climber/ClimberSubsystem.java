@@ -26,7 +26,7 @@ public class ClimberSubsystem extends SubsystemBase {
         }
         @Override
         public void periodic() {
-            t.log(Level.DEBUG, m_nameLeftClimber + " Velocity (RPM)", leftClimber.getVelocity());
-            t.log(Level.DEBUG, m_nameRightClimber + " Velocity (RPM)", rightClimber.getVelocity());
+            t.log(Level.DEBUG, m_nameLeftClimber + " Velocity (RPS)", leftClimber.getVelocity());
+            t.log(Level.DEBUG, m_nameRightClimber + " Velocity (RPS)", rightClimber.getVelocity());
         }
 }
