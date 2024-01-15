@@ -65,11 +65,11 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private final CANSparkMax m_motor;
     private final String m_name;
 
-    public NeoTurningMotor(String name, int canId) {
+    public NeoTurningMotor(String name, int canId, boolean motorPhase) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
 
-        m_motor.setInverted(true);
+        m_motor.setInverted(!motorPhase);
         m_motor.setSmartCurrentLimit(kCurrentLimit);
 
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
@@ -104,6 +104,9 @@ public class NeoTurningMotor implements Motor100<Angle> {
         m_motor.stopMotor();
     }
 
+    public void setInverted() {
+        
+    }
     /**
      * Supports accel feedforward.
      * 

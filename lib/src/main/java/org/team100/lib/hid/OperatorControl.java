@@ -1,5 +1,6 @@
 package org.team100.lib.hid;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -15,6 +16,17 @@ public interface OperatorControl {
     default Trigger doSomething() {
         return new Trigger(() -> false);
     }
+
+    default void index(Command command) {}
+
+    default void shooter(Command command) {}
+
+    default void intake(Command command) {}
+
+    default double climberState() {
+        return 0;
+    }
+
 
     default double lower() {
         return 0;

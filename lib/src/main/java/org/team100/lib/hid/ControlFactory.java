@@ -91,7 +91,7 @@ public class ControlFactory {
         Util.println("Found operator HID: " + operatorName);
 
         if (operatorName.contains("F310")) {
-            return new OperatorXboxControl();
+            return new OperatorV2Control();
         }
         if (operatorName.startsWith("MSP430")) {
             // the old button board
