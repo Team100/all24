@@ -19,7 +19,7 @@ public class NotePositionStruct implements Struct<NotePosition> {
 
     @Override
     public int getSize() {
-        return kSizeInt32 + Translation2d.struct.getSize();
+        return Translation2d.struct.getSize();
     }
 
     @Override
