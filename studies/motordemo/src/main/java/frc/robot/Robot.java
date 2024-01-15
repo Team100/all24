@@ -20,6 +20,8 @@ public class Robot extends TimedRobot {
   private RelativeEncoder m_encoder1;
   private SparkMaxPIDController m_pidController2;
   private RelativeEncoder m_encoder2;
+  private SparkMaxPIDController m_pidController3;
+  private RelativeEncoder m_encoder3;
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
  private static final double dynamicFrictionFFVolts = 0.065;
  private static final double  staticFrictionFFVolts = 0.1;
@@ -42,6 +44,8 @@ public class Robot extends TimedRobot {
     m_encoder1 = m_motor1.getEncoder();
     m_pidController2 = m_motor2.getPIDController();
     m_encoder2 = m_motor2.getEncoder();
+    m_pidController3 = m_motor3.getPIDController();
+    m_encoder3 = m_motor3.getEncoder();
     kP = 0.0001;
     kI = 0;
     kD = 0; 
@@ -62,6 +66,12 @@ public class Robot extends TimedRobot {
     m_pidController2.setIZone(kIz);
     m_pidController2.setFF(kFF);
     m_pidController2.setOutputRange(kMinOutput, kMaxOutput);
+    m_pidController3.setP(kP);
+    m_pidController3.setI(kI);
+    m_pidController3.setD(kD);
+    m_pidController3.setIZone(kIz);
+    m_pidController3.setFF(kFF);
+    m_pidController3.setOutputRange(kMinOutput, kMaxOutput);
     m_motor2.setInverted(true);
     m_joystick = new XboxController(0);
     SmartDashboard.putNumber("P Gain", kP);
@@ -81,6 +91,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     SmartDashboard.putNumber("Motor 1 Velocity", m_encoder1.getVelocity()/60);
     SmartDashboard.putNumber("Motor 2 Velocity", m_encoder2.getVelocity()/60);
+    SmartDashboard.putNumber("Motor 3 Velocity", m_encoder3.getVelocity()/60);
   }
 
   @Override
