@@ -2,7 +2,6 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 import org.team100.lib.commands.arm.CartesianManualArm;
 import org.team100.lib.commands.arm.CartesianManualPositionalArm;
@@ -62,7 +61,6 @@ import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.selftest.SelfTestable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -131,7 +129,7 @@ public class RobotContainer implements SelfTestable {
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
+        // BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
         // digital output 4
         // m_monitor = new Monitor(new Annunciator(6), test);
         // robot.addPeriodic(m_monitor::periodic, 0.02);

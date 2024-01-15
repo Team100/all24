@@ -97,6 +97,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
+        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
     }
 
     @Override
