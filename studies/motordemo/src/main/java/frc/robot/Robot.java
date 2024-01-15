@@ -130,12 +130,14 @@ public class Robot extends TimedRobot {
 
   // Units are revs per second
   public void setVelocity(double setpoint1, double setpoint2) {
-    double setpointRevsPerMin = setpoint1*60;
-    double FF = frictionFF(m_encoder1.getVelocity()/60, setpoint1) + velocityFF(setpoint1);
+    double setpointRevsPerMin1 = setpoint1*60;
+    double setpointRevsPerMin2 = setpoint2*60;
+    double FF1 = frictionFF(m_encoder1.getVelocity()/60, setpoint1) + velocityFF(setpoint1);
+    double FF2 = frictionFF(m_encoder1.getVelocity()/60, setpoint2) + velocityFF(setpoint2);
     SmartDashboard.putNumber("Motor 1 setpoint", setpoint1);
-    m_pidController1.setReference(setpointRevsPerMin, CANSparkMax.ControlType.kVelocity, 0, FF, SparkMaxPIDController.ArbFFUnits.kVoltage);
+    m_pidController1.setReference(setpointRevsPerMin1, CANSparkMax.ControlType.kVelocity, 0, FF1, SparkMaxPIDController.ArbFFUnits.kVoltage);
     SmartDashboard.putNumber("Motor 2 setpoint", setpoint2);
-    m_pidController2.setReference(setpointRevsPerMin, CANSparkMax.ControlType.kVelocity, 1, FF, SparkMaxPIDController.ArbFFUnits.kVoltage);
+    m_pidController2.setReference(setpointRevsPerMin2, CANSparkMax.ControlType.kVelocity, 1, FF2, SparkMaxPIDController.ArbFFUnits.kVoltage);
   }
 
   public void setVelocity(double value) {
