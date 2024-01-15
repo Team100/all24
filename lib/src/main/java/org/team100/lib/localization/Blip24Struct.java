@@ -19,7 +19,7 @@ public class Blip24Struct implements Struct<Blip24> {
 
     @Override
     public int getSize() {
-        return kSizeInt32 + Transform3d.struct.getSize();
+        return Transform3d.struct.getSize();
     }
 
     @Override
