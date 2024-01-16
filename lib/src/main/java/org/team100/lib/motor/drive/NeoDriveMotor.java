@@ -1,9 +1,9 @@
-package org.team100.lib.motor.turning;
+package org.team100.lib.motor.drive;
 
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Distance;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -18,15 +18,11 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
  * 
  * This is not finished, don't use it without finishing it.
  */
-public class NeoTurningMotor implements Motor100<Angle> {
+public class NeoDriveMotor implements Motor100<Distance> {
     private static final int kCurrentLimit = 40;
     private final RelativeEncoder m_encoder;
 
-    private static final double  staticFrictionFFVolts = 0.1;
-    /**
-     * This is surely wrong.
-     */
-    private static final double kMotorGearing = 1;
+    private static final double staticFrictionFFVolts = 0.1;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
@@ -63,9 +59,16 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private final Telemetry t = Telemetry.get();
     private final SparkPIDController m_pidController;
     private final CANSparkMax m_motor;
+    private final double m_gearRatio;
+    private final double m_wheelDiameter;
     private final String m_name;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase) {
+    public NeoDriveMotor(
+            String name,
+            int canId,
+            boolean motorPhase,
+            double gearRatio,
+            double wheelDiameter) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
 
@@ -75,13 +78,16 @@ public class NeoTurningMotor implements Motor100<Angle> {
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
-        m_pidController.setPositionPIDWrappingEnabled(true);
+        m_pidController.setPositionPIDWrappingEnabled(false);
         m_pidController.setP(outboardP);
         m_pidController.setI(0);
         m_pidController.setD(0);
         m_pidController.setIZone(0);
         m_pidController.setFF(0);
         m_pidController.setOutputRange(-1, 1);
+
+        m_gearRatio = gearRatio;
+        m_wheelDiameter = wheelDiameter;
 
         m_name = String.format("/Neo Turning Motor %s", name);
 
@@ -97,7 +103,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
+        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", m_encoder.getVelocity() / 60);
     }
 
     @Override
@@ -111,21 +117,23 @@ public class NeoTurningMotor implements Motor100<Angle> {
      * Note the implementation here is surely wrong, it needs to be calibrated.
      */
     @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2) {
-        double motorRad_S = kMotorGearing * outputRad_S;
-        double motorRevs_S = motorRad_S / (2*Math.PI);
-        double motorRevs_M = motorRevs_S * 60;
-        double motorRad_S2 = kMotorGearing * accelRad_S2;
-        double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
-        double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(this.getVelocity(),motorRevs_S);
-        double accelFF = accelFF(motorRevs_S2);
+    public void setVelocity(double outputM_S, double accelM_S2) {
+        double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
+        double motorRev_S = wheelRev_S * m_gearRatio;
+        double motorRev_M = motorRev_S * 60;
+
+        double wheelRev_S2 = accelM_S2 / (m_wheelDiameter * Math.PI);
+        double motorRev_S2 = wheelRev_S2 * m_gearRatio;
+
+        double velocityFF = velocityFF(motorRev_S);
+        double frictionFF = frictionFF(this.getVelocity(), motorRev_S);
+        double accelFF = accelFF(motorRev_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
+        m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
-        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
+        t.log(Level.DEBUG, m_name + "/Output", motorRev_S);
+        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", m_encoder.getVelocity() / 60);
     }
 
     @Override
@@ -145,6 +153,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
         }
         return dynamicFrictionFFVolts * direction;
     }
+
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
@@ -158,8 +167,8 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }
-    
+
     public double getVelocity() {
-        return m_encoder.getVelocity()/60;
+        return m_encoder.getVelocity() / 60;
     }
 }
