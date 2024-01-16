@@ -128,6 +128,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
         t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
+        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
     }
 
     @Override
