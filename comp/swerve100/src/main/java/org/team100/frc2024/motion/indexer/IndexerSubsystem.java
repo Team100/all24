@@ -1,4 +1,4 @@
-package org.team100.lib.motion.indexer;
+package org.team100.frc2024.motion.indexer;
 
 import org.team100.lib.motor.drive.NeoDriveMotor;
 
@@ -11,7 +11,6 @@ public class IndexerSubsystem extends SubsystemBase {
         m_motor = new NeoDriveMotor(name, canID, true, 1, 0.1);
     }
 
-    // Rots per second
     public void set(double value) {
         m_motor.setVelocity(value, 0);
     }

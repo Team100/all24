@@ -1,8 +1,12 @@
-package org.team100.frc2023;
+package org.team100.frc2024;
 
 import java.io.IOException;
 import java.util.List;
 
+import org.team100.frc2024.motion.climber.ClimberSubsystem;
+import org.team100.frc2024.motion.indexer.IndexerSubsystem;
+import org.team100.frc2024.motion.intake.IntakeSubsystem;
+import org.team100.frc2024.motion.shooter.ShooterSubsystem;
 import org.team100.lib.commands.arm.CartesianManualArm;
 import org.team100.lib.commands.arm.CartesianManualPositionalArm;
 import org.team100.lib.commands.arm.ManualArm;
@@ -47,15 +51,11 @@ import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.motion.climber.ClimberSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.motion.indexer.IndexerSubsystem;
-import org.team100.lib.motion.intake.IntakeSubsystem;
-import org.team100.lib.motion.shooter.ShooterSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.selftest.SelfTestable;

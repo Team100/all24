@@ -1,4 +1,4 @@
-package org.team100.lib.motion.intake;
+package org.team100.frc2024.motion.intake;
 
 import org.team100.lib.motor.drive.NeoDriveMotor;
 
@@ -13,7 +13,6 @@ public class IntakeSubsystem extends SubsystemBase {
         bottomRoller = new NeoDriveMotor(name2, canID2, false, 2, 0.05);
     }
 
-    // RPS
     public void set(double value) {
         topRoller.setVelocity(value, 0);
         bottomRoller.setVelocity(value, 0);
