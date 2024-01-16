@@ -14,7 +14,7 @@ import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 /**
- * Swerve steering motor using REV Neo.
+ * Linear drive motor using REV Neo.
  * 
  * This is not finished, don't use it without finishing it.
  */
@@ -139,6 +139,25 @@ public class NeoDriveMotor implements Motor100<Distance> {
     @Override
     public void close() {
         m_motor.close();
+    }
+
+    /**
+     * @return integrated sensor position in rotations. */
+    public double getPositionRot() {
+        return m_encoder.getPosition();
+    }
+
+    /**
+     * @return integrated sensor velocity in RPM */
+    public double getRateRPM() {
+        return m_encoder.getVelocity();
+    }
+
+        /**
+     * Sets integrated sensor position to zero.
+     */
+    public void resetPosition() {
+        m_encoder.setPosition(0);
     }
 
     /////////////////////////////////////////////////////////////////

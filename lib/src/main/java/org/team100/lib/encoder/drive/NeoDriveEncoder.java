@@ -1,50 +1,53 @@
 package org.team100.lib.encoder.drive;
 
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.motor.drive.FalconDriveMotor;
+import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
 
 /**
- * The built-in encoder in Falcon motors.
+ * The built-in encoder in Neo motors.
  * 
- * The encoder is a high-resolution magnetic sensor, 2048 ticks per turn.
+ * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
+ * per turn.
  */
-public class FalconDriveEncoder implements Encoder100<Distance> {
+public class NeoDriveEncoder implements Encoder100<Distance> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    private final FalconDriveMotor m_motor;
-    private final double m_distancePerPulse;
+    private final NeoDriveMotor m_motor;
+    private final double m_distancePerTurn;
 
     /**
      * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
      */
-    public FalconDriveEncoder(
+    public NeoDriveEncoder(
             String name,
-            FalconDriveMotor motor,
+            NeoDriveMotor motor,
             double distancePerTurn) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = String.format("/%s/Falcon Drive Encoder", name);
+        m_name = String.format("/%s/Neo Drive Encoder", name);
         m_motor = motor;
-        m_distancePerPulse = distancePerTurn / 2048;
+        m_distancePerTurn = distancePerTurn;
     }
 
     @Override
     public double getPosition() {
-        double result = m_motor.getPosition() * m_distancePerPulse;
+        // raw position is in rotations
+        double result = m_motor.getPositionRot() * m_distancePerTurn;
         t.log(Level.DEBUG, m_name + "/Position m", result);
         return result;
     }
 
     @Override
     public double getRate() {
-        // sensor velocity is 1/2048ths of a turn per 100ms
-        double result = m_motor.getVelocity2048_100() * 10 * m_distancePerPulse;
+        // raw velocity is in RPM
+        double result = m_motor.getRateRPM() * m_distancePerTurn / 60;
         t.log(Level.DEBUG, m_name + "/Speed m_s", result);
         return result;
+
     }
 
     @Override
