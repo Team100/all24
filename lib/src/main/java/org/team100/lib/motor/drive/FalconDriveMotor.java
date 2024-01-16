@@ -46,6 +46,9 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * 
  * Details on CAN bus status frame timing:
  * https://v5.docs.ctr-electronics.com/en/latest/ch18_CommonAPI.html#setting-status-frame-periods
+ * 
+ * TODO: phoenix 6 has a large number of zero-value arbitrary API changes; convert this
+ * class to use them at some point during 2024.
  */
 public class FalconDriveMotor implements Motor100<Distance> {
 

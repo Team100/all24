@@ -6,12 +6,12 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
+import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 /**
  * Swerve steering motor using REV Neo.
@@ -61,7 +61,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private static final double saturationVoltage = 1;
 
     private final Telemetry t = Telemetry.get();
-    private final SparkMaxPIDController m_pidController;
+    private final SparkPIDController m_pidController;
     private final CANSparkMax m_motor;
     private final String m_name;
 
@@ -105,9 +105,6 @@ public class NeoTurningMotor implements Motor100<Angle> {
         m_motor.stopMotor();
     }
 
-    public void setInverted() {
-        
-    }
     /**
      * Supports accel feedforward.
      * 
