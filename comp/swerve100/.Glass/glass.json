@@ -77,24 +77,29 @@
       "/LiveWindow/Ungrouped/navX-Sensor[2]": "Gyro",
       "/SmartDashboard/Arm": "Subsystem",
       "/SmartDashboard/Drive Subsystem": "Subsystem",
+      "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
+      "/SmartDashboard/ShowMode": "String Chooser",
+      "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
+      "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/elevator": "Mechanism2d",
       "/field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/Manual Drive Mode": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Telemetry Level": {
         "window": {
           "visible": true
         }
@@ -130,7 +135,7 @@
             0.9399999976158142,
             1.0
           ],
-          "height": -6,
+          "height": -12,
           "series": [
             {
               "color": [

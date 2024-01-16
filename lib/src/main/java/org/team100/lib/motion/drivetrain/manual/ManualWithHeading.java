@@ -129,6 +129,7 @@ public class ManualWithHeading {
                 clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 

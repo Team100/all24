@@ -76,9 +76,20 @@ public class DriveUtil {
                 speeds.vxMetersPerSecond = 0;
                 speeds.vyMetersPerSecond = 0;
                 speeds.omegaRadiansPerSecond = 0;
-                return;
+                throw e;
+                // return;
             }
             // in test/sim, it's ok to throw
+            throw e;
+        }
+    }
+
+    public static void checkTwist(Twist2d twist) {
+        try {
+            if (Double.isNaN(twist.dx)) throw new IllegalStateException("dx is Nan");
+            if (Double.isNaN(twist.dy)) throw new IllegalStateException("dy is Nan");
+            if (Double.isNaN(twist.dtheta)) throw new IllegalStateException("dtheta is Nan");
+        } catch (IllegalStateException e) {
             throw e;
         }
     }

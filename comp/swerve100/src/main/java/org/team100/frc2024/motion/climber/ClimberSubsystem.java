@@ -12,24 +12,21 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase {
-    private NeoDriveMotor leftClimber;
-    private NeoDriveMotor rightClimber;
+    private static final double kGearRatio = 20.0;
+    private static final double kWinchDiameterM = 0.01;
 
     private final PositionServo<Distance> s1;
     private final PositionServo<Distance> s2;
 
     public ClimberSubsystem(String name1, String name2, int canID1, int canID2) {
-        leftClimber = new NeoDriveMotor(name1, canID1, true, 20, 0.01);
-        rightClimber = new NeoDriveMotor(name2, canID2, true, 20, 0.01);
-
-        s1 = newPositionServo(name1, leftClimber);
-        s2 = newPositionServo(name2, rightClimber);
+        s1 = newPositionServo(name1, canID1, false);
+        s2 = newPositionServo(name2, canID2, true);
     }
 
-    /** Set velocity */
+    /** Set velocity in meters per second */
     public void set(double value) {
-        leftClimber.setVelocity(value, 0);
-        rightClimber.setVelocity(value, 0);
+        s1.setVelocity(value);
+        s2.setVelocity(value);
     }
 
     public void setPosition(double value) {
@@ -47,8 +44,20 @@ public class ClimberSubsystem extends SubsystemBase {
      * Using the velocity servo means we can select onboard or outboard velocity
      * closed-loop, and control position with the position servo.
      */
-    private static PositionServo<Distance> newPositionServo(String name, NeoDriveMotor motor) {
-        NeoDriveEncoder encoder = new NeoDriveEncoder(name + "encoder", motor, 0.05);
+    private static PositionServo<Distance> newPositionServo(
+            String name,
+            int canId,
+            boolean motorPhase) {
+        NeoDriveMotor motor = new NeoDriveMotor(
+                name,
+                canId,
+                motorPhase,
+                kGearRatio,
+                kWinchDiameterM);
+        NeoDriveEncoder encoder = new NeoDriveEncoder(
+                name + "/encoder",
+                motor,
+                kWinchDiameterM * Math.PI);
         VelocityServo<Distance> vServo = new VelocityServo<>(
                 name + "/velocity",
                 motor,
