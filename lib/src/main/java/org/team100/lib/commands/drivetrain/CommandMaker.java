@@ -47,7 +47,7 @@ public class CommandMaker {
                         new PIDController(1, 0.0, 0.0),
                         new PIDController(1, 0.0, 0.0),
                         x -> drivetrain.setChassisSpeeds(x, 0.02),
-                        false,
+                        () -> false,
                         drivetrain)) {
 
             @Override
