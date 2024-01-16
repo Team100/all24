@@ -2,7 +2,6 @@ package org.team100.frc2023;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 import org.team100.lib.commands.arm.CartesianManualArm;
 import org.team100.lib.commands.arm.CartesianManualPositionalArm;
@@ -48,17 +47,20 @@ import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
+import org.team100.lib.motion.climber.ClimberSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.motion.indexer.IndexerSubsystem;
+import org.team100.lib.motion.intake.IntakeSubsystem;
+import org.team100.lib.motion.shooter.ShooterSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystem;
 import org.team100.lib.motion.simple.SimpleSubsystemFactory;
 import org.team100.lib.selftest.SelfTestable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -78,6 +80,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 
 public class RobotContainer implements SelfTestable {
     private static final double kDriveCurrentLimit = 60;
@@ -96,12 +99,16 @@ public class RobotContainer implements SelfTestable {
     // for SelfTest
     private final DriveInALittleSquare m_driveInALittleSquare;
     private final MorseCodeBeep m_beep;
-    private final Monitor m_monitor;
+    // private final Monitor m_monitor;
 
     // Identity-specific fields
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
     private final SimpleSubsystem m_elevator;
+    private final IndexerSubsystem m_indexer;
+    private final ClimberSubsystem m_climber;
+    private final ShooterSubsystem m_shooter;
+    private final IntakeSubsystem m_intake;
 
     public RobotContainer(TimedRobot robot) throws IOException {
         // selects the correct control class for whatever is plugged in
@@ -122,10 +129,10 @@ public class RobotContainer implements SelfTestable {
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
+        // BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
         // digital output 4
-        m_monitor = new Monitor(new Annunciator(6), test);
-        robot.addPeriodic(m_monitor::periodic, 0.02);
+        // m_monitor = new Monitor(new Annunciator(6), test);
+        // robot.addPeriodic(m_monitor::periodic, 0.02);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
@@ -156,6 +163,11 @@ public class RobotContainer implements SelfTestable {
         listener.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
+
+        m_intake = new IntakeSubsystem("Top Roller", "Bottom Roller", 3, 6);
+        m_shooter = new ShooterSubsystem("Left Shooter", "Right Shooter", 7, 8);
+        m_indexer = new IndexerSubsystem("Indexer", 1);
+        m_climber = new ClimberSubsystem("Left Climber", "Right Climber", 2, 4);
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
@@ -254,6 +266,38 @@ public class RobotContainer implements SelfTestable {
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
         driverControl.never().whileTrue(m_driveInALittleSquare);
 
+
+
+        /////////////////OPERATOR V2//////////////////////////
+
+        m_intake.setDefaultCommand(
+            new RunCommand(
+                () -> m_intake.set(0), m_intake)
+        );
+
+        operatorControl.intake(new RunCommand(
+                () -> m_intake.set(40), m_intake));
+
+
+        m_shooter.setDefaultCommand(
+            new RunCommand(
+                () -> m_shooter.set(0),m_shooter)
+        );
+        operatorControl.shooter(new RunCommand(
+                () -> m_shooter.set(95), m_shooter));
+
+
+        m_indexer.setDefaultCommand(
+            new RunCommand(
+                () -> m_indexer.set(0), m_indexer)
+        );
+        operatorControl.index(new RunCommand(
+                () -> m_indexer.set(30), m_indexer));
+
+        m_climber.setDefaultCommand(
+            new RunCommand(
+                () -> m_climber.set(operatorControl.climberState()), m_climber));
+
         ///////////////////////
         //
         // ARM
@@ -316,7 +360,7 @@ public class RobotContainer implements SelfTestable {
 
         /////////////////////////////////
         //
-        // IDENTITY-SPECIFIC PARTS
+    // IDENTITY-SPECIFIC PARTS
         //
 
         switch (Identity.instance) {
@@ -394,7 +438,7 @@ public class RobotContainer implements SelfTestable {
 
     @Override
     public Monitor getMonitor() {
-        return m_monitor;
+        return null;
     }
 
     @Override

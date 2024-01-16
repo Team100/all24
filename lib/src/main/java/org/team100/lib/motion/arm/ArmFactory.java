@@ -25,7 +25,7 @@ public class ArmFactory {
                 // for testing
                 return simulated();
             default:
-                return real();
+                return simulated();
         }
     }
 
