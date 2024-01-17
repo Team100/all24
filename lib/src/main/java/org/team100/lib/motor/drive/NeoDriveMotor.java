@@ -103,7 +103,7 @@ public class NeoDriveMotor implements Motor100<Distance> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", m_encoder.getVelocity() / 60);
+        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", getRateRPS());
     }
 
     @Override
@@ -126,14 +126,14 @@ public class NeoDriveMotor implements Motor100<Distance> {
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
         double velocityFF = velocityFF(motorRev_S);
-        double frictionFF = frictionFF(this.getVelocity(), motorRev_S);
+        double frictionFF = frictionFF(getRateRPS(), motorRev_S);
         double accelFF = accelFF(motorRev_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
         t.log(Level.DEBUG, m_name + "/Output", motorRev_S);
-        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", m_encoder.getVelocity() / 60);
+        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", getRateRPS());
     }
 
     @Override
@@ -148,9 +148,9 @@ public class NeoDriveMotor implements Motor100<Distance> {
     }
 
     /**
-     * @return integrated sensor velocity in RPM */
-    public double getRateRPM() {
-        return m_encoder.getVelocity();
+     * @return integrated sensor velocity in RPS */
+    public double getRateRPS() {
+        return m_encoder.getVelocity()/60;
     }
 
         /**
@@ -185,9 +185,5 @@ public class NeoDriveMotor implements Motor100<Distance> {
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
-    }
-
-    public double getVelocity() {
-        return m_encoder.getVelocity() / 60;
     }
 }

@@ -1,10 +1,10 @@
-package org.team100.lib.encoder.drive;
+package org.team100.lib.encoder.turning;
 
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.motor.drive.NeoDriveMotor;
+import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Angle;
 
 /**
  * The built-in encoder in Neo motors.
@@ -12,31 +12,28 @@ import org.team100.lib.units.Distance;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoDriveEncoder implements Encoder100<Distance> {
+public class NeoTurningEncoder implements Encoder100<Angle> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    private final NeoDriveMotor m_motor;
-    private final double m_distancePerTurn;
+    private final NeoTurningMotor m_motor;
 
     /**
      * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
      */
-    public NeoDriveEncoder(
+    public NeoTurningEncoder(
             String name,
-            NeoDriveMotor motor,
-            double distancePerTurn) {
+            NeoTurningMotor motor) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = String.format("/%s/Neo Drive Encoder", name);
         m_motor = motor;
-        m_distancePerTurn = distancePerTurn;
     }
 
     @Override
     public double getPosition() {
         // raw position is in rotations
-        double result = m_motor.getPositionRot() * m_distancePerTurn;
+        double result = m_motor.getPositionRot();
         t.log(Level.DEBUG, m_name + "/Position m", result);
         return result;
     }
@@ -44,7 +41,7 @@ public class NeoDriveEncoder implements Encoder100<Distance> {
     @Override
     public double getRate() {
         // raw velocity is in RPS
-        double result = m_motor.getRateRPS() * m_distancePerTurn;
+        double result = m_motor.getRateRPS();
         t.log(Level.DEBUG, m_name + "/Speed m_s", result);
         return result;
 

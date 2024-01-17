@@ -22,6 +22,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void set(double value) {
+        
         setpoint = m_trapezoid.calculate(0.02, setpoint, new State100(value, 0, 0));
 
         leftShooter.setVelocity(setpoint.x(), 0);

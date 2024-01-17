@@ -97,7 +97,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
+        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",getRateRPS());
     }
 
     @Override
@@ -118,14 +118,14 @@ public class NeoTurningMotor implements Motor100<Angle> {
         double motorRad_S2 = kMotorGearing * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
         double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(this.getVelocity(),motorRevs_S);
+        double frictionFF = frictionFF(getRateRPS(),motorRevs_S);
         double accelFF = accelFF(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
         t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
-        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
+        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",getRateRPS());
     }
 
     @Override
@@ -151,15 +151,22 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private static double velocityFF(double motorRev_S) {
         return velocityFFVoltS_Rev * motorRev_S / saturationVoltage;
     }
-
+    public double getPositionRot() {
+        return m_encoder.getPosition();
+    }
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }
-    
-    public double getVelocity() {
+    /**
+     * Gets rate in rotations per second
+     */
+    public double getRateRPS() {
         return m_encoder.getVelocity()/60;
+    }
+    public void resetPosition() {
+        m_encoder.setPosition(0);
     }
 }
