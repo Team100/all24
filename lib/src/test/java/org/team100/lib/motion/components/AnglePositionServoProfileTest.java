@@ -34,7 +34,7 @@ class AnglePositionServoProfileTest {
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+        SelectableVelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,

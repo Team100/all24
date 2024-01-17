@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.drive.FalconDriveMotor;
@@ -69,7 +70,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 0.06, // kS
                 0.3, // kV
                 0.025); // kA
-        return new VelocityServo<>(
+        return new SelectableVelocityServo<>(
                 drive(name),
                 driveMotor,
                 driveEncoder,
@@ -104,7 +105,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 0.005, // kV: Since we are decreasing the value of how much the PID system does we need
                        // to conpensate for making feedforward larger as well
                 0); // kA
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+        VelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
                 turning(name),
                 turningMotor,
                 turningEncoder,

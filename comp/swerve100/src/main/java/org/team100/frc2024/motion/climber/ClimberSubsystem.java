@@ -2,6 +2,7 @@ package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.profile.ChoosableProfile;
@@ -58,7 +59,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 name + "/encoder",
                 motor,
                 kWinchDiameterM * Math.PI);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        VelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name + "/velocity",
                 motor,
                 encoder,
