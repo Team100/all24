@@ -6,7 +6,7 @@ import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.profile.ChoosableProfile;
-import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle;
 import edu.wpi.first.math.controller.PIDController;
@@ -20,7 +20,7 @@ public class IndexerSubsystem extends SubsystemBase {
     public IndexerSubsystem(String name, int canID) {
         m_servo = newPositionServo(name, canID, true);
         m_trapezoid = new TrapezoidProfile100(
-                new Constraints(4, 10), 0.05);
+                new Constraints100(4, 10), 0.05);
         setpoint = new State100(0, 0, 0);
     }
     @Override

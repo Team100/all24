@@ -7,7 +7,8 @@ import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
-import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.Profile100;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -34,14 +35,14 @@ class AnglePositionServoProfileTest {
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+        SelectableVelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
                 angleVelocityController,
                 feedforward);
 
-        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID);
+        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
                 turningVelocityServo,

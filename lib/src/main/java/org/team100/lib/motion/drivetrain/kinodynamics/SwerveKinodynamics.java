@@ -2,8 +2,9 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
-import org.team100.lib.profile.ChoosableProfile;
-import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.Constraints100;
+import org.team100.lib.profile.Profile100;
+import org.team100.lib.profile.TrapezoidProfile100;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -45,7 +46,7 @@ public class SwerveKinodynamics {
     private final double m_maxAngleAccelRad_S2;
     private final double m_MaxCapsizeAccelM_S2;
     private final SwerveDriveKinematics m_kinematics;
-    private final ChoosableProfile m_steeringProfile;
+    private final Profile100 m_steeringProfile;
 
     /**
      * Use the factory
@@ -88,13 +89,13 @@ public class SwerveKinodynamics {
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / vcg);
 
         m_kinematics = get(track, wheelbase);
-        m_steeringProfile = new ChoosableProfile(
+        m_steeringProfile = new TrapezoidProfile100(
                 maxSteeringVelocity,
                 maxSteeringAcceleration,
-                ChoosableProfile.Mode.TRAPEZOID);
+                0.05);
     }
 
-    public ChoosableProfile getSteeringProfile() {
+    public Profile100 getSteeringProfile() {
         return m_steeringProfile;
     }
 
@@ -143,15 +144,15 @@ public class SwerveKinodynamics {
     }
 
     /** If you want to rotate the robot with a trapezoidal profile, use this. */
-    public Constraints getAngleConstraints() {
-        return new Constraints(
+    public Constraints100 getAngleConstraints() {
+        return new Constraints100(
                 getMaxAngleSpeedRad_S(),
                 getMaxAngleAccelRad_S2());
     }
 
     /** Trapezoidal profile for linear motion. */
-    public Constraints getDistanceConstraints() {
-        return new Constraints(
+    public Constraints100 getDistanceConstraints() {
+        return new Constraints100(
                 getMaxDriveVelocityM_S(),
                 getMaxDriveAccelerationM_S2());
     }

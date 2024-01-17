@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.Profile100;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Distance;
 import org.team100.lib.util.Util;
 
@@ -40,13 +42,13 @@ class PositionProfileTest {
     @Test
     void testTrapezoid() {
         PIDController vController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
                 vController,
                 feedforward);
-        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID);
+        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
                 vServo,
@@ -63,13 +65,13 @@ class PositionProfileTest {
     @Test
     void testProfile() {
         PIDController vController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
                 vController,
                 feedforward);
-        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID);
+        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
                 vServo,
@@ -109,7 +111,7 @@ class PositionProfileTest {
     @Test
     void testExponential() {
         PIDController vController = new PIDController(5, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,

@@ -29,8 +29,6 @@ public class Experiments {
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
-            Experiment.UseClosedLoopDrive,
-            Experiment.UseClosedLoopSteering,
             Experiment.UseClosedLoopVelocity,
             Experiment.UseSetpointGenerator,
             Experiment.UseInitialVelocity,
@@ -39,8 +37,6 @@ public class Experiments {
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(
             Identity.COMP_BOT, Set.of(
-                    Experiment.UseClosedLoopDrive,
-                    Experiment.UseClosedLoopSteering,
                     Experiment.UseSetpointGenerator));
 
     /** Computed for the actual identity used. */

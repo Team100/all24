@@ -23,7 +23,7 @@ class DistanceVelocityServoTest {
 
         SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        VelocityServo<Distance> servo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> servo = new SelectableVelocityServo<>(
                 name,
                 driveMotor,
                 driveEncoder,
