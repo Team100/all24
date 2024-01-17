@@ -6,10 +6,6 @@ package org.team100.lib.experiments;
 public enum Experiment {
     /** Smooth chassis speeds. */
     UseSetpointGenerator,
-    /** Offload the drive PID to the motor controller. */
-    UseClosedLoopDrive,
-    /** Offload the steering PID to the motor controller. */
-    UseClosedLoopSteering,
     /** Offload simple servo velocity to the controller */
     UseClosedLoopVelocity,
     /** Use initial state in trajectory generation */
