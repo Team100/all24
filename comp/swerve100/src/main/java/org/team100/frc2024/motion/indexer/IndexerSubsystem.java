@@ -28,6 +28,7 @@ public class IndexerSubsystem extends SubsystemBase {
         m_servo.periodic();
         }
     public void set(double value) {
+        setpoint = m_trapezoid.calculate(0.02, setpoint, new State100(value, 0, 0));
         m_servo.setVelocity(setpoint.x());
     }
 
