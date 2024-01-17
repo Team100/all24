@@ -1,5 +1,13 @@
 {
   "NetworkTables": {
+    "Front Left": {
+      "Drive": {
+        "Velocity Servo": {
+          "open": true
+        }
+      },
+      "open": true
+    },
     "Holonomic3": {
       "measurement": {
         "open": true
@@ -52,9 +60,13 @@
         },
         "open": true
       },
+      "open": true,
       "upper": {
         "open": true
       }
+    },
+    "arm position": {
+      "open": true
     },
     "combined": true,
     "drive": {
@@ -160,12 +172,43 @@
         }
       }
     },
+    "transitory": {
+      "SmartDashboard": {
+        "Swerve Module Front Left": {
+          "open": false
+        },
+        "Swerve Module Front Right": {
+          "open": false
+        }
+      },
+      "experiments": {
+        "string[]##v_/experiments/enabled": {
+          "open": false
+        }
+      },
+      "position servo Front Left": {
+        "open": false
+      },
+      "position servo Front Right": {
+        "open": false
+      },
+      "position servo Rear Left": {
+        "open": false
+      },
+      "position servo Rear Right": {
+        "open": false
+      },
+      "robot": {
+        "open": false
+      }
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard//Front Left": "Mechanism2d",
       "/SmartDashboard//Front Right": "Mechanism2d",
       "/SmartDashboard//Rear Left": "Mechanism2d",
       "/SmartDashboard//Rear Right": "Mechanism2d",
+      "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/Front Left": "Mechanism2d",
       "/SmartDashboard/Front Right": "Mechanism2d",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
@@ -179,8 +222,10 @@
       "/SmartDashboard/Module3": "Mechanism2d",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
       "/SmartDashboard/Rear Left": "Mechanism2d",
       "/SmartDashboard/Rear Right": "Mechanism2d",
+      "/SmartDashboard/ShowMode": "String Chooser",
       "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Simple Manual Mode": "String Chooser",
       "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
@@ -193,6 +238,7 @@
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/annunciator": "Mechanism2d",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/SmartDashboard/swerve/Front Left": "Mechanism2d",
       "/SmartDashboard/swerve/Front Right": "Mechanism2d",
@@ -201,6 +247,11 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/FlushOften": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Manual Drive Mode": {
         "window": {
           "visible": true
@@ -267,6 +318,11 @@
         }
       },
       "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/annunciator": {
         "window": {
           "visible": true
         }

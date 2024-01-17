@@ -10,7 +10,6 @@ import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -212,13 +211,11 @@ public class SwerveLocal {
     private void setChassisSpeedsWithSetpointGenerator(
             ChassisSpeeds speeds,
             double kDtSec) {
-        DriveUtil.checkSpeeds(speeds);
         // Informs SwerveDriveKinematics of the module states.
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
                 prevSetpoint,
                 speeds,
                 kDtSec);
-        DriveUtil.checkSpeeds(setpoint.getChassisSpeeds());
         // ideally delta would be zero because our input would be feasible.
         ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
         t.log(Level.DEBUG, "/swervelocal/setpoint delta", delta);

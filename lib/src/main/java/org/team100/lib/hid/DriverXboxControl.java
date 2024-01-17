@@ -49,13 +49,18 @@ public class DriverXboxControl implements DriverControl {
      */
     @Override
     public Twist2d twist() {
+        double dx = 0;
+        double dy = 0;
+
         double x = deadband(-1.0 * clamp(m_controller.getRightY(), 1), kDeadband, 1);
         double y = deadband(-1.0 * clamp(m_controller.getRightX(), 1), kDeadband, 1);
         double r = Math.hypot(x, y);
-        double expoR = expo(r, kExpo);
-        double ratio = expoR / r;
-        double dx = ratio * x;
-        double dy = ratio * y;
+        if (r > kDeadband) {
+            double expoR = expo(r, kExpo);
+            double ratio = expoR / r;
+            dx = ratio * x;
+            dy = ratio * y;
+        }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
         t.log(Level.DEBUG, "/Xbox/right y", m_controller.getRightY());
         t.log(Level.DEBUG, "/Xbox/right x", m_controller.getRightX());
@@ -100,16 +105,17 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public Trigger steer0() {
-        return new JoystickButton(m_controller.getHID(), 3);
+        return m_controller.x();
     }
 
     @Override
     public Trigger steer90() {
-        return new JoystickButton(m_controller.getHID(), 4);
+        return m_controller.y();
     }
 
     @Override
     public Trigger rotate0() {
+        // this is the left trigger
         return new JoystickButton(m_controller.getHID(), 9);
     }
 
@@ -125,6 +131,6 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean annunicatorTest() {
-        return m_controller.getHID().getXButton();
+        return m_controller.getHID().getStartButton();
     }
 }

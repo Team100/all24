@@ -14,7 +14,6 @@ import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
