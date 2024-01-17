@@ -238,6 +238,7 @@
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/annunciator": "Mechanism2d",
       "/SmartDashboard/elevator": "Mechanism2d",
       "/SmartDashboard/swerve/Front Left": "Mechanism2d",
       "/SmartDashboard/swerve/Front Right": "Mechanism2d",
@@ -317,6 +318,11 @@
         }
       },
       "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/annunciator": {
         "window": {
           "visible": true
         }

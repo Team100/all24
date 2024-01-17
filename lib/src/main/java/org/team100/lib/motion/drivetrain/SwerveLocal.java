@@ -10,7 +10,6 @@ import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;

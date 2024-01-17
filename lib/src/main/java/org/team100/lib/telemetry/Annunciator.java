@@ -15,7 +15,7 @@ public class Annunciator implements BooleanConsumer {
         m_pwm = new DigitalOutput(channel);
         m_viz = new AnnunciatorVisualization();
     }
-
+    
     @Override
     public void accept(boolean value) {
         m_pwm.set(value);

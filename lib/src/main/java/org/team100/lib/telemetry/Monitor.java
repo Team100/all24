@@ -7,6 +7,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.RobotController;
 
 /**
@@ -29,7 +30,7 @@ public class Monitor {
     public Monitor(BooleanConsumer annunciator, BooleanSupplier test) {
         m_annunciator = annunciator;
         m_test = test;
-        m_pdp = new PowerDistribution();
+        m_pdp = new PowerDistribution(1, ModuleType.kRev);
     }
 
     public void periodic() {
@@ -37,12 +38,13 @@ public class Monitor {
         // this should test different things for different identities.
         if (Identity.instance == Identity.COMP_BOT) {
             t.log(Level.INFO, "/monitor/battery_voltage", getBatteryVoltage());
-            t.log(Level.INFO, "/monitor/bus_voltage", getBusVoltage());
-            t.log(Level.INFO, "/monitor/total_current", getTotalCurrent());
-            for (int i = 0; i < 16; ++i) {
-                t.log(Level.INFO, String.format("/monitor/channel_current_%02d", i),
-                        getChannelCurrent(i));
-            }
+            // TODO: fix the pdp observer
+            // t.log(Level.INFO, "/monitor/bus_voltage", getBusVoltage());
+            // t.log(Level.INFO, "/monitor/total_current", getTotalCurrent());
+            // for (int i = 0; i < 16; ++i) {
+            // t.log(Level.INFO, String.format("/monitor/channel_current_%02d", i),
+            // getChannelCurrent(i));
+            // }
         }
 
         if (m_test.getAsBoolean())

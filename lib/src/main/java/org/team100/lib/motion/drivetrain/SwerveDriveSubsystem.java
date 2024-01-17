@@ -11,8 +11,6 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.DriveUtil;
-
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;

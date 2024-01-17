@@ -1,9 +1,13 @@
 package org.team100.lib.hid;
 
+import static org.team100.lib.hid.ControlUtil.clamp;
+import static org.team100.lib.hid.ControlUtil.deadband;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class OperatorV2Control implements OperatorControl {
+    private static final double kDeadband = 0.2;
     private final CommandXboxController m_controller;
 
     public OperatorV2Control() {
@@ -32,6 +36,6 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public double climberState() {
-        return -1.0 * m_controller.getRightY();
+        return deadband(clamp(-1.0 * m_controller.getRightY(), 1), kDeadband, 1);
     }
 }

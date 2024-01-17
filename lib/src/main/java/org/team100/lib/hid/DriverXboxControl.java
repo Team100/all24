@@ -7,7 +7,6 @@ import static org.team100.lib.hid.ControlUtil.expo;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -106,16 +105,17 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public Trigger steer0() {
-        return new JoystickButton(m_controller.getHID(), 3);
+        return m_controller.x();
     }
 
     @Override
     public Trigger steer90() {
-        return new JoystickButton(m_controller.getHID(), 4);
+        return m_controller.y();
     }
 
     @Override
     public Trigger rotate0() {
+        // this is the left trigger
         return new JoystickButton(m_controller.getHID(), 9);
     }
 
@@ -131,6 +131,6 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean annunicatorTest() {
-        return m_controller.getHID().getXButton();
+        return m_controller.getHID().getStartButton();
     }
 }

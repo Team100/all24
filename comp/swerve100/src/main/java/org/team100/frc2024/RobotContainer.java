@@ -2,6 +2,7 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
@@ -49,6 +50,7 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.selftest.SelfTestable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -86,7 +88,7 @@ public class RobotContainer implements SelfTestable {
     // for SelfTest
     private final DriveInALittleSquare m_driveInALittleSquare;
     private final MorseCodeBeep m_beep;
-    // private final Monitor m_monitor;
+    private final Monitor m_monitor;
 
     // Identity-specific fields
     private final IndexerSubsystem m_indexer;
@@ -113,11 +115,11 @@ public class RobotContainer implements SelfTestable {
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        // BooleanSupplier test = () -> driverControl.annunicatorTest() ||
-        // m_beep.getOutput();
+        BooleanSupplier test = () -> driverControl.annunicatorTest() ||
+         m_beep.getOutput();
         // digital output 4
-        // m_monitor = new Monitor(new Annunciator(6), test);
-        // robot.addPeriodic(m_monitor::periodic, 0.02);
+        m_monitor = new Monitor(new Annunciator(6), test);
+        robot.addPeriodic(m_monitor::periodic, 0.02);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
@@ -151,7 +153,7 @@ public class RobotContainer implements SelfTestable {
 
         m_intake = new IntakeSubsystem("Top Roller", "Bottom Roller", 3, 6);
         m_shooter = new ShooterSubsystem("Left Shooter", "Right Shooter", 7, 8);
-        m_indexer = new IndexerSubsystem("Indexer", 1);
+        m_indexer = new IndexerSubsystem("Indexer", 5);
         m_climber = new ClimberSubsystem("Left Climber", "Right Climber", 2, 4);
 
         // show mode locks slow speed.
@@ -254,13 +256,13 @@ public class RobotContainer implements SelfTestable {
         ///////////////// OPERATOR V2//////////////////////////
 
         m_intake.setDefaultCommand(m_intake.run(() -> m_intake.set(0)));
-        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(40)));
+        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(1)));
 
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.set(0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(95)));
+        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(8)));
 
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.set(0)));
-        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(30)));
+        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(1)));
 
         m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
 
@@ -355,7 +357,7 @@ public class RobotContainer implements SelfTestable {
 
     @Override
     public Monitor getMonitor() {
-        return null;
+        return m_monitor;
     }
 
     @Override

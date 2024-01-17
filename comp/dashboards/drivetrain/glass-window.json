@@ -15,13 +15,13 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "609",
+      "height": "756",
       "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1198",
-      "xpos": "695",
-      "ypos": "389"
+      "width": "1666",
+      "xpos": "187",
+      "ypos": "200"
     }
   },
   "Table": {
@@ -162,6 +162,11 @@
       "Collapsed": "0",
       "Pos": "22,572",
       "Size": "254,54"
+    },
+    "###/SmartDashboard/annunciator": {
+      "Collapsed": "0",
+      "Pos": "1192,229",
+      "Size": "200,200"
     },
     "###/SmartDashboard/elevator": {
       "Collapsed": "0",
