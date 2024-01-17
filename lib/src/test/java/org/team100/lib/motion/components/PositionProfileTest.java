@@ -40,7 +40,7 @@ class PositionProfileTest {
     @Test
     void testTrapezoid() {
         PIDController vController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
@@ -63,7 +63,7 @@ class PositionProfileTest {
     @Test
     void testProfile() {
         PIDController vController = new PIDController(1, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
@@ -109,7 +109,7 @@ class PositionProfileTest {
     @Test
     void testExponential() {
         PIDController vController = new PIDController(5, 0, 0, period);
-        VelocityServo<Distance> vServo = new VelocityServo<>(
+        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,

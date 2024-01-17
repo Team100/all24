@@ -23,7 +23,7 @@ class AngleVelocityServoTest {
 
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        VelocityServo<Angle> servo = new VelocityServo<>(
+        SelectableVelocityServo<Angle> servo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,

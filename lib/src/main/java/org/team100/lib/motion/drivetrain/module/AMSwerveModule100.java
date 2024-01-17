@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.drive.FalconDriveMotor;
@@ -72,7 +73,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 0.23, // kV
                 0.02); // kA
 
-        return new VelocityServo<>(
+        return new SelectableVelocityServo<>(
                 drive(name),
                 driveMotor,
                 driveEncoder,
@@ -106,7 +107,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 0.003, // kV
                 0); // kA
 
-        VelocityServo<Angle> turningVelocityServo = new VelocityServo<>(
+        VelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
                 turning(name),
                 turningMotor,
                 turningEncoder,
