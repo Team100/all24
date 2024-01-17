@@ -5,7 +5,7 @@ import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.drive.NeoDriveMotor;
-import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Distance;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -71,7 +71,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 encoder,
                 1,
                 new PIDController(1, 0, 0),
-                new ChoosableProfile(1, 1, ChoosableProfile.Mode.TRAPEZOID),
+                new TrapezoidProfile100(1, 1, 0.05),
                 Distance.instance);
     }
 }

@@ -46,13 +46,17 @@ import edu.wpi.first.math.MathUtil;
  * It might be slower around the switching points, since it can call itself once
  * or twice, once per segment.
  */
-public class TrapezoidProfile100 {
-    private final Constraints m_constraints;
+public class TrapezoidProfile100 implements Profile100 {
+    private final Constraints100 m_constraints;
     private final double m_tolerance;
 
-    public TrapezoidProfile100(Constraints constraints, double tolerance) {
+    public TrapezoidProfile100(Constraints100 constraints, double tolerance) {
         m_constraints = constraints;
         m_tolerance = tolerance;
+    }
+
+    public TrapezoidProfile100(double maxVel, double maxAccel, double tolerance) {
+        this(new Constraints100(maxVel, maxAccel), tolerance);
     }
 
     /**
@@ -72,6 +76,7 @@ public class TrapezoidProfile100 {
      * a real system, it will tend to get ahead of the profile, but only by one time
      * period.
      */
+    @Override
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
         State100 initial = new State100(initialRaw.x(),
                 MathUtil.clamp(initialRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));

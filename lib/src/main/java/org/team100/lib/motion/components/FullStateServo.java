@@ -2,7 +2,7 @@ package org.team100.lib.motion.components;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
@@ -28,7 +28,7 @@ public class FullStateServo<T extends Measure100> {
     private final PIDController m_vController;
     private final double m_period;
     private final String m_name;
-    private final ChoosableProfile m_profile;
+    private final Profile100 m_profile;
     private final T m_instance;
 
     private State100 m_setpoint;
@@ -40,7 +40,7 @@ public class FullStateServo<T extends Measure100> {
             double maxVel,
             PIDController xController,
             PIDController vController,
-            ChoosableProfile profile,
+            Profile100 profile,
             T instance) {
         m_servo = servo;
         m_encoder = encoder;

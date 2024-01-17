@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.intake;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.motor.drive.NeoDriveMotor;
-import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,7 +17,7 @@ public class IntakeSubsystem extends SubsystemBase {
         topRoller = new NeoDriveMotor(name1, canID1, true, 2, 0.05);
         bottomRoller = new NeoDriveMotor(name2, canID2, false, 2, 0.05);
         m_trapezoid = new TrapezoidProfile100(
-                new Constraints(2, 5), 0.05);
+                new Constraints100(2, 5), 0.05);
         setpoint = new State100(0, 0, 0);
     }
 

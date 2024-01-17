@@ -4,7 +4,7 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.profile.Constraints;
+import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
@@ -52,7 +52,7 @@ public class DriveInALittleSquare extends Command100 {
     public DriveInALittleSquare(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
 
-        Constraints c = new Constraints(kMaxVel, kMaxAccel);
+        Constraints100 c = new Constraints100(kMaxVel, kMaxAccel);
         m_driveProfile = new TrapezoidProfile100(c, 0.05);
         addRequirements(m_swerve);
     }

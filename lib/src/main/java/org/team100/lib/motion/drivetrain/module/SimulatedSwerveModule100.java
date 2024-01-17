@@ -6,7 +6,7 @@ import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedMotor;
-import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
 
@@ -78,7 +78,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
-        ChoosableProfile profile = kinodynamics.getSteeringProfile();
+        Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
                 turningVelocityServo,

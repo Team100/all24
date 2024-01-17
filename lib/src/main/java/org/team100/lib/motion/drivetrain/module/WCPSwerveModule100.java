@@ -8,7 +8,7 @@ import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
-import org.team100.lib.profile.ChoosableProfile;
+import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
 
@@ -120,7 +120,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, -Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
 
-        ChoosableProfile profile = kinodynamics.getSteeringProfile();
+        Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle> turningServo = new PositionServo<>(
                 turning(name),
                 turningVelocityServo,
