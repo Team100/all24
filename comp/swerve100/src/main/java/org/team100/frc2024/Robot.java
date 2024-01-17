@@ -6,7 +6,6 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.selftest.SelfTestRunner;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
@@ -90,7 +89,7 @@ public class Robot extends TimedRobot {
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().clearComposedCommands();
-        CommandScheduler.getInstance().schedule(new SelfTestRunner(m_robotContainer));
+        m_robotContainer.scheduleSelfTest();
     }
 
     @Override

@@ -36,4 +36,9 @@ public class OperatorXboxControl implements OperatorControl {
         return m_controller.getLeftTriggerAxis();
     }
 
+    @Override
+    public boolean selfTestEnable() {
+        return m_controller.getHID().getStartButton();
+    }
+
 }

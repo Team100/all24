@@ -16,7 +16,7 @@ public class VeeringSelfTest extends Command {
 
     @Override
     public void initialize() {
-        m_timer.start();
+        m_timer.restart();
     }
 
     @Override
