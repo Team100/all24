@@ -127,6 +127,7 @@ public class OnboardVelocityServo<T extends Measure100> implements VelocityServo
 
     @Override
     public void periodic() {
+        m_motor.periodic();
         m_encoder.periodic();
     }
 

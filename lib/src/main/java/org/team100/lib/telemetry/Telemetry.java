@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
@@ -35,6 +36,7 @@ import edu.wpi.first.networktables.StringArrayTopic;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -75,6 +77,9 @@ public class Telemetry {
     private final NetworkTableInstance inst;
     private final Map<String, Publisher> pubs;
     private final SendableChooser<Level> m_levelChooser;
+    // avoids hitting sendable chooser mutex so often.
+    private final Notifier m_levelUpdater;
+    private Level m_level;
 
     /**
      * Uses the default network table instance.
@@ -89,16 +94,22 @@ public class Telemetry {
         }
         m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
         SmartDashboard.putData(m_levelChooser);
-
+        updateLevel();
+        m_levelUpdater = new Notifier(this::updateLevel);
+        m_levelUpdater.startPeriodic(1);
         DataLogManager.start();
     }
+
+    private void updateLevel() {
+        m_level = m_levelChooser.getSelected();
+    } 
 
     public static Telemetry get() {
         return instance;
     }
 
     public void log(Level level, String key, boolean val) {
-        if (!m_levelChooser.getSelected().admit(level))
+        if (!m_level.admit(level))
             return;
         if (kAlsoPrint)
             Util.println(key + ": " + val);
@@ -111,7 +122,7 @@ public class Telemetry {
     }
 
     public void log(Level level, String key, double val) {
-        if (!m_levelChooser.getSelected().admit(level))
+        if (!m_level.admit(level))
             return;
         if (kAlsoPrint)
             Util.println(key + ": " + val);
@@ -124,7 +135,7 @@ public class Telemetry {
     }
 
     public void log(Level level, String key, double[] val) {
-        if (!m_levelChooser.getSelected().admit(level))
+        if (!m_level.admit(level))
             return;
         if (kAlsoPrint)
             Util.println(key + ": " + val);
@@ -137,7 +148,7 @@ public class Telemetry {
     }
 
     public void log(Level level, String key, long val) {
-        if (!m_levelChooser.getSelected().admit(level))
+        if (!m_level.admit(level))
             return;
         if (kAlsoPrint)
             Util.println(key + ": " + val);
@@ -150,7 +161,7 @@ public class Telemetry {
     }
 
     public void log(Level level, String key, String val) {
-        if (!m_levelChooser.getSelected().admit(level))
+        if (!m_level.admit(level))
             return;
         if (kAlsoPrint)
             Util.println(key + ": " + val);
@@ -162,8 +173,9 @@ public class Telemetry {
         }, StringPublisher.class).set(val);
     }
 
-    public void log(Level level, String key, String[] val) {
-        if (!m_levelChooser.getSelected().admit(level))
+    /** val is a supplier to avoid doing any work if we're not going to log it. */
+    public void log(Level level, String key, Supplier<String[]> val) {
+        if (!m_level.admit(level))
             return;
         if (kAlsoPrint)
             Util.println(key + ": " + val);
@@ -172,7 +184,7 @@ public class Telemetry {
             t.publish();
             t.setRetained(true);
             return t.publish();
-        }, StringArrayPublisher.class).set(val);
+        }, StringArrayPublisher.class).set(val.get());
     }
 
     public void log(Level level, String key, Pose2d val) {

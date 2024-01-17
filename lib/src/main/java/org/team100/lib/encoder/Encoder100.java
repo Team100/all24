@@ -38,7 +38,8 @@ public interface Encoder100<T extends Measure100> {
     void close();
 
     /**
-     * For visualization and odometry (for simulated encoders).
+     * For visualization and odometry (for simulated encoders), and
+     * to collect measurements once per cycle, to save time.
      */
     void periodic();
 

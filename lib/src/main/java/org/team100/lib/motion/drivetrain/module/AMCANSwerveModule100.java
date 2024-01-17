@@ -137,6 +137,5 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             VelocityServo<Distance> driveServo,
             PositionServo<Angle> turningServo) {
         super(name, driveServo, turningServo);
-        //
     }
 }

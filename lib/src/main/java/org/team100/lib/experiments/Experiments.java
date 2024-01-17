@@ -91,7 +91,14 @@ public class Experiments {
     }
 
     private void log() {
-        t.log(Level.INFO, "/experiments/enabled", m_experiments.stream().map(Experiment::name).toArray(String[]::new));
+        // the enabled experiments are only logged here for analysis, not control.
+        t.log(Level.DEBUG, "/experiments/enabled",
+               ()-> m_overrides.entrySet()
+                        .stream()
+                        .filter(e -> e.getValue().getSelected().getAsBoolean())
+                        .map(Map.Entry::getKey)
+                        .map(Experiment::name)
+                        .toArray(String[]::new));
     }
 
 }

@@ -50,6 +50,7 @@ public class Monitor {
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
         t.log(Level.INFO, "/monitor/master_warning", m_shouldAlert);
+        // TODO: make the buzzer beep the morse code of the fault
         m_annunciator.accept(m_shouldAlert);
     }
 

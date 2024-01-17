@@ -56,12 +56,16 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     }
 
     public double getVelocity() {
-        t.log(Level.DEBUG, m_name + "/velocity", m_velocity);
         return m_velocity;
     }
 
     @Override
     public void close() {
+        //
+    }
+
+    @Override
+    public void periodic() {
         //
     }
 }

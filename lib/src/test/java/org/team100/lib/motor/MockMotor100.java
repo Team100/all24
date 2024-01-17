@@ -31,4 +31,9 @@ public class MockMotor100<T extends Measure100> implements Motor100<T> {
         //
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

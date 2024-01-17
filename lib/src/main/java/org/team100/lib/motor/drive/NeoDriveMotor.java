@@ -63,6 +63,11 @@ public class NeoDriveMotor implements Motor100<Distance> {
     private final double m_wheelDiameter;
     private final String m_name;
 
+    /** Current velocity measurement, obtained in periodic(). */
+    private double m_encoderVelocity;
+    /** Current position measurement, obtained in periodic(). */
+    private double m_encoderPosition;
+
     public NeoDriveMotor(
             String name,
             int canId,
@@ -103,7 +108,6 @@ public class NeoDriveMotor implements Motor100<Distance> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", m_encoder.getVelocity() / 60);
     }
 
     @Override
@@ -126,14 +130,13 @@ public class NeoDriveMotor implements Motor100<Distance> {
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
         double velocityFF = velocityFF(motorRev_S);
-        double frictionFF = frictionFF(this.getVelocity(), motorRev_S);
+        double frictionFF = frictionFF(m_encoderVelocity / 60, motorRev_S);
         double accelFF = accelFF(motorRev_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
         t.log(Level.DEBUG, m_name + "/Output", motorRev_S);
-        t.log(Level.DEBUG, m_name + "/Velocity (RPS)", m_encoder.getVelocity() / 60);
     }
 
     @Override
@@ -142,22 +145,35 @@ public class NeoDriveMotor implements Motor100<Distance> {
     }
 
     /**
-     * @return integrated sensor position in rotations. */
+     * @return integrated sensor position in rotations.
+     */
     public double getPositionRot() {
-        return m_encoder.getPosition();
+        return m_encoderPosition;
     }
 
     /**
-     * @return integrated sensor velocity in RPM */
+     * @return integrated sensor velocity in RPM
+     */
     public double getRateRPM() {
-        return m_encoder.getVelocity();
+        return m_encoderVelocity;
     }
 
-        /**
+    /**
      * Sets integrated sensor position to zero.
      */
     public void resetPosition() {
         m_encoder.setPosition(0);
+        m_encoderPosition = 0;
+    }
+
+    /**
+     * Update measurements.
+     */
+    public void periodic() {
+        m_encoderPosition = m_encoder.getPosition();
+        m_encoderVelocity = m_encoder.getVelocity();
+        t.log(Level.DEBUG, m_name + "/position (rev)", m_encoderPosition);
+        t.log(Level.DEBUG, m_name + "/velocity (rev_S)", m_encoderVelocity / 60);
     }
 
     /////////////////////////////////////////////////////////////////
@@ -185,9 +201,5 @@ public class NeoDriveMotor implements Motor100<Distance> {
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
-    }
-
-    public double getVelocity() {
-        return m_encoder.getVelocity() / 60;
     }
 }

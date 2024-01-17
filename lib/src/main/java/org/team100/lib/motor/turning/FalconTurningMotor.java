@@ -201,4 +201,9 @@ public class FalconTurningMotor implements Motor100<Angle> {
         return errorRev_100ms * 10;
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

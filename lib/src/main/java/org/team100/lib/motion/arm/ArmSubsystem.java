@@ -65,9 +65,11 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        m_viz.periodic();
+        m_lowerArmMotor.periodic();
+        m_upperArmMotor.periodic();
         m_lowerArmEncoder.periodic();
         m_upperArmEncoder.periodic();
+        m_viz.periodic();
     }
 
     /** Arm angles (radians), 0 up, positive forward. */

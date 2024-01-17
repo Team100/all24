@@ -88,6 +88,7 @@ class AnglePositionServoProfileTest {
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
         servo.setPosition(1);
+        servo.periodic();
         assertEquals(motorVelocity, motor.velocity, kDelta);
         assertEquals(setpointPosition, servo.getSetpoint().x(), kDelta);
         assertEquals(setpointVelocity, servo.getSetpoint().v(), kDelta);

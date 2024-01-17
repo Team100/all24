@@ -52,6 +52,7 @@ class AnglePositionServoTest {
                 Angle.instance);
         servo.reset();
         servo.setPosition(1);
+        servo.periodic();
         assertEquals(0, turningMotor.output, 0.001);
         assertEquals(0.5, servo.getSetpoint().x(), kDelta);
         assertEquals(1.0, servo.getSetpoint().v(), kDelta);
@@ -60,6 +61,7 @@ class AnglePositionServoTest {
         Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, false);
 
         servo.setPosition(1);
+        servo.periodic();
         assertEquals(1.0, turningMotor.output, kDelta);
         assertEquals(1.0, turningMotor.velocity, kDelta);
 

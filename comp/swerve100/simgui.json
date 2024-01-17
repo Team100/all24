@@ -25,6 +25,11 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Telemetry Level": {
         "window": {
           "visible": true
@@ -44,6 +49,9 @@
   },
   "NetworkTables": {
     "retained": {
+      "current pose": {
+        "open": true
+      },
       "monitor": {
         "open": true
       }
