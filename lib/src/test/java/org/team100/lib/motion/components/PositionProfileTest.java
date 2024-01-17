@@ -157,6 +157,7 @@ class PositionProfileTest {
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
         servo.setPosition(1);
+        servo.periodic();
         // useful to fix up the examples above
         if (dump)
             Util.printf("verify(%5.3f, %5.3f, %5.3f);\n", motor.velocity,

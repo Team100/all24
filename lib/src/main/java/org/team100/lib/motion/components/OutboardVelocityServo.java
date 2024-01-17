@@ -99,9 +99,9 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
         return accel;
     }
 
-    /** This is really only useful for simulation. */
     @Override
     public void periodic() {
+        m_motor.periodic();
         m_encoder.periodic();
     }
 }

@@ -65,6 +65,11 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private final CANSparkMax m_motor;
     private final String m_name;
 
+        /** Current velocity measurement, obtained in periodic(). */
+        private double m_encoderVelocity;
+        /** Current position measurement, obtained in periodic(). */
+        private double m_encoderPosition;
+
     public NeoTurningMotor(String name, int canId, boolean motorPhase) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
@@ -97,7 +102,6 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
     }
 
     @Override
@@ -118,19 +122,28 @@ public class NeoTurningMotor implements Motor100<Angle> {
         double motorRad_S2 = kMotorGearing * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
         double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(this.getVelocity(),motorRevs_S);
+        double frictionFF = frictionFF(m_encoderVelocity/60,motorRevs_S);
         double accelFF = accelFF(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
         t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
-        t.log(Level.DEBUG,m_name + "/Velocity (RPS)",m_encoder.getVelocity()/60);
     }
 
     @Override
     public void close() {
         m_motor.close();
+    }
+
+    /**
+     * Update measurements.
+     */
+    public void periodic() {
+        m_encoderPosition = m_encoder.getPosition();
+        m_encoderVelocity = m_encoder.getVelocity();
+        t.log(Level.DEBUG, m_name + "/position (rev)", m_encoderPosition);
+        t.log(Level.DEBUG, m_name + "/velocity (rev_S)", m_encoderVelocity / 60);
     }
 
     /////////////////////////////////////////////////////////////////
@@ -157,9 +170,5 @@ public class NeoTurningMotor implements Motor100<Angle> {
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
-    }
-    
-    public double getVelocity() {
-        return m_encoder.getVelocity()/60;
     }
 }

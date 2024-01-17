@@ -23,4 +23,9 @@ public class IndexerSubsystem extends SubsystemBase {
         setpoint = m_trapezoid.calculate(0.02, setpoint, new State100(value, 0, 0));
         m_motor.setVelocity(setpoint.x(), 0);
     }
+
+    @Override
+    public void periodic() {
+        m_motor.periodic();
+    }
 }

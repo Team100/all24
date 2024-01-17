@@ -106,6 +106,11 @@ public class FalconDriveMotor implements Motor100<Distance> {
     private final double m_wheelDiameter;
     private final String m_name;
 
+    /** Current position, updated in periodic(). */
+    private double m_rawPosition;
+    /** Current velocity, updated in periodic(). */
+    private double m_rawVelocity;
+
     /**
      * @param name            may not contain slashes
      * @param canId
@@ -220,14 +225,14 @@ public class FalconDriveMotor implements Motor100<Distance> {
      * @return integrated sensor position in sensor units (1/2048 turn).
      */
     public double getPosition() {
-        return m_motor.getSelectedSensorPosition();
+        return m_rawPosition;
     }
 
     /**
      * @return integrated sensor velocity in sensor units (1/2048 turn) per 100ms.
      */
     public double getVelocity2048_100() {
-        return m_motor.getSelectedSensorVelocity();
+        return m_rawVelocity;
     }
 
     /**
@@ -235,6 +240,7 @@ public class FalconDriveMotor implements Motor100<Distance> {
      */
     public void resetPosition() {
         m_motor.setSelectedSensorPosition(0);
+        m_rawPosition = 0;
     }
 
     ///////////////////////////////////////////////////////////////
@@ -266,7 +272,7 @@ public class FalconDriveMotor implements Motor100<Distance> {
      * and filtered.
      */
     private double currentMotorRev_S() {
-        double motorTick_100ms = m_motor.getSelectedSensorVelocity();
+        double motorTick_100ms = m_rawVelocity;
         double motorRev_100ms = motorTick_100ms / ticksPerRevolution;
         return motorRev_100ms * 10;
     }
@@ -275,5 +281,13 @@ public class FalconDriveMotor implements Motor100<Distance> {
         double errorTick_100ms = m_motor.getClosedLoopError();
         double errorRev_100ms = errorTick_100ms / ticksPerRevolution;
         return errorRev_100ms * 10;
+    }
+
+    @Override
+    public void periodic() {
+        m_rawPosition = m_motor.getSelectedSensorPosition();
+        m_rawVelocity = m_motor.getSelectedSensorVelocity();
+        t.log(Level.DEBUG, m_name + "/position (raw)", m_rawPosition);
+        t.log(Level.DEBUG, m_name + "/velocity (raw)", m_rawVelocity);
     }
 }

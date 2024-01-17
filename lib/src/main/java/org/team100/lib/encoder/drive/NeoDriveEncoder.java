@@ -47,7 +47,6 @@ public class NeoDriveEncoder implements Encoder100<Distance> {
         double result = m_motor.getRateRPM() * m_distancePerTurn / 60;
         t.log(Level.DEBUG, m_name + "/Speed m_s", result);
         return result;
-
     }
 
     @Override

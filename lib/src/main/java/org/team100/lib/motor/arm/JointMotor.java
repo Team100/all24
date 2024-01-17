@@ -71,4 +71,9 @@ public class JointMotor implements Motor100<Angle> {
         m_motor.close();
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

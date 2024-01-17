@@ -26,4 +26,10 @@ public class IntakeSubsystem extends SubsystemBase {
         topRoller.setVelocity(setpoint.x(), 0);
         bottomRoller.setVelocity(setpoint.x(), 0);
     }
+
+    @Override
+    public void periodic() {
+        topRoller.periodic();
+        bottomRoller.periodic();
+    }
 }

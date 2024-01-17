@@ -115,11 +115,11 @@ public class RobotContainer implements SelfTestable {
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() ||
-         m_beep.getOutput();
-        // digital output 4
+        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
+
         m_monitor = new Monitor(new Annunciator(6), test);
-        robot.addPeriodic(m_monitor::periodic, 0.02);
+        // The monitor runs less frequently than the control loop.
+        robot.addPeriodic(m_monitor::periodic, 0.2);
 
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 

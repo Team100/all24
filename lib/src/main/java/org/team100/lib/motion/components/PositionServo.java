@@ -157,5 +157,6 @@ public class PositionServo<T extends Measure100> {
 
     public void periodic() {
         m_encoder.periodic();
+        m_servo.periodic();
     }
 }

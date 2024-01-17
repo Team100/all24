@@ -28,4 +28,7 @@ public interface Motor100<T extends Measure100> {
 
     /** For test cleanup */
     void close();
+
+    /** Used to collect measurements once per cycle, to save time. */
+    void periodic();
 }

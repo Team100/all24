@@ -21,6 +21,7 @@ public class SimpleSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        m_actuator.periodic();
         m_viz.periodic();
     }
 

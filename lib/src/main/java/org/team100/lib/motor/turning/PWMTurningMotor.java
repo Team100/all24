@@ -53,4 +53,9 @@ public class PWMTurningMotor implements Motor100<Angle> {
     public void close() {
         m_motor.close();
     }
+
+    @Override
+    public void periodic() {
+        //
+    }
 }

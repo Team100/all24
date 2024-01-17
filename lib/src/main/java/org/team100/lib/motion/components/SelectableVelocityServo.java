@@ -150,6 +150,7 @@ public class SelectableVelocityServo<T extends Measure100> implements VelocitySe
 
     @Override
     public void periodic() {
+        m_motor.periodic();
         m_encoder.periodic();
     }
 }
