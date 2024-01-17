@@ -15,7 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveInALittleSquareTest {
-    boolean dump = true;
+    boolean dump = false;
     private static final double kDelta = 0.001;
 
     Fixture fixture = new Fixture();
