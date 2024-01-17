@@ -36,7 +36,8 @@ public class SquareSelfTest extends Command {
     @Override
     public void initialize() {
         m_initial = m_drivetrain.getPose();
-        m_timer.start();
+        m_timer.restart();
+        terminate = false;
     }
 
     @Override

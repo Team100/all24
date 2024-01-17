@@ -1,6 +1,7 @@
 package org.team100.lib.selftest;
 
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
@@ -21,12 +22,19 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 /** Run all the test cases sequentially. */
 @ExcludeFromJacocoGeneratedReport
 public class SelfTestRunner extends Command {
+    public static class SelfTestEnableException extends RuntimeException {
+    }
+
+    private static final int kLimit = 10;
     private final SelfTestable m_container;
     private final SequentialCommandGroup m_group;
     private final SelfTestListener m_listener;
+    private final BooleanSupplier m_enable;
 
-    public SelfTestRunner(SelfTestable container) {
+    /** @param enable for safety this requires holding down a button. */
+    public SelfTestRunner(SelfTestable container, BooleanSupplier enable) {
         m_container = container;
+        m_enable = enable;
         m_group = new SequentialCommandGroup();
         m_listener = new SelfTestListener();
 
@@ -85,6 +93,18 @@ public class SelfTestRunner extends Command {
 
     @Override
     public final void initialize() {
+        int waitCounter = 0;
+        while (!m_enable.getAsBoolean()) {
+            if (waitCounter > kLimit) {
+                Util.warn("Cancelling self test due to enable");
+                // throw new SelfTestEnableException();
+                cancel();
+            }
+            Util.println("Hold down enable (operator start) to proceed...");
+            sleep1();
+            waitCounter += 1;
+            DriverStation.refreshData();
+        }
         m_group.initialize();
     }
 
@@ -95,7 +115,15 @@ public class SelfTestRunner extends Command {
 
     @Override
     public final boolean isFinished() {
-        return m_group.isFinished();
+        if (!m_enable.getAsBoolean()) {
+            Util.warn("Aborting test due to enable");
+            return true;
+        }
+        if (m_group.isFinished()) {
+            Util.warn("Test complete.");
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -107,5 +135,13 @@ public class SelfTestRunner extends Command {
     @Override
     public Set<Subsystem> getRequirements() {
         return m_group.getRequirements();
+    }
+
+    private void sleep1() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            //
+        }
     }
 }

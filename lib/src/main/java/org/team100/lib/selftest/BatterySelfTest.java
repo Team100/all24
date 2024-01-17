@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 @ExcludeFromJacocoGeneratedReport
 public class BatterySelfTest extends Command {
-    final  Monitor m_monitor;
+    final Monitor m_monitor;
     private final SelfTestListener m_listener;
 
     /** Verify battery voltage between 11 and 14 volts */
@@ -26,10 +26,10 @@ public class BatterySelfTest extends Command {
         if (voltage > 14) {
             m_listener.fail(this, "voltage too high: %5.3f", voltage);
         } else if (voltage < 11) {
-            m_listener.fail(this, "voltage too low: %5.3f" , voltage);
+            m_listener.fail(this, "voltage too low: %5.3f", voltage);
         } else {
-            m_listener.pass(this, "ok battery voltage %5.3f" , voltage);
-        } 
+            m_listener.pass(this, "ok battery voltage %5.3f", voltage);
+        }
     }
 
     /** All the work happens in initialize, so finish immediately. */

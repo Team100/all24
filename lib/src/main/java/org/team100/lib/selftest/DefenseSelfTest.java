@@ -35,7 +35,8 @@ public class DefenseSelfTest extends Command {
 
     @Override
     public void initialize() {
-        m_timer.start();
+        m_timer.restart();
+        terminate = false;
     }
 
     @Override

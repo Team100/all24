@@ -38,4 +38,9 @@ public class OperatorV2Control implements OperatorControl {
     public double climberState() {
         return deadband(clamp(-1.0 * m_controller.getRightY(), 1), kDeadband, 1);
     }
+
+    @Override
+    public boolean selfTestEnable() {
+        return m_controller.getHID().getStartButton();
+    }
 }

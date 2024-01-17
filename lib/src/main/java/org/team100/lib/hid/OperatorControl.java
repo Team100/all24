@@ -50,4 +50,8 @@ public interface OperatorControl {
     default Trigger never() {
         return new Trigger(() -> false);
     }
+
+    default boolean selfTestEnable() {
+        return false;
+    }
 }

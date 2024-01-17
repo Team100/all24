@@ -47,6 +47,7 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.selftest.SelfTestRunner;
 import org.team100.lib.selftest.SelfTestable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -85,7 +86,7 @@ public class RobotContainer implements SelfTestable {
     private final Command m_auton;
 
     private final DrawCircle m_drawCircle;
-    // for SelfTest
+    private final SelfTestRunner m_selfTest;
     private final DriveInALittleSquare m_driveInALittleSquare;
     private final MorseCodeBeep m_beep;
     private final Monitor m_monitor;
@@ -289,7 +290,12 @@ public class RobotContainer implements SelfTestable {
                         driverControl::trigger));
 
         m_auton = m_drive.runInit(m_drive::defense);
+        // selftest uses fields we just initialized above, so it comes last.
+        m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
+    }
 
+    public void scheduleSelfTest() {
+        m_selfTest.schedule();
     }
 
     public void scheduleAuton() {

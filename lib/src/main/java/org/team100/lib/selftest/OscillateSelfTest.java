@@ -54,12 +54,13 @@ public class OscillateSelfTest extends Command {
 
     @Override
     public void initialize() {
-        m_timer.start();
+        m_timer.restart();
         m_initial = m_drivetrain.getPose();
         prevOscillateTheta = Experiments.instance.enabled(Experiment.OscillateTheta);
         prevOscillateDirect = Experiments.instance.enabled(Experiment.OscillateDirect);
         Experiments.instance.testOverride(Experiment.OscillateTheta, m_rotation);
         Experiments.instance.testOverride(Experiment.OscillateDirect, m_direct);
+        terminate = false;
     }
 
     @Override
