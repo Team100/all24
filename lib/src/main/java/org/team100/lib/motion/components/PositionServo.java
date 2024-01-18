@@ -27,6 +27,8 @@ public class PositionServo<T extends Measure100> {
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
 
+    private State100 m_velocitySetpoint = new State100(0, 0);
+
     /**
      * @param name may not start with a slash
      */
@@ -98,7 +100,8 @@ public class PositionServo<T extends Measure100> {
 
     /** Direct velocity control for testing */
     public void setVelocity(double velocity) {
-        m_servo.setVelocity(velocity);
+        m_velocitySetpoint = m_profile.calculate(0.02, m_velocitySetpoint, new State100(velocity, 0, 0));
+        m_servo.setVelocity(m_velocitySetpoint.x());
     }
 
     /** Direct duty cycle for testing */

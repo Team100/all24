@@ -24,7 +24,7 @@ public class ServoFactory {
             double wheelDiameter,
             double maxVel,
             double maxAccel,
-            double kP) {
+            PIDController pidController) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
@@ -44,7 +44,7 @@ public class ServoFactory {
                 vServo,
                 encoder,
                 maxVel,
-                new PIDController(kP, 0, 0),
+                pidController,
                 new TrapezoidProfile100(maxVel, maxAccel, 0.05),
                 Distance.instance);
     }

@@ -7,7 +7,8 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.IntakeSubsystem;
-import org.team100.frc2024.motion.shooter.ShooterSubsystem;
+import org.team100.frc2024.motion.shooter.FlywheelShooter;
+import org.team100.frc2024.motion.shooter.ShooterFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawCircle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -71,6 +72,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class RobotContainer implements SelfTestable {
     private static final double kDriveCurrentLimit = 60;
@@ -94,7 +96,7 @@ public class RobotContainer implements SelfTestable {
     // Identity-specific fields
     private final IndexerSubsystem m_indexer;
     private final ClimberSubsystem m_climber;
-    private final ShooterSubsystem m_shooter;
+    private final ShooterFactory m_shooter;
     private final IntakeSubsystem m_intake;
 
     public RobotContainer(TimedRobot robot) throws IOException {
@@ -153,7 +155,7 @@ public class RobotContainer implements SelfTestable {
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
         m_intake = new IntakeSubsystem("Top Roller", "Bottom Roller", 3, 6);
-        m_shooter = new ShooterSubsystem("Left Shooter", "Right Shooter", 7, 8);
+        m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, "Left Shooter", "Right Shooter", 7, 8);
         m_indexer = new IndexerSubsystem("Indexer", 5);
         m_climber = new ClimberSubsystem("Left Climber", "Right Climber", 2, 4);
 
@@ -257,13 +259,13 @@ public class RobotContainer implements SelfTestable {
         ///////////////// OPERATOR V2//////////////////////////
 
         m_intake.setDefaultCommand(m_intake.run(() -> m_intake.set(0)));
-        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(1)));
+        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(3)));
 
-        m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.set(0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(8)));
+        m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.set(0.0)));
+        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(30.0)));
 
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.set(0)));
-        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(1)));
+        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(3.5)));
 
         m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
 
