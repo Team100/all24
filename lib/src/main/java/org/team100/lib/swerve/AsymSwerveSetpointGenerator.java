@@ -111,15 +111,17 @@ public class AsymSwerveSetpointGenerator {
         // we are at desiredState.
         double min_s = 1.0;
 
-        min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, min_s, kDtSec);
-        t.log(Level.DEBUG, "/setpoint_generator/min_s centripetal", min_s);
+        double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, 1.0, kDtSec);
+
+        t.log(Level.DEBUG, "/setpoint_generator/min_s centripetal", centripetal_min_s);
+        min_s = Math.min(min_s, centripetal_min_s);
 
         // In cases where an individual module is stopped, we want to remember the right
         // steering angle to command (since
         // inverse kinematics doesn't care about angle, we can be opportunistically
         // lazy).
         List<Optional<Rotation2d>> overrideSteering = new ArrayList<>(prevModuleStates.length);
-        min_s = m_steeringRateLimiter.enforceSteeringLimit(
+        double steering_min_s = m_steeringRateLimiter.enforceSteeringLimit(
                 desiredModuleStates,
                 prevModuleStates,
                 need_to_steer,
@@ -129,22 +131,24 @@ public class AsymSwerveSetpointGenerator {
                 desired_vx,
                 desired_vy,
                 desired_heading,
-                min_s,
+                1.0,
                 overrideSteering,
                 kDtSec);
 
-        t.log(Level.DEBUG, "/setpoint_generator/min_s steering", min_s);
+        t.log(Level.DEBUG, "/setpoint_generator/min_s steering", steering_min_s);
+        min_s = Math.min(min_s, steering_min_s);
 
-        min_s = m_DriveAccelerationLimiter.enforceWheelAccelLimit(
+        double accel_min_s = m_DriveAccelerationLimiter.enforceWheelAccelLimit(
                 prevModuleStates,
                 prev_vx,
                 prev_vy,
                 desired_vx,
                 desired_vy,
-                min_s,
+                1.0,
                 kDtSec);
 
-        t.log(Level.DEBUG, "/setpoint_generator/min_s final", min_s);
+        t.log(Level.DEBUG, "/setpoint_generator/min_s accel", accel_min_s);
+        min_s = Math.min(min_s, accel_min_s);
 
         return makeSetpoint(
                 prevSetpoint,
