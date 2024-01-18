@@ -7,7 +7,7 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.IntakeSubsystem;
-import org.team100.frc2024.motion.shooter.FlywheelShooter;
+import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawCircle;
@@ -72,7 +72,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class RobotContainer implements SelfTestable {
     private static final double kDriveCurrentLimit = 60;
@@ -96,7 +95,7 @@ public class RobotContainer implements SelfTestable {
     // Identity-specific fields
     private final IndexerSubsystem m_indexer;
     private final ClimberSubsystem m_climber;
-    private final ShooterFactory m_shooter;
+    private final Shooter m_shooter;
     private final IntakeSubsystem m_intake;
 
     public RobotContainer(TimedRobot robot) throws IOException {
@@ -261,8 +260,8 @@ public class RobotContainer implements SelfTestable {
         m_intake.setDefaultCommand(m_intake.run(() -> m_intake.set(0)));
         operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(3)));
 
-        m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.set(0.0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(30.0)));
+        m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
+        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(30.0)));
 
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.set(0)));
         operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(3.5)));

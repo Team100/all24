@@ -6,7 +6,7 @@ public interface VelocityServo<T extends Measure100> {
 
     void reset();
 
-    void setVelocity(Double setpoint);
+    void setVelocity(double setpoint);
 
     /** Direct control for testing. */
     void setDutyCycle(double dutyCycle);
