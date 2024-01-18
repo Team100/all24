@@ -257,13 +257,14 @@ public class RobotContainer implements SelfTestable {
         ///////////////// OPERATOR V2//////////////////////////
 
         m_intake.setDefaultCommand(m_intake.run(() -> m_intake.set(0)));
-        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(1)));
+        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(3)));
 
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.set(0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(8)));
+        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.set(30
+        )));
 
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.set(0)));
-        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(1)));
+        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(3.5)));
 
         m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
 
