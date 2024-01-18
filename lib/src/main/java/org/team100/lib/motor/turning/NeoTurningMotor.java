@@ -26,7 +26,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     /**
      * This is surely wrong.
      */
-    private static final double kMotorGearing = 1;
+    private final double m_gearRatio;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
@@ -70,10 +70,10 @@ public class NeoTurningMotor implements Motor100<Angle> {
         /** Current position measurement, obtained in periodic(). */
         private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase) {
+    public NeoTurningMotor(String name, int canId, boolean motorPhase,double gearRatio) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
-
+        m_gearRatio=gearRatio;
         m_motor.setInverted(!motorPhase);
         m_motor.setSmartCurrentLimit(kCurrentLimit);
 
@@ -116,10 +116,10 @@ public class NeoTurningMotor implements Motor100<Angle> {
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2) {
-        double motorRad_S = kMotorGearing * outputRad_S;
+        double motorRad_S = m_gearRatio * outputRad_S;
         double motorRevs_S = motorRad_S / (2*Math.PI);
         double motorRevs_M = motorRevs_S * 60;
-        double motorRad_S2 = kMotorGearing * accelRad_S2;
+        double motorRad_S2 = m_gearRatio * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
         double velocityFF = velocityFF(motorRevs_S);
         double frictionFF = frictionFF(m_encoderVelocity/60,motorRevs_S);
@@ -131,11 +131,23 @@ public class NeoTurningMotor implements Motor100<Angle> {
         t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
     }
 
+    public void resetPosition() {
+        m_encoder.setPosition(0);
+        m_encoderPosition = 0;
+    }
+
     @Override
     public void close() {
         m_motor.close();
     }
 
+    public double getPositionRot() {
+        return m_encoderPosition;
+    }
+
+    public double getRateRPM() {
+        return m_encoderVelocity;
+    }
     /**
      * Update measurements.
      */
