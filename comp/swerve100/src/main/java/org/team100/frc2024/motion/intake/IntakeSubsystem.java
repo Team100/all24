@@ -13,6 +13,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double kWheelDiameter = 1;
     private static final double kMaxVelM_S = 5;
     private static final double kMaxAccelM_S2 = 5;
+    private static final double kMaxDecelM_S2 = 5;
 
     private final LimitedVelocityServo<Distance> topRoller;
     private final LimitedVelocityServo<Distance> bottomRoller;
@@ -25,7 +26,8 @@ public class IntakeSubsystem extends SubsystemBase {
                 kGearRatio,
                 kWheelDiameter,
                 kMaxVelM_S,
-                kMaxAccelM_S2);
+                kMaxAccelM_S2,
+                kMaxDecelM_S2);
 
         bottomRoller = ServoFactory.limitedNeoVelocityServo(
                 name2,
@@ -34,7 +36,8 @@ public class IntakeSubsystem extends SubsystemBase {
                 kGearRatio,
                 kWheelDiameter,
                 kMaxVelM_S,
-                kMaxAccelM_S2);
+                kMaxAccelM_S2,
+                kMaxDecelM_S2);
     }
 
     public void set(double value) {

@@ -9,6 +9,7 @@ public class FlywheelShooter extends Shooter {
     private static final double kWinchDiameterM = 0.01;
     private static final double kMaxVelM_S = 8;
     private static final double kMaxAccelM_S2 = 30;
+    private static final double kMaxDecelM_S2 = 30;
 
     private final LimitedVelocityServo<Distance> leftShooter;
     private final LimitedVelocityServo<Distance> rightShooter;
@@ -22,7 +23,8 @@ public class FlywheelShooter extends Shooter {
                 kGearRatio,
                 kWinchDiameterM,
                 kMaxVelM_S,
-                kMaxAccelM_S2);
+                kMaxAccelM_S2,
+                kMaxDecelM_S2);
 
         rightShooter = ServoFactory.limitedNeoVelocityServo(
                 name2,
@@ -31,7 +33,8 @@ public class FlywheelShooter extends Shooter {
                 kGearRatio,
                 kWinchDiameterM,
                 kMaxVelM_S,
-                kMaxAccelM_S2);
+                kMaxAccelM_S2,
+                kMaxDecelM_S2);
         
     }
 

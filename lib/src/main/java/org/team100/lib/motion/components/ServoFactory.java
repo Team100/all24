@@ -12,6 +12,18 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class ServoFactory {
 
+    /**
+     * 
+     * @param name
+     * @param canId
+     * @param motorPhase
+     * @param gearRatio
+     * @param wheelDiameter
+     * @param maxVel
+     * @param maxAccel
+     * @param maxDecel maximum decleration: usually mechanisms can slow down faster than they can speed up.
+     * @return
+     */
     public static LimitedVelocityServo<Distance> limitedNeoVelocityServo(
             String name,
             int canId,
@@ -19,7 +31,8 @@ public class ServoFactory {
             double gearRatio,
             double wheelDiameter,
             double maxVel,
-            double maxAccel) {
+            double maxAccel,
+            double maxDecel) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
@@ -34,7 +47,7 @@ public class ServoFactory {
                 name + "/velocity",
                 motor,
                 encoder);
-        return new LimitedVelocityServo<>(v, maxVel, maxAccel);
+        return new LimitedVelocityServo<>(v, maxVel, maxAccel, maxDecel);
     }
 
     public static VelocityServo<Distance> neoVelocityServo(
