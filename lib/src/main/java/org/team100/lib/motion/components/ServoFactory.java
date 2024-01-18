@@ -12,6 +12,54 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class ServoFactory {
 
+    public static LimitedVelocityServo<Distance> limitedNeoVelocityServo(
+            String name,
+            int canId,
+            boolean motorPhase,
+            double gearRatio,
+            double wheelDiameter,
+            double maxVel,
+            double maxAccel) {
+        NeoDriveMotor motor = new NeoDriveMotor(
+                name,
+                canId,
+                motorPhase,
+                gearRatio,
+                wheelDiameter);
+        NeoDriveEncoder encoder = new NeoDriveEncoder(
+                name + "/encoder",
+                motor,
+                wheelDiameter * Math.PI);
+        VelocityServo<Distance> v = new OutboardVelocityServo<>(
+                name + "/velocity",
+                motor,
+                encoder);
+        return new LimitedVelocityServo<>(v, maxVel, maxAccel);
+    }
+
+    public static VelocityServo<Distance> neoVelocityServo(
+            String name,
+            int canId,
+            boolean motorPhase,
+            double gearRatio,
+            double wheelDiameter) {
+        NeoDriveMotor motor = new NeoDriveMotor(
+                name,
+                canId,
+                motorPhase,
+                gearRatio,
+                wheelDiameter);
+        NeoDriveEncoder encoder = new NeoDriveEncoder(
+                name + "/encoder",
+                motor,
+                wheelDiameter * Math.PI);
+        return new OutboardVelocityServo<>(
+                name + "/velocity",
+                motor,
+                encoder);
+
+    }
+
     /**
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
@@ -48,6 +96,7 @@ public class ServoFactory {
                 new TrapezoidProfile100(maxVel, maxAccel, 0.05),
                 Distance.instance);
     }
+
     public static PositionServo<Angle> neoPositionServo(
             String name,
             int canId,

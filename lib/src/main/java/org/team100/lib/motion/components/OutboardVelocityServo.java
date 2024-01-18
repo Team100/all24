@@ -42,7 +42,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     }
 
     @Override
-    public void setVelocity(Double setpoint) {
+    public void setVelocity(double setpoint) {
         if (Double.isNaN(setpoint))
             throw new IllegalArgumentException("setpoint is NaN");
         m_setpoint = setpoint;
