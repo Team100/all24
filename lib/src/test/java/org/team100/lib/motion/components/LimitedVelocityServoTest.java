@@ -16,7 +16,9 @@ class LimitedVelocityServoTest {
         MockVelocityServo<Distance> mv = new MockVelocityServo<>();
         double maxVel = 1;
         double maxAccel = 1;
-        LimitedVelocityServo<Distance> pv = new LimitedVelocityServo<>(mv, maxVel, maxAccel);
+        double maxDecel = 1;
+        LimitedVelocityServo<Distance> pv = new LimitedVelocityServo<>(
+                mv, maxVel, maxAccel, maxDecel);
 
         // slew rate limiter tells time via
         // WPIUtilJNI.now() rather than FPGA.getTimestamp,

@@ -14,10 +14,22 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     /** The limiter keeps state. */
     private final SlewRateLimiter m_limiter;
 
-    public LimitedVelocityServo(VelocityServo<T> servo, double maxVel, double maxAccel) {
+    /**
+     * 
+     * @param servo    the servo to wrap
+     * @param maxVel   maximum velocity
+     * @param maxAccel maximum acceleration
+     * @param maxDecel maximum deceleration: usually mechanisms can slow down faster
+     *                 than they can speed up.
+     */
+    public LimitedVelocityServo(
+            VelocityServo<T> servo,
+            double maxVel,
+            double maxAccel,
+            double maxDecel) {
         m_servo = servo;
         m_maxVel = maxVel;
-        m_limiter = new SlewRateLimiter(maxAccel);
+        m_limiter = new SlewRateLimiter(maxAccel, maxDecel, 0);
         reset();
     }
 

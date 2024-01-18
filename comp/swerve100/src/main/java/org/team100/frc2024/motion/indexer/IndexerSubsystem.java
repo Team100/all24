@@ -13,6 +13,7 @@ public class IndexerSubsystem extends SubsystemBase {
     private static final double kWheelDiameter = 1;
     private static final double kMaxVelM_S = 1;
     private static final double kMaxAccelM_S2 = 1;
+    private static final double kMaxDecelM_S2 = 1;
 
     private final LimitedVelocityServo<Distance> driveMotor;
 
@@ -24,7 +25,8 @@ public class IndexerSubsystem extends SubsystemBase {
                 kGearRatio,
                 kWheelDiameter,
                 kMaxVelM_S,
-                kMaxAccelM_S2);
+                kMaxAccelM_S2,
+                kMaxDecelM_S2);
     }
 
     public void set(double value) {
