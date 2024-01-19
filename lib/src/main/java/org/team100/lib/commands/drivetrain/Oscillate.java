@@ -57,7 +57,7 @@ public class Oscillate extends Command100 {
     @Override
     public void initialize100() {
         m_timer.restart();
-        m_initial = m_swerve.getState(0.02);
+        m_initial = m_swerve.getState();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class Oscillate extends Command100 {
         t.log(Level.DEBUG, "/oscillate/setpoint/speed", speedM_S);
         t.log(Level.DEBUG, "/oscillate/setpoint/position", positionM);
 
-        SwerveState swerveState = m_swerve.getState(dt);
+        SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
             t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.theta().v());
             t.log(Level.DEBUG, "/oscillate/measurement/position",

@@ -27,7 +27,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 kWinchDiameterM,
                 kMaxVelM_S,
                 kMaxAccelM_S2,
-                new PIDController(1, 0, 0));
+                new PIDController(kP, 0, 0));
         s2 = ServoFactory.neoPositionServo(
                 name2,
                 canID2,
@@ -36,7 +36,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 kWinchDiameterM,
                 kMaxVelM_S,
                 kMaxAccelM_S2,
-                new PIDController(1, 0, 0));
+                new PIDController(kP, 0, 0));
     }
 
     /** Set velocity in meters per second */

@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.InitCommand;
+import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -18,13 +19,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * There are four mutually exclusive drive methods.
  * We depend on CommandScheduler to enforce the mutex.
  */
-public class SwerveDriveSubsystem extends SubsystemBase {
+public class SwerveDriveSubsystem extends Subsystem100 {
     // multiply field-relative speeds for medium and slow modes.
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.1;
@@ -40,6 +40,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private Pose2d m_pose;
     private Twist2d m_velocity;
     private Twist2d m_accel;
+    private SwerveState m_state;
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
@@ -54,6 +55,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         m_pose = new Pose2d();
         m_velocity = new Twist2d();
         m_accel = new Twist2d();
+        m_state = new SwerveState();
 
         stop();
         t.log(Level.INFO, "/field/.type", "Field2d");
@@ -74,19 +76,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Periodic() should not do actuation. Let commands do that.
      */
     @Override
-    public void periodic() {
+    public void periodic100(double dt) {
         // the order of these calls is important
         // since the odometry depends on the module state
         // and acceleration depends on odometry...
         m_swerveLocal.periodic();
         updatePosition();
-        updateVelocity();
-        updateAcceleration();
+        updateVelocity(dt);
+        updateAcceleration(dt);
+        updateState();
 
         t.log(Level.DEBUG, "/swerve/pose", m_pose);
         t.log(Level.DEBUG, "/swerve/velocity", m_velocity);
         t.log(Level.DEBUG, "/swerve/acceleration", m_accel);
-        t.log(Level.DEBUG, "/swerve/state", getState(0.02));
+        t.log(Level.DEBUG, "/swerve/state", m_state);
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
@@ -206,15 +209,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         m_swerveLocal.stop();
     }
 
-    /**
-    
-     */
+    /** Pose snapshot from periodic(). */
     public Pose2d getPose() {
         return m_pose;
     }
 
     /**
-     * Field-relative velocity. This is intended for tuning.
+     * Field-relative velocity. This is intended for tuning.  Snapshot from periodic().
      * 
      * The omega signal here will be delayed relative to the gyro. Use the gyro if
      * you really just want omega.
@@ -226,7 +227,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Field-relative acceleration. This is intended for tuning.
+     * Field-relative acceleration. This is intended for tuning.  Snapshot from periodic.
      * 
      * @return a twist where the values are accelerations in meters and radians per
      *         second squared
@@ -236,16 +237,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * SwerveState representing the drivetrain's pose and velocity, with zero
-     * accelerations.
-     * 
-     * TODO: move this dt to periodic, add a subsystem shim for it
+     * SwerveState representing the drivetrain's pose, velocity, and acceleration, snapshot from periodic.
      */
-    public SwerveState getState(double dt) {
-        Pose2d x = m_pose;
-        Twist2d v = m_velocity;
-        Twist2d a = m_accel;
-        return new SwerveState(x, v, a);
+    public SwerveState getState() {
+        return m_state;
     }
 
     public void resetPose(Pose2d robotPose) {
@@ -293,11 +288,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // }
 
         m_pose = m_poseEstimator.getEstimatedPosition();
-
     }
 
-    private void updateVelocity() {
-        double dt = 0.02;
+    private void updateVelocity(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
                 speeds, m_pose.getRotation());
@@ -305,8 +298,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     }
 
-    private void updateAcceleration() {
-        double dt = 0.02;
+    private void updateAcceleration(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         if (m_prevSpeeds == null) {
             m_prevSpeeds = speeds;
@@ -318,5 +310,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         ChassisSpeeds field = ChassisSpeeds.fromFieldRelativeSpeeds(accel, m_pose.getRotation());
         Twist2d deltaV = new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
         m_accel = GeometryUtil.scale(deltaV, 1.0 / dt);
+    }
+
+    private void updateState() {
+        m_state =  new SwerveState(m_pose, m_velocity, m_accel);
     }
 }
