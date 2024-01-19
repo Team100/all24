@@ -8,6 +8,9 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * TODO: add climber to selftest.
+ */
 public class ClimberSubsystem extends SubsystemBase {
     private static final double kGearRatio = 20.0;
     private static final double kWinchDiameterM = 0.01;

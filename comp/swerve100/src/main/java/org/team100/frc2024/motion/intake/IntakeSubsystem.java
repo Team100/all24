@@ -7,6 +7,9 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * TODO: add intake to selftest.
+ */
 public class IntakeSubsystem extends SubsystemBase {
     
     //TODO GET THE RIGHT NUMBERS

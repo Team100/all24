@@ -257,15 +257,21 @@ public class RobotContainer implements SelfTestable {
 
         ///////////////// OPERATOR V2//////////////////////////
 
+        // TODO: run the intake if the camera sees a note.
         m_intake.setDefaultCommand(m_intake.run(() -> m_intake.set(0)));
         operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(3)));
 
+        // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
         operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(30.0)));
 
+        // TODO: intake whenever intake is running.
+        // TODO: stop when note is accpeted using optical detector.
+        // TODO: shoot only when the shooter is ready.
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.set(0)));
         operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(3.5)));
 
+        // TODO: presets
         m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
 
         ///////////////////////////
