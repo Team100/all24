@@ -10,10 +10,10 @@ public abstract class Command100 extends Command {
 
     private double prevTime;
 
-    public void initialize100() {}
+    public abstract void initialize100();
     
     /** @param dt duration since the previous call. */
-    public void execute100(double dt) {}
+    public abstract void execute100(double dt);
 
     @Override
     public final void initialize() {

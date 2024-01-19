@@ -80,7 +80,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
         if (m_aligned) {
             State desiredState = m_currentTrajectory.sample(m_timer.get());
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
-            SwerveState measurement = m_swerve.getState(dt);
+            SwerveState measurement = m_swerve.getState();
             Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
             t.log(Level.DEBUG, "/full state trajectory list/reference", reference);
@@ -88,7 +88,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
             // look one loop ahead
             State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
-            SwerveState measurement = m_swerve.getState(dt);
+            SwerveState measurement = m_swerve.getState();
             Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
             boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             if (aligned) {

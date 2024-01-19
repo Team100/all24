@@ -28,12 +28,11 @@ import edu.wpi.first.networktables.NetworkTable.TableEventListener;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Extracts robot pose estimates from camera input.
  */
-public class VisionDataProvider extends SubsystemBase implements TableEventListener {
+public class VisionDataProvider implements TableEventListener {
     /**
      * If the tag is closer than this threshold, then the camera's estimate of tag
      * rotation might be more accurate than the gyro, so we use the camera's

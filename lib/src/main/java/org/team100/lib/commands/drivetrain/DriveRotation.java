@@ -22,6 +22,11 @@ public class DriveRotation extends Command100 {
     }
 
     @Override
+    public void initialize100() {
+        //
+    }
+
+    @Override
     public void execute100(double dt) {
         double rot = m_rotSpeed.get();
         if (Math.abs(rot) <= 0.15) {

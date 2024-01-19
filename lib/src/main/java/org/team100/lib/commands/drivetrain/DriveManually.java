@@ -113,7 +113,7 @@ public class DriveManually extends Command100 {
 
         // input in [-1,1] control units
         Twist2d input = m_twistSupplier.get();
-        SwerveState state = m_drive.getState(dt);
+        SwerveState state = m_drive.getState();
         Pose2d currentPose = state.pose();
 
         /**

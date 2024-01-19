@@ -28,6 +28,10 @@ public class State100 {
         this(x, v, 0);
     }
 
+    public State100() {
+        this(0, 0, 0);
+    }
+
     public double x() {
         return m_x;
     }

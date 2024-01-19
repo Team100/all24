@@ -131,7 +131,7 @@ class SwerveDriveSubsystemTest extends TimelessTest {
         assertEquals(0, v.dx);
         Twist2d a = drive.getAcceleration();
         assertEquals(0, a.dx);
-        SwerveState s = drive.getState(0.02);
+        SwerveState s = drive.getState();
         assertEquals(0, s.x().x());
         assertEquals(0, s.x().v());
         assertEquals(0, s.x().a());
@@ -154,10 +154,10 @@ class SwerveDriveSubsystemTest extends TimelessTest {
         assertEquals(0.02, v.dx, kDelta);
         a = drive.getAcceleration();
         assertEquals(1, a.dx, kDelta);
-        s = drive.getState(0.02);
+        s = drive.getState();
         assertEquals(0.0006, s.x().x(), kDelta);
-        assertEquals(0.02, s.x().v());
-        assertEquals(1, s.x().a());
+        assertEquals(0.02, s.x().v(), kDelta);
+        assertEquals(1, s.x().a(), kDelta);
 
         drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
 
@@ -171,7 +171,7 @@ class SwerveDriveSubsystemTest extends TimelessTest {
         assertEquals(0.04, v.dx, kDelta);
         a = drive.getAcceleration();
         assertEquals(1, a.dx, kDelta);
-        s = drive.getState(0.02);
+        s = drive.getState();
         assertEquals(0.0015, s.x().x(), kDelta);
         assertEquals(0.04, s.x().v(), kDelta);
         assertEquals(1, s.x().a(), kDelta);
@@ -188,7 +188,7 @@ class SwerveDriveSubsystemTest extends TimelessTest {
         assertEquals(0.06, v.dx, kDelta);
         a = drive.getAcceleration();
         assertEquals(1, a.dx, kDelta);
-        s = drive.getState(0.02);
+        s = drive.getState();
         assertEquals(0.002, s.x().x(), kDelta);
         assertEquals(0.06, s.x().v(), kDelta);
         assertEquals(1, s.x().a(), kDelta);
