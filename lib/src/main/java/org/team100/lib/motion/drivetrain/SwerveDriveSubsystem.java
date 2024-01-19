@@ -35,6 +35,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
 
+    private ChassisSpeeds m_prevSpeeds;
+    // maintained in periodic.
+    private Pose2d m_pose;
+    private Twist2d m_velocity;
+    private Twist2d m_accel;
+
     public SwerveDriveSubsystem(
             HeadingInterface heading,
             SwerveDrivePoseEstimator poseEstimator,
@@ -44,6 +50,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
+        m_prevSpeeds = new ChassisSpeeds();
+        m_pose = new Pose2d();
+        m_velocity = new Twist2d();
+        m_accel = new Twist2d();
 
         stop();
         t.log(Level.INFO, "/field/.type", "Field2d");
@@ -65,14 +75,30 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        updateOdometry();
-        Pose2d pose = getPose();
-        if (Double.isNaN(pose.getX()))
-            throw new IllegalStateException();
-        if (Double.isNaN(pose.getY()))
-            throw new IllegalStateException();
-        t.log(Level.DEBUG, "/swerve/pose", pose);
+        // the order of these calls is important
+        // since the odometry depends on the module state
+        // and acceleration depends on odometry...
         m_swerveLocal.periodic();
+        updatePosition();
+        updateVelocity();
+        updateAcceleration();
+
+        t.log(Level.DEBUG, "/swerve/pose", m_pose);
+        t.log(Level.DEBUG, "/swerve/velocity", m_velocity);
+        t.log(Level.DEBUG, "/swerve/acceleration", m_accel);
+        t.log(Level.DEBUG, "/swerve/state", getState(0.02));
+
+        // Update the Field2d widget
+        // the name "field" is used by Field2d.
+        // the name "robot" can be anything.
+        t.log(Level.DEBUG, "/field/robot", new double[] {
+                m_pose.getX(),
+                m_pose.getY(),
+                m_pose.getRotation().getDegrees()
+        });
+ 
+        t.log(Level.DEBUG, "/swerve/heading rate rad_s", m_heading.getHeadingRateNWU());
+
     }
 
     /**
@@ -97,30 +123,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         m_swerveLocal.resetSetpoint(setpoint);
     }
 
-    private void updateOdometry() {
-        m_poseEstimator.update(m_heading.getHeadingNWU(), m_swerveLocal.positions());
-        // {
-        // if (m_pose.aprilPresent()) {
-        // m_poseEstimator.addVisionMeasurement(
-        // m_pose.getRobotPose(0),
-        // Timer.getFPGATimestamp() - 0.3);
-        // }
-
-        // Update the Field2d widget
-        Pose2d newEstimate = getPose();
-        // the name "field" is used by Field2d.
-        // the name "robot" can be anything.
-        t.log(Level.DEBUG, "/field/robot", new double[] {
-                newEstimate.getX(),
-                newEstimate.getY(),
-                newEstimate.getRotation().getDegrees()
-        });
-        t.log(Level.DEBUG, "/current pose/x m", newEstimate.getX());
-        t.log(Level.DEBUG, "/current pose/y m", newEstimate.getY());
-        t.log(Level.DEBUG, "/current pose/theta rad", newEstimate.getRotation().getRadians());
-        t.log(Level.DEBUG, "/current pose/Heading NWU rad_s", m_heading.getHeadingRateNWU());
-    }
-
     ////////////////
     //
     // ACTUATORS
@@ -138,7 +140,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         DriverControl.Speed speed = m_speed.get();
         if (Experiments.instance.enabled(Experiment.ShowMode))
             speed = DriverControl.Speed.SLOW;
-        t.log(Level.DEBUG, "/chassis/control_speed", speed.name());
+        t.log(Level.DEBUG, "/swerve/control_speed", speed.name());
         switch (speed) {
             case SLOW:
                 twist = GeometryUtil.scale(twist, kSlow);
@@ -154,10 +156,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 twist.dx,
                 twist.dy,
                 twist.dtheta,
-                getPose().getRotation());
-        t.log(Level.DEBUG, "/chassis/x m", twist.dx);
-        t.log(Level.DEBUG, "/chassis/y m", twist.dy);
-        t.log(Level.DEBUG, "/chassis/theta rad", twist.dtheta);
+                m_pose.getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -171,7 +170,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public boolean steerAtRest(Twist2d twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, getPose().getRotation());
+                twist.dx, twist.dy, twist.dtheta, m_pose.getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -208,37 +207,53 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Note this doesn't include the gyro reading directly, the estimate is
-     * considerably massaged by the odometry logic.
+    
      */
     public Pose2d getPose() {
-        return m_poseEstimator.getEstimatedPosition();
+        return m_pose;
     }
 
     /**
+     * Field-relative velocity. This is intended for tuning.
+     * 
      * The omega signal here will be delayed relative to the gyro. Use the gyro if
      * you really just want omega.
+     * 
+     * @return a twist where the values are speeds in meters and radians per second
      */
-    public Twist2d getImpliedTwist2d(double dt) {
-        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
-        ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
-                speeds.vxMetersPerSecond,
-                speeds.vyMetersPerSecond,
-                speeds.omegaRadiansPerSecond,
-                getPose().getRotation());
-        return new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
+    public Twist2d getVelocity() {
+        return m_velocity;
+    }
+
+    /**
+     * Field-relative acceleration. This is intended for tuning.
+     * 
+     * @return a twist where the values are accelerations in meters and radians per
+     *         second squared
+     */
+    public Twist2d getAcceleration() {
+        return m_accel;
     }
 
     /**
      * SwerveState representing the drivetrain's pose and velocity, with zero
      * accelerations.
+     * 
+     * TODO: move this dt to periodic, add a subsystem shim for it
      */
     public SwerveState getState(double dt) {
-        return new SwerveState(getPose(), getImpliedTwist2d(dt));
+        Pose2d x = m_pose;
+        Twist2d v = m_velocity;
+        Twist2d a = m_accel;
+        return new SwerveState(x, v, a);
     }
 
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+        m_pose = robotPose;
+        // TODO: should we really assume we're motionless when we call this??
+        m_velocity = new Twist2d();
+        m_accel = new Twist2d();
     }
 
     /** The controllers are on the profiles. */
@@ -258,5 +273,50 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public void close() {
         m_swerveLocal.close();
+    }
+
+    /**
+     * Note this doesn't include the gyro reading directly, the estimate is
+     * considerably massaged by the odometry logic.
+     * 
+     * the poseEstimator can be asynchronously updated by network tables events,
+     * which is why we update it once in periodic, so that the various derivatives
+     * of odometry are self-consistent.
+     */
+    private void updatePosition() {
+        m_poseEstimator.update(m_heading.getHeadingNWU(), m_swerveLocal.positions());
+        // {
+        // if (m_pose.aprilPresent()) {
+        // m_poseEstimator.addVisionMeasurement(
+        // m_pose.getRobotPose(0),
+        // Timer.getFPGATimestamp() - 0.3);
+        // }
+
+        m_pose = m_poseEstimator.getEstimatedPosition();
+
+    }
+
+    private void updateVelocity() {
+        double dt = 0.02;
+        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
+        ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
+                speeds, m_pose.getRotation());
+        m_velocity = new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
+
+    }
+
+    private void updateAcceleration() {
+        double dt = 0.02;
+        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
+        if (m_prevSpeeds == null) {
+            m_prevSpeeds = speeds;
+            m_accel = GeometryUtil.kTwist2dIdentity;
+            return;
+        }
+        ChassisSpeeds accel = speeds.minus(m_prevSpeeds);
+        m_prevSpeeds = speeds;
+        ChassisSpeeds field = ChassisSpeeds.fromFieldRelativeSpeeds(accel, m_pose.getRotation());
+        Twist2d deltaV = new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
+        m_accel = GeometryUtil.scale(deltaV, 1.0 / dt);
     }
 }

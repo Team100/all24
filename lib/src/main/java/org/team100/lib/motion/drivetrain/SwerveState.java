@@ -35,6 +35,13 @@ public class SwerveState {
                 new State100(p.getRotation().getRadians(), t.dtheta, 0));
     }
 
+        public SwerveState(Pose2d x, Twist2d v, Twist2d a) {
+        this(
+                new State100(x.getX(), v.dx, a.dx),
+                new State100(x.getY(), v.dy, a.dy),
+                new State100(x.getRotation().getRadians(), v.dtheta, a.dtheta));
+    }
+
     public Pose2d pose() {
         return new Pose2d(m_x.x(), m_y.x(), new Rotation2d(m_theta.x()));
     }
