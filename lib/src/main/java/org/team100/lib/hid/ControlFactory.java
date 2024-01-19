@@ -7,9 +7,15 @@ import edu.wpi.first.wpilibj.GenericHID;
 
 /**
  * Produces control instances based on their positions in the list and their
- * names. The driver control must be assigned to port zero. The operator control
- * must be assigned to port one. The constructor waits a few seconds before
- * giving up on disconnected ports.
+ * names
+ * 
+ * The driver control must be assigned to port zero!
+ * 
+ * The operator control must be assigned to port one!
+ * 
+ * The third control must be assigned to port two!
+ * 
+ * The constructor waits a few seconds before giving up on disconnected ports.
  */
 public class ControlFactory {
     private static final int kLimit = 5;
@@ -17,18 +23,24 @@ public class ControlFactory {
     };
     private static final OperatorControl kNoOperator = new OperatorControl() {
     };
+    private static final ThirdControl kNoThird = new ThirdControl() {
+    };
     private final DriverControl m_DriverControl;
     private final OperatorControl m_OperatorControl;
+    private final ThirdControl m_ThirdControl;
 
     public ControlFactory() {
         m_DriverControl = assignDriver();
         m_OperatorControl = assignOperator();
+        m_ThirdControl = assignThird();
 
         Util.println("********************************** CONTROLS **********************************");
         Util.printf("*   Driver HID: %23.23s     Control: %23.23s *\n", m_DriverControl.getHIDName(),
                 m_DriverControl.getClass().getSimpleName());
         Util.printf("* Operator HID: %23.23s     Control: %23.23s *\n", m_OperatorControl.getHIDName(),
                 m_OperatorControl.getClass().getSimpleName());
+        Util.printf("*    Third HID: %23.23s     Control: %23.23s *\n", m_ThirdControl.getHIDName(),
+                m_ThirdControl.getClass().getSimpleName());
         Util.println("******************************************************************************");
 
     }
@@ -102,6 +114,29 @@ public class ControlFactory {
         }
         Util.println("Unrecognized driver control name: " + operatorHID.getName());
         return kNoOperator;
+    }
+
+    private ThirdControl assignThird() {
+        GenericHID operatorHID = new GenericHID(2);
+        int waitCounter = 0;
+        while (!operatorHID.isConnected()) {
+            if (waitCounter > kLimit) {
+                return kNoThird;
+            }
+            Util.println("Waiting for port two...");
+            sleep1();
+            waitCounter += 1;
+            DriverStation.refreshData();
+        }
+
+        String operatorName = operatorHID.getName();
+        Util.println("Found operator HID: " + operatorName);
+
+        if (operatorName.contains("MIDI")) {
+            return new ThirdMidiControl();
+        }
+        Util.println("Unrecognized third control name: " + operatorHID.getName());
+        return kNoThird;
     }
 
     private void sleep1() {
