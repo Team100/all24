@@ -8,13 +8,14 @@ import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.testing.TimelessTest;
 import org.team100.lib.units.Distance;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-class PositionProfileTest {
+class PositionProfileTest extends TimelessTest {
     boolean dump = false;
     private static final double kDelta = 0.001;
 
@@ -157,6 +158,7 @@ class PositionProfileTest {
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
         servo.setPosition(1);
+        stepTime(0.02);
         servo.periodic();
         // useful to fix up the examples above
         if (dump)

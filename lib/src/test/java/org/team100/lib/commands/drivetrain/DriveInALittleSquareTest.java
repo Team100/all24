@@ -8,13 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.testing.TimelessTest;
 import org.team100.lib.util.Util;
 
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 
-class DriveInALittleSquareTest {
+class DriveInALittleSquareTest extends TimelessTest {
     boolean dump = false;
     private static final double kDelta = 0.001;
 
@@ -23,13 +22,11 @@ class DriveInALittleSquareTest {
     /** Confirm that the steering commands are simple steps. */
     @Test
     void testSteering() {
-        // required for SimHooks.stepTiming
-        HAL.initialize(500, 0);
         SwerveDriveSubsystem swerve = fixture.drive;
         DriveInALittleSquare command = new DriveInALittleSquare(swerve);
         command.initialize();
-
         // the first time we call execute, drive doesn't yet know it's at the goal
+        stepTime(0.02);
         fixture.drive.periodic();
         command.execute();
         // initially steering
@@ -39,35 +36,34 @@ class DriveInALittleSquareTest {
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
 
+        
         // the second time, it knows, so we switch to driving.
+        stepTime(0.02);
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
-        assertEquals(0.008, command.speedM_S.v(), 0.01);
+        assertEquals(0.02, command.speedM_S.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
 
         // step through the driving phase
-        SimHooks.stepTimingAsync(2.5);
+        stepTime(2.5);
         fixture.drive.periodic();
         command.execute();
         // now we should be steering again
-        SimHooks.stepTimingAsync(0.02);
+        stepTime(0.02);
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.speedM_S.v(), kDelta);
-        assertEquals(Math.PI/2, command.m_goal.getRadians(), kDelta);
+        assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI/2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
-        //HAL.shutdown();
+        assertEquals(Math.PI / 2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
     }
 
     @Test
     void testLowLevel() {
-        // required for SimHooks.stepTiming
-        HAL.initialize(500, 0);
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
         command.initialize();
         // first align the wheels in case they're not already aligned.
@@ -78,7 +74,7 @@ class DriveInALittleSquareTest {
         assertEquals(0, command.m_goal.getRadians(), kDelta);
 
         // a little while later we should be driving
-        SimHooks.stepTimingAsync(0.1);
+        stepTime(0.1);
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
@@ -89,7 +85,7 @@ class DriveInALittleSquareTest {
 
         // drive to the next corner
         for (double t = 0; t < 2.1; t += 0.02) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             fixture.drive.periodic();
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].speedMetersPerSecond;
@@ -98,7 +94,7 @@ class DriveInALittleSquareTest {
         }
 
         // steer
-        SimHooks.stepTimingAsync(0.02);
+        stepTime(0.02);
         fixture.drive.periodic();
         command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
@@ -112,7 +108,7 @@ class DriveInALittleSquareTest {
 
         // wait a half second.
         for (double t = 0; t < 0.5; t += 0.02) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             fixture.drive.periodic();
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
@@ -137,7 +133,6 @@ class DriveInALittleSquareTest {
         // there's no specific test here because the velocity seems to depend
         // on the timing in the simulation
         assertTrue(command.speedM_S.v() > 0);
-        //HAL.shutdown();
     }
 
 }

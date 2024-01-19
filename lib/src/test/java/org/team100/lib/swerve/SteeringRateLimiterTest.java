@@ -35,13 +35,12 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 0 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
-        double min_s = 1;
         List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
 
         double s = c.enforceSteeringLimit(desiredModuleStates,
                 prevModuleStates, need_to_steer, prev_vx,
                 prev_vy, prev_heading, desired_vx, desired_vy,
-                desired_heading, min_s, overrideSteering, 0.02);
+                desired_heading, overrideSteering, 0.02);
 
         assertEquals(1.0, s, kDelta);
     }
@@ -64,13 +63,12 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 1 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotation90 };
-        double min_s = 1;
         List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
 
         double s = c.enforceSteeringLimit(desiredModuleStates,
                 prevModuleStates, need_to_steer, prev_vx,
                 prev_vy, prev_heading, desired_vx, desired_vy,
-                desired_heading, min_s, overrideSteering, 0.02);
+                desired_heading, overrideSteering, 0.02);
 
         // s = 0 stops the drive motors
         assertEquals(0, s, kDelta);

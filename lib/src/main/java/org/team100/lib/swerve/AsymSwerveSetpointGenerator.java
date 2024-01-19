@@ -109,12 +109,11 @@ public class AsymSwerveSetpointGenerator {
 
         // 's' interpolates between start and goal. At 0, we are at prevState and at 1,
         // we are at desiredState.
-        double min_s = 1.0;
 
-        double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, 1.0, kDtSec);
+        double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, kDtSec);
 
         t.log(Level.DEBUG, "/setpoint_generator/min_s centripetal", centripetal_min_s);
-        min_s = Math.min(min_s, centripetal_min_s);
+        double min_s = centripetal_min_s;
 
         // In cases where an individual module is stopped, we want to remember the right
         // steering angle to command (since
@@ -131,7 +130,6 @@ public class AsymSwerveSetpointGenerator {
                 desired_vx,
                 desired_vy,
                 desired_heading,
-                1.0,
                 overrideSteering,
                 kDtSec);
 
@@ -144,7 +142,6 @@ public class AsymSwerveSetpointGenerator {
                 prev_vy,
                 desired_vx,
                 desired_vy,
-                1.0,
                 kDtSec);
 
         t.log(Level.DEBUG, "/setpoint_generator/min_s accel", accel_min_s);

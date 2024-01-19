@@ -10,19 +10,17 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
+import org.team100.lib.testing.TimelessTest;
 
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 
-class ArmTrajectoryCommandTest {
+class ArmTrajectoryCommandTest extends TimelessTest {
     private static final double kDelta = 0.001;
 
     @Test
     void testSimple() {
-        HAL.initialize(500, 0);
         ArmSubsystem armSubSystem = ArmFactory.get();
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
@@ -32,17 +30,16 @@ class ArmTrajectoryCommandTest {
                 goal);
         command.initialize();
         assertEquals(0, armSubSystem.getPosition().th1, kDelta);
+        stepTime(0.02);
         command.execute();
         // the goal is impossible so this is always finished.
         assertTrue(command.isFinished());
         command.end(false);
         armSubSystem.close();
-        //HAL.shutdown();
     }
 
     @Test
     void testSimple2() {
-        HAL.initialize(500, 0);
         ArmSubsystem armSubSystem = ArmFactory.get();
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
@@ -53,14 +50,14 @@ class ArmTrajectoryCommandTest {
         command.initialize();
         // the command takes 2s or so
         for (int i = 0; i < 116; ++i) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             armSubSystem.periodic();
             command.execute();
             assertFalse(command.isFinished());
         }
         // let the controllers catch up
         for (int i = 0; i < 30; ++i) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             armSubSystem.periodic();
             command.execute();
         }
@@ -70,7 +67,6 @@ class ArmTrajectoryCommandTest {
         assertEquals(Math.PI / 2, armSubSystem.getPosition().th2, 0.02);
         command.end(false);
         armSubSystem.close();
-        //HAL.shutdown();
     }
 
     @Test

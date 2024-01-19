@@ -71,6 +71,10 @@ public class SwerveKinodynamics {
             double track,
             double wheelbase,
             double vcg) {
+        if (track < 0.1)
+            throw new IllegalArgumentException();
+        if (wheelbase < 0.1)
+            throw new IllegalArgumentException();
 
         m_MaxDriveVelocityM_S = maxDriveVelocity;
         m_MaxDriveAccelerationM_S2 = maxDriveAcceleration;
@@ -176,15 +180,17 @@ public class SwerveKinodynamics {
      * 
      * It also does extra veering correction proportional to rotation rate and
      * translational acceleration.
-     * @param in chassis speeds to transform
+     * 
+     * @param in            chassis speeds to transform
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
-     * @param accelM_S magnitude of acceleration
-     * @param dt time to aim for
+     * @param accelM_S      magnitude of acceleration
+     * @param dt            time to aim for
      */
     public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
-        // ... which is subtracted here; this isn't really a field-relative transformation it's just a rotation.
+        // ... which is subtracted here; this isn't really a field-relative
+        // transformation it's just a rotation.
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 in.vxMetersPerSecond,
                 in.vyMetersPerSecond,
@@ -222,7 +228,7 @@ public class SwerveKinodynamics {
                 deltaPose.getY(),
                 deltaPose.getRotation().getRadians()).div(dt);
 
-        // This is the opposite direction 
+        // This is the opposite direction
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         return ChassisSpeeds.fromFieldRelativeSpeeds(
                 continuousSpeeds.vxMetersPerSecond,

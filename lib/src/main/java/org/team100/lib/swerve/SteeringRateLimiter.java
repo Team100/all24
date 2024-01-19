@@ -35,9 +35,9 @@ public class SteeringRateLimiter {
             double[] desired_vx,
             double[] desired_vy,
             Rotation2d[] desired_heading,
-            double min_s,
             List<Optional<Rotation2d>> overrideSteering,
             double kDtSec) {
+        double min_s = 1.0;
 
         final double max_theta_step = kDtSec * m_limits.getMaxSteeringVelocityRad_S();
         for (int i = 0; i < prevModuleStates.length; ++i) {
