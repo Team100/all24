@@ -17,8 +17,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 class DriveManuallyTest {
     ManualMode.Mode desiredMode = null;
     Twist2d desiredTwist = new Twist2d(1, 0, 0);
-        Fixture fixture = new Fixture();
-
+    Fixture fixture = new Fixture();
 
     @Test
     void testSimple() {
@@ -36,7 +35,7 @@ class DriveManuallyTest {
                 robotDrive,
                 new MockHeading(),
                 swerveKinodynamics,
-                () -> null, 
+                () -> null,
                 thetaController,
                 omegaController,
                 () -> null,

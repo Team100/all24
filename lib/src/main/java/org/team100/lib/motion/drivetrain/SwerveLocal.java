@@ -165,6 +165,9 @@ public class SwerveLocal {
     /**
      * The speed implied by the module states.
      * performs inverse discretization and extra correction
+     * 
+     * @param gyroRateRad_S gyro rate
+     * @param dt            for discretization
      */
     public ChassisSpeeds speeds(double gyroRateRad_S, double dt) {
         SwerveModuleState[] states = states();
