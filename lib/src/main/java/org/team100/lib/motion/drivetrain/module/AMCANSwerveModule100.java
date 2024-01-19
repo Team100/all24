@@ -29,6 +29,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     // andymark ma3 encoder is 1:1
     private static final double turningGearRatio = 1.0;
 
+    /** @param name like "front left" or whatever */
     public static AMCANSwerveModule100 get(
             String name,
             double currentLimit,
@@ -40,12 +41,12 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics) {
 
         VelocityServo<Distance> driveServo = driveServo(
-                name,
+                name + "/Drive",
                 currentLimit,
                 driveMotorCanId);
 
         PositionServo<Angle> turningServo = turningServo(
-                name,
+                name + "/Turning",
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -78,7 +79,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 0.0, // kS
                 .5); // kV
         return new SelectableVelocityServo<>(
-                drive(name),
+                name,
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -107,7 +108,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 .25, // kS
                 0.015); // kV
         VelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
-                turning(name),
+                name,
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -121,7 +122,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle> turningServo = new PositionServo<>(
-                turning(name),
+                name,
                 turningVelocityServo,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),

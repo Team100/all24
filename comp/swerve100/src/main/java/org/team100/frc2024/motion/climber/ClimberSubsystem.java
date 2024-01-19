@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.climber;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,13 +15,15 @@ public class ClimberSubsystem extends SubsystemBase {
     private static final double kMaxAccelM_S2 = 1;
     /** Position servo PID kP */
     private static final double kP = 1;
+    private final String m_name;
 
     private final PositionServo<Distance> s1;
     private final PositionServo<Distance> s2;
 
-    public ClimberSubsystem(String name1, String name2, int canID1, int canID2) {
+    public ClimberSubsystem( int canID1, int canID2) {
+        m_name = Names.name(this);
         s1 = ServoFactory.neoPositionServo(
-                name1,
+                m_name + "/Left",
                 canID1,
                 false,
                 kGearRatio,
@@ -29,7 +32,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 kMaxAccelM_S2,
                 new PIDController(kP, 0, 0));
         s2 = ServoFactory.neoPositionServo(
-                name2,
+                m_name + "/Right",
                 canID2,
                 true,
                 kGearRatio,

@@ -40,11 +40,11 @@ public class ServoFactory {
                 gearRatio,
                 wheelDiameter);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
-                name + "/encoder",
+                name,
                 motor,
                 wheelDiameter * Math.PI);
         VelocityServo<Distance> v = new OutboardVelocityServo<>(
-                name + "/velocity",
+                name,
                 motor,
                 encoder);
         return new LimitedVelocityServo<>(v, maxVel, maxAccel, maxDecel);
@@ -63,11 +63,11 @@ public class ServoFactory {
                 gearRatio,
                 wheelDiameter);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
-                name + "/encoder",
+                name,
                 motor,
                 wheelDiameter * Math.PI);
         return new OutboardVelocityServo<>(
-                name + "/velocity",
+                name,
                 motor,
                 encoder);
 
@@ -93,15 +93,15 @@ public class ServoFactory {
                 gearRatio,
                 wheelDiameter);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
-                name + "/encoder",
+                name,
                 motor,
                 wheelDiameter * Math.PI);
         VelocityServo<Distance> vServo = new OutboardVelocityServo<>(
-                name + "/velocity",
+                name,
                 motor,
                 encoder);
         return new PositionServo<>(
-                name + "/position",
+                name,
                 vServo,
                 encoder,
                 maxVel,
@@ -124,14 +124,14 @@ public class ServoFactory {
                 motorPhase,
                 gearRatio);
         NeoTurningEncoder encoder = new NeoTurningEncoder(
-                name + "/encoder",
+                name,
                 motor);
         VelocityServo<Angle> vServo = new OutboardVelocityServo<>(
-                name + "/velocity",
+                name,
                 motor,
                 encoder);
         return new PositionServo<>(
-                name + "/position",
+                name,
                 vServo,
                 encoder,
                 maxVel,

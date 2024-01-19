@@ -5,6 +5,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -47,7 +48,7 @@ public class ArmSubsystem extends SubsystemBase {
             Encoder100<Angle> upperEncoder) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = String.format("/%s", name);
+        m_name = Names.append(name, this);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
@@ -74,12 +75,11 @@ public class ArmSubsystem extends SubsystemBase {
 
     /** Arm angles (radians), 0 up, positive forward. */
     public ArmAngles getPosition() {
-        ArmAngles result = new ArmAngles(
+        ArmAngles position = new ArmAngles(
                 MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(m_lowerArmEncoder.getPosition())),
                 MathUtil.angleModulus(m_upperMeasurementFilter.calculate(m_upperArmEncoder.getPosition())));
-        t.log(Level.DEBUG, m_name + "/Lower Encoder Pos: ", result.th1);
-        t.log(Level.DEBUG, m_name + "/Upper Encoder Pos: ", result.th2);
-        return result;
+        t.log(Level.DEBUG, m_name, "position", position);
+        return position;
     }
 
     /** Joint velocities in radians per second. */
@@ -88,10 +88,9 @@ public class ArmSubsystem extends SubsystemBase {
         double th1 = position.th1 - m_previousPosition.th1;
         double th2 = position.th2 - m_previousPosition.th2;
         m_previousPosition = position;
-        ArmAngles result = new ArmAngles(th1 * 50, th2 * 50);
-        t.log(Level.DEBUG, m_name + "/Lower Encoder Vel: ", result.th1);
-        t.log(Level.DEBUG, m_name + "/Upper Encoder Vel: ", result.th2);
-        return result;
+        ArmAngles velocity = new ArmAngles(th1 * 50, th2 * 50);
+        t.log(Level.DEBUG, m_name, "velocity", velocity);
+        return velocity;
     }
 
     /**

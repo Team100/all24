@@ -4,6 +4,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Twist2d;
 
@@ -15,9 +16,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 public class ManualFieldRelativeSpeeds {
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
+    private final String m_name;
 
     public ManualFieldRelativeSpeeds(SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
+        m_name = Names.name(this);
     }
 
     /**
@@ -40,9 +43,9 @@ public class ManualFieldRelativeSpeeds {
         // desaturate to feasibility
         twistM_S = m_swerveKinodynamics.analyticDesaturation(twistM_S);
 
-        t.log(Level.DEBUG, "/manual field relative/twist x m_s", twistM_S.dx);
-        t.log(Level.DEBUG, "/manual field relative/twist y m_s", twistM_S.dy);
-        t.log(Level.DEBUG, "/manual field relative/twist theta rad_s", twistM_S.dtheta);
+        t.log(Level.DEBUG, m_name, "twist x m_s", twistM_S.dx);
+        t.log(Level.DEBUG, m_name, "twist y m_s", twistM_S.dy);
+        t.log(Level.DEBUG, m_name, "twist theta rad_s", twistM_S.dtheta);
         return twistM_S;
     }
 }

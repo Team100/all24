@@ -5,6 +5,7 @@ import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -21,18 +22,13 @@ public class SwerveModule100 {
     private final PositionServo<Angle> m_turningServo;
     private final SwerveModuleVisualization m_viz;
 
-    /**
-     * @param name         may not contain slashes
-     * @param driveServo
-     * @param turningServo
-     */
     public SwerveModule100(
             String name,
             VelocityServo<Distance> driveServo,
             PositionServo<Angle> turningServo) {
-        if (name.contains("/"))
+        if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = name;
+        m_name = Names.append(name, this);
         m_driveServo = driveServo;
         m_turningServo = turningServo;
         m_viz = new SwerveModuleVisualization(this);
@@ -117,13 +113,5 @@ public class SwerveModule100 {
     void stop() {
         m_driveServo.stop();
         m_turningServo.stop();
-    }
-
-    protected static String turning(String name) {
-        return name + "/Turning";
-    }
-
-    protected static String drive(String name) {
-        return name + "/Drive";
     }
 }

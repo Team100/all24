@@ -1,5 +1,7 @@
 package org.team100.lib.commands;
 
+import org.team100.lib.util.Names;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -8,10 +10,18 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public abstract class Command100 extends Command {
 
+    protected final String m_name;
+
     private double prevTime;
 
-    public abstract void initialize100();
-    
+    protected Command100() {
+        m_name = Names.append("command", this);
+    }
+
+    public void initialize100() {
+        //
+    }
+
     /** @param dt duration since the previous call. */
     public abstract void execute100(double dt);
 

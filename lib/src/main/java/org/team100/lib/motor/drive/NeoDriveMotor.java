@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -63,10 +64,10 @@ public class NeoDriveMotor implements Motor100<Distance> {
     private final double m_wheelDiameter;
     private final String m_name;
 
-    /** Current velocity measurement, obtained in periodic(). */
-    private double m_encoderVelocity;
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
+    /** Current velocity measurement, obtained in periodic(). */
+    private double m_encoderVelocity;
 
     public NeoDriveMotor(
             String name,
@@ -94,20 +95,15 @@ public class NeoDriveMotor implements Motor100<Distance> {
         m_gearRatio = gearRatio;
         m_wheelDiameter = wheelDiameter;
 
-        m_name = String.format("/Neo Turning Motor %s", name);
+        m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceId());
-    }
-
-    @Override
-    public double get() {
-        return m_motor.getAppliedOutput();
+        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name, "Output", output);
     }
 
     @Override
@@ -136,7 +132,10 @@ public class NeoDriveMotor implements Motor100<Distance> {
 
         m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.DEBUG, m_name + "/Output", motorRev_S);
+        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
+        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.DEBUG, m_name, "desired speed (rev_s)", motorRev_S);
     }
 
     @Override
@@ -172,8 +171,8 @@ public class NeoDriveMotor implements Motor100<Distance> {
     public void periodic() {
         m_encoderPosition = m_encoder.getPosition();
         m_encoderVelocity = m_encoder.getVelocity();
-        t.log(Level.DEBUG, m_name + "/position (rev)", m_encoderPosition);
-        t.log(Level.DEBUG, m_name + "/velocity (rev_S)", m_encoderVelocity / 60);
+        t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
     }
 
     /////////////////////////////////////////////////////////////////

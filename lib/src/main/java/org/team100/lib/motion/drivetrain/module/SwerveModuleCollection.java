@@ -11,11 +11,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection {
-    // these names should not have slashes, it messes up the visualization
-    private static final String kFrontLeft = "Front Left";
-    private static final String kFrontRight = "Front Right";
-    private static final String kRearLeft = "Rear Left";
-    private static final String kRearRight = "Rear Right";
+    private static final String kFrontLeft = "Swerve Modules/Front Left";
+    private static final String kFrontRight = "Swerve Modules/Front Right";
+    private static final String kRearLeft = "Swerve Modules/Rear Left";
+    private static final String kRearRight = "Swerve Modules/Rear Right";
 
     private final SwerveModule100 m_frontLeft;
     private final SwerveModule100 m_frontRight;

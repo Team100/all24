@@ -12,6 +12,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -39,6 +40,7 @@ public class ManualWithHeading {
     private final HeadingLatch m_latch;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
+    private final String m_name;
 
     public final TrapezoidProfile100 m_profile;
     Rotation2d m_goal = null;
@@ -55,6 +57,7 @@ public class ManualWithHeading {
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
+        m_name = Names.name(this);
         m_latch = new HeadingLatch();
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -98,7 +101,7 @@ public class ManualWithHeading {
         m_goal = m_latch.latchedRotation(pov, clipped);
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
-            t.log(Level.DEBUG, "/ManualWithHeading/mode", "free");
+            t.log(Level.DEBUG, m_name, "mode", "free");
 
             // scale to max in both translation and rotation
             Twist2d twistM_S = DriveUtil.scale(
@@ -143,13 +146,12 @@ public class ManualWithHeading {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
-        t.log(Level.DEBUG, "/ManualWithHeading/mode", "snap");
-        t.log(Level.DEBUG, "/ManualWithHeading/reference/theta", m_thetaSetpoint.x());
-        t.log(Level.DEBUG, "/ManualWithHeading/reference/omega", m_thetaSetpoint.v());
-        t.log(Level.DEBUG, "/ManualWithHeading/measurement/theta", headingMeasurement);
-        t.log(Level.DEBUG, "/ManualWithHeading/measurement/omega", headingRate);
-        t.log(Level.DEBUG, "/ManualWithHeading/error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.DEBUG, "/ManualWithHeading/error/omega", m_thetaSetpoint.v() - headingRate);
+        t.log(Level.DEBUG, m_name, "mode", "snap");
+        t.log(Level.DEBUG, m_name, "theta setpoint", m_thetaSetpoint);
+        t.log(Level.DEBUG, m_name, "measurement/theta", headingMeasurement);
+        t.log(Level.DEBUG, m_name, "measurement/omega", headingRate);
+        t.log(Level.DEBUG, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
+        t.log(Level.DEBUG, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

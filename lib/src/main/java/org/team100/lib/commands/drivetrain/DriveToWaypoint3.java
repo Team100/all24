@@ -9,6 +9,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -31,9 +32,9 @@ public class DriveToWaypoint3 extends Command100 {
     private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
-    private final Timer m_timer;
-    private final HolonomicDriveController3 m_controller;
     private final StraightLineTrajectory m_trajectories;
+    private final HolonomicDriveController3 m_controller;
+    private final Timer m_timer;
 
     private Trajectory m_trajectory;
     /**
@@ -94,14 +95,14 @@ public class DriveToWaypoint3 extends Command100 {
             }
         }
 
-        t.log(Level.DEBUG, "/Drive To Waypoint/Aligned", m_steeringAligned);
-        t.log(Level.DEBUG, "/Drive To Waypoint/Desired X", desiredState.poseMeters.getX());
-        t.log(Level.DEBUG, "/Drive To Waypoint/Desired Y", desiredState.poseMeters.getY());
-        t.log(Level.DEBUG, "/Drive To Waypoint/Pose X", m_swerve.getPose().getX());
-        t.log(Level.DEBUG, "/Drive To Waypoint/Pose Y", m_swerve.getPose().getY());
-        t.log(Level.DEBUG, "/Drive To Waypoint/Desired Rot", m_goal.getRotation().getRadians());
-        t.log(Level.DEBUG, "/Drive To Waypoint/Pose Rot", m_swerve.getPose().getRotation().getRadians());
-        t.log(Level.DEBUG, "/Drive To Waypoint/Time", curTime);
+        t.log(Level.DEBUG, m_name, "Aligned", m_steeringAligned);
+        t.log(Level.DEBUG, m_name, "Desired X", desiredState.poseMeters.getX());
+        t.log(Level.DEBUG, m_name, "Desired Y", desiredState.poseMeters.getY());
+        t.log(Level.DEBUG, m_name, "Pose X", m_swerve.getPose().getX());
+        t.log(Level.DEBUG, m_name, "Pose Y", m_swerve.getPose().getY());
+        t.log(Level.DEBUG, m_name, "Desired Rot", m_goal.getRotation().getRadians());
+        t.log(Level.DEBUG, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.DEBUG, m_name, "Time", curTime);
     }
 
     @Override

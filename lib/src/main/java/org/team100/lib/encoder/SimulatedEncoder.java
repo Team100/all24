@@ -4,6 +4,7 @@ import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
@@ -41,7 +42,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
             double upperLimit) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = String.format("/%s/Simulated Encoder", name);
+        m_name = Names.append(name, this);
         m_motor = motor;
         m_reduction = reduction;
         m_lowerLimit = lowerLimit;
@@ -78,7 +79,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         m_position += m_rate * dt;
         m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
-        t.log(Level.DEBUG, m_name + "/position", m_position);
-        t.log(Level.DEBUG, m_name + "/rate", m_rate);
+        t.log(Level.DEBUG, m_name, "position", m_position);
+        t.log(Level.DEBUG, m_name, "rate", m_rate);
     }
 }

@@ -102,15 +102,16 @@ public class Telemetry {
 
     private void updateLevel() {
         m_level = m_levelChooser.getSelected();
-    } 
+    }
 
     public static Telemetry get() {
         return instance;
     }
 
-    public void log(Level level, String key, boolean val) {
+    public void log(Level level, String root, String leaf, boolean val) {
         if (!m_level.admit(level))
             return;
+        String key = Telemetry.append(root, leaf);
         if (kAlsoPrint)
             Util.println(key + ": " + val);
         pub(key, k -> {
@@ -121,9 +122,10 @@ public class Telemetry {
         }, BooleanPublisher.class).set(val);
     }
 
-    public void log(Level level, String key, double val) {
+    public void log(Level level, String root, String leaf, double val) {
         if (!m_level.admit(level))
             return;
+        String key = Telemetry.append(root, leaf);
         if (kAlsoPrint)
             Util.println(key + ": " + val);
         pub(key, k -> {
@@ -134,9 +136,10 @@ public class Telemetry {
         }, DoublePublisher.class).set(val);
     }
 
-    public void log(Level level, String key, double[] val) {
+    public void log(Level level, String root, String leaf, double[] val) {
         if (!m_level.admit(level))
             return;
+        String key = Telemetry.append(root, leaf);
         if (kAlsoPrint)
             Util.println(key + ": " + val);
         pub(key, k -> {
@@ -147,9 +150,10 @@ public class Telemetry {
         }, DoubleArrayPublisher.class).set(val);
     }
 
-    public void log(Level level, String key, long val) {
+    public void log(Level level, String root, String leaf, long val) {
         if (!m_level.admit(level))
             return;
+        String key = Telemetry.append(root, leaf);
         if (kAlsoPrint)
             Util.println(key + ": " + val);
         pub(key, k -> {
@@ -160,9 +164,10 @@ public class Telemetry {
         }, IntegerPublisher.class).set(val);
     }
 
-    public void log(Level level, String key, String val) {
+    public void log(Level level, String root, String leaf, String val) {
         if (!m_level.admit(level))
             return;
+        String key = Telemetry.append(root, leaf);
         if (kAlsoPrint)
             Util.println(key + ": " + val);
         pub(key, k -> {
@@ -174,9 +179,10 @@ public class Telemetry {
     }
 
     /** val is a supplier to avoid doing any work if we're not going to log it. */
-    public void log(Level level, String key, Supplier<String[]> val) {
+    public void log(Level level, String root, String leaf, Supplier<String[]> val) {
         if (!m_level.admit(level))
             return;
+        String key = Telemetry.append(root, leaf);
         if (kAlsoPrint)
             Util.println(key + ": " + val);
         pub(key, k -> {
@@ -187,83 +193,87 @@ public class Telemetry {
         }, StringArrayPublisher.class).set(val.get());
     }
 
-    public void log(Level level, String key, Pose2d val) {
-        log(level, key + "/translation", val.getTranslation());
-        log(level, key + "/rotation", val.getRotation());
+    public void log(Level level, String root, String leaf, Pose2d val) {
+        log(level, Telemetry.append(root, leaf), "translation", val.getTranslation());
+        log(level, Telemetry.append(root, leaf), "rotation", val.getRotation());
     }
 
-    public void log(Level level, String key, Translation2d val) {
-        log(level, key + "/x", val.getX());
-        log(level, key + "/y", val.getY());
+    public void log(Level level, String root, String leaf, Translation2d val) {
+        log(level, Telemetry.append(root, leaf), "x", val.getX());
+        log(level, Telemetry.append(root, leaf), "y", val.getY());
     }
 
-    public void log(Level level, String key, Rotation2d val) {
-        log(level, key + "/rad", val.getRadians());
+    public void log(Level level, String root, String leaf, Rotation2d val) {
+        log(level, Telemetry.append(root, leaf), "rad", val.getRadians());
     }
 
-    public void log(Level level, String key, TrajectorySamplePoint val) {
-        log(level, key + "/state", val.state());
+    public void log(Level level, String root, String leaf, TrajectorySamplePoint val) {
+        log(level, Telemetry.append(root, leaf), "state", val.state());
     }
 
-    public void log(Level level, String key, TimedPose val) {
-        log(level, key + "/posestate", val.state());
-        log(level, key + "/time", val.getTimeS());
-        log(level, key + "/velocity", val.velocityM_S());
-        log(level, key + "/accel", val.acceleration());
+    public void log(Level level, String root, String leaf, TimedPose val) {
+        log(level, Telemetry.append(root, leaf), "posestate", val.state());
+        log(level, Telemetry.append(root, leaf), "time", val.getTimeS());
+        log(level, Telemetry.append(root, leaf), "velocity", val.velocityM_S());
+        log(level, Telemetry.append(root, leaf), "accel", val.acceleration());
     }
 
-    public void log(Level level, String key, PoseWithCurvature val) {
-        log(level, key + "/pose", val.poseMeters);
+    public void log(Level level, String root, String leaf, PoseWithCurvature val) {
+        log(level, Telemetry.append(root, leaf), "pose", val.poseMeters);
     }
 
-    public void log(Level level, String key, Pose2dWithMotion val) {
-        log(level, key + "/pose", val.getPose());
+    public void log(Level level, String root, String leaf, Pose2dWithMotion val) {
+        log(level, Telemetry.append(root, leaf), "pose", val.getPose());
         Optional<Rotation2d> course = val.getCourse();
         if (course.isPresent()) {
-            log(level, key + "/course", course.get());
+            log(level, Telemetry.append(root, leaf), "course", course.get());
         }
     }
 
-    public void log(Level level, String key, Twist2d val) {
-        log(level, key + "/dx", val.dx);
-        log(level, key + "/dy", val.dy);
-        log(level, key + "/dtheta", val.dtheta);
+    public void log(Level level, String root, String leaf, Twist2d val) {
+        log(level, Telemetry.append(root, leaf), "dx", val.dx);
+        log(level, Telemetry.append(root, leaf), "dy", val.dy);
+        log(level, Telemetry.append(root, leaf), "dtheta", val.dtheta);
     }
 
-    public void log(Level level, String key, ChassisSpeeds val) {
-        log(level, key + "/vx m_s", val.vxMetersPerSecond);
-        log(level, key + "/vy m_s", val.vyMetersPerSecond);
-        log(level, key + "/omega rad_s", val.omegaRadiansPerSecond);
+    public void log(Level level, String root, String leaf, ChassisSpeeds val) {
+        log(level, Telemetry.append(root, leaf), "vx m_s", val.vxMetersPerSecond);
+        log(level, Telemetry.append(root, leaf), "vy m_s", val.vyMetersPerSecond);
+        log(level, Telemetry.append(root, leaf), "omega rad_s", val.omegaRadiansPerSecond);
     }
 
-    public void log(Level level, String key, State100 state) {
-        log(level, key + "/x", state.x());
-        log(level, key + "/v", state.v());
-        log(level, key + "/a", state.a());
+    public void log(Level level, String root, String leaf, State100 state) {
+        log(level, Telemetry.append(root, leaf), "x", state.x());
+        log(level, Telemetry.append(root, leaf), "v", state.v());
+        log(level, Telemetry.append(root, leaf), "a", state.a());
     }
 
-    public void log(Level level, String key, SwerveState state) {
-        log(level, key + "/x", state.x());
-        log(level, key + "/y", state.y());
-        log(level, key + "/theta", state.theta());
+    public void log(Level level, String root, String leaf, SwerveState state) {
+        log(level, Telemetry.append(root, leaf), "x", state.x());
+        log(level, Telemetry.append(root, leaf), "y", state.y());
+        log(level, Telemetry.append(root, leaf), "theta", state.theta());
     }
 
-    public void log(Level level, String key, ArmAngles angles) {
-        log(level, key + "/th1", angles.th1);
-        log(level, key + "/th2", angles.th2);
+    public void log(Level level, String root, String leaf, ArmAngles angles) {
+        log(level, Telemetry.append(root, leaf), "th1", angles.th1);
+        log(level, Telemetry.append(root, leaf), "th2", angles.th2);
     }
 
-    public void log(Level level, String key, State state) {
-        log(level, key + "/pose", state.poseMeters);
-        log(level, key + "/curvature", state.curvatureRadPerMeter);
-        log(level, key + "/velocity", state.velocityMetersPerSecond);
-        log(level, key + "/accel", state.accelerationMetersPerSecondSq);
+    public void log(Level level, String root, String leaf, State state) {
+        log(level, Telemetry.append(root, leaf), "pose", state.poseMeters);
+        log(level, Telemetry.append(root, leaf), "curvature", state.curvatureRadPerMeter);
+        log(level, Telemetry.append(root, leaf), "velocity", state.velocityMetersPerSecond);
+        log(level, Telemetry.append(root, leaf), "accel", state.accelerationMetersPerSecondSq);
     }
 
     private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {
         Publisher publisher = pubs.computeIfAbsent(valid(key), fn);
         if (!pubClass.isInstance(publisher))
-            throw new IllegalArgumentException("value type clash");
+            throw new IllegalArgumentException(
+                    String.format("value type clash for key %s old %s new %s",
+                            key,
+                            publisher.getClass().getName(),
+                            pubClass.getName()));
         return pubClass.cast(publisher);
     }
 
@@ -271,7 +281,12 @@ public class Telemetry {
         if (key.length() == 0)
             throw new IllegalArgumentException("empty key");
         if (key.charAt(0) != '/')
-            throw new IllegalArgumentException("no leading slash");
+            throw new IllegalArgumentException("key must start with slash; you provided: " + key);
         return key;
+    }
+
+    /** Make a key for the root level (with a leading slash). */
+    private static String append(String root, String leaf) {
+        return "/" + root + "/" + leaf;
     }
 }

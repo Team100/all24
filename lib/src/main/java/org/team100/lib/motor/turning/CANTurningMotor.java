@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
+import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -22,7 +23,8 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Because the number of ticks per revolution is small, the velocity measurement
  * is coarse at low speed.
  *
- * One motor tick is 0.22 rad, measuring across 50ms means we'd like to have a minimum tick rate of 20hz, so 4.4 rad/s.
+ * One motor tick is 0.22 rad, measuring across 50ms means we'd like to have a
+ * minimum tick rate of 20hz, so 4.4 rad/s.
  * 
  * Through the gearbox, that/s 0.074 rad/s, or about 4 degrees/sec.
  * 
@@ -31,7 +33,8 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * 
  * https://www.andymark.com/products/am-mag-encoder
  * 
- * Given the issues with feedback, this controller should rely mostly on feedforward.
+ * Given the issues with feedback, this controller should rely mostly on
+ * feedforward.
  */
 public class CANTurningMotor implements Motor100<Angle> {
     /**
@@ -120,13 +123,8 @@ public class CANTurningMotor implements Motor100<Angle> {
 
         m_motor.setSensorPhase(true);
 
-        m_name = String.format("/CAN Turning Motor %s", name);
-        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceID());
-    }
-
-    @Override
-    public double get() {
-        return m_motor.getMotorOutputPercent();
+        m_name = Names.append(name, this);
+        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
     }
 
     public WPI_TalonSRX getMotor() {
@@ -136,11 +134,7 @@ public class CANTurningMotor implements Motor100<Angle> {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name + "/Output", output);
-        t.log(Level.DEBUG, m_name + "/Encoder Value",
-                m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.log(Level.DEBUG, m_name + "/Velocity Value",
-                m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
+        t.log(Level.DEBUG, m_name, "Output", output);
     }
 
     @Override
@@ -173,7 +167,10 @@ public class CANTurningMotor implements Motor100<Angle> {
 
     @Override
     public void periodic() {
-        //
+        t.log(Level.DEBUG, m_name, "Encoder Value",
+                m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
+        t.log(Level.DEBUG, m_name, "Velocity Value",
+                m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
     ///////////////////////////////////////////////////////

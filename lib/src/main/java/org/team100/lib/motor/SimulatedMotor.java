@@ -3,6 +3,7 @@ package org.team100.lib.motor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -19,20 +20,15 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     public SimulatedMotor(String name) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = String.format("/%s/Simulated Motor", name);
+        m_name = Names.append(name, this);
     }
 
     private double m_velocity = 0;
 
     @Override
-    public double get() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void setDutyCycle(double output) {
         output = MathUtil.clamp(output, -1, 1);
-        t.log(Level.DEBUG, m_name + "/duty_cycle", output);
+        t.log(Level.DEBUG, m_name, "duty_cycle", output);
         // 100% output => about 6k rpm
         setVelocity(output * 600, 0);
     }
@@ -52,7 +48,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
             throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
         // ignore accel
-        t.log(Level.DEBUG, m_name + "/velocity", m_velocity);
+        t.log(Level.DEBUG, m_name, "velocity", m_velocity);
     }
 
     public double getVelocity() {

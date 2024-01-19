@@ -2,6 +2,7 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -13,9 +14,11 @@ public class Heading implements HeadingInterface {
     private final Telemetry t = Telemetry.get();
 
     private final RedundantGyroInterface m_gyro;
+    private final String m_name;
 
     public Heading(RedundantGyroInterface gyro) {
         m_gyro = gyro;
+        m_name = Names.name(this);
     }
 
     @Override
@@ -23,8 +26,8 @@ public class Heading implements HeadingInterface {
         double yawNED = m_gyro.getRedundantYawNED();
         // invert NED to get NWU
         Rotation2d result = Rotation2d.fromDegrees(-1.0 * yawNED);
-        t.log(Level.DEBUG, "/Heading/Heading deg", result.getDegrees());
-        t.log(Level.DEBUG, "/Heading/Heading rad", result.getRadians());
+        t.log(Level.DEBUG, m_name, "heading (deg)", result.getDegrees());
+        t.log(Level.DEBUG, m_name, "Heading (rad)", result.getRadians());
         return result;
     }
 

@@ -5,6 +5,7 @@ import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 /**
  * The built-in encoder in Falcon motors.
@@ -17,6 +18,11 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
     private final FalconDriveMotor m_motor;
     private final double m_distancePerPulse;
 
+    /** updated in periodic() */
+    private double m_positionM;
+    /** updated in periodic() */
+    private double m_velocityM_S;
+
     /**
      * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
@@ -27,29 +33,27 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
             double distancePerTurn) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_name = String.format("/%s/Falcon Drive Encoder", name);
+        m_name = Names.append(name, this);
         m_motor = motor;
         m_distancePerPulse = distancePerTurn / 2048;
     }
 
+    /** Position in meters */
     @Override
     public double getPosition() {
-        double result = m_motor.getPosition() * m_distancePerPulse;
-        t.log(Level.DEBUG, m_name + "/Position m", result);
-        return result;
+        return m_positionM;
     }
 
+    /** Velocity in meters/sec */
     @Override
     public double getRate() {
-        // sensor velocity is 1/2048ths of a turn per 100ms
-        double result = m_motor.getVelocity2048_100() * 10 * m_distancePerPulse;
-        t.log(Level.DEBUG, m_name + "/Speed m_s", result);
-        return result;
+        return m_velocityM_S;
     }
 
     @Override
     public void reset() {
         m_motor.resetPosition();
+        m_positionM = 0;
     }
 
     @Override
@@ -59,6 +63,20 @@ public class FalconDriveEncoder implements Encoder100<Distance> {
 
     @Override
     public void periodic() {
-        //
+        updatePosition();
+        updateVelocity();
+        t.log(Level.DEBUG, m_name, "position (m)", m_positionM);
+        t.log(Level.DEBUG, m_name, "velocity (m_s)", m_velocityM_S);
+    }
+
+    ///////////////////////////////////
+
+    private void updatePosition() {
+        m_positionM = m_motor.getPosition() * m_distancePerPulse;
+    }
+
+    private void updateVelocity() {
+        // sensor velocity is 1/2048ths of a turn per 100ms
+        m_velocityM_S = m_motor.getVelocity2048_100() * 10 * m_distancePerPulse;
     }
 }

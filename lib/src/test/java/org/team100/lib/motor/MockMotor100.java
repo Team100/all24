@@ -7,11 +7,6 @@ public class MockMotor100<T extends Measure100> implements Motor100<T> {
     public double velocity = 0;
 
     @Override
-    public double get() {
-        return 0;
-    }
-
-    @Override
     public void setDutyCycle(double output) {
         this.output = output;
     }

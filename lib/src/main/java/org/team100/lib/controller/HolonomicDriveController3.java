@@ -4,6 +4,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,6 +20,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
+    private final String m_name;
 
     public HolonomicDriveController3() {
         this(cartesian(), cartesian(), theta());
@@ -31,6 +33,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_xController = xController;
         m_yController = yController;
         m_thetaController = thetaController;
+        m_name = Names.name(this);
     }
 
     public static HolonomicDriveController3 withTolerance(
@@ -76,21 +79,20 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        t.log(Level.DEBUG, "/Holonomic3/u_FF/x", xFF);
-        t.log(Level.DEBUG, "/Holonomic3/u_FF/y", yFF);
-        t.log(Level.DEBUG, "/Holonomic3/u_FF/theta", thetaFF);
-        t.log(Level.DEBUG, "/Holonomic3/u_FB/x", xFB);
-        t.log(Level.DEBUG, "/Holonomic3/u_FB/y", yFB);
-        t.log(Level.DEBUG, "/Holonomic3/u_FB/theta", thetaFB);
-        t.log(Level.DEBUG, "/Holonomic3/measurement/x", currentPose.getX());
-        t.log(Level.DEBUG, "/Holonomic3/measurement/y", currentPose.getY());
-        t.log(Level.DEBUG, "/Holonomic3/measurement/theta", currentRotation.getRadians());
-        t.log(Level.DEBUG, "/Holonomic3/setpoint/x", m_xController.getSetpoint());
-        t.log(Level.DEBUG, "/Holonomic3/setpoint/y", m_yController.getSetpoint());
-        t.log(Level.DEBUG, "/Holonomic3/setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.DEBUG, "/Holonomic3/error/x", m_xController.getPositionError());
-        t.log(Level.DEBUG, "/Holonomic3/error/y", m_yController.getPositionError());
-        t.log(Level.DEBUG, "/Holonomic3/error/theta", m_thetaController.getPositionError());
+        t.log(Level.DEBUG, m_name, "u_FF/x", xFF);
+        t.log(Level.DEBUG, m_name, "u_FF/y", yFF);
+        t.log(Level.DEBUG, m_name, "u_FF/theta", thetaFF);
+        t.log(Level.DEBUG, m_name, "u_FB/x", xFB);
+        t.log(Level.DEBUG, m_name, "u_FB/y", yFB);
+        t.log(Level.DEBUG, m_name, "u_FB/theta", thetaFB);
+        t.log(Level.DEBUG, m_name, "measurement", currentPose);
+
+        t.log(Level.DEBUG, m_name, "setpoint/x", m_xController.getSetpoint());
+        t.log(Level.DEBUG, m_name, "setpoint/y", m_yController.getSetpoint());
+        t.log(Level.DEBUG, m_name, "setpoint/theta", m_thetaController.getSetpoint());
+        t.log(Level.DEBUG, m_name, "error/x", m_xController.getPositionError());
+        t.log(Level.DEBUG, m_name, "error/y", m_yController.getPositionError());
+        t.log(Level.DEBUG, m_name, "error/theta", m_thetaController.getPositionError());
 
         return new Twist2d(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }

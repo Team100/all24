@@ -10,7 +10,7 @@ import org.team100.frc2024.motion.intake.IntakeSubsystem;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
-import org.team100.lib.commands.drivetrain.DrawCircle;
+import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
@@ -86,7 +86,7 @@ public class RobotContainer implements SelfTestable {
 
     private final Command m_auton;
 
-    private final DrawCircle m_drawCircle;
+    private final DrawSquare m_drawCircle;
     private final SelfTestRunner m_selfTest;
     private final DriveInALittleSquare m_driveInALittleSquare;
     private final MorseCodeBeep m_beep;
@@ -106,11 +106,11 @@ public class RobotContainer implements SelfTestable {
 
         // digital inputs 0, 1, 2, 3.
         m_autonSelector = new AutonSelector();
-        t.log(Level.INFO, "/Routine", getRoutine());
+        t.log(Level.INFO, "RobotContainer", "Routine", getRoutine());
 
         // digital inputs 4, 5
         m_allianceSelector = new AllianceSelector();
-        t.log(Level.INFO, "/Alliance", m_allianceSelector.alliance().name());
+        t.log(Level.INFO, "RobotContainer", "Alliance", m_allianceSelector.alliance().name());
 
         m_indicator = new LEDIndicator(8);
 
@@ -153,10 +153,10 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = new IntakeSubsystem("Top Roller", "Bottom Roller", 3, 6);
-        m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, "Left Shooter", "Right Shooter", 7, 8);
-        m_indexer = new IndexerSubsystem("Indexer", 5);
-        m_climber = new ClimberSubsystem("Left Climber", "Right Climber", 2, 4);
+        m_intake = new IntakeSubsystem(3, 6);
+        m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, 7, 8);
+        m_indexer = new IndexerSubsystem(5);
+        m_climber = new ClimberSubsystem(2, 4);
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
@@ -185,7 +185,7 @@ public class RobotContainer implements SelfTestable {
 
         driverControl.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawCircle(m_drive, swerveKinodynamics, controller);
+        m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
         driverControl.circle().whileTrue(m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);

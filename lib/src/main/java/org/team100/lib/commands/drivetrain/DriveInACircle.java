@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -36,7 +37,7 @@ public class DriveInACircle extends Command100 {
     private static final Telemetry t = Telemetry.get();
 
     private final SwerveDriveSubsystem m_swerve;
-    private double m_turnRatio;
+    private final double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
 
     private Translation2d m_center;
@@ -62,6 +63,7 @@ public class DriveInACircle extends Command100 {
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
+
         addRequirements(m_swerve);
     }
 
@@ -98,10 +100,10 @@ public class DriveInACircle extends Command100 {
         Twist2d fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        t.log(Level.DEBUG, "/circle/center", m_center);
-        t.log(Level.DEBUG, "/circle/angle", m_angleRad);
-        t.log(Level.DEBUG, "/circle/reference", reference);
-        t.log(Level.DEBUG, "/circle/target", fieldRelativeTarget);
+        t.log(Level.DEBUG, m_name, "center", m_center);
+        t.log(Level.DEBUG, m_name, "angle", m_angleRad);
+        t.log(Level.DEBUG, m_name, "reference", reference);
+        t.log(Level.DEBUG, m_name, "target", fieldRelativeTarget);
     }
 
     static Translation2d getCenter(Pose2d currentPose, double radiusM) {
@@ -134,8 +136,6 @@ public class DriveInACircle extends Command100 {
                 center.getY() - cos * radiusM,
                 speedRad_S * sin * radiusM,
                 speedRad_S * speedRad_S * cos * radiusM + accelRad_S_S * sin);
-        t.log(Level.DEBUG, "/circle/x_state", xState);
-        t.log(Level.DEBUG, "/circle/y_state", yState);
         return new SwerveState(xState, yState, rotation);
     }
 

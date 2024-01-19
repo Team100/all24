@@ -12,7 +12,8 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
 public class TrajectoryVisualization {
-    private static final String kKey = "/field/trajectory";
+    private static final String kField = "field";
+    private static final String kTrajectory = "trajectory";
     private static final Telemetry t = Telemetry.get();
 
     private TrajectoryVisualization() {
@@ -29,7 +30,7 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        t.log(Level.DEBUG, kKey, arr);
+        t.log(Level.DEBUG, kField, kTrajectory, arr);
     }
 
     public static void setViz(Trajectory m_trajectory) {
@@ -42,7 +43,7 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        t.log(Level.DEBUG, kKey, arr);
+        t.log(Level.DEBUG, kField, kTrajectory, arr);
     }
 
     public static void setViz(List<Pose2d> poses) {
@@ -54,7 +55,7 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        t.log(Level.DEBUG, kKey, arr);
+        t.log(Level.DEBUG, kField, kTrajectory, arr);
     }
 
     public static void setViz(ChoreoTrajectory trajectory) {
@@ -62,7 +63,7 @@ public class TrajectoryVisualization {
     }
 
     public static void clear() {
-        t.log(Level.DEBUG, kKey, new double[0]);
+        t.log(Level.DEBUG, kField, kTrajectory, new double[0]);
     }
 
 }

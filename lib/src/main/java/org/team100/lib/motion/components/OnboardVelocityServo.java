@@ -5,10 +5,12 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -47,7 +49,7 @@ public class OnboardVelocityServo<T extends Measure100> implements VelocityServo
         m_encoder = encoder;
         m_controller = controller;
         m_feedforward = feedforward;
-        m_name = String.format("/%s/Velocity Servo", name);
+        m_name = Names.append(name, this);
     }
 
     @Override
@@ -67,13 +69,13 @@ public class OnboardVelocityServo<T extends Measure100> implements VelocityServo
         u_TOTAL = MathUtil.applyDeadband(u_TOTAL, kDeadband, 1);
         u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
         m_motor.setDutyCycle(u_TOTAL);
-        t.log(Level.DEBUG, m_name + "/Controller Output", u_FB);
-        t.log(Level.DEBUG, m_name + "/Feed Forward Output", u_FF);
-        t.log(Level.DEBUG, m_name + "/Total Output", u_TOTAL);
-        t.log(Level.DEBUG, m_name + "/Desired setpoint", setpoint);
-        t.log(Level.DEBUG, m_name + "/Controller Setpoint", m_controller.getSetpoint());
-        t.log(Level.DEBUG, m_name + "/Controller Speed Error", m_controller.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Controller Accel Error", m_controller.getVelocityError());
+        t.log(Level.DEBUG, m_name, "Controller Output", u_FB);
+        t.log(Level.DEBUG, m_name, "Feed Forward Output", u_FF);
+        t.log(Level.DEBUG, m_name, "Total Output", u_TOTAL);
+        t.log(Level.DEBUG, m_name, "Desired setpoint", setpoint);
+        t.log(Level.DEBUG, m_name, "Controller Setpoint", m_controller.getSetpoint());
+        t.log(Level.DEBUG, m_name, "Controller Speed Error", m_controller.getPositionError());
+        t.log(Level.DEBUG, m_name, "Controller Accel Error", m_controller.getVelocityError());
     }
 
     /** Direct control for testing. */

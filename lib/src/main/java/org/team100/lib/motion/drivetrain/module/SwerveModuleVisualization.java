@@ -19,13 +19,10 @@ public class SwerveModuleVisualization {
     private final MechanismLigament2d m_steer;
     private final MechanismLigament2d m_drive;
 
-    /**
-     * Module name is used as the root key, so it may not contain a slash.
-     */
     public SwerveModuleVisualization(SwerveModule100 module) {
-        String name = module.getName();
-        if (name.contains("/"))
-            throw new IllegalArgumentException();
+        // the glass visualization requires the key to be a root key
+        // so eliminate the slashes.
+        String name = module.getName().replace("/", "_");
         m_module = module;
         m_mechanism = new Mechanism2d(100, 100);
         // the root name cannot have slashes in it.

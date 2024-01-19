@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.intake;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -14,14 +15,17 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double kMaxVelM_S = 5;
     private static final double kMaxAccelM_S2 = 5;
     private static final double kMaxDecelM_S2 = 5;
+    private final String m_name;
 
     private final LimitedVelocityServo<Distance> topRoller;
     private final LimitedVelocityServo<Distance> bottomRoller;
 
-    public IntakeSubsystem(String name1, String name2, int canID1, int canID2) {
+    public IntakeSubsystem(int topCAN, int bottomCAN) {
+        m_name = Names.name(this);
+
         topRoller = ServoFactory.limitedNeoVelocityServo(
-                name1,
-                canID1,
+                m_name + "/Top Roller",
+                topCAN,
                 false,
                 kGearRatio,
                 kWheelDiameter,
@@ -30,8 +34,8 @@ public class IntakeSubsystem extends SubsystemBase {
                 kMaxDecelM_S2);
 
         bottomRoller = ServoFactory.limitedNeoVelocityServo(
-                name2,
-                canID2,
+                m_name + "/Bottom Roller",
+                bottomCAN,
                 false,
                 kGearRatio,
                 kWheelDiameter,

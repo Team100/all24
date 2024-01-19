@@ -16,6 +16,7 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -89,7 +90,7 @@ public class FancyTrajectory extends Command100 {
         ChassisSpeeds currentSpeed = m_robotDrive.speeds(dt);
         Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
-        t.log(Level.DEBUG, "/fancy trajectory/chassis speeds", output);
+        t.log(Level.DEBUG, m_name, "chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output, dt);
     }
 

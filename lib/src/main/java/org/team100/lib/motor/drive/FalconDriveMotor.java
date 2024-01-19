@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -47,7 +48,8 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Details on CAN bus status frame timing:
  * https://v5.docs.ctr-electronics.com/en/latest/ch18_CommonAPI.html#setting-status-frame-periods
  * 
- * TODO: phoenix 6 has a large number of zero-value arbitrary API changes; convert this
+ * TODO: phoenix 6 has a large number of zero-value arbitrary API changes;
+ * convert this
  * class to use them at some point during 2024.
  */
 public class FalconDriveMotor implements Motor100<Distance> {
@@ -110,14 +112,11 @@ public class FalconDriveMotor implements Motor100<Distance> {
     private double m_rawPosition;
     /** Current velocity, updated in periodic(). */
     private double m_rawVelocity;
+    /** Current output, updated in periodic() */
+    private double m_output;
+    /** Current motor error, updated in periodic() */
+    private double m_error;
 
-    /**
-     * @param name            may not contain slashes
-     * @param canId
-     * @param currentLimit
-     * @param kDriveReduction
-     * @param wheelDiameter
-     */
     public FalconDriveMotor(
             String name,
             int canId,
@@ -165,22 +164,14 @@ public class FalconDriveMotor implements Motor100<Distance> {
         m_motor.config_kD(0, 0);
         m_motor.config_kF(0, 0);
 
-        m_name = String.format("/%s/Falcon Drive Motor", name);
-        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceID());
-    }
-
-    @Override
-    public double get() {
-        return m_motor.getMotorOutputPercent();
+        m_name = Names.append(name, this);
+        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(ControlMode.PercentOutput, output);
-
-        t.log(Level.DEBUG, m_name + "/current speed rev_s", currentMotorRev_S());
-        t.log(Level.DEBUG, m_name + "/output [-1,1]", output);
-        t.log(Level.DEBUG, m_name + "/current speed 2048ths_100ms", getVelocity2048_100());
+        t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
     }
 
     /**
@@ -201,14 +192,10 @@ public class FalconDriveMotor implements Motor100<Distance> {
 
         m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
 
-        t.log(Level.DEBUG, m_name + "/friction feedforward [-1,1]", frictionFF);
-        t.log(Level.DEBUG, m_name + "/velocity feedforward [-1,1]", velocityFF);
-        t.log(Level.DEBUG, m_name + "/accel feedforward [-1,1]", accelFF);
-        t.log(Level.DEBUG, m_name + "/current speed rev_s", currentMotorRev_S);
-        t.log(Level.DEBUG, m_name + "/error rev_s", getErrorRev_S());
-        t.log(Level.DEBUG, m_name + "/output [-1,1]", get());
-        t.log(Level.DEBUG, m_name + "/desired speed 2048ths_100ms", motorTick_100ms);
-        t.log(Level.DEBUG, m_name + "/current speed 2048ths_100ms", getVelocity2048_100());
+        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
+        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
     }
 
     @Override
@@ -243,10 +230,24 @@ public class FalconDriveMotor implements Motor100<Distance> {
         m_rawPosition = 0;
     }
 
+    @Override
+    public void periodic() {
+        m_rawPosition = m_motor.getSelectedSensorPosition();
+        m_rawVelocity = m_motor.getSelectedSensorVelocity();
+        m_output = m_motor.getMotorOutputPercent();
+        m_error = m_motor.getClosedLoopError();
+        t.log(Level.DEBUG, m_name, "position (raw)", m_rawPosition);
+        t.log(Level.DEBUG, m_name, "velocity (raw)", m_rawVelocity);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", currentMotorRev_S());
+        t.log(Level.DEBUG, m_name, "output [-1,1]", m_output);
+        t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
+    }
+
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Frictional feedforward in duty cycle units [-1, 1] */
+     * Frictional feedforward in duty cycle units [-1, 1]
+     */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
@@ -256,13 +257,15 @@ public class FalconDriveMotor implements Motor100<Distance> {
     }
 
     /**
-     * Velocity feedforward in duty cycle units [-1, 1] */
+     * Velocity feedforward in duty cycle units [-1, 1]
+     */
     private static double velocityFF(double desiredMotorRev_S) {
         return velocityFFVoltS_Rev * desiredMotorRev_S / saturationVoltage;
     }
 
     /**
-     * Acceleration feedforward in duty cycle units [-1, 1] */
+     * Acceleration feedforward in duty cycle units [-1, 1]
+     */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }
@@ -278,16 +281,8 @@ public class FalconDriveMotor implements Motor100<Distance> {
     }
 
     private double getErrorRev_S() {
-        double errorTick_100ms = m_motor.getClosedLoopError();
+        double errorTick_100ms = m_error;
         double errorRev_100ms = errorTick_100ms / ticksPerRevolution;
         return errorRev_100ms * 10;
-    }
-
-    @Override
-    public void periodic() {
-        m_rawPosition = m_motor.getSelectedSensorPosition();
-        m_rawVelocity = m_motor.getSelectedSensorVelocity();
-        t.log(Level.DEBUG, m_name + "/position (raw)", m_rawPosition);
-        t.log(Level.DEBUG, m_name + "/velocity (raw)", m_rawVelocity);
     }
 }

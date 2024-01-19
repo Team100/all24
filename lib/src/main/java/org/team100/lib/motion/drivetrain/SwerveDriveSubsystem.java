@@ -12,6 +12,8 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
+
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -34,6 +36,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final SwerveDrivePoseEstimator m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
+    private final String m_name;
 
     private ChassisSpeeds m_prevSpeeds;
     // maintained in periodic.
@@ -51,6 +54,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
+        m_name = Names.name(this);
         m_prevSpeeds = new ChassisSpeeds();
         m_pose = new Pose2d();
         m_velocity = new Twist2d();
@@ -58,7 +62,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_state = new SwerveState();
 
         stop();
-        t.log(Level.INFO, "/field/.type", "Field2d");
+        // this needs to be exactly "/field/.type" for glass.
+        t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
     /**
@@ -86,21 +91,21 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateAcceleration(dt);
         updateState();
 
-        t.log(Level.DEBUG, "/swerve/pose", m_pose);
-        t.log(Level.DEBUG, "/swerve/velocity", m_velocity);
-        t.log(Level.DEBUG, "/swerve/acceleration", m_accel);
-        t.log(Level.DEBUG, "/swerve/state", m_state);
+        t.log(Level.DEBUG, m_name, "pose", m_pose);
+        t.log(Level.DEBUG, m_name, "velocity", m_velocity);
+        t.log(Level.DEBUG, m_name, "acceleration", m_accel);
+        t.log(Level.DEBUG, m_name, "state", m_state);
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        t.log(Level.DEBUG, "/field/robot", new double[] {
+        t.log(Level.DEBUG, "field", "robot", new double[] {
                 m_pose.getX(),
                 m_pose.getY(),
                 m_pose.getRotation().getDegrees()
         });
- 
-        t.log(Level.DEBUG, "/swerve/heading rate rad_s", m_heading.getHeadingRateNWU());
+
+        t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
 
     }
 
@@ -143,7 +148,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         DriverControl.Speed speed = m_speed.get();
         if (Experiments.instance.enabled(Experiment.ShowMode))
             speed = DriverControl.Speed.SLOW;
-        t.log(Level.DEBUG, "/swerve/control_speed", speed.name());
+        t.log(Level.DEBUG, m_name, "control_speed", speed.name());
         switch (speed) {
             case SLOW:
                 twist = GeometryUtil.scale(twist, kSlow);
@@ -215,7 +220,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
-     * Field-relative velocity. This is intended for tuning.  Snapshot from periodic().
+     * Field-relative velocity. This is intended for tuning. Snapshot from
+     * periodic().
      * 
      * The omega signal here will be delayed relative to the gyro. Use the gyro if
      * you really just want omega.
@@ -227,7 +233,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
-     * Field-relative acceleration. This is intended for tuning.  Snapshot from periodic.
+     * Field-relative acceleration. This is intended for tuning. Snapshot from
+     * periodic.
      * 
      * @return a twist where the values are accelerations in meters and radians per
      *         second squared
@@ -237,7 +244,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
-     * SwerveState representing the drivetrain's pose, velocity, and acceleration, snapshot from periodic.
+     * SwerveState representing the drivetrain's pose, velocity, and acceleration,
+     * snapshot from periodic.
      */
     public SwerveState getState() {
         return m_state;
@@ -313,6 +321,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     private void updateState() {
-        m_state =  new SwerveState(m_pose, m_velocity, m_accel);
+        m_state = new SwerveState(m_pose, m_velocity, m_accel);
     }
 }

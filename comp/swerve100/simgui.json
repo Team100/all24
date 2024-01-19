@@ -13,6 +13,7 @@
   },
   "NTProvider": {
     "types": {
+      "//field": "Field2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
@@ -26,6 +27,18 @@
       "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Swerve Modules_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Swerve Modules_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Swerve Modules_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/_Swerve Modules_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
       "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
@@ -61,11 +74,123 @@
   },
   "NetworkTables": {
     "retained": {
+      "Bottom Roller": {
+        "OutboardVelocityServo": {
+          "open": true
+        },
+        "velocity": {
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "Experiments": {
+        "string[]##v_/Experiments/enabled": {
+          "open": true
+        }
+      },
+      "FlywheelShooter": {
+        "Left": {
+          "open": true
+        }
+      },
+      "Indexer": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "IntakeSubsystem": {
+        "Bottom Roller": {
+          "open": true
+        },
+        "Top Roller": {
+          "open": true
+        }
+      },
+      "Rear Right": {
+        "Drive": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          }
+        },
+        "Turning": {
+          "OutboardVelocityServo": {
+            "open": true
+          }
+        },
+        "open": true
+      },
+      "Right Climber": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "Right Shooter": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          }
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "SwerveDriveSubsystem": {
+        "swerve": {
+          "open": true
+        }
+      },
+      "Top Roller": {
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "field": {
+        "double[]##v_//field/robot": {
+          "open": true
+        }
+      },
       "swerve": {
         "acceleration": {
           "open": true
         },
-        "open": true,
         "state": {
           "open": true,
           "x": {
@@ -83,7 +208,6 @@
         "implied speed": {
           "open": true
         },
-        "open": true,
         "setpoint chassis speed": {
           "open": true
         }
@@ -125,111 +249,6 @@
         "open": true
       },
       "open": true
-    },
-    "visible": true
-  },
-  "Plot": {
-    "Plot <0>": {
-      "plots": [
-        {
-          "backgroundColor": [
-            0.0,
-            0.0,
-            0.0,
-            0.8500000238418579
-          ],
-          "height": 225,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/setpoint_generator/min_s accel"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/setpoint_generator/min_s centripetal"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/setpoint_generator/min_s steering"
-            }
-          ]
-        }
-      ]
-    },
-    "Plot <1>": {
-      "plots": [
-        {
-          "backgroundColor": [
-            0.0,
-            0.0,
-            0.0,
-            0.8500000238418579
-          ],
-          "height": 257,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/swerve/state/x/x"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/swerve/state/x/v"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/swerve/state/x/a"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/swervelocal/desired chassis speed/vx m_s"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/swervelocal/setpoint chassis speed/vx m_s"
-            }
-          ]
-        }
-      ]
     }
   }
 }

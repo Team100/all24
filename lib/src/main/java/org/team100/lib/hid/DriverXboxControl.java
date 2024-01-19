@@ -7,6 +7,7 @@ import static org.team100.lib.hid.ControlUtil.expo;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -22,10 +23,12 @@ public class DriverXboxControl implements DriverControl {
     private static final double kExpo = 0.5;
     private final Telemetry t = Telemetry.get();
     private final CommandXboxController m_controller;
+    private final String m_name;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public DriverXboxControl() {
         m_controller = new CommandXboxController(0);
+        m_name = Names.name(this);
     }
 
     @Override
@@ -65,9 +68,9 @@ public class DriverXboxControl implements DriverControl {
             dy = 0;
         }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
-        t.log(Level.DEBUG, "/Xbox/right y", m_controller.getRightY());
-        t.log(Level.DEBUG, "/Xbox/right x", m_controller.getRightX());
-        t.log(Level.DEBUG, "/Xbox/left x", m_controller.getLeftX());
+        t.log(Level.DEBUG, m_name, "Xbox/right y", m_controller.getRightY());
+        t.log(Level.DEBUG, m_name, "Xbox/right x", m_controller.getRightX());
+        t.log(Level.DEBUG, m_name, "Xbox/left x", m_controller.getLeftX());
         return new Twist2d(dx, dy, dtheta);
     }
 

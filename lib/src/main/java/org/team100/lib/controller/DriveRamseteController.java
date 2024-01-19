@@ -9,6 +9,7 @@ import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,6 +34,12 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kLooperDt = 0.02;
     private static final Telemetry t = Telemetry.get();
 
+    private final String m_name;
+
+    public DriveRamseteController() {
+        m_name = Names.name(this);
+    }
+
     private TrajectoryTimeIterator m_iter;
     private double mLastTime = Double.POSITIVE_INFINITY;
 
@@ -51,7 +58,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        t.log(Level.DEBUG, "/ramsete_planner/current state", measurement);
+        t.log(Level.DEBUG, m_name, "current state", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -60,10 +67,10 @@ public class DriveRamseteController implements DriveMotionController {
         if (!setpoint.isPresent()) {
             return new ChassisSpeeds();
         }
-        t.log(Level.DEBUG, "/ramsete_planner/setpoint", setpoint.get());
+        t.log(Level.DEBUG, m_name, "setpoint", setpoint.get());
 
         Pose2d mError = DriveMotionControllerUtil.getError(measurement, setpoint.get());
-        t.log(Level.DEBUG, "/ramsete_planner/error", mError);
+        t.log(Level.DEBUG, m_name, "error", mError);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
@@ -153,7 +160,7 @@ public class DriveRamseteController implements DriveMotionController {
             return Optional.empty();
         }
 
-        t.log(Level.DEBUG, "/ramsete_planner/sample point", sample_point.get());
+        t.log(Level.DEBUG, m_name, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 

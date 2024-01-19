@@ -5,6 +5,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.numbers.N3;
  */
 public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
+    private static final String m_name = Names.name(PoseEstimationHelper.class);
 
     /**
      * Calculate robot pose.
@@ -36,14 +38,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, "/pose_estimate_rotation_source", "CAMERA");
+            t.log(Level.DEBUG, m_name, "rotation_source", "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        t.log(Level.DEBUG, "/pose_estimate_rotation_source", "GYRO");
+        t.log(Level.DEBUG, m_name, "rotation_source", "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,

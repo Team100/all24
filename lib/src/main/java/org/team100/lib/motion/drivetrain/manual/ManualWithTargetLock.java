@@ -14,6 +14,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -47,6 +48,7 @@ public class ManualWithTargetLock {
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
+    private final String m_name;
     private final TrapezoidProfile100 m_profile;
     State100 m_thetaSetpoint;
     Translation2d m_ball;
@@ -66,6 +68,7 @@ public class ManualWithTargetLock {
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
+        m_name = Names.name(this);
         m_trigger = trigger;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -111,7 +114,7 @@ public class ManualWithTargetLock {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = targetMotion(state, target);
-        t.log(Level.DEBUG, "/ManualWithTargetLock/apparent motion", targetMotion);
+        t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -126,15 +129,15 @@ public class ManualWithTargetLock {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/reference", m_thetaSetpoint.x());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/measurement", measurement);
-        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/error", m_thetaController.getPositionError());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/theta/fb", thetaFB);
+        t.log(Level.DEBUG, m_name, "theta/setpoint", m_thetaSetpoint);
+        t.log(Level.DEBUG, m_name, "theta/measurement", measurement);
+        t.log(Level.DEBUG, m_name, "theta/error", m_thetaController.getPositionError());
+        t.log(Level.DEBUG, m_name, "theta/fb", thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/reference", m_thetaSetpoint.v());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/measurement", headingRate);
-        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/error", m_omegaController.getPositionError());
-        t.log(Level.DEBUG, "/ManualWithTargetLock/omega/fb", omegaFB);
+        t.log(Level.DEBUG, m_name, "omega/reference", m_thetaSetpoint);
+        t.log(Level.DEBUG, m_name, "omega/measurement", headingRate);
+        t.log(Level.DEBUG, m_name, "omega/error", m_omegaController.getPositionError());
+        t.log(Level.DEBUG, m_name, "omega/fb", omegaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -145,8 +148,8 @@ public class ManualWithTargetLock {
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
-
-        t.log(Level.DEBUG, "/field/target", new double[] {
+        // this name needs to be exactly "/field/target" for glass.
+        t.log(Level.DEBUG, "field", "target", new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -160,7 +163,8 @@ public class ManualWithTargetLock {
         }
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
-            t.log(Level.DEBUG, "/field/ball", new double[] {
+            // this name needs to be exactly "/field/ball" for glass.
+            t.log(Level.DEBUG, "field", "ball", new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

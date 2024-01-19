@@ -4,6 +4,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -17,9 +18,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class ManualChassisSpeeds {
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
+    private final String m_name;
 
     public ManualChassisSpeeds(SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
+        m_name = Names.name(this);
     }
 
     /**
@@ -41,10 +44,7 @@ public class ManualChassisSpeeds {
 
         // desaturate to feasibility
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
-
-        t.log(Level.DEBUG, "/manual robot relative/vx m_s", speeds.vxMetersPerSecond);
-        t.log(Level.DEBUG, "/manual robot relative/vy m_s", speeds.vyMetersPerSecond);
-        t.log(Level.DEBUG, "/manual robot relative/omega rad_s", speeds.omegaRadiansPerSecond);
+        t.log(Level.DEBUG, m_name, "speeds", speeds);
         return speeds;
     }
 }

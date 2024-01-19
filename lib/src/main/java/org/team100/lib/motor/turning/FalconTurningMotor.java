@@ -5,6 +5,7 @@ import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
+import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -71,6 +72,13 @@ public class FalconTurningMotor implements Motor100<Angle> {
     private final TalonFX m_motor;
     private final String m_name;
 
+    /** Current velocity, updated in periodic(). */
+    private double m_rawVelocity;
+    /** Current output, updated in periodic() */
+    private double m_output;
+    /** Current motor error, updated in periodic() */
+    private double m_error;
+
     public FalconTurningMotor(String name, int canId) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
@@ -114,20 +122,14 @@ public class FalconTurningMotor implements Motor100<Angle> {
         m_motor.config_kD(0, 0);
         m_motor.config_kF(0, 0);
 
-        m_name = String.format("/%s/Falcon Turning Motor", name);
-        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceID());
-    }
-
-    @Override
-    public double get() {
-        return m_motor.getMotorOutputPercent();
+        m_name = Names.append(name, this);
+        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(ControlMode.PercentOutput, output);
-
-        t.log(Level.DEBUG, m_name + "/output [-1,1]", output);
+        t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
     }
 
     /**
@@ -147,9 +149,10 @@ public class FalconTurningMotor implements Motor100<Angle> {
 
         m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
 
-        t.log(Level.DEBUG, m_name + "/error rev_s", getErrorRev_S());
-        t.log(Level.DEBUG, m_name + "/current speed rev_s", currentMotorRev_S);
-        t.log(Level.DEBUG, m_name + "/output [-1, 1]", get());
+        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
+        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
     }
 
     @Override
@@ -160,6 +163,17 @@ public class FalconTurningMotor implements Motor100<Angle> {
     @Override
     public void close() {
         m_motor.DestroyObject();
+    }
+
+    @Override
+    public void periodic() {
+        m_rawVelocity = m_motor.getSelectedSensorVelocity();
+        m_output = m_motor.getMotorOutputPercent();
+        m_error = m_motor.getClosedLoopError();
+        t.log(Level.DEBUG, m_name, "velocity (raw)", m_rawVelocity);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", currentMotorRev_S());
+        t.log(Level.DEBUG, m_name, "output [-1,1]", m_output);
+        t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
     }
 
     //////////////////////////////////////////////////////////////////
@@ -190,20 +204,14 @@ public class FalconTurningMotor implements Motor100<Angle> {
      * and filtered.
      */
     private double currentMotorRev_S() {
-        double motorTick_100ms = m_motor.getSelectedSensorVelocity();
+        double motorTick_100ms = m_rawVelocity;
         double motorRev_100ms = motorTick_100ms / ticksPerRevolution;
         return motorRev_100ms * 10;
     }
 
     private double getErrorRev_S() {
-        double errorTick_100ms = m_motor.getClosedLoopError();
+        double errorTick_100ms = m_error;
         double errorRev_100ms = errorTick_100ms / ticksPerRevolution;
         return errorRev_100ms * 10;
     }
-
-    @Override
-    public void periodic() {
-        //
-    }
-
 }
