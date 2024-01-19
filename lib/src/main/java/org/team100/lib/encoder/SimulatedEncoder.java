@@ -46,6 +46,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         m_reduction = reduction;
         m_lowerLimit = lowerLimit;
         m_upperLimit = upperLimit;
+        reset();
     }
 
     @Override

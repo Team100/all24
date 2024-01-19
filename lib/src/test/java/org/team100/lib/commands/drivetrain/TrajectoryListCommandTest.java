@@ -12,22 +12,20 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.testing.TimelessTest;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 
-class TrajectoryListCommandTest {
+class TrajectoryListCommandTest extends TimelessTest {
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
 
     @Test
     void testSimple() {
-        // required for SimHooks.StepTiming
-        HAL.initialize(500, 0);
+        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         Fixture fixture = new Fixture();
         HolonomicDriveController3 control = new HolonomicDriveController3();
         TrajectoryListCommand c = new TrajectoryListCommand(
@@ -38,16 +36,16 @@ class TrajectoryListCommandTest {
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         c.execute();
         assertFalse(c.isFinished());
-        // the trajectory takes about 2s
-        for (double t = 0; t < 2; t += kDtS) {
-            SimHooks.stepTimingAsync(kDtS);
+        // the trajectory takes a little over 2s
+        for (double t = 0; t < 2.02; t += kDtS) {
+            stepTime(kDtS);
             c.execute();
             fixture.drive.periodic(); // for updateOdometry
+
         }
         // at goal; wide tolerance due to test timing
-        assertEquals(1, fixture.drive.getPose().getX(), 0.1);
         assertTrue(c.isFinished());
-        //HAL.shutdown();
+        assertEquals(1.033, fixture.drive.getPose().getX(), 0.001);
     }
 
     /**
@@ -56,8 +54,6 @@ class TrajectoryListCommandTest {
      */
     @Test
     void testLowLevel() {
-        // required for SimHooks.stepTiming
-        HAL.initialize(500, 0);
         Fixture fixture = new Fixture();
         HolonomicDriveController3 controller = new HolonomicDriveController3();
         TrajectoryListCommand command = new TrajectoryListCommand(
@@ -68,7 +64,7 @@ class TrajectoryListCommandTest {
         fixture.drive.periodic();
         command.initialize();
         do {
-            SimHooks.stepTimingAsync(kDtS);
+            stepTime(kDtS);
             fixture.drive.periodic();
             command.execute();
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
@@ -83,6 +79,5 @@ class TrajectoryListCommandTest {
                      setpoint.v(),
                      measurement);
         } while (!command.isFinished());
-        //HAL.shutdown();
     }
 }

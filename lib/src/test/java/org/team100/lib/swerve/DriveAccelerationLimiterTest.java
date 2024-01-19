@@ -24,14 +24,12 @@ class DriveAccelerationLimiterTest {
         double[] prev_vy = new double[] { 0 };
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 0 };
-        double min_s = 1;
         double s = c.enforceWheelAccelLimit(
                 prevModuleStates,
                 prev_vx,
                 prev_vy,
                 desired_vx,
                 desired_vy,
-                min_s,
                 0.02);
         assertEquals(1, s, kDelta);
     }
@@ -47,14 +45,12 @@ class DriveAccelerationLimiterTest {
         double[] prev_vy = new double[] { 0 };
         double[] desired_vx = new double[] { 1 };
         double[] desired_vy = new double[] { 0 };
-        double min_s = 1;
         double s = c.enforceWheelAccelLimit(
                 prevModuleStates,
                 prev_vx,
                 prev_vy,
                 desired_vx,
                 desired_vy,
-                min_s,
                 0.02);
         assertEquals(0.02, s, kDelta);
     }

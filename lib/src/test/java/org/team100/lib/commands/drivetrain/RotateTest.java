@@ -11,19 +11,15 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.testing.TimelessTest;
 
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
-
-class RotateTest {
+class RotateTest extends TimelessTest {
     private static final double kDelta = 0.02;
 
     Fixture fixture = new Fixture();
 
     @Test
     void testRotate() {
-        // required for SImHooks.stepTiming
-        HAL.initialize(500, 0);
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
         MockHeading heading = new MockHeading();
@@ -46,7 +42,7 @@ class RotateTest {
 
         // steering
         for (int i = 0; i < 18; ++i) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             fixture.drive.periodic();
             rotate.execute();
         }
@@ -62,7 +58,7 @@ class RotateTest {
 
         // finished steering, start rotating
         for (int i = 0; i < 25; ++i) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             fixture.drive.periodic();
             rotate.execute();
         }
@@ -72,7 +68,7 @@ class RotateTest {
 
         // should be done rotating now
         for (int i = 0; i < 25; ++i) {
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             fixture.drive.periodic();
             rotate.execute();
         }
@@ -81,8 +77,8 @@ class RotateTest {
         // assertEquals(-0.403, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
 
-        for (int i = 0; i < 100; ++i) {
-            SimHooks.stepTimingAsync(0.02);
+        for (int i = 0; i < 103; ++i) {
+            stepTime(0.02);
             fixture.drive.periodic();
             rotate.execute();
         }
@@ -92,7 +88,5 @@ class RotateTest {
         rotate.end(false);
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
-
-        //HAL.shutdown();
     }
 }

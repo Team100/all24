@@ -6,36 +6,32 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.testing.TimelessTest;
 
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 
-class SpinTest {
+class SpinTest extends TimelessTest {
     private static final double kDelta = 0.01;
 
     Fixture fixture = new Fixture();
 
     @Test
     void testSimple() {
-        // required for SimHooks.stepTiming
-        HAL.initialize(500, 0);
-
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
 
         Spin command = new Spin(fixture.drive, fixture.controller);
         command.initialize();
-
+        stepTime(0.02);
         // starts from rest
         command.execute();
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);
         assertEquals(0, command.m_angleRad, kDelta);
-        assertEquals(0, command.m_speedRad_S, kDelta);
+        assertEquals(0.01, command.m_speedRad_S, kDelta);
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-0.01, fixture.drive.desiredStates()[0].angle.getRadians(), 0.01);
+        assertEquals(-0.785, fixture.drive.desiredStates()[0].angle.getRadians(), 0.01);
 
-        SimHooks.stepTimingAsync(5);
+        stepTime(5);
         command.execute();
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
@@ -52,8 +48,6 @@ class SpinTest {
         assertEquals(Math.PI / 4, fixture.drive.desiredStates()[2].angle.getRadians(), kDelta);
         assertEquals(0.176, fixture.drive.desiredStates()[3].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[3].angle.getRadians(), kDelta);
-
-        //HAL.shutdown();
     }
 
 }

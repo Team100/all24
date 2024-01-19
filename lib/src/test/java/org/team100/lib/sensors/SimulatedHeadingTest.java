@@ -6,14 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.testing.TimelessTest;
 
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 
-class SimulatedHeadingTest {
+class SimulatedHeadingTest extends TimelessTest {
     private static final double kDelta = 0.001;
 
     @Test
@@ -28,7 +27,6 @@ class SimulatedHeadingTest {
     // TODO: fix this test
     // @Test
     void testTranslation() {
-        HAL.initialize(500, 0);
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(10, l);
         SwerveModulePosition[] p = c.positions();
@@ -44,7 +42,7 @@ class SimulatedHeadingTest {
         // go for 0.4s
         for (int i = 0; i < 20; ++i) {
             c.setDesiredStates(states);
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             c.periodic();
         }
         assertEquals(0, h.getHeadingNWU().getRadians(), kDelta);
@@ -54,13 +52,11 @@ class SimulatedHeadingTest {
         assertEquals(0.42, p[1].distanceMeters, 0.03);
         assertEquals(0.42, p[2].distanceMeters, 0.03);
         assertEquals(0.42, p[3].distanceMeters, 0.03);
-        HAL.shutdown();
     }
 
     // TODO: fix this test
     // @Test
     void testRotation() {
-        HAL.initialize(500, 0);
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(10, l);
         SimulatedHeading h = new SimulatedHeading(l, c);
@@ -73,7 +69,7 @@ class SimulatedHeadingTest {
         for (int i = 0; i < 20; ++i) {
             // get the modules pointing the right way (wait for the steering profiles)
             c.setDesiredStates(states);
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             c.periodic();
         }
 
@@ -83,13 +79,11 @@ class SimulatedHeadingTest {
         assertEquals(0.42, h.getHeadingNWU().getRadians(), 0.03);
         // the rate is what we asked for.
         assertEquals(1, h.getHeadingRateNWU(), kDelta);
-        HAL.shutdown();
     }
 
     // TODO: fix this test
-    //@Test
+    // @Test
     void testHolonomic() {
-        HAL.initialize(500, 0);
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
@@ -113,7 +107,7 @@ class SimulatedHeadingTest {
         for (int i = 0; i < 20; ++i) {
             // get the modules pointing the right way (wait for the steering profiles)
             c.setDesiredStates(states);
-            SimHooks.stepTimingAsync(0.02);
+            stepTime(0.02);
             c.periodic();
         }
         SwerveModuleState[] states2 = c.states();
@@ -132,6 +126,5 @@ class SimulatedHeadingTest {
         assertEquals(0.42, h.getHeadingNWU().getRadians(), 0.03);
         // we wanted to move 1 rad/s, so that's what we got.
         assertEquals(1, h.getHeadingRateNWU(), kDelta);
-        HAL.shutdown();
     }
 }

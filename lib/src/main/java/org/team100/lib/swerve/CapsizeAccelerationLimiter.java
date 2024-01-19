@@ -13,9 +13,10 @@ public class CapsizeAccelerationLimiter {
         m_limits = limits;
     }
 
-    public double enforceCentripetalLimit(double dx, double dy, double min_s, double kDtSec) {
+    public double enforceCentripetalLimit(double dx, double dy, double kDtSec) {
         double dv = Math.hypot(dx, dy);
-        double s = kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
-        return Math.min(min_s, s);
+        if (Math.abs(dv) < 1e-6)
+            return 1.0;
+        return kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
     }
 }
