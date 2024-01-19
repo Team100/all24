@@ -10,14 +10,14 @@
       "style": "0",
       "userScale": "2",
       "width": "964",
-      "xpos": "142",
-      "ypos": "156"
+      "xpos": "160",
+      "ypos": "160"
     }
   },
   "Table": {
     "0x542B5671,2": {
       "Column 0  Width": "151",
-      "Column 1  Width": "120",
+      "Column 1  Width": "171",
       "RefScale": "10"
     },
     "0x965B9C9E,2": {
@@ -43,6 +43,11 @@
       "Pos": "179,121",
       "Size": "200,48"
     },
+    "###/SmartDashboard/Swerve Viz/_Front Left_SimulatedSwerveModule": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
       "Pos": "176,21",
@@ -55,7 +60,7 @@
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "9,176",
+      "Pos": "9,177",
       "Size": "352,214"
     },
     "###FMS": {
@@ -75,8 +80,8 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "2,412",
-      "Size": "358,238"
+      "Pos": "440,232",
+      "Size": "484,432"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
@@ -90,7 +95,7 @@
     },
     "###Plot <0>": {
       "Collapsed": "0",
-      "Pos": "379,343",
+      "Pos": "463,137",
       "Size": "484,281"
     },
     "###Plot <1>": {

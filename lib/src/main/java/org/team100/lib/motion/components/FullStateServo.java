@@ -6,6 +6,7 @@ import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -48,7 +49,7 @@ public class FullStateServo<T extends Measure100> {
         m_xController = xController;
         m_vController = vController;
         m_period = xController.getPeriod();
-        m_name = String.format("/full state servo %s", name);
+        m_name = Names.append(name, this);
         m_profile = profile;
         m_instance = instance;
 
@@ -98,18 +99,17 @@ public class FullStateServo<T extends Measure100> {
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
-        t.log(Level.DEBUG, m_name + "/u_XFB ", u_XFB);
-        t.log(Level.DEBUG, m_name + "/u_VFB ", u_VFB);
-        t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
-        t.log(Level.DEBUG, m_name + "/Position", getPosition());
-        t.log(Level.DEBUG, m_name + "/Goal", m_goal.x());
-        t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.x());
-        t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.v());
-        t.log(Level.DEBUG, m_name + "/Position Error", m_xController.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Velocity Error", m_vController.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Position Error Velocity", m_xController.getVelocityError());
-        t.log(Level.DEBUG, m_name + "/Velocity Error Velocity", m_vController.getVelocityError());
-        t.log(Level.DEBUG, m_name + "/Velocity", m_servo.getVelocity());
+        t.log(Level.DEBUG, m_name, "u_XFB ", u_XFB);
+        t.log(Level.DEBUG, m_name, "u_VFB ", u_VFB);
+        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
+        t.log(Level.DEBUG, m_name, "Measurement", getPosition());
+        t.log(Level.DEBUG, m_name, "Goal", m_goal);
+        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
+        t.log(Level.DEBUG, m_name, "Position Error", m_xController.getPositionError());
+        t.log(Level.DEBUG, m_name, "Velocity Error", m_vController.getPositionError());
+        t.log(Level.DEBUG, m_name, "Position Error Velocity", m_xController.getVelocityError());
+        t.log(Level.DEBUG, m_name, "Velocity Error Velocity", m_vController.getVelocityError());
+        t.log(Level.DEBUG, m_name, "Velocity", m_servo.getVelocity());
     }
 
     /** Direct velocity control for testing */

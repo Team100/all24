@@ -9,8 +9,10 @@ import java.util.function.Supplier;
 
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.team100.lib.config.Cameras2023;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,9 +54,11 @@ public class VisionDataProvider implements TableEventListener {
     private final Telemetry t = Telemetry.get();
 
     private final Supplier<Pose2d> poseSupplier;
+    // TODO: remove object mapper, use struct instead.
     private final ObjectMapper objectMapper;
     private final SwerveDrivePoseEstimator poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
+    private final String m_name;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -68,6 +72,7 @@ public class VisionDataProvider implements TableEventListener {
         this.layout = layout;
         this.poseEstimator = poseEstimator;
         this.poseSupplier = poseSupplier;
+        m_name = Names.name(this);
 
         objectMapper = new ObjectMapper(new MessagePackFactory());
     }
@@ -128,20 +133,14 @@ public class VisionDataProvider implements TableEventListener {
             Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
 
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
-            t.log(Level.DEBUG, "/Vision Data Provider/Vision X", currentRobotinFieldCoords.getX());
-            t.log(Level.DEBUG, "/Vision Data Provider/Vision Y", currentRobotinFieldCoords.getY());
-            t.log(Level.DEBUG, "/Vision Data Provider/Vision Rotation",
-                    currentRobotinFieldCoords.getRotation().getRadians());
+            t.log(Level.DEBUG, m_name, "pose", currentRobotinFieldCoords);
 
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-            t.log(Level.DEBUG, "/Vision Data Provider/Tag Rotation", tagRotation.getAngle());
+            t.log(Level.DEBUG, m_name, "Tag Rotation", tagRotation.getAngle());
 
             if (lastRobotInFieldCoords != null) {
-                Transform2d translationSinceLast = currentRobotinFieldCoords.minus(lastRobotInFieldCoords);
-                double xComponent = translationSinceLast.getX();
-                double yComponent = translationSinceLast.getY();
-                if (xComponent * xComponent + yComponent * yComponent <= kVisionChangeToleranceMeters
-                        * kVisionChangeToleranceMeters) {
+                double distanceM = GeometryUtil.distance(lastRobotInFieldCoords,currentRobotinFieldCoords);
+                if (distanceM <= kVisionChangeToleranceMeters) {
                     estimateConsumer.accept(currentRobotinFieldCoords, Timer.getFPGATimestamp() - .075);
                 }
             }

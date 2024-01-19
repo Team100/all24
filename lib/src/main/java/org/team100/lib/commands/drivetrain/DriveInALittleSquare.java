@@ -51,7 +51,6 @@ public class DriveInALittleSquare extends Command100 {
 
     public DriveInALittleSquare(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
-
         Constraints100 c = new Constraints100(kMaxVel, kMaxAccel);
         m_driveProfile = new TrapezoidProfile100(c, 0.05);
         addRequirements(m_swerve);

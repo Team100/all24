@@ -4,6 +4,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -35,7 +36,11 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
 
     private Double prevAngle = null;
     private Double prevTime = null;
-    private double m_rate;
+
+    /** Current position, updated in periodic() */
+    private double m_positionRad;
+    /** Current velocity, updated in periodic() */
+    private double m_rateRad_S;
 
     /**
      * @param name        may not start with a slash
@@ -65,21 +70,21 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
                 m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
                 break;
         }
-        m_name = String.format("/%s/Analog Turning Encoder", name);
+        m_name = Names.append(name, this);
+        t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
     }
 
     @Override
     public double getPosition() {
-        t.log(Level.DEBUG, m_name + "/Channel", m_encoder.getChannel());
-        t.log(Level.DEBUG, m_name + "/Angle rad", m_encoder.getDistance());
-        t.log(Level.DEBUG, m_name + "/Turns", m_encoder.get());
-        t.log(Level.DEBUG, m_name + "/Absolute", m_encoder.getAbsolutePosition());
-        t.log(Level.DEBUG, m_name + "/Volts", m_input.getVoltage());
-        return m_encoder.getDistance();
+        return m_positionRad;
     }
 
     /**
-     * Trailing unfiltered velocity, likely to be very noisy.
+     * Current rate in rad/s.
+     * 
+     * This is simply the backward finite difference over one time step.
+     * 
+     * As such, it is likely to be very noisy.
      * 
      * Use a simple filter if you want a lagged, smoother measurement.
      * 
@@ -87,12 +92,13 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
      */
     @Override
     public double getRate() {
-        return m_rate;
+        return m_rateRad_S;
     }
 
     @Override
     public void reset() {
         m_encoder.reset();
+        m_positionRad = 0;
     }
 
     public void close() {
@@ -102,12 +108,28 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
 
     @Override
     public void periodic() {
-        double angle = getPosition();
+        updatePosition();
+        updateRate();
+        t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
+        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
+        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
+        t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
+    }
+
+    //////////////////////////////////////////////
+
+    private void updatePosition() {
+        m_positionRad = m_encoder.getDistance();
+    }
+
+    /** Update position before calling this. */
+    private void updateRate() {
+        double angle = m_positionRad;
         double time = Timer.getFPGATimestamp();
         if (prevAngle == null) {
             prevAngle = angle;
             prevTime = time;
-            m_rate = 0;
+            m_rateRad_S = 0;
             return;
         }
         double dx = angle - prevAngle;
@@ -116,6 +138,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle> {
         prevAngle = angle;
         prevTime = time;
 
-        m_rate = dx / dt;
+        m_rateRad_S = dx / dt;
+
     }
 }

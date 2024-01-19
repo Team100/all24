@@ -11,9 +11,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 /**
- * Actually draws a square.
+ * Drive in a square.  This used to be called "DrawCircle."
  */
-public class DrawCircle extends SequentialCommandGroup {
+public class DrawSquare extends SequentialCommandGroup {
     private static final double maxVelocityM_S = 2.0;
     private static final double maxAccelM_S_S = 2;
 
@@ -26,7 +26,7 @@ public class DrawCircle extends SequentialCommandGroup {
      * .....|...|
      * .Y...2---1/5
      */
-    public DrawCircle(
+    public DrawSquare(
             SwerveDriveSubsystem drivetrain,
             SwerveKinodynamics kinodynamics,
             HolonomicDriveController3 controller) {

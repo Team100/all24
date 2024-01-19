@@ -1,6 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -59,13 +60,13 @@ public class TrajectoryCommand extends Command100 {
 
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        t.log(Level.DEBUG, "/TrajectoryCommand/Desired X", desiredState.poseMeters.getX());
-        t.log(Level.DEBUG, "/TrajectoryCommand/Desired Y", desiredState.poseMeters.getY());
-        t.log(Level.DEBUG, "/TrajectoryCommand/Pose X", m_swerve.getPose().getX());
-        t.log(Level.DEBUG, "/TrajectoryCommand/Pose Y", m_swerve.getPose().getY());
-        t.log(Level.DEBUG, "/TrajectoryCommand/Desired Rot", lastState.poseMeters.getRotation().getRadians());
-        t.log(Level.DEBUG, "/TrajectoryCommand/Pose Rot", m_swerve.getPose().getRotation().getRadians());
-        t.log(Level.DEBUG, "/TrajectoryCommand/Time", curTime);
+        t.log(Level.DEBUG, m_name, "Desired X", desiredState.poseMeters.getX());
+        t.log(Level.DEBUG, m_name, "Desired Y", desiredState.poseMeters.getY());
+        t.log(Level.DEBUG, m_name, "Pose X", m_swerve.getPose().getX());
+        t.log(Level.DEBUG, m_name, "Pose Y", m_swerve.getPose().getY());
+        t.log(Level.DEBUG, m_name, "Desired Rot", lastState.poseMeters.getRotation().getRadians());
+        t.log(Level.DEBUG, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.DEBUG, m_name, "Time", curTime);
     }
 
     @Override

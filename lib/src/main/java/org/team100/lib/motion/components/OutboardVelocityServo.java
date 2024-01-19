@@ -5,7 +5,9 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Names;
 
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -23,7 +25,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     private double m_setpoint;
 
     /**
-     * @param name        may not start with slash
+     * @param name    may not start with slash
      * @param motor
      * @param encoder
      */
@@ -32,7 +34,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
             throw new IllegalArgumentException();
         m_motor = motor;
         m_encoder = encoder;
-        m_name = String.format("/%s/Velocity Servo", name);
+        m_name = Names.append(name, this);
     }
 
     @Override
@@ -47,13 +49,14 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
             throw new IllegalArgumentException("setpoint is NaN");
         m_setpoint = setpoint;
         m_motor.setVelocity(setpoint, accel(setpoint));
-        t.log(Level.DEBUG, m_name + "/Desired setpoint", setpoint);
+        t.log(Level.DEBUG, m_name, "Desired setpoint", setpoint);
     }
 
     /** Direct control for testing. */
     @Override
     public void setDutyCycle(double dutyCycle) {
         m_motor.setDutyCycle(dutyCycle);
+        t.log(Level.DEBUG, m_name, "Desired duty cycle [-1,1]", dutyCycle);
     }
 
     /**

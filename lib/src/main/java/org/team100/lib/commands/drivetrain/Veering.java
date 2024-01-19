@@ -41,7 +41,7 @@ public class Veering extends Command100 {
         double dx = m_square.applyAsDouble(time);
         Twist2d input = new Twist2d(dx, 0, kOmega);
         m_swerve.driveInFieldCoords(input, dt);
-        t.log(Level.DEBUG, "/veering/input", input);
+        t.log(Level.DEBUG, m_name, "input", input);
     }
 
     @Override

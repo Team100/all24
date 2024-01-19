@@ -8,6 +8,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -40,12 +41,14 @@ public class AsymSwerveSetpointGenerator {
     private final CapsizeAccelerationLimiter m_centripetalLimiter;
     private final SteeringRateLimiter m_steeringRateLimiter;
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
+    private final String m_name;
 
     public AsymSwerveSetpointGenerator(SwerveKinodynamics limits) {
         m_limits = limits;
         m_centripetalLimiter = new CapsizeAccelerationLimiter(limits);
         m_steeringRateLimiter = new SteeringRateLimiter(limits);
         m_DriveAccelerationLimiter = new DriveAccelerationLimiter(limits);
+        m_name = Names.name(this);
     }
 
     /**
@@ -112,7 +115,7 @@ public class AsymSwerveSetpointGenerator {
 
         double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, kDtSec);
 
-        t.log(Level.DEBUG, "/setpoint_generator/min_s centripetal", centripetal_min_s);
+        t.log(Level.DEBUG, m_name, "min_s centripetal", centripetal_min_s);
         double min_s = centripetal_min_s;
 
         // In cases where an individual module is stopped, we want to remember the right
@@ -133,7 +136,7 @@ public class AsymSwerveSetpointGenerator {
                 overrideSteering,
                 kDtSec);
 
-        t.log(Level.DEBUG, "/setpoint_generator/min_s steering", steering_min_s);
+        t.log(Level.DEBUG, m_name, "min_s steering", steering_min_s);
         min_s = Math.min(min_s, steering_min_s);
 
         double accel_min_s = m_DriveAccelerationLimiter.enforceWheelAccelLimit(
@@ -144,7 +147,7 @@ public class AsymSwerveSetpointGenerator {
                 desired_vy,
                 kDtSec);
 
-        t.log(Level.DEBUG, "/setpoint_generator/min_s accel", accel_min_s);
+        t.log(Level.DEBUG, m_name, "min_s accel", accel_min_s);
         min_s = Math.min(min_s, accel_min_s);
 
         return makeSetpoint(
@@ -265,7 +268,8 @@ public class AsymSwerveSetpointGenerator {
      * 1. Scales the commanded accelerations by min_s, i.e. applies the constraints
      * calculated earlier.
      * 
-     * 2. Transforms translations according to the rotational velocity, regardless of
+     * 2. Transforms translations according to the rotational velocity, regardless
+     * of
      * min_s -- essentially modeling inertia. This part was missing before, which I
      * think must just be a mistake.
      */

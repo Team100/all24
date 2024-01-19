@@ -2,11 +2,13 @@ package org.team100.lib.commands.arm;
 
 import java.util.function.DoubleSupplier;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -19,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * There are several flaws in this implementation.
  */
-public class CartesianManualPositionalArm extends Command {
+public class CartesianManualPositionalArm extends Command100 {
     private final Telemetry t = Telemetry.get();
 
     private final ArmSubsystem m_arm;
@@ -39,6 +41,7 @@ public class CartesianManualPositionalArm extends Command {
         m_kinematics = kinematics;
         m_x = x;
         m_y = y;
+
         m_lowerController = new PIDController(1, 0, 0);
         m_upperController = new PIDController(1, 0, 0);
         m_lowerController.enableContinuousInput(-Math.PI, Math.PI);
@@ -51,37 +54,36 @@ public class CartesianManualPositionalArm extends Command {
      * This uses an offset to keep the inputs away from the origin.
      */
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         Translation2d input = new Translation2d(
                 0.6 * m_x.getAsDouble() + 0.7,
                 0.6 * m_y.getAsDouble() + 0.7);
-        t.log(Level.DEBUG, "/arm position/input", input);
 
         ArmAngles setpoint = m_kinematics.inverse(input);
         if (setpoint == null) {
             Util.warn("Ignoring infeasible input");
             return;
         }
-        t.log(Level.DEBUG, "/arm position/setpoint", setpoint);
 
         ArmAngles measurement = m_arm.getPosition();
-        t.log(Level.DEBUG, "/arm position/measurement", measurement);
 
         Translation2d cartesian_measurement = m_kinematics.forward(measurement);
-        t.log(Level.DEBUG, "/arm position/cartesian_measurement", cartesian_measurement);
 
         double u1 = MathUtil.clamp(
                 m_lowerController.calculate(measurement.th1, setpoint.th1), -1, 1);
         double u2 = MathUtil.clamp(
                 m_upperController.calculate(measurement.th2, setpoint.th2), -1, 1);
 
-        t.log(Level.DEBUG, "/arm position/output/u1", u1);
-        t.log(Level.DEBUG, "/arm position/output/u2", u2);
-
-        t.log(Level.DEBUG, "/arm position/error/e1", m_lowerController.getPositionError());
-        t.log(Level.DEBUG, "/arm position/error/e2", m_upperController.getPositionError());
-
         m_arm.set(u1, u2);
+
+        t.log(Level.DEBUG, m_name, "input", input);
+        t.log(Level.DEBUG, m_name, "setpoint", setpoint);
+        t.log(Level.DEBUG, m_name, "measurement", measurement);
+        t.log(Level.DEBUG, m_name, "cartesian_measurement", cartesian_measurement);
+        t.log(Level.DEBUG, m_name, "output/u1", u1);
+        t.log(Level.DEBUG, m_name, "output/u2", u2);
+        t.log(Level.DEBUG, m_name, "error/e1", m_lowerController.getPositionError());
+        t.log(Level.DEBUG, m_name, "error/e2", m_upperController.getPositionError());
     }
 
     @Override

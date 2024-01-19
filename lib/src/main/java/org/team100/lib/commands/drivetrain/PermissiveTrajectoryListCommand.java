@@ -87,7 +87,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
             State desiredState = m_currentTrajectory.sample(m_timer.get());
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
-            t.log(Level.DEBUG, "/permissive trajectory list/reference", reference);
+            t.log(Level.DEBUG, m_name, "reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
@@ -95,7 +95,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
             State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
-            t.log(Level.DEBUG, "/permissive trajectory list/reference", reference);
+            t.log(Level.DEBUG, m_name, "reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             if (aligned) {

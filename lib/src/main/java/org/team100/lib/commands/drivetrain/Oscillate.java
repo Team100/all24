@@ -100,19 +100,19 @@ public class Oscillate extends Command100 {
 
         }
 
-        t.log(Level.DEBUG, "/oscillate/time", time);
-        t.log(Level.DEBUG, "/oscillate/setpoint/accel", accelM_S_S);
-        t.log(Level.DEBUG, "/oscillate/setpoint/speed", speedM_S);
-        t.log(Level.DEBUG, "/oscillate/setpoint/position", positionM);
+        t.log(Level.DEBUG, m_name, "time", time);
+        t.log(Level.DEBUG, m_name, "setpoint/accel", accelM_S_S);
+        t.log(Level.DEBUG, m_name, "setpoint/speed", speedM_S);
+        t.log(Level.DEBUG, m_name, "setpoint/position", positionM);
 
         SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-            t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.theta().v());
-            t.log(Level.DEBUG, "/oscillate/measurement/position",
+            t.log(Level.DEBUG, m_name, "measurement/speed", swerveState.theta().v());
+            t.log(Level.DEBUG, m_name, "measurement/position",
                     swerveState.theta().x() - m_initial.theta().x());
         } else {
-            t.log(Level.DEBUG, "/oscillate/measurement/speed", swerveState.x().v());
-            t.log(Level.DEBUG, "/oscillate/measurement/position",
+            t.log(Level.DEBUG, m_name, "measurement/speed", swerveState.x().v());
+            t.log(Level.DEBUG, m_name, "measurement/position",
                     swerveState.x().x() - m_initial.x().x());
         }
     }

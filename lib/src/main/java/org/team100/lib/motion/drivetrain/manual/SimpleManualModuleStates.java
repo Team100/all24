@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.manual;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -19,9 +20,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class SimpleManualModuleStates {
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
+    private final String m_name;
 
     public SimpleManualModuleStates(SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
+        m_name = Names.name(this);
     }
 
     /**
@@ -33,8 +36,8 @@ public class SimpleManualModuleStates {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.dtheta);
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.dx;
-        t.log(Level.DEBUG, "/simple manual module state/v m_s", speedM_S);
-        t.log(Level.DEBUG, "/simple manual module state/angle rad", angle.getRadians());
+        t.log(Level.DEBUG, m_name, "speed m_s", speedM_S);
+        t.log(Level.DEBUG, m_name, "angle rad", angle.getRadians());
         return new SwerveModuleState[] {
                 new SwerveModuleState(speedM_S, angle),
                 new SwerveModuleState(speedM_S, angle),

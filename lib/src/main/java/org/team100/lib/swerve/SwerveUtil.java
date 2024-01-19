@@ -7,6 +7,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveUtil {
     private static final Telemetry t = Telemetry.get();
+    private static final String m_name = Names.name(SwerveUtil.class);
 
     /**
      * Check if it would be faster to go to the opposite of the goal heading (and
@@ -138,7 +140,7 @@ public class SwerveUtil {
 
         double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
                 : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
-        t.log(Level.DEBUG, "/setpoint_generator/max_vel_step", max_vel_step);
+        t.log(Level.DEBUG,  m_name, "max_vel_step", max_vel_step);
         return max_vel_step;
     }
 
@@ -148,10 +150,10 @@ public class SwerveUtil {
             double desired_vx_i,
             double desired_vy_i) {
         double prevV = Math.hypot(prev_vx_i, prev_vy_i);
-        t.log(Level.DEBUG, "/setpoint_generator/prevV", prevV);
+        t.log(Level.DEBUG, m_name, "prevV", prevV);
 
         double desiredV = Math.hypot(desired_vx_i, desired_vy_i);
-        t.log(Level.DEBUG, "/setpoint_generator/desiredV", desiredV);
+        t.log(Level.DEBUG,  m_name, "desiredV", desiredV);
 
         return desiredV >= prevV;
     }
@@ -175,7 +177,7 @@ public class SwerveUtil {
 
         double max_vel_step = isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
                 : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
-        t.log(Level.DEBUG, "/setpoint_generator/max_vel_step", max_vel_step);
+        t.log(Level.DEBUG,  m_name, "max_vel_step", max_vel_step);
         return max_vel_step;
     }
 

@@ -6,6 +6,7 @@ import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -27,7 +28,6 @@ public class PositionServo<T extends Measure100> {
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
 
-
     /**
      * @param name may not start with a slash
      */
@@ -46,7 +46,7 @@ public class PositionServo<T extends Measure100> {
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
-        m_name = String.format("/%s/Position Servo", name);
+        m_name = Names.append(name, this);
         m_profile = profile;
         m_instance = instance;
     }
@@ -86,20 +86,21 @@ public class PositionServo<T extends Measure100> {
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
-        t.log(Level.DEBUG, m_name + "/u_FB", u_FB);
-        t.log(Level.DEBUG, m_name + "/u_FF", u_FF);
-        t.log(Level.DEBUG, m_name + "/u_TOTAL", u_TOTAL);
-        t.log(Level.DEBUG, m_name + "/Measurement", measurement);
-        t.log(Level.DEBUG, m_name + "/Goal", m_goal.x());
-        t.log(Level.DEBUG, m_name + "/Setpoint", m_setpoint.x());
-        t.log(Level.DEBUG, m_name + "/Setpoint Velocity", m_setpoint.v());
-        t.log(Level.DEBUG, m_name + "/Controller Position Error", m_controller.getPositionError());
-        t.log(Level.DEBUG, m_name + "/Controller Velocity Error", m_controller.getVelocityError());
+        t.log(Level.DEBUG, m_name, "u_FB", u_FB);
+        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
+        t.log(Level.DEBUG, m_name, "u_TOTAL", u_TOTAL);
+        t.log(Level.DEBUG, m_name, "Measurement", measurement);
+        t.log(Level.DEBUG, m_name, "Goal", m_goal);
+        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
+        t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
+        t.log(Level.DEBUG, m_name, "Controller Position Error", m_controller.getPositionError());
+        t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
     }
 
     /** Direct velocity control for testing */
     public void setVelocity(double velocity) {
-        // m_velocitySetpoint = m_profile.calculate(0.02, m_velocitySetpoint, new State100(velocity, 0, 0));
+        // m_velocitySetpoint = m_profile.calculate(0.02, m_velocitySetpoint, new
+        // State100(velocity, 0, 0));
         m_servo.setVelocity(velocity);
     }
 
@@ -122,9 +123,9 @@ public class PositionServo<T extends Measure100> {
 
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        t.log(Level.DEBUG, m_name + "/Position Tolerance", m_controller.getPositionTolerance());
-        t.log(Level.DEBUG, m_name + "/Velocity Tolerance", m_controller.getVelocityTolerance());
-        t.log(Level.DEBUG, m_name + "/At Setpoint", atSetpoint);
+        t.log(Level.DEBUG, m_name, "Position Tolerance", m_controller.getPositionTolerance());
+        t.log(Level.DEBUG, m_name, "Velocity Tolerance", m_controller.getVelocityTolerance());
+        t.log(Level.DEBUG, m_name, "At Setpoint", atSetpoint);
         return atSetpoint;
     }
 

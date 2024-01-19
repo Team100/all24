@@ -1,11 +1,13 @@
 package org.team100.lib.commands.arm;
 
+import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.arm.ArmTrajectories;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * feedforward and positional feedback, both using constant parameters (i.e. no
  * gravity feedforward, no inertia-dependent feedback).
  */
-public class ArmTrajectoryCommand extends Command {
+public class ArmTrajectoryCommand extends Command100 {
     private static final double kTolerance = 0.02;
     private static final TrajectoryConfig kConf = new TrajectoryConfig(1, 1);
     private static final double kA = 0.2;
@@ -48,19 +50,6 @@ public class ArmTrajectoryCommand extends Command {
 
     private Trajectory m_trajectory;
 
-    private static PIDController controller(double p, double d) {
-        PIDController c = new PIDController(p, 0, d);
-        c.setTolerance(kTolerance);
-        return c;
-    }
-
-    /** Position controller is continuous. */
-    private static PIDController pController(double p, double d) {
-        PIDController c = controller(p, d);
-        c.enableContinuousInput(-Math.PI, Math.PI);
-        return c;
-    }
-
     public ArmTrajectoryCommand(
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
@@ -83,14 +72,14 @@ public class ArmTrajectoryCommand extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void initialize100() {
         m_timer.restart();
         m_trajectory = m_trajectories.makeTrajectory(
                 m_armKinematicsM.forward(m_armSubsystem.getPosition()), m_goal);
     }
 
     @Override
-    public void execute() {
+    public void execute100(double dt) {
         if (m_trajectory == null)
             return;
         if (m_goalAngles == null)
@@ -124,14 +113,14 @@ public class ArmTrajectoryCommand extends Command {
 
         m_armSubsystem.set(u1, u2);
 
-        t.log(Level.DEBUG, "/arm_trajectory/Lower FF ", ff1);
-        t.log(Level.DEBUG, "/arm_trajectory/Lower Controller Output: ", u1_pos);
-        t.log(Level.DEBUG, "/arm_trajectory/Upper FF ", ff2);
-        t.log(Level.DEBUG, "/arm_trajectory/Upper Controller Output: ", u2_pos);
-        t.log(Level.DEBUG, "/arm_trajectory/Lower Ref: ", r.th1);
-        t.log(Level.DEBUG, "/arm_trajectory/Upper Ref: ", r.th2);
-        t.log(Level.DEBUG, "/arm_trajectory/Output Upper: ", u1);
-        t.log(Level.DEBUG, "/arm_trajectory/Output Lower: ", u2);
+        t.log(Level.DEBUG, m_name, "Lower FF ", ff1);
+        t.log(Level.DEBUG, m_name, "Lower Controller Output: ", u1_pos);
+        t.log(Level.DEBUG, m_name, "Upper FF ", ff2);
+        t.log(Level.DEBUG, m_name, "Upper Controller Output: ", u2_pos);
+        t.log(Level.DEBUG, m_name, "Lower Ref: ", r.th1);
+        t.log(Level.DEBUG, m_name, "Upper Ref: ", r.th2);
+        t.log(Level.DEBUG, m_name, "Output Upper: ", u1);
+        t.log(Level.DEBUG, m_name, "Output Lower: ", u2);
     }
 
     private State getDesiredState() {
@@ -186,5 +175,20 @@ public class ArmTrajectoryCommand extends Command {
     public void end(boolean interrupted) {
         m_armSubsystem.set(0, 0);
         m_trajectory = null;
+    }
+
+    ////////////////////////////////
+
+        private static PIDController controller(double p, double d) {
+        PIDController c = new PIDController(p, 0, d);
+        c.setTolerance(kTolerance);
+        return c;
+    }
+
+    /** Position controller is continuous. */
+    private static PIDController pController(double p, double d) {
+        PIDController c = controller(p, d);
+        c.enableContinuousInput(-Math.PI, Math.PI);
+        return c;
     }
 }

@@ -10,6 +10,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.ExperimentChooser;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Experiments {
     public static final Experiments instance = new Experiments(Identity.instance);
     private final Telemetry t = Telemetry.get();
+    private final String m_name;
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
@@ -48,6 +50,7 @@ public class Experiments {
     private final Map<Experiment, Boolean> m_testOverrides;
 
     private Experiments(Identity identity) {
+        m_name = Names.name(this);
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
         log();
@@ -92,7 +95,7 @@ public class Experiments {
 
     private void log() {
         // the enabled experiments are only logged here for analysis, not control.
-        t.log(Level.DEBUG, "/experiments/enabled",
+        t.log(Level.DEBUG, m_name, "enabled",
                ()-> m_overrides.entrySet()
                         .stream()
                         .filter(e -> e.getValue().getSelected().getAsBoolean())

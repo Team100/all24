@@ -22,6 +22,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double kDriveReduction = 5.50;
     private static final double driveEncoderDistancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
+    /** @param name like "front left" or whatever */
     public static WCPSwerveModule100 get(
             String name,
             double currentLimit,
@@ -32,12 +33,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics) {
 
         VelocityServo<Distance> driveServo = driveServo(
-                name,
+                name + "/Drive",
                 currentLimit,
                 driveMotorCanId);
 
         PositionServo<Angle> turningServo = turningServo(
-                name,
+                name + "/Turning",
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -71,7 +72,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 0.3, // kV
                 0.025); // kA
         return new SelectableVelocityServo<>(
-                drive(name),
+                name,
                 driveMotor,
                 driveEncoder,
                 driveController,
@@ -106,7 +107,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                        // to conpensate for making feedforward larger as well
                 0); // kA
         VelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
-                turning(name),
+                name,
                 turningMotor,
                 turningEncoder,
                 angleVelocityController,
@@ -122,7 +123,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle> turningServo = new PositionServo<>(
-                turning(name),
+                name,
                 turningVelocityServo,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),

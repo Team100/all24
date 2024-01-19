@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.indexer;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -14,12 +15,14 @@ public class IndexerSubsystem extends SubsystemBase {
     private static final double kMaxVelM_S = 1;
     private static final double kMaxAccelM_S2 = 1;
     private static final double kMaxDecelM_S2 = 1;
+    private final String m_name;
 
     private final LimitedVelocityServo<Distance> driveMotor;
 
-    public IndexerSubsystem(String name, int canID) {
+    public IndexerSubsystem(int canID) {
+         m_name = Names.name(this);
         driveMotor = ServoFactory.limitedNeoVelocityServo(
-                name,
+                m_name,
                 canID,
                 false,
                 kGearRatio,

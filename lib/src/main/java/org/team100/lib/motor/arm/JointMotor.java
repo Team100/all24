@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
+import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -38,14 +39,9 @@ public class JointMotor implements Motor100<Angle> {
         // reduce total velocity measurement delay
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
 
-        m_name = String.format("/%s/Joint Motor", name);
+        m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceId());
-    }
-
-    @Override
-    public double get() {
-        return m_motor.getAppliedOutput();
+        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
     }
 
     @Override

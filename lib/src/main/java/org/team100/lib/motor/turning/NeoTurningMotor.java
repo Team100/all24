@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle;
+import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -22,7 +23,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private static final int kCurrentLimit = 40;
     private final RelativeEncoder m_encoder;
 
-    private static final double  staticFrictionFFVolts = 0.1;
+    private static final double staticFrictionFFVolts = 0.1;
     /**
      * This is surely wrong.
      */
@@ -65,15 +66,15 @@ public class NeoTurningMotor implements Motor100<Angle> {
     private final CANSparkMax m_motor;
     private final String m_name;
 
-        /** Current velocity measurement, obtained in periodic(). */
-        private double m_encoderVelocity;
-        /** Current position measurement, obtained in periodic(). */
-        private double m_encoderPosition;
+    /** Current velocity measurement, obtained in periodic(). */
+    private double m_encoderVelocity;
+    /** Current position measurement, obtained in periodic(). */
+    private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase,double gearRatio) {
+    public NeoTurningMotor(String name, int canId, boolean motorPhase, double gearRatio) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
-        m_gearRatio=gearRatio;
+        m_gearRatio = gearRatio;
         m_motor.setInverted(!motorPhase);
         m_motor.setSmartCurrentLimit(kCurrentLimit);
 
@@ -88,20 +89,15 @@ public class NeoTurningMotor implements Motor100<Angle> {
         m_pidController.setFF(0);
         m_pidController.setOutputRange(-1, 1);
 
-        m_name = String.format("/Neo Turning Motor %s", name);
+        m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name + "/Device ID", m_motor.getDeviceId());
-    }
-
-    @Override
-    public double get() {
-        return m_motor.getAppliedOutput();
+        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name + "/Output", output);
+        t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
     }
 
     @Override
@@ -117,18 +113,21 @@ public class NeoTurningMotor implements Motor100<Angle> {
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2) {
         double motorRad_S = m_gearRatio * outputRad_S;
-        double motorRevs_S = motorRad_S / (2*Math.PI);
+        double motorRevs_S = motorRad_S / (2 * Math.PI);
         double motorRevs_M = motorRevs_S * 60;
         double motorRad_S2 = m_gearRatio * accelRad_S2;
-        double motorRevs_S2 = motorRad_S2 / (2*Math.PI);
+        double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
         double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(m_encoderVelocity/60,motorRevs_S);
+        double frictionFF = frictionFF(m_encoderVelocity / 60, motorRevs_S);
         double accelFF = accelFF(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.DEBUG, m_name + "/Output", motorRevs_S);
+        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
+        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.DEBUG, m_name, "desired speed (rev_s)", motorRevs_S);
     }
 
     public void resetPosition() {
@@ -148,14 +147,15 @@ public class NeoTurningMotor implements Motor100<Angle> {
     public double getRateRPM() {
         return m_encoderVelocity;
     }
+
     /**
      * Update measurements.
      */
     public void periodic() {
         m_encoderPosition = m_encoder.getPosition();
         m_encoderVelocity = m_encoder.getVelocity();
-        t.log(Level.DEBUG, m_name + "/position (rev)", m_encoderPosition);
-        t.log(Level.DEBUG, m_name + "/velocity (rev_S)", m_encoderVelocity / 60);
+        t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
     }
 
     /////////////////////////////////////////////////////////////////
@@ -170,6 +170,7 @@ public class NeoTurningMotor implements Motor100<Angle> {
         }
         return dynamicFrictionFFVolts * direction;
     }
+
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */

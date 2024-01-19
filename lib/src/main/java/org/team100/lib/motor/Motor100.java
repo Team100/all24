@@ -5,11 +5,6 @@ import org.team100.lib.units.Measure100;
 public interface Motor100<T extends Measure100> {
 
     /**
-     * @return output in range [-1, 1]
-     */
-    double get();
-
-    /**
      * Open-loop duty cycle control.
      * 
      * @param output in range [-1, 1]
@@ -26,9 +21,14 @@ public interface Motor100<T extends Measure100> {
 
     void stop();
 
-    /** For test cleanup */
+    /**
+     * For test cleanup.
+     */
     void close();
 
-    /** Used to collect measurements once per cycle, to save time. */
+    /**
+     * Used to collect measurements once per cycle, to save time and improve
+     * consistency.
+     */
     void periodic();
 }

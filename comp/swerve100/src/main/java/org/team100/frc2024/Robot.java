@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        t.log(Level.DEBUG, "/robot/key list size", keyListSize);
+        t.log(Level.DEBUG, "/Robot","key list size", keyListSize);
         if (keyListSize == 0) {
             m_robotContainer.red();
         } else {

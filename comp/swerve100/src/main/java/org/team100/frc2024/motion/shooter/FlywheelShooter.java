@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.shooter;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance;
+import org.team100.lib.util.Names;
 
 public class FlywheelShooter extends Shooter {
     private static final double kGearRatio = 20.0;
@@ -10,14 +11,16 @@ public class FlywheelShooter extends Shooter {
     private static final double kMaxVelM_S = 8;
     private static final double kMaxAccelM_S2 = 30;
     private static final double kMaxDecelM_S2 = 30;
+    private final String m_name;
 
     private final LimitedVelocityServo<Distance> leftShooter;
     private final LimitedVelocityServo<Distance> rightShooter;
 
-    public FlywheelShooter(String name1, String name2, int canID1, int canID2) {
+    public FlywheelShooter(int canID1, int canID2) {
+        m_name = Names.name(this);
 
         leftShooter = ServoFactory.limitedNeoVelocityServo(
-                name1,
+                m_name + "/Left",
                 canID1,
                 false,
                 kGearRatio,
@@ -27,7 +30,7 @@ public class FlywheelShooter extends Shooter {
                 kMaxDecelM_S2);
 
         rightShooter = ServoFactory.limitedNeoVelocityServo(
-                name2,
+                m_name + "/Right",
                 canID2,
                 false,
                 kGearRatio,

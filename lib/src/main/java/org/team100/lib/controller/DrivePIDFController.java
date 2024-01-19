@@ -7,6 +7,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -20,6 +21,7 @@ public class DrivePIDFController implements DriveMotionController {
     private static final double kTolerance = 0.05;
     public static final Telemetry t = Telemetry.get();
     private final boolean m_feedforwardOnly;
+    private final String m_name;
 
     private TrajectoryTimeIterator m_iter;
     private double m_prevTimeS;
@@ -27,6 +29,7 @@ public class DrivePIDFController implements DriveMotionController {
 
     public DrivePIDFController(boolean feedforwardOnly) {
         m_feedforwardOnly = feedforwardOnly;
+        m_name = Names.name(this);
     }
 
     @Override
@@ -41,7 +44,7 @@ public class DrivePIDFController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        t.log(Level.DEBUG, "/drive_pid_controller/measurement", measurement);
+        t.log(Level.DEBUG, m_name, "measurement", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -52,8 +55,8 @@ public class DrivePIDFController implements DriveMotionController {
             return new ChassisSpeeds();
         }
         error = DriveMotionControllerUtil.getError(measurement, mSetpoint.get());
-        t.log(Level.DEBUG, "/drive_pid_controller/setpoint", mSetpoint.get());
-        t.log(Level.DEBUG, "/drive_pid_controller/error", error);
+        t.log(Level.DEBUG, m_name, "setpoint", mSetpoint.get());
+        t.log(Level.DEBUG, m_name, "error", error);
 
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, mSetpoint.get());
         if (m_feedforwardOnly)
@@ -77,7 +80,7 @@ public class DrivePIDFController implements DriveMotionController {
         if (!sample_point.isPresent()) {
             return Optional.empty();
         }
-        t.log(Level.DEBUG, "/drive_pid_controller/sample point", sample_point.get());
+        t.log(Level.DEBUG, m_name, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 
