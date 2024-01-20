@@ -3,7 +3,7 @@ package org.team100.lib.encoder.turning;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.AnalogEncoder;
@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
  */
-public class AnalogTurningEncoder implements Encoder100<Angle> {
+public class AnalogTurningEncoder implements Encoder100<Angle100> {
     /** Describes how the encoder angle is linked to the steering angle. */
     public enum Drive {
         /**

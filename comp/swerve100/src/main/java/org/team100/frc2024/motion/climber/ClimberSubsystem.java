@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -20,8 +20,8 @@ public class ClimberSubsystem extends SubsystemBase {
     private static final double kP = 1;
     private final String m_name;
 
-    private final PositionServo<Distance> s1;
-    private final PositionServo<Distance> s2;
+    private final PositionServo<Distance100> s1;
+    private final PositionServo<Distance100> s2;
 
     public ClimberSubsystem( int canID1, int canID2) {
         m_name = Names.name(this);

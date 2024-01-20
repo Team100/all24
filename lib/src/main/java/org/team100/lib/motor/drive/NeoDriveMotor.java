@@ -3,7 +3,7 @@ package org.team100.lib.motor.drive;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
@@ -19,7 +19,7 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
  * 
  * This is not finished, don't use it without finishing it.
  */
-public class NeoDriveMotor implements Motor100<Distance> {
+public class NeoDriveMotor implements Motor100<Distance100> {
     private static final int kCurrentLimit = 40;
     private final RelativeEncoder m_encoder;
 

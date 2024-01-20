@@ -3,7 +3,7 @@ package org.team100.lib.motor.turning;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 /**
  * Swerve steering motor using PWM control.
  */
-public class PWMTurningMotor implements Motor100<Angle> {
+public class PWMTurningMotor implements Motor100<Angle100> {
     private final Telemetry t = Telemetry.get();
     private final PWMMotorController m_motor;
     private final String m_name;

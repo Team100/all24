@@ -9,7 +9,7 @@ import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.testing.TimelessTest;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -20,12 +20,12 @@ class PositionProfileTest extends TimelessTest {
     private static final double kDelta = 0.001;
 
     private final String name;
-    private final MockMotor100<Distance> motor;
-    private final MockEncoder100<Distance> encoder;
+    private final MockMotor100<Distance100> motor;
+    private final MockEncoder100<Distance100> encoder;
     private final double period;
     private final PIDController controller2;
     private final SimpleMotorFeedforward feedforward;
-    private PositionServo<Distance> servo;
+    private PositionServo<Distance100> servo;
 
     public PositionProfileTest() {
         name = "test";
@@ -43,7 +43,7 @@ class PositionProfileTest extends TimelessTest {
     @Test
     void testTrapezoid() {
         PIDController vController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
+        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
@@ -57,7 +57,7 @@ class PositionProfileTest extends TimelessTest {
                 1,
                 controller2,
                 profile,
-                Distance.instance);
+                Distance100.instance);
         servo.reset();
 
         verifyTrapezoid();
@@ -66,7 +66,7 @@ class PositionProfileTest extends TimelessTest {
     @Test
     void testProfile() {
         PIDController vController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
+        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
@@ -80,7 +80,7 @@ class PositionProfileTest extends TimelessTest {
                 1,
                 controller2,
                 profile,
-                Distance.instance);
+                Distance100.instance);
         servo.reset();
         verifyTrapezoid();
     }
@@ -112,7 +112,7 @@ class PositionProfileTest extends TimelessTest {
     @Test
     void testExponential() {
         PIDController vController = new PIDController(5, 0, 0, period);
-        SelectableVelocityServo<Distance> vServo = new SelectableVelocityServo<>(
+        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
@@ -126,7 +126,7 @@ class PositionProfileTest extends TimelessTest {
                 1,
                 controller2,
                 profile,
-                Distance.instance);
+                Distance100.instance);
         servo.reset();
         verifyExp();
     }

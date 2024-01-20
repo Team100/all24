@@ -3,8 +3,8 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.units.Angle;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,14 +18,14 @@ public class SwerveModule100 {
     protected static final double dt = 0.02;
 
     private final String m_name;
-    private final VelocityServo<Distance> m_driveServo;
-    private final PositionServo<Angle> m_turningServo;
+    private final VelocityServo<Distance100> m_driveServo;
+    private final PositionServo<Angle100> m_turningServo;
     private final SwerveModuleVisualization m_viz;
 
     public SwerveModule100(
             String name,
-            VelocityServo<Distance> driveServo,
-            PositionServo<Angle> turningServo) {
+            VelocityServo<Distance100> driveServo,
+            PositionServo<Angle100> turningServo) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);

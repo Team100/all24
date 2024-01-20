@@ -4,18 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.testing.TimelessTest;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 
 class LimitedVelocityServoTest extends TimelessTest {
     private static final double kDelta = 0.0001;
 
     @Test
     void test100() {
-        MockVelocityServo<Distance> mv = new MockVelocityServo<>();
+        MockVelocityServo<Distance100> mv = new MockVelocityServo<>();
         double maxVel = 1;
         double maxAccel = 1;
         double maxDecel = 1;
-        LimitedVelocityServo<Distance> pv = new LimitedVelocityServo<>(
+        LimitedVelocityServo<Distance100> pv = new LimitedVelocityServo<>(
                 mv, maxVel, maxAccel, maxDecel);
 
         assertEquals(0, mv.m_setpoint, kDelta);

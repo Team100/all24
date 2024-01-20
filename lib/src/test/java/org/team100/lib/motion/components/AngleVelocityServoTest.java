@@ -7,23 +7,23 @@ import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-class AngleVelocityServoTest {
+class Angle100VelocityServoTest {
     @Test
     void testSimple() {
 
         String name = "test";
-        MockMotor100<Angle> motor = new MockMotor100<>();
-        MockEncoder100<Angle> encoder = new MockEncoder100<>();
+        MockMotor100<Angle100> motor = new MockMotor100<>();
+        MockEncoder100<Angle100> encoder = new MockEncoder100<>();
         PIDController controller = new PIDController(1, 0, 0);
 
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        SelectableVelocityServo<Angle> servo = new SelectableVelocityServo<>(
+        SelectableVelocityServo<Angle100> servo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,

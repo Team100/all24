@@ -7,6 +7,6 @@ public enum SubsystemChoice {
     /** Smooth chassis speeds. */
     DrumShooter,
     FlywheelShooter,
-    BeltIndexer,
-    StarwheelIndexer
+    RollerIntake,
+    WheelIntake
 }

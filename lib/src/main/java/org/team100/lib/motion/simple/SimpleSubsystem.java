@@ -1,7 +1,7 @@
 package org.team100.lib.motion.simple;
 
 import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -10,11 +10,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class SimpleSubsystem extends SubsystemBase {
 
-    private final PositionServo<Distance> m_actuator;
+    private final PositionServo<Distance100> m_actuator;
     private final SimpleVisualization m_viz;
 
     // use the factory to instantiate
-    SimpleSubsystem(PositionServo<Distance> actuator) {
+    SimpleSubsystem(PositionServo<Distance100> actuator) {
         m_actuator = actuator;
         m_viz = new SimpleVisualization(this);
     }

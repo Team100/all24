@@ -3,7 +3,7 @@ package org.team100.lib.motor.turning;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
@@ -19,7 +19,7 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
  * 
  * This is not finished, don't use it without finishing it.
  */
-public class NeoTurningMotor implements Motor100<Angle> {
+public class NeoTurningMotor implements Motor100<Angle100> {
     private static final int kCurrentLimit = 40;
     private final RelativeEncoder m_encoder;
 

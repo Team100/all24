@@ -7,8 +7,8 @@ import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.units.Angle;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -18,14 +18,14 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     public static SimulatedSwerveModule100 get(
             String name,
             SwerveKinodynamics kinodynamics) {
-        VelocityServo<Distance> driveServo = simulatedDriveServo(name + "/Drive");
-        PositionServo<Angle> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
+        VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
+        PositionServo<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance> simulatedDriveServo(String name) {
-        SimulatedMotor<Distance> driveMotor = new SimulatedMotor<>(name);
-        SimulatedEncoder<Distance> driveEncoder = new SimulatedEncoder<>(
+    private static VelocityServo<Distance100> simulatedDriveServo(String name) {
+        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(name);
+        SimulatedEncoder<Distance100> driveEncoder = new SimulatedEncoder<>(
                 name,
                 driveMotor,
                 1,
@@ -37,17 +37,17 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 driveEncoder);
     }
 
-    private static PositionServo<Angle> simulatedTurningServo(
+    private static PositionServo<Angle100> simulatedTurningServo(
             String name,
             SwerveKinodynamics kinodynamics) {
-        SimulatedMotor<Angle> turningMotor = new SimulatedMotor<>(name);
-        SimulatedEncoder<Angle> turningEncoder = new SimulatedEncoder<>(
+        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(name);
+        SimulatedEncoder<Angle100> turningEncoder = new SimulatedEncoder<>(
                 name,
                 turningMotor,
                 1,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
-        VelocityServo<Angle> turningVelocityServo = new OutboardVelocityServo<>(
+        VelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
                 name,
                 turningMotor,
                 turningEncoder);
@@ -60,22 +60,22 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle> turningServo = new PositionServo<>(
+        PositionServo<Angle100> turningServo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
                 profile,
-                Angle.instance);
+                Angle100.instance);
         turningServo.reset();
         return turningServo;
     }
 
     private SimulatedSwerveModule100(
             String name,
-            VelocityServo<Distance> driveServo,
-            PositionServo<Angle> turningServo) {
+            VelocityServo<Distance100> driveServo,
+            PositionServo<Angle100> turningServo) {
         super(name, driveServo, turningServo);
         //
     }

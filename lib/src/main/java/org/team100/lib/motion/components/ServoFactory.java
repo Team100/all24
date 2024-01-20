@@ -1,12 +1,13 @@
 package org.team100.lib.motion.components;
 
+import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.units.Angle;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -24,33 +25,32 @@ public class ServoFactory {
      * @param maxDecel maximum decleration: usually mechanisms can slow down faster than they can speed up.
      * @return
      */
-    public static LimitedVelocityServo<Distance> limitedNeoVelocityServo(
+    public static LimitedVelocityServo<Distance100> limitedNeoVelocityServo(
             String name,
             int canId,
             boolean motorPhase,
-            double gearRatio,
-            double wheelDiameter,
-            double maxVel,
-            double maxAccel,
-            double maxDecel) {
+            SysParam param) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
                 motorPhase,
-                gearRatio,
-                wheelDiameter);
+                param.getkGearRatio(),
+                param.getkWheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                wheelDiameter * Math.PI);
-        VelocityServo<Distance> v = new OutboardVelocityServo<>(
+                param.getkWheelDiameter() * Math.PI);
+        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
-        return new LimitedVelocityServo<>(v, maxVel, maxAccel, maxDecel);
+        return new LimitedVelocityServo<>(v, param.getkMaxVelocity(), param.getkMaxAccel(), param.getkMaxDecel());
     }
 
-    public static VelocityServo<Distance> neoVelocityServo(
+    
+
+
+    public static VelocityServo<Distance100> neoVelocityServo(
             String name,
             int canId,
             boolean motorPhase,
@@ -77,7 +77,7 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static PositionServo<Distance> neoPositionServo(
+    public static PositionServo<Distance100> neoPositionServo(
             String name,
             int canId,
             boolean motorPhase,
@@ -96,7 +96,7 @@ public class ServoFactory {
                 name,
                 motor,
                 wheelDiameter * Math.PI);
-        VelocityServo<Distance> vServo = new OutboardVelocityServo<>(
+        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
@@ -107,10 +107,10 @@ public class ServoFactory {
                 maxVel,
                 pidController,
                 new TrapezoidProfile100(maxVel, maxAccel, 0.05),
-                Distance.instance);
+                Distance100.instance);
     }
 
-    public static PositionServo<Angle> neoPositionServo(
+    public static PositionServo<Angle100> neoPositionServo(
             String name,
             int canId,
             boolean motorPhase,
@@ -126,7 +126,7 @@ public class ServoFactory {
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
                 motor);
-        VelocityServo<Angle> vServo = new OutboardVelocityServo<>(
+        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
@@ -137,7 +137,35 @@ public class ServoFactory {
                 maxVel,
                 new PIDController(kP, 0, 0),
                 new TrapezoidProfile100(maxVel, maxAccel, 0.05),
-                Angle.instance);
+                Angle100.instance);
+    }
+
+    public static PositionServo<Angle100> neoPositionServo(
+            String name,
+            int canId,
+            boolean motorPhase,
+            SysParam param,
+            PIDController controller) {
+        NeoTurningMotor motor = new NeoTurningMotor(
+                name,
+                canId,
+                motorPhase,
+                param.getkGearRatio());
+        NeoTurningEncoder encoder = new NeoTurningEncoder(
+                name,
+                motor);
+        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new PositionServo<>(
+                name,
+                vServo,
+                encoder,
+                param.getkMaxVelocity(),
+                controller,
+                new TrapezoidProfile100(param.getkMaxVelocity(), param.getkMaxAccel(), 0.05),
+                Angle100.instance);
     }
 
     private ServoFactory() {

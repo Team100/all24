@@ -3,7 +3,7 @@ package org.team100.lib.motor.arm;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
@@ -16,7 +16,7 @@ import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 /**
  * Arm motor from 2023.
  */
-public class JointMotor implements Motor100<Angle> {
+public class JointMotor implements Motor100<Angle100> {
     private final Telemetry t = Telemetry.get();
     private final CANSparkMax m_motor;
     private final String m_name;

@@ -4,7 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -23,7 +23,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * 
  * See {@link FalconDriveMotor} for configuration details.
  */
-public class FalconTurningMotor implements Motor100<Angle> {
+public class FalconTurningMotor implements Motor100<Angle100> {
     private static final double ticksPerRevolution = 2048;
     private static final double gearRatio = 10.29;
     private static final double kCurrentLimit = 40;

@@ -4,7 +4,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 /**
@@ -12,7 +12,7 @@ import org.team100.lib.util.Names;
  * 
  * The encoder is a high-resolution magnetic sensor, 2048 ticks per turn.
  */
-public class FalconDriveEncoder implements Encoder100<Distance> {
+public class FalconDriveEncoder implements Encoder100<Distance100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final FalconDriveMotor m_motor;

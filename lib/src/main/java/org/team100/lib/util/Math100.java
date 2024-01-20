@@ -14,6 +14,8 @@ public class Math100 {
     // we just don't need very precise answers.
     private static final double kRootTolerance = 0.0001;
 
+
+    
     /**
      * Returns the real solutions to the quadratic ax^2 + bx + c.
      */

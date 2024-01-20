@@ -9,8 +9,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.units.Angle;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -32,12 +32,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
 
-        VelocityServo<Distance> driveServo = driveServo(
+        VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
                 driveMotorCanId);
 
-        PositionServo<Angle> turningServo = turningServo(
+        PositionServo<Angle100> turningServo = turningServo(
                 name + "/Turning",
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -47,7 +47,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance> driveServo(
+    private static VelocityServo<Distance100> driveServo(
             String name,
             double currentLimit,
             int driveMotorCanId) {
@@ -79,7 +79,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveFeedforward);
     }
 
-    private static PositionServo<Angle> turningServo(
+    private static PositionServo<Angle100> turningServo(
             String name,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -106,7 +106,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 0.005, // kV: Since we are decreasing the value of how much the PID system does we need
                        // to conpensate for making feedforward larger as well
                 0); // kA
-        VelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
+        VelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
                 name,
                 turningMotor,
                 turningEncoder,
@@ -122,22 +122,22 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningPositionController.setTolerance(0.1, 0.1);
 
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle> turningServo = new PositionServo<>(
+        PositionServo<Angle100> turningServo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
                 profile,
-                Angle.instance);
+                Angle100.instance);
         turningServo.reset();
         return turningServo;
     }
 
     private WCPSwerveModule100(
             String name,
-            VelocityServo<Distance> driveServo,
-            PositionServo<Angle> turningServo) {
+            VelocityServo<Distance100> driveServo,
+            PositionServo<Angle100> turningServo) {
         super(name, driveServo, turningServo);
         //
     }
