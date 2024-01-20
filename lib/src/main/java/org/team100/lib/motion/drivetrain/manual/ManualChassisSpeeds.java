@@ -20,9 +20,9 @@ public class ManualChassisSpeeds {
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
-    public ManualChassisSpeeds(SwerveKinodynamics swerveKinodynamics) {
+    public ManualChassisSpeeds(String parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.name(this);
+        m_name = Names.append(parent, this);
     }
 
     /**

@@ -70,7 +70,6 @@ public class ServoFactory {
                 name,
                 motor,
                 encoder);
-
     }
 
     /**

@@ -27,6 +27,10 @@
       "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
@@ -85,13 +89,19 @@
           "open": true
         }
       },
-      "Experiments": {
-        "string[]##v_/Experiments/enabled": {
+      "Command100": {
+        "DriveManually": {
+          "ManualChassisSpeeds": {
+            "open": true
+          },
+          "SimpleManualModuleStates": {
+            "open": true
+          },
           "open": true
         }
       },
-      "FlywheelShooter": {
-        "Left": {
+      "Experiments": {
+        "string[]##v_/Experiments/enabled": {
           "open": true
         }
       },
@@ -169,14 +179,50 @@
           "open": true
         }
       },
+      "Swerve Modules": {
+        "Front Left": {
+          "Drive": {
+            "open": true
+          },
+          "Turning": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
       "SwerveDriveSubsystem": {
         "swerve": {
           "open": true
         }
       },
+      "SwerveLocal": {
+        "AsymSwerveSetpointGenerator": {
+          "CapsizeAccelerationLimiter": {
+            "open": true
+          },
+          "DriveAccelerationLimiter": {
+            "open": true
+          },
+          "SteeringRateLimiter": {
+            "open": true
+          }
+        }
+      },
+      "SwerveUtil": {
+        "open": true
+      },
       "Top Roller": {
         "velocity": {
           "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "command": {
+        "DriveManually": {
+          "ManualWithHeading": {
             "open": true
           },
           "open": true

@@ -18,9 +18,9 @@ public class ManualFieldRelativeSpeeds {
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
-    public ManualFieldRelativeSpeeds(SwerveKinodynamics swerveKinodynamics) {
+    public ManualFieldRelativeSpeeds(String parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.name(this);
+        m_name = Names.append(parent, this);
     }
 
     /**

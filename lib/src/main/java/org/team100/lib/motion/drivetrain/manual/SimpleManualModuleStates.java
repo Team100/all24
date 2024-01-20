@@ -22,9 +22,9 @@ public class SimpleManualModuleStates {
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
-    public SimpleManualModuleStates(SwerveKinodynamics swerveKinodynamics) {
+    public SimpleManualModuleStates(String parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.name(this);
+        m_name = Names.append(parent, this);
     }
 
     /**

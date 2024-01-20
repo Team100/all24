@@ -9,17 +9,23 @@ import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 
 public class SimulatedSwerveModule100 extends SwerveModule100 {
+    private static final String m_name = Names.name(SimulatedSwerveModule100.class);
 
     /** @param name like "front left" or whatever */
     public static SimulatedSwerveModule100 get(
             String name,
             SwerveKinodynamics kinodynamics) {
+
         VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
         PositionServo<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
+
+        name = m_name + "/" + name;
+        
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 

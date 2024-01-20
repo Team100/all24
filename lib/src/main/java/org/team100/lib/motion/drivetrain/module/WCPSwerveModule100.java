@@ -11,11 +11,14 @@ import org.team100.lib.motor.turning.FalconTurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    private static final String m_name = Names.name(WCPSwerveModule100.class);
+
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.1015;
     // see wcproducts.com, this is the "fast" ratio.
@@ -31,6 +34,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
+        name = m_name + "/" + name;
 
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",

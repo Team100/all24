@@ -15,7 +15,7 @@ class ManualChassisSpeedsTest {
     @Test
     void testChassisSpeedsZero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        ManualChassisSpeeds manual = new ManualChassisSpeeds(limits);
+        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
         Twist2d input =  new Twist2d();
         ChassisSpeeds speeds = manual.apply(input);
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
@@ -28,7 +28,7 @@ class ManualChassisSpeedsTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         assertEquals(1, limits.getMaxDriveVelocityM_S(), kDelta);
         assertEquals(2.828, limits.getMaxAngleSpeedRad_S(), kDelta);
-        ManualChassisSpeeds manual = new ManualChassisSpeeds(limits);
+        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
         // clipping to the unit circle, then desaturating.
         Twist2d input = new Twist2d(1, 2, 3);
         ChassisSpeeds speeds = manual.apply(input);

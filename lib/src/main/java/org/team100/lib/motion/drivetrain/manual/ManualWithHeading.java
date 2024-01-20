@@ -47,6 +47,7 @@ public class ManualWithHeading {
     State100 m_thetaSetpoint;
 
     public ManualWithHeading(
+            String parent, 
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation,
@@ -57,7 +58,7 @@ public class ManualWithHeading {
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.name(this);
+        m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,

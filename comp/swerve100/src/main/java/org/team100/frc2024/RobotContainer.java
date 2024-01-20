@@ -61,6 +61,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
+import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
@@ -100,7 +101,10 @@ public class RobotContainer implements SelfTestable {
     private final Shooter m_shooter;
     private final Intake m_intake;
 
+    private final String m_name;
+
     public RobotContainer(TimedRobot robot) throws IOException {
+        m_name = Names.name(this);
         // selects the correct control class for whatever is plugged in
         ControlFactory controlFactory = new ControlFactory();
         DriverControl driverControl = controlFactory.getDriverControl();
@@ -108,11 +112,11 @@ public class RobotContainer implements SelfTestable {
 
         // digital inputs 0, 1, 2, 3.
         m_autonSelector = new AutonSelector();
-        t.log(Level.INFO, "RobotContainer", "Routine", getRoutine());
+        t.log(Level.INFO, m_name, "Routine", getRoutine());
 
         // digital inputs 4, 5
         m_allianceSelector = new AllianceSelector();
-        t.log(Level.INFO, "RobotContainer", "Alliance", m_allianceSelector.alliance().name());
+        t.log(Level.INFO, m_name, "Alliance", m_allianceSelector.alliance().name());
 
         m_indicator = new LEDIndicator(8);
 

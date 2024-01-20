@@ -66,7 +66,7 @@ class AsymSwerveSetpointGeneratorTest {
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(new ChassisSpeeds(), initialStates);
 
-        var generator = new AsymSwerveSetpointGenerator(kKinematicLimits);
+        var generator = new AsymSwerveSetpointGenerator("foo", kKinematicLimits);
 
         var goalSpeeds = new ChassisSpeeds(0.0, 0.0, 1.0);
         setpoint = driveToGoal(setpoint, goalSpeeds, generator);
@@ -96,7 +96,7 @@ class AsymSwerveSetpointGeneratorTest {
     @Test
     void testLimiting() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -130,7 +130,7 @@ class AsymSwerveSetpointGeneratorTest {
     void testNotLimiting() {
         // high centripetal limit to stay out of the way
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -156,7 +156,7 @@ class AsymSwerveSetpointGeneratorTest {
         // high centripetal limit to stay out of the way
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
 
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -188,7 +188,7 @@ class AsymSwerveSetpointGeneratorTest {
         // very low centripetal limit so we can see it
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.lowCapsize();
 
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -226,7 +226,7 @@ class AsymSwerveSetpointGeneratorTest {
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
 
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initially moving full speed +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(4, 0, 0);
@@ -285,7 +285,7 @@ class AsymSwerveSetpointGeneratorTest {
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.decelCase();
 
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initially moving 0.5 +y
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0.5, 0);
@@ -318,7 +318,7 @@ class AsymSwerveSetpointGeneratorTest {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highDecelAndCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initial speed is faster than possible.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(10, 0, 0);
@@ -344,7 +344,7 @@ class AsymSwerveSetpointGeneratorTest {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
 
         // initial speed is at the limit +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(5, 0, 0);
