@@ -23,10 +23,10 @@ public class IntakeWheel extends Intake {
 
       intakeParam = new SysParam();
       intakeParam.setkGearRatio(1);
-      intakeParam.setkWheelDiameter(1);
-      intakeParam.setkMaxVelocity(1);
-      intakeParam.setkMaxAccel(1);
-      intakeParam.setkMaxDeccel(1);
+      intakeParam.setkWheelDiameter(.05);
+      intakeParam.setkMaxVelocity(8);
+      intakeParam.setkMaxAccel(20);
+      intakeParam.setkMaxDeccel(20);
 
       intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, canID, false, intakeParam);
   }

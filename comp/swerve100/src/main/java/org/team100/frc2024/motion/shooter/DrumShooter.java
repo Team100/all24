@@ -19,7 +19,7 @@ public class DrumShooter extends Shooter {
 
         rollerParameter = new SysParam();
         rollerParameter.setkGearRatio(1);
-        rollerParameter.setkWheelDiameter(0.05);
+        rollerParameter.setkWheelDiameter(0.1);
         rollerParameter.setkMaxVelocity(8);
         rollerParameter.setkMaxAccel(30);
         rollerParameter.setkMaxDeccel(30);

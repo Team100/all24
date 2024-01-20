@@ -29,15 +29,15 @@ public class IndexerSubsystem extends SubsystemBase {
     public IndexerSubsystem(int canID, int canID2, int canID3) {
         m_name = Names.name(this);
 
-        driveParameter.setkGearRatio(1);
-        driveParameter.setkWheelDiameter(1);
-        driveParameter.setkMaxVelocity(1);
-        driveParameter.setkMaxDeccel(1);
+        driveParameter.setkGearRatio(2);
+        driveParameter.setkWheelDiameter(0.05);
+        driveParameter.setkMaxVelocity(8);
+        driveParameter.setkMaxDeccel(20);
 
         ampAngleParameter.setkGearRatio(15);
-        ampAngleParameter.setkWheelDiameter(1);
-        ampAngleParameter.setkMaxVelocity(1);
-        ampAngleParameter.setkMaxDeccel(1);
+        ampAngleParameter.setkWheelDiameter(0.05);
+        ampAngleParameter.setkMaxVelocity(8);
+        ampAngleParameter.setkMaxDeccel(20);
         
         driveMotor = ServoFactory.limitedNeoVelocityServo(
                 m_name,
