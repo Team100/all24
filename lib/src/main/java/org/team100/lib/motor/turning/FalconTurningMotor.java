@@ -25,7 +25,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  */
 public class FalconTurningMotor implements Motor100<Angle100> {
     private static final double ticksPerRevolution = 2048;
-    private static final double gearRatio = 10.29;
+    private  final double gearRatio;
     private static final double kCurrentLimit = 40;
 
     /**
@@ -79,16 +79,21 @@ public class FalconTurningMotor implements Motor100<Angle100> {
     /** Current motor error, updated in periodic() */
     private double m_error;
 
-    public FalconTurningMotor(String name, int canId) {
+    public FalconTurningMotor(String name, int canId, boolean motorPhase,double currentLimit,
+    double kGearRatio) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
         m_motor = new TalonFX(canId);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
-
+        gearRatio = kGearRatio;
         // the serve module steering gear is inverted
-        m_motor.setInverted(InvertType.InvertMotorOutput);
+        if (motorPhase) {
+            m_motor.setInverted(InvertType.None);
+        } else {
+            m_motor.setInverted(InvertType.InvertMotorOutput);
+        }
 
         // configure current limits
         m_motor.configStatorCurrentLimit(

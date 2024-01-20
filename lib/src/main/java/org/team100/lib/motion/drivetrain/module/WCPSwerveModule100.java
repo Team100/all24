@@ -46,6 +46,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
+                10.29,
                 kinodynamics);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
@@ -58,6 +59,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         FalconDriveMotor driveMotor = new FalconDriveMotor(
                 name,
                 driveMotorCanId,
+                true,
                 currentLimit,
                 kDriveReduction,
                 kWheelDiameterM);
@@ -88,11 +90,15 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
+            double gearRatio,
             SwerveKinodynamics kinodynamics) {
         final double turningGearRatio = 1.0;
         FalconTurningMotor turningMotor = new FalconTurningMotor(
                 name,
-                turningMotorCanId);
+                turningMotorCanId,
+                true,
+                60,
+                gearRatio);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
                 name,
                 turningEncoderChannel,

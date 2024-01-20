@@ -68,6 +68,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         FalconDriveMotor driveMotor = new FalconDriveMotor(
                 name,
                 driveMotorCanId,
+                true,
                 currentLimit,
                 kDriveReduction,
                 kWheelDiameterM);

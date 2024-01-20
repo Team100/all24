@@ -6,19 +6,11 @@ import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * TODO: add intake to selftest.
  */
 public class IntakeRoller extends Intake {
-    
-    //TODO GET THE RIGHT NUMBERS
-    private static final double kGearRatio = 1;
-    private static final double kWheelDiameter = 1;
-    private static final double kMaxVelM_S = 5;
-    private static final double kMaxAccelM_S2 = 5;
-    private static final double kMaxDecelM_S2 = 5;
     private final String m_name;
 
     private final LimitedVelocityServo<Distance100> topRoller;

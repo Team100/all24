@@ -7,11 +7,6 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 public class DrumShooter extends Shooter {
-    private static final double kGearRatio = 20.0;
-    private static final double kWinchDiameterM = 0.01;
-    private static final double kMaxVelM_S = 8;
-    private static final double kMaxAccelM_S2 = 30;
-    private static final double kMaxDecelM_S2 = 30;
     private final String m_name;
 
     private final LimitedVelocityServo<Distance100> topRoller;
@@ -23,8 +18,8 @@ public class DrumShooter extends Shooter {
         m_name = Names.name(this);
 
         rollerParameter = new SysParam();
-        rollerParameter.setkGearRatio(20);
-        rollerParameter.setkWheelDiameter(0.01);
+        rollerParameter.setkGearRatio(1);
+        rollerParameter.setkWheelDiameter(0.05);
         rollerParameter.setkMaxVelocity(8);
         rollerParameter.setkMaxAccel(30);
         rollerParameter.setkMaxDeccel(30);
@@ -34,7 +29,7 @@ public class DrumShooter extends Shooter {
         topRoller = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Top",
                 canID1,
-                false,
+                true,
                 rollerParameter);
 
         bottomRoller = ServoFactory.limitedNeoVelocityServo(

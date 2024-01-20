@@ -10,7 +10,6 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
