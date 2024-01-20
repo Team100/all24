@@ -24,6 +24,10 @@ public interface OperatorControl {
         return new Trigger(() -> false);
     }
 
+    default double shooterSpeed() {
+        return 0;
+    }
+
     default Trigger intake() {
         return new Trigger(() -> false);
     }

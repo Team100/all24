@@ -43,7 +43,6 @@ public class ThirdMidiControl implements ThirdControl {
                 return 1.0;
             default:
                 return 0.0;
-
         }
     }
 

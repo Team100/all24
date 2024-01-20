@@ -155,4 +155,8 @@ public class ControlFactory {
     public OperatorControl getOperatorControl() {
         return m_OperatorControl;
     }
+
+    public ThirdControl getThirdControl() {
+        return m_ThirdControl;
+    }
 }
