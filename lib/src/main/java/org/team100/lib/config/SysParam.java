@@ -1,5 +1,9 @@
 package org.team100.lib.config;
 
+/**
+ * TODO(sanjan) I think this would be nice and clean as a "record"
+ * https://www.baeldung.com/java-record-keyword
+ */
 public class SysParam {
 
     public double kGearRatio;

@@ -35,6 +35,13 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public double shooterSpeed() {
+        if (m_controller.getHID().getAButton())
+            return 1.0;
+        return 0.0;
+    }
+
+    @Override
     public double climberState() {
         return deadband(clamp(-1.0 * m_controller.getRightY(), 1), kDeadband, 1);
     }

@@ -40,6 +40,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.OperatorControl;
+import org.team100.lib.hid.ThirdControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -106,9 +107,10 @@ public class RobotContainer implements SelfTestable {
     public RobotContainer(TimedRobot robot) throws IOException {
         m_name = Names.name(this);
         // selects the correct control class for whatever is plugged in
-        ControlFactory controlFactory = new ControlFactory();
-        DriverControl driverControl = controlFactory.getDriverControl();
-        OperatorControl operatorControl = controlFactory.getOperatorControl();
+        final ControlFactory controlFactory = new ControlFactory();
+        final DriverControl driverControl = controlFactory.getDriverControl();
+        final OperatorControl operatorControl = controlFactory.getOperatorControl();
+        final ThirdControl thirdControl = controlFactory.getThirdControl();
 
         // digital inputs 0, 1, 2, 3.
         m_autonSelector = new AutonSelector();
@@ -161,7 +163,7 @@ public class RobotContainer implements SelfTestable {
 
         m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 3, 6);
         m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, 7, 8);
-        m_indexer = new IndexerSubsystem(5, 1000); //NEED CAN FOR AMP MOTOR
+        m_indexer = new IndexerSubsystem(5, 1000); // NEED CAN FOR AMP MOTOR
         m_climber = new ClimberSubsystem(2, 4);
 
         // show mode locks slow speed.
@@ -270,6 +272,24 @@ public class RobotContainer implements SelfTestable {
         // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
         operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(30.0)));
+
+        /*
+         * 
+         * this is another way to do speed control
+         * 
+         * final double kMaxShooterVelocity = 30.0;
+         * m_shooter.setDefaultCommand(
+         * m_shooter.run(
+         * () -> m_shooter.setVelocity(
+         * kMaxShooterVelocity * operatorControl.shooterSpeed())));
+         * 
+         * the midi control can do it too
+         * 
+         * m_shooter.setDefaultCommand(
+         * m_shooter.run(
+         * () -> m_shooter.setVelocity(
+         * kMaxShooterVelocity * thirdControl.shooterSpeed())));
+         */
 
         // TODO: intake whenever intake is running.
         // TODO: stop when note is accpeted using optical detector.
