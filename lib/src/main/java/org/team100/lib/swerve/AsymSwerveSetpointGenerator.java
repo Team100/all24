@@ -6,8 +6,6 @@ import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,8 +32,6 @@ public class AsymSwerveSetpointGenerator {
     // this used to be pi/2, which resulted in "square corner" paths
     private static final double flipLimit = 3 * Math.PI / 4;
 
-    private static final Telemetry t = Telemetry.get();
-
     private final SwerveKinodynamics m_limits;
 
     private final CapsizeAccelerationLimiter m_centripetalLimiter;
@@ -43,12 +39,12 @@ public class AsymSwerveSetpointGenerator {
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
     private final String m_name;
 
-    public AsymSwerveSetpointGenerator(SwerveKinodynamics limits) {
+    public AsymSwerveSetpointGenerator(String parent, SwerveKinodynamics limits) {
         m_limits = limits;
-        m_centripetalLimiter = new CapsizeAccelerationLimiter(limits);
-        m_steeringRateLimiter = new SteeringRateLimiter(limits);
-        m_DriveAccelerationLimiter = new DriveAccelerationLimiter(limits);
-        m_name = Names.name(this);
+        m_name = Names.append(parent, this);
+        m_centripetalLimiter = new CapsizeAccelerationLimiter(m_name, limits);
+        m_steeringRateLimiter = new SteeringRateLimiter(m_name, limits);
+        m_DriveAccelerationLimiter = new DriveAccelerationLimiter(m_name, limits);
     }
 
     /**
@@ -115,7 +111,6 @@ public class AsymSwerveSetpointGenerator {
 
         double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, kDtSec);
 
-        t.log(Level.DEBUG, m_name, "min_s centripetal", centripetal_min_s);
         double min_s = centripetal_min_s;
 
         // In cases where an individual module is stopped, we want to remember the right
@@ -136,7 +131,6 @@ public class AsymSwerveSetpointGenerator {
                 overrideSteering,
                 kDtSec);
 
-        t.log(Level.DEBUG, m_name, "min_s steering", steering_min_s);
         min_s = Math.min(min_s, steering_min_s);
 
         double accel_min_s = m_DriveAccelerationLimiter.enforceWheelAccelLimit(
@@ -147,7 +141,6 @@ public class AsymSwerveSetpointGenerator {
                 desired_vy,
                 kDtSec);
 
-        t.log(Level.DEBUG, m_name, "min_s accel", accel_min_s);
         min_s = Math.min(min_s, accel_min_s);
 
         return makeSetpoint(

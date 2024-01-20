@@ -57,6 +57,7 @@ public class ManualWithTargetLock {
     Pose2d m_prevPose;
 
     public ManualWithTargetLock(
+            String parent, 
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Translation2d> target,
@@ -68,7 +69,7 @@ public class ManualWithTargetLock {
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.name(this);
+        m_name = Names.append(parent, this);
         m_trigger = trigger;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,

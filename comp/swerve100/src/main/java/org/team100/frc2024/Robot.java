@@ -8,6 +8,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -22,6 +23,7 @@ public class Robot extends TimedRobot {
     private static final String kReset = "\033[0m";
 
     private final Telemetry t = Telemetry.get();
+    private final String m_name = Names.name(this);
     private RobotContainer m_robotContainer;
 
     @Override
@@ -61,7 +63,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        t.log(Level.DEBUG, "/Robot","key list size", keyListSize);
+        t.log(Level.DEBUG, m_name, "key list size", keyListSize);
         if (keyListSize == 0) {
             m_robotContainer.red();
         } else {

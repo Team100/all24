@@ -13,7 +13,7 @@ class CapsizeAccelerationLimiterTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter(l);
+        CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter("foo", l);
         double s = c.enforceCentripetalLimit(0, 0, 0.02);
         assertEquals(1, s, kDelta);
     }
@@ -24,7 +24,7 @@ class CapsizeAccelerationLimiterTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter(l);
+        CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter("foo", l);
         double s = c.enforceCentripetalLimit(-1, 1, 0.02);
         assertEquals(0.115, s, kDelta);
     }

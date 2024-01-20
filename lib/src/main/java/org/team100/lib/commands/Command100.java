@@ -15,7 +15,7 @@ public abstract class Command100 extends Command {
     private double prevTime;
 
     protected Command100() {
-        m_name = Names.append("command", this);
+        m_name = Names.append(Names.name(Command100.class), this);
     }
 
     public void initialize100() {

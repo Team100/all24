@@ -1,6 +1,9 @@
 package org.team100.lib.swerve;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -8,12 +11,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * Enforces drive motor torque constraints.
  */
 public class DriveAccelerationLimiter {
+    private static final Telemetry t = Telemetry.get();
+
     private static final int kMaxIterations = 10;
 
     private final SwerveKinodynamics m_limits;
+    private final String m_name;
 
-    public DriveAccelerationLimiter(SwerveKinodynamics limits) {
+    public DriveAccelerationLimiter(String parent, SwerveKinodynamics limits) {
         m_limits = limits;
+        m_name = Names.append(parent, this);
     }
 
     public double enforceWheelAccelLimit(
@@ -38,6 +45,7 @@ public class DriveAccelerationLimiter {
                     desired_vx[i],
                     desired_vy[i],
                     kDtSec);
+            t.log(Level.DEBUG, m_name, "max_vel_step", max_vel_step);
 
             double vx_min_s = min_s == 1.0 ? desired_vx[i] : (desired_vx[i] - prev_vx[i]) * min_s + prev_vx[i];
             double vy_min_s = min_s == 1.0 ? desired_vy[i] : (desired_vy[i] - prev_vy[i]) * min_s + prev_vy[i];
@@ -54,6 +62,7 @@ public class DriveAccelerationLimiter {
                     kMaxIterations);
             min_s = Math.min(min_s, s);
         }
+        t.log(Level.DEBUG, m_name, "s", min_s);
         return min_s;
     }
     

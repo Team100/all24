@@ -65,16 +65,18 @@ public class DriveManually extends Command100 {
         m_mode = mode;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
-        m_manualModuleStates = new SimpleManualModuleStates(swerveKinodynamics);
-        m_manualChassisSpeeds = new ManualChassisSpeeds(swerveKinodynamics);
-        m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(swerveKinodynamics);
+        m_manualModuleStates = new SimpleManualModuleStates(m_name, swerveKinodynamics);
+        m_manualChassisSpeeds = new ManualChassisSpeeds(m_name, swerveKinodynamics);
+        m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics);
         m_manualWithHeading = new ManualWithHeading(
+            m_name,
                 swerveKinodynamics,
                 heading,
                 desiredRotation,
                 thetaController,
                 omegaController);
         m_manualWithTargetLock = new ManualWithTargetLock(
+            m_name,
                 swerveKinodynamics,
                 heading,
                 target,
