@@ -35,6 +35,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+                "foo", 
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -69,6 +70,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+                "foo", 
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -108,6 +110,7 @@ class ManualWithHeadingTest {
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+                "foo", 
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -189,6 +192,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+                "foo", 
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,

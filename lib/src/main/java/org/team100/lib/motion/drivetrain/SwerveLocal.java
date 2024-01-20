@@ -57,8 +57,8 @@ public class SwerveLocal {
             SwerveModuleCollection modules) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_swerveKinodynamics);
         m_name = Names.name(this);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_name, m_swerveKinodynamics);
         prevSetpoint = new SwerveSetpoint();
     }
 

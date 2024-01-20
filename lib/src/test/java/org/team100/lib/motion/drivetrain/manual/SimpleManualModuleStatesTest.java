@@ -16,7 +16,7 @@ class SimpleManualModuleStatesTest {
     @Test
     void testZero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
+        SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
         Twist2d input = new Twist2d();
         SwerveModuleState[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
@@ -33,7 +33,7 @@ class SimpleManualModuleStatesTest {
     @Test
     void testAngle() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
+        SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
         Twist2d input =  new Twist2d(0, 0, 0.5);
         SwerveModuleState[] ms = s.apply(input);
         assertEquals(Math.PI / 2, ms[0].angle.getRadians(), kDelta);
@@ -50,7 +50,7 @@ class SimpleManualModuleStatesTest {
     @Test
     void testDrive() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        SimpleManualModuleStates s = new SimpleManualModuleStates(limits);
+        SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
         Twist2d input =  new Twist2d(0.5, 0, 0);
         SwerveModuleState[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);

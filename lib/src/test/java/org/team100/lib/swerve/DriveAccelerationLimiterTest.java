@@ -16,7 +16,7 @@ class DriveAccelerationLimiterTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        DriveAccelerationLimiter c = new DriveAccelerationLimiter(l);
+        DriveAccelerationLimiter c = new DriveAccelerationLimiter("foo", l);
         SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
         };
@@ -37,7 +37,7 @@ class DriveAccelerationLimiterTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        DriveAccelerationLimiter c = new DriveAccelerationLimiter(l);
+        DriveAccelerationLimiter c = new DriveAccelerationLimiter("foo", l);
         SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
         };

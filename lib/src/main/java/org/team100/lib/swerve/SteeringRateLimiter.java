@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -17,11 +20,13 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * minimum across all modules, since that is the active constraint.
  */
 public class SteeringRateLimiter {
+    private static final Telemetry t = Telemetry.get();
     private static final int kMaxIterations = 10;
-
     private final SwerveKinodynamics m_limits;
+    private final String m_name;
 
-    public SteeringRateLimiter(SwerveKinodynamics limits) {
+    public SteeringRateLimiter(String parent, SwerveKinodynamics limits) {
+        m_name = Names.append(parent, this);
         m_limits = limits;
     }
 
@@ -93,6 +98,7 @@ public class SteeringRateLimiter {
                     kMaxIterations);
             min_s = Math.min(min_s, s);
         }
+        t.log(Level.DEBUG, m_name, "s", min_s);
         return min_s;
     }
 
