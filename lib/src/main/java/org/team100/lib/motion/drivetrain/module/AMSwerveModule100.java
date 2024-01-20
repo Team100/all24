@@ -9,8 +9,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.PWMTurningMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.units.Angle;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -37,12 +37,12 @@ public class AMSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
 
-        VelocityServo<Distance> driveServo = driveServo(
+        VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
                 driveMotorCanId);
 
-        PositionServo<Angle> turningServo = turningServo(
+        PositionServo<Angle100> turningServo = turningServo(
                 name + "/Turning",
                 turningMotorChannel,
                 turningEncoderChannel,
@@ -52,7 +52,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
         return new AMSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance> driveServo(String name,
+    private static VelocityServo<Distance100> driveServo(String name,
             double currentLimit,
             int driveMotorCanId) {
         FalconDriveMotor driveMotor = new FalconDriveMotor(name,
@@ -83,7 +83,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
 
     }
 
-    private static PositionServo<Angle> turningServo(
+    private static PositionServo<Angle100> turningServo(
             String name,
             int turningMotorChannel,
             int turningEncoderChannel,
@@ -108,7 +108,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 0.003, // kV
                 0); // kA
 
-        VelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
+        VelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
                 name,
                 turningMotor,
                 turningEncoder,
@@ -123,22 +123,22 @@ public class AMSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle> turningServo = new PositionServo<>(
+        PositionServo<Angle100> turningServo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
                 profile,
-                Angle.instance);
+                Angle100.instance);
         turningServo.reset();
         return turningServo;
     }
 
     private AMSwerveModule100(
             String name,
-            VelocityServo<Distance> driveServo,
-            PositionServo<Angle> turningServo) {
+            VelocityServo<Distance100> driveServo,
+            PositionServo<Angle100> turningServo) {
         super(name, driveServo, turningServo);
         //
     }

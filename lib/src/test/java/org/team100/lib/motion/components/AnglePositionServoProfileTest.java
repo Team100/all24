@@ -9,7 +9,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -18,12 +18,12 @@ class AnglePositionServoProfileTest {
     private static final double kDelta = 0.001;
 
     private final String name;
-    private final MockMotor100<Angle> motor;
-    private final MockEncoder100<Angle> encoder;
+    private final MockMotor100<Angle100> motor;
+    private final MockEncoder100<Angle100> encoder;
     private final double period;
     private final PIDController controller2;
     private final SimpleMotorFeedforward feedforward;
-    private final PositionServo<Angle> servo;
+    private final PositionServo<Angle100> servo;
 
     public AnglePositionServoProfileTest() {
         name = "test";
@@ -35,7 +35,7 @@ class AnglePositionServoProfileTest {
         feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
         PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
+        SelectableVelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
                 name,
                 motor,
                 encoder,
@@ -50,7 +50,7 @@ class AnglePositionServoProfileTest {
                 1,
                 controller2,
                 profile,
-                Angle.instance);
+                Angle100.instance);
         servo.reset();
     }
 

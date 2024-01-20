@@ -3,7 +3,7 @@ package org.team100.lib.motor.drive;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -52,7 +52,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * convert this
  * class to use them at some point during 2024.
  */
-public class FalconDriveMotor implements Motor100<Distance> {
+public class FalconDriveMotor implements Motor100<Distance100> {
 
     /**
      * The speed, below which, static friction applies, in motor revolutions per

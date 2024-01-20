@@ -3,7 +3,7 @@ package org.team100.lib.motor.turning;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -36,7 +36,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Given the issues with feedback, this controller should rely mostly on
  * feedforward.
  */
-public class CANTurningMotor implements Motor100<Angle> {
+public class CANTurningMotor implements Motor100<Angle100> {
     /**
      * There is a planetary gearbox between the motor and the steering gear, and the
      * final is 48/40.

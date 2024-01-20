@@ -6,7 +6,9 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
-import org.team100.frc2024.motion.intake.IntakeSubsystem;
+import org.team100.frc2024.motion.intake.Intake;
+import org.team100.frc2024.motion.intake.IntakeFactory;
+import org.team100.frc2024.motion.intake.IntakeRoller;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
@@ -97,7 +99,7 @@ public class RobotContainer implements SelfTestable {
     private final IndexerSubsystem m_indexer;
     private final ClimberSubsystem m_climber;
     private final Shooter m_shooter;
-    private final IntakeSubsystem m_intake;
+    private final Intake m_intake;
 
     private final String m_name;
 
@@ -157,9 +159,9 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = new IntakeSubsystem(3, 6);
+        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 3, 6);
         m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, 7, 8);
-        m_indexer = new IndexerSubsystem(5);
+        m_indexer = new IndexerSubsystem(5, 1000); //NEED CAN FOR AMP MOTOR
         m_climber = new ClimberSubsystem(2, 4);
 
         // show mode locks slow speed.
@@ -262,8 +264,8 @@ public class RobotContainer implements SelfTestable {
         ///////////////// OPERATOR V2//////////////////////////
 
         // TODO: run the intake if the camera sees a note.
-        m_intake.setDefaultCommand(m_intake.run(() -> m_intake.set(0)));
-        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.set(3)));
+        m_intake.setDefaultCommand(m_intake.run(() -> m_intake.setIntake(0)));
+        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.setIntake(3)));
 
         // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
@@ -272,8 +274,8 @@ public class RobotContainer implements SelfTestable {
         // TODO: intake whenever intake is running.
         // TODO: stop when note is accpeted using optical detector.
         // TODO: shoot only when the shooter is ready.
-        m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.set(0)));
-        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.set(3.5)));
+        m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.setDrive(0)));
+        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.setDrive(3.5)));
 
         // TODO: presets
         m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));

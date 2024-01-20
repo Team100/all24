@@ -4,7 +4,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -15,7 +15,7 @@ import edu.wpi.first.math.MathUtil;
  * This was an attempt to use the TalonSRX data interface for absolute encoder,
  * but it didn't work out. Maybe we should delete it.
  */
-public class TalonSRXTurningEncoder implements Encoder100<Angle> {
+public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
     private static final int ticksPerRevolution = 1666;
 
     private final Telemetry t = Telemetry.get();

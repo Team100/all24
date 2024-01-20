@@ -4,7 +4,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
@@ -22,10 +22,10 @@ public class ArmSubsystem extends SubsystemBase {
     private final String m_name;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
-    private final Motor100<Angle> m_lowerArmMotor;
-    private final Motor100<Angle> m_upperArmMotor;
-    private final Encoder100<Angle> m_lowerArmEncoder;
-    private final Encoder100<Angle> m_upperArmEncoder;
+    private final Motor100<Angle100> m_lowerArmMotor;
+    private final Motor100<Angle100> m_upperArmMotor;
+    private final Encoder100<Angle100> m_lowerArmEncoder;
+    private final Encoder100<Angle100> m_upperArmEncoder;
 
     private final ArmVisualization m_viz;
 
@@ -42,10 +42,10 @@ public class ArmSubsystem extends SubsystemBase {
      */
     ArmSubsystem(
             String name,
-            Motor100<Angle> lowerMotor,
-            Encoder100<Angle> lowerEncoder,
-            Motor100<Angle> upperMotor,
-            Encoder100<Angle> upperEncoder) {
+            Motor100<Angle100> lowerMotor,
+            Encoder100<Angle100> lowerEncoder,
+            Motor100<Angle100> upperMotor,
+            Encoder100<Angle100> upperEncoder) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);

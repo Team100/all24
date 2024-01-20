@@ -11,7 +11,7 @@ import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.units.Distance;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -39,12 +39,12 @@ public class SimpleSubsystemFactory {
 
     private SimpleSubsystem getDefault() {
         FalconDriveMotor motor = new FalconDriveMotor("simple/drive", 1, 10, 1, 1);
-        Encoder100<Distance> encoder = new FalconDriveEncoder("simple/encoder", motor, 1);
+        Encoder100<Distance100> encoder = new FalconDriveEncoder("simple/encoder", motor, 1);
 
         PIDController velocityController = new PIDController(1, 0, 0);
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.06, 0.3, 0.025);
 
-        VelocityServo<Distance> velocityServo = new SelectableVelocityServo<>(
+        VelocityServo<Distance100> velocityServo = new SelectableVelocityServo<>(
                 "simple/velocity",
                 motor,
                 encoder,
@@ -52,21 +52,21 @@ public class SimpleSubsystemFactory {
                 feedforward);
         PIDController positionController = new PIDController(1, 0, 0);
 
-        PositionServo<Distance> actuator = new PositionServo<>(
+        PositionServo<Distance100> actuator = new PositionServo<>(
                 "simple/position",
                 velocityServo,
                 encoder,
                 10,
                 positionController,
                 profile,
-                Distance.instance);
+                Distance100.instance);
         actuator.reset();
         return new SimpleSubsystem(actuator);
     }
 
     private SimpleSubsystem simulated() {
-        SimulatedMotor<Distance> motor = new SimulatedMotor<>("simple/drive");
-        Encoder100<Distance> encoder = new SimulatedEncoder<>(
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>("simple/drive");
+        Encoder100<Distance100> encoder = new SimulatedEncoder<>(
                 "simple/encoder", 
                 motor, 
                 1,
@@ -75,7 +75,7 @@ public class SimpleSubsystemFactory {
                 
         PIDController velocityController = new PIDController(1, 0, 0);
         SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.06, 0.3, 0.025);
-        VelocityServo<Distance> velocityServo = new SelectableVelocityServo<>(
+        VelocityServo<Distance100> velocityServo = new SelectableVelocityServo<>(
                 "simple/velocity",
                 motor,
                 encoder,
@@ -83,14 +83,14 @@ public class SimpleSubsystemFactory {
                 feedforward);
 
         PIDController positionController = new PIDController(1, 0, 0);
-        PositionServo<Distance> actuator = new PositionServo<>(
+        PositionServo<Distance100> actuator = new PositionServo<>(
                 "simple/position",
                 velocityServo,
                 encoder,
                 10,
                 positionController,
                 profile,
-                Distance.instance);
+                Distance100.instance);
         actuator.reset();
         return new SimpleSubsystem(actuator);
     }

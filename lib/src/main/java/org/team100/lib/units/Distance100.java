@@ -1,10 +1,10 @@
 package org.team100.lib.units;
 
 /** Marker to keep from mixing up lengths and angles. */
-public class Distance implements Measure100 {
-    public static final Distance instance = new Distance();
+public class Distance100 implements Measure100 {
+    public static final Distance100 instance = new Distance100();
 
-    private Distance() {
+    private Distance100() {
         //
     }
 

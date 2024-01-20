@@ -9,12 +9,12 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.units.Angle;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-class AnglePositionServoTest {
+class Angle100PositionServoTest {
     private static final double kDelta = 0.001;
 
     /** A minimal exercise. */
@@ -24,8 +24,8 @@ class AnglePositionServoTest {
         double period = 1;
 
         String name = "test";
-        MockMotor100<Angle> turningMotor = new MockMotor100<>();
-        MockEncoder100<Angle> turningEncoder = new MockEncoder100<>();
+        MockMotor100<Angle100> turningMotor = new MockMotor100<>();
+        MockEncoder100<Angle100> turningEncoder = new MockEncoder100<>();
 
 
         PIDController turningController2 = new PIDController(1, 0, 0, period);
@@ -33,23 +33,23 @@ class AnglePositionServoTest {
 
         SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Angle> turningVelocityServo = new SelectableVelocityServo<>(
+        PIDController angle100Angle100VelocityController = new PIDController(1, 0, 0, period);
+        SelectableVelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
                 name,
                 turningMotor,
                 turningEncoder,
-                angleVelocityController,
+                angle100Angle100VelocityController,
                 turningFeedforward);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        PositionServo<Angle> servo = new PositionServo<>(
+        PositionServo<Angle100> servo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
                 1,
                 turningController2,
                 profile,
-                Angle.instance);
+                Angle100.instance);
         servo.reset();
         servo.setPosition(1);
         servo.periodic();
