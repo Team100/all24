@@ -29,12 +29,13 @@ public class IntakeRoller extends Intake {
     public IntakeRoller(int topCAN, int bottomCAN) {
         m_name = Names.name(this);
 
-        rollerParameter = new SysParam();
-        rollerParameter.setkGearRatio(1);
-        rollerParameter.setkWheelDiameter(1);
-        rollerParameter.setkMaxVelocity(5);
-        rollerParameter.setkMaxAccel(5);
-        rollerParameter.setkMaxDeccel(5);
+        rollerParameter = SysParam.limitedNeoVelocityServoSystem(
+            1,
+            1, 
+            5, 
+            5, 
+            5
+        );
 
 
         topRoller = ServoFactory.limitedNeoVelocityServo(

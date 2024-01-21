@@ -19,27 +19,28 @@ public class DrumShooter extends Shooter {
 
     private final SysParam rollerParameter;
 
-    public DrumShooter(int canID1, int canID2) {
+    public DrumShooter(int topRollerID, int bottomRollerID) {
         m_name = Names.name(this);
 
-        rollerParameter = new SysParam();
-        rollerParameter.setkGearRatio(20);
-        rollerParameter.setkWheelDiameter(0.01);
-        rollerParameter.setkMaxVelocity(8);
-        rollerParameter.setkMaxAccel(30);
-        rollerParameter.setkMaxDeccel(30);
+        rollerParameter = SysParam.limitedNeoVelocityServoSystem(
+            1, 
+            0.05, 
+            8, 
+            30, 
+            30
+        );
 
 
 
         topRoller = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Top",
-                canID1,
-                false,
+                topRollerID,
+                true,
                 rollerParameter);
 
         bottomRoller = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Bottom",
-                canID2,
+                bottomRollerID,
                 false,
                rollerParameter);
     }
