@@ -22,7 +22,7 @@ public enum Identity {
     COMP_BOT("032363AC"),
     TEST_BOARD_6B("030d286b"),
     RIO_2022("foo"),
-    TEAM100_2019("0317f0cd"),
+    BETA_BOT("0317f0cd"),
     TEAM100_2018("0313baf3"),
     BLANK(""), // e.g. test default or simulation
     UNKNOWN(null);

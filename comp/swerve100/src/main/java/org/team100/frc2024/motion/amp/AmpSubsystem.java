@@ -24,7 +24,7 @@ public class AmpSubsystem extends SubsystemBase {
 
   public AmpSubsystem(int leftPivotID, int rightPivotID) {
       m_name = Names.name(this);
-      ampAngleParameter = SysParam.neoPositionServoSystem(15, 1, 1, 1);    
+      ampAngleParameter = SysParam.neoPositionServoSystem(15, 8, 20);    
 
       ampAngleMotorLeft = ServoFactory.neoPositionServo(
             m_name, 

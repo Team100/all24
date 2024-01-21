@@ -2,13 +2,10 @@ package org.team100.frc2024.motion.indexer;
 
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
-import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -36,7 +33,7 @@ public class IndexerSubsystem extends SubsystemBase {
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
 
-        driveParameter = SysParam.limitedNeoVelocityServoSystem(1, 1, 1, 1, 1);
+        driveParameter = SysParam.limitedNeoVelocityServoSystem(1, .05, 8, 20, 20);
 
 
         driveMotor = ServoFactory.limitedNeoVelocityServo(

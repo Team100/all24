@@ -1,10 +1,8 @@
 package org.team100.lib.motion.components;
 
 import org.team100.lib.config.SysParam;
-import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
-import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;

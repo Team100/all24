@@ -14,6 +14,7 @@ public class RedundantGyroFactory {
             case COMP_BOT:
             case SWERVE_ONE:
             case SWERVE_TWO:
+            case BETA_BOT:
                 return new RedundantGyro();
             default:
                 return new NullRedundantGyro();

@@ -23,10 +23,10 @@ public class IntakeWheel extends Intake {
 
       intakeParam = SysParam.limitedNeoVelocityServoSystem(
         1,
-        1, 
-        1, 
-        1, 
-        1
+        .05, 
+        8, 
+        20, 
+        20
       );
 
 
