@@ -28,8 +28,20 @@ public interface OperatorControl {
         return 0;
     }
 
+    default Trigger outtake() {
+        return new Trigger(() -> false);
+    }
+
     default Trigger intake() {
         return new Trigger(() -> false);
+    }
+
+    default boolean indexState() {
+        return false;
+    }
+
+    default double ampState(){
+        return 0;
     }
 
     default double climberState() {

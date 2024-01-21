@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.team100.frc2024.motion.amp.AmpSubsystem;
+import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
@@ -98,9 +100,13 @@ public class RobotContainer implements SelfTestable {
 
     // Identity-specific fields
     private final IndexerSubsystem m_indexer;
+    private final AmpSubsystem m_amp;
     private final ClimberSubsystem m_climber;
     private final Shooter m_shooter;
     private final Intake m_intake;
+
+    //Commands
+    private final PivotAmp m_pivotAmp;
 
     private final String m_name;
 
@@ -163,8 +169,11 @@ public class RobotContainer implements SelfTestable {
 
         m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 3, 6);
         m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, 7, 8);
-        m_indexer = new IndexerSubsystem(5, 1000); // NEED CAN FOR AMP MOTOR
+        m_indexer = new IndexerSubsystem(5); // NEED CAN FOR AMP MOTOR
         m_climber = new ClimberSubsystem(2, 4);
+        m_amp = new AmpSubsystem(1000, 1001);
+
+        m_pivotAmp = new PivotAmp(m_amp, () -> operatorControl.climberState());
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
@@ -268,6 +277,8 @@ public class RobotContainer implements SelfTestable {
         // TODO: run the intake if the camera sees a note.
         m_intake.setDefaultCommand(m_intake.run(() -> m_intake.setIntake(0)));
         operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.setIntake(3)));
+        operatorControl.outtake().whileTrue(m_intake.run(() -> m_intake.setIntake(-3)));
+
 
         // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
@@ -299,6 +310,7 @@ public class RobotContainer implements SelfTestable {
 
         // TODO: presets
         m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
+        m_amp.setDefaultCommand(m_pivotAmp);
 
         ///////////////////////////
         //

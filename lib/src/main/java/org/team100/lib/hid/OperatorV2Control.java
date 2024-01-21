@@ -25,8 +25,18 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public Trigger outtake() {
+        return m_controller.y();
+    }
+
+    @Override
     public Trigger index() {
         return m_controller.b();
+    }
+
+    @Override
+    public boolean indexState() {
+        return m_controller.getHID().getBButton();
     }
 
     @Override
@@ -44,6 +54,11 @@ public class OperatorV2Control implements OperatorControl {
     @Override
     public double climberState() {
         return deadband(clamp(-1.0 * m_controller.getRightY(), 1), kDeadband, 1);
+    }
+
+    @Override
+    public double ampState() {
+        return deadband(clamp(-1.0 * m_controller.getLeftY(), 1), kDeadband, 1);
     }
 
     @Override

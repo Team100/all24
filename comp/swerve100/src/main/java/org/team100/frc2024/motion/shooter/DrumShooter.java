@@ -22,12 +22,13 @@ public class DrumShooter extends Shooter {
     public DrumShooter(int canID1, int canID2) {
         m_name = Names.name(this);
 
-        rollerParameter = new SysParam();
-        rollerParameter.setkGearRatio(20);
-        rollerParameter.setkWheelDiameter(0.01);
-        rollerParameter.setkMaxVelocity(8);
-        rollerParameter.setkMaxAccel(30);
-        rollerParameter.setkMaxDeccel(30);
+        rollerParameter = SysParam.limitedNeoVelocityServoSystem(
+            20, 
+            0.01, 
+            8, 
+            30, 
+            30
+        );
 
 
 

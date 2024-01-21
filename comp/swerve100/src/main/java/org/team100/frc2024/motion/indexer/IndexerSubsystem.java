@@ -19,50 +19,33 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IndexerSubsystem extends SubsystemBase {
 
     // TODO GET THE RIGHT NUMBERS
-    private static final double kGearRatio = 1;
-    private static final double kWheelDiameter = 1;
-    private static final double kMaxVelM_S = 1;
-    private static final double kMaxAccelM_S2 = 1;
-    private static final double kMaxDecelM_S2 = 1;
 
     SysParam driveParameter;
     SysParam ampAngleParameter;
-
-    private static final double kGearRatioAmp = 1;
-    private static final double kMaxVelocityAmp = 1;
-    private static final double kMaxAccAmp = 1;
-
-
-
 
 
     private final String m_name;
 
     private final LimitedVelocityServo<Distance100> driveMotor;
 
-    private final PositionServo<Angle100> ampAngleMotor;
+   
 
 
-    public IndexerSubsystem(int canID, int canID2) {
+
+    public IndexerSubsystem(int canID) {
         m_name = Names.name(this);
 
-        driveParameter.setkGearRatio(1);
-        driveParameter.setkWheelDiameter(1);
-        driveParameter.setkMaxVelocity(1);
-        driveParameter.setkMaxDeccel(1);
-
-        ampAngleParameter.setkGearRatio(1);
-        ampAngleParameter.setkWheelDiameter(1);
-        ampAngleParameter.setkMaxVelocity(1);
-        ampAngleParameter.setkMaxDeccel(1);
-        
+        driveParameter = SysParam.limitedNeoVelocityServoSystem(1, 1, 1, 1, 1);
+                
         driveMotor = ServoFactory.limitedNeoVelocityServo(
-                m_name,
-                canID,
-                false,
-                driveParameter);
+            m_name,
+            canID,
+            false,
+            driveParameter);
 
-        ampAngleMotor = ServoFactory.neoPositionServo(m_name, canID2, false, ampAngleParameter, new PIDController(1, 0, 0));
+       
+
+        
 
     }
 
@@ -70,9 +53,13 @@ public class IndexerSubsystem extends SubsystemBase {
         driveMotor.setVelocity(value);
     }
 
-    public void setAmpPosition(double value) {
-        ampAngleMotor.setPosition(value);
-    }
+  
+
+    // public void setAmpVelocity(double value) {
+    //     ampAngleMotorRight.setPosition(value);
+    //     ampAngleMotorLeft.setPosition(value);
+
+    // }
 
     @Override
     public void periodic() {

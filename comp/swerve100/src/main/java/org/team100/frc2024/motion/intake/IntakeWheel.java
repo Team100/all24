@@ -23,12 +23,14 @@ public class IntakeWheel extends Intake {
   public IntakeWheel(int canID) {
       m_name = Names.name(this);
 
-      intakeParam = new SysParam();
-      intakeParam.setkGearRatio(1);
-      intakeParam.setkWheelDiameter(1);
-      intakeParam.setkMaxVelocity(1);
-      intakeParam.setkMaxAccel(1);
-      intakeParam.setkMaxDeccel(1);
+      intakeParam = SysParam.limitedNeoVelocityServoSystem(
+        1,
+        1, 
+        1, 
+        1, 
+        1
+      );
+
 
       intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, canID, false, intakeParam);
   }

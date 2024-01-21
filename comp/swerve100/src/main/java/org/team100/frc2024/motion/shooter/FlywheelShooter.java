@@ -21,12 +21,16 @@ public class FlywheelShooter extends Shooter {
     public FlywheelShooter(int canID1, int canID2) {
         m_name = Names.name(this);
 
-        shooterParam = new SysParam();
-        shooterParam.setkGearRatio(20);
-        shooterParam.setkWheelDiameter(10);
-        shooterParam.setkMaxVelocity(8);
-        shooterParam.setkMaxAccel(30);
-        shooterParam.setkMaxDeccel(30);
+
+
+        shooterParam = SysParam.limitedNeoVelocityServoSystem(
+            20, 
+            10, 
+            8, 
+            30, 
+            30
+        );
+      
 
 
         leftShooter = ServoFactory.limitedNeoVelocityServo(
