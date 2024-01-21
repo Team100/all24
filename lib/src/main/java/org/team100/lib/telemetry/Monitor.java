@@ -39,7 +39,7 @@ public class Monitor {
     public void periodic() {
         m_shouldAlert = false;
         // this should test different things for different identities.
-        if (Identity.instance == Identity.COMP_BOT) {
+        if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT) {
             t.log(Level.INFO, m_name, "battery_voltage", getBatteryVoltage());
             // TODO: fix the pdp observer
             // t.log(Level.INFO,  m_name, "bus_voltage", getBusVoltage());

@@ -31,6 +31,8 @@ public class SwerveKinodynamicsFactory {
                 return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.449, 0.464, 0.3);
             case BLANK:
                 return new SwerveKinodynamics(4, 2, 3, 13, 20 * Math.PI, 0.5, 0.5, 0.3);
+            case BETA_BOT:
+                return new SwerveKinodynamics(4, 2, 3, 13, 20 * Math.PI, 0.491, 0.765, 0.3);
             default:
                 Util.warn("Using default kinodynamics");
                 return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.5, 0.5, 0.3);

@@ -20,7 +20,7 @@ public class DrumShooter extends Shooter {
 
         rollerParameter = SysParam.limitedNeoVelocityServoSystem(
             1, 
-            0.05, 
+            0.1, 
             8, 
             30, 
             30

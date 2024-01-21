@@ -122,6 +122,10 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
                 pid.setIntegratorRange(-0.1, 0.1);
                 pid.setTolerance(0.01); // 1 cm
                 return pid;
+            case BETA_BOT:
+                pid = new PIDController(3, 2, 0);
+                pid.setIntegratorRange(-0.1, 0.1);
+                pid.setTolerance(0.01); // 1 cm
             case BLANK:
                 // for testing
                 pid = new PIDController(3, 1, 0);

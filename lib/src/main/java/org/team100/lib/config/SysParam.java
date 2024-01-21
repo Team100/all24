@@ -26,8 +26,8 @@ public record SysParam(
         return new SysParam(gearRatio, wheelDiameter, 0, 0, 0);
     }
 
-    public static SysParam neoPositionServoSystem(double gearRatio, double wheelDiameter, double maxVel,
+    public static SysParam neoPositionServoSystem(double gearRatio, double maxVel,
             double maxAccel) {
-        return new SysParam(gearRatio, wheelDiameter, maxVel, maxAccel, 0);
+        return new SysParam(gearRatio, 0, maxVel, maxAccel, 0);
     }
 }
