@@ -36,17 +36,17 @@ public class ServoFactory {
                 name,
                 canId,
                 motorPhase,
-                param.getkGearRatio(),
-                param.getkWheelDiameter());
+                param.kGearRatio(),
+                param.kWheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.getkWheelDiameter() * Math.PI);
+                param.kWheelDiameter() * Math.PI);
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
-        return new LimitedVelocityServo<>(v, param.getkMaxVelocity(), param.getkMaxAccel(), param.getkMaxDecel());
+        return new LimitedVelocityServo<>(v, param.kMaxVelM_S(), param.kMaxAccelM_S2(), param.kMaxDecel());
     }
 
     public static LimitedVelocityServo<Distance100> limitedFalconVelocityServo(
@@ -172,7 +172,7 @@ public class ServoFactory {
                 name,
                 canId,
                 motorPhase,
-                param.getkGearRatio());
+                param.kGearRatio());
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
                 motor);
@@ -184,9 +184,9 @@ public class ServoFactory {
                 name,
                 vServo,
                 encoder,
-                param.getkMaxVelocity(),
+                param.kMaxVelM_S(),
                 controller,
-                new TrapezoidProfile100(param.getkMaxVelocity(), param.getkMaxAccel(), 0.05),
+                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
                 Angle100.instance);
     }
 

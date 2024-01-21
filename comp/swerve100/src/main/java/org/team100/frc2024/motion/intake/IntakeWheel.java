@@ -18,17 +18,20 @@ public class IntakeWheel extends Intake {
 
   private final LimitedVelocityServo<Distance100> intakeMotor;
 
-  public IntakeWheel(int canID) {
+  public IntakeWheel(int wheelID) {
       m_name = Names.name(this);
 
-      intakeParam = new SysParam();
-      intakeParam.setkGearRatio(1);
-      intakeParam.setkWheelDiameter(.05);
-      intakeParam.setkMaxVelocity(8);
-      intakeParam.setkMaxAccel(20);
-      intakeParam.setkMaxDeccel(20);
+      intakeParam = SysParam.limitedNeoVelocityServoSystem(
+        1,
+        1, 
+        1, 
+        1, 
+        1
+      );
 
-      intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, canID, false, intakeParam);
+
+
+      intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, wheelID, false, intakeParam);
   }
 
   @Override
