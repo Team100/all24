@@ -23,8 +23,8 @@ public class DrumShooter extends Shooter {
         m_name = Names.name(this);
 
         rollerParameter = SysParam.limitedNeoVelocityServoSystem(
-            20, 
-            0.01, 
+            1, 
+            0.05, 
             8, 
             30, 
             30
@@ -35,7 +35,7 @@ public class DrumShooter extends Shooter {
         topRoller = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Top",
                 topRollerID,
-                false,
+                true,
                 rollerParameter);
 
         bottomRoller = ServoFactory.limitedNeoVelocityServo(
