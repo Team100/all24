@@ -49,30 +49,6 @@ public class ServoFactory {
         return new LimitedVelocityServo<>(v, param.kMaxVelM_S(), param.kMaxAccelM_S2(), param.kMaxDecel());
     }
 
-    public static LimitedVelocityServo<Distance100> limitedFalconVelocityServo(
-            String name,
-            int canId,
-            boolean motorPhase,
-            SysParam param) {
-        FalconDriveMotor motor = new FalconDriveMotor(
-                name,
-                canId,
-                motorPhase,
-                60,
-                param.getkGearRatio(),
-                param.getkWheelDiameter());
-        FalconDriveEncoder encoder = new FalconDriveEncoder(
-                name,
-                motor,
-                param.getkWheelDiameter() * Math.PI);
-        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
-        return new LimitedVelocityServo<>(v, param.getkMaxVelocity(), param.getkMaxAccel(), param.getkMaxDecel());
-    }
-
-
     public static VelocityServo<Distance100> neoVelocityServo(
             String name,
             int canId,
