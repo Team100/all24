@@ -34,20 +34,20 @@ public class DrumShooter extends Shooter {
 
                 topRollerID,
 
-                true,
+                false,
                 rollerParameter);
 
         bottomRoller = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Bottom",
                 bottomRollerID,
-                false,
+                true,
                rollerParameter);
     }
 
     @Override
     public void setVelocity(double value) {
-        topRoller.setVelocity(value);
-        bottomRoller.setVelocity(value);
+        topRoller.setDutyCycle(value);
+        bottomRoller.setDutyCycle(value);
     }
 
     @Override

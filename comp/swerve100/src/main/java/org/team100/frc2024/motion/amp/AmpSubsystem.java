@@ -48,8 +48,8 @@ public class AmpSubsystem extends SubsystemBase {
   }
 
   public void setAmpVelocity(double value) {
-    ampAngleMotorRight.setVelocity(value);
-    ampAngleMotorLeft.setVelocity(value);
+    ampAngleMotorRight.setDutyCycle(value);
+    ampAngleMotorLeft.setDutyCycle(value);
   }
 
   public double getLeftAmpPosition(){

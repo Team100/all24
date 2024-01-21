@@ -36,7 +36,7 @@ public class IntakeWheel extends Intake {
 
   @Override
   public void setIntake(double value){
-    intakeMotor.setVelocity(value);
+    intakeMotor.setDutyCycle(value);
 
   }
 

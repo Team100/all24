@@ -44,8 +44,9 @@ public class FlywheelShooter extends Shooter {
 
     @Override
     public void setVelocity(double value) {
-        leftShooter.setVelocity(value);
-        rightShooter.setVelocity(value);
+        // leftShooter.setVelocity(value);
+        // rightShooter.setVelocity(value);
+        
     }
 
     @Override

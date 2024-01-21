@@ -69,4 +69,8 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
         m_servo.periodic();
     }
 
+    public void getMotor(){
+        
+    }
+
 }

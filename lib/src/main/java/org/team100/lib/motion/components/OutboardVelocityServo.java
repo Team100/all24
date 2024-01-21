@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class OutboardVelocityServo<T extends Measure100> implements VelocityServo<T> {
     private final Telemetry t = Telemetry.get();
-    private final Motor100<T> m_motor;
+    private final Motor100 m_motor;
     private final Encoder100<T> m_encoder;
     private final String m_name;
 
@@ -82,6 +82,10 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     public double getSetpoint() {
         return m_setpoint;
     }
+
+    // public Motor100<T> getMotor(){
+    //     return m_motor.
+    // }
 
     ////////////////////////////////////////////////
 

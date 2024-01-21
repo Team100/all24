@@ -48,7 +48,7 @@ public class IndexerSubsystem extends SubsystemBase {
     }
 
     public void setDrive(double value) {
-        driveMotor.setVelocity(value);
+        driveMotor.setDutyCycle(value);
     }
 
 
