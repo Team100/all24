@@ -22,20 +22,20 @@ public class AmpSubsystem extends SubsystemBase {
   private final PositionServo<Angle100> ampAngleMotorLeft;
   private final PositionServo<Angle100> ampAngleMotorRight;
 
-  public AmpSubsystem(int canID1, int canID2) {
+  public AmpSubsystem(int leftPivotID, int rightPivotID) {
       m_name = Names.name(this);
       ampAngleParameter = SysParam.neoPositionServoSystem(1, 1, 1, 1);    
 
       ampAngleMotorLeft = ServoFactory.neoPositionServo(
             m_name, 
-            canID1, 
+            leftPivotID, 
             false, 
             ampAngleParameter, 
             new PIDController(1, 0, 0));
     
       ampAngleMotorRight = ServoFactory.neoPositionServo(
             m_name, 
-            canID2, 
+            rightPivotID, 
             false, 
             ampAngleParameter, 
             new PIDController(1, 0, 0));

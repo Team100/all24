@@ -32,14 +32,14 @@ public class IndexerSubsystem extends SubsystemBase {
 
 
 
-    public IndexerSubsystem(int canID) {
+    public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
 
         driveParameter = SysParam.limitedNeoVelocityServoSystem(1, 1, 1, 1, 1);
-                
+
         driveMotor = ServoFactory.limitedNeoVelocityServo(
             m_name,
-            canID,
+            driveID,
             false,
             driveParameter);
 

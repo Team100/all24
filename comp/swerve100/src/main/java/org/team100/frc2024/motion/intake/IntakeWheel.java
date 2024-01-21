@@ -20,7 +20,7 @@ public class IntakeWheel extends Intake {
 
   private final LimitedVelocityServo<Distance100> intakeMotor;
 
-  public IntakeWheel(int canID) {
+  public IntakeWheel(int wheelID) {
       m_name = Names.name(this);
 
       intakeParam = SysParam.limitedNeoVelocityServoSystem(
@@ -32,7 +32,7 @@ public class IntakeWheel extends Intake {
       );
 
 
-      intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, canID, false, intakeParam);
+      intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, wheelID, false, intakeParam);
   }
 
   @Override

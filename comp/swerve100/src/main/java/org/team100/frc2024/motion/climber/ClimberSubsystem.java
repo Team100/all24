@@ -23,11 +23,11 @@ public class ClimberSubsystem extends SubsystemBase {
     private final PositionServo<Distance100> s1;
     private final PositionServo<Distance100> s2;
 
-    public ClimberSubsystem( int canID1, int canID2) {
+    public ClimberSubsystem( int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
         s1 = ServoFactory.neoPositionServo(
                 m_name + "/Left",
-                canID1,
+                leftClimberID,
                 false,
                 kGearRatio,
                 kWinchDiameterM,
@@ -36,7 +36,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 new PIDController(kP, 0, 0));
         s2 = ServoFactory.neoPositionServo(
                 m_name + "/Right",
-                canID2,
+                rightClimberID,
                 true,
                 kGearRatio,
                 kWinchDiameterM,

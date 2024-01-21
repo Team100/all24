@@ -18,7 +18,7 @@ public class FlywheelShooter extends Shooter {
     private final LimitedVelocityServo<Distance100> rightShooter;
     private final SysParam shooterParam;
 
-    public FlywheelShooter(int canID1, int canID2) {
+    public FlywheelShooter(int leftShooterID, int rightShooterID) {
         m_name = Names.name(this);
 
 
@@ -35,13 +35,13 @@ public class FlywheelShooter extends Shooter {
 
         leftShooter = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Left",
-                canID1,
+                leftShooterID,
                 false,
                 shooterParam);
 
         rightShooter = ServoFactory.limitedNeoVelocityServo(
                 m_name + "/Right",
-                canID2,
+                rightShooterID,
                 false,
                 shooterParam);
         
