@@ -7,7 +7,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.Timer;
 
 /**

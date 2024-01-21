@@ -1,8 +1,10 @@
 package org.team100.lib.motion.components;
 
 import org.team100.lib.config.SysParam;
+import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
+import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -47,7 +49,28 @@ public class ServoFactory {
         return new LimitedVelocityServo<>(v, param.kMaxVelM_S(), param.kMaxAccelM_S2(), param.kMaxDecel());
     }
 
-    
+    public static LimitedVelocityServo<Distance100> limitedFalconVelocityServo(
+            String name,
+            int canId,
+            boolean motorPhase,
+            SysParam param) {
+        FalconDriveMotor motor = new FalconDriveMotor(
+                name,
+                canId,
+                motorPhase,
+                60,
+                param.getkGearRatio(),
+                param.getkWheelDiameter());
+        FalconDriveEncoder encoder = new FalconDriveEncoder(
+                name,
+                motor,
+                param.getkWheelDiameter() * Math.PI);
+        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new LimitedVelocityServo<>(v, param.getkMaxVelocity(), param.getkMaxAccel(), param.getkMaxDecel());
+    }
 
 
     public static VelocityServo<Distance100> neoVelocityServo(

@@ -1,5 +1,8 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
@@ -15,6 +18,9 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_motor1;
   private CANSparkMax m_motor2;
     private CANSparkMax m_motor3;
+    private TalonFX e;
+        private TalonFX b;
+
   private XboxController m_joystick;
   private SparkMaxPIDController m_pidController1;
   private RelativeEncoder m_encoder1;
@@ -34,53 +40,58 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    m_motor1 = new CANSparkMax(7, MotorType.kBrushless);
-    m_motor2 = new CANSparkMax(8, MotorType.kBrushless);
-    m_motor3 = new CANSparkMax(1, MotorType.kBrushless);
-    m_motor1.restoreFactoryDefaults();
-    m_motor2.restoreFactoryDefaults();
-        m_motor3.restoreFactoryDefaults();
-    m_pidController1 = m_motor1.getPIDController();
-    m_encoder1 = m_motor1.getEncoder();
-    m_pidController2 = m_motor2.getPIDController();
-    m_encoder2 = m_motor2.getEncoder();
-    m_pidController3 = m_motor3.getPIDController();
-    m_encoder3 = m_motor3.getEncoder();
-    kP = 0.0001;
-    kI = 0;
-    kD = 0; 
-    kIz = 0; 
-    kFF = 0; 
-    kMaxOutput = 1; 
-    kMinOutput = -1;
-    maxRPM = 5700;
-    m_pidController1.setP(kP);
-    m_pidController1.setI(kI);
-    m_pidController1.setD(kD);
-    m_pidController1.setIZone(kIz);
-    m_pidController1.setFF(kFF);
-    m_pidController1.setOutputRange(kMinOutput, kMaxOutput);
-    m_pidController2.setP(kP);
-    m_pidController2.setI(kI);
-    m_pidController2.setD(kD);
-    m_pidController2.setIZone(kIz);
-    m_pidController2.setFF(kFF);
-    m_pidController2.setOutputRange(kMinOutput, kMaxOutput);
-    m_pidController3.setP(kP);
-    m_pidController3.setI(kI);
-    m_pidController3.setD(kD);
-    m_pidController3.setIZone(kIz);
-    m_pidController3.setFF(kFF);
-    m_pidController3.setOutputRange(kMinOutput, kMaxOutput);
-    m_motor2.setInverted(true);
-    m_joystick = new XboxController(0);
-    SmartDashboard.putNumber("P Gain", kP);
-    SmartDashboard.putNumber("I Gain", kI);
-    SmartDashboard.putNumber("D Gain", kD);
-    SmartDashboard.putNumber("I Zone", kIz);
-    SmartDashboard.putNumber("Feed Forward", kFF);
-    SmartDashboard.putNumber("Max Output", kMaxOutput);
-    SmartDashboard.putNumber("Min Output", kMinOutput);
+    e = new TalonFX(1);
+    b = new TalonFX(2);
+    e.clearStickyFaults();
+        b.clearStickyFaults();
+    
+    // m_motor1 = new CANSparkMax(7, MotorType.kBrushless);
+    // m_motor2 = new CANSparkMax(8, MotorType.kBrushless);
+    // m_motor3 = new CANSparkMax(1, MotorType.kBrushless);
+    // m_motor1.restoreFactoryDefaults();
+    // m_motor2.restoreFactoryDefaults();
+    //     m_motor3.restoreFactoryDefaults();
+    // m_pidController1 = m_motor1.getPIDController();
+    // m_encoder1 = m_motor1.getEncoder();
+    // m_pidController2 = m_motor2.getPIDController();
+    // m_encoder2 = m_motor2.getEncoder();
+    // m_pidController3 = m_motor3.getPIDController();
+    // m_encoder3 = m_motor3.getEncoder();
+    // kP = 0.0001;
+    // kI = 0;
+    // kD = 0; 
+    // kIz = 0; 
+    // kFF = 0; 
+    // kMaxOutput = 1; 
+    // kMinOutput = -1;
+    // maxRPM = 5700;
+    // m_pidController1.setP(kP);
+    // m_pidController1.setI(kI);
+    // m_pidController1.setD(kD);
+    // m_pidController1.setIZone(kIz);
+    // m_pidController1.setFF(kFF);
+    // m_pidController1.setOutputRange(kMinOutput, kMaxOutput);
+    // m_pidController2.setP(kP);
+    // m_pidController2.setI(kI);
+    // m_pidController2.setD(kD);
+    // m_pidController2.setIZone(kIz);
+    // m_pidController2.setFF(kFF);
+    // m_pidController2.setOutputRange(kMinOutput, kMaxOutput);
+    // m_pidController3.setP(kP);
+    // m_pidController3.setI(kI);
+    // m_pidController3.setD(kD);
+    // m_pidController3.setIZone(kIz);
+    // m_pidController3.setFF(kFF);
+    // m_pidController3.setOutputRange(kMinOutput, kMaxOutput);
+    // m_motor2.setInverted(true);
+    // m_joystick = new XboxController(0);
+    // SmartDashboard.putNumber("P Gain", kP);
+    // SmartDashboard.putNumber("I Gain", kI);
+    // SmartDashboard.putNumber("D Gain", kD);
+    // SmartDashboard.putNumber("I Zone", kIz);
+    // SmartDashboard.putNumber("Feed Forward", kFF);
+    // SmartDashboard.putNumber("Max Output", kMaxOutput);
+    // SmartDashboard.putNumber("Min Output", kMinOutput);
   }
 
   /*
@@ -89,20 +100,22 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Motor 1 Velocity", m_encoder1.getVelocity()/60);
-    SmartDashboard.putNumber("Motor 2 Velocity", m_encoder2.getVelocity()/60);
-    SmartDashboard.putNumber("Motor 3 Velocity", m_encoder3.getVelocity()/60);
+    // SmartDashboard.putNumber("Motor 1 Velocity", m_encoder1.getVelocity()/60);
+    // SmartDashboard.putNumber("Motor 2 Velocity", m_encoder2.getVelocity()/60);
+    // SmartDashboard.putNumber("Motor 3 Velocity", m_encoder3.getVelocity()/60);
   }
 
   @Override
   public void testPeriodic() {
-    if (m_joystick.getRightBumper()) {
-      this.set(MathUtil.applyDeadband(m_joystick.getLeftY(), 0.05));
-      m_motor3.set(m_joystick.getRightY()/3);
-    } else {
-      this.set(0);
-      m_motor3.set(0);
-    }
+    // if (m_joystick.getRightBumper()) {
+    //   this.set(MathUtil.applyDeadband(m_joystick.getLeftY(), 0.05));
+    //   m_motor3.set(m_joystick.getRightY()/3);
+    // } else {
+    //   this.set(0);
+    //   m_motor3.set(0);
+    // }
+    e.set(TalonFXControlMode.PercentOutput,0.3);
+    b.set(TalonFXControlMode.PercentOutput,0.3);
   }
 
   @Override

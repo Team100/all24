@@ -38,7 +38,7 @@ public class SimpleSubsystemFactory {
     }
 
     private SimpleSubsystem getDefault() {
-        FalconDriveMotor motor = new FalconDriveMotor("simple/drive", 1, 10, 1, 1);
+        FalconDriveMotor motor = new FalconDriveMotor("simple/drive", 1,true, 10, 1, 1);
         Encoder100<Distance100> encoder = new FalconDriveEncoder("simple/encoder", motor, 1);
 
         PIDController velocityController = new PIDController(1, 0, 0);

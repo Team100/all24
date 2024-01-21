@@ -57,6 +57,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId) {
         FalconDriveMotor driveMotor = new FalconDriveMotor(name,
                 driveMotorCanId,
+                true,
                 currentLimit,
                 kDriveReduction,
                 kWheelDiameterM);

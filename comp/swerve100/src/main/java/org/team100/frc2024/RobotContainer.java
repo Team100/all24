@@ -10,7 +10,6 @@ import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
-import org.team100.frc2024.motion.intake.IntakeRoller;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
@@ -116,7 +115,6 @@ public class RobotContainer implements SelfTestable {
         final ControlFactory controlFactory = new ControlFactory();
         final DriverControl driverControl = controlFactory.getDriverControl();
         final OperatorControl operatorControl = controlFactory.getOperatorControl();
-        final ThirdControl thirdControl = controlFactory.getThirdControl();
 
         // digital inputs 0, 1, 2, 3.
         m_autonSelector = new AutonSelector();
@@ -169,7 +167,9 @@ public class RobotContainer implements SelfTestable {
 
         m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 3, 6);
         m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, 7, 8);
+
         m_indexer = new IndexerSubsystem(5); // NEED CAN FOR AMP MOTOR
+
         m_climber = new ClimberSubsystem(2, 4);
         m_amp = new AmpSubsystem(1000, 1001);
 

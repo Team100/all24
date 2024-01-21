@@ -1,7 +1,5 @@
 package org.team100.frc2024.motion.indexer;
 
-import javax.swing.text.Position;
-
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
@@ -18,15 +16,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class IndexerSubsystem extends SubsystemBase {
 
+
     // TODO GET THE RIGHT NUMBERS
 
     SysParam driveParameter;
     SysParam ampAngleParameter;
 
 
+
     private final String m_name;
 
     private final LimitedVelocityServo<Distance100> driveMotor;
+
 
    
 
@@ -37,21 +38,22 @@ public class IndexerSubsystem extends SubsystemBase {
 
         driveParameter = SysParam.limitedNeoVelocityServoSystem(1, 1, 1, 1, 1);
 
+
         driveMotor = ServoFactory.limitedNeoVelocityServo(
             m_name,
             driveID,
             false,
             driveParameter);
 
-       
 
-        
+
 
     }
 
     public void setDrive(double value) {
         driveMotor.setVelocity(value);
     }
+
 
   
 
@@ -60,6 +62,7 @@ public class IndexerSubsystem extends SubsystemBase {
     //     ampAngleMotorLeft.setPosition(value);
 
     // }
+
 
     @Override
     public void periodic() {

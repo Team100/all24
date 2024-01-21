@@ -9,6 +9,7 @@ import org.team100.lib.util.Names;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
@@ -120,6 +121,7 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     public FalconDriveMotor(
             String name,
             int canId,
+            boolean motorPhase,
             double currentLimit,
             double kDriveReduction,
             double wheelDiameter) {
@@ -140,7 +142,11 @@ public class FalconDriveMotor implements Motor100<Distance100> {
 
         // use integrated sensor for status and PID feedback
         m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-
+        if (motorPhase) {
+            m_motor.setInverted(InvertType.None);
+        } else {
+            m_motor.setInverted(InvertType.InvertMotorOutput);
+        }
         // configure velocity measurement sampling
         m_motor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_10Ms);
         m_motor.configVelocityMeasurementWindow(8);

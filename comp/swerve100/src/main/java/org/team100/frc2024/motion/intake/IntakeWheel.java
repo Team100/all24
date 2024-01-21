@@ -10,8 +10,6 @@ import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public class IntakeWheel extends Intake {
   /** Creates a new IntakeWheel. */
 
@@ -30,6 +28,7 @@ public class IntakeWheel extends Intake {
         1, 
         1
       );
+
 
 
       intakeMotor = ServoFactory.limitedNeoVelocityServo(m_name, wheelID, false, intakeParam);
