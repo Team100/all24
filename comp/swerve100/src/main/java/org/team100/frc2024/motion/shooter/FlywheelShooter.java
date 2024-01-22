@@ -49,7 +49,14 @@ public class FlywheelShooter extends Shooter implements Speeding {
         }
         m_viz = new SpeedingVisualization(m_name, this);
     }
-
+    
+    public double getFirstRollerVelocity() {
+        return leftShooter.getVelocity();
+    }
+    
+    public double getSecondRollerVelocity() {
+        return rightShooter.getVelocity();
+    }
     @Override
     public void setVelocity(double value) {
         // leftShooter.setVelocity(value);

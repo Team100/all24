@@ -78,7 +78,7 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     }
 
     private void updateVelocity() {
-        // raw velocity is in RPM
+        // raw velocity is in MPS
         m_velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
     }
 

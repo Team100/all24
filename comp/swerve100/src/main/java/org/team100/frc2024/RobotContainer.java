@@ -6,7 +6,7 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
-import org.team100.frc2024.motion.climber.ClimberSubsystem;
+import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
@@ -41,7 +41,6 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.OperatorControl;
-import org.team100.lib.hid.ThirdControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -104,7 +103,7 @@ public class RobotContainer implements SelfTestable {
     private final Shooter m_shooter;
     private final Intake m_intake;
 
-    //Commands
+    // Commands
     private final PivotAmp m_pivotAmp;
 
     private final String m_name;
@@ -279,7 +278,6 @@ public class RobotContainer implements SelfTestable {
         operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.setIntake(3)));
         operatorControl.outtake().whileTrue(m_intake.run(() -> m_intake.setIntake(-3)));
 
-
         // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
         operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(1)));
@@ -305,8 +303,9 @@ public class RobotContainer implements SelfTestable {
         // TODO: intake whenever intake is running.
         // TODO: stop when note is accpeted using optical detector.
         // TODO: shoot only when the shooter is ready.
+
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.setDrive(0)));
-        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.setDrive(3.5)));
+        operatorControl.index().whileTrue(new IndexCommand(m_amp, m_indexer,m_shooter,30));
 
         // TODO: presets
         // m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));

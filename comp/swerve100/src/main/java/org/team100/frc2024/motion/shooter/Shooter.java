@@ -7,4 +7,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public abstract class Shooter extends SubsystemBase {
     public abstract void setVelocity(double value);    
+    public abstract double getFirstRollerVelocity();  
+    public abstract double getSecondRollerVelocity();      
 }

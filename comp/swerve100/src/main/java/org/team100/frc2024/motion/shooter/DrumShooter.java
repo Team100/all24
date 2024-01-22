@@ -57,6 +57,14 @@ public class DrumShooter extends Shooter implements Speeding {
         bottomRoller.setVelocity(value);
     }
 
+    public double getFirstRollerVelocity() {
+        return topRoller.getVelocity();
+    }
+    
+    public double getSecondRollerVelocity() {
+        return bottomRoller.getVelocity();
+    }
+
     @Override
     public void periodic() {
         topRoller.periodic();
