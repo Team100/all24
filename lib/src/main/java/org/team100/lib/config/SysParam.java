@@ -6,8 +6,9 @@ package org.team100.lib.config;
  * 
  * TODO(sanjan): make several of these sysparam classes, one per subsystem,
  * instead of using optional parameters.
+ * 
+ * @param kMaxDecel must be non-positive.
  */
-
 public record SysParam(
         double kGearRatio,
         double kWheelDiameter,

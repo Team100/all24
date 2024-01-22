@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.climber;
 
+import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.units.Distance100;
@@ -12,37 +13,27 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * TODO: add climber to selftest.
  */
 public class ClimberSubsystem extends SubsystemBase {
-    private static final double kGearRatio = 20.0;
-    private static final double kWinchDiameterM = 0.01;
-    private static final double kMaxVelM_S = 1;
-    private static final double kMaxAccelM_S2 = 1;
-    /** Position servo PID kP */
-    private static final double kP = 1;
     private final String m_name;
+    private final SysParam m_params;
 
     private final PositionServo<Distance100> s1;
     private final PositionServo<Distance100> s2;
 
-    public ClimberSubsystem( int leftClimberID, int rightClimberID) {
+    public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
-        s1 = ServoFactory.neoPositionServo(
+        m_params = new SysParam(20.0, 0.01, 1, 1, -1);
+        s1 = ServoFactory.neoDistanceServo(
                 m_name + "/Left",
                 leftClimberID,
                 false,
-                kGearRatio,
-                kWinchDiameterM,
-                kMaxVelM_S,
-                kMaxAccelM_S2,
-                new PIDController(kP, 0, 0));
-        s2 = ServoFactory.neoPositionServo(
+                m_params,
+                new PIDController(1, 0, 0));
+        s2 = ServoFactory.neoDistanceServo(
                 m_name + "/Right",
                 rightClimberID,
                 true,
-                kGearRatio,
-                kWinchDiameterM,
-                kMaxVelM_S,
-                kMaxAccelM_S2,
-                new PIDController(kP, 0, 0));
+                m_params,
+                new PIDController(1, 0, 0));
     }
 
     /** Set velocity in meters per second */
