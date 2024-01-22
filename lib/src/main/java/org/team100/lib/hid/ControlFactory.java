@@ -110,7 +110,7 @@ public class ControlFactory {
             return kNoOperator;
         }
         if (operatorName.contains("Keyboard")) {
-            return new OperatorXboxControl();
+            return new OperatorV2Control();
         }
         Util.println("Unrecognized driver control name: " + operatorHID.getName());
         return kNoOperator;

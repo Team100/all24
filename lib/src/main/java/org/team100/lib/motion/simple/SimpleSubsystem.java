@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /**
  * Represents a simple one-dimensional mechanism.
  */
-public class SimpleSubsystem extends SubsystemBase {
+public class SimpleSubsystem extends SubsystemBase implements Positioning {
 
     private final PositionServo<Distance100> m_actuator;
     private final SimpleVisualization m_viz;
@@ -16,7 +16,7 @@ public class SimpleSubsystem extends SubsystemBase {
     // use the factory to instantiate
     SimpleSubsystem(PositionServo<Distance100> actuator) {
         m_actuator = actuator;
-        m_viz = new SimpleVisualization(this);
+        m_viz = new SimpleVisualization("example", this);
     }
 
     @Override
@@ -25,6 +25,7 @@ public class SimpleSubsystem extends SubsystemBase {
         m_viz.periodic();
     }
 
+    @Override
     public double getPosition() {
         return m_actuator.getPosition();
     }

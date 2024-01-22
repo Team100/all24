@@ -2,8 +2,10 @@ package org.team100.lib.motion.components;
 
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -52,37 +54,19 @@ public class ServoFactory {
                 param.kMaxDecel());
     }
 
-    public static PositionServo<Distance100> neoPositionServo(
+    public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
             String name,
-            int canId,
-            boolean motorPhase,
-            double gearRatio,
-            double wheelDiameter,
-            double maxVel,
-            double maxAccel,
-            PIDController pidController) {
-        NeoDriveMotor motor = new NeoDriveMotor(
-                name,
-                canId,
-                motorPhase,
-                gearRatio,
-                wheelDiameter);
-        NeoDriveEncoder encoder = new NeoDriveEncoder(
-                name,
-                motor,
-                wheelDiameter * Math.PI);
-        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
+            SysParam param) {
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name);
+        SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
+        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
-        return new PositionServo<>(
-                name,
-                vServo,
-                encoder,
-                maxVel,
-                pidController,
-                new TrapezoidProfile100(maxVel, maxAccel, 0.05),
-                Distance100.instance);
+        return new LimitedVelocityServo<>(v,
+                param.kMaxVelM_S(),
+                param.kMaxAccelM_S2(),
+                param.kMaxDecel());
     }
 
     /**
@@ -117,6 +101,26 @@ public class ServoFactory {
                 Angle100.instance);
     }
 
+    public static PositionServo<Angle100> simulatedAngleServo(
+            String name,
+            SysParam param,
+            PIDController controller) {
+        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name);
+        SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
+        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new PositionServo<>(
+                name,
+                vServo,
+                encoder,
+                param.kMaxVelM_S(),
+                controller,
+                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
+                Angle100.instance);
+    }
+
     /**
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
@@ -137,6 +141,26 @@ public class ServoFactory {
                 name,
                 motor,
                 param.kWheelDiameter() * Math.PI);
+        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new PositionServo<>(
+                name,
+                vServo,
+                encoder,
+                param.kMaxVelM_S(),
+                controller,
+                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
+                Distance100.instance);
+    }
+
+    public static PositionServo<Distance100> simulatedDistanceServo(
+            String name,
+            SysParam param,
+            PIDController controller) {
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name);
+        Encoder100<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
         VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
