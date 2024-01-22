@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * A 1-dof arm driven by two separate motors with opposite phases.
  */
 public class AmpSubsystem extends SubsystemBase implements Positioning {
+    // ALERT! notice this very high current limit!!  ALERT! 
+    private static final int kCurrentLimit = 80;
+
     private final String m_name;
     private final SysParam m_params;
     private final PositionServo<Angle100> ampAngleServoLeft;
@@ -35,6 +38,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         m_name + "/Left",
                         leftPivotID,
                         true,
+                        kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0));
 
@@ -42,6 +46,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         m_name + "/Right",
                         rightPivotID,
                         false,
+                        kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0));
                 break;

@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * TODO: add climber to selftest.
  */
 public class ClimberSubsystem extends SubsystemBase implements Positioning {
+    // TODO: tune the current limit
+    private static final int kCurrentLimit = 30;
     private final String m_name;
     private final SysParam m_params;
     private final PositionServo<Distance100> s1;
@@ -49,12 +51,14 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         m_name + "/Left",
                         leftClimberID,
                         false,
+                        kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0));
                 s2 = ServoFactory.neoDistanceServo(
                         m_name + "/Right",
                         rightClimberID,
                         true,
+                        kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0));
                 break;

@@ -33,11 +33,13 @@ public class ServoFactory {
             String name,
             int canId,
             boolean motorPhase,
+            int currentLimit,
             SysParam param) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
                 motorPhase,
+                currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
@@ -77,12 +79,14 @@ public class ServoFactory {
             String name,
             int canId,
             boolean motorPhase,
+            int currentLimit,
             SysParam param,
             PIDController controller) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
                 canId,
                 motorPhase,
+                currentLimit,
                 param.gearRatio());
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
@@ -135,12 +139,14 @@ public class ServoFactory {
             String name,
             int canId,
             boolean motorPhase,
+            int currentLimit,
             SysParam param,
             PIDController controller) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
                 motorPhase,
+                currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter());
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
