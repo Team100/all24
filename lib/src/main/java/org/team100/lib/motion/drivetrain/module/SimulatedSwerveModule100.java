@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedMotor;
@@ -22,7 +23,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics) {
 
         VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
-        PositionServo<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
+        PositionServoInterface<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
 
         name = m_name + "/" + name;
         
@@ -43,7 +44,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 driveEncoder);
     }
 
-    private static PositionServo<Angle100> simulatedTurningServo(
+    private static PositionServoInterface<Angle100> simulatedTurningServo(
             String name,
             SwerveKinodynamics kinodynamics) {
         SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(name);
@@ -66,7 +67,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle100> turningServo = new PositionServo<>(
+        PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
@@ -81,7 +82,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     private SimulatedSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            PositionServoInterface<Angle100> turningServo) {
         super(name, driveServo, turningServo);
         //
     }

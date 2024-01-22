@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Positioning;
 import org.team100.lib.motion.simple.SimpleVisualization;
@@ -32,8 +32,8 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
     private static final int kCurrentLimit = 30;
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServo<Distance100> s1;
-    private final PositionServo<Distance100> s2;
+    private final PositionServoInterface<Distance100> s1;
+    private final PositionServoInterface<Distance100> s2;
     private final SimpleVisualization m_viz;
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {

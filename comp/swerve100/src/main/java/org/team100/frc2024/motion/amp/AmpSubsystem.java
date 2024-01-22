@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.AngularVisualization;
 import org.team100.lib.motion.simple.Positioning;
@@ -21,8 +21,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServo<Angle100> ampAngleServoLeft;
-    private final PositionServo<Angle100> ampAngleServoRight;
+    private final PositionServoInterface<Angle100> ampAngleServoLeft;
+    private final PositionServoInterface<Angle100> ampAngleServoRight;
     private final AngularVisualization m_viz;
 
     public AmpSubsystem(int leftPivotID, int rightPivotID) {
