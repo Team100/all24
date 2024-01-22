@@ -55,7 +55,6 @@ public class DrumShooter extends Shooter implements Speeding {
     public void setVelocity(double value) {
         topRoller.setVelocity(value);
         bottomRoller.setVelocity(value);
-        System.out.println(value);
     }
 
     @Override

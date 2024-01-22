@@ -54,7 +54,6 @@ public class FlywheelShooter extends Shooter implements Speeding {
     public void setVelocity(double value) {
         leftShooter.setVelocity(value);
         rightShooter.setVelocity(value);
-        System.out.println(value);
     }
 
     @Override
