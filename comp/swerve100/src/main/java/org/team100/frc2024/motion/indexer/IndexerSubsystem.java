@@ -12,18 +12,35 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
+ * Direct-drive roller indexer.
+ * 
+ * Typical free speed of 6k rpm => 100 turn/sec
+ * diameter of 0.05m => 0.15 m/turn
+ * therefore top speed is around 15 m/s.
+ * 
+ * This system has low intertia but a lot of friction,
+ * and it's fragile. we want to eject as fast as possible
+ * though, so try a high accel limit.
+ * 
  * TODO: add indexer to selftest.
  */
 public class IndexerSubsystem extends SubsystemBase implements Speeding {
-    // TODO GET THE RIGHT NUMBERS
+    /**
+     * Surface velocity of whatever is turning in the indexer.
+     */
+    private static final double kIndexerVelocityM_S = 3;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> driveMotor;
     private final SpeedingVisualization m_viz;
 
-
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
-        SysParam params = SysParam.limitedNeoVelocityServoSystem(1, .05, 8, 20, -20);
+        SysParam params = SysParam.limitedNeoVelocityServoSystem(
+            1.0,
+             0.05,
+             15,
+             50,
+             -50);
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
@@ -42,8 +59,12 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
-    public void setDrive(double value) {
-        driveMotor.setDutyCycle(value);
+    public void forward() {
+        driveMotor.setVelocity(kIndexerVelocityM_S);
+    }
+
+    public void stop() {
+        driveMotor.stop();
     }
     
     @Override

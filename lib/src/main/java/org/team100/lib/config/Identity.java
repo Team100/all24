@@ -36,6 +36,8 @@ public enum Identity {
     }
 
     public static final Identity instance = get();
+    // for testing
+    // public static final Identity instance = BETA_BOT;
 
     private final String m_serialNumber;
 

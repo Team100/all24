@@ -41,7 +41,7 @@ public class SwerveModuleCollection {
             SwerveKinodynamics kinodynamics) {
         switch (Identity.instance) {
             case COMP_BOT:
-                Util.println("************** WCP MODULES **************");
+                Util.println("************** WCP MODULES using AI 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 11,
@@ -93,20 +93,20 @@ public class SwerveModuleCollection {
                         SimulatedSwerveModule100.get(kRearLeft, kinodynamics),
                         SimulatedSwerveModule100.get(kRearRight, kinodynamics));
             case BETA_BOT:
-                Util.println("************** WCP MODULES **************");
+                Util.println("************** WCP MODULES using DIO 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                        WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 3,
-                                AnalogTurningEncoder.class, 30, 0, 0.708328, kinodynamics),
+                                DutyCycleTurningEncoder.class, 34, 0, 0.708328, kinodynamics),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 22,
-                                AnalogTurningEncoder.class, 32, 1, 0.659267, kinodynamics),
+                                DutyCycleTurningEncoder.class, 25, 1, 0.659267, kinodynamics),
                         WCPSwerveModule100.get(
                                 kRearLeft, currentLimit, 13,
-                                AnalogTurningEncoder.class, 31, 2, 0.396148, kinodynamics),
+                                DutyCycleTurningEncoder.class, 12, 2, 0.396148, kinodynamics),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 11,
-                                AnalogTurningEncoder.class, 33, 3, 0.109823, kinodynamics));
+                                DutyCycleTurningEncoder.class, 21, 3, 0.109823, kinodynamics));
             default:
                 Util.println("WARNING: using default module collection");
                 return new SwerveModuleCollection(

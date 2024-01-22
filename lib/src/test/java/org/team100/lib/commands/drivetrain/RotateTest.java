@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -17,6 +18,11 @@ class RotateTest extends TimelessTest {
     private static final double kDelta = 0.02;
 
     Fixture fixture = new Fixture();
+
+    @AfterEach
+    void close() {
+        fixture.close();
+    }
 
     @Test
     void testRotate() {
@@ -54,7 +60,7 @@ class RotateTest extends TimelessTest {
         assertEquals(0, rotate.refTheta.x(), 0.01);
         // now we're ready to start rotating
         assertEquals(-0.02, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
+        assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
 
         // finished steering, start rotating
         for (int i = 0; i < 25; ++i) {
@@ -64,7 +70,7 @@ class RotateTest extends TimelessTest {
         }
         assertEquals(1, rotate.refTheta.x(), 0.2);
         assertEquals(-0.512, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
+        assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
 
         // should be done rotating now
         for (int i = 0; i < 25; ++i) {
@@ -73,9 +79,10 @@ class RotateTest extends TimelessTest {
             rotate.execute();
         }
 
-        assertEquals(Math.PI/2, rotate.refTheta.x(), kDelta);
-        // assertEquals(-0.403, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(Math.PI / 2, rotate.refTheta.x(), kDelta);
+        // assertEquals(-0.403, fixture.drive.desiredStates()[0].speedMetersPerSecond,
+        // kDelta);
+        assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
 
         for (int i = 0; i < 103; ++i) {
             stepTime(0.02);
@@ -87,6 +94,6 @@ class RotateTest extends TimelessTest {
 
         rotate.end(false);
         assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-Math.PI/4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[0].angle.getRadians(), kDelta);
     }
 }

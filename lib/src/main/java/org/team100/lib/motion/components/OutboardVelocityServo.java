@@ -83,10 +83,6 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
         return m_setpoint;
     }
 
-    // public Motor100<T> getMotor(){
-    //     return m_motor.
-    // }
-
     ////////////////////////////////////////////////
 
     /**

@@ -10,9 +10,23 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 /**
+ * Direct-drive roller intake
+ * 
+ * Typical free speed of 6k rpm => 100 turn/sec
+ * diameter of 0.05m => 0.15 m/turn
+ * therefore top speed is around 15 m/s.
+ * 
+ * This system has very low intertia, so can spin up
+ * very fast, but it's fragile: limit accel to avoid stressing it.
+ * 
  * TODO: add intake to selftest.
  */
 public class IntakeRoller extends Intake implements Speeding {
+    /**
+     * Surface velocity of whatever is turning in the intake.
+     */
+    final double kIntakeVelocityM_S = 3;
+
     private final String m_name;
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;
@@ -22,10 +36,10 @@ public class IntakeRoller extends Intake implements Speeding {
         m_name = Names.name(this);
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(
                 1,
-                1,
-                5,
-                5,
-                -5);
+                0.05,
+                15,
+                10,
+                -10);
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -54,9 +68,21 @@ public class IntakeRoller extends Intake implements Speeding {
     }
 
     @Override
-    public void setIntake(double value) {
-        topRoller.setDutyCycle(value);
-        bottomRoller.setDutyCycle(value);
+    public void intake() {
+        topRoller.setVelocity(kIntakeVelocityM_S);
+        bottomRoller.setVelocity(kIntakeVelocityM_S);
+    }
+
+    @Override
+    public void outtake() {
+        topRoller.setVelocity(-1.0 * kIntakeVelocityM_S);
+        bottomRoller.setVelocity(-1.0 * kIntakeVelocityM_S);
+    }
+
+    @Override
+    public void stop() {
+        topRoller.stop();
+        bottomRoller.stop();
     }
 
     @Override

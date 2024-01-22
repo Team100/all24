@@ -112,6 +112,9 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     }
 
     /**
+     * Using the supplied wheel diameter and gear ratio, set the motor velocity
+     * to the correct RPM given the desired linear speed in m/s.
+     * 
      * Supports accel feedforward.
      * 
      * Note the implementation here is surely wrong, it needs to be calibrated.
