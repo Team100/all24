@@ -82,6 +82,15 @@ public class FlywheelShooter extends Shooter implements Speeding {
         rightShooter.stop();
     }
 
+    public boolean readyToShoot() {
+        //TODO get real values here
+        if (rightShooter.getVelocity() > 30 && leftShooter.getVelocity() > 30) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public double getVelocity() {
         return (leftShooter.getVelocity() + rightShooter.getVelocity()) / 2;

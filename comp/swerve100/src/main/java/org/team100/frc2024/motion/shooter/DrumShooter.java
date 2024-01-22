@@ -90,6 +90,15 @@ public class DrumShooter extends Shooter implements Speeding {
         m_viz.periodic();
     }
 
+    public boolean readyToShoot() {
+        //TODO get real values here
+        if (topRoller.getVelocity() > 30 && bottomRoller.getVelocity() > 30) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public double getVelocity() {
         return (topRoller.getVelocity() + bottomRoller.getVelocity()) / 2;
