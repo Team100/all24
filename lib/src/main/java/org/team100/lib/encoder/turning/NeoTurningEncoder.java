@@ -17,11 +17,12 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final NeoTurningMotor m_motor;
+    private final double m_gearRatio;
 
-    /** Current position measurement, obtained in periodic(). */
-    private double m_positionRev;
-    /** Current velocity measurement, obtained in periodic(). */
-    private double m_rateRev_S;
+    /** Current position measurement of the mechanism, obtained in periodic(). */
+    private double m_positionRad;
+    /** Current velocity measurement of the mechanism, obtained in periodic(). */
+    private double m_rateRad_S;
 
     /**
      * @param name            do not use a leading slash.
@@ -29,23 +30,26 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
      */
     public NeoTurningEncoder(
             String name,
-            NeoTurningMotor motor) {
+            NeoTurningMotor motor,
+            double gearRatio) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
         m_motor = motor;
+        m_gearRatio = gearRatio;
+        reset();
     }
 
-    /** Position in revolutions. */
+    /** Position of the mechanism in radians. */
     @Override
     public double getPosition() {
-        return m_positionRev;
+        return m_positionRad;
     }
 
-    /** Velocity in revolutions per second. */
+    /** Velocity of the mechanism in radians per second. */
     @Override
     public double getRate() {
-        return m_rateRev_S;
+        return m_rateRad_S;
     }
 
     @Override
@@ -62,17 +66,17 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
     public void periodic() {
         updatePosition();
         updateRate();
-        t.log(Level.DEBUG, m_name, "position (rev)", m_positionRev);
-        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_rateRev_S);
+        t.log(Level.DEBUG, m_name, "position (rad)", m_positionRad);
+        t.log(Level.DEBUG, m_name, "velocity (rad_s)", m_rateRad_S);
     }
 
     ////////////////////////////////////
 
     private void updatePosition() {
-        m_positionRev = m_motor.getPositionRot();
+        m_positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
     }
 
     private void updateRate() {
-        m_rateRev_S = m_motor.getRateRPM() / 60;
+        m_rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
     }
 }

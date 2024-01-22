@@ -184,7 +184,7 @@ public class RobotContainer implements SelfTestable {
         // m_climber = new ClimberSubsystem(2, 9);
         m_amp = new AmpSubsystem(28, 39);
 
-        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampState);
+        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(

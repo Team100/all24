@@ -20,16 +20,16 @@ public class SimpleVisualization {
 
     public SimpleVisualization(String name, Positioning subsystem) {
         m_subsystem = subsystem;
-        double position = m_subsystem.getPosition();
         m_sideView = new Mechanism2d(100, 100);
         MechanismRoot2d root = m_sideView.getRoot("root", 50, 50);
+        double position = m_subsystem.getPositionRad();
         m_ligament = new MechanismLigament2d(name, kScale * position, 90, 5, new Color8Bit(Color.kOrange));
         root.append(m_ligament);
         SmartDashboard.putData(name, m_sideView);
     }
 
     public void periodic() {
-        double position = m_subsystem.getPosition();
+        double position = m_subsystem.getPositionRad();
         m_ligament.setLength(kScale * position);
     }
 

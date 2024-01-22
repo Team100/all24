@@ -22,6 +22,10 @@ public class ControlUtil {
         return MathUtil.clamp(input, -clamp, clamp);
     }
 
+    public static double clamp(double input, double low, double high) {
+        return MathUtil.clamp(input, low, high);
+    }
+
     private ControlUtil() {
     }
 }

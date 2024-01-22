@@ -38,20 +38,20 @@ public class ServoFactory {
                 name,
                 canId,
                 motorPhase,
-                param.kGearRatio(),
-                param.kWheelDiameter());
+                param.gearRatio(),
+                param.wheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.kWheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI);
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
         return new LimitedVelocityServo<>(v,
-                param.kMaxVelM_S(),
-                param.kMaxAccelM_S2(),
-                param.kMaxDecel());
+                param.maxVelM_S(),
+                param.maxAccelM_S2(),
+                param.maxDecelM_S2());
     }
 
     public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
@@ -64,9 +64,9 @@ public class ServoFactory {
                 motor,
                 encoder);
         return new LimitedVelocityServo<>(v,
-                param.kMaxVelM_S(),
-                param.kMaxAccelM_S2(),
-                param.kMaxDecel());
+                param.maxVelM_S(),
+                param.maxAccelM_S2(),
+                param.maxDecelM_S2());
     }
 
     /**
@@ -83,10 +83,11 @@ public class ServoFactory {
                 name,
                 canId,
                 motorPhase,
-                param.kGearRatio());
+                param.gearRatio());
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
-                motor);
+                motor,
+                param.gearRatio());
         VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
@@ -95,9 +96,9 @@ public class ServoFactory {
                 name,
                 vServo,
                 encoder,
-                param.kMaxVelM_S(),
+                param.maxVelM_S(),
                 controller,
-                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Angle100.instance);
     }
 
@@ -106,7 +107,12 @@ public class ServoFactory {
             SysParam param,
             PIDController controller) {
         SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name);
-        SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
+        SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(
+            name,
+             motor,
+              1,
+              0, // minimum hard stop
+               2); // maximum hard stop
         VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
@@ -115,9 +121,9 @@ public class ServoFactory {
                 name,
                 vServo,
                 encoder,
-                param.kMaxVelM_S(),
+                param.maxVelM_S(),
                 controller,
-                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Angle100.instance);
     }
 
@@ -135,12 +141,12 @@ public class ServoFactory {
                 name,
                 canId,
                 motorPhase,
-                param.kGearRatio(),
-                param.kWheelDiameter());
+                param.gearRatio(),
+                param.wheelDiameter());
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.kWheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI);
         VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
@@ -149,9 +155,9 @@ public class ServoFactory {
                 name,
                 vServo,
                 encoder,
-                param.kMaxVelM_S(),
+                param.maxVelM_S(),
                 controller,
-                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Distance100.instance);
     }
 
@@ -169,9 +175,9 @@ public class ServoFactory {
                 name,
                 vServo,
                 encoder,
-                param.kMaxVelM_S(),
+                param.maxVelM_S(),
                 controller,
-                new TrapezoidProfile100(param.kMaxVelM_S(), param.kMaxAccelM_S2(), 0.05),
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Distance100.instance);
     }
 

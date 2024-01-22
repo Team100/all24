@@ -74,22 +74,17 @@
           "visible": true
         }
       },
-      "/SmartDashboard/FlushOften": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/FlywheelShooter": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/IntakeWheel": {
+      "/SmartDashboard/IndexerSubsystem": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Manual Drive Mode": {
+      "/SmartDashboard/IntakeWheel": {
         "window": {
           "visible": true
         }
@@ -119,9 +114,30 @@
           "OutboardVelocityServo": {
             "open": true
           },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
           "open": true
         },
         "Right": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "PositionServo": {
+            "Goal": {
+              "open": true
+            },
+            "Setpoint": {
+              "open": true
+            },
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
           "open": true
         },
         "open": true
@@ -383,6 +399,18 @@
       }
     },
     "transitory": {
+      "SmartDashboard": {
+        "AmpSubsystem": {
+          "SideRoot": {
+            "Boom": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
       "vision": {
         "10000000e31d4a24": {
           "Blip24[]##v_vision/10000000e31d4a24/blips": {
@@ -418,7 +446,6 @@
         "open": true
       },
       "open": true
-    },
-    "visible": true
+    }
   }
 }

@@ -1,24 +1,21 @@
 package org.team100.lib.config;
 
 /**
- * TODO(sanjan) I think this would be nice and clean as a "record"
- * https://www.baeldung.com/java-record-keyword
- * 
  * TODO(sanjan): make several of these sysparam classes, one per subsystem,
  * instead of using optional parameters.
  * 
- * @param kGearRatio
- * @param kWheelDiameter
- * @param kMaxVelM_S
- * @param kMaxAccelM_S2
- * @param kMaxDecel must be non-positive.
+ * @param gearRatio
+ * @param wheelDiameter
+ * @param maxVelM_S
+ * @param maxAccelM_S2
+ * @param maxDecelM_S2 must be non-positive.
  */
 public record SysParam(
-        double kGearRatio,
-        double kWheelDiameter,
-        double kMaxVelM_S,
-        double kMaxAccelM_S2,
-        double kMaxDecel) {
+        double gearRatio,
+        double wheelDiameter,
+        double maxVelM_S,
+        double maxAccelM_S2,
+        double maxDecelM_S2) {
     // No need to explicitly declare a constructor or getter/setter methods
 
     public static SysParam limitedNeoVelocityServoSystem(double gearRatio, double wheelDiameter, double maxVel,
