@@ -2,7 +2,9 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
-import org.team100.lib.encoder.turning.AnalogTurningEncoder.Drive;
+import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Util;
 
@@ -43,35 +45,47 @@ public class SwerveModuleCollection {
                 Util.println("************** WCP MODULES **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 11, 30, 0, 0.708328, kinodynamics),
+                                kFrontLeft, currentLimit, 11,
+                                AnalogTurningEncoder.class, 30, 0, 0.708328, kinodynamics),
                         WCPSwerveModule100.get(
-                                kFrontRight, currentLimit, 12, 32, 1, 0.659267, kinodynamics),
+                                kFrontRight, currentLimit, 12,
+                                AnalogTurningEncoder.class, 32, 1, 0.659267, kinodynamics),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 21, 31, 2, 0.396148, kinodynamics),
+                                kRearLeft, currentLimit, 21,
+                                AnalogTurningEncoder.class, 31, 2, 0.396148, kinodynamics),
                         WCPSwerveModule100.get(
-                                kRearRight, currentLimit, 22, 33, 3, 0.109823, kinodynamics));
+                                kRearRight, currentLimit, 22,
+                                AnalogTurningEncoder.class, 33, 3, 0.109823, kinodynamics));
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
                         AMCANSwerveModule100.get(
-                                kFrontLeft, currentLimit, 3, 36, 2, 0.354994, Drive.INVERSE, kinodynamics),
+                                kFrontLeft, currentLimit, 3,
+                                36, 2, 0.354994, Drive.INVERSE, kinodynamics),
                         AMCANSwerveModule100.get(
-                                kFrontRight, currentLimit, 12, 13, 3, 0.880423, Drive.INVERSE, kinodynamics),
+                                kFrontRight, currentLimit, 12,
+                                13, 3, 0.880423, Drive.INVERSE, kinodynamics),
                         AMCANSwerveModule100.get(
-                                kRearLeft, currentLimit, 22, 1, 1, 0.916801, Drive.INVERSE, kinodynamics),
+                                kRearLeft, currentLimit, 22,
+                                1, 1, 0.916801, Drive.INVERSE, kinodynamics),
                         AMCANSwerveModule100.get(
-                                kRearRight, currentLimit, 21, 0, 0, 0.806963, Drive.INVERSE, kinodynamics));
+                                kRearRight, currentLimit, 21,
+                                0, 0, 0.806963, Drive.INVERSE, kinodynamics));
             case SWERVE_ONE:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
                         AMCANSwerveModule100.get(
-                                kFrontLeft, currentLimit, 11, 5, 2, 0.694815, Drive.DIRECT, kinodynamics),
+                                kFrontLeft, currentLimit, 11,
+                                5, 2, 0.694815, Drive.DIRECT, kinodynamics),
                         AMCANSwerveModule100.get(
-                                kFrontRight, currentLimit, 12, 2, 0, 0.718789, Drive.DIRECT, kinodynamics),
+                                kFrontRight, currentLimit, 12,
+                                2, 0, 0.718789, Drive.DIRECT, kinodynamics),
                         AMCANSwerveModule100.get(
-                                kRearLeft, currentLimit, 21, 3, 3, 0.365612, Drive.DIRECT, kinodynamics),
+                                kRearLeft, currentLimit, 21,
+                                3, 3, 0.365612, Drive.DIRECT, kinodynamics),
                         AMCANSwerveModule100.get(
-                                kRearRight, currentLimit, 22, 1, 1, 0.942851, Drive.DIRECT, kinodynamics));
+                                kRearRight, currentLimit, 22,
+                                1, 1, 0.942851, Drive.DIRECT, kinodynamics));
             case BLANK:
                 Util.println("************** SIMULATED MODULES **************");
                 return new SwerveModuleCollection(
@@ -83,13 +97,17 @@ public class SwerveModuleCollection {
                 Util.println("************** WCP MODULES **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 11, 30, 0, 0.708328, kinodynamics),
+                                kFrontLeft, currentLimit, 11,
+                                DutyCycleTurningEncoder.class, 30, 0, 0.708328, kinodynamics),
                         WCPSwerveModule100.get(
-                                kFrontRight, currentLimit, 12, 32, 1, 0.659267, kinodynamics),
+                                kFrontRight, currentLimit, 12,
+                                DutyCycleTurningEncoder.class, 32, 1, 0.659267, kinodynamics),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 21, 31, 2, 0.396148, kinodynamics),
+                                kRearLeft, currentLimit, 21,
+                                DutyCycleTurningEncoder.class, 31, 2, 0.396148, kinodynamics),
                         WCPSwerveModule100.get(
-                                kRearRight, currentLimit, 22, 33, 3, 0.109823, kinodynamics));
+                                kRearRight, currentLimit, 22,
+                                DutyCycleTurningEncoder.class, 33, 3, 0.109823, kinodynamics));
             default:
                 Util.println("WARNING: using default module collection");
                 return new SwerveModuleCollection(

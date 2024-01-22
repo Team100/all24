@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.testing.TimelessTest;
@@ -13,7 +14,7 @@ class SwerveModuleFactoryTest extends TimelessTest {
     @Test
     void testWCP() {
         SwerveKinodynamics k = SwerveKinodynamicsFactory.forTest();
-        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, 0, 0, 0, k);
+        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, AnalogTurningEncoder.class, 0, 0, 0, k);
         assertNotNull(module);
         module.close();
     }
@@ -21,7 +22,7 @@ class SwerveModuleFactoryTest extends TimelessTest {
     @Test
     void testAMCAN() {
         SwerveKinodynamics k = SwerveKinodynamicsFactory.forTest();
-        SwerveModule100 module = AMCANSwerveModule100.get("test", 0, 0, 0, 0, 0, AnalogTurningEncoder.Drive.DIRECT, k);
+        SwerveModule100 module = AMCANSwerveModule100.get("test", 0, 0, 0, 0, 0, Drive.DIRECT, k);
         assertNotNull(module);
         module.close();
     }
