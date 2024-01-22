@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class OperatorV2Control implements OperatorControl {
-    private static final double kDeadband = 0.2;
+    private static final double kDeadband = 0.1;
     private final CommandXboxController m_controller;
 
     public OperatorV2Control() {
@@ -57,8 +57,10 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public double ampState() {
-        return deadband(clamp(-1.0 * m_controller.getLeftY(), 1), kDeadband, 1);
+    public double ampPosition() {
+        // left Y is channel 1
+        // this clamps the lower half so it returns only positive.
+        return deadband(clamp(-1.0 * m_controller.getLeftY(), 0, 1), kDeadband, 1);
     }
 
     @Override

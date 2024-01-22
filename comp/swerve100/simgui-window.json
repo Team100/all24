@@ -10,8 +10,8 @@
       "style": "0",
       "userScale": "2",
       "width": "964",
-      "xpos": "116",
-      "ypos": "238"
+      "xpos": "161",
+      "ypos": "203"
     }
   },
   "Table": {
@@ -35,32 +35,37 @@
   "Window": {
     "###/SmartDashboard/AmpSubsystem": {
       "Collapsed": "0",
-      "Pos": "175,410",
-      "Size": "200,200"
+      "Pos": "136,112",
+      "Size": "115,117"
     },
     "###/SmartDashboard/ClimberSubsystem": {
       "Collapsed": "0",
-      "Pos": "25,433",
-      "Size": "226,204"
+      "Pos": "496,118",
+      "Size": "128,109"
     },
     "###/SmartDashboard/FlushOften": {
       "Collapsed": "0",
-      "Pos": "178,72",
+      "Pos": "94,73",
       "Size": "200,48"
     },
     "###/SmartDashboard/FlywheelShooter": {
       "Collapsed": "0",
-      "Pos": "316,186",
-      "Size": "200,200"
+      "Pos": "377,114",
+      "Size": "115,111"
+    },
+    "###/SmartDashboard/IndexerSubsystem": {
+      "Collapsed": "0",
+      "Pos": "261,115",
+      "Size": "116,116"
     },
     "###/SmartDashboard/IntakeWheel": {
       "Collapsed": "0",
-      "Pos": "493,27",
-      "Size": "200,200"
+      "Pos": "8,115",
+      "Size": "115,110"
     },
     "###/SmartDashboard/Manual Drive Mode": {
       "Collapsed": "0",
-      "Pos": "179,121",
+      "Pos": "119,94",
       "Size": "200,48"
     },
     "###/SmartDashboard/Swerve Viz/_Front Left_SimulatedSwerveModule": {
@@ -70,7 +75,7 @@
     },
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
-      "Pos": "176,21",
+      "Pos": "83,22",
       "Size": "200,48"
     },
     "###/SmartDashboard/annunciator": {
@@ -80,7 +85,7 @@
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "9,177",
+      "Pos": "63,307",
       "Size": "352,214"
     },
     "###FMS": {
@@ -90,7 +95,7 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "73,395",
+      "Pos": "26,530",
       "Size": "616,160"
     },
     "###Keyboard 1 Settings": {
@@ -100,12 +105,12 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "459,233",
-      "Size": "484,432"
+      "Pos": "459,244",
+      "Size": "484,421"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "167,87",
+      "Pos": "167,86",
       "Size": "500,95"
     },
     "###Other Devices": {

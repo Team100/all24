@@ -40,7 +40,8 @@ public interface OperatorControl {
         return false;
     }
 
-    default double ampState(){
+    /** @return position in range [0,1] */
+    default double ampPosition(){
         return 0;
     }
 

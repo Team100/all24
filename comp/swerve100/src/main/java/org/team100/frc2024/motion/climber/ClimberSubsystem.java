@@ -84,7 +84,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
     }
 
     @Override
-    public double getPosition() {
+    public double getPositionRad() {
         return (s1.getPosition() + s2.getPosition()) / 2;
     }
 
