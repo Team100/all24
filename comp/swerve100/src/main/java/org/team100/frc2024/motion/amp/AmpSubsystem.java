@@ -34,7 +34,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 ampAngleServoLeft = ServoFactory.neoAngleServo(
                         m_name + "/Left",
                         leftPivotID,
-                        false,
+                        true,
                         m_params,
                         new PIDController(1, 0, 0));
 

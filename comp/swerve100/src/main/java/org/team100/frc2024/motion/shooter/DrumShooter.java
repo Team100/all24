@@ -51,12 +51,12 @@ public class DrumShooter extends Shooter implements Speeding {
                 topRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Top",
                         topRollerID,
-                        true,
+                        false,
                         params);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom",
                         bottomRollerID,
-                        false,
+                        true,
                         params);
                 break;
             case BLANK:
