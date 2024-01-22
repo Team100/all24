@@ -8,19 +8,18 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 /**
- * Visualization for a 1-dof mechanism.
- * 
- * This represents an elevator, one ligament with variable length.
+ * Visualization for 1-dof velocity.
  */
-public class SimpleVisualization {
+public class SpeedingVisualization {
+
     private static final double kScale = 10.0;
-    private final Positioning m_subsystem;
+    private final Speeding m_subsystem;
     private final Mechanism2d m_sideView;
     private final MechanismLigament2d m_ligament;
 
-    public SimpleVisualization(String name, Positioning subsystem) {
+    public SpeedingVisualization(String name, Speeding subsystem) {
         m_subsystem = subsystem;
-        double position = m_subsystem.getPosition();
+        double position = m_subsystem.getVelocity();
         m_sideView = new Mechanism2d(100, 100);
         MechanismRoot2d root = m_sideView.getRoot("root", 50, 50);
         m_ligament = new MechanismLigament2d(name, kScale * position, 90, 5, new Color8Bit(Color.kOrange));
@@ -29,7 +28,7 @@ public class SimpleVisualization {
     }
 
     public void periodic() {
-        double position = m_subsystem.getPosition();
+        double position = m_subsystem.getVelocity();
         m_ligament.setLength(kScale * position);
     }
 

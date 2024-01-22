@@ -15,7 +15,12 @@
     "types": {
       "//field": "Field2d",
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/AmpSubsystem": "Mechanism2d",
+      "/SmartDashboard/ClimberSubsystem": "Mechanism2d",
       "/SmartDashboard/FlushOften": "String Chooser",
+      "/SmartDashboard/FlywheelShooter": "Mechanism2d",
+      "/SmartDashboard/IndexerSubsystem": "Mechanism2d",
+      "/SmartDashboard/IntakeWheel": "Mechanism2d",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
@@ -54,7 +59,27 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/AmpSubsystem": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/ClimberSubsystem": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/FlushOften": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/FlywheelShooter": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/IntakeWheel": {
         "window": {
           "visible": true
         }
@@ -89,6 +114,21 @@
           "open": true
         }
       },
+      "ClimberSubsystem": {
+        "Left": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
       "Command100": {
         "DriveManually": {
           "ManualChassisSpeeds": {
@@ -104,6 +144,21 @@
         "string[]##v_/Experiments/enabled": {
           "open": true
         }
+      },
+      "FlywheelShooter": {
+        "Left": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
       },
       "Indexer": {
         "encoder": {
@@ -126,6 +181,18 @@
         "Top Roller": {
           "open": true
         }
+      },
+      "IntakeWheel": {
+        "OutboardVelocityServo": {
+          "open": true
+        },
+        "SimulatedEncoder": {
+          "open": true
+        },
+        "SimulatedMotor": {
+          "open": true
+        },
+        "open": true
       },
       "Rear Right": {
         "Drive": {
@@ -295,6 +362,7 @@
         "open": true
       },
       "open": true
-    }
+    },
+    "visible": true
   }
 }
