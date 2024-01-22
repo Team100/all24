@@ -43,7 +43,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     }
 
     public void setDrive(double value) {
-        driveMotor.setVelocity(value);
+        driveMotor.setDutyCycle(value);
     }
     
     @Override

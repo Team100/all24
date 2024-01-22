@@ -100,7 +100,7 @@ public class RobotContainer implements SelfTestable {
     // Identity-specific fields
     private final IndexerSubsystem m_indexer;
     private final AmpSubsystem m_amp;
-    private final ClimberSubsystem m_climber;
+    // private final ClimberSubsystem m_climber;
     private final Shooter m_shooter;
     private final Intake m_intake;
 
@@ -165,13 +165,13 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 3, 6);
-        m_shooter = ShooterFactory.get(SubsystemChoice.FlywheelShooter, 7, 8);
+        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 13, -1); //3 6
+        m_shooter = ShooterFactory.get(SubsystemChoice.DrumShooter, 5, 4); //7 8
 
-        m_indexer = new IndexerSubsystem(5); // NEED CAN FOR AMP MOTOR
+        m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
 
-        m_climber = new ClimberSubsystem(2, 4);
-        m_amp = new AmpSubsystem(1000, 1001);
+        // m_climber = new ClimberSubsystem(2, 9);
+        m_amp = new AmpSubsystem(28, 39);
 
         m_pivotAmp = new PivotAmp(m_amp, () -> operatorControl.climberState());
 
@@ -282,7 +282,7 @@ public class RobotContainer implements SelfTestable {
 
         // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(30.0)));
+        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(1)));
 
         /*
          * 
@@ -309,7 +309,7 @@ public class RobotContainer implements SelfTestable {
         operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.setDrive(3.5)));
 
         // TODO: presets
-        m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
+        // m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
         m_amp.setDefaultCommand(m_pivotAmp);
 
         ///////////////////////////

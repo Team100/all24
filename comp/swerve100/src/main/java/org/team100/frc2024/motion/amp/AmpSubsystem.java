@@ -63,7 +63,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         ampAngleMotorRight.setVelocity(value);
         ampAngleMotorLeft.setVelocity(value);
     }
-
+  
     public double getLeftAmpPosition() {
         return ampAngleMotorLeft.getPosition();
     }

@@ -93,21 +93,17 @@ public class SwerveModuleCollection {
                         SimulatedSwerveModule100.get(kFrontRight, kinodynamics),
                         SimulatedSwerveModule100.get(kRearLeft, kinodynamics),
                         SimulatedSwerveModule100.get(kRearRight, kinodynamics));
-            case BETA_BOT:
+            ccase BETA_BOT:
                 Util.println("************** WCP MODULES **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 11,
-                                DutyCycleTurningEncoder.class, 30, 0, 0.708328, kinodynamics),
+                                kFrontLeft, currentLimit, 3, 34, 0, 0.708328, kinodynamics),
                         WCPSwerveModule100.get(
-                                kFrontRight, currentLimit, 12,
-                                DutyCycleTurningEncoder.class, 32, 1, 0.659267, kinodynamics),
+                                kFrontRight, currentLimit, 22, 25, 1, 0.659267, kinodynamics),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 21,
-                                DutyCycleTurningEncoder.class, 31, 2, 0.396148, kinodynamics),
+                                kRearLeft, currentLimit, 13, 12, 2, 0.396148, kinodynamics),
                         WCPSwerveModule100.get(
-                                kRearRight, currentLimit, 22,
-                                DutyCycleTurningEncoder.class, 33, 3, 0.109823, kinodynamics));
+                                kRearRight, currentLimit, 11, 21, 3, 0.109823, kinodynamics));
             default:
                 Util.println("WARNING: using default module collection");
                 return new SwerveModuleCollection(

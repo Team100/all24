@@ -55,8 +55,8 @@ public class IntakeRoller extends Intake implements Speeding {
 
     @Override
     public void setIntake(double value) {
-        topRoller.setVelocity(value);
-        bottomRoller.setVelocity(value);
+        topRoller.setDutyCycle(value);
+        bottomRoller.setDutyCycle(value);
     }
 
     @Override
