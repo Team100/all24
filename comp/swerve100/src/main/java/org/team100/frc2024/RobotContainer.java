@@ -305,6 +305,7 @@ public class RobotContainer implements SelfTestable {
         // TODO: shoot only when the shooter is ready.
 
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.setDrive(0)));
+        //TODO get real desired velocity before indexing
         operatorControl.index().whileTrue(new IndexCommand(m_amp, m_indexer, m_shooter, 29));
 
         // TODO: presets
