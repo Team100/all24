@@ -10,7 +10,7 @@
       "style": "0",
       "userScale": "2",
       "width": "964",
-      "xpos": "142",
+      "xpos": "144",
       "ypos": "198"
     }
   },
@@ -33,10 +33,30 @@
     }
   },
   "Window": {
+    "###/SmartDashboard/AmpSubsystem": {
+      "Collapsed": "0",
+      "Pos": "175,410",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/ClimberSubsystem": {
+      "Collapsed": "0",
+      "Pos": "25,433",
+      "Size": "226,204"
+    },
     "###/SmartDashboard/FlushOften": {
       "Collapsed": "0",
       "Pos": "178,72",
       "Size": "200,48"
+    },
+    "###/SmartDashboard/FlywheelShooter": {
+      "Collapsed": "0",
+      "Pos": "316,186",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/IntakeWheel": {
+      "Collapsed": "0",
+      "Pos": "493,27",
+      "Size": "200,200"
     },
     "###/SmartDashboard/Manual Drive Mode": {
       "Collapsed": "0",
@@ -70,23 +90,23 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "166,310",
-      "Size": "616,132"
+      "Pos": "73,395",
+      "Size": "616,160"
     },
     "###Keyboard 1 Settings": {
       "Collapsed": "0",
-      "Pos": "213,33",
-      "Size": "200,373"
+      "Pos": "744,28",
+      "Size": "206,422"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "440,232",
+      "Pos": "459,233",
       "Size": "484,432"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "167,86",
-      "Size": "500,96"
+      "Pos": "167,87",
+      "Size": "500,95"
     },
     "###Other Devices": {
       "Collapsed": "0",

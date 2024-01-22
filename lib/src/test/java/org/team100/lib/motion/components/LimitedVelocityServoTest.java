@@ -14,7 +14,7 @@ class LimitedVelocityServoTest extends TimelessTest {
         MockVelocityServo<Distance100> mv = new MockVelocityServo<>();
         double maxVel = 1;
         double maxAccel = 1;
-        double maxDecel = 1;
+        double maxDecel = -1;
         LimitedVelocityServo<Distance100> pv = new LimitedVelocityServo<>(
                 mv, maxVel, maxAccel, maxDecel);
 

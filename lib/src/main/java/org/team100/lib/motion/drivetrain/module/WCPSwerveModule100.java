@@ -1,7 +1,10 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
@@ -25,11 +28,15 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double kDriveReduction = 5.50;
     private static final double driveEncoderDistancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
-    /** @param name like "front left" or whatever */
+    /**
+     * @param name         like "front left" or whatever
+     * @param encoderClass select the type of encoder that exists on the robot
+     */
     public static WCPSwerveModule100 get(
             String name,
             double currentLimit,
             int driveMotorCanId,
+            Class<? extends Encoder100<Angle100>> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
@@ -43,6 +50,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         PositionServo<Angle100> turningServo = turningServo(
                 name + "/Turning",
+                encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -87,6 +95,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static PositionServo<Angle100> turningServo(
             String name,
+            Class<? extends Encoder100<Angle100>> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
@@ -99,12 +108,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 true,
                 60,
                 gearRatio);
-        AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
+        Encoder100<Angle100> turningEncoder = turningEncoder(
+                encoderClass,
                 name,
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio,
-                AnalogTurningEncoder.Drive.DIRECT);
+                Drive.DIRECT);
         PIDController angleVelocityController = new PIDController(
                 2.86, // kP
                 0, // kI
@@ -142,6 +152,31 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 Angle100.instance);
         turningServo.reset();
         return turningServo;
+    }
+
+    private static Encoder100<Angle100> turningEncoder(
+            Class<?> encoderClass,
+            String name,
+            int channel,
+            double inputOffset,
+            double gearRatio,
+            Drive drive) {
+        if (encoderClass == AnalogTurningEncoder.class) {
+            return new AnalogTurningEncoder(name,
+                    channel,
+                    inputOffset,
+                    gearRatio,
+                    drive);
+        }
+        if (encoderClass == DutyCycleTurningEncoder.class) {
+            return new DutyCycleTurningEncoder(name,
+                    channel,
+                    inputOffset,
+                    gearRatio,
+                    drive);
+        }
+        throw new IllegalArgumentException("unknown encoder class: " + encoderClass.getName());
+
     }
 
     private WCPSwerveModule100(
