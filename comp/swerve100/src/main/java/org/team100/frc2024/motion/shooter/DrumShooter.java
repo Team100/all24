@@ -22,6 +22,9 @@ import org.team100.lib.util.Names;
  * TODO: add shooter to self-test
  */
 public class DrumShooter extends Shooter implements Speeding {
+    // TODO: tune the current limit
+    private static final int kCurrentLimit = 40;
+
     /**
      * Muzzle velocity of game piece exiting the shooter.
      * 
@@ -52,11 +55,13 @@ public class DrumShooter extends Shooter implements Speeding {
                         m_name + "/Top",
                         topRollerID,
                         false,
+                        kCurrentLimit,
                         params);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom",
                         bottomRollerID,
                         true,
+                        kCurrentLimit,
                         params);
                 break;
             case BLANK:

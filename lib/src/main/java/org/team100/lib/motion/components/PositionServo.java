@@ -14,7 +14,7 @@ import edu.wpi.first.math.controller.PIDController;
 /**
  * Positional control on top of a velocity servo.
  */
-public class PositionServo<T extends Measure100> {
+public class PositionServo<T extends Measure100> implements PositionServoInterface<T> {
     private final Telemetry t = Telemetry.get();
     private final VelocityServo<T> m_servo;
     private final Encoder100<T> m_encoder;
@@ -57,6 +57,7 @@ public class PositionServo<T extends Measure100> {
      * To prevent oscillation, the previous setpoint is used to compute the profile,
      * but there needs to be an initial setpoint.
      */
+    @Override
     public void reset() {
         m_controller.reset();
         m_setpoint = new State100(getPosition(), getVelocity());
@@ -65,6 +66,7 @@ public class PositionServo<T extends Measure100> {
     /**
      * @param goal For distance, use meters, For angle, use radians.
      */
+    @Override
     public void setPosition(double goal) {
         double measurement = m_instance.modulus(m_encoder.getPosition());
 
@@ -98,6 +100,7 @@ public class PositionServo<T extends Measure100> {
     }
 
     /** Direct velocity control for testing */
+    @Override
     public void setVelocity(double velocity) {
         // m_velocitySetpoint = m_profile.calculate(0.02, m_velocitySetpoint, new
         // State100(velocity, 0, 0));
@@ -105,6 +108,7 @@ public class PositionServo<T extends Measure100> {
     }
 
     /** Direct duty cycle for testing */
+    @Override
     public void setDutyCycle(double dutyCycle) {
         m_servo.setDutyCycle(dutyCycle);
     }
@@ -113,14 +117,17 @@ public class PositionServo<T extends Measure100> {
      * @return Current position measurement. For distance this is meters, for angle
      *         this is radians.
      */
+    @Override
     public double getPosition() {
         return m_instance.modulus(m_encoder.getPosition());
     }
 
+    @Override
     public double getVelocity() {
         return m_servo.getVelocity();
     }
 
+    @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
         t.log(Level.DEBUG, m_name, "Position Tolerance", m_controller.getPositionTolerance());
@@ -129,6 +136,7 @@ public class PositionServo<T extends Measure100> {
         return atSetpoint;
     }
 
+    @Override
     public boolean atGoal() {
         return atSetpoint()
                 && MathUtil.isNear(
@@ -141,23 +149,28 @@ public class PositionServo<T extends Measure100> {
                         m_controller.getVelocityTolerance());
     }
 
+    @Override
     public double getGoal() {
         return m_goal.x();
     }
 
+    @Override
     public void stop() {
         m_servo.stop();
     }
 
+    @Override
     public void close() {
         m_encoder.close();
     }
 
     /** for testing only */
+    @Override
     public State100 getSetpoint() {
         return m_setpoint;
     }
 
+    @Override
     public void periodic() {
         m_encoder.periodic();
         m_servo.periodic();
