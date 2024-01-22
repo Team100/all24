@@ -17,7 +17,7 @@ public class AmpSubsystem extends SubsystemBase {
   /** Creates a new AmpSubsystem. */
 
   private final String m_name;
-  SysParam ampAngleParameter;
+  private final SysParam ampAngleParameter;
 
   private final PositionServo<Angle100> ampAngleMotorLeft;
   private final PositionServo<Angle100> ampAngleMotorRight;
@@ -26,15 +26,15 @@ public class AmpSubsystem extends SubsystemBase {
       m_name = Names.name(this);
       ampAngleParameter = SysParam.neoPositionServoSystem(15, 8, 20);    
 
-      ampAngleMotorLeft = ServoFactory.neoPositionServo(
-            m_name, 
+      ampAngleMotorLeft = ServoFactory.neoAngleServo(
+            m_name + "/Left", 
             leftPivotID, 
             false, 
             ampAngleParameter, 
             new PIDController(1, 0, 0));
     
-      ampAngleMotorRight = ServoFactory.neoPositionServo(
-            m_name, 
+      ampAngleMotorRight = ServoFactory.neoAngleServo(
+            m_name + "/Right", 
             rightPivotID, 
             false, 
             ampAngleParameter, 

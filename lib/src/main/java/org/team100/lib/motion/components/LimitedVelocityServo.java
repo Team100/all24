@@ -20,13 +20,14 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
      * @param maxVel   maximum velocity
      * @param maxAccel maximum acceleration
      * @param maxDecel maximum deceleration: usually mechanisms can slow down faster
-     *                 than they can speed up.
+     *                 than they can speed up.  this should be a negative number.
      */
     public LimitedVelocityServo(
             VelocityServo<T> servo,
             double maxVel,
             double maxAccel,
             double maxDecel) {
+        if (maxDecel > 0) throw new IllegalArgumentException("max decel must be non-positive");
         m_servo = servo;
         m_maxVel = maxVel;
         m_limiter = new SlewRateLimiter(maxAccel, maxDecel, 0);
