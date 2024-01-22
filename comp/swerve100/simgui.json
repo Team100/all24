@@ -17,6 +17,7 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/AmpSubsystem": "Mechanism2d",
       "/SmartDashboard/ClimberSubsystem": "Mechanism2d",
+      "/SmartDashboard/DrumShooter": "Mechanism2d",
       "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/FlywheelShooter": "Mechanism2d",
       "/SmartDashboard/IndexerSubsystem": "Mechanism2d",
@@ -40,6 +41,10 @@
       "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Front Left_WCPSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Front Right_WCPSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Rear Left_WCPSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Rear Right_WCPSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/_Front Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/_Front Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
@@ -103,6 +108,24 @@
   },
   "NetworkTables": {
     "retained": {
+      "AmpSubsystem": {
+        "Left": {
+          "NeoTurningEncoder": {
+            "open": true
+          },
+          "NeoTurningMotor": {
+            "open": true
+          },
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        },
+        "Right": {
+          "open": true
+        },
+        "open": true
+      },
       "Bottom Roller": {
         "OutboardVelocityServo": {
           "open": true
@@ -140,6 +163,24 @@
           "open": true
         }
       },
+      "DrumShooter": {
+        "Bottom": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "NeoDriveMotor": {
+            "open": true
+          },
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        },
+        "Top": {
+          "open": true
+        },
+        "open": true
+      },
       "Experiments": {
         "string[]##v_/Experiments/enabled": {
           "open": true
@@ -174,6 +215,15 @@
           "open": true
         }
       },
+      "IndexerSubsystem": {
+        "NeoDriveEncoder": {
+          "open": true
+        },
+        "NeoDriveMotor": {
+          "open": true
+        },
+        "open": true
+      },
       "IntakeSubsystem": {
         "Bottom Roller": {
           "open": true
@@ -183,6 +233,12 @@
         }
       },
       "IntakeWheel": {
+        "NeoDriveEncoder": {
+          "open": true
+        },
+        "NeoDriveMotor": {
+          "open": true
+        },
         "OutboardVelocityServo": {
           "open": true
         },

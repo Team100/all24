@@ -148,7 +148,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         DriverControl.Speed speed = m_speed.get();
         if (Experiments.instance.enabled(Experiment.ShowMode))
             speed = DriverControl.Speed.SLOW;
-        t.log(Level.DEBUG, m_name, "control_speed", speed.name());
+        t.log(Level.DEBUG, m_name, "control_speed", speed);
         switch (speed) {
             case SLOW:
                 twist = GeometryUtil.scale(twist, kSlow);

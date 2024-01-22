@@ -193,6 +193,10 @@ public class Telemetry {
         }, StringArrayPublisher.class).set(val.get());
     }
 
+    public void log(Level level, String root, String leaf, Enum<?> val) {
+        log(level, root, leaf, val.name());
+    }
+
     public void log(Level level, String root, String leaf, Pose2d val) {
         log(level, Telemetry.append(root, leaf), "translation", val.getTranslation());
         log(level, Telemetry.append(root, leaf), "rotation", val.getRotation());

@@ -6,7 +6,6 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
-import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
@@ -32,6 +31,7 @@ import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
@@ -41,7 +41,6 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.OperatorControl;
-import org.team100.lib.hid.ThirdControl;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -81,11 +80,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RobotContainer implements SelfTestable {
     private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
+
     private final AutonSelector m_autonSelector;
+    private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
+    private final Alliance m_alliance;
+
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
-    private final AprilTagFieldLayoutWithCorrectOrientation layout;
+    private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollection m_modules;
 
@@ -104,7 +107,7 @@ public class RobotContainer implements SelfTestable {
     private final Shooter m_shooter;
     private final Intake m_intake;
 
-    //Commands
+    // Commands
     private final PivotAmp m_pivotAmp;
 
     private final String m_name;
@@ -116,13 +119,27 @@ public class RobotContainer implements SelfTestable {
         final DriverControl driverControl = controlFactory.getDriverControl();
         final OperatorControl operatorControl = controlFactory.getOperatorControl();
 
-        // digital inputs 0, 1, 2, 3.
-        m_autonSelector = new AutonSelector();
-        t.log(Level.INFO, m_name, "Routine", getRoutine());
-
-        // digital inputs 4, 5
-        m_allianceSelector = new AllianceSelector();
-        t.log(Level.INFO, m_name, "Alliance", m_allianceSelector.alliance().name());
+        // these devices only currently exist on the comp bot
+        if (Identity.instance == Identity.COMP_BOT) {
+            // digital inputs 0, 1, 2, 3.
+            m_autonSelector = new AutonSelector();
+            m_autonRoutine = m_autonSelector.routine();
+            // digital inputs 4, 5
+            m_allianceSelector = new AllianceSelector();
+            m_alliance = m_allianceSelector.alliance();
+        } else {
+            m_autonSelector = null;
+            m_autonRoutine = 0;
+            m_allianceSelector = null;
+            m_alliance = Alliance.Blue;
+        }
+        if (m_alliance == Alliance.Blue) {
+            m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
+        } else {
+            m_layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
+        }
+        t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
+        t.log(Level.INFO, m_name, "Alliance", m_alliance);
 
         m_indicator = new LEDIndicator(8);
 
@@ -148,14 +165,8 @@ public class RobotContainer implements SelfTestable {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        if (m_allianceSelector.alliance() == Alliance.Blue) {
-            layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
-        } else {
-            layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
-        }
-
         VisionDataProvider visionDataProvider = new VisionDataProvider(
-                layout,
+                m_layout,
                 poseEstimator,
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
@@ -165,15 +176,15 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 13, -1); //3 6
-        m_shooter = ShooterFactory.get(SubsystemChoice.DrumShooter, 5, 4); //7 8
+        m_intake = IntakeFactory.get();
+        m_shooter = ShooterFactory.get();
 
         m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
 
         // m_climber = new ClimberSubsystem(2, 9);
         m_amp = new AmpSubsystem(28, 39);
 
-        m_pivotAmp = new PivotAmp(m_amp, () -> operatorControl.climberState());
+        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampState);
 
         // show mode locks slow speed.
         m_drive = new SwerveDriveSubsystem(
@@ -275,14 +286,15 @@ public class RobotContainer implements SelfTestable {
         ///////////////// OPERATOR V2//////////////////////////
 
         // TODO: run the intake if the camera sees a note.
-        m_intake.setDefaultCommand(m_intake.run(() -> m_intake.setIntake(0)));
-        operatorControl.intake().whileTrue(m_intake.run(() -> m_intake.setIntake(3)));
-        operatorControl.outtake().whileTrue(m_intake.run(() -> m_intake.setIntake(-3)));
 
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
+        operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
 
         // TODO: spin up the shooter whenever the robot is in range.
-        m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(1)));
+
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        operatorControl.shooter().whileTrue(m_shooter.run(m_shooter::forward));
 
         /*
          * 
@@ -305,11 +317,14 @@ public class RobotContainer implements SelfTestable {
         // TODO: intake whenever intake is running.
         // TODO: stop when note is accpeted using optical detector.
         // TODO: shoot only when the shooter is ready.
-        m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.setDrive(0)));
-        operatorControl.index().whileTrue(m_indexer.run(() -> m_indexer.setDrive(3.5)));
+
+        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        operatorControl.index().whileTrue(m_indexer.run(m_indexer::forward));
 
         // TODO: presets
-        // m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
+        // m_climber.setDefaultCommand(m_climber.run(() ->
+        // m_climber.set(operatorControl.climberState())));
+
         m_amp.setDefaultCommand(m_pivotAmp);
 
         ///////////////////////////
@@ -382,8 +397,10 @@ public class RobotContainer implements SelfTestable {
 
     // this keeps the tests from conflicting via the use of simulated HAL ports.
     public void close() {
-        m_autonSelector.close();
-        m_allianceSelector.close();
+        if (m_autonSelector != null)
+            m_autonSelector.close();
+        if (m_allianceSelector != null)
+            m_allianceSelector.close();
         m_indicator.close();
         m_modules.close();
     }

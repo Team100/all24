@@ -27,20 +27,20 @@ public class ControlFactory {
     };
     private final DriverControl m_DriverControl;
     private final OperatorControl m_OperatorControl;
-    private final ThirdControl m_ThirdControl;
+    // private final ThirdControl m_ThirdControl;
 
     public ControlFactory() {
         m_DriverControl = assignDriver();
         m_OperatorControl = assignOperator();
-        m_ThirdControl = assignThird();
+        // m_ThirdControl = assignThird();
 
         Util.println("********************************** CONTROLS **********************************");
         Util.printf("*   Driver HID: %23.23s     Control: %23.23s *\n", m_DriverControl.getHIDName(),
                 m_DriverControl.getClass().getSimpleName());
         Util.printf("* Operator HID: %23.23s     Control: %23.23s *\n", m_OperatorControl.getHIDName(),
                 m_OperatorControl.getClass().getSimpleName());
-        Util.printf("*    Third HID: %23.23s     Control: %23.23s *\n", m_ThirdControl.getHIDName(),
-                m_ThirdControl.getClass().getSimpleName());
+        // Util.printf("*    Third HID: %23.23s     Control: %23.23s *\n", m_ThirdControl.getHIDName(),
+        //         m_ThirdControl.getClass().getSimpleName());
         Util.println("******************************************************************************");
 
     }
@@ -156,7 +156,7 @@ public class ControlFactory {
         return m_OperatorControl;
     }
 
-    public ThirdControl getThirdControl() {
-        return m_ThirdControl;
-    }
+    // public ThirdControl getThirdControl() {
+    //     return m_ThirdControl;
+    // }
 }
