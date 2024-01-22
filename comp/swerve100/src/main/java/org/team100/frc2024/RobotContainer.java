@@ -164,8 +164,8 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 13, -1); // 3 6
-        m_shooter = ShooterFactory.get(SubsystemChoice.DrumShooter, 5, 4); // 7 8
+        m_intake = IntakeFactory.get(13, -1); // 3 6
+        m_shooter = ShooterFactory.get(5, 4); // 7 8
 
         m_indexer = new IndexerSubsystem(30); //5
 

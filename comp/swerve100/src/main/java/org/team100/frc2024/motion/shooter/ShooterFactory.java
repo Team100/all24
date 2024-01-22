@@ -1,16 +1,17 @@
 package org.team100.frc2024.motion.shooter;
 
-import org.team100.frc2024.SubsystemChoice;
+import org.team100.lib.config.Identity;
 
 public class ShooterFactory {
 
-    // TODO(sanjan): use Identity here.
-    public static Shooter get(SubsystemChoice choice, int canID1, int canID2) {
-        if (choice == SubsystemChoice.DrumShooter) {
+    public static Shooter get(int canID1, int canID2) {
+        switch (Identity.instance) {
+        case BETA_BOT:
             return new DrumShooter(canID1, canID2);
-        } else if (choice == SubsystemChoice.FlywheelShooter) {
+        case COMP_BOT:
             return new FlywheelShooter(canID1, canID2);
-        } else {
+        case BLANK:
+        default:
             return null;
         }
     }
