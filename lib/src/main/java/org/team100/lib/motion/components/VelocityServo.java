@@ -6,6 +6,11 @@ public interface VelocityServo<T extends Measure100> {
 
     void reset();
 
+    /**
+     * Velocity in meters/sec or radians/sec depending on T.
+     * 
+     * @param setpoint
+     */
     void setVelocity(double setpoint);
 
     /** Direct control for testing. */

@@ -49,4 +49,9 @@ public class Fixture {
         controller = new HolonomicDriveController3();
     }
 
+    public void close() {
+        // close the DIO inside the turning encoder
+        collection.close();
+    }
+
 }

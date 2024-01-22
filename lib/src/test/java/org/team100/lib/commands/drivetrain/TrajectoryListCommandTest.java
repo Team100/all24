@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
@@ -23,10 +24,16 @@ class TrajectoryListCommandTest extends TimelessTest {
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
 
+    Fixture fixture = new Fixture();
+
+    @AfterEach
+    void close() {
+        fixture.close();
+    }
+
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        Fixture fixture = new Fixture();
         HolonomicDriveController3 control = new HolonomicDriveController3();
         TrajectoryListCommand c = new TrajectoryListCommand(
                 fixture.drive,
@@ -54,7 +61,6 @@ class TrajectoryListCommandTest extends TimelessTest {
      */
     @Test
     void testLowLevel() {
-        Fixture fixture = new Fixture();
         HolonomicDriveController3 controller = new HolonomicDriveController3();
         TrajectoryListCommand command = new TrajectoryListCommand(
                 fixture.drive,
@@ -72,12 +78,12 @@ class TrajectoryListCommandTest extends TimelessTest {
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
-             Util.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
-                     command.m_timer.get(),
-                     goal.angle.getRadians(),
-                     setpoint.x(),
-                     setpoint.v(),
-                     measurement);
+                Util.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
+                        command.m_timer.get(),
+                        goal.angle.getRadians(),
+                        setpoint.x(),
+                        setpoint.v(),
+                        measurement);
         } while (!command.isFinished());
     }
 }

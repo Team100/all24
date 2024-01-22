@@ -2,17 +2,22 @@ package org.team100.lib.commands.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.testing.TimelessTest;
 
-
 class SpinTest extends TimelessTest {
     private static final double kDelta = 0.01;
 
     Fixture fixture = new Fixture();
+
+    @AfterEach
+    void close() {
+        fixture.close();
+    }
 
     @Test
     void testSimple() {

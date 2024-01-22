@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -12,6 +13,11 @@ import org.team100.lib.trajectory.TrajectoryPlanner;
 class FancyTrajectoryTest {
 
     Fixture fixture = new Fixture();
+
+    @AfterEach
+    void close() {
+        fixture.close();
+    }
 
     @Test
     void testSimple() {

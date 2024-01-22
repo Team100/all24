@@ -21,7 +21,10 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     public AmpSubsystem(int leftPivotID, int rightPivotID) {
         m_name = Names.name(this);
-        m_params = SysParam.neoPositionServoSystem(15, 8, 20);
+        m_params = SysParam.neoPositionServoSystem(
+                15,
+                8,
+                20);
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
@@ -56,20 +59,24 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     public void setAmpPosition(double value, double value2) {
         ampAngleMotorRight.setPosition(value);
         ampAngleMotorLeft.setPosition(value2);
-
     }
 
     public void setAmpVelocity(double value) {
         ampAngleMotorRight.setVelocity(value);
         ampAngleMotorLeft.setVelocity(value);
     }
-  
+
     public double getLeftAmpPosition() {
         return ampAngleMotorLeft.getPosition();
     }
 
     public double getRightAmpPosition() {
         return ampAngleMotorRight.getPosition();
+    }
+
+    public void stop() {
+        ampAngleMotorRight.stop();
+        ampAngleMotorLeft.stop();
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -22,11 +23,18 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SwerveDriveSubsystemTest extends TimelessTest {
+
     private static final double kDelta = 0.001;
+
+    Fixture fixture = new Fixture();
+
+    @AfterEach
+    void close() {
+        fixture.close();
+    }
 
     @Test
     void testSimple() {
-        Fixture fixture = new Fixture();
 
         MockHeading heading = new MockHeading();
 
@@ -61,7 +69,6 @@ class SwerveDriveSubsystemTest extends TimelessTest {
 
         stepTime(0.02);
 
-
         drive.setChassisSpeeds(new ChassisSpeeds(), 0.02);
 
         stepTime(0.02);
@@ -90,8 +97,6 @@ class SwerveDriveSubsystemTest extends TimelessTest {
     @Test
     void testAccel() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-
-        Fixture fixture = new Fixture();
 
         MockHeading heading = new MockHeading();
 

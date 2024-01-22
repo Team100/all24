@@ -30,7 +30,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     /**
      * @param name         like "front left" or whatever
+     * @param curerntLimit in amps
+     * @param driveMotorCanId
      * @param encoderClass select the type of encoder that exists on the robot
+     * @param turningMotorCanId
+     * @param turningEncoderChannel
+     * @param turningOffset
+     * @param kinodynamics
      */
     public static WCPSwerveModule100 get(
             String name,

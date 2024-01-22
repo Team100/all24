@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 
@@ -11,9 +12,15 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 /** Just exercises some code. */
 class SwerveLocalTest {
 
+    Fixture fixture = new Fixture();
+
+    @AfterEach
+    void close() {
+        fixture.close();
+    }
+
     @Test
     void testSimple() {
-        Fixture fixture = new Fixture();
         SwerveModuleCollection modules = fixture.collection;
         SwerveLocal local = fixture.swerveLocal;
 

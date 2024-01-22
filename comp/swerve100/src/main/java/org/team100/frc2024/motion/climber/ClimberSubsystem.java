@@ -13,6 +13,18 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
+ * Dual winch climber.
+ * 
+ * Typical free speed of 6k rpm => 100 turn/sec
+ * diameter of 0.01m => 0.0314 m/turn
+ * therefore top speed is around 3 m/s.
+ * There's no reason to go so fast though.
+ * 
+ * Try a reasonable accel value.
+ * 
+ * TODO: this mechanism can self-destruct without positional limits, so add
+ * some.
+ * 
  * TODO: add climber to selftest.
  */
 public class ClimberSubsystem extends SubsystemBase implements Positioning {
@@ -24,7 +36,12 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
-        m_params = new SysParam(20.0, 0.01, 1, 1, -1);
+        m_params = new SysParam(
+                20.0,
+                0.01,
+                1,
+                3,
+                -3);
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
@@ -52,7 +69,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         m_params,
                         new PIDController(1, 0, 0));
         }
-                m_viz = new SimpleVisualization(m_name, this);
+        m_viz = new SimpleVisualization(m_name, this);
     }
 
     /** Set velocity in meters per second */

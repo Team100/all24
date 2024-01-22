@@ -34,44 +34,47 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
         reset();
     }
 
+    @Override
     public void reset() {
         m_servo.reset();
         m_limiter.reset(0);
     }
 
+    @Override
     public void setVelocity(double goal) {
         double setpoint = m_limiter.calculate(goal);
         setpoint = MathUtil.clamp(setpoint, -m_maxVel, m_maxVel);
         m_servo.setVelocity(setpoint);
     }
 
+    @Override
     public void setDutyCycle(double dutyCycle) {
         m_servo.setDutyCycle(dutyCycle);
     }
 
+    @Override
     public double getVelocity() {
         return m_servo.getVelocity();
     }
 
+    @Override
     public void stop() {
         m_servo.stop();
         m_limiter.reset(0);
     }
 
+    @Override
     public double getDistance() {
         return m_servo.getDistance();
     }
 
+    @Override
     public double getSetpoint() {
         return m_servo.getSetpoint();
     }
 
+    @Override
     public void periodic() {
         m_servo.periodic();
     }
-
-    public void getMotor(){
-        
-    }
-
 }
