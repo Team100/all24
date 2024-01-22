@@ -164,10 +164,10 @@ public class RobotContainer implements SelfTestable {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
-        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 13, -1); //3 6
-        m_shooter = ShooterFactory.get(SubsystemChoice.DrumShooter, 5, 4); //7 8
+        m_intake = IntakeFactory.get(SubsystemChoice.WheelIntake, 13, -1); // 3 6
+        m_shooter = ShooterFactory.get(SubsystemChoice.DrumShooter, 5, 4); // 7 8
 
-        m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
+        m_indexer = new IndexerSubsystem(30); //5
 
         // m_climber = new ClimberSubsystem(2, 9);
         m_amp = new AmpSubsystem(28, 39);
@@ -280,7 +280,7 @@ public class RobotContainer implements SelfTestable {
 
         // TODO: spin up the shooter whenever the robot is in range.
         m_shooter.setDefaultCommand(m_shooter.run(() -> m_shooter.setVelocity(0.0)));
-        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(1)));
+        operatorControl.shooter().whileTrue(m_shooter.run(() -> m_shooter.setVelocity(30)));
 
         /*
          * 
@@ -305,10 +305,11 @@ public class RobotContainer implements SelfTestable {
         // TODO: shoot only when the shooter is ready.
 
         m_indexer.setDefaultCommand(m_indexer.run(() -> m_indexer.setDrive(0)));
-        operatorControl.index().whileTrue(new IndexCommand(m_amp, m_indexer,m_shooter,30));
+        operatorControl.index().whileTrue(new IndexCommand(m_amp, m_indexer, m_shooter, 29));
 
         // TODO: presets
-        // m_climber.setDefaultCommand(m_climber.run(() -> m_climber.set(operatorControl.climberState())));
+        // m_climber.setDefaultCommand(m_climber.run(() ->
+        // m_climber.set(operatorControl.climberState())));
         m_amp.setDefaultCommand(m_pivotAmp);
 
         ///////////////////////////

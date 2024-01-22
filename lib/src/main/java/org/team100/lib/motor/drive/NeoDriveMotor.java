@@ -173,6 +173,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoderVelocity = m_encoder.getVelocity();
         t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+        t.log(Level.DEBUG, m_name, "velocity (motorMeters_s)", m_encoderVelocity * m_gearRatio * m_wheelDiameter * Math.PI/ 60 );
     }
 
     /////////////////////////////////////////////////////////////////
