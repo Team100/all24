@@ -10,20 +10,23 @@ import edu.wpi.first.wpilibj.RobotController;
  * Represents a specific RoboRIO, as a key for configurations.
  * 
  * The serial numbers here can be found on the label on the back: add a leading zero.
+ * 
+ * Please keep the ID strings in lexical order.
+ * 
+ * Note that the ID string may change when you reflash the RoboRIO.
  */
 public enum Identity {
-    SWERVE_ONE("03238232"), // 0313baf3
-    SWERVE_TWO("0317f285"),
-    SQUAREBOT("031e31e3"),
-    CAMERA_DOLLY("03126d76"),
-    FRC_100_ea4("0306cea4"),
-    TEST_BOARD_8D("03063c8d"),
     TEST_BOARD_B0("030628b0"),
-    COMP_BOT("032363AC"),
+    TEST_BOARD_8D("03063c8d"),
+    FRC_100_ea4("0306cea4"),
     TEST_BOARD_6B("030d286b"),
-    RIO_2022("foo"),
-    BETA_BOT("0317f0cd"),
+    CAMERA_DOLLY("03126d76"),
     TEAM100_2018("0313baf3"),
+    BETA_BOT("0315db43"),
+    SQUAREBOT("031e31e3"),
+    SWERVE_TWO("0317f285"),
+    COMP_BOT("032363AC"),
+    SWERVE_ONE("03238232"),
     BLANK(""), // e.g. test default or simulation
     UNKNOWN(null);
 
