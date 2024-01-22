@@ -6,18 +6,20 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.wpilibj.AnalogEncoder;
-import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
+ * Encoder using the AMS 5048 PWM output through a RoboRIO DIO port.
+ * 
+ * This is a near-copy of AnalogTurningEncoder; sadly the underlying WPI types
+ * have no common parent, so there's some duplication here.
  */
-public class AnalogTurningEncoder implements Encoder100<Angle100> {
+public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     private final Telemetry t = Telemetry.get();
+
+    private final DutyCycleEncoder m_encoder;
     private final String m_name;
-    private final AnalogInput m_input;
-    private final AnalogEncoder m_encoder;
 
     private Double prevAngle = null;
     private Double prevTime = null;
@@ -27,15 +29,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     /** Current velocity, updated in periodic() */
     private double m_rateRad_S;
 
-    /**
-     * @param name        may not start with a slash
-     * @param channel     roboRIO analog input channel
-     * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
-     *                    measurement
-     * @param gearRatio
-     * @param drive       polarity
-     */
-    public AnalogTurningEncoder(
+    public DutyCycleTurningEncoder(
             String name,
             int channel,
             double inputOffset,
@@ -44,8 +38,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
-        m_input = new AnalogInput(channel);
-        m_encoder = new AnalogEncoder(m_input);
+        m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         switch (drive) {
             case DIRECT:
@@ -55,7 +48,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
                 m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
                 break;
         }
-        t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
+        t.log(Level.DEBUG, m_name, "channel", m_encoder.getSourceChannel());
     }
 
     @Override
@@ -63,17 +56,6 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         return m_positionRad;
     }
 
-    /**
-     * Current rate in rad/s.
-     * 
-     * This is simply the backward finite difference over one time step.
-     * 
-     * As such, it is likely to be very noisy.
-     * 
-     * Use a simple filter if you want a lagged, smoother measurement.
-     * 
-     * Use a Kalman filter if you can, to reduce the lag.
-     */
     @Override
     public double getRate() {
         return m_rateRad_S;
@@ -85,8 +67,8 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         m_positionRad = 0;
     }
 
+    @Override
     public void close() {
-        m_input.close();
         m_encoder.close();
     }
 
@@ -97,10 +79,9 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
         t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
         t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
-        t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
     }
 
-    //////////////////////////////////////////////
+    ////////////////////////////////////
 
     private void updatePosition() {
         m_positionRad = m_encoder.getDistance();
@@ -124,4 +105,5 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
 
         m_rateRad_S = dx / dt;
     }
+
 }

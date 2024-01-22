@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
@@ -40,7 +41,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            AnalogTurningEncoder.Drive turningDrive,
+            Drive turningDrive,
             SwerveKinodynamics kinodynamics) {
         name = m_name + "/" + name;
 
@@ -96,7 +97,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            AnalogTurningEncoder.Drive turningDrive,
+            Drive turningDrive,
             SwerveKinodynamics kinodynamics) {
         CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(

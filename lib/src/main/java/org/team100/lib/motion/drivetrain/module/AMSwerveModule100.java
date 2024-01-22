@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
@@ -96,7 +97,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio,
-                AnalogTurningEncoder.Drive.DIRECT);
+                Drive.DIRECT);
 
         PIDController angleVelocityController = new PIDController(
                 0.5, // kP
