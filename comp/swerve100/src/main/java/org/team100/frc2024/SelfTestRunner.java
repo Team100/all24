@@ -10,6 +10,7 @@ import org.team100.frc2024.selftest.ShooterSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.Oscillate;
+import org.team100.lib.commands.drivetrain.Veering;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.selftest.BatterySelfTest;
@@ -19,6 +20,7 @@ import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.selftest.SquareSelfTest;
+import org.team100.lib.selftest.VeeringSelfTest;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
 
@@ -40,6 +42,13 @@ public class SelfTestRunner extends Command {
     public static class SelfTestEnableException extends RuntimeException {
     }
 
+    // You can select which groups of tests to run. Running them
+    // all takes a lot of space and long time.
+    private static final boolean kTestDrivetrain = false;
+    private static final boolean kTestOscillate = false;
+    private static final boolean kTestVeering = false;
+    private static final boolean kTestMechanisms = true;
+
     private static final int kLimit = 10;
     private final RobotContainer m_container;
     private final SequentialCommandGroup m_group;
@@ -53,11 +62,7 @@ public class SelfTestRunner extends Command {
         m_group = new SequentialCommandGroup();
         m_listener = new SelfTestListener();
 
-        // a blocking beep to start the test
-        // the duration is set here to make sure it happens at the right time
-        // this is a simple beep
-        // addCase(new InstantCommand(() -> m_container.m_beep.setDuration(2)));
-        // this is morse code
+        // a blocking morse code message to start the test
         addCase(new InstantCommand(() -> m_container.m_beep.setMessage("TEST")));
         addCase(m_container.m_beep);
 
@@ -66,58 +71,60 @@ public class SelfTestRunner extends Command {
 
         SwerveDriveSubsystem drivetrain = m_container.m_drive;
 
-        // "treatment" is in situ.
-        // addCase(new SquareSelfTest(drivetrain, m_listener),
-        // m_container.m_driveInALittleSquare);
+        if (kTestDrivetrain) {
+            // "treatment" is in situ.
+            addCase(new SquareSelfTest(drivetrain, m_listener), m_container.m_driveInALittleSquare);
 
-        // treatment is a specific manual input, supplied by the test case.
-        DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
+            // treatment is a specific manual input, supplied by the test case.
+            DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
 
-        PIDController thetaController = new PIDController(3.5, 0, 0);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(3.5, 0, 0);
-        DriveManually driveManually = new DriveManually(
-                () -> ManualMode.Mode.MODULE_STATE,
-                driveManuallyTest::treatment,
-                drivetrain,
-                m_container.m_heading,
-                SwerveKinodynamicsFactory.forTest(),
-                () -> null,
-                thetaController,
-                omegaController,
-                () -> null,
-                () -> false);
-        addCase(driveManuallyTest, driveManually);
+            PIDController thetaController = new PIDController(3.5, 0, 0);
+            thetaController.enableContinuousInput(-Math.PI, Math.PI);
+            PIDController omegaController = new PIDController(3.5, 0, 0);
+            DriveManually driveManually = new DriveManually(
+                    () -> ManualMode.Mode.MODULE_STATE,
+                    driveManuallyTest::treatment,
+                    drivetrain,
+                    m_container.m_heading,
+                    SwerveKinodynamicsFactory.forTest(),
+                    () -> null,
+                    thetaController,
+                    omegaController,
+                    () -> null,
+                    () -> false);
+            addCase(driveManuallyTest, driveManually);
 
-        // this only tests the end-state
-        addCase(new DefenseSelfTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
+            // this only tests the end-state
+            addCase(new DefenseSelfTest(drivetrain, m_listener), drivetrain.run(drivetrain::defense));
+        }
 
-        // these take a long time
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new
-        // Oscillate(drivetrain));
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new
-        // Oscillate(drivetrain));
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new
-        // Oscillate(drivetrain));
-        // addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new
-        // Oscillate(drivetrain));
+        if (kTestOscillate) {
+            // these take a long time
+            addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
+        }
 
-        // ALERT! This test goes FAAAAAST! ALERT!
-        // addCase(new VeeringSelfTest(m_listener), new Veering(drivetrain));
+        if (kTestVeering) {
+            // ALERT! This test goes FAAAAAST! ALERT!
+            addCase(new VeeringSelfTest(m_listener), new Veering(drivetrain));
+        }
 
-        // subsystem tests
+        if (kTestMechanisms) {
+            // mechanism tests
+            IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
+            addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
 
-        IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
-        addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
+            IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
+            addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
 
-        IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
-        addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
+            AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
+            addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
 
-        AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
-        addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
-
-        ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
-        addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
+            ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
+            addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
+        }
 
         // since we print to the console we don't want warning noise
         DriverStation.silenceJoystickConnectionWarning(true);
@@ -138,7 +145,6 @@ public class SelfTestRunner extends Command {
         while (!m_enable.getAsBoolean()) {
             if (waitCounter > kLimit) {
                 Util.warn("Cancelling self test due to enable");
-                // throw new SelfTestEnableException();
                 cancel();
             }
             Util.println("Hold down enable (operator start, '8' in sim) to proceed...");

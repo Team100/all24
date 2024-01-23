@@ -1,7 +1,6 @@
 package org.team100.frc2024.selftest;
 
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
-import org.team100.frc2024.motion.intake.Intake;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
