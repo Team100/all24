@@ -20,6 +20,8 @@ import org.team100.lib.util.Names;
  * up, so set the acceleration a bit higher than that to start.
  */
 public class FlywheelShooter extends Shooter implements Speeding {
+    // TODO: tune the current limit
+    private static final int kCurrentLimit = 40;
     /**
      * Muzzle velocity of game piece exiting the shooter.
      * 
@@ -50,11 +52,13 @@ public class FlywheelShooter extends Shooter implements Speeding {
                         m_name + "/Left",
                         leftShooterID,
                         false,
+                        kCurrentLimit,
                         params);
                 rightShooter = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Right",
                         rightShooterID,
                         false,
+                        kCurrentLimit,
                         params);
                 break;
             case BLANK:

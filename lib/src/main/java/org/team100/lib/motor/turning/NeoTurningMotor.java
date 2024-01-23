@@ -7,6 +7,7 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -20,7 +21,6 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
  * This is not finished, don't use it without finishing it.
  */
 public class NeoTurningMotor implements Motor100<Angle100> {
-    private static final int kCurrentLimit = 40;
     private final RelativeEncoder m_encoder;
 
     private static final double staticFrictionFFVolts = 0.1;
@@ -71,27 +71,32 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase, double gearRatio) {
+    public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
-        m_motor.restoreFactoryDefaults();
+        require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
         m_motor.setInverted(!motorPhase);
-        m_motor.setSmartCurrentLimit(kCurrentLimit);
+        require(m_motor.setSmartCurrentLimit(currentLimit));
 
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
-        m_pidController.setPositionPIDWrappingEnabled(true);
-        m_pidController.setP(outboardP);
-        m_pidController.setI(0);
-        m_pidController.setD(0);
-        m_pidController.setIZone(0);
-        m_pidController.setFF(0);
-        m_pidController.setOutputRange(-1, 1);
+        require(m_pidController.setPositionPIDWrappingEnabled(true));
+        require(m_pidController.setP(outboardP));
+        require(m_pidController.setI(0));
+        require(m_pidController.setD(0));
+        require(m_pidController.setIZone(0));
+        require(m_pidController.setFF(0));
+        require(m_pidController.setOutputRange(-1, 1));
 
         m_name = Names.append(name, this);
 
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
+    }
+
+    private void require(REVLibError responseCode) {
+        if (responseCode != REVLibError.kOk )
+        throw new IllegalStateException();
     }
 
     @Override

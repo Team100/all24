@@ -25,6 +25,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * TODO: add indexer to selftest.
  */
 public class IndexerSubsystem extends SubsystemBase implements Speeding {
+    // TODO: tune the current limit
+    private static final int kCurrentLimit = 30;
+
     /**
      * Surface velocity of whatever is turning in the indexer.
      */
@@ -48,6 +51,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
                         m_name,
                         driveID,
                         true,
+                        kCurrentLimit,
                         params);
                 break;
             case BLANK:

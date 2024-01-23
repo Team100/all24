@@ -5,6 +5,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.SimulatedMotor;
@@ -52,7 +53,7 @@ public class SimpleSubsystemFactory {
                 feedforward);
         PIDController positionController = new PIDController(1, 0, 0);
 
-        PositionServo<Distance100> actuator = new PositionServo<>(
+        PositionServoInterface<Distance100> actuator = new PositionServo<>(
                 "simple/position",
                 velocityServo,
                 encoder,
@@ -83,7 +84,7 @@ public class SimpleSubsystemFactory {
                 feedforward);
 
         PIDController positionController = new PIDController(1, 0, 0);
-        PositionServo<Distance100> actuator = new PositionServo<>(
+        PositionServoInterface<Distance100> actuator = new PositionServo<>(
                 "simple/position",
                 velocityServo,
                 encoder,

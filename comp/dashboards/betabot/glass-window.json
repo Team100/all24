@@ -195,12 +195,12 @@
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "979,490",
+      "Pos": "17,459",
       "Size": "342,186"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "376,263",
+      "Pos": "303,263",
       "Size": "574,544"
     },
     "###NetworkTables Info": {
@@ -220,13 +220,18 @@
     },
     "###Plot <0>": {
       "Collapsed": "0",
-      "Pos": "631,35",
-      "Size": "442,582"
+      "Pos": "1130,41",
+      "Size": "527,281"
+    },
+    "###Plot <1>": {
+      "Collapsed": "0",
+      "Pos": "959,549",
+      "Size": "700,313"
     },
     "###Plot <2>": {
       "Collapsed": "0",
-      "Pos": "60,60",
-      "Size": "49,72"
+      "Pos": "907,259",
+      "Size": "426,271"
     },
     "About": {
       "Collapsed": "0",
