@@ -69,6 +69,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * 
      * TODO: calibrate to the horizontal, reset the actual angle at the stop,
      * and/or use an absolute encoder.
+     * 
      * @param value
      */
     public void setAmpPosition(double value) {
@@ -84,6 +85,15 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     @Override
     public double getPositionRad() {
         return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) / 2;
+    }
+
+    public boolean inPosition() {
+        // TODO get real values here
+        if (getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

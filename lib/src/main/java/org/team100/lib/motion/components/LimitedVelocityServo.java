@@ -52,6 +52,9 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
         m_servo.setDutyCycle(dutyCycle);
     }
 
+    /*
+     * Units are Meters Per Second
+     */
     @Override
     public double getVelocity() {
         return m_servo.getVelocity();
