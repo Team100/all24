@@ -25,12 +25,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * TODO: add indexer to selftest.
  */
 public class IndexerSubsystem extends SubsystemBase implements Speeding {
+    // TODO: tune the current limit
+    private static final int kCurrentLimit = 30;
+
     /**
      * Surface velocity of whatever is turning in the indexer.
      */
     private static final double kIndexerVelocityM_S = 3;
     private final String m_name;
-    private final LimitedVelocityServo<Distance100> driveMotor;
+    private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
 
     public IndexerSubsystem(int driveID) {
@@ -44,15 +47,16 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
-                driveMotor = ServoFactory.limitedNeoVelocityServo(
+                m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,
-                        false,
+                        true,
+                        kCurrentLimit,
                         params);
                 break;
             case BLANK:
             default:
-                driveMotor = ServoFactory.limitedSimulatedVelocityServo(
+                m_servo = ServoFactory.limitedSimulatedVelocityServo(
                         m_name,
                         params);
         }
@@ -60,21 +64,21 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     }
 
     public void forward() {
-        driveMotor.setVelocity(kIndexerVelocityM_S);
+        m_servo.setVelocity(kIndexerVelocityM_S);
     }
 
     public void stop() {
-        driveMotor.stop();
+        m_servo.stop();
     }
     
     @Override
     public double getVelocity() {
-        return driveMotor.getVelocity();
+        return m_servo.getVelocity();
     }
 
     @Override
     public void periodic() {
-        driveMotor.periodic();
+        m_servo.periodic();
         m_viz.periodic();
     }
 }

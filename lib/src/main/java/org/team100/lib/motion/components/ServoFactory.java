@@ -33,11 +33,13 @@ public class ServoFactory {
             String name,
             int canId,
             boolean motorPhase,
+            int currentLimit,
             SysParam param) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
                 motorPhase,
+                currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
@@ -73,16 +75,18 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static PositionServo<Angle100> neoAngleServo(
+    public static PositionServoInterface<Angle100> neoAngleServo(
             String name,
             int canId,
             boolean motorPhase,
+            int currentLimit,
             SysParam param,
             PIDController controller) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
                 canId,
                 motorPhase,
+                currentLimit,
                 param.gearRatio());
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
@@ -102,7 +106,7 @@ public class ServoFactory {
                 Angle100.instance);
     }
 
-    public static PositionServo<Angle100> simulatedAngleServo(
+    public static PositionServoInterface<Angle100> simulatedAngleServo(
             String name,
             SysParam param,
             PIDController controller) {
@@ -131,16 +135,18 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static PositionServo<Distance100> neoDistanceServo(
+    public static PositionServoInterface<Distance100> neoDistanceServo(
             String name,
             int canId,
             boolean motorPhase,
+            int currentLimit,
             SysParam param,
             PIDController controller) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
                 motorPhase,
+                currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter());
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
@@ -161,7 +167,7 @@ public class ServoFactory {
                 Distance100.instance);
     }
 
-    public static PositionServo<Distance100> simulatedDistanceServo(
+    public static PositionServoInterface<Distance100> simulatedDistanceServo(
             String name,
             SysParam param,
             PIDController controller) {

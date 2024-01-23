@@ -22,6 +22,9 @@ import org.team100.lib.util.Names;
  * TODO: add intake to selftest.
  */
 public class IntakeRoller extends Intake implements Speeding {
+    // TODO: tune the current limit
+    private static final int kCurrentLimit = 30;
+
     /**
      * Surface velocity of whatever is turning in the intake.
      */
@@ -47,11 +50,13 @@ public class IntakeRoller extends Intake implements Speeding {
                         m_name + "/Top Roller",
                         topCAN,
                         false,
+                        kCurrentLimit,
                         rollerParameter);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom Roller",
                         bottomCAN,
                         false,
+                        kCurrentLimit,
                         rollerParameter);
                 break;
             case BLANK:

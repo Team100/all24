@@ -4,6 +4,7 @@ import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -50,7 +51,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 currentLimit,
                 driveMotorCanId);
 
-        PositionServo<Angle100> turningServo = turningServo(
+        PositionServoInterface<Angle100> turningServo = turningServo(
                 name + "/Turning",
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -92,7 +93,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 driveFeedforward);
     }
 
-    private static PositionServo<Angle100> turningServo(
+    private static PositionServoInterface<Angle100> turningServo(
             String name,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -127,7 +128,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle100> turningServo = new PositionServo<>(
+        PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
                 turningVelocityServo,
                 turningEncoder,
@@ -142,7 +143,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     private AMCANSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            PositionServoInterface<Angle100> turningServo) {
         super(name, driveServo, turningServo);
     }
 }

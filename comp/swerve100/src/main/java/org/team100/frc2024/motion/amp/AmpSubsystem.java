@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.AngularVisualization;
 import org.team100.lib.motion.simple.Positioning;
@@ -16,10 +16,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * A 1-dof arm driven by two separate motors with opposite phases.
  */
 public class AmpSubsystem extends SubsystemBase implements Positioning {
+    // ALERT! notice this very high current limit!!  ALERT! 
+    private static final int kCurrentLimit = 80;
+
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServo<Angle100> ampAngleServoLeft;
-    private final PositionServo<Angle100> ampAngleServoRight;
+    private final PositionServoInterface<Angle100> ampAngleServoLeft;
+    private final PositionServoInterface<Angle100> ampAngleServoRight;
     private final AngularVisualization m_viz;
 
     public AmpSubsystem(int leftPivotID, int rightPivotID) {
@@ -34,7 +37,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 ampAngleServoLeft = ServoFactory.neoAngleServo(
                         m_name + "/Left",
                         leftPivotID,
-                        false,
+                        true,
+                        kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0));
 
@@ -42,6 +46,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         m_name + "/Right",
                         rightPivotID,
                         false,
+                        kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0));
                 break;
@@ -64,6 +69,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * 
      * TODO: calibrate to the horizontal, reset the actual angle at the stop,
      * and/or use an absolute encoder.
+     * 
      * @param value
      */
     public void setAmpPosition(double value) {
@@ -79,6 +85,15 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     @Override
     public double getPositionRad() {
         return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) / 2;
+    }
+
+    public boolean inPosition() {
+        // TODO get real values here
+        if (getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
