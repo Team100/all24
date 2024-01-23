@@ -2,24 +2,17 @@ package org.team100.lib.commands.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
-class DriveToWaypoint100Test {
+class DriveToWaypoint100Test extends Fixtured {
     private static final double kDelta = 0.001;
-    Fixture fixture = new Fixture();
-
-    @AfterEach
-    void close() {
-        fixture.close();
-    }
 
     @Test
     void testWithPID() {

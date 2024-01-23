@@ -19,7 +19,7 @@ import org.team100.lib.util.Names;
  * Empirically it seems to take a second or so to spin
  * up, so set the acceleration a bit higher than that to start.
  */
-public class FlywheelShooter extends Shooter implements Speeding {
+public class FlywheelShooter extends Shooter {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 40;
     /**

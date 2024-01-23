@@ -21,15 +21,14 @@ import org.team100.lib.util.Names;
  * 
  * TODO: add intake to selftest.
  */
-public class IntakeRoller extends Intake implements Speeding {
+public class IntakeRoller extends Intake {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 30;
 
     /**
      * Surface velocity of whatever is turning in the intake.
      */
-    final double kIntakeVelocityM_S = 3;
-
+    private static final double kIntakeVelocityM_S = 3;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;

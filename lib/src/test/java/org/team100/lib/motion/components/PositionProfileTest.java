@@ -8,14 +8,14 @@ import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-class PositionProfileTest extends TimelessTest {
+class PositionProfileTest implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
 
