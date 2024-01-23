@@ -10,13 +10,13 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 
-class ArmTrajectoryCommandTest extends TimelessTest {
+class ArmTrajectoryCommandTest implements Timeless {
     private static final double kDelta = 0.001;
 
     @Test

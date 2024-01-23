@@ -3,9 +3,9 @@ package org.team100.lib.motion.arm;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 
-class ArmSubsystemTest extends TimelessTest {
+class ArmSubsystemTest implements Timeless {
     private static final double kDelta = 0.001;
 
     // test simple direct motion

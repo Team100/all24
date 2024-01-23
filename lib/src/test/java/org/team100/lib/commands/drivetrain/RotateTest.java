@@ -3,26 +3,18 @@ package org.team100.lib.commands.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 
-class RotateTest extends TimelessTest {
+class RotateTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.02;
-
-    Fixture fixture = new Fixture();
-
-    @AfterEach
-    void close() {
-        fixture.close();
-    }
 
     @Test
     void testRotate() {
