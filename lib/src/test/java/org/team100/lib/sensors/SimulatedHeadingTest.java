@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-class SimulatedHeadingTest extends TimelessTest {
+class SimulatedHeadingTest implements Timeless {
     private static final double kDelta = 0.001;
 
     @Test

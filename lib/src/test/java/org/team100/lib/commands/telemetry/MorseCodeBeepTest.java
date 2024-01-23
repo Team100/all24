@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.MorseCode;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 
-class MorseCodeBeepTest extends TimelessTest {
+class MorseCodeBeepTest implements Timeless {
     @Test
     void testEmpty() {
         MorseCodeBeep b = new MorseCodeBeep(1);

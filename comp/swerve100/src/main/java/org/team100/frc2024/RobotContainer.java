@@ -51,8 +51,6 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.selftest.SelfTestRunner;
-import org.team100.lib.selftest.SelfTestable;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
@@ -77,7 +75,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class RobotContainer implements SelfTestable {
+public class RobotContainer {
     private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
@@ -86,26 +84,26 @@ public class RobotContainer implements SelfTestable {
     private final AllianceSelector m_allianceSelector;
     private final Alliance m_alliance;
 
-    private final HeadingInterface m_heading;
+    final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
-    private final SwerveDriveSubsystem m_drive;
+    final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollection m_modules;
 
     private final Command m_auton;
 
     private final DrawSquare m_drawCircle;
     private final SelfTestRunner m_selfTest;
-    private final DriveInALittleSquare m_driveInALittleSquare;
-    private final MorseCodeBeep m_beep;
-    private final Monitor m_monitor;
+    final DriveInALittleSquare m_driveInALittleSquare;
+    final MorseCodeBeep m_beep;
+    final Monitor m_monitor;
 
     // Identity-specific fields
-    private final IndexerSubsystem m_indexer;
-    private final AmpSubsystem m_amp;
+    final IndexerSubsystem m_indexer;
+    final AmpSubsystem m_amp;
     // private final ClimberSubsystem m_climber;
-    private final Shooter m_shooter;
-    private final Intake m_intake;
+    final Shooter m_shooter;
+    final Intake m_intake;
 
     // Commands
     private final PivotAmp m_pivotAmp;
@@ -374,11 +372,6 @@ public class RobotContainer implements SelfTestable {
         return m_autonSelector.routine();
     }
 
-    @Override
-    public MorseCodeBeep getBeep() {
-        return m_beep;
-    }
-
     public void ledStart() {
         m_indicator.set(State.ORANGE);
     }
@@ -405,31 +398,4 @@ public class RobotContainer implements SelfTestable {
         m_modules.close();
     }
 
-    //////////////////////////////////
-    //
-    // for testing
-
-    public SwerveDriveSubsystem getSwerveDriveSubsystem() {
-        return m_drive;
-    }
-
-    @Override
-    public Command getDrawCircle() {
-        return m_drawCircle;
-    }
-
-    @Override
-    public DriveInALittleSquare getDriveInALittleSquare() {
-        return m_driveInALittleSquare;
-    }
-
-    @Override
-    public Monitor getMonitor() {
-        return m_monitor;
-    }
-
-    @Override
-    public HeadingInterface getHeading() {
-        return m_heading;
-    }
 }

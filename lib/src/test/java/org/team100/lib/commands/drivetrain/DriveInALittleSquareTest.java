@@ -4,26 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-class DriveInALittleSquareTest extends TimelessTest {
+class DriveInALittleSquareTest extends Fixtured implements Timeless  {
     boolean dump = false;
     private static final double kDelta = 0.001;
 
-    Fixture fixture = new Fixture();
-
-    @AfterEach
-    void close() {
-        fixture.close();
-    }
 
     /** Confirm that the steering commands are simple steps. */
     @Test

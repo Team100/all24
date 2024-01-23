@@ -28,7 +28,7 @@ public class IntakeWheel extends Intake implements Speeding {
     /**
      * Surface velocity of whatever is turning in the intake.
      */
-    final double kIntakeVelocityM_S = 3;
+    private static final double kIntakeVelocityM_S = 3;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;

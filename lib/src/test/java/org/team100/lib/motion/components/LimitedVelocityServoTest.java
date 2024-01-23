@@ -3,10 +3,10 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.testing.Timeless;
 import org.team100.lib.units.Distance100;
 
-class LimitedVelocityServoTest extends TimelessTest {
+class LimitedVelocityServoTest implements Timeless {
     private static final double kDelta = 0.0001;
 
     @Test

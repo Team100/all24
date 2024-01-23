@@ -14,6 +14,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
 import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -25,15 +26,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
-class DriveToWaypoint3Test {
+class DriveToWaypoint3Test extends Fixtured {
     private static final double kDelta = 0.001;
-
-    private final Fixture fixture = new Fixture();
-
-    @AfterEach
-    void close() {
-        fixture.close();
-    }
 
     @Test
     void testSimple() {

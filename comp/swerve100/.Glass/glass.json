@@ -116,6 +116,9 @@
       }
     }
   },
+  "NetworkTables Info": {
+    "visible": true
+  },
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
     "serverTeam": "localhost"
@@ -135,7 +138,7 @@
             0.9399999976158142,
             1.0
           ],
-          "height": -12,
+          "height": -6,
           "series": [
             {
               "color": [

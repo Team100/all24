@@ -69,12 +69,7 @@
           "visible": true
         }
       },
-      "/SmartDashboard/ClimberSubsystem": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/FlywheelShooter": {
+      "/SmartDashboard/DrumShooter": {
         "window": {
           "visible": true
         }

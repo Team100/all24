@@ -6,30 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.drivetrain.Fixture;
-import org.team100.lib.testing.TimelessTest;
+import org.team100.lib.motion.drivetrain.Fixtured;
+import org.team100.lib.testing.Timeless;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-class TrajectoryListCommandTest extends TimelessTest {
+class TrajectoryListCommandTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
-
-    Fixture fixture = new Fixture();
-
-    @AfterEach
-    void close() {
-        fixture.close();
-    }
 
     @Test
     void testSimple() {

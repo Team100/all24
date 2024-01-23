@@ -49,7 +49,6 @@ public class OscillateSelfTest extends Command {
     @Override
     public String getName() {
         return super.getName() + String.format(" direct: %b rotation: %b", m_direct, m_rotation);
-
     }
 
     @Override

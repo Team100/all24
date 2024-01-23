@@ -11,21 +11,21 @@ import edu.wpi.first.wpilibj.simulation.SimHooks;
  * 
  * Pausing the timer makes the tests deterministic.
  */
-public class TimelessTest {
+public interface Timeless {
 
     @BeforeEach
-    void before() {
+    default void pauseTiming() {
         HAL.initialize(500, 0);
         SimHooks.pauseTiming();
     }
 
     @AfterEach
-    void after() {
+    default void resumeTiming() {
         SimHooks.resumeTiming();
         HAL.shutdown();
     }
 
-    protected void stepTime(double t) {
+    default void stepTime(double t) {
         SimHooks.stepTiming(t);
     }
 
