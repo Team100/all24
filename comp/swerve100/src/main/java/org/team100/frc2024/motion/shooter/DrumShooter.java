@@ -21,7 +21,7 @@ import org.team100.lib.util.Names;
  * 
  * TODO: add shooter to self-test
  */
-public class DrumShooter extends Shooter implements Speeding {
+public class DrumShooter extends Shooter {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 40;
 

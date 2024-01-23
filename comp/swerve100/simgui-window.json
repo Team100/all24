@@ -35,13 +35,18 @@
   "Window": {
     "###/SmartDashboard/AmpSubsystem": {
       "Collapsed": "0",
-      "Pos": "136,112",
-      "Size": "115,117"
+      "Pos": "483,155",
+      "Size": "109,111"
     },
     "###/SmartDashboard/ClimberSubsystem": {
       "Collapsed": "0",
       "Pos": "496,118",
       "Size": "128,109"
+    },
+    "###/SmartDashboard/DrumShooter": {
+      "Collapsed": "0",
+      "Pos": "483,40",
+      "Size": "108,112"
     },
     "###/SmartDashboard/FlushOften": {
       "Collapsed": "0",
@@ -55,12 +60,12 @@
     },
     "###/SmartDashboard/IndexerSubsystem": {
       "Collapsed": "0",
-      "Pos": "261,115",
-      "Size": "116,116"
+      "Pos": "365,39",
+      "Size": "112,111"
     },
     "###/SmartDashboard/IntakeWheel": {
       "Collapsed": "0",
-      "Pos": "8,115",
+      "Pos": "363,155",
       "Size": "115,110"
     },
     "###/SmartDashboard/Manual Drive Mode": {
@@ -105,8 +110,8 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "459,244",
-      "Size": "484,421"
+      "Pos": "459,310",
+      "Size": "484,355"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",

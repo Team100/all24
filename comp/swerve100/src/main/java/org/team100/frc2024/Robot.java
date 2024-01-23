@@ -81,7 +81,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().clearComposedCommands();
         m_robotContainer.cancelAuton();
-        MorseCodeBeep beep = m_robotContainer.getBeep();
+        MorseCodeBeep beep = m_robotContainer.m_beep;
         // beep.setDuration(1);
         beep.setMessage("K");
         CommandScheduler.getInstance().schedule(beep);

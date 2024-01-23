@@ -307,12 +307,19 @@
         }
       },
       "SmartDashboard": {
+        "Manual Drive Mode": {
+          "open": false
+        },
         "Swerve Module Front Left": {
           "open": false
         },
         "Swerve Module Front Right": {
           "open": false
-        }
+        },
+        "UseSetpointGenerator": {
+          "open": false
+        },
+        "open": false
       },
       "center": {
         "open": false
@@ -396,6 +403,10 @@
       "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Front Left_WCPSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Front Right_WCPSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/WCPSwerveModule100_Rear Left_WCPSwerveModule100": "Mechanism2d",
@@ -470,6 +481,16 @@
           "visible": true
         }
       },
+      "/SmartDashboard/UseClosedLoopVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "robot": {
           "selectable": false
@@ -512,7 +533,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 219,
+          "height": 225,
           "series": [
             {
               "color": [
@@ -541,7 +562,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 251,
+          "height": 257,
           "series": [
             {
               "color": [
@@ -570,7 +591,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 209,
+          "height": 215,
           "series": [
             {
               "color": [
