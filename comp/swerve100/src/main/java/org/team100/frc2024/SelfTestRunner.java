@@ -14,6 +14,7 @@ import org.team100.lib.commands.drivetrain.Veering;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.selftest.BatterySelfTest;
+import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.DefenseSelfTest;
 import org.team100.lib.selftest.DriveManuallySelfTest;
 import org.team100.lib.selftest.SelfTestCase;
