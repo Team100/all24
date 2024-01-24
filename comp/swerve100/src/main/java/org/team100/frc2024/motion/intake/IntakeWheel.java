@@ -4,7 +4,6 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
@@ -22,7 +21,7 @@ import org.team100.lib.util.Names;
  * 
  * TODO: add intake to selftest.
  */
-public class IntakeWheel extends Intake implements Speeding {
+public class IntakeWheel extends Intake {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 30;
     /**
