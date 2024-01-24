@@ -9,16 +9,13 @@ import org.team100.frc2024.selftest.IntakeSelfTest;
 import org.team100.frc2024.selftest.ShooterSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
-import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.selftest.BatterySelfTest;
 import org.team100.lib.selftest.DefenseSelfTest;
 import org.team100.lib.selftest.DriveManuallySelfTest;
-import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
-import org.team100.lib.selftest.SquareSelfTest;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
 
