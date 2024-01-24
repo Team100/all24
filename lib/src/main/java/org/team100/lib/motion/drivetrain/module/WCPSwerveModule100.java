@@ -60,7 +60,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         PositionServoInterface<Angle100> turningServo;
         if (Identity.instance == Identity.BETA_BOT) {
             // not working yet
-            turningServo = new NullPositionServo<Angle100>();
+            turningServo = new NullPositionServo<>();
         } else {
             turningServo = turningServo(
                 name + "/Turning",
@@ -123,7 +123,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 name,
                 turningMotorCanId,
                 true,
-                60,
                 gearRatio);
         Encoder100<Angle100> turningEncoder = turningEncoder(
                 encoderClass,

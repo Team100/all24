@@ -89,11 +89,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     public boolean inPosition() {
         // TODO get real values here
-        if (getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI) {
-            return true;
-        } else {
-            return false;
-        }
+        return getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI;
     }
 
     @Override

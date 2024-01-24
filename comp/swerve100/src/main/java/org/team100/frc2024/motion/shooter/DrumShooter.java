@@ -17,8 +17,6 @@ import org.team100.lib.util.Names;
  * 
  * Empirically it seems to take a second or so to spin
  * up, so set the acceleration a bit higher than that to start.
- * 
- * TODO: add shooter to self-test
  */
 public class DrumShooter extends Shooter {
     // TODO: tune the current limit
@@ -96,11 +94,7 @@ public class DrumShooter extends Shooter {
 
     public boolean readyToShoot() {
         //TODO get real values here
-        if (topRoller.getVelocity() > 30 && bottomRoller.getVelocity() > 30) {
-            return true;
-        } else {
-            return false;
-        }
+        return topRoller.getVelocity() > 30 && bottomRoller.getVelocity() > 30;
     }
 
     @Override

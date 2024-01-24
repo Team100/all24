@@ -6,50 +6,26 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.InvertType;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 /**
+ * PHOENIX 6 VERSION
+ * 
  * Swerve drive motor using Falcon 500.
  * 
  * Uses default position/velocity sensor which is the integrated one.
  * 
- * See details on velocity averaging and sampling.
- * https://v5.docs.ctr-electronics.com/en/stable/ch14_MCSensor.html#velocity-measurement-filter
- * 
- * Summarized:
- * 
- * * every 1ms, the velocity is measured as (x(t) - x(t-p)) / p
- * * N such measurements are averaged
- * 
- * Default p is 100 ms, default N is 64, so, if the velocity measurement is
- * perfect, it represents the actual velocity 82 ms ago, which is a long time.
- * 
- * A better setting would use a window that's about the width of the control
- * period, 20ms, so try 10ms and 8 samples, so the measurement will represent
- * the velocity about 10 ms ago.
- * 
- * If we're aiming for a quantization error of 10%, we need 10 steps between
- * position samples, or 10/2048ths of a revolution, and using a period of 10 ms,
- * the minimum rotational rate would be about 0.5 rev/s.
- * 
- * For onboard (roboRIO) feedback, there is additional delay in the velocity
- * measurement caused by the periodicity of the CAN status report, which can be
- * adjusted. The default is 20 ms; reducing it too much floods the CAN bus, so
- * we chose 10 ms below, which is a common value.
- * 
- * Details on CAN bus status frame timing:
- * https://v5.docs.ctr-electronics.com/en/latest/ch18_CommonAPI.html#setting-status-frame-periods
+ * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
-public class FalconDriveMotor implements Motor100<Distance100> {
+public class Falcon6DriveMotor implements Motor100<Distance100> {
 
     /**
      * The speed, below which, static friction applies, in motor revolutions per
@@ -108,13 +84,13 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     /** Current position, updated in periodic(). */
     private double m_rawPosition;
     /** Current velocity, updated in periodic(). */
-    private double m_rawVelocity;
+    private double m_velocityRev_S;
     /** Current output, updated in periodic() */
     private double m_output;
     /** Current motor error, updated in periodic() */
     private double m_error;
 
-    public FalconDriveMotor(
+    public Falcon6DriveMotor(
             String name,
             int canId,
             boolean motorPhase,
@@ -127,44 +103,90 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         m_gearRatio = kDriveReduction;
 
         m_motor = new TalonFX(canId);
-        m_motor.configFactoryDefault();
-        m_motor.setNeutralMode(NeutralMode.Brake);
 
-        // configure current limits
-        m_motor.configStatorCurrentLimit(
-                new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
-        m_motor.configSupplyCurrentLimit(
-                new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+        // m_motor.configFactoryDefault();
+        var talonFXConfigurator = m_motor.getConfigurator();
+        
+        TalonFXConfiguration conf = new TalonFXConfiguration();
+        talonFXConfigurator.apply(conf);
+
+        // m_motor.setNeutralMode(NeutralMode.Brake);
+
+        var motorConfigs = new MotorOutputConfigs();
+        motorConfigs.NeutralMode = NeutralModeValue.Brake;
+
+
+
+        var currentConfigs = new CurrentLimitsConfigs();
+        // i think maybe we don't care about this?
+        // currentConfigs.StatorCurrentLimit = kCurrentLimit;
+        // currentConfigs.StatorCurrentLimitEnable = true;
+        // we're just trying to avoid draining the battery too much.
+        currentConfigs.SupplyCurrentLimit = currentLimit;
+        currentConfigs.SupplyCurrentLimitEnable = true;
+        talonFXConfigurator.apply(currentConfigs);
+
+
+
+        // // configure current limits
+        // m_motor.configStatorCurrentLimit(
+        //         new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+        // m_motor.configSupplyCurrentLimit(
+        //         new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
 
         // use integrated sensor for status and PID feedback
-        m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+        // m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
         if (motorPhase) {
-            m_motor.setInverted(InvertType.None);
+            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+            // m_motor.setInverted(InvertType.None);
         } else {
-            m_motor.setInverted(InvertType.InvertMotorOutput);
+            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
+            // m_motor.setInverted(InvertType.InvertMotorOutput);
         }
+
+        talonFXConfigurator.apply(motorConfigs);
+
+
         // configure velocity measurement sampling
-        m_motor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_10Ms);
-        m_motor.configVelocityMeasurementWindow(8);
+        // m_motor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_10Ms);
+        // m_motor.configVelocityMeasurementWindow(8);
 
         // configure CAN bus velocity measurement reporting period
-        m_motor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+        // m_motor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+
+        m_motor.getVelocity().setUpdateFrequency(50);
 
         // configure voltage compensation
-        m_motor.configVoltageCompSaturation(saturationVoltage);
-        m_motor.enableVoltageCompensation(true);
+        // m_motor.configVoltageCompSaturation(saturationVoltage);
+        // m_motor.enableVoltageCompensation(true);
 
         // configure output limits
-        m_motor.configNominalOutputForward(0);
-        m_motor.configNominalOutputReverse(0);
-        m_motor.configPeakOutputForward(1);
-        m_motor.configPeakOutputReverse(-1);
+        // m_motor.configNominalOutputForward(0);
+        // m_motor.configNominalOutputReverse(0);
+        // m_motor.configPeakOutputForward(1);
+        // m_motor.configPeakOutputReverse(-1);
 
         // configure outboard PID
-        m_motor.config_kP(0, outboardP);
-        m_motor.config_kI(0, 0);
-        m_motor.config_kD(0, 0);
-        m_motor.config_kF(0, 0);
+        // m_motor.config_kP(0, outboardP);
+        // m_motor.config_kI(0, 0);
+        // m_motor.config_kD(0, 0);
+        // m_motor.config_kF(0, 0);
+
+
+        // set slot 0 gains
+        var slot0Configs = new Slot0Configs();
+        slot0Configs.kV = 0.0;
+        slot0Configs.kP = outboardP;
+        slot0Configs.kI = 0.0;
+        slot0Configs.kD = 0.0;
+
+        // apply gains, 50 ms total timeout
+        m_motor.getConfigurator().apply(slot0Configs, 0.050);
+
+
+
+
 
         m_name = Names.append(name, this);
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
@@ -172,7 +194,9 @@ public class FalconDriveMotor implements Motor100<Distance100> {
 
     @Override
     public void setDutyCycle(double output) {
-        m_motor.set(ControlMode.PercentOutput, output);
+        DutyCycleOut d = new DutyCycleOut(output);
+        m_motor.setControl(d);
+        // m_motor.set(ControlMode.PercentOutput, output);
         t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
     }
 
@@ -182,32 +206,41 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     @Override
     public void setVelocity(double outputM_S, double accelM_S_S) {
         double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
+        double wheelRev_S2 = accelM_S_S / (m_wheelDiameter * Math.PI);
         double motorRev_S = wheelRev_S * m_gearRatio;
-        double motorRev_100ms = motorRev_S / 10;
-        double motorTick_100ms = motorRev_100ms * ticksPerRevolution;
+        double motorRev_S2 = wheelRev_S2 * m_gearRatio;
+        // double motorRev_100ms = motorRev_S / 10;
+        // double motorTick_100ms = motorRev_100ms * ticksPerRevolution;
 
-        double currentMotorRev_S = currentMotorRev_S();
+        double currentMotorRev_S = m_velocityRev_S;
         double frictionFF = frictionFF(currentMotorRev_S, motorRev_S);
         double velocityFF = velocityFF(motorRev_S);
         double accelFF = accelFF(accelM_S_S);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
+        VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
+        v.FeedForward = kFF;
+        v.Acceleration = motorRev_S2;
+        m_motor.setControl(v);
+
+        // m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
 
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
-        t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
+        // t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
     }
 
     @Override
     public void stop() {
-        m_motor.neutralOutput();
+        m_motor.stopMotor();
+        // m_motor.neutralOutput();
     }
 
     @Override
     public void close() {
-        m_motor.DestroyObject();
+        // m_motor.DestroyObject();
+        m_motor.close();
     }
 
     /**
@@ -218,34 +251,38 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     }
 
     /**
-     * @return integrated sensor velocity in sensor units (1/2048 turn) per 100ms.
+     * @return integrated sensor velocity in rev per sec
      */
-    public double getVelocity2048_100() {
-        return m_rawVelocity;
+    public double getVelocityRev_S() {
+        return m_velocityRev_S;
     }
 
     /**
      * Sets integrated sensor position to zero.
      */
     public void resetPosition() {
-        m_motor.setSelectedSensorPosition(0);
+        // m_motor.setSelectedSensorPosition(0);
+        m_motor.setPosition(0);
         m_rawPosition = 0;
     }
 
     @Override
     public void periodic() {
-        m_rawPosition = m_motor.getSelectedSensorPosition();
-        m_rawVelocity = m_motor.getSelectedSensorVelocity();
-        m_output = m_motor.getMotorOutputPercent();
-        m_error = m_motor.getClosedLoopError();
-        t.log(Level.DEBUG, m_name, "position (raw)", m_rawPosition);
-        t.log(Level.DEBUG, m_name, "velocity (raw)", m_rawVelocity);
-        t.log(Level.DEBUG, m_name, "velocity (rev_s)", currentMotorRev_S());
+        // m_rawPosition = m_motor.getSelectedSensorPosition();
+        m_rawPosition = m_motor.getPosition().getValueAsDouble();
+        
+        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        // m_output = m_motor.getMotorOutputPercent();
+        m_output = m_motor.getDutyCycle().getValueAsDouble();
+        m_error = m_motor.getClosedLoopError().getValueAsDouble();
+        t.log(Level.DEBUG, m_name, "position (rev)", m_rawPosition);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_velocityRev_S);
         t.log(Level.DEBUG, m_name, "output [-1,1]", m_output);
         t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
-        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getTemperature());
-        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent());        
-        t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());        
+        // t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getTemperature());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());        
+        // t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());        
     }
 
     ///////////////////////////////////////////////////////////////
@@ -273,16 +310,6 @@ public class FalconDriveMotor implements Motor100<Distance100> {
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
-    }
-
-    /**
-     * Current speed in revolutions per second. Note: this measurement is delayed
-     * and filtered.
-     */
-    private double currentMotorRev_S() {
-        double motorTick_100ms = m_rawVelocity;
-        double motorRev_100ms = motorTick_100ms / ticksPerRevolution;
-        return motorRev_100ms * 10;
     }
 
     private double getErrorRev_S() {

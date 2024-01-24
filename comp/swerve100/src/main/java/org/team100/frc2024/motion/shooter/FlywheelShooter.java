@@ -87,11 +87,7 @@ public class FlywheelShooter extends Shooter {
 
     public boolean readyToShoot() {
         //TODO get real values here
-        if (rightShooter.getVelocity() > 30 && leftShooter.getVelocity() > 30) {
-            return true;
-        } else {
-            return false;
-        }
+        return rightShooter.getVelocity() > 30 && leftShooter.getVelocity() > 30;
     }
 
     @Override
