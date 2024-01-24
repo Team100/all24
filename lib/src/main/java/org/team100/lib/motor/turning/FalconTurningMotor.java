@@ -25,7 +25,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  */
 public class FalconTurningMotor implements Motor100<Angle100> {
     private static final double ticksPerRevolution = 2048;
-    private  final double gearRatio;
+    private final double gearRatio;
     private static final double kCurrentLimit = 40;
 
     /**
@@ -79,8 +79,11 @@ public class FalconTurningMotor implements Motor100<Angle100> {
     /** Current motor error, updated in periodic() */
     private double m_error;
 
-    public FalconTurningMotor(String name, int canId, boolean motorPhase,double currentLimit,
-    double kGearRatio) {
+    public FalconTurningMotor(
+            String name,
+            int canId,
+            boolean motorPhase,
+            double kGearRatio) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
