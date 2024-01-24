@@ -17,8 +17,6 @@ import org.team100.lib.util.Names;
  * 
  * This system has very low intertia, so can spin up
  * very fast, but it's fragile: limit accel to avoid stressing it.
- * 
- * TODO: add intake to selftest.
  */
 public class IntakeRoller extends Intake {
     // TODO: tune the current limit
