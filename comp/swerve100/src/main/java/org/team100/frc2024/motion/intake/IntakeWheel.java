@@ -18,8 +18,6 @@ import org.team100.lib.util.Names;
  * 
  * This system has low intertia but a lot of friction,
  * and it's fragile. guess at a reasonable accel limit.
- * 
- * TODO: add intake to selftest.
  */
 public class IntakeWheel extends Intake {
     // TODO: tune the current limit

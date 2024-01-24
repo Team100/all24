@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * This system has low intertia but a lot of friction,
  * and it's fragile. we want to eject as fast as possible
  * though, so try a high accel limit.
- * 
- * TODO: add indexer to selftest.
  */
 public class IndexerSubsystem extends SubsystemBase implements Speeding {
     // TODO: tune the current limit
