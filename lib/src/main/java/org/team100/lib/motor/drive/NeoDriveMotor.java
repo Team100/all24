@@ -102,8 +102,9 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     }
 
     private void require(REVLibError responseCode) {
-        if (responseCode != REVLibError.kOk)
-            throw new IllegalStateException();
+        return;
+        // if (responseCode != REVLibError.kOk)
+            // throw new IllegalStateException();
     }
 
     @Override
