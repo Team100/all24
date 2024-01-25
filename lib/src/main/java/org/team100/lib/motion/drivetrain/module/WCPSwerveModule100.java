@@ -58,10 +58,10 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveMotorCanId);
 
         PositionServoInterface<Angle100> turningServo;
-        if (Identity.instance == Identity.BETA_BOT) {
-            // not working yet
-            turningServo = new NullPositionServo<>();
-        } else {
+        // if (Identity.instance == Identity.BETA_BOT) {
+        //     // not working yet
+        //     turningServo = new NullPositionServo<>();
+        // } else {
             turningServo = turningServo(
                 name + "/Turning",
                 encoderClass,
@@ -71,7 +71,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 10.29,
                 kinodynamics);
 
-        }
+        // }
 
 
         return new WCPSwerveModule100(name, driveServo, turningServo);

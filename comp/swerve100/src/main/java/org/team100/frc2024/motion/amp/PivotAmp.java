@@ -20,6 +20,7 @@ public class PivotAmp extends Command {
     }
 
     @Override
+    //TODO have a better control scheme and tune PID
     public void execute() {
         m_amp.setAmpPosition(kScale * m_ampPosition.getAsDouble());
     }
