@@ -28,9 +28,9 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     public AmpSubsystem(int leftPivotID, int rightPivotID) {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
-                15,
-                8,
-                20);
+                45,
+                1,
+                1);
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:

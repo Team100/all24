@@ -95,8 +95,9 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     }
 
     private void require(REVLibError responseCode) {
-        if (responseCode != REVLibError.kOk )
-        throw new IllegalStateException();
+        return;
+        // if (responseCode != REVLibError.kOk )
+        // throw new IllegalStateException();
     }
 
     @Override
