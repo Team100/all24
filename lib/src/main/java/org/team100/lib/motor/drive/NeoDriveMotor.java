@@ -5,6 +5,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -102,9 +103,10 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     }
 
     private void require(REVLibError responseCode) {
-        return;
-        // if (responseCode != REVLibError.kOk)
-            // throw new IllegalStateException();
+        // TODO: make this throw
+        if (responseCode != REVLibError.kOk)
+            Util.warn("NeoDriveMotor received response code " + responseCode.name());
+        // throw new IllegalStateException();
     }
 
     @Override
@@ -183,6 +185,9 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoderVelocity = m_encoder.getVelocity();
         t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
+        t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
     }
 
     /////////////////////////////////////////////////////////////////

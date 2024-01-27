@@ -53,8 +53,8 @@ public class Experiments {
         m_name = Names.name(this);
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
-        log();
         m_overrides = new EnumMap<>(Experiment.class);
+        log();
         m_testOverrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
             SendableChooser<BooleanSupplier> override = ExperimentChooser.get(e.name());
@@ -96,7 +96,7 @@ public class Experiments {
     private void log() {
         // the enabled experiments are only logged here for analysis, not control.
         t.log(Level.DEBUG, m_name, "enabled",
-               ()-> m_overrides.entrySet()
+                () -> m_overrides.entrySet()
                         .stream()
                         .filter(e -> e.getValue().getSelected().getAsBoolean())
                         .map(Map.Entry::getKey)
