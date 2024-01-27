@@ -48,13 +48,15 @@ public class IntakeRoller extends Intake {
                         topCAN,
                         false,
                         kCurrentLimit,
-                        rollerParameter);
+                        rollerParameter,
+                        0.0001);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom Roller",
                         bottomCAN,
                         false,
                         kCurrentLimit,
-                        rollerParameter);
+                        rollerParameter,
+                        0.0001);
                 break;
             case BLANK:
             default:

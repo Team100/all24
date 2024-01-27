@@ -51,7 +51,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double outboardP = 0.0001;
+    private final double outboardP;
 
     /**
      * For voltage compensation, the maximum output voltage.
@@ -76,7 +76,9 @@ public class NeoDriveMotor implements Motor100<Distance100> {
             boolean motorPhase,
             int currentLimit,
             double gearRatio,
-            double wheelDiameter) {
+            double wheelDiameter,
+            double kV) {
+        outboardP = kV;
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
 

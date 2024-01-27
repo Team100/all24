@@ -53,13 +53,15 @@ public class DrumShooter extends Shooter {
                         topRollerID,
                         false,
                         kCurrentLimit,
-                        params);
+                        params,
+                        0.0001);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom",
                         bottomRollerID,
                         true,
                         kCurrentLimit,
-                        params);
+                        params,
+                        0.0001);
                 break;
             case BLANK:
             default:

@@ -43,7 +43,7 @@ public class IntakeWheel extends Intake {
             case COMP_BOT:
             case BETA_BOT:
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
-                        m_name, wheelID, false, kCurrentLimit, params);
+                        m_name, wheelID, false, kCurrentLimit, params,.0001);
                 break;
             case BLANK:
             default:

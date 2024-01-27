@@ -50,7 +50,8 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
                         driveID,
                         true,
                         kCurrentLimit,
-                        params);
+                        params,
+                        0.0001);
                 break;
             case BLANK:
             default:

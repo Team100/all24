@@ -55,7 +55,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double outboardP = 0.0001;
+    private final double outboardP;
 
     /**
      * For voltage compensation, the maximum output voltage.
@@ -72,7 +72,8 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio) {
+    public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio, double kV) {
+        outboardP = kV;
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;

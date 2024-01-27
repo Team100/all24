@@ -40,7 +40,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         true,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(1, 0, 0));
+                        new PIDController(1, 0, 0),
+                        0.0001);
 
                 ampAngleServoRight = ServoFactory.neoAngleServo(
                         m_name + "/Right",
@@ -48,7 +49,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         false,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(1, 0, 0));
+                        new PIDController(1, 0, 0),
+                        0.0001);
                 break;
             case BLANK:
             default:

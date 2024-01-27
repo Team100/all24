@@ -53,14 +53,16 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         false,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(1, 0, 0));
+                        new PIDController(1, 0, 0),
+                        0.0001);
                 s2 = ServoFactory.neoDistanceServo(
                         m_name + "/Right",
                         rightClimberID,
                         true,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(1, 0, 0));
+                        new PIDController(1, 0, 0),
+                        0.0001);
                 break;
             case BLANK:
             default:

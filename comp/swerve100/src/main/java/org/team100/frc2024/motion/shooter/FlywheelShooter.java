@@ -52,13 +52,15 @@ public class FlywheelShooter extends Shooter {
                         leftShooterID,
                         false,
                         kCurrentLimit,
-                        params);
+                        params,
+                        0.0001);
                 rightShooter = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Right",
                         rightShooterID,
                         false,
                         kCurrentLimit,
-                        params);
+                        params,
+                        0.0001);
                 break;
             case BLANK:
             default:
