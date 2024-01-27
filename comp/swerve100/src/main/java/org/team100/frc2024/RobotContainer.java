@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.team100.frc2024.motion.IntakeNote;
+import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
+import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
@@ -287,7 +290,15 @@ public class RobotContainer {
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
         operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
+
         operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
+
+        // operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
+
+        // operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
+
+        operatorControl.pivotToAmpPosition().whileTrue(new PivotToAmpPosition(m_amp));
+
 
         // TODO: spin up the shooter whenever the robot is in range.
 
@@ -317,7 +328,7 @@ public class RobotContainer {
         // TODO: shoot only when the shooter is ready.
 
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        operatorControl.index().whileTrue(m_indexer.run(m_indexer::forward));
+        operatorControl.index().whileTrue(m_indexer.run(m_indexer::index));
 
         // TODO: presets
         // m_climber.setDefaultCommand(m_climber.run(() ->

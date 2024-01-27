@@ -98,16 +98,16 @@ public class SwerveModuleCollection {
                 return new SwerveModuleCollection(
                        WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 3,
-                                DutyCycleTurningEncoder.class, 34, 0, 0.708328, kinodynamics),
+                                DutyCycleTurningEncoder.class, 34, 0, 0.359225, kinodynamics),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 22,
-                                DutyCycleTurningEncoder.class, 25, 1, 0.659267, kinodynamics),
+                                DutyCycleTurningEncoder.class, 25, 1, 0.786087, kinodynamics),
                         WCPSwerveModule100.get(
                                 kRearLeft, currentLimit, 13,
-                                DutyCycleTurningEncoder.class, 12, 2, 0.396148, kinodynamics),
+                                DutyCycleTurningEncoder.class, 12, 2, 0.103871, kinodynamics),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 11,
-                                DutyCycleTurningEncoder.class, 21, 3, 0.109823, kinodynamics));
+                                DutyCycleTurningEncoder.class, 21, 3, 0.015756, kinodynamics));
             default:
                 Util.println("WARNING: using default module collection");
                 return new SwerveModuleCollection(

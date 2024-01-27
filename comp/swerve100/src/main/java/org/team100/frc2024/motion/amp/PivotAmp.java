@@ -2,6 +2,7 @@ package org.team100.frc2024.motion.amp;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class PivotAmp extends Command {

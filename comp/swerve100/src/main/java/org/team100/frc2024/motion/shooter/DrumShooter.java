@@ -31,7 +31,7 @@ public class DrumShooter extends Shooter {
      * but there are many factors that affect the relationship in
      * the real world.
      */
-    private static final double kMuzzleVelocityM_S = 15;
+    private static final double kMuzzleVelocityM_S = 30;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;

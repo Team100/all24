@@ -19,7 +19,7 @@ public class IndexCommand extends Command100 {
     @Override
     public void execute100(double dt) {
         if (m_readyToTurn.getAsBoolean()) {
-            m_index.forward();
+            m_index.index();
         } else {
             m_index.stop();
         } 

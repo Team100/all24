@@ -29,7 +29,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     /**
      * Surface velocity of whatever is turning in the indexer.
      */
-    private static final double kIndexerVelocityM_S = 3;
+    private static final double kIndexerVelocityM_S = 1;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
@@ -37,7 +37,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
-            1.0,
+            12.0,
              0.05,
              15,
              50,
@@ -61,8 +61,12 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
-    public void forward() {
+    public void index() {
         m_servo.setVelocity(kIndexerVelocityM_S);
+    }
+
+    public void outdex() {
+        m_servo.setVelocity(-kIndexerVelocityM_S);
     }
 
     public void stop() {
