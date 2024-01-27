@@ -9,6 +9,7 @@ import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
+import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
@@ -329,6 +330,9 @@ public class RobotContainer {
 
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
         operatorControl.index().whileTrue(m_indexer.run(m_indexer::index));
+        operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> true));
+        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (m_amp.inPosition())));
+        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (!m_intake.noteInIntake())));
 
         // TODO: presets
         // m_climber.setDefaultCommand(m_climber.run(() ->

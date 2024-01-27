@@ -5,6 +5,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -95,8 +96,9 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     }
 
     private void require(REVLibError responseCode) {
-        return;
-        // if (responseCode != REVLibError.kOk )
+        // TODO: make this throw
+        if (responseCode != REVLibError.kOk)
+            Util.warn("NeoTurningMotor received response code " + responseCode.name());
         // throw new IllegalStateException();
     }
 
@@ -165,7 +167,6 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
- 
     }
 
     /////////////////////////////////////////////////////////////////
