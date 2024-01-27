@@ -92,7 +92,9 @@ public class Telemetry {
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }
-        m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
+        Util.warn("Setting default telemetry to DEBUG.  Fix this for comp.");
+        m_levelChooser.setDefaultOption(Level.DEBUG.name(), Level.DEBUG);
+        // m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
         m_levelUpdater = new Notifier(this::updateLevel);
