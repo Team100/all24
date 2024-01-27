@@ -45,13 +45,14 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
+            //TODO tune kV
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,
                         true,
                         kCurrentLimit,
                         params,
-                        0.0001);
+                        0.122);
                 break;
             case BLANK:
             default:

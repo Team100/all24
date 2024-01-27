@@ -43,7 +43,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double velocityFFVoltS_Rev = 0.122;
+    private final double velocityFFVoltS_Rev;
 
     /**
      * Placeholder for accel feedforward.
@@ -55,7 +55,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private final double outboardP;
+    private static final double outboardP = 0.0001;
 
     /**
      * For voltage compensation, the maximum output voltage.
@@ -73,7 +73,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     private double m_encoderPosition;
 
     public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio, double kV) {
-        outboardP = kV;
+        velocityFFVoltS_Rev = kV;
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
@@ -186,7 +186,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
-    private static double velocityFF(double motorRev_S) {
+    private double velocityFF(double motorRev_S) {
         return velocityFFVoltS_Rev * motorRev_S / saturationVoltage;
     }
 

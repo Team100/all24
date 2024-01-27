@@ -43,20 +43,21 @@ public class IntakeRoller extends Intake {
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
+            //TODO tune kV
                 topRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Top Roller",
                         topCAN,
                         false,
                         kCurrentLimit,
                         rollerParameter,
-                        0.0001);
+                        0.122);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom Roller",
                         bottomCAN,
                         false,
                         kCurrentLimit,
                         rollerParameter,
-                        0.0001);
+                        0.122);
                 break;
             case BLANK:
             default:
