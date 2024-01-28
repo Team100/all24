@@ -1,6 +1,8 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
@@ -15,6 +17,8 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
+
+import edu.wpi.first.math.controller.PIDController;
 
 /**
  * Swerve steering motor using REV Neo.
@@ -72,22 +76,28 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio, double kV) {
+    public NeoTurningMotor(String name, int canId, MotorPhase motorPhase, int currentLimit, double gearRatio, double kV, PIDConstants lowLevelVelocityConstants) {
         velocityFFVoltS_Rev = kV;
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
-        m_motor.setInverted(!motorPhase);
+
+        if(motorPhase == MotorPhase.FORWARD){
+            m_motor.setInverted(!true);
+        } else {
+            m_motor.setInverted(!false);
+        }
+
         require(m_motor.setSmartCurrentLimit(currentLimit));
 
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(true));
-        require(m_pidController.setP(outboardP));
-        require(m_pidController.setI(0));
-        require(m_pidController.setD(0));
-        require(m_pidController.setIZone(0));
+        require(m_pidController.setP(lowLevelVelocityConstants.getP()));
+        require(m_pidController.setI(lowLevelVelocityConstants.getI()));
+        require(m_pidController.setD(lowLevelVelocityConstants.getD()));
+        require(m_pidController.setIZone(lowLevelVelocityConstants.getIZone()));
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 

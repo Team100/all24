@@ -38,4 +38,10 @@ public class Heading implements HeadingInterface {
         return -1.0 * rateNED;
     }
 
+    @Override
+    public void periodic(){
+        t.log(Level.DEBUG, m_name, "Heading NWU", getHeadingNWU());
+        t.log(Level.DEBUG, m_name, "Heading Rate NWU", getHeadingRateNWU());
+    }
+
 }

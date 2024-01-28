@@ -1,12 +1,16 @@
 package org.team100.frc2024.motion.shooter;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Direct-drive shooter with top and bottom drums.
@@ -31,14 +35,17 @@ public class DrumShooter extends Shooter {
      * but there are many factors that affect the relationship in
      * the real world.
      */
-    private static final double kMuzzleVelocityM_S = 15;
+    private static final double kMuzzleVelocityM_S = 30;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;
     private final SpeedingVisualization m_viz;
+    private final PIDConstants m_velocityConstants;
 
     public DrumShooter(int topRollerID, int bottomRollerID) {
         m_name = Names.name(this);
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
+
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
                 1,
                 0.1,
@@ -55,14 +62,16 @@ public class DrumShooter extends Shooter {
                         false,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_velocityConstants);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom",
                         bottomRollerID,
                         true,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_velocityConstants);
                 break;
             case BLANK:
             default:

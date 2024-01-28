@@ -1,10 +1,12 @@
 package org.team100.lib.motion.components;
 
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
@@ -35,7 +37,8 @@ public class ServoFactory {
             boolean motorPhase,
             int currentLimit,
             SysParam param,
-            double lowLevelkV) {
+            double lowLevelkV,
+            PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
@@ -43,7 +46,8 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelkV);
+                lowLevelkV,
+                lowLevelVelocityConstants);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
@@ -80,18 +84,20 @@ public class ServoFactory {
     public static PositionServoInterface<Angle100> neoAngleServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
             PIDController controller, 
-            double lowLevelkV) {
+            double lowLevelkV,
+            PIDConstants lowLevelVelocityConstants) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
                 canId,
                 motorPhase,
                 currentLimit,
                 param.gearRatio(),
-                lowLevelkV);
+                lowLevelkV,
+                lowLevelVelocityConstants);
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
                 motor,
@@ -146,7 +152,8 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDController controller,
-            double lowLevelkV) {
+            double lowLevelkV,
+            PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
@@ -154,7 +161,8 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelkV);
+                lowLevelkV,
+                lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
                 motor,

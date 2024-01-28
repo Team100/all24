@@ -12,7 +12,7 @@ public class IntakeFactory {
                 return new IntakeRoller(3, 6);
             case BETA_BOT:
             default:
-                return new IntakeWheel(13);
+                return new IntakeWheel(19);
         }
     }
 

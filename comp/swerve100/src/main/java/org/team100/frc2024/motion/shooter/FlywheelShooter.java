@@ -1,12 +1,16 @@
 package org.team100.frc2024.motion.shooter;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Direct-drive shooter with right and left wheels.
@@ -35,9 +39,11 @@ public class FlywheelShooter extends Shooter {
     private final LimitedVelocityServo<Distance100> leftShooter;
     private final LimitedVelocityServo<Distance100> rightShooter;
     private final SpeedingVisualization m_viz;
+    private final PIDConstants m_velocityConstants;
 
     public FlywheelShooter(int leftShooterID, int rightShooterID) {
         m_name = Names.name(this);
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
                 1,
                 0.1,
@@ -54,14 +60,16 @@ public class FlywheelShooter extends Shooter {
                         false,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_velocityConstants);
                 rightShooter = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Right",
                         rightShooterID,
                         false,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_velocityConstants);
                 break;
             case BLANK:
             default:

@@ -1,14 +1,21 @@
 package org.team100.frc2024.motion.indexer;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -26,18 +33,27 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 30;
 
+    Telemetry t = Telemetry.get();
+
     /**
      * Surface velocity of whatever is turning in the indexer.
      */
-    private static final double kIndexerVelocityM_S = 3;
+    private static final double kIndexerVelocityM_S = 5;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
+    private final PIDConstants m_velocityConstants;
+    
+
+    DigitalInput beamBreak1;
+    DigitalInput beamBreak2;
 
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
+
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
-            1.0,
+            12.0,
              0.05,
              15,
              50,
@@ -45,14 +61,19 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
-            //TODO tune kV
+
+                beamBreak1 = new DigitalInput(4);
+                beamBreak2 = new DigitalInput(8);
+
+                //TODO tune kV
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,
                         true,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_velocityConstants);
                 break;
             case BLANK:
             default:
@@ -63,8 +84,21 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
-    public void forward() {
+    public void index() {
         m_servo.setVelocity(kIndexerVelocityM_S);
+    }
+
+    public void indexWithBeamBreak() {
+        if(beamBreak1.get()){
+            m_servo.setVelocity(0);
+        } else {
+            m_servo.setVelocity(kIndexerVelocityM_S);
+
+        }
+    }
+
+    public void outdex() {
+        m_servo.setVelocity(-kIndexerVelocityM_S);
     }
 
     public void stop() {
@@ -78,6 +112,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
 
     @Override
     public void periodic() {
+
         m_servo.periodic();
         m_viz.periodic();
     }

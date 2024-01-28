@@ -20,12 +20,13 @@ public class HeadingFactory {
                 try {
                     // the kauailabs library calls System.exit() in case
                     // it can't find this library, so check here first.
-                    System.loadLibrary("vmxHaljni");
+                    // System.loadLibrary("vmxHaljni");
                     RedundantGyroInterface ahrsclass = new RedundantGyroFactory(Identity.instance).get();
                     return new Heading(ahrsclass);
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.
-                    return new SimulatedHeading(kinodynamics, collection);
+                    throw e;
+                    // return new SimulatedHeading(kinodynamics, collection);
                 }
         }
     }

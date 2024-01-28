@@ -1,12 +1,16 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Four-axle wheeled intake with reduction
@@ -25,18 +29,22 @@ public class IntakeWheel extends Intake {
     /**
      * Surface velocity of whatever is turning in the intake.
      */
-    private static final double kIntakeVelocityM_S = 3;
+    private static final double kIntakeVelocityM_S = 10;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;
+    private final PIDConstants m_velocityConstants;
+
 
     public IntakeWheel(int wheelID) {
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
+
         m_name = Names.name(this);
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
-                3.0,
+                4.0,
                 0.05,
-                5.0,
+                10.0,
                 20.0,
                 -20.0);
         switch (Identity.instance) {
@@ -44,7 +52,7 @@ public class IntakeWheel extends Intake {
             case BETA_BOT:
             //TODO tune kV
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
-                        m_name, wheelID, false, kCurrentLimit, params,0.122);
+                        m_name, wheelID, false, kCurrentLimit, params,0.122, m_velocityConstants);
                 break;
             case BLANK:
             default:

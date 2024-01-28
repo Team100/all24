@@ -1,5 +1,6 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -15,6 +16,8 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
+
+import edu.wpi.first.math.controller.PIDController;
 
 /**
  * Linear drive motor using REV Neo.
@@ -77,7 +80,8 @@ public class NeoDriveMotor implements Motor100<Distance100> {
             int currentLimit,
             double gearRatio,
             double wheelDiameter,
-            double kV) {
+            double kV,
+            PIDConstants lowLevelVelocityConstants) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         velocityFFVoltS_Rev = kV; 
@@ -88,10 +92,10 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(false));
-        require(m_pidController.setP(outboardP));
-        require(m_pidController.setI(0));
-        require(m_pidController.setD(0));
-        require(m_pidController.setIZone(0));
+        require(m_pidController.setP(lowLevelVelocityConstants.getP()));
+        require(m_pidController.setI(lowLevelVelocityConstants.getI()));
+        require(m_pidController.setD(lowLevelVelocityConstants.getD()));
+        require(m_pidController.setIZone(lowLevelVelocityConstants.getIZone()));
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 

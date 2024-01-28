@@ -48,6 +48,10 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
                 m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
                 break;
         }
+
+        
+
+
         t.log(Level.DEBUG, m_name, "channel", m_encoder.getSourceChannel());
     }
 
@@ -77,7 +81,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         updatePosition();
         updateRate();
         t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
-        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
+        t.log(Level.DEBUG, m_name, "position (turns) USE FOR OFFSETS", m_encoder.get());
         t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
     }
 

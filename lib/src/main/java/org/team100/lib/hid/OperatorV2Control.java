@@ -40,6 +40,11 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public Trigger pivotToAmpPosition(){
+        return m_controller.leftBumper();
+    }
+
+    @Override
     public Trigger shooter() {
         return m_controller.a();
     }
