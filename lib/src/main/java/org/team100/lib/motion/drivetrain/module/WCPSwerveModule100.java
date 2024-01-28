@@ -48,7 +48,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            SwerveKinodynamics kinodynamics) {
+            SwerveKinodynamics kinodynamics,
+            Drive drive) {
         name = m_name + "/" + name;
 
         VelocityServo<Distance100> driveServo = driveServo(
@@ -63,7 +64,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 10.29,
-                kinodynamics);
+                kinodynamics,
+                drive);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
@@ -108,12 +110,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             double gearRatio,
-            SwerveKinodynamics kinodynamics) {
+            SwerveKinodynamics kinodynamics,
+            Drive drive) {
         final double turningGearRatio = 1.0;
         FalconTurningMotor turningMotor = new FalconTurningMotor(
                 name,
                 turningMotorCanId,
-                true,
+                false,
                 gearRatio);
         Encoder100<Angle100> turningEncoder = turningEncoder(
                 encoderClass,
@@ -121,7 +124,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio,
-                Drive.DIRECT);
+                drive);
         PIDController angleVelocityController = new PIDController(
                 2.86, // kP
                 0, // kI

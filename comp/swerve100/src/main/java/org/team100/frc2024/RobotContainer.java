@@ -154,6 +154,8 @@ public class RobotContainer {
         // The monitor runs less frequently than the control loop.
         robot.addPeriodic(m_monitor::periodic, 0.2);
 
+        
+
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
@@ -167,6 +169,8 @@ public class RobotContainer {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
+    
+
         VisionDataProvider visionDataProvider = new VisionDataProvider(
                 m_layout,
                 poseEstimator,
@@ -178,6 +182,12 @@ public class RobotContainer {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
+        m_drive = new SwerveDriveSubsystem(
+                m_heading,
+                poseEstimator,
+                swerveLocal,
+                driverControl::speed);
+                
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
 
@@ -189,11 +199,7 @@ public class RobotContainer {
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         // show mode locks slow speed.
-        m_drive = new SwerveDriveSubsystem(
-                m_heading,
-                poseEstimator,
-                swerveLocal,
-                driverControl::speed);
+        
 
         ////////////////////////////
         //
@@ -290,13 +296,13 @@ public class RobotContainer {
         // TODO: run the intake if the camera sees a note.
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
+        // operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
 
-        operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
+        // operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
 
-        // operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
+        operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
 
-        // operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
+        operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
 
         operatorControl.pivotToAmpPosition().whileTrue(new PivotToAmpPosition(m_amp));
 

@@ -10,6 +10,7 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -25,22 +26,27 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Angle100> ampAngleServoRight;
     private final AngularVisualization m_viz;
 
+    
+
+
     public AmpSubsystem(int leftPivotID, int rightPivotID) {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                1,
-                1);
+                10,
+                10);
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
+                
+
                 ampAngleServoLeft = ServoFactory.neoAngleServo(
                         m_name + "/Left",
                         leftPivotID,
                         true,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(1, 0, 0));
+                        new PIDController(2.5, 0.1, 0)); //2.5 0.1
 
                 ampAngleServoRight = ServoFactory.neoAngleServo(
                         m_name + "/Right",
@@ -48,7 +54,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         false,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(1, 0, 0));
+                        new PIDController(2.5, 0.1, 0)); //2.5 0.1
                 break;
             case BLANK:
             default:
@@ -73,6 +79,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
+        System.out.println("AHHHHHHHHHHHH");
         ampAngleServoRight.setPosition(value);
         ampAngleServoLeft.setPosition(value);
     }

@@ -6,7 +6,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class PivotAmp extends Command {
-    private static final double kScale = 2.0;
+    private static final double kScale = 2.5;
     private final AmpSubsystem m_amp;
     private final DoubleSupplier m_ampPosition;
 
@@ -24,5 +24,7 @@ public class PivotAmp extends Command {
     //TODO have a better control scheme and tune PID
     public void execute() {
         m_amp.setAmpPosition(kScale * m_ampPosition.getAsDouble());
+        // m_amp.setAmpPosition(0);
+
     }
 }

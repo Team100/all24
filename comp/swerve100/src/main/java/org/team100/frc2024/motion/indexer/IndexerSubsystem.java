@@ -6,9 +6,12 @@ import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -26,13 +29,18 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 30;
 
+    Telemetry t = Telemetry.get();
+
     /**
      * Surface velocity of whatever is turning in the indexer.
      */
-    private static final double kIndexerVelocityM_S = 1;
+    private static final double kIndexerVelocityM_S = 5;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
+
+    DigitalInput beamBreak1;
+    DigitalInput beamBreak2;
 
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
@@ -45,6 +53,10 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
+
+                beamBreak1 = new DigitalInput(4);
+                beamBreak2 = new DigitalInput(8);
+
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,
@@ -65,6 +77,15 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         m_servo.setVelocity(kIndexerVelocityM_S);
     }
 
+    public void indexWithBeamBreak() {
+        if(beamBreak1.get()){
+            m_servo.setVelocity(0);
+        } else {
+            m_servo.setVelocity(kIndexerVelocityM_S);
+
+        }
+    }
+
     public void outdex() {
         m_servo.setVelocity(-kIndexerVelocityM_S);
     }
@@ -80,6 +101,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
 
     @Override
     public void periodic() {
+
         m_servo.periodic();
         m_viz.periodic();
     }

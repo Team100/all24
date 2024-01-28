@@ -25,7 +25,7 @@ public class IntakeWheel extends Intake {
     /**
      * Surface velocity of whatever is turning in the intake.
      */
-    private static final double kIntakeVelocityM_S = 4;
+    private static final double kIntakeVelocityM_S = 10;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;
@@ -34,9 +34,9 @@ public class IntakeWheel extends Intake {
         m_name = Names.name(this);
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
-                3.0,
+                4.0,
                 0.05,
-                5.0,
+                10.0,
                 20.0,
                 -20.0);
         switch (Identity.instance) {
