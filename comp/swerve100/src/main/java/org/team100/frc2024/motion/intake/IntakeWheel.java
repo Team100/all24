@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -32,12 +33,11 @@ public class IntakeWheel extends Intake {
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;
-    private final PIDController m_intakePIDController;
+    private final PIDConstants m_velocityConstants;
 
 
     public IntakeWheel(int wheelID) {
-        m_intakePIDController = new PIDController(0.0001, 0, 0);
-        SmartDashboard.putData("Intake Wheel PID Controller", m_intakePIDController);
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
 
         m_name = Names.name(this);
 
@@ -52,7 +52,7 @@ public class IntakeWheel extends Intake {
             case BETA_BOT:
             //TODO tune kV
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
-                        m_name, wheelID, false, kCurrentLimit, params,0.122, m_intakePIDController);
+                        m_name, wheelID, false, kCurrentLimit, params,0.122, m_velocityConstants);
                 break;
             case BLANK:
             default:

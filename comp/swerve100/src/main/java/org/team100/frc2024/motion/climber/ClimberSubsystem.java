@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
@@ -36,15 +37,14 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Distance100> s1;
     private final PositionServoInterface<Distance100> s2;
     private final SimpleVisualization m_viz;
-    private final PIDController m_climberVelocityController;
+    private final PIDConstants m_velocityPIDConstants;
     private final PIDController m_climberPositionController;
 
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
-        m_climberVelocityController = new PIDController(0.0001, 0, 0);
+        m_velocityPIDConstants = new PIDConstants(0.0001, 0, 0);
         m_climberPositionController = new PIDController(1, 0, 0);
-        SmartDashboard.putData("Climber PID Velocity Controller", m_climberVelocityController);
         SmartDashboard.putData("Climber PID Positional Controller", m_climberPositionController);
 
 
@@ -66,7 +66,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         m_params,
                         new PIDController(1, 0, 0),
                         0.122,
-                        m_climberVelocityController);
+                        m_velocityPIDConstants);
                 s2 = ServoFactory.neoDistanceServo(
                         m_name + "/Right",
                         rightClimberID,
@@ -75,7 +75,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         m_params,
                         new PIDController(1, 0, 0),
                         0.122,
-                        m_climberVelocityController);
+                        m_velocityPIDConstants);
                 break;
             case BLANK:
             default:

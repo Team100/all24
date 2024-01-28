@@ -1,16 +1,17 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.AngularVisualization;
 import org.team100.lib.motion.simple.Positioning;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -27,7 +28,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Angle100> ampAngleServoRight;
     private final AngularVisualization m_viz;
     private final PIDController m_armPositionPIDController; 
-    private final PIDController m_armVelocityPIDController; 
+    private final PIDConstants m_armVelocityPIDConstants; 
 
 
 
@@ -41,12 +42,10 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
         m_armPositionPIDController = new PIDController(2.5, 0.1, 0);
 
-        m_armVelocityPIDController = new PIDController(0.0001, 0, 0);
+        m_armVelocityPIDConstants = new PIDConstants(0.0001, 0, 0);
 
 
         SmartDashboard.putData("Arm PID Position Controller", m_armPositionPIDController);
-
-        SmartDashboard.putData("Arm PID Velocity Controller", m_armVelocityPIDController);
 
 
 
@@ -57,22 +56,22 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 ampAngleServoLeft = ServoFactory.neoAngleServo(
                         m_name + "/Left",
                         leftPivotID,
-                        true,
+                        MotorPhase.FORWARD,
                         kCurrentLimit,
                         m_params,
                         m_armPositionPIDController, //2.5 0.1
                         0.122,
-                        m_armVelocityPIDController); //Where did this come from?
+                        m_armVelocityPIDConstants); //Where did this come from?
 
                 ampAngleServoRight = ServoFactory.neoAngleServo(
                         m_name + "/Right",
                         rightPivotID,
-                        false,
+                        MotorPhase.REVERSE,
                         kCurrentLimit,
                         m_params,
                         m_armPositionPIDController,
                         0.122,
-                        m_armVelocityPIDController);
+                        m_armVelocityPIDConstants);
                 break;
             case BLANK:
             default:

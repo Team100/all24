@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -33,11 +34,10 @@ public class IntakeRoller extends Intake {
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;
     private final SpeedingVisualization m_viz;
-    private final PIDController m_intakePIDController;
+    private final PIDConstants m_velocityConstants;
 
     public IntakeRoller(int topCAN, int bottomCAN) {
-        m_intakePIDController = new PIDController(0.0001, 0, 0);
-        SmartDashboard.putData("Intake Roller Controller", m_intakePIDController);
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
 
         m_name = Names.name(this);
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(
@@ -58,7 +58,7 @@ public class IntakeRoller extends Intake {
                         kCurrentLimit,
                         rollerParameter,
                         0.122,
-                        m_intakePIDController);
+                        m_velocityConstants);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom Roller",
                         bottomCAN,
@@ -66,7 +66,7 @@ public class IntakeRoller extends Intake {
                         kCurrentLimit,
                         rollerParameter,
                         0.122,
-                        m_intakePIDController);
+                        m_velocityConstants);
                 break;
             case BLANK:
             default:

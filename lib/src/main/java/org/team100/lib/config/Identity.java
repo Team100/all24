@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * 
  * Note that the ID string may change when you reflash the RoboRIO.
  */
+
 public enum Identity {
     TEST_BOARD_B0("030628b0"),
     TEST_BOARD_8D("03063c8d"),

@@ -10,6 +10,7 @@ import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
 import org.team100.lib.profile.Profile100;
@@ -49,7 +50,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics,
-            Drive drive) {
+            Drive drive,
+            MotorPhase motorPhase) {
         name = m_name + "/" + name;
 
         VelocityServo<Distance100> driveServo = driveServo(
@@ -65,7 +67,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningOffset,
                 10.29,
                 kinodynamics,
-                drive);
+                drive,
+                motorPhase);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
@@ -111,12 +114,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             double gearRatio,
             SwerveKinodynamics kinodynamics,
-            Drive drive) {
+            Drive drive,
+            MotorPhase motorPhase) {
         final double turningGearRatio = 1.0;
         FalconTurningMotor turningMotor = new FalconTurningMotor(
                 name,
                 turningMotorCanId,
-                false,
+                motorPhase,
                 gearRatio);
         Encoder100<Angle100> turningEncoder = turningEncoder(
                 encoderClass,

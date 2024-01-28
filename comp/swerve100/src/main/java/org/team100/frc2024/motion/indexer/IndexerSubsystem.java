@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.indexer;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -41,15 +42,15 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
-    private final PIDController m_indexerPIDController;
+    private final PIDConstants m_velocityConstants;
+    
 
     DigitalInput beamBreak1;
     DigitalInput beamBreak2;
 
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
-        m_indexerPIDController = new PIDController(0.0001, 0, 0);
-        SmartDashboard.putData("Indexer PID Controller", m_indexerPIDController);
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
             12.0,
@@ -72,7 +73,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
                         kCurrentLimit,
                         params,
                         0.122,
-                        m_indexerPIDController);
+                        m_velocityConstants);
                 break;
             case BLANK:
             default:

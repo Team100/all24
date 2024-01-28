@@ -1,5 +1,6 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -80,7 +81,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
             double gearRatio,
             double wheelDiameter,
             double kV,
-            PIDController lowLevelVelocityController) {
+            PIDConstants lowLevelVelocityConstants) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         velocityFFVoltS_Rev = kV; 
@@ -91,10 +92,10 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(false));
-        require(m_pidController.setP(lowLevelVelocityController.getP()));
-        require(m_pidController.setI(lowLevelVelocityController.getI()));
-        require(m_pidController.setD(lowLevelVelocityController.getD()));
-        require(m_pidController.setIZone(lowLevelVelocityController.getIZone()));
+        require(m_pidController.setP(lowLevelVelocityConstants.getP()));
+        require(m_pidController.setI(lowLevelVelocityConstants.getI()));
+        require(m_pidController.setD(lowLevelVelocityConstants.getD()));
+        require(m_pidController.setIZone(lowLevelVelocityConstants.getIZone()));
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 
