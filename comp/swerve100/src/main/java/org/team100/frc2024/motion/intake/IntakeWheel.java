@@ -8,6 +8,9 @@ import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * Four-axle wheeled intake with reduction
  * 
@@ -29,8 +32,13 @@ public class IntakeWheel extends Intake {
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;
+    private final PIDController m_intakePIDController;
+
 
     public IntakeWheel(int wheelID) {
+        m_intakePIDController = new PIDController(0.0001, 0, 0);
+        SmartDashboard.putData("Intake Wheel PID Controller", m_intakePIDController);
+
         m_name = Names.name(this);
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
@@ -44,7 +52,7 @@ public class IntakeWheel extends Intake {
             case BETA_BOT:
             //TODO tune kV
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
-                        m_name, wheelID, false, kCurrentLimit, params,0.122);
+                        m_name, wheelID, false, kCurrentLimit, params,0.122, m_intakePIDController);
                 break;
             case BLANK:
             default:

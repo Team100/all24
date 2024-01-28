@@ -10,6 +10,7 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -35,9 +36,18 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Distance100> s1;
     private final PositionServoInterface<Distance100> s2;
     private final SimpleVisualization m_viz;
+    private final PIDController m_climberVelocityController;
+    private final PIDController m_climberPositionController;
+
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
+        m_climberVelocityController = new PIDController(0.0001, 0, 0);
+        m_climberPositionController = new PIDController(1, 0, 0);
+        SmartDashboard.putData("Climber PID Velocity Controller", m_climberVelocityController);
+        SmartDashboard.putData("Climber PID Positional Controller", m_climberPositionController);
+
+
         m_params = new SysParam(
                 20.0,
                 0.01,
@@ -55,7 +65,8 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0),
-                        0.122);
+                        0.122,
+                        m_climberVelocityController);
                 s2 = ServoFactory.neoDistanceServo(
                         m_name + "/Right",
                         rightClimberID,
@@ -63,7 +74,8 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0),
-                        0.122);
+                        0.122,
+                        m_climberVelocityController);
                 break;
             case BLANK:
             default:

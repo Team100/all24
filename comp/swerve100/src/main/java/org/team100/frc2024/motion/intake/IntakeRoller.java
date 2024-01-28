@@ -8,6 +8,9 @@ import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * Direct-drive roller intake
  * 
@@ -30,8 +33,12 @@ public class IntakeRoller extends Intake {
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;
     private final SpeedingVisualization m_viz;
+    private final PIDController m_intakePIDController;
 
     public IntakeRoller(int topCAN, int bottomCAN) {
+        m_intakePIDController = new PIDController(0.0001, 0, 0);
+        SmartDashboard.putData("Intake Roller Controller", m_intakePIDController);
+
         m_name = Names.name(this);
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(
                 1,
@@ -50,14 +57,16 @@ public class IntakeRoller extends Intake {
                         false,
                         kCurrentLimit,
                         rollerParameter,
-                        0.122);
+                        0.122,
+                        m_intakePIDController);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom Roller",
                         bottomCAN,
                         false,
                         kCurrentLimit,
                         rollerParameter,
-                        0.122);
+                        0.122,
+                        m_intakePIDController);
                 break;
             case BLANK:
             default:

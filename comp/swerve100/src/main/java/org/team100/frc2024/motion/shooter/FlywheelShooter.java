@@ -8,6 +8,9 @@ import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * Direct-drive shooter with right and left wheels.
  * 
@@ -35,9 +38,12 @@ public class FlywheelShooter extends Shooter {
     private final LimitedVelocityServo<Distance100> leftShooter;
     private final LimitedVelocityServo<Distance100> rightShooter;
     private final SpeedingVisualization m_viz;
+    private final PIDController m_shooterPIDController;
 
     public FlywheelShooter(int leftShooterID, int rightShooterID) {
         m_name = Names.name(this);
+        m_shooterPIDController = new PIDController(0.0001, 0, 0);
+        SmartDashboard.putData("Shooter Controller", m_shooterPIDController);
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
                 1,
                 0.1,
@@ -54,14 +60,16 @@ public class FlywheelShooter extends Shooter {
                         false,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_shooterPIDController);
                 rightShooter = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Right",
                         rightShooterID,
                         false,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_shooterPIDController);
                 break;
             case BLANK:
             default:

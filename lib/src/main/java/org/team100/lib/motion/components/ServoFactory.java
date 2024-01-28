@@ -35,7 +35,8 @@ public class ServoFactory {
             boolean motorPhase,
             int currentLimit,
             SysParam param,
-            double lowLevelkV) {
+            double lowLevelkV,
+            PIDController lowLevelVelocityController) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
@@ -43,7 +44,8 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelkV);
+                lowLevelkV,
+                lowLevelVelocityController);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
@@ -84,14 +86,16 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDController controller, 
-            double lowLevelkV) {
+            double lowLevelkV,
+            PIDController lowLevelVelocityController) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
                 canId,
                 motorPhase,
                 currentLimit,
                 param.gearRatio(),
-                lowLevelkV);
+                lowLevelkV,
+                lowLevelVelocityController);
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
                 motor,
@@ -146,7 +150,8 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDController controller,
-            double lowLevelkV) {
+            double lowLevelkV,
+            PIDController lowLevelVelocityController) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
                 canId,
@@ -154,7 +159,8 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelkV);
+                lowLevelkV,
+                lowLevelVelocityController);
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
                 motor,

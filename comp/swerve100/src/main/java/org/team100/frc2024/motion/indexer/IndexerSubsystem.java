@@ -11,7 +11,10 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -38,12 +41,16 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
+    private final PIDController m_indexerPIDController;
 
     DigitalInput beamBreak1;
     DigitalInput beamBreak2;
 
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
+        m_indexerPIDController = new PIDController(0.0001, 0, 0);
+        SmartDashboard.putData("Indexer PID Controller", m_indexerPIDController);
+
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
             12.0,
              0.05,
@@ -64,7 +71,8 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
                         true,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_indexerPIDController);
                 break;
             case BLANK:
             default:

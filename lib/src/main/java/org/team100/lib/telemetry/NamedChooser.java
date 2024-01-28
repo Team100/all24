@@ -26,3 +26,5 @@ public abstract class NamedChooser<T> extends SendableChooser<T> {
         SendableRegistry.add(this, name);
     }
 }
+
+

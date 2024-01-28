@@ -16,6 +16,8 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
+import edu.wpi.first.math.controller.PIDController;
+
 /**
  * Swerve steering motor using REV Neo.
  * 
@@ -72,7 +74,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio, double kV) {
+    public NeoTurningMotor(String name, int canId, boolean motorPhase, int currentLimit, double gearRatio, double kV, PIDController lowLevelVelocityController) {
         velocityFFVoltS_Rev = kV;
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
@@ -84,10 +86,10 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(true));
-        require(m_pidController.setP(outboardP));
-        require(m_pidController.setI(0));
-        require(m_pidController.setD(0));
-        require(m_pidController.setIZone(0));
+        require(m_pidController.setP(lowLevelVelocityController.getP()));
+        require(m_pidController.setI(lowLevelVelocityController.getI()));
+        require(m_pidController.setD(lowLevelVelocityController.getD()));
+        require(m_pidController.setIZone(lowLevelVelocityController.getIZone()));
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 

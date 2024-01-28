@@ -11,6 +11,7 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -25,8 +26,9 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Angle100> ampAngleServoLeft;
     private final PositionServoInterface<Angle100> ampAngleServoRight;
     private final AngularVisualization m_viz;
+    private final PIDController m_armPositionPIDController; 
+    private final PIDController m_armVelocityPIDController; 
 
-    
 
 
     public AmpSubsystem(int leftPivotID, int rightPivotID) {
@@ -35,12 +37,22 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 45,
                 10,
                 10);
+
+
+        m_armPositionPIDController = new PIDController(2.5, 0.1, 0);
+
+        m_armVelocityPIDController = new PIDController(0.0001, 0, 0);
+
+
+        SmartDashboard.putData("Arm PID Position Controller", m_armPositionPIDController);
+
+        SmartDashboard.putData("Arm PID Velocity Controller", m_armVelocityPIDController);
+
+
+
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
-                
-
-
                 //TODO tune kV
                 ampAngleServoLeft = ServoFactory.neoAngleServo(
                         m_name + "/Left",
@@ -48,8 +60,9 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         true,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(2.5, 0.1, 0), //2.5 0.1
-                        0.122);
+                        m_armPositionPIDController, //2.5 0.1
+                        0.122,
+                        m_armVelocityPIDController); //Where did this come from?
 
                 ampAngleServoRight = ServoFactory.neoAngleServo(
                         m_name + "/Right",
@@ -57,8 +70,9 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         false,
                         kCurrentLimit,
                         m_params,
-                        new PIDController(2.5, 0.1, 0),
-                        0.122);
+                        m_armPositionPIDController,
+                        0.122,
+                        m_armVelocityPIDController);
                 break;
             case BLANK:
             default:

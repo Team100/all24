@@ -8,6 +8,9 @@ import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * Direct-drive shooter with top and bottom drums.
  * 
@@ -36,9 +39,13 @@ public class DrumShooter extends Shooter {
     private final LimitedVelocityServo<Distance100> topRoller;
     private final LimitedVelocityServo<Distance100> bottomRoller;
     private final SpeedingVisualization m_viz;
+    private final PIDController m_shooterPIDController;
 
     public DrumShooter(int topRollerID, int bottomRollerID) {
         m_name = Names.name(this);
+        m_shooterPIDController = new PIDController(0.0001, 0, 0);
+        SmartDashboard.putData("Shooter Controller", m_shooterPIDController);
+
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
                 1,
                 0.1,
@@ -55,14 +62,16 @@ public class DrumShooter extends Shooter {
                         false,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_shooterPIDController);
                 bottomRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Bottom",
                         bottomRollerID,
                         true,
                         kCurrentLimit,
                         params,
-                        0.122);
+                        0.122,
+                        m_shooterPIDController);
                 break;
             case BLANK:
             default:
