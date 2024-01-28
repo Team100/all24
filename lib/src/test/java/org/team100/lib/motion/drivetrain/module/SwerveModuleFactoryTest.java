@@ -14,7 +14,7 @@ class SwerveModuleFactoryTest implements Timeless {
     @Test
     void testWCP() {
         SwerveKinodynamics k = SwerveKinodynamicsFactory.forTest();
-        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, AnalogTurningEncoder.class, 0, 0, 0, k);
+        SwerveModule100 module = WCPSwerveModule100.get("test", 0, 0, AnalogTurningEncoder.class, 0, 0, 0, k, Drive.DIRECT);
         assertNotNull(module);
         module.close();
     }
