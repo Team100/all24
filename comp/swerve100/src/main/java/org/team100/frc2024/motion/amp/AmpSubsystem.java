@@ -40,6 +40,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
             case BETA_BOT:
                 
 
+
+                //TODO tune kV
                 ampAngleServoLeft = ServoFactory.neoAngleServo(
                         m_name + "/Left",
                         leftPivotID,
@@ -47,6 +49,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         new PIDController(2.5, 0.1, 0)); //2.5 0.1
+                        0.122);
 
                 ampAngleServoRight = ServoFactory.neoAngleServo(
                         m_name + "/Right",
@@ -55,6 +58,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         new PIDController(2.5, 0.1, 0)); //2.5 0.1
+                        0.122);
                 break;
             case BLANK:
             default:

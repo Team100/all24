@@ -57,12 +57,14 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
                 beamBreak1 = new DigitalInput(4);
                 beamBreak2 = new DigitalInput(8);
 
+                //TODO tune kV
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,
                         true,
                         kCurrentLimit,
-                        params);
+                        params,
+                        0.122);
                 break;
             case BLANK:
             default:
