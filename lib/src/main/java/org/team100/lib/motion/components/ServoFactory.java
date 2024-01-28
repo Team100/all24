@@ -1,5 +1,6 @@
 package org.team100.lib.motion.components;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
@@ -37,7 +38,7 @@ public class ServoFactory {
             boolean motorPhase,
             int currentLimit,
             SysParam param,
-            double lowLevelkV,
+            FeedforwardConstants lowLevelFeedforwardConstants,
             PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
@@ -46,7 +47,7 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelkV,
+                lowLevelFeedforwardConstants,
                 lowLevelVelocityConstants);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
@@ -88,7 +89,7 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDController controller, 
-            double lowLevelkV,
+            FeedforwardConstants lowLevelFeedforwardConstants,
             PIDConstants lowLevelVelocityConstants) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
@@ -96,7 +97,7 @@ public class ServoFactory {
                 motorPhase,
                 currentLimit,
                 param.gearRatio(),
-                lowLevelkV,
+                lowLevelFeedforwardConstants,
                 lowLevelVelocityConstants);
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
@@ -152,7 +153,7 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDController controller,
-            double lowLevelkV,
+            FeedforwardConstants lowLevelFeedforwardConstants,
             PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
@@ -161,7 +162,7 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelkV,
+                lowLevelFeedforwardConstants,
                 lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,

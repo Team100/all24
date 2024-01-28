@@ -4,7 +4,6 @@
 
 package org.team100.frc2024.motion;
 
-import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 

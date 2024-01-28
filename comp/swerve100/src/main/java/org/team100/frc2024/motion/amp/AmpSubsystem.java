@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.amp;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -29,6 +30,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final AngularVisualization m_viz;
     private final PIDController m_armPositionPIDController; 
     private final PIDConstants m_armVelocityPIDConstants; 
+    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
 
 
 
@@ -39,9 +41,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 10,
                 10);
 
-
         m_armPositionPIDController = new PIDController(2.5, 0.1, 0);
-
+        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
         m_armVelocityPIDConstants = new PIDConstants(0.0001, 0, 0);
 
 
@@ -60,7 +61,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         m_armPositionPIDController, //2.5 0.1
-                        0.122,
+                        m_lowLevelFeedforwardConstants,
                         m_armVelocityPIDConstants); //Where did this come from?
 
                 ampAngleServoRight = ServoFactory.neoAngleServo(
@@ -70,7 +71,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         m_armPositionPIDController,
-                        0.122,
+                        m_lowLevelFeedforwardConstants,
                         m_armVelocityPIDConstants);
                 break;
             case BLANK:
