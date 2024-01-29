@@ -36,8 +36,9 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                10,
-                10);
+                9,
+                5)
+                ;
 
 
         m_armPositionPIDController = new PIDController(2.5, 0.1, 0);
