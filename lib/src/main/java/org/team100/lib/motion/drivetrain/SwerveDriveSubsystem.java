@@ -92,6 +92,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateState();
 
         t.log(Level.DEBUG, m_name, "pose", m_pose);
+        t.log(Level.DEBUG, m_name, "pose array", new double[] {m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians()});
         t.log(Level.DEBUG, m_name, "velocity", m_velocity);
         t.log(Level.DEBUG, m_name, "acceleration", m_accel);
         t.log(Level.DEBUG, m_name, "state", m_state);
