@@ -6,6 +6,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -60,6 +61,11 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         return m_positionRad;
     }
 
+    public double getWrappedPosition(){
+        return MathUtil.angleModulus(m_positionRad);
+        
+    }
+
     @Override
     public double getRate() {
         return m_rateRad_S;
@@ -80,9 +86,11 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     public void periodic() {
         updatePosition();
         updateRate();
-        t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
-        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
+        t.log(Level.DEBUG, m_name, "position (rad) ROBOT USES THIS (COUNTER CLOCKWISE IS POSITIVE)", m_encoder.getDistance());
+        t.log(Level.DEBUG, m_name, "position (turns) USE FOR OFFSETS", m_encoder.get());
         t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
+        t.log(Level.DEBUG, m_name, "Wrapped position rads (absolute)", getWrappedPosition());
+
     }
 
     ////////////////////////////////////
