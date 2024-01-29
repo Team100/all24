@@ -98,7 +98,6 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
-        System.out.println("AHHHHHHHHHHHH");
         ampAngleServoRight.setPosition(value);
         ampAngleServoLeft.setPosition(value);
     }
