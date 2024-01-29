@@ -42,9 +42,10 @@ import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
+import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -116,10 +117,9 @@ public class RobotContainer {
 
     public RobotContainer(TimedRobot robot) throws IOException {
         m_name = Names.name(this);
-        // selects the correct control class for whatever is plugged in
-        final ControlFactory controlFactory = new ControlFactory();
-        final DriverControl driverControl = controlFactory.getDriverControl();
-        final OperatorControl operatorControl = controlFactory.getOperatorControl();
+
+        final DriverControl driverControl = new DriverControlProxy();
+        final OperatorControl operatorControl = new OperatorControlProxy();
 
         // these devices only currently exist on the comp bot
         if (Identity.instance == Identity.COMP_BOT) {
