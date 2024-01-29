@@ -1,8 +1,5 @@
 package org.team100.lib.config;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
-
 /** Uses digital inputs 4 and 5. */
 public class PIDConstants {
     private final double m_p;

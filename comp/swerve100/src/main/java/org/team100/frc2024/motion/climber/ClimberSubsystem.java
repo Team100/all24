@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.climber;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -38,12 +39,14 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Distance100> s2;
     private final SimpleVisualization m_viz;
     private final PIDConstants m_velocityPIDConstants;
+    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
     private final PIDController m_climberPositionController;
 
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
         m_velocityPIDConstants = new PIDConstants(0.0001, 0, 0);
+        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
         m_climberPositionController = new PIDController(1, 0, 0);
         SmartDashboard.putData("Climber PID Positional Controller", m_climberPositionController);
 
@@ -65,7 +68,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0),
-                        0.122,
+                        m_lowLevelFeedforwardConstants,
                         m_velocityPIDConstants);
                 s2 = ServoFactory.neoDistanceServo(
                         m_name + "/Right",
@@ -74,7 +77,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         kCurrentLimit,
                         m_params,
                         new PIDController(1, 0, 0),
-                        0.122,
+                        m_lowLevelFeedforwardConstants,
                         m_velocityPIDConstants);
                 break;
             case BLANK:
