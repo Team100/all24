@@ -1,7 +1,6 @@
 package org.team100.lib.sensors;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTable.SubTableListener;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /**

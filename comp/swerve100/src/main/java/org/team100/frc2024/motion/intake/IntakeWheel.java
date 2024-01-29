@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.intake;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -8,9 +9,6 @@ import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Four-axle wheeled intake with reduction
@@ -34,10 +32,12 @@ public class IntakeWheel extends Intake {
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;
     private final PIDConstants m_velocityConstants;
+    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
 
 
     public IntakeWheel(int wheelID) {
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
+        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
 
         m_name = Names.name(this);
 
@@ -52,7 +52,7 @@ public class IntakeWheel extends Intake {
             case BETA_BOT:
             //TODO tune kV
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
-                        m_name, wheelID, false, kCurrentLimit, params,0.122, m_velocityConstants);
+                        m_name, wheelID, false, kCurrentLimit, params, m_lowLevelFeedforwardConstants, m_velocityConstants);
                 break;
             case BLANK:
             default:
