@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.indexer;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -8,14 +9,10 @@ import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -43,14 +40,15 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
     private final LimitedVelocityServo<Distance100> m_servo;
     private final SpeedingVisualization m_viz;
     private final PIDConstants m_velocityConstants;
-    
+    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
 
     DigitalInput beamBreak1;
-    DigitalInput beamBreak2;
+    // DigitalInput beamBreak2;
 
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
+        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
             12.0,
@@ -63,7 +61,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
             case BETA_BOT:
 
                 beamBreak1 = new DigitalInput(4);
-                beamBreak2 = new DigitalInput(8);
+                // beamBreak2 = new DigitalInput(8);
 
                 //TODO tune kV
                 m_servo = ServoFactory.limitedNeoVelocityServo(
@@ -72,7 +70,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
                         true,
                         kCurrentLimit,
                         params,
-                        0.122,
+                        m_lowLevelFeedforwardConstants,
                         m_velocityConstants);
                 break;
             case BLANK:

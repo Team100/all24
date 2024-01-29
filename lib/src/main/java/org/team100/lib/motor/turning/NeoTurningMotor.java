@@ -1,5 +1,6 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
@@ -18,8 +19,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
-import edu.wpi.first.math.controller.PIDController;
-
 /**
  * Swerve steering motor using REV Neo.
  * 
@@ -28,7 +27,7 @@ import edu.wpi.first.math.controller.PIDController;
 public class NeoTurningMotor implements Motor100<Angle100> {
     private final RelativeEncoder m_encoder;
 
-    private static final double staticFrictionFFVolts = 0.1;
+    private final double staticFrictionFFVolts;
     /**
      * This is surely wrong.
      */
@@ -39,7 +38,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double dynamicFrictionFFVolts = 0.065;
+    private final double dynamicFrictionFFVolts;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
@@ -52,19 +51,13 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /**
      * Placeholder for accel feedforward.
      */
-    private static final double accelFFVoltS2_M = 0;
+    private final double accelFFVoltS2_M;
 
     /**
      * Proportional feedback coefficient for the controller.
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double outboardP = 0.0001;
-
-    /**
-     * For voltage compensation, the maximum output voltage.
-     */
-    private static final double saturationVoltage = 1;
 
     private final Telemetry t = Telemetry.get();
     private final SparkPIDController m_pidController;
@@ -76,8 +69,11 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, MotorPhase motorPhase, int currentLimit, double gearRatio, double kV, PIDConstants lowLevelVelocityConstants) {
-        velocityFFVoltS_Rev = kV;
+    public NeoTurningMotor(String name, int canId, MotorPhase motorPhase, int currentLimit, double gearRatio, FeedforwardConstants lowLevelFeedforwardConstants, PIDConstants lowLevelVelocityConstants) {
+        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
+        accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
+        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
+        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
@@ -185,7 +181,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /**
      * Frictional feedforward in duty cycle units [-1, 1]
      */
-    private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < 0.5) {
             return staticFrictionFFVolts * direction;
@@ -197,13 +193,13 @@ public class NeoTurningMotor implements Motor100<Angle100> {
      * Velocity feedforward in duty cycle units [-1, 1]
      */
     private double velocityFF(double motorRev_S) {
-        return velocityFFVoltS_Rev * motorRev_S / saturationVoltage;
+        return velocityFFVoltS_Rev * motorRev_S;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
-    private static double accelFF(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
+    private double accelFF(double accelM_S_S) {
+        return accelFFVoltS2_M * accelM_S_S;
     }
 }
