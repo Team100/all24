@@ -80,12 +80,10 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(false));
-
-        setP(lowLevelVelocityConstants.getP());
-        setI(lowLevelVelocityConstants.getI());
-        setD(lowLevelVelocityConstants.getD());
-        setIZone(lowLevelVelocityConstants.getIZone());
-
+        m_pidController.setP(lowLevelVelocityConstants.getP());
+        m_pidController.setI(lowLevelVelocityConstants.getI());
+        m_pidController.setD(lowLevelVelocityConstants.getD());
+        m_pidController.setIZone(lowLevelVelocityConstants.getIZone());
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 
@@ -95,7 +93,6 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_name = Names.append(name, this);
 
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
-
         t.register(Level.DEBUG, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
         t.register(Level.DEBUG, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
         t.register(Level.DEBUG, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);

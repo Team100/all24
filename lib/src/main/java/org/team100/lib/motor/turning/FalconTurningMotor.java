@@ -1,5 +1,7 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.FalconDriveMotor;
@@ -39,31 +41,29 @@ public class FalconTurningMotor implements Motor100<Angle100> {
      * Friction feedforward in volts, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.375;
+    private final double staticFrictionFFVolts;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
      */
-    private static final double dynamicFrictionFFVolts = 0.27;
+    private final double dynamicFrictionFFVolts;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
      * volt-seconds per revolution. Since saturation is 11 volts and free speed is
      * about 100 rev/s, this is about 0.11.
      */
-    private static final double velocityFFVoltS_Rev = 0.11;
+    private final double velocityFFVoltS_Rev;
 
     /**
      * Placeholder for accel feedforward.
      */
-    private static final double accelFFVoltS2_Rad = 0;
+    private final double accelFFVoltS2_Rad;
 
     /**
      * Proportional feedback coefficient for the controller. The error is measured
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
-    private static final double outboardP = 0.1;
-
     /**
      * For voltage compensation, the maximum output voltage.
      */
@@ -84,7 +84,13 @@ public class FalconTurningMotor implements Motor100<Angle100> {
             String name,
             int canId,
             MotorPhase motorPhase,
-            double kGearRatio) {
+            double kGearRatio,
+            PIDConstants lowLevelVelocityConstant,
+            FeedforwardConstants lowLevelFeedforwardConstants) {
+        accelFFVoltS2_Rad = lowLevelFeedforwardConstants.getkA();
+        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
+        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
+        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
@@ -126,9 +132,10 @@ public class FalconTurningMotor implements Motor100<Angle100> {
         m_motor.configPeakOutputReverse(-1);
 
         // configure outboard PID
-        m_motor.config_kP(0, outboardP);
-        m_motor.config_kI(0, 0);
-        m_motor.config_kD(0, 0);
+        m_motor.config_kP(0, lowLevelVelocityConstant.getP());
+        m_motor.config_kI(0, lowLevelVelocityConstant.getI());
+        m_motor.config_kD(0, lowLevelVelocityConstant.getD());
+        m_motor.config_IntegralZone(0, lowLevelVelocityConstant.getIZone());
         m_motor.config_kF(0, 0);
 
         m_name = Names.append(name, this);
@@ -188,12 +195,12 @@ public class FalconTurningMotor implements Motor100<Angle100> {
     //////////////////////////////////////////////////////////////////
 
     /** Velocity feedforward in duty cycle units [-1, 1] */
-    private static double velocityFF(double desiredMotorRev_S) {
+    private double velocityFF(double desiredMotorRev_S) {
         return velocityFFVoltS_Rev * desiredMotorRev_S / saturationVoltage;
     }
 
     /** Frictional feedforward in duty cycle units [-1, 1] */
-    private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
             return staticFrictionFFVolts * direction / saturationVoltage;
@@ -204,7 +211,7 @@ public class FalconTurningMotor implements Motor100<Angle100> {
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
-    private static double accelFF(double accelRad_S_S) {
+    private double accelFF(double accelRad_S_S) {
         return accelFFVoltS2_Rad * accelRad_S_S / saturationVoltage;
     }
 

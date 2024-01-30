@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
@@ -45,11 +47,14 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             Drive turningDrive,
             SwerveKinodynamics kinodynamics) {
         name = m_name + "/" + name;
-
+        PIDConstants drivePidConstants = new PIDConstants(0.05);
+        FeedforwardConstants driveFeedforwardConstants = new FeedforwardConstants(0.11, 0, 0.18, 0.01);
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
-                driveMotorCanId);
+                driveMotorCanId,
+                drivePidConstants,
+                driveFeedforwardConstants);
 
         PositionServoInterface<Angle100> turningServo = turningServo(
                 name + "/Turning",
@@ -66,14 +71,18 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     private static VelocityServo<Distance100> driveServo(
             String name,
             double currentLimit,
-            int driveMotorCanId) {
+            int driveMotorCanId,
+            PIDConstants pidConstants,
+            FeedforwardConstants feedforwardConstants) {
         FalconDriveMotor driveMotor = new FalconDriveMotor(
                 name,
                 driveMotorCanId,
                 true,
                 currentLimit,
                 kDriveReduction,
-                kWheelDiameterM);
+                kWheelDiameterM,
+                pidConstants,
+                feedforwardConstants);
         FalconDriveEncoder driveEncoder = new FalconDriveEncoder(
                 name,
                 driveMotor,

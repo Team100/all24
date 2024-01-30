@@ -1,7 +1,6 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
-import java.util.Scanner;
 
 import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.Identity;
