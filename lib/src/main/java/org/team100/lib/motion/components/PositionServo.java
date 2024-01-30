@@ -88,6 +88,8 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
+        m_controller.setIntegratorRange(0, 0.1);
+
         t.log(Level.DEBUG, m_name, "u_FB", u_FB);
         t.log(Level.DEBUG, m_name, "u_FF", u_FF);
         t.log(Level.DEBUG, m_name, "u_TOTAL", u_TOTAL);

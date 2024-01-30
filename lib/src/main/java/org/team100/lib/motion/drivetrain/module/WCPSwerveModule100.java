@@ -1,17 +1,16 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.config.Identity;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
-import org.team100.lib.motion.components.NullPositionServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.motor.turning.FalconTurningMotor;
 import org.team100.lib.profile.Profile100;
@@ -32,10 +31,11 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double driveEncoderDistancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
     /**
-     * @param name         like "front left" or whatever
-     * @param curerntLimit in amps
+     * @param name                  like "front left" or whatever
+     * @param curerntLimit          in amps
      * @param driveMotorCanId
-     * @param encoderClass select the type of encoder that exists on the robot
+     * @param encoderClass          select the type of encoder that exists on the
+     *                              robot
      * @param turningMotorCanId
      * @param turningEncoderChannel
      * @param turningOffset
@@ -49,7 +49,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            SwerveKinodynamics kinodynamics) {
+            SwerveKinodynamics kinodynamics,
+            Drive drive,
+            MotorPhase motorPhase) {
         name = m_name + "/" + name;
 
         VelocityServo<Distance100> driveServo = driveServo(
@@ -57,22 +59,16 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 currentLimit,
                 driveMotorCanId);
 
-        PositionServoInterface<Angle100> turningServo;
-        if (Identity.instance == Identity.BETA_BOT) {
-            // not working yet
-            turningServo = new NullPositionServo<>();
-        } else {
-            turningServo = turningServo(
+        PositionServoInterface<Angle100> turningServo = turningServo(
                 name + "/Turning",
                 encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
                 10.29,
-                kinodynamics);
-
-        }
-
+                kinodynamics,
+                drive,
+                motorPhase);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
@@ -117,12 +113,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             double gearRatio,
-            SwerveKinodynamics kinodynamics) {
+            SwerveKinodynamics kinodynamics,
+            Drive drive,
+            MotorPhase motorPhase) {
         final double turningGearRatio = 1.0;
         FalconTurningMotor turningMotor = new FalconTurningMotor(
                 name,
                 turningMotorCanId,
-                true,
+                motorPhase,
                 gearRatio);
         Encoder100<Angle100> turningEncoder = turningEncoder(
                 encoderClass,
@@ -130,7 +128,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio,
-                Drive.DIRECT);
+                drive);
         PIDController angleVelocityController = new PIDController(
                 2.86, // kP
                 0, // kI
@@ -169,9 +167,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningServo.reset();
         return turningServo;
     }
-
-
-
 
     private static Encoder100<Angle100> turningEncoder(
             Class<?> encoderClass,

@@ -1,6 +1,7 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.Identity;
@@ -10,6 +11,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
+
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -25,6 +27,7 @@ public class Robot extends TimedRobot {
     private final Telemetry t = Telemetry.get();
     private final String m_name = Names.name(this);
     private RobotContainer m_robotContainer;
+    private String m_logName = "";
 
     @Override
     public void robotInit() {
@@ -58,6 +61,10 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         m_robotContainer.ledStart();
+    }
+
+    public void setLogName(String logName){
+        m_logName = logName;
     }
 
     @Override
@@ -119,5 +126,7 @@ public class Robot extends TimedRobot {
         b.append("\n");
         b.append(kReset);
         Util.println(b.toString());
+
+        
     }
 }

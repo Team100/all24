@@ -24,6 +24,10 @@ public interface OperatorControl {
         return new Trigger(() -> false);
     }
 
+    default Trigger pivotToAmpPosition(){
+        return new Trigger(() -> false);
+    }
+
     default double shooterSpeed() {
         return 0;
     }

@@ -28,7 +28,7 @@ public class IndexerSelfTest extends Command {
     
     public void treatment() {
         // spin up the mechanism.
-        m_indexer.forward();
+        m_indexer.index();
     }
 
     @Override

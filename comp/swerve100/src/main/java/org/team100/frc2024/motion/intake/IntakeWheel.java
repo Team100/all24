@@ -1,6 +1,8 @@
 package org.team100.frc2024.motion.intake;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -25,25 +27,32 @@ public class IntakeWheel extends Intake {
     /**
      * Surface velocity of whatever is turning in the intake.
      */
-    private static final double kIntakeVelocityM_S = 3;
+    private static final double kIntakeVelocityM_S = 10;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeMotor;
     private final SpeedingVisualization m_viz;
+    private final PIDConstants m_velocityConstants;
+    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
+
 
     public IntakeWheel(int wheelID) {
+        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
+        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
+
         m_name = Names.name(this);
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
-                3.0,
+                4.0,
                 0.05,
-                5.0,
+                10.0,
                 20.0,
                 -20.0);
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
+            //TODO tune kV
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
-                        m_name, wheelID, false, kCurrentLimit, params);
+                        m_name, wheelID, false, kCurrentLimit, params, m_lowLevelFeedforwardConstants, m_velocityConstants);
                 break;
             case BLANK:
             default:
