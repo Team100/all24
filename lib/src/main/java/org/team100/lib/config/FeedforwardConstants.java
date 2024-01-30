@@ -6,9 +6,9 @@ public class FeedforwardConstants {
     private final double m_kSS;
     private final double m_kDS;
 
-    //Default no friction or attached objects contraints
+    //Default no friction or attached objects contraints for NEO
     public FeedforwardConstants() {
-        m_kV = 0.122;
+       m_kV = 0.122;
        m_kA = 0;
        m_kSS = 0.1;
        m_kDS = 0.065;

@@ -1,6 +1,8 @@
 package org.team100.lib.motion.simple;
 
+import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
@@ -39,7 +41,9 @@ public class SimpleSubsystemFactory {
     }
 
     private SimpleSubsystem getDefault() {
-        FalconDriveMotor motor = new FalconDriveMotor("simple/drive", 1,true, 10, 1, 1);
+        FeedforwardConstants FeedforwardConstants = new FeedforwardConstants();
+        PIDConstants pidConstants = new PIDConstants(1);
+        FalconDriveMotor motor = new FalconDriveMotor("simple/drive", 1,true, 10, 1, 1,pidConstants,FeedforwardConstants);
         Encoder100<Distance100> encoder = new FalconDriveEncoder("simple/encoder", motor, 1);
 
         PIDController velocityController = new PIDController(1, 0, 0);

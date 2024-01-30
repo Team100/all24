@@ -69,7 +69,8 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name, int canId, MotorPhase motorPhase, int currentLimit, double gearRatio, FeedforwardConstants lowLevelFeedforwardConstants, PIDConstants lowLevelVelocityConstants) {
+    public NeoTurningMotor(String name, int canId, MotorPhase motorPhase, int currentLimit, double gearRatio,
+            FeedforwardConstants lowLevelFeedforwardConstants, PIDConstants lowLevelVelocityConstants) {
         velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
         accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
         dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
@@ -78,10 +79,10 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
 
-        if(motorPhase == MotorPhase.FORWARD){
-            m_motor.setInverted(!true);
+        if (motorPhase == MotorPhase.FORWARD) {
+            m_motor.setInverted(false);
         } else {
-            m_motor.setInverted(!false);
+            m_motor.setInverted(true);
         }
 
         require(m_motor.setSmartCurrentLimit(currentLimit));

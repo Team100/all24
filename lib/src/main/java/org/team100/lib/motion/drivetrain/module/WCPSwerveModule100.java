@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
@@ -53,11 +55,16 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Drive drive,
             MotorPhase motorPhase) {
         name = m_name + "/" + name;
-
+        PIDConstants drivePidConstants = new PIDConstants(0.05);
+        PIDConstants turningPidConstants = new PIDConstants(0.1);
+        FeedforwardConstants turningFeedforwardConstants = new FeedforwardConstants(0.11, 0, 0.375, 0.27);
+        FeedforwardConstants driveFeedforwardConstants = new FeedforwardConstants(0.11, 0, 0.18, 0.01);
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
-                driveMotorCanId);
+                driveMotorCanId,
+                drivePidConstants,
+                driveFeedforwardConstants);
 
         PositionServoInterface<Angle100> turningServo = turningServo(
                 name + "/Turning",
@@ -68,7 +75,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 10.29,
                 kinodynamics,
                 drive,
-                motorPhase);
+                motorPhase,
+                turningPidConstants,
+                turningFeedforwardConstants);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
@@ -76,14 +85,18 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static VelocityServo<Distance100> driveServo(
             String name,
             double currentLimit,
-            int driveMotorCanId) {
+            int driveMotorCanId,
+            PIDConstants pidConstants,
+            FeedforwardConstants feedforwardConstants) {
         FalconDriveMotor driveMotor = new FalconDriveMotor(
                 name,
                 driveMotorCanId,
                 true,
                 currentLimit,
                 kDriveReduction,
-                kWheelDiameterM);
+                kWheelDiameterM,
+                pidConstants,
+                feedforwardConstants);
         FalconDriveEncoder driveEncoder = new FalconDriveEncoder(
                 name,
                 driveMotor,
@@ -115,13 +128,17 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double gearRatio,
             SwerveKinodynamics kinodynamics,
             Drive drive,
-            MotorPhase motorPhase) {
+            MotorPhase motorPhase,
+            PIDConstants lowLevelPID,
+            FeedforwardConstants lowLevelFeedforward) {
         final double turningGearRatio = 1.0;
         FalconTurningMotor turningMotor = new FalconTurningMotor(
                 name,
                 turningMotorCanId,
                 motorPhase,
-                gearRatio);
+                gearRatio,
+                lowLevelPID,
+                lowLevelFeedforward);
         Encoder100<Angle100> turningEncoder = turningEncoder(
                 encoderClass,
                 name,
