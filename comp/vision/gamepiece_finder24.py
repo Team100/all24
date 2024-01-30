@@ -60,7 +60,7 @@ class GamePieceFinder:
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", NotePosition).publish().set(
-            NotePosition(int(),int())
+            NotePosition(0,0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
@@ -69,7 +69,7 @@ class GamePieceFinder:
 
     def find_object(self, img):
         range = cv2.inRange(img, self.object_lower, self.object_higher)
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
+        # img_rgb = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
         floodfill = range.copy()
         h, w = range.shape[:2]
         mask = np.zeros((h+2, w+2), np.uint8)
@@ -83,17 +83,13 @@ class GamePieceFinder:
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
             if (cnt_height < 50):
-                print("WWWW")
                 continue
             if (cnt_width/cnt_height < 2):
-                print("OOO")
                 continue
             if (cnt_height/cnt_width > 5):
-                print("NO")
                 continue
             mmnts = cv2.moments(c)
             if (mmnts["m00"] == 0):
-                print("bruh")
                 continue
 
             cX = int(mmnts["m10"] / mmnts["m00"])

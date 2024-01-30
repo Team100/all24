@@ -6,13 +6,34 @@ public class FeedforwardConstants {
     private final double m_kSS;
     private final double m_kDS;
 
-    //Default no friction or attached objects contraints for NEO
-    public FeedforwardConstants() {
-       m_kV = 0.122;
-       m_kA = 0;
-       m_kSS = 0.1;
-       m_kDS = 0.065;
+    /**
+    *Default no friction or attached objects contraints for NEO
+    */
+    public static FeedforwardConstants makeNeo() {
+        return new FeedforwardConstants(0.122, 0, 0.1, 0.065);
     }
+
+    public static FeedforwardConstants makeWCPSwerveTurningFalcon() {
+        return new FeedforwardConstants(0.11, 0, 0.18, 0.01);
+    }
+    
+    public static FeedforwardConstants makeWCPSwerveDriveFalcon() {
+        return new FeedforwardConstants(0.11, 0, 0.375, 0.27);
+    }
+
+    public FeedforwardConstants() {
+       m_kV = 0;
+       m_kA = 0;
+       m_kSS = 0;
+       m_kDS = 0;
+    }
+
+    public FeedforwardConstants(double kV) {
+        m_kV = kV;
+        m_kA = 0;
+        m_kSS = 0;
+        m_kDS = 0;
+     }
 
     public FeedforwardConstants(double kV, double kA, double kSS, double kDS) {
        m_kV = kV;

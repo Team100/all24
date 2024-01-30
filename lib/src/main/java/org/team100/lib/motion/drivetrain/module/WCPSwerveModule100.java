@@ -57,8 +57,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         name = m_name + "/" + name;
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         PIDConstants turningPidConstants = new PIDConstants(0.1);
-        FeedforwardConstants turningFeedforwardConstants = new FeedforwardConstants(0.11, 0, 0.375, 0.27);
-        FeedforwardConstants driveFeedforwardConstants = new FeedforwardConstants(0.11, 0, 0.18, 0.01);
+        FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon();
+        FeedforwardConstants driveFeedforwardConstants = FeedforwardConstants.makeWCPSwerveDriveFalcon();
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
