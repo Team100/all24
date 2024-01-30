@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.team100.frc2024.motion.IntakeNote;
+import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
+import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
@@ -39,9 +42,10 @@ import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.hid.ControlFactory;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
+import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -113,10 +117,9 @@ public class RobotContainer {
 
     public RobotContainer(TimedRobot robot) throws IOException {
         m_name = Names.name(this);
-        // selects the correct control class for whatever is plugged in
-        final ControlFactory controlFactory = new ControlFactory();
-        final DriverControl driverControl = controlFactory.getDriverControl();
-        final OperatorControl operatorControl = controlFactory.getOperatorControl();
+
+        final DriverControl driverControl = new DriverControlProxy();
+        final OperatorControl operatorControl = new OperatorControlProxy();
 
         // these devices only currently exist on the comp bot
         if (Identity.instance == Identity.COMP_BOT) {
@@ -151,6 +154,8 @@ public class RobotContainer {
         // The monitor runs less frequently than the control loop.
         robot.addPeriodic(m_monitor::periodic, 0.2);
 
+        
+
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
@@ -164,6 +169,8 @@ public class RobotContainer {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
+    
+
         VisionDataProvider visionDataProvider = new VisionDataProvider(
                 m_layout,
                 poseEstimator,
@@ -175,6 +182,12 @@ public class RobotContainer {
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
+        m_drive = new SwerveDriveSubsystem(
+                m_heading,
+                poseEstimator,
+                swerveLocal,
+                driverControl::speed);
+                
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
 
@@ -186,11 +199,7 @@ public class RobotContainer {
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         // show mode locks slow speed.
-        m_drive = new SwerveDriveSubsystem(
-                m_heading,
-                poseEstimator,
-                swerveLocal,
-                driverControl::speed);
+        
 
         ////////////////////////////
         //
@@ -287,8 +296,16 @@ public class RobotContainer {
         // TODO: run the intake if the camera sees a note.
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
-        operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
+        // operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
+
+        // operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
+
+        operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
+
+        operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
+
+        operatorControl.pivotToAmpPosition().whileTrue(new PivotToAmpPosition(m_amp));
+
 
         // TODO: spin up the shooter whenever the robot is in range.
 
@@ -318,6 +335,7 @@ public class RobotContainer {
         // TODO: shoot only when the shooter is ready.
 
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        operatorControl.index().whileTrue(m_indexer.run(m_indexer::index));
         operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> true));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (m_amp.inPosition())));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (!m_intake.noteInIntake())));

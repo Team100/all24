@@ -1,6 +1,7 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.FalconDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -82,7 +83,7 @@ public class FalconTurningMotor implements Motor100<Angle100> {
     public FalconTurningMotor(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             double kGearRatio) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
@@ -92,7 +93,7 @@ public class FalconTurningMotor implements Motor100<Angle100> {
         m_motor.setNeutralMode(NeutralMode.Brake);
         gearRatio = kGearRatio;
         // the serve module steering gear is inverted
-        if (motorPhase) {
+        if (motorPhase == MotorPhase.FORWARD) {
             m_motor.setInverted(InvertType.None);
         } else {
             m_motor.setInverted(InvertType.InvertMotorOutput);

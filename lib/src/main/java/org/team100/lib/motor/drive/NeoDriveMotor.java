@@ -1,10 +1,13 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -23,14 +26,14 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
 public class NeoDriveMotor implements Motor100<Distance100> {
     private final RelativeEncoder m_encoder;
 
-    private static final double staticFrictionFFVolts = 0.1;
+    private final double staticFrictionFFVolts;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double dynamicFrictionFFVolts = 0.065;
+    private final double dynamicFrictionFFVolts;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
@@ -38,25 +41,12 @@ public class NeoDriveMotor implements Motor100<Distance100> {
      * 
      * This is a guess. Calibrate it before using it.
      */
-    private static final double velocityFFVoltS_Rev = 0.122;
+    private final double velocityFFVoltS_Rev;
 
     /**
      * Placeholder for accel feedforward.
      */
-    private static final double accelFFVoltS2_M = 0;
-
-    /**
-     * Proportional feedback coefficient for the controller.
-     * 
-     * This is a guess. Calibrate it before using it.
-     */
-    private static final double outboardP = 0.0001;
-
-    /**
-     * For voltage compensation, the maximum output voltage.
-     */
-    private static final double saturationVoltage = 1;
-
+    private final double accelFFVoltS2_M;
     private final Telemetry t = Telemetry.get();
     private final SparkPIDController m_pidController;
     private final CANSparkMax m_motor;
@@ -75,21 +65,27 @@ public class NeoDriveMotor implements Motor100<Distance100> {
             boolean motorPhase,
             int currentLimit,
             double gearRatio,
-            double wheelDiameter) {
+            double wheelDiameter,
+            FeedforwardConstants lowLevelFeedforwardConstants,
+            PIDConstants lowLevelVelocityConstants) {
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
-
+        accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
+        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV(); 
+        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
+        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
         m_motor.setInverted(!motorPhase);
         require(m_motor.setSmartCurrentLimit(currentLimit));
-
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(false));
-        require(m_pidController.setP(outboardP));
-        require(m_pidController.setI(0));
-        require(m_pidController.setD(0));
-        require(m_pidController.setIZone(0));
+
+        setP(lowLevelVelocityConstants.getP());
+        setI(lowLevelVelocityConstants.getI());
+        setD(lowLevelVelocityConstants.getD());
+        setIZone(lowLevelVelocityConstants.getIZone());
+
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 
@@ -99,12 +95,34 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_name = Names.append(name, this);
 
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
+
+        t.register(Level.DEBUG, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
+        t.register(Level.DEBUG, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
+        t.register(Level.DEBUG, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
+        t.register(Level.DEBUG, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
+    }
+
+    private void setP(double p) {
+        m_pidController.setP(p);
+    }
+
+    private void setI(double i) {
+        m_pidController.setI(i);
+    }
+
+    private void setD(double d) {
+        m_pidController.setD(d);
+    }
+
+    private void setIZone(double iz) {
+        m_pidController.setIZone(iz);
     }
 
     private void require(REVLibError responseCode) {
-        return;
-        // if (responseCode != REVLibError.kOk)
-            // throw new IllegalStateException();
+        // TODO: make this throw
+        if (responseCode != REVLibError.kOk)
+            Util.warn("NeoDriveMotor received response code " + responseCode.name());
+        // throw new IllegalStateException();
     }
 
     @Override
@@ -183,6 +201,9 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoderVelocity = m_encoder.getVelocity();
         t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
+        t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
     }
 
     /////////////////////////////////////////////////////////////////
@@ -190,7 +211,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     /**
      * Frictional feedforward in duty cycle units [-1, 1]
      */
-    private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < 0.5) {
             return staticFrictionFFVolts * direction;
@@ -201,14 +222,14 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
-    private static double velocityFF(double motorRev_S) {
-        return velocityFFVoltS_Rev * motorRev_S / saturationVoltage;
+    private double velocityFF(double motorRev_S) {
+        return velocityFFVoltS_Rev * motorRev_S;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
-    private static double accelFF(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
+    private double accelFF(double accelM_S_S) {
+        return accelFFVoltS2_M * accelM_S_S;
     }
 }
