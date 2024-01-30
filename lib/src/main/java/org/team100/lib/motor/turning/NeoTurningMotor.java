@@ -80,9 +80,9 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         m_gearRatio = gearRatio;
 
         if (motorPhase == MotorPhase.FORWARD) {
-            m_motor.setInverted(!true);
+            m_motor.setInverted(false);
         } else {
-            m_motor.setInverted(!false);
+            m_motor.setInverted(true);
         }
 
         require(m_motor.setSmartCurrentLimit(currentLimit));
