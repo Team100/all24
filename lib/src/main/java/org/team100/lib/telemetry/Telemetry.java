@@ -1,10 +1,8 @@
 package org.team100.lib.telemetry;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,7 +29,6 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerTopic;
-import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.StringArrayPublisher;
@@ -125,22 +122,6 @@ public class Telemetry {
             t.setRetained(true);
             return t.publish();
         }, BooleanPublisher.class).set(val);
-    }
-
-    /**
-     * This is for tuning through glass.
-     * Remember that the values don't survive restarts, so
-     * you should write them down.
-     */
-    public void register(Level level, String root, String leaf, double initial, DoubleConsumer consumer) {
-        if (!m_level.admit(level))
-            return;
-        String k = Telemetry.append(root, leaf);
-        DoubleTopic t = inst.getDoubleTopic(k);
-        t.publish().set(initial);
-        t.setRetained(true);
-        inst.addListener(t, EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-                e -> consumer.accept(e.valueData.value.getDouble()));
     }
 
     public void log(Level level, String root, String leaf, double val) {

@@ -69,13 +69,8 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /** Current position measurement, obtained in periodic(). */
     private double m_encoderPosition;
 
-    public NeoTurningMotor(String name,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            double gearRatio,
-            FeedforwardConstants lowLevelFeedforwardConstants,
-            PIDConstants lowLevelVelocityConstants) {
+    public NeoTurningMotor(String name, int canId, MotorPhase motorPhase, int currentLimit, double gearRatio,
+            FeedforwardConstants lowLevelFeedforwardConstants, PIDConstants lowLevelVelocityConstants) {
         velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
         accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
         dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
@@ -84,10 +79,10 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
 
-        if(motorPhase == MotorPhase.FORWARD){
-            m_motor.setInverted(false);
+        if (motorPhase == MotorPhase.FORWARD) {
+            m_motor.setInverted(!true);
         } else {
-            m_motor.setInverted(true);
+            m_motor.setInverted(!false);
         }
 
         require(m_motor.setSmartCurrentLimit(currentLimit));
@@ -96,39 +91,16 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(true));
-        
-        setP(lowLevelVelocityConstants.getP());
-        setI(lowLevelVelocityConstants.getI());
-        setD(lowLevelVelocityConstants.getD());
-        setIZone(lowLevelVelocityConstants.getIZone());
-        
+        require(m_pidController.setP(lowLevelVelocityConstants.getP()));
+        require(m_pidController.setI(lowLevelVelocityConstants.getI()));
+        require(m_pidController.setD(lowLevelVelocityConstants.getD()));
+        require(m_pidController.setIZone(lowLevelVelocityConstants.getIZone()));
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 
         m_name = Names.append(name, this);
 
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
-
-        t.register(Level.DEBUG, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
-        t.register(Level.DEBUG, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
-        t.register(Level.DEBUG, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
-        t.register(Level.DEBUG, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
-    }
-
-    private void setP(double p) {
-        m_pidController.setP(p);
-    }
-
-    private void setI(double i) {
-        m_pidController.setI(i);
-    }
-
-    private void setD(double d) {
-        m_pidController.setD(d);
-    }
-
-    private void setIZone(double iz) {
-        m_pidController.setIZone(iz);
     }
 
     private void require(REVLibError responseCode) {

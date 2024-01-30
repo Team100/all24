@@ -5,9 +5,6 @@ import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -37,27 +34,19 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  * lower it here.
  */
 public class SwerveKinodynamics {
-    private final Telemetry t = Telemetry.get();
-
-    // geometry
-    private final double m_track;
-    private final double m_wheelbase;
-    private final double m_radius;
-    private final double m_vcg;
-    private final SwerveDriveKinematics m_kinematics;
-    private final double m_MaxCapsizeAccelM_S2;
 
     // configured inputs
-    private double m_MaxDriveVelocityM_S;
-    private double m_MaxDriveAccelerationM_S2;
-    private double m_MaxDriveDecelerationM_S2;
-    private double m_MaxSteeringVelocityRad_S;
-    private double m_maxSteeringAccelerationRad_S2;
+    private final double m_MaxDriveVelocityM_S;
+    private final double m_MaxDriveAccelerationM_S2;
+    private final double m_MaxDriveDecelerationM_S2;
+    private final double m_MaxSteeringVelocityRad_S;
 
     // calculated
-    private double m_maxAngleSpeedRad_S;
-    private double m_maxAngleAccelRad_S2;
-    private Profile100 m_steeringProfile;
+    private final double m_maxAngleSpeedRad_S;
+    private final double m_maxAngleAccelRad_S2;
+    private final double m_MaxCapsizeAccelM_S2;
+    private final SwerveDriveKinematics m_kinematics;
+    private final Profile100 m_steeringProfile;
 
     /**
      * Use the factory
@@ -65,7 +54,8 @@ public class SwerveKinodynamics {
      * @param maxDriveVelocity        module drive speed m/s
      * @param maxDriveAcceleration    module drive accel m/s^2
      * @param maxDriveDeceleration    module drive decel m/s^2. Should be higher
-     *                                than accel limit, this is a positive number.
+     *                                than
+     *                                accel limit.
      * @param maxSteeringVelocity     module steering axis rate rad/s
      * @param maxSteeringAcceleration module steering axis accel rad/s^2
      * @param track                   meters
@@ -86,74 +76,26 @@ public class SwerveKinodynamics {
         if (wheelbase < 0.1)
             throw new IllegalArgumentException();
 
-        m_track = track;
-        m_wheelbase = wheelbase;
-        m_vcg = vcg;
+        m_MaxDriveVelocityM_S = maxDriveVelocity;
+        m_MaxDriveAccelerationM_S2 = maxDriveAcceleration;
+        m_MaxDriveDecelerationM_S2 = maxDriveDeceleration;
+        m_MaxSteeringVelocityRad_S = maxSteeringVelocity;
+
         // distance from center to wheel
-        m_radius = Math.hypot(track / 2, m_wheelbase / 2);
-        m_kinematics = get(m_track, m_wheelbase);
-        // fulcrum is the distance from the center to the nearest edge.
-        double fulcrum = Math.min(m_track / 2, m_wheelbase / 2);
-        m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
-
-        setMaxDriveVelocityM_S(maxDriveVelocity);
-        setMaxDriveAccelerationM_S2(maxDriveAcceleration);
-        setMaxDriveDecelerationM_S2(maxDriveDeceleration);
-        setMaxSteeringVelocityRad_S(maxSteeringVelocity);
-        setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
-
-        t.register(Level.DEBUG, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
-                this::setMaxDriveVelocityM_S);
-        t.register(Level.DEBUG, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
-                this::setMaxDriveAccelerationM_S2);
-        t.register(Level.DEBUG, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
-                this::setMaxDriveDecelerationM_S2);
-        t.register(Level.DEBUG, Names.name(this), "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
-                this::setMaxSteeringVelocityRad_S);
-        t.register(Level.DEBUG, Names.name(this), "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
-                this::setMaxSteeringAccelerationRad_S2);
-    }
-
-    private void setMaxDriveVelocityM_S(double maxDriveVelocityM_S) {
-        m_MaxDriveVelocityM_S = maxDriveVelocityM_S;
-        setAngleSpeed();
-    }
-
-    private void setMaxDriveAccelerationM_S2(double maxDriveAccelerationM_S2) {
-        m_MaxDriveAccelerationM_S2 = maxDriveAccelerationM_S2;
-        setAngleAccel();
-    }
-
-    private void setMaxDriveDecelerationM_S2(double maxDriveDecelerationM_S2) {
-        m_MaxDriveDecelerationM_S2 = maxDriveDecelerationM_S2;
-        setAngleAccel();
-    }
-
-    private void setMaxSteeringVelocityRad_S(double maxSteeringVelocityRad_S) {
-        m_MaxSteeringVelocityRad_S = maxSteeringVelocityRad_S;
-        setSteeringProfile();
-    }
-
-    private void setMaxSteeringAccelerationRad_S2(double maxSteeringAccelerationRad_S2) {
-        m_maxSteeringAccelerationRad_S2 = maxSteeringAccelerationRad_S2;
-        setSteeringProfile();
-    }
-
-    private void setAngleSpeed() {
-        m_maxAngleSpeedRad_S = m_MaxDriveVelocityM_S / m_radius;
-    }
-
-    private void setAngleAccel() {
+        double radius = Math.hypot(track / 2, wheelbase / 2);
+        m_maxAngleSpeedRad_S = m_MaxDriveVelocityM_S / radius;
         // this assumes the robot is a uniform rectangular cuboid.
-        double accel = Math.max(m_MaxDriveAccelerationM_S2, m_MaxDriveDecelerationM_S2);
-        m_maxAngleAccelRad_S2 = 12 * accel * m_radius
-                / (m_track * m_track + m_wheelbase * m_wheelbase);
-    }
+        m_maxAngleAccelRad_S2 = 12 * m_MaxDriveAccelerationM_S2 * radius
+                / (track * track + wheelbase * wheelbase);
 
-    private void setSteeringProfile() {
+        // fulcrum is the distance from the center to the nearest edge.
+        double fulcrum = Math.min(track / 2, wheelbase / 2);
+        m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / vcg);
+
+        m_kinematics = get(track, wheelbase);
         m_steeringProfile = new TrapezoidProfile100(
-                m_MaxSteeringVelocityRad_S,
-                m_maxSteeringAccelerationRad_S2,
+                maxSteeringVelocity,
+                maxSteeringAcceleration,
                 0.05);
     }
 
