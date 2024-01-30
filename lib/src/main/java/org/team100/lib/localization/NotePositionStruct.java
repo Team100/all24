@@ -2,7 +2,6 @@ package org.team100.lib.localization;
 
 import java.nio.ByteBuffer;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.struct.Struct;
 
 public class NotePositionStruct implements Struct<NotePosition> {
@@ -19,23 +18,25 @@ public class NotePositionStruct implements Struct<NotePosition> {
 
     @Override
     public int getSize() {
-        return Translation2d.struct.getSize();
+        return kSizeInt32 + kSizeInt32;
     }
 
     @Override
     public String getSchema() {
-        return "Translation2d pose";
+        return "int x,int y";
     }
 
     @Override
     public NotePosition unpack(ByteBuffer bb) {
-        Translation2d pose = Translation2d.struct.unpack(bb);
-        return new NotePosition(pose);
+        int x = bb.getInt(0);
+        int y = bb.getInt(1);
+        return new NotePosition(x,y);
     }
 
     @Override
     public void pack(ByteBuffer bb, NotePosition value) {
-        Translation2d.struct.pack(bb, value.getPose());
+        bb.putInt(value.getX());
+        bb.putInt(value.getY());
     }
 
 }
