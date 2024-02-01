@@ -4,14 +4,14 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import java.util.function.BooleanSupplier;
+
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Experiment for driving swerve with the big joystick.
@@ -38,31 +38,36 @@ public abstract class JoystickControl implements DriverControl {
     }
 
     @Override
-    public Trigger circle() {
+    public BooleanSupplier circle() {
         // return button(1);
-        return new Trigger(() -> false);
+        return () -> false;
     }
 
     @Override
-    public Trigger actualCircle() {
+    public BooleanSupplier test() {
+        return button(3);
+    }
+
+    @Override
+    public BooleanSupplier actualCircle() {
         return button(2);
     }
 
     @Override
-    public Trigger resetRotation0() {
+    public BooleanSupplier resetRotation0() {
         // return button(2);
-        return new Trigger(() -> false);
+        return () -> false;
     }
 
     @Override
-    public Trigger resetRotation180() {
-        return new Trigger(() -> false);
+    public BooleanSupplier resetRotation180() {
+        return () -> false;
         // return button(3);
     }
 
     @Override
-    public Trigger resetPose() {
-        return new Trigger(() -> false);
+    public BooleanSupplier resetPose() {
+        return () -> false;
         // return button(4);
     }
 
@@ -107,12 +112,12 @@ public abstract class JoystickControl implements DriverControl {
         return m_controller.getHID().getRawButton(4);
     }
 
-    private JoystickButton button(int button) {
-        return new JoystickButton(m_controller.getHID(), button);
+    private BooleanSupplier button(int button) {
+        return () -> m_controller.getHID().getRawButton(button);
     }
 
     @Override
     public boolean annunicatorTest() {
         return m_controller.getHID().getRawButton(1);
-    }
+    }   
 }

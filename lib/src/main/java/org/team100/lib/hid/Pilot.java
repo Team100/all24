@@ -4,13 +4,13 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import java.util.function.BooleanSupplier;
+
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * The RC joystick thing joel made.
@@ -37,12 +37,12 @@ public class Pilot implements DriverControl {
     }
 
     @Override
-    public Trigger resetRotation0() {
+    public BooleanSupplier resetRotation0() {
         return button(2);
     }
 
     @Override
-    public Trigger resetRotation180() {
+    public BooleanSupplier resetRotation180() {
         return button(3);
     }
 
@@ -70,7 +70,7 @@ public class Pilot implements DriverControl {
         return m_controller.getHID().getRawAxis(axis);
     }
 
-    private JoystickButton button(int button) {
-        return new JoystickButton(m_controller.getHID(), button);
+    private BooleanSupplier button(int button) {
+        return ()->m_controller.getHID().getRawButton(button);
     }
 }

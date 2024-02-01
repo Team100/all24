@@ -1,8 +1,8 @@
 package org.team100.lib.hid;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class OperatorXboxControl implements OperatorControl {
     private final CommandXboxController m_controller;
@@ -17,8 +17,8 @@ public class OperatorXboxControl implements OperatorControl {
     }
 
     @Override
-    public Trigger doSomething() {
-        return new JoystickButton(m_controller.getHID(), 1);
+    public BooleanSupplier doSomething() {
+        return ()->m_controller.getHID().getRawButton( 1);
     }
 
     @Override

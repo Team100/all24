@@ -1,6 +1,6 @@
 package org.team100.lib.hid;
 
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.function.BooleanSupplier;
 
 /**
  * Represents the HID used by the "operator" role, which typically controls
@@ -12,32 +12,32 @@ public interface OperatorControl {
         return "No HID Found!!";
     }
 
-    default Trigger doSomething() {
-        return new Trigger(() -> false);
+    default BooleanSupplier doSomething() {
+        return () -> false;
     }
 
-    default Trigger index() {
-        return new Trigger(() -> false);
+    default BooleanSupplier index() {
+        return () -> false;
     }
 
-    default Trigger shooter() {
-        return new Trigger(() -> false);
+    default BooleanSupplier shooter() {
+        return () -> false;
     }
 
-    default Trigger pivotToAmpPosition(){
-        return new Trigger(() -> false);
+    default BooleanSupplier pivotToAmpPosition(){
+        return () -> false;
     }
 
     default double shooterSpeed() {
         return 0;
     }
 
-    default Trigger outtake() {
-        return new Trigger(() -> false);
+    default BooleanSupplier outtake() {
+        return () -> false;
     }
 
-    default Trigger intake() {
-        return new Trigger(() -> false);
+    default BooleanSupplier intake() {
+        return () -> false;
     }
 
     default boolean indexState() {
@@ -68,8 +68,8 @@ public interface OperatorControl {
 
     // this exists to bind to commands we don't want to run,
     // but we don't want them to rot either.
-    default Trigger never() {
-        return new Trigger(() -> false);
+    default BooleanSupplier never() {
+        return () -> false;
     }
 
     default boolean selfTestEnable() {

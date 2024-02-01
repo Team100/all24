@@ -3,8 +3,9 @@ package org.team100.lib.hid;
 import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class OperatorV2Control implements OperatorControl {
     private static final double kDeadband = 0.1;
@@ -20,18 +21,18 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public Trigger intake() {
-        return m_controller.x();
+    public BooleanSupplier intake() {
+        return () -> m_controller.getHID().getXButton();
     }
 
     @Override
-    public Trigger outtake() {
-        return m_controller.y();
+    public BooleanSupplier outtake() {
+        return () -> m_controller.getHID().getYButton();
     }
 
     @Override
-    public Trigger index() {
-        return m_controller.b();
+    public BooleanSupplier index() {
+        return () -> m_controller.getHID().getBButton();
     }
 
     @Override
@@ -40,13 +41,13 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public Trigger pivotToAmpPosition(){
-        return m_controller.leftBumper();
+    public BooleanSupplier pivotToAmpPosition() {
+        return () -> m_controller.getHID().getLeftBumper();
     }
 
     @Override
-    public Trigger shooter() {
-        return m_controller.a();
+    public BooleanSupplier shooter() {
+        return () -> m_controller.getHID().getAButton();
     }
 
     @Override

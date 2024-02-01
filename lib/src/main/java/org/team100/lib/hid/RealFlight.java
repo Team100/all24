@@ -4,6 +4,8 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -64,15 +66,15 @@ public class RealFlight implements DriverControl {
     }
 
     @Override
-    public Trigger resetPose() {
-        return hid.button(1);
+    public BooleanSupplier resetPose() {
+        return ()-> hid.getHID().getRawButton(1);
     }
 
     /**
      * Use slow when the right switch is on
      */
     @Override
-    public Trigger driveSlow() {
+    public BooleanSupplier driveSlow() {
         return rightSwitchOn();
     }
 
@@ -81,9 +83,8 @@ public class RealFlight implements DriverControl {
      * (slow overrides medium)
      */
     @Override
-    public Trigger driveMedium() {
-        Trigger rightSwitchOff = rightSwitchOn().negate();
-        return leftSwitchOn().and(rightSwitchOff);
+    public BooleanSupplier driveMedium() {
+        return () -> leftSwitchOn().getAsBoolean() && ! rightSwitchOn().getAsBoolean();
     }
 
     @Override
@@ -99,12 +100,12 @@ public class RealFlight implements DriverControl {
 
     /////////////////////////////////////////
 
-    public Trigger leftSwitchOn() {
-        return hid.button(2);
+    public BooleanSupplier leftSwitchOn() {
+        return ()->hid.getHID().getRawButton(2);
     }
 
-    public Trigger rightSwitchOn() {
-        return hid.button(3);
+    public BooleanSupplier rightSwitchOn() {
+        return ()->hid.getHID().getRawButton(3);
     }
 
     /**

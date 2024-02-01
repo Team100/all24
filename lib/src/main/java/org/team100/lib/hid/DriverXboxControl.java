@@ -4,6 +4,8 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import java.util.function.BooleanSupplier;
+
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This is a Logitech F310 or similar.
@@ -37,13 +38,13 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger resetRotation0() {
-        return new JoystickButton(m_controller.getHID(), 7);
+    public BooleanSupplier resetRotation0() {
+        return () -> m_controller.getHID().getRawButton(7);
     }
 
     @Override
-    public Trigger resetRotation180() {
-        return new JoystickButton(m_controller.getHID(), 8);
+    public BooleanSupplier resetRotation180() {
+        return () -> m_controller.getHID().getRawButton(8);
     }
 
     /**
@@ -75,13 +76,13 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger driveSlow() {
-        return m_controller.leftBumper();
+    public BooleanSupplier driveSlow() {
+        return () -> m_controller.getHID().getLeftBumper();
     }
 
     @Override
-    public Trigger driveMedium() {
-        return m_controller.rightBumper();
+    public BooleanSupplier driveMedium() {
+        return () -> m_controller.getHID().getRightBumper();
     }
 
     @Override
@@ -94,8 +95,8 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger resetPose() {
-        return m_controller.leftBumper();
+    public BooleanSupplier resetPose() {
+        return () -> m_controller.getHID().getLeftBumper();
     }
 
     @Override
@@ -110,29 +111,29 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger steer0() {
-        return m_controller.x();
+    public BooleanSupplier steer0() {
+        return () -> m_controller.getHID().getXButton();
     }
 
     @Override
-    public Trigger steer90() {
-        return m_controller.y();
+    public BooleanSupplier steer90() {
+        return () -> m_controller.getHID().getYButton();
     }
 
     @Override
-    public Trigger rotate0() {
+    public BooleanSupplier rotate0() {
         // this is the left trigger
         return new JoystickButton(m_controller.getHID(), 9);
     }
 
     @Override
-    public Trigger circle() {
-        return m_controller.a();
+    public BooleanSupplier circle() {
+        return () -> m_controller.getHID().getAButton();
     }
 
     @Override
-    public Trigger actualCircle() {
-        return m_controller.b();
+    public BooleanSupplier actualCircle() {
+        return () -> m_controller.getHID().getBButton();
     }
 
     @Override

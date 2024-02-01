@@ -1,5 +1,7 @@
 package org.team100.lib.hid;
 
+import java.util.function.BooleanSupplier;
+
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -7,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Checks periodically for changes in the HID connected to port 0, and changes
@@ -91,28 +92,28 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Trigger resetPose() {
-        return m_driverControl.resetPose();
+    public BooleanSupplier resetPose() {
+        return () -> m_driverControl.resetPose().getAsBoolean();
     }
 
     @Override
-    public Trigger resetRotation0() {
-        return m_driverControl.resetRotation0();
+    public BooleanSupplier resetRotation0() {
+        return () -> m_driverControl.resetRotation0().getAsBoolean();
     }
 
     @Override
-    public Trigger resetRotation180() {
-        return m_driverControl.resetRotation180();
+    public BooleanSupplier resetRotation180() {
+        return () -> m_driverControl.resetRotation180().getAsBoolean();
     }
 
     @Override
-    public Trigger driveSlow() {
-        return m_driverControl.driveSlow();
+    public BooleanSupplier driveSlow() {
+        return () -> m_driverControl.driveSlow().getAsBoolean();
     }
 
     @Override
-    public Trigger driveMedium() {
-        return m_driverControl.driveMedium();
+    public BooleanSupplier driveMedium() {
+        return () -> m_driverControl.driveMedium().getAsBoolean();
     }
 
     @Override
@@ -121,47 +122,52 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Trigger defense() {
-        return m_driverControl.defense();
+    public BooleanSupplier defense() {
+        return () -> m_driverControl.defense().getAsBoolean();
     }
 
     @Override
-    public Trigger steer0() {
-        return m_driverControl.steer0();
+    public BooleanSupplier steer0() {
+        return () -> m_driverControl.steer0().getAsBoolean();
     }
 
     @Override
-    public Trigger steer90() {
-        return m_driverControl.steer90();
+    public BooleanSupplier steer90() {
+        return () -> m_driverControl.steer90().getAsBoolean();
     }
 
     @Override
-    public Trigger rotate0() {
-        return m_driverControl.rotate0();
+    public BooleanSupplier rotate0() {
+        return () -> m_driverControl.rotate0().getAsBoolean();
     }
 
     @Override
-    public Trigger driveWithFancyTrajec() {
-        return m_driverControl.driveWithFancyTrajec();
+    public BooleanSupplier driveWithFancyTrajec() {
+        return () -> m_driverControl.driveWithFancyTrajec().getAsBoolean();
     }
 
     @Override
-    public Trigger circle() {
-        return m_driverControl.circle();
+    public BooleanSupplier circle() {
+        return () -> m_driverControl.circle().getAsBoolean();
     }
 
     @Override
-    public Trigger actualCircle() {
-        return m_driverControl.actualCircle();
+    public BooleanSupplier actualCircle() {
+        return () -> m_driverControl.actualCircle().getAsBoolean();
     }
 
     @Override
-    public Trigger never() {
-        return m_driverControl.never();
+    public BooleanSupplier never() {
+        return () -> m_driverControl.never().getAsBoolean();
     }
 
     @Override
     public boolean annunicatorTest() {
         return m_driverControl.annunicatorTest();
+    }
+
+    @Override
+    public BooleanSupplier test(){
+        return () -> m_driverControl.test().getAsBoolean();
     }
 }

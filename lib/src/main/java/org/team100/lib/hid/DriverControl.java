@@ -1,9 +1,10 @@
 package org.team100.lib.hid;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Represents the HID used by the "driver" role, which typically focuses on
@@ -61,65 +62,69 @@ public interface DriverControl {
         return false;
     }
 
-    default Trigger resetPose() {
-        return new Trigger(() -> false);
+    default BooleanSupplier resetPose() {
+        return () -> false;
     }
 
-    default Trigger resetRotation0() {
-        return new Trigger(() -> false);
+    default BooleanSupplier resetRotation0() {
+        return () -> false;
     }
 
-    default Trigger resetRotation180() {
-        return new Trigger(() -> false);
+    default BooleanSupplier resetRotation180() {
+        return () -> false;
     }
 
-    default Trigger driveSlow() {
-        return new Trigger(() -> false);
+    default BooleanSupplier driveSlow() {
+        return () -> false;
     }
 
-    default Trigger driveMedium() {
-        return new Trigger(() -> false);
+    default BooleanSupplier driveMedium() {
+        return () -> false;
     }
 
     default Speed speed() {
         return Speed.NORMAL;
     }
 
-    default Trigger defense() {
-        return new Trigger(() -> false);
+    default BooleanSupplier defense() {
+        return () -> false;
     }
 
-    default Trigger steer0() {
-        return new Trigger(() -> false);
+    default BooleanSupplier steer0() {
+        return () -> false;
     }
 
-    default Trigger steer90() {
-        return new Trigger(() -> false);
+    default BooleanSupplier steer90() {
+        return () -> false;
     }
 
-    default Trigger rotate0() {
-        return new Trigger(() -> false);
+    default BooleanSupplier rotate0() {
+        return () -> false;
     }
 
-    default Trigger driveWithFancyTrajec() {
-        return new Trigger(() -> false);
+    default BooleanSupplier driveWithFancyTrajec() {
+        return () -> false;
     }
 
-    default Trigger circle() {
-        return new Trigger(() -> false);
+    default BooleanSupplier circle() {
+        return () -> false;
     }
 
-    default Trigger actualCircle() {
-        return new Trigger(() -> false);
+    default BooleanSupplier actualCircle() {
+        return () -> false;
     }
 
     // this exists to bind to commands we don't want to run,
     // but we don't want them to rot either.
-    default Trigger never() {
-        return new Trigger(() -> false);
+    default BooleanSupplier never() {
+        return () -> false;
     }
 
     default boolean annunicatorTest() {
         return false;
+    }
+
+    default BooleanSupplier test(){
+        return () -> false;
     }
 }

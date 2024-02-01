@@ -1,10 +1,11 @@
 package org.team100.lib.hid;
 
+import java.util.function.BooleanSupplier;
+
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Checks periodically for changes in the HID connected to port 1, and changes
@@ -60,23 +61,23 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public Trigger doSomething() {
-        return m_operatorControl.doSomething();
+    public BooleanSupplier doSomething() {
+        return () -> m_operatorControl.doSomething().getAsBoolean();
     }
 
     @Override
-    public Trigger index() {
-        return m_operatorControl.index();
+    public BooleanSupplier index() {
+        return () -> m_operatorControl.index().getAsBoolean();
     }
 
     @Override
-    public Trigger shooter() {
-        return m_operatorControl.shooter();
+    public BooleanSupplier shooter() {
+        return () -> m_operatorControl.shooter().getAsBoolean();
     }
 
     @Override
-    public Trigger pivotToAmpPosition() {
-        return m_operatorControl.pivotToAmpPosition();
+    public BooleanSupplier pivotToAmpPosition() {
+        return () -> m_operatorControl.pivotToAmpPosition().getAsBoolean();
     }
 
     @Override
@@ -85,13 +86,13 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public Trigger outtake() {
-        return m_operatorControl.outtake();
+    public BooleanSupplier outtake() {
+        return () ->m_operatorControl.outtake().getAsBoolean();
     }
 
     @Override
-    public Trigger intake() {
-        return m_operatorControl.intake();
+    public BooleanSupplier intake() {
+        return () ->m_operatorControl.intake().getAsBoolean();
     }
 
     @Override
@@ -125,8 +126,8 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public Trigger never() {
-        return m_operatorControl.never();
+    public BooleanSupplier never() {
+        return () -> m_operatorControl.never().getAsBoolean();
     }
 
     @Override
