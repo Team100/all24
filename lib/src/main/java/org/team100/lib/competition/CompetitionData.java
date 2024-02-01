@@ -1,15 +1,11 @@
 package org.team100.lib.competition;
 
-import java.sql.Driver;
-import java.sql.DriverAction;
 import java.util.OptionalInt;
 
-import org.team100.lib.swerve.DriveAccelerationLimiter;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation.MatchType;
 
 public class CompetitionData {
@@ -29,10 +25,13 @@ public class CompetitionData {
         switch(matchType){
             case Practice:
                 System.out.println("PRACTICE MATCH: " + matchNumber);
+                break;
             case Qualification:
                 System.out.println("QUALS MATCH: " + matchNumber);
+                break;
             case Elimination:
                 System.out.println("ELIM MATCH: " + matchNumber);
+                break;
             default:
                 System.out.println("");
 
