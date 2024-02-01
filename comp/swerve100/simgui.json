@@ -16,6 +16,7 @@
       "//field": "Field2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/AmpSubsystem": "Mechanism2d",
+      "/SmartDashboard/Arm PID Position Controller": "PIDController",
       "/SmartDashboard/ClimberSubsystem": "Mechanism2d",
       "/SmartDashboard/DrumShooter": "Mechanism2d",
       "/SmartDashboard/FlushOften": "String Chooser",
@@ -84,6 +85,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Telemetry Level": {
         "window": {
           "visible": true
@@ -103,6 +109,9 @@
     }
   },
   "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
     "retained": {
       "AmpSubsystem": {
         "Left": {
@@ -332,6 +341,13 @@
         "open": true
       },
       "SwerveDriveSubsystem": {
+        "open": true,
+        "pose": {
+          "open": true,
+          "translation": {
+            "open": true
+          }
+        },
         "swerve": {
           "open": true
         }

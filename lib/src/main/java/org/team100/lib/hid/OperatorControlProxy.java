@@ -1,5 +1,6 @@
 package org.team100.lib.hid;
 
+import org.team100.frc2024.RobotContainer;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,10 +20,12 @@ public class OperatorControlProxy implements OperatorControl {
     private final Notifier m_notifier;
     private String m_name;
     private OperatorControl m_operatorControl;
+    private RobotContainer m_container;
 
-    public OperatorControlProxy() {
+    public OperatorControlProxy(RobotContainer container) {
         m_notifier = new Notifier(this::refresh);
         refresh();
+        m_container = container;
         m_notifier.startPeriodic(kFreq);
     }
 
@@ -34,6 +37,9 @@ public class OperatorControlProxy implements OperatorControl {
         m_name = name;
         m_operatorControl = getOperatorControl(name);
 
+        if(m_container != null){
+            m_container.bindOperatorControls();
+        }
         Util.printf("*** CONTROL UPDATE\n");
         Util.printf("*** Operator HID: %s Control: %s\n",
                 m_operatorControl.getHIDName(),

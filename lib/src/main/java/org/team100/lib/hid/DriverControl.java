@@ -126,4 +126,8 @@ public interface DriverControl {
     default Trigger test(){
         return new Trigger(() -> false);
     }
+
+    default void addBindings(Runnable run){
+
+    }
 }

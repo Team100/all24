@@ -94,10 +94,15 @@ public class RobotContainer {
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollection m_modules;
+    private final SwerveKinodynamics m_swerveKinodynamics;
+    private final HolonomicDriveController3 m_controller; 
+    private final TrajectoryPlanner m_planner;
+
+
+
 
     private final Command m_auton;
 
-    private final DrawSquare m_drawCircle;
     private final SelfTestRunner m_selfTest;
     final DriveInALittleSquare m_driveInALittleSquare;
     final MorseCodeBeep m_beep;
@@ -110,16 +115,26 @@ public class RobotContainer {
     final Shooter m_shooter;
     final Intake m_intake;
 
+    final DriverControl m_driverControl;
+    final OperatorControl m_operatorControl;
+
+
     // Commands
     private final PivotAmp m_pivotAmp;
 
     private final String m_name;
 
-    public RobotContainer(TimedRobot robot) throws IOException {
+    public RobotContainer(TimedRobot robot) throws IOException {    
         m_name = Names.name(this);
 
-        final DriverControl driverControl = new DriverControlProxy();
-        final OperatorControl operatorControl = new OperatorControlProxy();
+        m_swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_controller = new HolonomicDriveController3();
+        m_driverControl = new DriverControlProxy(this);
+        m_operatorControl = new OperatorControlProxy(this);
+
+        m_planner = new TrajectoryPlanner(m_swerveKinodynamics);
+
+
 
         // these devices only currently exist on the comp bot
         if (Identity.instance == Identity.COMP_BOT) {
@@ -148,21 +163,18 @@ public class RobotContainer {
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
+        BooleanSupplier test = () -> m_driverControl.annunicatorTest() || m_beep.getOutput();
 
         m_monitor = new Monitor(new Annunciator(6), test);
         // The monitor runs less frequently than the control loop.
         robot.addPeriodic(m_monitor::periodic, 0.2);
 
         
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, m_swerveKinodynamics);
 
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_heading = HeadingFactory.get(m_swerveKinodynamics, m_modules);
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
-
-        m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
-
-        SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
+        SwerveDrivePoseEstimator poseEstimator = m_swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
@@ -180,137 +192,33 @@ public class RobotContainer {
         Blip24ArrayListener listener = new Blip24ArrayListener();
         listener.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(m_swerveKinodynamics, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
                 swerveLocal,
-                driverControl::speed);
+                m_driverControl::speed);
+
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
+
                 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
 
         m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
-
-        // m_climber = new ClimberSubsystem(2, 9);
         m_amp = new AmpSubsystem(28, 39);
+        m_pivotAmp = new PivotAmp(m_amp, m_operatorControl::ampPosition);        
 
-        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
+       
+        bindDriverControls();
 
-        // show mode locks slow speed.
-        
-
-        ////////////////////////////
-        //
-        // DRIVETRAIN COMMANDS
-        //
-
-        driverControl.defense().whileTrue(m_drive.runInit(m_drive::defense));
-        driverControl.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
-        driverControl.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
-
-        driverControl.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
-        driverControl.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
-
-        ManualMode manualMode = new ManualMode();
-
-        driverControl.resetPose().onTrue(new ResetPose(m_drive, 0, 0, Math.PI));
-
-        HolonomicDriveController3 controller = new HolonomicDriveController3();
-
-        driverControl.rotate0().whileTrue(new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
-
-        m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
-        driverControl.circle().whileTrue(m_drawCircle);
-
-        TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
-
-        driverControl.driveWithFancyTrajec().whileTrue(
-                new FancyTrajectory(m_drive, planner, swerveKinodynamics));
-
-        driverControl.never().whileTrue(new DriveInACircle(m_drive, controller, -1));
-        driverControl.never().whileTrue(new Spin(m_drive, controller));
-        driverControl.never().whileTrue(new Oscillate(m_drive));
-
-        // make a one-meter line
-        driverControl.never().whileTrue(
-                new TrajectoryListCommand(m_drive, controller,
-                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
-
-        // make a one-meter square
-        driverControl.never().whileTrue(
-                new TrajectoryListCommand(m_drive, controller,
-                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
-
-        // one-meter square with reset at the corners
-        driverControl.never().whileTrue(
-                new PermissiveTrajectoryListCommand(m_drive, controller,
-                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
-
-        // one-meter square with position and velocity feedback control
-        driverControl.never().whileTrue(
-                new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
-
-        // trying the new ChoreoLib
-        ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
-        driverControl.never().whileTrue(CommandMaker.choreo(choreoTrajectory, m_drive));
-
-        // playing with trajectory followers
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        StraightLineTrajectory maker = new StraightLineTrajectory(config);
-
-        // field center, roughly, facing to the left.
-        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
-        Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
-        driverControl.never().whileTrue(follower);
-
-        // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false);
-        driverControl.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
-
-        // 254 FF follower
-        DriveMotionController driveFF = new DrivePIDFController(true);
-        driverControl.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
-
-        // 254 Pursuit follower
-        DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        driverControl.actualCircle().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
-
-        // 254 Ramsete follower
-        // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = new DriveRamseteController();
-        driverControl.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
-
-        // little square
-        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
-        driverControl.never().whileTrue(m_driveInALittleSquare);
-
-        ///////////////// OPERATOR V2//////////////////////////
-
-        // TODO: run the intake if the camera sees a note.
-
-        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        // operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
-
-        // operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
-
-        operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
-
-        operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
-
-        operatorControl.pivotToAmpPosition().whileTrue(new PivotToAmpPosition(m_amp));
+        bindOperatorControls();
+       
 
 
         // TODO: spin up the shooter whenever the robot is in range.
-
-        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-        operatorControl.shooter().whileTrue(m_shooter.run(m_shooter::forward));
+       
 
         /*
          * 
@@ -334,19 +242,7 @@ public class RobotContainer {
         // TODO: stop when note is accpeted using optical detector.
         // TODO: shoot only when the shooter is ready.
 
-        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        operatorControl.index().whileTrue(m_indexer.run(m_indexer::index));
-        operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> true));
-        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (m_amp.inPosition())));
-        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (!m_intake.noteInIntake())));
-
-        // TODO: presets
-        // m_climber.setDefaultCommand(m_climber.run(() ->
-        // m_climber.set(operatorControl.climberState())));
-
-        m_amp.setDefaultCommand(m_pivotAmp);
-
-        driverControl.test().whileTrue(new Empty());
+        
 
 
         ///////////////////////////
@@ -360,20 +256,28 @@ public class RobotContainer {
 
         m_drive.setDefaultCommand(
                 new DriveManually(
-                        manualMode,
-                        driverControl::twist,
+                        new ManualMode(),
+                        m_driverControl::twist,
                         m_drive,
                         m_heading,
-                        swerveKinodynamics,
-                        driverControl::desiredRotation,
+                        m_swerveKinodynamics,
+                        m_driverControl::desiredRotation,
                         thetaController,
                         omegaController,
-                        driverControl::target,
-                        driverControl::trigger));
+                        m_driverControl::target,
+                        m_driverControl::trigger));
+
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        m_amp.setDefaultCommand(m_pivotAmp);
+
+
+
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.
-        m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
+        m_selfTest = new SelfTestRunner(this, m_operatorControl::selfTestEnable);
     }
 
     public void scheduleSelfTest() {
@@ -421,5 +325,102 @@ public class RobotContainer {
         m_indicator.close();
         m_modules.close();
     }
+
+    public void bindDriverControls(){
+        m_driverControl.test().whileTrue(CommandMaker.choreo(Choreo.getTrajectory("fourpiecev3"), m_drive));
+
+        m_driverControl.defense().whileTrue(m_drive.runInit(m_drive::defense));
+        m_driverControl.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
+        m_driverControl.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
+
+        m_driverControl.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        m_driverControl.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+
+
+        // m_driverControl.resetPose().onTrue(new ResetPose(m_drive, 0.8725617527961731, 3.3582773208618164, 0));
+        m_driverControl.resetPose().onTrue(new ResetPose(m_drive, 0.8725617527961731, 3.35, 0));
+
+
+        m_driverControl.rotate0().whileTrue(new Rotate(m_drive, m_heading, m_swerveKinodynamics, 0));
+
+        m_driverControl.circle().whileTrue(new DrawSquare(m_drive, m_swerveKinodynamics, m_controller));
+
+
+        m_driverControl.driveWithFancyTrajec().whileTrue(
+                new FancyTrajectory(m_drive, m_planner, m_swerveKinodynamics));
+
+        m_driverControl.never().whileTrue(new DriveInACircle(m_drive, m_controller, -1));
+        m_driverControl.never().whileTrue(new Spin(m_drive, m_controller));
+        m_driverControl.never().whileTrue(new Oscillate(m_drive));
+
+        // make a one-meter line
+        m_driverControl.never().whileTrue(
+                new TrajectoryListCommand(m_drive, m_controller,
+                        x -> List.of(TrajectoryMaker.line(m_swerveKinodynamics, x))));
+
+        // make a one-meter square
+        m_driverControl.never().whileTrue(
+                new TrajectoryListCommand(m_drive, m_controller,
+                        x -> TrajectoryMaker.square(m_swerveKinodynamics, x)));
+
+        // one-meter square with reset at the corners
+        m_driverControl.never().whileTrue(
+                new PermissiveTrajectoryListCommand(m_drive, m_controller,
+                        TrajectoryMaker.permissiveSquare(m_swerveKinodynamics)));
+
+        // one-meter square with position and velocity feedback control
+        m_driverControl.never().whileTrue(
+                new FullStateTrajectoryListCommand(m_drive,
+                        x -> TrajectoryMaker.square(m_swerveKinodynamics, x)));
+
+        // trying the new ChoreoLib
+        m_driverControl.never().whileTrue(CommandMaker.choreo(Choreo.getTrajectory("test"), m_drive));
+
+        // playing with trajectory followers
+        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        StraightLineTrajectory maker = new StraightLineTrajectory(config);
+
+        // field center, roughly, facing to the left.
+        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
+        Command follower = new DriveToWaypoint3(goal, m_drive, maker, m_controller);
+        m_driverControl.never().whileTrue(follower);
+
+        // 254 PID follower
+        DriveMotionController drivePID = new DrivePIDFController(false);
+        m_driverControl.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, m_planner, drivePID, m_swerveKinodynamics));
+
+        // 254 FF follower
+        DriveMotionController driveFF = new DrivePIDFController(true);
+        m_driverControl.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, m_planner, driveFF, m_swerveKinodynamics));
+
+        // 254 Pursuit follower
+        DriveMotionController drivePP = new DrivePursuitController(m_swerveKinodynamics);
+        m_driverControl.actualCircle().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, m_planner, drivePP, m_swerveKinodynamics));
+
+        // 254 Ramsete follower
+        // this one seems to have a pretty high tolerance?
+        DriveMotionController driveRam = new DriveRamseteController();
+        m_driverControl.never().whileTrue(
+                new DriveToWaypoint100(goal, m_drive, m_planner, driveRam, m_swerveKinodynamics));
+
+        // little square
+        m_driverControl.never().whileTrue(new DriveInALittleSquare(m_drive));
+
+    }
+
+    public void bindOperatorControls(){
+        m_operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
+
+        m_operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
+
+        m_operatorControl.pivotToAmpPosition().whileTrue(new PivotToAmpPosition(m_amp));
+
+        m_operatorControl.shooter().whileTrue(m_shooter.run(m_shooter::forward));
+
+
+    } 
 
 }
