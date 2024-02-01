@@ -9,10 +9,10 @@ import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
 
 /** For testing the NotePosition struct array */
-public class NotePositionArrayListener {
+public class NotePosition24ArrayListener {
 
-    StructBuffer<NotePosition> m_buf = StructBuffer.create(NotePosition.struct);
-
+    StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
+    NotePosition24[] positions;
     void consumeValues(NetworkTableEvent e) {
         ValueEventData ve = e.valueData;
         NetworkTableValue v = ve.value;
@@ -24,12 +24,11 @@ public class NotePositionArrayListener {
             // FPS is not used by the robot
         } else if (fields[2].equals("latency")) {
             // latency is not used by the robot
-        } else if (fields[2].equals("NotePosition")) {
+        } else if (fields[2].equals("NotePosition24")) {
             // decode the way StructArrayEntryImpl does
             byte[] b = v.getRaw();
             if (b.length == 0)
                 return;
-            NotePosition[] positions;
             try {
                 synchronized (m_buf) {
                     positions = m_buf.readArray(b);
@@ -37,18 +36,25 @@ public class NotePositionArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
-            for (NotePosition position : positions) {
+            for (NotePosition24 position : positions) {
                 // this is where you would do something useful with the payload
                 System.out.println(fields[1] + " " + position);
             }
         } else {
-            System.out.println("weird vision update key: " + name);
+            System.out.println("note weird vision update key: " + name);
         }
+    }
+
+    public int getX() {
+        return positions[0].getX();
+    }
+    public int getY() {
+        return positions[0].getY();
     }
 
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
-                new String[] { "objectDetector" },
+                new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::consumeValues);
     }

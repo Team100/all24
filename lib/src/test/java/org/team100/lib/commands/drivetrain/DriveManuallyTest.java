@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -39,7 +40,8 @@ class DriveManuallyTest extends Fixtured {
                 thetaController,
                 omegaController,
                 () -> null,
-                () -> false);
+                () -> false,
+                new NotePosition24ArrayListener());
 
         command.initialize();
 

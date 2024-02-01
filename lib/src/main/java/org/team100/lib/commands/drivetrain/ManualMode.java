@@ -16,6 +16,8 @@ public class ManualMode implements Supplier<ManualMode.Mode> {
         MODULE_STATE,
         /** Robot-relative dx, dy, and omega */
         ROBOT_RELATIVE_CHASSIS_SPEED,
+        /**Drive robot relative while facing note*/
+        ROBOT_RELATIVE_FACING_NOTE,
         /** Field-relative dx, dy, and omega */
         FIELD_RELATIVE_TWIST,
         /** Field-relative dx and dy, rotational feedback control */

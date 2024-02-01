@@ -1,5 +1,7 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -55,13 +57,13 @@ public class FalconDriveMotor implements Motor100<Distance100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 3.5;
+    private final double staticFrictionSpeedLimitRev_S = 3.5;
 
     /**
      * Friction feedforward in volts, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.18;
+    private final double staticFrictionFFVolts;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
@@ -69,26 +71,24 @@ public class FalconDriveMotor implements Motor100<Distance100> {
      * This value seems very low, perhaps because the falcon closed-loop control is
      * compensating?
      */
-    private static final double dynamicFrictionFFVolts = 0.01;
+    private final double dynamicFrictionFFVolts;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
      * volt-seconds per revolution. Since saturation is 11 volts and free speed is
      * about 100 rev/s, this is about 0.11.
      */
-    private static final double velocityFFVoltS_Rev = 0.11;
+    private final double velocityFFVoltS_Rev;
 
     /**
      * Placeholder for accel feedforward.
      */
-    private static final double accelFFVoltS2_M = 0;
+    private final double accelFFVoltS2_M;
 
     /**
      * Proportional feedback coefficient for the controller. The error is measured
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
-    private static final double outboardP = 0.05;
-
     /**
      * The Falcon 500 onboard sensor.
      */
@@ -120,7 +120,13 @@ public class FalconDriveMotor implements Motor100<Distance100> {
             boolean motorPhase,
             double currentLimit,
             double kDriveReduction,
-            double wheelDiameter) {
+            double wheelDiameter,
+            PIDConstants lowLevelVelocityConstants,
+            FeedforwardConstants lowLevelFeedforwardConstants) {
+        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
+        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
+        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
+        accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_wheelDiameter = wheelDiameter;
@@ -161,9 +167,10 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         m_motor.configPeakOutputReverse(-1);
 
         // configure outboard PID
-        m_motor.config_kP(0, outboardP);
-        m_motor.config_kI(0, 0);
-        m_motor.config_kD(0, 0);
+        m_motor.config_kP(0, lowLevelVelocityConstants.getP());
+        m_motor.config_kI(0, lowLevelVelocityConstants.getI());
+        m_motor.config_kD(0, lowLevelVelocityConstants.getD());
+        m_motor.config_IntegralZone(0, lowLevelVelocityConstants.getIZone());
         m_motor.config_kF(0, 0);
 
         m_name = Names.append(name, this);
@@ -253,7 +260,7 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     /**
      * Frictional feedforward in duty cycle units [-1, 1]
      */
-    private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
             return staticFrictionFFVolts * direction / saturationVoltage;
@@ -264,14 +271,14 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
-    private static double velocityFF(double desiredMotorRev_S) {
+    private double velocityFF(double desiredMotorRev_S) {
         return velocityFFVoltS_Rev * desiredMotorRev_S / saturationVoltage;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
-    private static double accelFF(double accelM_S_S) {
+    private double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }
 
