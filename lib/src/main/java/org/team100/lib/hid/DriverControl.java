@@ -122,7 +122,7 @@ public interface DriverControl {
         return false;
     }
 
-    default boolean test(){
+    default boolean test() {
         return false;
     }
 }

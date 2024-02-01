@@ -4,6 +4,11 @@
       "visible": false
     }
   },
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "Keyboard 1 Settings": {
     "window": {
       "visible": true
@@ -26,7 +31,6 @@
           "incKey": 83
         },
         {
-          "decKey": 69,
           "decayRate": 0.0,
           "incKey": 82,
           "keyRate": 0.009999999776482582
@@ -35,10 +39,10 @@
       "axisCount": 3,
       "buttonCount": 4,
       "buttonKeys": [
+        81,
+        69,
         90,
-        88,
-        67,
-        86
+        88
       ],
       "povConfig": [
         {
@@ -78,7 +82,7 @@
       "axisCount": 6,
       "buttonCount": 8,
       "buttonKeys": [
-        49,
+        -1,
         50,
         51,
         52,
@@ -125,5 +129,6 @@
     {
       "guid": "Keyboard1"
     }
-  ]
+  ],
+  "useEnableDisableHotkeys": true
 }

@@ -65,8 +65,7 @@ public abstract class JoystickControl implements DriverControl {
 
     @Override
     public boolean resetPose() {
-        return false;
-        // return button(4);
+        return button(4);
     }
 
     /**

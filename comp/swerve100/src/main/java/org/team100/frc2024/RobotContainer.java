@@ -96,10 +96,15 @@ public class RobotContainer {
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     final SwerveDriveSubsystem m_drive;
     private final SwerveModuleCollection m_modules;
+    private final SwerveKinodynamics m_swerveKinodynamics;
+    private final HolonomicDriveController3 m_controller; 
+    private final TrajectoryPlanner m_planner;
+
+
+
 
     private final Command m_auton;
 
-    private final DrawSquare m_drawCircle;
     private final SelfTestRunner m_selfTest;
     final DriveInALittleSquare m_driveInALittleSquare;
     final MorseCodeBeep m_beep;
@@ -117,11 +122,17 @@ public class RobotContainer {
 
     private final String m_name;
 
-    public RobotContainer(TimedRobot robot) throws IOException {
+    public RobotContainer(TimedRobot robot) throws IOException {    
         m_name = Names.name(this);
 
-        final DriverControl driverControl = new DriverControlProxy();
-        final OperatorControl operatorControl = new OperatorControlProxy();
+        m_swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_controller = new HolonomicDriveController3();
+        final DriverControl driverControl = new DriverControlProxy(this);
+        final OperatorControl operatorControl = new OperatorControlProxy(this);
+
+        m_planner = new TrajectoryPlanner(m_swerveKinodynamics);
+
+
 
         // these devices only currently exist on the comp bot
         if (Identity.instance == Identity.COMP_BOT) {
@@ -157,14 +168,11 @@ public class RobotContainer {
         robot.addPeriodic(m_monitor::periodic, 0.2);
 
         
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, m_swerveKinodynamics);
 
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_heading = HeadingFactory.get(m_swerveKinodynamics, m_modules);
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
-
-        m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
-
-        SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
+        SwerveDrivePoseEstimator poseEstimator = m_swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
@@ -184,23 +192,23 @@ public class RobotContainer {
         Blip24ArrayListener listener = new Blip24ArrayListener();
         listener.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(m_swerveKinodynamics, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
                 m_heading,
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
+
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
+
                 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
 
         m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
-
-        // m_climber = new ClimberSubsystem(2, 9);
         m_amp = new AmpSubsystem(28, 39);
-
-        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
+        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);        
 
         // show mode locks slow speed.
         
@@ -348,10 +356,7 @@ public class RobotContainer {
         // m_climber.setDefaultCommand(m_climber.run(() ->
         // m_climber.set(operatorControl.climberState())));
 
-        m_amp.setDefaultCommand(m_pivotAmp);
-
-        whileTrue(driverControl::test, new Empty());
-
+        whileTrue(driverControl::test, CommandMaker.choreo(Choreo.getTrajectory("fourpiecev3"), m_drive));
 
 
         ///////////////////////////
@@ -365,17 +370,21 @@ public class RobotContainer {
 
         m_drive.setDefaultCommand(
                 new DriveManually(
-                        manualMode,
+                        new ManualMode(),
                         driverControl::twist,
                         m_drive,
                         m_heading,
-                        swerveKinodynamics,
+                        m_swerveKinodynamics,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController,
                         driverControl::target,
-                        driverControl::trigger,
-                        notePositionDetector));
+                        driverControl::trigger));
+
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        m_amp.setDefaultCommand(m_pivotAmp);
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.

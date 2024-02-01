@@ -43,9 +43,9 @@ public class CommandMaker {
                 Choreo.choreoSwerveCommand(
                         trajectory,
                         drivetrain::getPose,
-                        new PIDController(1, 0.0, 0.0),
-                        new PIDController(1, 0.0, 0.0),
-                        new PIDController(1, 0.0, 0.0),
+                        new PIDController(0.25, 0.0, 0.0),
+                        new PIDController(0.25, 0.0, 0.0),
+                        new PIDController(0.25, 0.0, 0.0),
                         x -> drivetrain.setChassisSpeeds(x, 0.02),
                         () -> false,
                         drivetrain)) {

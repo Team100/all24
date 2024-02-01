@@ -14,9 +14,7 @@ public class Empty extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-      System.out.println("asdf");
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -26,9 +24,7 @@ public class Empty extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-      System.out.println("asdasafsd");
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
@@ -36,3 +32,4 @@ public class Empty extends Command {
     return false;
   }
 }
+
