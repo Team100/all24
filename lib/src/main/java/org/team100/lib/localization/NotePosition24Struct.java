@@ -4,16 +4,16 @@ import java.nio.ByteBuffer;
 
 import edu.wpi.first.util.struct.Struct;
 
-public class NotePositionStruct implements Struct<NotePosition> {
+public class NotePosition24Struct implements Struct<NotePosition24> {
 
     @Override
-    public Class<NotePosition> getTypeClass() {
-        return NotePosition.class;
+    public Class<NotePosition24> getTypeClass() {
+        return NotePosition24.class;
     }
 
     @Override
     public String getTypeString() {
-        return "struct:NotePosition";
+        return "struct:NotePosition24";
     }
 
     @Override
@@ -27,14 +27,14 @@ public class NotePositionStruct implements Struct<NotePosition> {
     }
 
     @Override
-    public NotePosition unpack(ByteBuffer bb) {
+    public NotePosition24 unpack(ByteBuffer bb) {
         int x = bb.getInt(0);
         int y = bb.getInt(1);
-        return new NotePosition(x,y);
+        return new NotePosition24(x,y);
     }
 
     @Override
-    public void pack(ByteBuffer bb, NotePosition value) {
+    public void pack(ByteBuffer bb, NotePosition24 value) {
         bb.putInt(value.getX());
         bb.putInt(value.getY());
     }

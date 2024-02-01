@@ -464,6 +464,15 @@
       },
       "open": true
     },
+    "gamepiece_finder24@1": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      },
+      "open": true
+    },
     "visible": true
   }
 }
