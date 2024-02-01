@@ -47,7 +47,7 @@ class GamePieceFinder:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = NetworkTableInstance.getDefault()
         self.inst.startClient4("gamepiece_finder24")
-        # this is always the RIO IP address; set sa matching static IP on your
+        # this is always the RIO IP address; set a matching static IP on your
         # laptop if you're using this in simulation.
         # self.inst.setServer("10.107.191.21")
         self.inst.setServer("10.1.0.2")
