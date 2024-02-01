@@ -11,9 +11,7 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj.XboxController;
 
 /**
  * This is a Logitech F310 or similar.
@@ -22,28 +20,28 @@ public class DriverXboxControl implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
     private final Telemetry t = Telemetry.get();
-    private final CommandXboxController m_controller;
+    private final XboxController m_controller;
     private final String m_name;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public DriverXboxControl() {
-        m_controller = new CommandXboxController(0);
+        m_controller = new XboxController(0);
         m_name = Names.name(this);
     }
 
     @Override
     public String getHIDName() {
-        return m_controller.getHID().getName();
+        return m_controller.getName();
     }
 
     @Override
-    public Trigger resetRotation0() {
-        return new JoystickButton(m_controller.getHID(), 7);
+    public boolean resetRotation0() {
+        return m_controller.getRawButton(7);
     }
 
     @Override
-    public Trigger resetRotation180() {
-        return new JoystickButton(m_controller.getHID(), 8);
+    public boolean resetRotation180() {
+        return m_controller.getRawButton(8);
     }
 
     /**
@@ -75,32 +73,32 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger driveSlow() {
-        return m_controller.leftBumper();
+    public boolean driveSlow() {
+        return m_controller.getLeftBumper();
     }
 
     @Override
-    public Trigger driveMedium() {
-        return m_controller.rightBumper();
+    public boolean driveMedium() {
+        return m_controller.getRightBumper();
     }
 
     @Override
     public Speed speed() {
-        if (m_controller.getHID().getLeftBumper())
+        if (m_controller.getLeftBumper())
             return Speed.SLOW;
-        if (m_controller.getHID().getRightBumper())
+        if (m_controller.getRightBumper())
             return Speed.MEDIUM;
         return Speed.NORMAL;
     }
 
     @Override
-    public Trigger resetPose() {
-        return m_controller.leftBumper();
+    public boolean resetPose() {
+        return m_controller.getLeftBumper();
     }
 
     @Override
     public Rotation2d desiredRotation() {
-        double desiredAngleDegrees = m_controller.getHID().getPOV();
+        double desiredAngleDegrees = m_controller.getPOV();
 
         if (desiredAngleDegrees < 0) {
             return null;
@@ -110,24 +108,23 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger steer0() {
-        return m_controller.x();
+    public boolean steer0() {
+        return m_controller.getXButton();
     }
 
     @Override
-    public Trigger steer90() {
-        return m_controller.y();
+    public boolean steer90() {
+        return m_controller.getYButton();
     }
 
     @Override
-    public Trigger rotate0() {
-        // this is the left trigger
-        return new JoystickButton(m_controller.getHID(), 9);
+    public boolean rotate0() {
+        return m_controller.getLeftBumper();
     }
 
     @Override
-    public Trigger circle() {
-        return m_controller.a();
+    public boolean circle() {
+        return m_controller.getAButton();
     }
 
     public Trigger choreo(){
@@ -136,12 +133,12 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Trigger actualCircle() {
-        return m_controller.b();
+    public boolean actualCircle() {
+        return m_controller.getBButton();
     }
 
     @Override
     public boolean annunicatorTest() {
-        return m_controller.getHID().getStartButton();
+        return m_controller.getStartButton();
     }
 }

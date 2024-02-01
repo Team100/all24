@@ -2,22 +2,22 @@ package org.team100.lib.hid;
 
 import java.util.BitSet;
 
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import edu.wpi.first.wpilibj.GenericHID;
 
 /**
  * Implements a single MIDI controller, for port 2
  */
 public class ThirdMidiControl implements ThirdControl {
 
-    private final CommandGenericHID m_controller;
+    private final GenericHID m_controller;
 
     public ThirdMidiControl() {
-        m_controller = new CommandGenericHID(2);
+        m_controller = new GenericHID(2);
     }
 
     @Override
     public String getHIDName() {
-        return m_controller.getHID().getName();
+        return m_controller.getName();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ThirdMidiControl implements ThirdControl {
     }
 
     private boolean b(int b) {
-        return m_controller.getHID().getRawButton(b);
+        return m_controller.getRawButton(b);
     }
 
 }

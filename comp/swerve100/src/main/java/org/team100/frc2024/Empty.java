@@ -32,3 +32,4 @@ public class Empty extends Command {
     return false;
   }
 }
+

@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Checks periodically for changes in the HID connected to port 0, and changes
@@ -101,27 +100,27 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Trigger resetPose() {
+    public boolean resetPose() {
         return m_driverControl.resetPose();
     }
 
     @Override
-    public Trigger resetRotation0() {
+    public boolean resetRotation0() {
         return m_driverControl.resetRotation0();
     }
 
     @Override
-    public Trigger resetRotation180() {
+    public boolean resetRotation180() {
         return m_driverControl.resetRotation180();
     }
 
     @Override
-    public Trigger driveSlow() {
+    public boolean driveSlow() {
         return m_driverControl.driveSlow();
     }
 
     @Override
-    public Trigger driveMedium() {
+    public boolean driveMedium() {
         return m_driverControl.driveMedium();
     }
 
@@ -131,42 +130,42 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Trigger defense() {
+    public boolean defense() {
         return m_driverControl.defense();
     }
 
     @Override
-    public Trigger steer0() {
+    public boolean steer0() {
         return m_driverControl.steer0();
     }
 
     @Override
-    public Trigger steer90() {
+    public boolean steer90() {
         return m_driverControl.steer90();
     }
 
     @Override
-    public Trigger rotate0() {
+    public boolean rotate0() {
         return m_driverControl.rotate0();
     }
 
     @Override
-    public Trigger driveWithFancyTrajec() {
+    public boolean driveWithFancyTrajec() {
         return m_driverControl.driveWithFancyTrajec();
     }
 
     @Override
-    public Trigger circle() {
+    public boolean circle() {
         return m_driverControl.circle();
     }
 
     @Override
-    public Trigger actualCircle() {
+    public boolean actualCircle() {
         return m_driverControl.actualCircle();
     }
 
     @Override
-    public Trigger never() {
+    public boolean never() {
         return m_driverControl.never();
     }
 
@@ -176,7 +175,7 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Trigger test(){
+    public boolean test(){
         return m_driverControl.test();
     }
 }

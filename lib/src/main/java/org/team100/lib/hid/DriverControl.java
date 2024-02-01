@@ -3,7 +3,6 @@ package org.team100.lib.hid;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Represents the HID used by the "driver" role, which typically focuses on
@@ -61,73 +60,69 @@ public interface DriverControl {
         return false;
     }
 
-    default Trigger resetPose() {
-        return new Trigger(() -> false);
+    default boolean resetPose() {
+        return false;
     }
 
-    default Trigger resetRotation0() {
-        return new Trigger(() -> false);
+    default boolean resetRotation0() {
+        return false;
     }
 
-    default Trigger resetRotation180() {
-        return new Trigger(() -> false);
+    default boolean resetRotation180() {
+        return false;
     }
 
-    default Trigger driveSlow() {
-        return new Trigger(() -> false);
+    default boolean driveSlow() {
+        return false;
     }
 
-    default Trigger driveMedium() {
-        return new Trigger(() -> false);
+    default boolean driveMedium() {
+        return false;
     }
 
     default Speed speed() {
         return Speed.NORMAL;
     }
 
-    default Trigger defense() {
-        return new Trigger(() -> false);
+    default boolean defense() {
+        return false;
     }
 
-    default Trigger steer0() {
-        return new Trigger(() -> false);
+    default boolean steer0() {
+        return false;
     }
 
-    default Trigger steer90() {
-        return new Trigger(() -> false);
+    default boolean steer90() {
+        return false;
     }
 
-    default Trigger rotate0() {
-        return new Trigger(() -> false);
+    default boolean rotate0() {
+        return false;
     }
 
-    default Trigger driveWithFancyTrajec() {
-        return new Trigger(() -> false);
+    default boolean driveWithFancyTrajec() {
+        return false;
     }
 
-    default Trigger circle() {
-        return new Trigger(() -> false);
+    default boolean circle() {
+        return false;
     }
 
-    default Trigger actualCircle() {
-        return new Trigger(() -> false);
+    default boolean actualCircle() {
+        return false;
     }
 
     // this exists to bind to commands we don't want to run,
     // but we don't want them to rot either.
-    default Trigger never() {
-        return new Trigger(() -> false);
+    default boolean never() {
+        return false;
     }
 
     default boolean annunicatorTest() {
         return false;
     }
 
-    default Trigger test(){
-        return new Trigger(() -> false);
-    }
-
-    default void addBindings(Runnable run){
-
+    default boolean test() {
+        return false;
     }
 }

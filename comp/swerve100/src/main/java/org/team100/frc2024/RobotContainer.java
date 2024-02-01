@@ -80,6 +80,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
     private static final double kDriveCurrentLimit = 60;
@@ -116,10 +117,6 @@ public class RobotContainer {
     final Shooter m_shooter;
     final Intake m_intake;
 
-    final DriverControl m_driverControl;
-    final OperatorControl m_operatorControl;
-
-
     // Commands
     private final PivotAmp m_pivotAmp;
 
@@ -130,8 +127,8 @@ public class RobotContainer {
 
         m_swerveKinodynamics = SwerveKinodynamicsFactory.get();
         m_controller = new HolonomicDriveController3();
-        m_driverControl = new DriverControlProxy(this);
-        m_operatorControl = new OperatorControlProxy(this);
+        final DriverControl driverControl = new DriverControlProxy(this);
+        final OperatorControl operatorControl = new OperatorControlProxy(this);
 
         m_planner = new TrajectoryPlanner(m_swerveKinodynamics);
 
@@ -164,7 +161,7 @@ public class RobotContainer {
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> m_driverControl.annunicatorTest() || m_beep.getOutput();
+        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
 
         m_monitor = new Monitor(new Annunciator(6), test);
         // The monitor runs less frequently than the control loop.
@@ -201,7 +198,7 @@ public class RobotContainer {
                 m_heading,
                 poseEstimator,
                 swerveLocal,
-                m_driverControl::speed);
+                driverControl::speed);
 
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
 
@@ -211,17 +208,121 @@ public class RobotContainer {
 
         m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(28, 39);
-        m_pivotAmp = new PivotAmp(m_amp, m_operatorControl::ampPosition);        
+        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);        
 
-       
-        bindDriverControls();
+        // show mode locks slow speed.
+        
 
-        bindOperatorControls();
-       
+        ////////////////////////////
+        //
+        // DRIVETRAIN COMMANDS
+        //
+
+        whileTrue(driverControl::defense, m_drive.runInit(m_drive::defense));
+        whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
+        whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
+
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+
+        ManualMode manualMode = new ManualMode();
+
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, Math.PI));
+
+        HolonomicDriveController3 controller = new HolonomicDriveController3();
+
+        whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
+
+        m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
+        whileTrue(driverControl::circle, m_drawCircle);
+
+        TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
+
+        whileTrue(driverControl::driveWithFancyTrajec,
+                new FancyTrajectory(m_drive, planner, swerveKinodynamics));
+
+        whileTrue(driverControl::never, new DriveInACircle(m_drive, controller, -1));
+        whileTrue(driverControl::never, new Spin(m_drive, controller));
+        whileTrue(driverControl::never, new Oscillate(m_drive));
+
+        // make a one-meter line
+        whileTrue(driverControl::never, 
+                new TrajectoryListCommand(m_drive, controller,
+                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
+
+        // make a one-meter square
+        whileTrue(driverControl::never, 
+                new TrajectoryListCommand(m_drive, controller,
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+
+        // one-meter square with reset at the corners
+        whileTrue(driverControl::never, 
+                new PermissiveTrajectoryListCommand(m_drive, controller,
+                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
+
+        // one-meter square with position and velocity feedback control
+        whileTrue(driverControl::never, 
+                new FullStateTrajectoryListCommand(m_drive,
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+
+        // trying the new ChoreoLib
+        ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
+        whileTrue(driverControl::never, CommandMaker.choreo(choreoTrajectory, m_drive));
+
+        // playing with trajectory followers
+        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        StraightLineTrajectory maker = new StraightLineTrajectory(config);
+
+        // field center, roughly, facing to the left.
+        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
+        Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
+        whileTrue(driverControl::never, follower);
+
+        // 254 PID follower
+        DriveMotionController drivePID = new DrivePIDFController(false);
+        whileTrue(driverControl::never, 
+                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
+
+        // 254 FF follower
+        DriveMotionController driveFF = new DrivePIDFController(true);
+        whileTrue(driverControl::never, 
+                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
+
+        // 254 Pursuit follower
+        DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
+        whileTrue(driverControl::actualCircle, 
+                new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
+
+        // 254 Ramsete follower
+        // this one seems to have a pretty high tolerance?
+        DriveMotionController driveRam = new DriveRamseteController();
+        whileTrue(driverControl::never, 
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
+
+        // little square
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
+        whileTrue(driverControl::never, m_driveInALittleSquare);
+
+        ///////////////// OPERATOR V2//////////////////////////
+
+        // TODO: run the intake if the camera sees a note.
+
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        // operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
+
+        // operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
+
+        whileTrue(operatorControl::intake, new IntakeNote(m_intake, m_indexer));
+
+        whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
+
+        whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
 
 
         // TODO: spin up the shooter whenever the robot is in range.
-       
+
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        whileTrue(operatorControl::shooter, m_shooter.run(m_shooter::forward));
 
         /*
          * 
@@ -245,7 +346,17 @@ public class RobotContainer {
         // TODO: stop when note is accpeted using optical detector.
         // TODO: shoot only when the shooter is ready.
 
-        
+        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
+        whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
+        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (m_amp.inPosition())));
+        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () -> (!m_intake.noteInIntake())));
+
+        // TODO: presets
+        // m_climber.setDefaultCommand(m_climber.run(() ->
+        // m_climber.set(operatorControl.climberState())));
+
+        whileTrue(driverControl::test, CommandMaker.choreo(Choreo.getTrajectory("fourpiecev3"), m_drive));
 
 
         ///////////////////////////
@@ -260,15 +371,15 @@ public class RobotContainer {
         m_drive.setDefaultCommand(
                 new DriveManually(
                         new ManualMode(),
-                        m_driverControl::twist,
+                        driverControl::twist,
                         m_drive,
                         m_heading,
                         m_swerveKinodynamics,
-                        m_driverControl::desiredRotation,
+                        driverControl::desiredRotation,
                         thetaController,
                         omegaController,
-                        m_driverControl::target,
-                        m_driverControl::trigger));
+                        driverControl::target,
+                        driverControl::trigger));
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
@@ -277,7 +388,15 @@ public class RobotContainer {
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.
-        m_selfTest = new SelfTestRunner(this, m_operatorControl::selfTestEnable);
+        m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
+    }
+
+    private void whileTrue(BooleanSupplier condition, Command command) {
+        new Trigger(condition).whileTrue(command);
+    }
+
+    private void onTrue(BooleanSupplier condition, Command command) {
+        new Trigger(condition).onTrue(command);
     }
 
     public void scheduleSelfTest() {
@@ -325,102 +444,5 @@ public class RobotContainer {
         m_indicator.close();
         m_modules.close();
     }
-
-    public void bindDriverControls(){
-        m_driverControl.test().whileTrue(CommandMaker.choreo(Choreo.getTrajectory("fourpiecev3"), m_drive));
-
-        m_driverControl.defense().whileTrue(m_drive.runInit(m_drive::defense));
-        m_driverControl.steer0().whileTrue(m_drive.runInit(m_drive::steer0));
-        m_driverControl.steer90().whileTrue(m_drive.runInit(m_drive::steer90));
-
-        m_driverControl.resetRotation0().onTrue(new SetRotation(m_drive, GeometryUtil.kRotationZero));
-        m_driverControl.resetRotation180().onTrue(new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
-
-
-        // m_driverControl.resetPose().onTrue(new ResetPose(m_drive, 0.8725617527961731, 3.3582773208618164, 0));
-        m_driverControl.resetPose().onTrue(new ResetPose(m_drive, 0.8725617527961731, 3.35, 0));
-
-
-        m_driverControl.rotate0().whileTrue(new Rotate(m_drive, m_heading, m_swerveKinodynamics, 0));
-
-        m_driverControl.circle().whileTrue(new DrawSquare(m_drive, m_swerveKinodynamics, m_controller));
-
-
-        m_driverControl.driveWithFancyTrajec().whileTrue(
-                new FancyTrajectory(m_drive, m_planner, m_swerveKinodynamics));
-
-        m_driverControl.never().whileTrue(new DriveInACircle(m_drive, m_controller, -1));
-        m_driverControl.never().whileTrue(new Spin(m_drive, m_controller));
-        m_driverControl.never().whileTrue(new Oscillate(m_drive));
-
-        // make a one-meter line
-        m_driverControl.never().whileTrue(
-                new TrajectoryListCommand(m_drive, m_controller,
-                        x -> List.of(TrajectoryMaker.line(m_swerveKinodynamics, x))));
-
-        // make a one-meter square
-        m_driverControl.never().whileTrue(
-                new TrajectoryListCommand(m_drive, m_controller,
-                        x -> TrajectoryMaker.square(m_swerveKinodynamics, x)));
-
-        // one-meter square with reset at the corners
-        m_driverControl.never().whileTrue(
-                new PermissiveTrajectoryListCommand(m_drive, m_controller,
-                        TrajectoryMaker.permissiveSquare(m_swerveKinodynamics)));
-
-        // one-meter square with position and velocity feedback control
-        m_driverControl.never().whileTrue(
-                new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(m_swerveKinodynamics, x)));
-
-        // trying the new ChoreoLib
-        m_driverControl.never().whileTrue(CommandMaker.choreo(Choreo.getTrajectory("test"), m_drive));
-
-        // playing with trajectory followers
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
-        StraightLineTrajectory maker = new StraightLineTrajectory(config);
-
-        // field center, roughly, facing to the left.
-        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
-        Command follower = new DriveToWaypoint3(goal, m_drive, maker, m_controller);
-        m_driverControl.never().whileTrue(follower);
-
-        // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false);
-        m_driverControl.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, m_planner, drivePID, m_swerveKinodynamics));
-
-        // 254 FF follower
-        DriveMotionController driveFF = new DrivePIDFController(true);
-        m_driverControl.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, m_planner, driveFF, m_swerveKinodynamics));
-
-        // 254 Pursuit follower
-        DriveMotionController drivePP = new DrivePursuitController(m_swerveKinodynamics);
-        m_driverControl.actualCircle().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, m_planner, drivePP, m_swerveKinodynamics));
-
-        // 254 Ramsete follower
-        // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = new DriveRamseteController();
-        m_driverControl.never().whileTrue(
-                new DriveToWaypoint100(goal, m_drive, m_planner, driveRam, m_swerveKinodynamics));
-
-        // little square
-        m_driverControl.never().whileTrue(new DriveInALittleSquare(m_drive));
-
-    }
-
-    public void bindOperatorControls(){
-        m_operatorControl.intake().whileTrue(new IntakeNote(m_intake, m_indexer));
-
-        m_operatorControl.outtake().whileTrue(new OuttakeNote(m_intake, m_indexer));
-
-        m_operatorControl.pivotToAmpPosition().whileTrue(new PivotToAmpPosition(m_amp));
-
-        m_operatorControl.shooter().whileTrue(m_shooter.run(m_shooter::forward));
-
-
-    } 
 
 }

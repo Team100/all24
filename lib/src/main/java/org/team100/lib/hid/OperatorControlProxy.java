@@ -5,15 +5,15 @@ import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * Checks periodically for changes in the HID connected to port 1, and changes
  * the operator control implementation to match.
  */
 public class OperatorControlProxy implements OperatorControl {
-    private static class NoOperatorControl  implements OperatorControl {
+    private static class NoOperatorControl implements OperatorControl {
     }
+
     private static final int kPort = 1;
     private static final double kFreq = 1;
 
@@ -66,22 +66,22 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public Trigger doSomething() {
+    public boolean doSomething() {
         return m_operatorControl.doSomething();
     }
 
     @Override
-    public Trigger index() {
+    public boolean index() {
         return m_operatorControl.index();
     }
 
     @Override
-    public Trigger shooter() {
+    public boolean shooter() {
         return m_operatorControl.shooter();
     }
 
     @Override
-    public Trigger pivotToAmpPosition() {
+    public boolean pivotToAmpPosition() {
         return m_operatorControl.pivotToAmpPosition();
     }
 
@@ -91,12 +91,12 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public Trigger outtake() {
+    public boolean outtake() {
         return m_operatorControl.outtake();
     }
 
     @Override
-    public Trigger intake() {
+    public boolean intake() {
         return m_operatorControl.intake();
     }
 
@@ -131,7 +131,7 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public Trigger never() {
+    public boolean never() {
         return m_operatorControl.never();
     }
 
