@@ -164,4 +164,9 @@ public class DriverControlProxy implements DriverControl {
     public boolean annunicatorTest() {
         return m_driverControl.annunicatorTest();
     }
+
+    @Override
+    public Trigger test(){
+        return m_driverControl.test();
+    }
 }

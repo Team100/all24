@@ -346,6 +346,9 @@ public class RobotContainer {
 
         m_amp.setDefaultCommand(m_pivotAmp);
 
+        driverControl.test().whileTrue(new Empty());
+
+
         ///////////////////////////
         //
         // DRIVE

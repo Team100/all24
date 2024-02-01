@@ -44,6 +44,11 @@ public abstract class JoystickControl implements DriverControl {
     }
 
     @Override
+    public Trigger test() {
+        return button(3);
+    }
+
+    @Override
     public Trigger actualCircle() {
         return button(2);
     }

@@ -130,6 +130,11 @@ public class DriverXboxControl implements DriverControl {
         return m_controller.a();
     }
 
+    public Trigger choreo(){
+        JoystickButton button = new JoystickButton(m_controller.getHID(), 2);
+        return button;
+    }
+
     @Override
     public Trigger actualCircle() {
         return m_controller.b();

@@ -122,4 +122,8 @@ public interface DriverControl {
     default boolean annunicatorTest() {
         return false;
     }
+
+    default Trigger test(){
+        return new Trigger(() -> false);
+    }
 }

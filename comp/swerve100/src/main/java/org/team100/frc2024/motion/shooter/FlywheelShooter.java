@@ -112,4 +112,6 @@ public class FlywheelShooter extends Shooter {
         rightShooter.periodic();
         m_viz.periodic();
     }
+
+    
 }

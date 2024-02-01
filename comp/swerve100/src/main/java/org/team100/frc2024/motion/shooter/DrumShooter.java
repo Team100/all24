@@ -99,6 +99,7 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void periodic() {
+        // System.out.println("AHHHHHHHHHH");
         topRoller.periodic();
         bottomRoller.periodic();
         m_viz.periodic();

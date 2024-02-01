@@ -8,4 +8,5 @@ public abstract class Shooter extends SubsystemBase implements Speeding {
     public abstract void forward();
     public abstract void stop();
     public abstract boolean readyToShoot();
+
 }
