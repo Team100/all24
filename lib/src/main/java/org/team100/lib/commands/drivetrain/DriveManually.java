@@ -4,9 +4,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -48,6 +50,7 @@ public class DriveManually extends Command100 {
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
     private final ManualWithHeading m_manualWithHeading;
     private final ManualWithTargetLock m_manualWithTargetLock;
+    private final DriveWithNoteRotation m_driveWithNoteRotation;
 
     ManualMode.Mode currentManualMode = null;
 
@@ -61,7 +64,8 @@ public class DriveManually extends Command100 {
             PIDController thetaController,
             PIDController omegaController,
             Supplier<Translation2d> target,
-            BooleanSupplier trigger) {
+            BooleanSupplier trigger,
+            NotePosition24ArrayListener arrayListener) {
         m_mode = mode;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -69,20 +73,25 @@ public class DriveManually extends Command100 {
         m_manualChassisSpeeds = new ManualChassisSpeeds(m_name, swerveKinodynamics);
         m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics);
         m_manualWithHeading = new ManualWithHeading(
-            m_name,
+                m_name,
                 swerveKinodynamics,
                 heading,
                 desiredRotation,
                 thetaController,
                 omegaController);
         m_manualWithTargetLock = new ManualWithTargetLock(
-            m_name,
+                m_name,
                 swerveKinodynamics,
                 heading,
                 target,
                 thetaController,
                 omegaController,
                 trigger);
+        m_driveWithNoteRotation = new DriveWithNoteRotation(
+                m_name,
+                swerveKinodynamics,
+                thetaController,
+                arrayListener);
         addRequirements(m_drive);
     }
 
@@ -130,6 +139,10 @@ public class DriveManually extends Command100 {
             case ROBOT_RELATIVE_CHASSIS_SPEED:
                 m_drive.setChassisSpeeds(
                         m_manualChassisSpeeds.apply(input), dt);
+                break;
+            case ROBOT_RELATIVE_FACING_NOTE:
+                m_drive.setChassisSpeeds(
+                        m_driveWithNoteRotation.apply(input), dt);
                 break;
             case FIELD_RELATIVE_TWIST:
                 m_drive.driveInFieldCoords(

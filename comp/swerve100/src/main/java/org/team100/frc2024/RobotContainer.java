@@ -50,6 +50,7 @@ import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Blip24ArrayListener;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
@@ -170,12 +171,14 @@ public class RobotContainer {
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
     
-
         VisionDataProvider visionDataProvider = new VisionDataProvider(
                 m_layout,
                 poseEstimator,
                 poseEstimator::getEstimatedPosition);
         visionDataProvider.enable();
+        
+        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
+        notePositionDetector.enable();
 
         Blip24ArrayListener listener = new Blip24ArrayListener();
         listener.enable();
@@ -366,7 +369,8 @@ public class RobotContainer {
                         thetaController,
                         omegaController,
                         driverControl::target,
-                        driverControl::trigger));
+                        driverControl::trigger,
+                        notePositionDetector));
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.
