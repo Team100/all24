@@ -15,6 +15,11 @@
     }
   },
   "Table": {
+    "0x50E3C1A4,2": {
+      "Column 0  Width": "190",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "19"
+    },
     "0x542B5671,2": {
       "Column 0  Width": "151",
       "Column 1  Width": "171",
@@ -80,8 +85,8 @@
     },
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
-      "Pos": "-144,194",
-      "Size": "415,72"
+      "Pos": "526,178",
+      "Size": "361,66"
     },
     "###/SmartDashboard/annunciator": {
       "Collapsed": "0",
@@ -90,7 +95,7 @@
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "1085,358",
+      "Pos": "920,113",
       "Size": "1238,583"
     },
     "###FMS": {
@@ -101,7 +106,7 @@
     "###Joysticks": {
       "Collapsed": "0",
       "Pos": "78,622",
-      "Size": "1336,278"
+      "Size": "1156,248"
     },
     "###Keyboard 1 Settings": {
       "Collapsed": "0",
@@ -115,8 +120,8 @@
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "398,629",
-      "Size": "895,544"
+      "Pos": "1005,181",
+      "Size": "1391,910"
     },
     "###Other Devices": {
       "Collapsed": "0",
@@ -156,7 +161,7 @@
     "Robot State": {
       "Collapsed": "0",
       "Pos": "10,481",
-      "Size": "144,170"
+      "Size": "126,152"
     }
   }
 }
