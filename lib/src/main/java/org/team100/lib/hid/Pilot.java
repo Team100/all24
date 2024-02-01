@@ -4,13 +4,11 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import java.util.function.BooleanSupplier;
-
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import edu.wpi.first.wpilibj.GenericHID;
 
 /**
  * The RC joystick thing joel made.
@@ -24,25 +22,25 @@ public class Pilot implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
 
-    private final CommandGenericHID m_controller;
+    private final GenericHID m_controller;
     private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public Pilot() {
-        m_controller = new CommandGenericHID(0);
+        m_controller = new GenericHID(0);
     }
 
     @Override
     public String getHIDName() {
-        return m_controller.getHID().getName();
+        return m_controller.getName();
     }
 
     @Override
-    public BooleanSupplier resetRotation0() {
+    public boolean resetRotation0() {
         return button(2);
     }
 
     @Override
-    public BooleanSupplier resetRotation180() {
+    public boolean resetRotation180() {
         return button(3);
     }
 
@@ -61,16 +59,16 @@ public class Pilot implements DriverControl {
     @Override
     public Rotation2d desiredRotation() {
         // the control goes from -1 to 1 in one turn
-        double rotControl = m_controller.getHID().getRawAxis(5);
+        double rotControl = m_controller.getRawAxis(5);
         previousRotation = Rotation2d.fromRotations(rotControl / 2);
         return previousRotation;
     }
 
     private double axis(int axis) {
-        return m_controller.getHID().getRawAxis(axis);
+        return m_controller.getRawAxis(axis);
     }
 
-    private BooleanSupplier button(int button) {
-        return ()->m_controller.getHID().getRawButton(button);
+    private boolean button(int button) {
+        return m_controller.getRawButton(button);
     }
 }

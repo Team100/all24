@@ -4,11 +4,8 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj.GenericHID;
 
 /**
  * The RealFlight USB controller is a basic RC-style control that comes with the
@@ -42,15 +39,15 @@ public class RealFlight implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
 
-    private final CommandGenericHID hid;
+    private final GenericHID hid;
 
     public RealFlight() {
-        hid = new CommandGenericHID(0);
+        hid = new GenericHID(0);
     }
 
     @Override
     public String getHIDName() {
-        return hid.getHID().getName();
+        return hid.getName();
     }
 
     /**
@@ -66,15 +63,15 @@ public class RealFlight implements DriverControl {
     }
 
     @Override
-    public BooleanSupplier resetPose() {
-        return ()-> hid.getHID().getRawButton(1);
+    public boolean resetPose() {
+        return hid.getRawButton(1);
     }
 
     /**
      * Use slow when the right switch is on
      */
     @Override
-    public BooleanSupplier driveSlow() {
+    public boolean driveSlow() {
         return rightSwitchOn();
     }
 
@@ -83,29 +80,29 @@ public class RealFlight implements DriverControl {
      * (slow overrides medium)
      */
     @Override
-    public BooleanSupplier driveMedium() {
-        return () -> leftSwitchOn().getAsBoolean() && ! rightSwitchOn().getAsBoolean();
+    public boolean driveMedium() {
+        return leftSwitchOn() && !rightSwitchOn();
     }
 
     @Override
     public Speed speed() {
         // left
-        if (hid.getHID().getRawButton(2))
+        if (hid.getRawButton(2))
             return Speed.SLOW;
         // right
-        if (hid.getHID().getRawButton(3))
+        if (hid.getRawButton(3))
             return Speed.MEDIUM;
         return Speed.NORMAL;
     }
 
     /////////////////////////////////////////
 
-    public BooleanSupplier leftSwitchOn() {
-        return ()->hid.getHID().getRawButton(2);
+    public boolean leftSwitchOn() {
+        return hid.getRawButton(2);
     }
 
-    public BooleanSupplier rightSwitchOn() {
-        return ()->hid.getHID().getRawButton(3);
+    public boolean rightSwitchOn() {
+        return hid.getRawButton(3);
     }
 
     /**

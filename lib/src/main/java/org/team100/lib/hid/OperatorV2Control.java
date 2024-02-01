@@ -3,56 +3,54 @@ package org.team100.lib.hid;
 import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 
-import java.util.function.BooleanSupplier;
-
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj.XboxController;
 
 public class OperatorV2Control implements OperatorControl {
     private static final double kDeadband = 0.1;
-    private final CommandXboxController m_controller;
+    private final XboxController m_controller;
 
     public OperatorV2Control() {
-        m_controller = new CommandXboxController(1);
+        m_controller = new XboxController(1);
     }
 
     @Override
     public String getHIDName() {
-        return m_controller.getHID().getName();
+        return m_controller.getName();
     }
 
     @Override
-    public BooleanSupplier intake() {
-        return () -> m_controller.getHID().getXButton();
+    public boolean intake() {
+        return m_controller.getXButton();
     }
 
     @Override
-    public BooleanSupplier outtake() {
-        return () -> m_controller.getHID().getYButton();
+    public boolean outtake() {
+        return m_controller.getYButton();
     }
 
     @Override
-    public BooleanSupplier index() {
-        return () -> m_controller.getHID().getBButton();
+    public boolean index() {
+        return m_controller.getBButton();
     }
 
     @Override
     public boolean indexState() {
-        return m_controller.getHID().getBButton();
+        return m_controller.getBButton();
     }
 
     @Override
-    public BooleanSupplier pivotToAmpPosition() {
-        return () -> m_controller.getHID().getLeftBumper();
+    public boolean pivotToAmpPosition() {
+        return m_controller.getLeftBumper();
     }
 
     @Override
-    public BooleanSupplier shooter() {
-        return () -> m_controller.getHID().getAButton();
+    public boolean shooter() {
+        return m_controller.getAButton();
     }
 
     @Override
     public double shooterSpeed() {
-        if (m_controller.getHID().getAButton())
+        if (m_controller.getAButton())
             return 1.0;
         return 0.0;
     }
@@ -71,6 +69,6 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean selfTestEnable() {
-        return m_controller.getHID().getStartButton();
+        return m_controller.getStartButton();
     }
 }

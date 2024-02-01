@@ -1,7 +1,5 @@
 package org.team100.lib.hid;
 
-import java.util.function.BooleanSupplier;
-
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -92,28 +90,28 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public BooleanSupplier resetPose() {
-        return () -> m_driverControl.resetPose().getAsBoolean();
+    public boolean resetPose() {
+        return m_driverControl.resetPose();
     }
 
     @Override
-    public BooleanSupplier resetRotation0() {
-        return () -> m_driverControl.resetRotation0().getAsBoolean();
+    public boolean resetRotation0() {
+        return m_driverControl.resetRotation0();
     }
 
     @Override
-    public BooleanSupplier resetRotation180() {
-        return () -> m_driverControl.resetRotation180().getAsBoolean();
+    public boolean resetRotation180() {
+        return m_driverControl.resetRotation180();
     }
 
     @Override
-    public BooleanSupplier driveSlow() {
-        return () -> m_driverControl.driveSlow().getAsBoolean();
+    public boolean driveSlow() {
+        return m_driverControl.driveSlow();
     }
 
     @Override
-    public BooleanSupplier driveMedium() {
-        return () -> m_driverControl.driveMedium().getAsBoolean();
+    public boolean driveMedium() {
+        return m_driverControl.driveMedium();
     }
 
     @Override
@@ -122,43 +120,43 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public BooleanSupplier defense() {
-        return () -> m_driverControl.defense().getAsBoolean();
+    public boolean defense() {
+        return m_driverControl.defense();
     }
 
     @Override
-    public BooleanSupplier steer0() {
-        return () -> m_driverControl.steer0().getAsBoolean();
+    public boolean steer0() {
+        return m_driverControl.steer0();
     }
 
     @Override
-    public BooleanSupplier steer90() {
-        return () -> m_driverControl.steer90().getAsBoolean();
+    public boolean steer90() {
+        return m_driverControl.steer90();
     }
 
     @Override
-    public BooleanSupplier rotate0() {
-        return () -> m_driverControl.rotate0().getAsBoolean();
+    public boolean rotate0() {
+        return m_driverControl.rotate0();
     }
 
     @Override
-    public BooleanSupplier driveWithFancyTrajec() {
-        return () -> m_driverControl.driveWithFancyTrajec().getAsBoolean();
+    public boolean driveWithFancyTrajec() {
+        return m_driverControl.driveWithFancyTrajec();
     }
 
     @Override
-    public BooleanSupplier circle() {
-        return () -> m_driverControl.circle().getAsBoolean();
+    public boolean circle() {
+        return m_driverControl.circle();
     }
 
     @Override
-    public BooleanSupplier actualCircle() {
-        return () -> m_driverControl.actualCircle().getAsBoolean();
+    public boolean actualCircle() {
+        return m_driverControl.actualCircle();
     }
 
     @Override
-    public BooleanSupplier never() {
-        return () -> m_driverControl.never().getAsBoolean();
+    public boolean never() {
+        return m_driverControl.never();
     }
 
     @Override
@@ -167,7 +165,7 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public BooleanSupplier test(){
-        return () -> m_driverControl.test().getAsBoolean();
+    public boolean test(){
+        return m_driverControl.test();
     }
 }

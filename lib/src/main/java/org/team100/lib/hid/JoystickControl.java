@@ -4,14 +4,12 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import java.util.function.BooleanSupplier;
-
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj.Joystick;
 
 /**
  * Experiment for driving swerve with the big joystick.
@@ -25,49 +23,49 @@ public abstract class JoystickControl implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
 
-    private final CommandJoystick m_controller;
+    private final Joystick m_controller;
     private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     protected JoystickControl() {
-        m_controller = new CommandJoystick(0);
+        m_controller = new Joystick(0);
     }
 
     @Override
     public String getHIDName() {
-        return m_controller.getHID().getName();
+        return m_controller.getName();
     }
 
     @Override
-    public BooleanSupplier circle() {
+    public boolean circle() {
         // return button(1);
-        return () -> false;
+        return false;
     }
 
     @Override
-    public BooleanSupplier test() {
+    public boolean test() {
         return button(3);
     }
 
     @Override
-    public BooleanSupplier actualCircle() {
+    public boolean actualCircle() {
         return button(2);
     }
 
     @Override
-    public BooleanSupplier resetRotation0() {
+    public boolean resetRotation0() {
         // return button(2);
-        return () -> false;
+        return false;
     }
 
     @Override
-    public BooleanSupplier resetRotation180() {
-        return () -> false;
+    public boolean resetRotation180() {
+        return false;
         // return button(3);
     }
 
     @Override
-    public BooleanSupplier resetPose() {
-        return () -> false;
+    public boolean resetPose() {
+        return false;
         // return button(4);
     }
 
@@ -85,7 +83,7 @@ public abstract class JoystickControl implements DriverControl {
 
     @Override
     public Rotation2d desiredRotation() {
-        double desiredAngleDegrees = m_controller.getHID().getPOV();
+        double desiredAngleDegrees = m_controller.getPOV();
         if (desiredAngleDegrees < 0) {
             return null;
         }
@@ -98,7 +96,7 @@ public abstract class JoystickControl implements DriverControl {
      */
     @Override
     public Translation2d target() {
-        if (m_controller.getHID().getRawButton(3)) {
+        if (m_controller.getRawButton(3)) {
             // alternate target is closer to the left side
             return new Translation2d(6, 4);
         } else {
@@ -109,15 +107,15 @@ public abstract class JoystickControl implements DriverControl {
 
     @Override
     public boolean trigger() {
-        return m_controller.getHID().getRawButton(4);
+        return m_controller.getRawButton(4);
     }
 
-    private BooleanSupplier button(int button) {
-        return () -> m_controller.getHID().getRawButton(button);
+    private boolean button(int button) {
+        return m_controller.getRawButton(button);
     }
 
     @Override
     public boolean annunicatorTest() {
-        return m_controller.getHID().getRawButton(1);
-    }   
+        return m_controller.getRawButton(1);
+    }
 }

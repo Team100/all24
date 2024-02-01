@@ -1,7 +1,5 @@
 package org.team100.lib.hid;
 
-import java.util.function.BooleanSupplier;
-
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,8 +10,9 @@ import edu.wpi.first.wpilibj.Notifier;
  * the operator control implementation to match.
  */
 public class OperatorControlProxy implements OperatorControl {
-    private static class NoOperatorControl  implements OperatorControl {
+    private static class NoOperatorControl implements OperatorControl {
     }
+
     private static final int kPort = 1;
     private static final double kFreq = 1;
 
@@ -61,23 +60,23 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public BooleanSupplier doSomething() {
-        return () -> m_operatorControl.doSomething().getAsBoolean();
+    public boolean doSomething() {
+        return m_operatorControl.doSomething();
     }
 
     @Override
-    public BooleanSupplier index() {
-        return () -> m_operatorControl.index().getAsBoolean();
+    public boolean index() {
+        return m_operatorControl.index();
     }
 
     @Override
-    public BooleanSupplier shooter() {
-        return () -> m_operatorControl.shooter().getAsBoolean();
+    public boolean shooter() {
+        return m_operatorControl.shooter();
     }
 
     @Override
-    public BooleanSupplier pivotToAmpPosition() {
-        return () -> m_operatorControl.pivotToAmpPosition().getAsBoolean();
+    public boolean pivotToAmpPosition() {
+        return m_operatorControl.pivotToAmpPosition();
     }
 
     @Override
@@ -86,13 +85,13 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public BooleanSupplier outtake() {
-        return () ->m_operatorControl.outtake().getAsBoolean();
+    public boolean outtake() {
+        return m_operatorControl.outtake();
     }
 
     @Override
-    public BooleanSupplier intake() {
-        return () ->m_operatorControl.intake().getAsBoolean();
+    public boolean intake() {
+        return m_operatorControl.intake();
     }
 
     @Override
@@ -126,8 +125,8 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public BooleanSupplier never() {
-        return () -> m_operatorControl.never().getAsBoolean();
+    public boolean never() {
+        return m_operatorControl.never();
     }
 
     @Override

@@ -1,7 +1,5 @@
 package org.team100.lib.hid;
 
-import java.util.function.BooleanSupplier;
-
 /**
  * Represents the HID used by the "operator" role, which typically controls
  * everything other than the drivetrain.
@@ -12,32 +10,32 @@ public interface OperatorControl {
         return "No HID Found!!";
     }
 
-    default BooleanSupplier doSomething() {
-        return () -> false;
+    default boolean doSomething() {
+        return false;
     }
 
-    default BooleanSupplier index() {
-        return () -> false;
+    default boolean index() {
+        return false;
     }
 
-    default BooleanSupplier shooter() {
-        return () -> false;
+    default boolean shooter() {
+        return false;
     }
 
-    default BooleanSupplier pivotToAmpPosition(){
-        return () -> false;
+    default boolean pivotToAmpPosition(){
+        return false;
     }
 
     default double shooterSpeed() {
         return 0;
     }
 
-    default BooleanSupplier outtake() {
-        return () -> false;
+    default boolean outtake() {
+        return false;
     }
 
-    default BooleanSupplier intake() {
-        return () -> false;
+    default boolean intake() {
+        return false;
     }
 
     default boolean indexState() {
@@ -68,8 +66,8 @@ public interface OperatorControl {
 
     // this exists to bind to commands we don't want to run,
     // but we don't want them to rot either.
-    default BooleanSupplier never() {
-        return () -> false;
+    default boolean never() {
+        return false;
     }
 
     default boolean selfTestEnable() {

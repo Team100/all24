@@ -1,7 +1,5 @@
 package org.team100.lib.hid;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -62,69 +60,69 @@ public interface DriverControl {
         return false;
     }
 
-    default BooleanSupplier resetPose() {
-        return () -> false;
+    default boolean resetPose() {
+        return false;
     }
 
-    default BooleanSupplier resetRotation0() {
-        return () -> false;
+    default boolean resetRotation0() {
+        return false;
     }
 
-    default BooleanSupplier resetRotation180() {
-        return () -> false;
+    default boolean resetRotation180() {
+        return false;
     }
 
-    default BooleanSupplier driveSlow() {
-        return () -> false;
+    default boolean driveSlow() {
+        return false;
     }
 
-    default BooleanSupplier driveMedium() {
-        return () -> false;
+    default boolean driveMedium() {
+        return false;
     }
 
     default Speed speed() {
         return Speed.NORMAL;
     }
 
-    default BooleanSupplier defense() {
-        return () -> false;
+    default boolean defense() {
+        return false;
     }
 
-    default BooleanSupplier steer0() {
-        return () -> false;
+    default boolean steer0() {
+        return false;
     }
 
-    default BooleanSupplier steer90() {
-        return () -> false;
+    default boolean steer90() {
+        return false;
     }
 
-    default BooleanSupplier rotate0() {
-        return () -> false;
+    default boolean rotate0() {
+        return false;
     }
 
-    default BooleanSupplier driveWithFancyTrajec() {
-        return () -> false;
+    default boolean driveWithFancyTrajec() {
+        return false;
     }
 
-    default BooleanSupplier circle() {
-        return () -> false;
+    default boolean circle() {
+        return false;
     }
 
-    default BooleanSupplier actualCircle() {
-        return () -> false;
+    default boolean actualCircle() {
+        return false;
     }
 
     // this exists to bind to commands we don't want to run,
     // but we don't want them to rot either.
-    default BooleanSupplier never() {
-        return () -> false;
+    default boolean never() {
+        return false;
     }
 
     default boolean annunicatorTest() {
         return false;
     }
 
-    default BooleanSupplier test(){
-        return () -> false;
+    default boolean test(){
+        return false;
     }
 }
