@@ -127,9 +127,8 @@ public class DriverXboxControl implements DriverControl {
         return m_controller.getAButton();
     }
 
-    public Trigger choreo(){
-        JoystickButton button = new JoystickButton(m_controller.getHID(), 2);
-        return button;
+    public boolean choreo(){
+        return m_controller.getRawButton(2);
     }
 
     @Override

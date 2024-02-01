@@ -1,6 +1,5 @@
 package org.team100.lib.hid;
 
-import org.team100.frc2024.RobotContainer;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,12 +21,10 @@ public class DriverControlProxy implements DriverControl {
     private final Notifier m_notifier;
     private String m_name;
     private DriverControl m_driverControl;
-    private RobotContainer m_container;
 
-    public DriverControlProxy(RobotContainer container) {
+    public DriverControlProxy() {
         m_notifier = new Notifier(this::refresh);
         refresh();
-        m_container = container;
 
         m_notifier.startPeriodic(kFreq);
     }
@@ -40,11 +37,6 @@ public class DriverControlProxy implements DriverControl {
             return;
         m_name = name;
         m_driverControl = getDriverControl(name);
-
-        //It dosent run for this first time because it dosent need to rebind during the first cycle
-        if(m_container != null){
-            m_container.bindDriverControls();
-        }
 
         Util.printf("*** CONTROL UPDATE\n");
         Util.printf("*** Driver HID: %s Control: %s\n",
