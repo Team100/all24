@@ -340,7 +340,7 @@ public class SwerveKinodynamics {
         double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
 
         if (xySpeed < 1e-12) {
-            return new ChassisSpeeds(0, 0, Math.signum(speeds.omegaRadiansPerSecond) * maxOmega);
+            return new ChassisSpeeds(0, 0, Math.min(speeds.omegaRadiansPerSecond, maxOmega));
         }
         if (Math.abs(speeds.omegaRadiansPerSecond) < 1e-12) {
             return new ChassisSpeeds(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);

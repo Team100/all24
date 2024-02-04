@@ -33,7 +33,7 @@ class Camera(Enum):
 class GamePieceFinder:
 
     def __init__(self, serial, topic_name, camera_params):
-        self.object_lower = (90 , 200, 225)
+        self.object_lower = (90 , 100, 200)
         self.serial = serial
         self.object_higher = (120, 255, 255)
         self.width = camera_params[0]
@@ -87,7 +87,7 @@ class GamePieceFinder:
             if (cnt_width == 832 and cnt_height == 616):
                 continue
             if ():
-                (cnt_height < 5 or cnt_width < 5)
+                (cnt_height < 10 or cnt_width < 10)
                 continue
             mmnts = cv2.moments(c)
             if (mmnts["m00"] == 0):

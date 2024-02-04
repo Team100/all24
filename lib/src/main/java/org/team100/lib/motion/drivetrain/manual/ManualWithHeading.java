@@ -156,7 +156,7 @@ public class ManualWithHeading {
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation
-        twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
+        twistWithSnapM_S = m_swerveKinodynamics.    preferRotation(twistWithSnapM_S);
         return twistWithSnapM_S;
     }
 }

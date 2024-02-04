@@ -39,17 +39,27 @@ public class DriveWithNoteRotation {
      */
     public ChassisSpeeds apply(Twist2d input) {
         // clip the input to the unit circle
-        Twist2d clipped = DriveUtil.clampTwist(new Twist2d(input.dx,input.dy,m_pidController.calculate(m_arrayListener.getX(), 416)), 1.0);
+        double dtheta;
+        // System.out.println("EE");
+        if (m_arrayListener.getX() == null) {
+            dtheta = 0;
+        } else {
+            dtheta = 1.0 * m_arrayListener.getX()/1.5;
+        }
+        Twist2d clipped = DriveUtil.clampTwist(new Twist2d(input.dx,input.dy,m_pidController.calculate(dtheta, 
+        0)/2), 1.0);
         // scale to max in both translation and rotation
-
+        t.log(Level.DEBUG, m_name, "twist", clipped);
+        Twist2d preferRot = m_swerveKinodynamics.preferRotation(clipped);
         ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
-                clipped,
+                preferRot,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // desaturate to feasibility
+        t.log(Level.DEBUG, m_name, "scaled", scaled);
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
         t.log(Level.DEBUG, m_name, "speeds", speeds);
-        return speeds;
+        return scaled;
     }
 }
