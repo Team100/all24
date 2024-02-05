@@ -106,8 +106,9 @@ public class FalconTurningMotor implements Motor100<Angle100> {
         }
 
         // configure current limits
-        m_motor.configStatorCurrentLimit(
-                new StatorCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
+        // note we don't actually care what the stator limit is, we just want to limit the battery draw.
+        // m_motor.configStatorCurrentLimit(
+        //         new StatorCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
         m_motor.configSupplyCurrentLimit(
                 new SupplyCurrentLimitConfiguration(true, kCurrentLimit, kCurrentLimit, 0));
 
