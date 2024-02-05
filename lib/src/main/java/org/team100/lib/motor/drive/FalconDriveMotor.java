@@ -137,8 +137,9 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         m_motor.setNeutralMode(NeutralMode.Brake);
 
         // configure current limits
-        m_motor.configStatorCurrentLimit(
-                new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+        // note we don't actually care what the stator limit is, we just want to limit the battery draw.
+        // m_motor.configStatorCurrentLimit(
+        //         new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
         m_motor.configSupplyCurrentLimit(
                 new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
 
