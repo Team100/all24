@@ -54,7 +54,6 @@ public class DrumShooter extends Shooter {
                 -40);
         switch (Identity.instance) {
             case COMP_BOT:
-            case BETA_BOT:
             //TODO tune kV
                 topRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Top",

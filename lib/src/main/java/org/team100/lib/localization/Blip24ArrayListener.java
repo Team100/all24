@@ -42,7 +42,7 @@ public class Blip24ArrayListener {
                 System.out.println(fields[1] + " " + blip);
             }
         } else {
-            System.out.println("weird vision update key: " + name);
+            // System.out.println("weird vision update key: " + name);
         }
     }
 

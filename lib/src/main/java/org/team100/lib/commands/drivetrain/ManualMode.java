@@ -23,9 +23,7 @@ public class ManualMode implements Supplier<ManualMode.Mode> {
         /** Field-relative dx and dy, rotational feedback control */
         SNAPS,
         /** Field-relative dx and dy, rotational target lock */
-        LOCKED,
-        /**Drive field relative while facing note*/
-        DRIVE_TO_NOTE
+        LOCKED
     }
     private final SendableChooser<Mode> m_manualModeChooser;
 

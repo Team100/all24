@@ -33,7 +33,7 @@ class Camera(Enum):
 class GamePieceFinder:
 
     def __init__(self, serial, topic_name, camera_params):
-        self.object_lower = (90 , 90, 200)
+        self.object_lower = (90 , 70, 200)
         self.serial = serial
         self.object_higher = (120, 255, 255)
         self.width = camera_params[0]

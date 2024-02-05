@@ -2,8 +2,6 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.function.Supplier;
 
-import javax.xml.xpath.XPathFactoryConfigurationException;
-
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
@@ -64,21 +62,21 @@ public class DriveWithProfile extends Command100 {
 
     @Override
     public void execute100(double dt) {
-        SwerveState state = m_swerve.getState();
+        if (m_robotRelativeGoal.get() != null) {
+        System.out.println(m_robotRelativeGoal);
         State100 xGoalRaw = new State100(m_robotRelativeGoal.get().getX(),0,0);
         xSetpoint = xProfile.calculate(0.02, xSetpoint, xGoalRaw);
-        System.out.println("X: " + state.x());
-        System.out.println(m_robotRelativeGoal.get().getX());
         State100 yGoalRaw = new State100(m_robotRelativeGoal.get().getY(),0,0);
         ySetpoint = yProfile.calculate(0.02, ySetpoint, yGoalRaw);
-        System.out.println("Y: " + state.y());
-        System.out.println(m_robotRelativeGoal.get().getY());
         State100 thetaGoalRaw = new State100(m_robotRelativeGoal.get().getRotation().getRadians(),0,0);
         thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, thetaGoalRaw);
         SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
-        System.out.println(goalState);
         Twist2d goal = m_controller.calculate(m_swerve.getPose(), goalState);
-        m_swerve.driveInFieldCoords(goal, 0.02);    
+        m_swerve.driveInFieldCoords(goal, 0.02);
+        } else {
+            System.out.println("Detection error");
+            m_swerve.driveInFieldCoords(new Twist2d(), 0.02);
+        }    
     }
 
     @Override

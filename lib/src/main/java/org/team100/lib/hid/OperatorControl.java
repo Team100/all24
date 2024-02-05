@@ -30,10 +30,6 @@ public interface OperatorControl {
         return 0;
     }
 
-    default boolean driveToNote() {
-        return false;
-    }
-
     default boolean outtake() {
         return false;
     }

@@ -77,7 +77,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -180,8 +179,6 @@ public class RobotContainer {
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
         notePositionDetector.enable();
 
-        m_noteCamera = new CameraAngles(5, 67.5, 50, 832, 616, 1, notePositionDetector, () -> new Pose2d());
-
         Blip24ArrayListener listener = new Blip24ArrayListener();
         listener.enable();
 
@@ -192,6 +189,7 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
+        m_noteCamera = new CameraAngles(5, 67.5, 50, 832, 616, 1, notePositionDetector, () -> m_drive.getPose());
 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
@@ -273,8 +271,8 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         //Drive With Profile
-        whileTrue(operatorControl::driveToNote,
-                new DriveWithProfile(() -> new Pose2d(1,1,new Rotation2d()), m_drive, controller, swerveKinodynamics));
+        whileTrue(driverControl::driveToNote,
+                new DriveWithProfile(() -> m_noteCamera.fieldRelativePose2d(), m_drive, controller, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);

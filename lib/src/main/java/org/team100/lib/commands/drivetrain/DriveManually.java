@@ -157,10 +157,6 @@ public class DriveManually extends Command100 {
                 m_drive.driveInFieldCoords(
                         m_manualWithTargetLock.apply(state, input), dt);
                 break;
-            case DRIVE_TO_NOTE:
-                m_drive.driveInFieldCoords(
-                        m_manualWithTargetLock.apply(state, input), dt);
-                break;
             default:
                 // do nothing
                 break;
