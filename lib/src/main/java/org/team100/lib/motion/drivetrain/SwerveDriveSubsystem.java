@@ -246,7 +246,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     /**
      * SwerveState representing the drivetrain's pose, velocity, and acceleration,
-     * snapshot from periodic.
+     * snapshot from periodic, is field relative
      */
     public SwerveState getState() {
         return m_state;

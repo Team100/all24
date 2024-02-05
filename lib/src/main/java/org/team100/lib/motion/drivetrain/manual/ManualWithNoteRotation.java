@@ -41,10 +41,10 @@ public class ManualWithNoteRotation {
         // clip the input to the unit circle
         double dtheta;
         // System.out.println("EE");
-        if (m_noteCamera.getX() == null) {
+        if (m_noteCamera.getY() == null) {
             dtheta = 0;
         } else {
-            dtheta = m_noteCamera.getX();
+            dtheta = m_noteCamera.getY();
         }
 
         Twist2d clipped = DriveUtil.clampTwist(new Twist2d(input.dx,input.dy,m_pidController.calculate(dtheta, 

@@ -95,6 +95,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/annunciator": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -422,6 +427,15 @@
             "Boom": {
               "open": true
             },
+            "open": true
+          },
+          "open": true
+        },
+        "IntakeWheel": {
+          "open": true
+        },
+        "Swerve Viz": {
+          "SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": {
             "open": true
           },
           "open": true

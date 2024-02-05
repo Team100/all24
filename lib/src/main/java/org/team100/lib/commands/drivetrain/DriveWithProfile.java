@@ -1,5 +1,9 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.function.Supplier;
+
+import javax.xml.xpath.XPathFactoryConfigurationException;
+
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
@@ -9,33 +13,33 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveUnderProfile extends Command100 {
+public class DriveWithProfile extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
-    private final Transform2d m_robotRelativeGoal;
+    private final Supplier<Pose2d> m_robotRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController3 m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-
+    private State100 xSetpoint;
+    private State100 ySetpoint;
+    private State100 thetaSetpoint;
     /**
      * @param goal
      * @param drivetrain
-     * @param planner
      * @param controller
-     * @param viz        ok to be null
+     * @param limits
      */
-    public DriveUnderProfile(
-            Transform2d robotRelativeGoal,
+    public DriveWithProfile(
+            Supplier<Pose2d> robotRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
             SwerveKinodynamics limits) {
@@ -43,8 +47,8 @@ public class DriveUnderProfile extends Command100 {
         m_swerve = drivetrain;
         m_controller = controller;
         m_limits = limits;
-        Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),m_limits.getMaxAngleAccelRad_S2());
-        Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),m_limits.getMaxDriveAccelerationM_S2());
+        Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S()/2,m_limits.getMaxAngleAccelRad_S2()/2);
+        Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S()/2,m_limits.getMaxDriveAccelerationM_S2()/2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -53,23 +57,33 @@ public class DriveUnderProfile extends Command100 {
 
     @Override
     public void initialize100() {
+        xSetpoint = m_swerve.getState().x();
+        ySetpoint = m_swerve.getState().y();
+        thetaSetpoint = m_swerve.getState().theta();
     }
 
     @Override
     public void execute100(double dt) {
-        Pose2d fieldRelativeGoal = m_swerve.getPose().transformBy(m_robotRelativeGoal);
         SwerveState state = m_swerve.getState();
-        State100 xState = xProfile.calculate(0.02, state.x(), new State100(fieldRelativeGoal.getX(),0,0));
-        State100 yState = yProfile.calculate(0.02, state.y(), new State100(fieldRelativeGoal.getY(),0,0));
-        State100 thetaState = thetaProfile.calculate(0.02, state.theta(), new State100(fieldRelativeGoal.getRotation().getRadians(),0,0));
-        SwerveState goalState = new SwerveState(xState, yState, thetaState);
-        Twist2d goal = m_controller.calculate(m_swerve.getPose(),goalState);
+        State100 xGoalRaw = new State100(m_robotRelativeGoal.get().getX(),0,0);
+        xSetpoint = xProfile.calculate(0.02, xSetpoint, xGoalRaw);
+        System.out.println("X: " + state.x());
+        System.out.println(m_robotRelativeGoal.get().getX());
+        State100 yGoalRaw = new State100(m_robotRelativeGoal.get().getY(),0,0);
+        ySetpoint = yProfile.calculate(0.02, ySetpoint, yGoalRaw);
+        System.out.println("Y: " + state.y());
+        System.out.println(m_robotRelativeGoal.get().getY());
+        State100 thetaGoalRaw = new State100(m_robotRelativeGoal.get().getRotation().getRadians(),0,0);
+        thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, thetaGoalRaw);
+        SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
+        System.out.println(goalState);
+        Twist2d goal = m_controller.calculate(m_swerve.getPose(), goalState);
         m_swerve.driveInFieldCoords(goal, 0.02);    
     }
 
     @Override
     public boolean isFinished() {
-        return m_controller.atReference();
+        return false;
     }
 
     @Override

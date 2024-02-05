@@ -65,6 +65,11 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
+    public boolean driveToNote() {
+        return m_operatorControl.driveToNote();
+    }
+
+    @Override
     public boolean index() {
         return m_operatorControl.index();
     }

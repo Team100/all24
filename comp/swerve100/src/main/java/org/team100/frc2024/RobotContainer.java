@@ -3,7 +3,6 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
@@ -22,6 +21,7 @@ import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
+import org.team100.lib.commands.drivetrain.DriveWithProfile;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ManualMode;
@@ -77,6 +77,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -179,7 +180,7 @@ public class RobotContainer {
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
         notePositionDetector.enable();
 
-        m_noteCamera = new CameraAngles(5, 67.5, 50, 832, 616, 1, notePositionDetector);
+        m_noteCamera = new CameraAngles(5, 67.5, 50, 832, 616, 1, notePositionDetector, () -> new Pose2d());
 
         Blip24ArrayListener listener = new Blip24ArrayListener();
         listener.enable();
@@ -270,6 +271,10 @@ public class RobotContainer {
         DriveMotionController drivePID = new DrivePIDFController(false);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
+
+        //Drive With Profile
+        whileTrue(operatorControl::driveToNote,
+                new DriveWithProfile(() -> new Pose2d(1,1,new Rotation2d()), m_drive, controller, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);

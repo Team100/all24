@@ -44,6 +44,11 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public boolean driveToNote() {
+        return m_controller.getRightBumper();
+    }
+
+    @Override
     public boolean shooter() {
         return m_controller.getAButton();
     }

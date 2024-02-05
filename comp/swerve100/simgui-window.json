@@ -5,13 +5,13 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "1130",
-      "maximized": "0",
+      "height": "1494",
+      "maximized": "1",
       "style": "0",
       "userScale": "2",
-      "width": "2212",
-      "xpos": "161",
-      "ypos": "203"
+      "width": "2560",
+      "xpos": "0",
+      "ypos": "34"
     }
   },
   "Table": {
@@ -38,6 +38,11 @@
     }
   },
   "Window": {
+    "###/FMSInfo": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "235,221"
+    },
     "###/SmartDashboard/AmpSubsystem": {
       "Collapsed": "0",
       "Pos": "483,155",
@@ -75,8 +80,8 @@
     },
     "###/SmartDashboard/Manual Drive Mode": {
       "Collapsed": "0",
-      "Pos": "119,94",
-      "Size": "200,48"
+      "Pos": "16,57",
+      "Size": "361,66"
     },
     "###/SmartDashboard/Swerve Viz/_Front Left_SimulatedSwerveModule": {
       "Collapsed": "0",
@@ -105,22 +110,27 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "78,622",
+      "Pos": "127,676",
       "Size": "1156,248"
+    },
+    "###Keyboard 0 Settings": {
+      "Collapsed": "0",
+      "Pos": "1919,795",
+      "Size": "1053,1077"
     },
     "###Keyboard 1 Settings": {
       "Collapsed": "0",
-      "Pos": "744,28",
-      "Size": "206,422"
+      "Pos": "1153,1122",
+      "Size": "1180,1382"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "459,310",
-      "Size": "484,355"
+      "Pos": "1296,738",
+      "Size": "1260,669"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "1005,181",
+      "Pos": "715,1358",
       "Size": "1391,910"
     },
     "###Other Devices": {

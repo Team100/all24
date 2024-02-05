@@ -48,24 +48,30 @@ public class NotePosition24ArrayListener {
         }
     }
 
+    /**
+     * @return The x position in the camera in pixels, 0 should be the left of the screen
+    */
     public Double getX() {
         if (latestTime < Timer.getFPGATimestamp()-0.1) {
             return null;
         }
         if (positions != null) {
             double x = positions[0].getX();
-            return (x-416)/416;
+            return x;
         }
         return null;
     }
 
+    /**
+     * @return The y position in the camera in pixels, 0 should be the bottom of the screen 
+    */
     public Double getY() {
         if (latestTime < Timer.getFPGATimestamp()-0.1) {
             return null;
         }
         if (positions != null) {
             double y = positions[0].getY();
-            return (y-308)/308;
+            return -1.0 * (y-616);
         }
         return null;
     }
