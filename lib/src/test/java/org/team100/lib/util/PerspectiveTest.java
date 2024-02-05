@@ -1,5 +1,7 @@
 package org.team100.lib.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,30 +21,56 @@ public class PerspectiveTest {
         CameraServerCvJNI.forceLoad();
     }
 
+    Mat calibrationSquareInWorldCoordinatesMeters() {
+       // dst is the floor relative to the robot (robot is zero, x ahead, y to the left)
+       // this is a one-meter square centered on zero in Y, centered on 2 in X
+       List<Point> dstpts = new ArrayList<Point>();
+       dstpts.add(new Point(1.5, 0.5));
+       dstpts.add(new Point(1.5, -0.5));
+       dstpts.add(new Point(2.5, 0.5));
+       dstpts.add(new Point(2.5, -0.5));
+       return Converters.vector_Point2f_to_Mat(dstpts);
+    }
+
+    Mat calibrationSquareInCameraPixels() {
+        // src is camera pixels (upper left is zero, x to the right, y down)
+        // say the camera is 832x616
+        // this is the image of the calibration square as seen by the camera
+        // width is 832 so center is 416
+        // height is 616 so center is 308.
+        // these are guesses, completely different from the actual camera
+        // TODO: do a real calibration; note it depends on the camera angle.
+        List<Point> srcpts = new ArrayList<Point>();
+        srcpts.add(new Point(366, 666));
+        srcpts.add(new Point(466, 666));
+        srcpts.add(new Point(316, 566));
+        srcpts.add(new Point(516, 566));
+        return Converters.vector_Point2f_to_Mat(srcpts);
+    }
+
+
     @Test
     void testPerspective() {
-        // src is camera pixels (upper left is zero, x to the right, y down)
-        List<Point> srcpts = new ArrayList<Point>();
-        srcpts.add(new Point(-0.5, -0.5));
-        srcpts.add(new Point(0.5, -0.5));
-        srcpts.add(new Point(-1, 1));
-        srcpts.add(new Point(1, 1));
-        // dst is the floor relative to the robot (robot is zero, x ahead, y to the left)
-        List<Point> dstpts = new ArrayList<Point>();
-        dstpts.add(new Point(1, 1));
-        dstpts.add(new Point(1, -1));
-        dstpts.add(new Point(2, 1));
-        dstpts.add(new Point(2, -1));
-        Mat src = Converters.vector_Point2f_to_Mat(srcpts);
-        Mat dst = Converters.vector_Point2f_to_Mat(dstpts);
+
+        Mat src = calibrationSquareInCameraPixels();
+        Mat dst = calibrationSquareInWorldCoordinatesMeters();
+
         Mat transform = Imgproc.getPerspectiveTransform(src, dst);
         System.out.println(transform.dump());
+
+        // try feeding one of the sample points above into the transform
+        int xPixels = 366;
+        int yPixels = 666;
         Mat src1 = new Mat(3,1,CvType.CV_64F);
-        src1.put(0,0,0);
-        src1.put(1,0,0);
-        src1.put(2,0,1); // homogeneous coordinates
+        src1.put(0,0,xPixels);
+        src1.put(1,0,yPixels);
+        src1.put(2,0,1); // homogeneous coordinates, this is always 1
         Mat dst1 = transform.matMul(src1);
+        dst1 = dst1.mul(Mat.ones(3,1,CvType.CV_64F), 1/dst1.get(2,0)[0]);
+        // this is the real-world coordinate.
         System.out.println(dst1.dump());
+        assertEquals(1.5, dst1.get(0,0)[0], 0.001);
+        assertEquals(0.5, dst1.get(1,0)[0], 0.001);
     }
 
 }
