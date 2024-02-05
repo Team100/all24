@@ -1,9 +1,9 @@
 package org.team100.lib.motion.drivetrain.manual;
 
-import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Names;
 
@@ -16,14 +16,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The x and y are mapped directly to the
  * corresponding ChassisSpeeds components (and scaled).
  */
-public class DriveWithNoteRotation {
+public class ManualWithNoteRotation {
     private final PIDController m_pidController;
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
-    private final NotePosition24ArrayListener m_arrayListener;
-    public DriveWithNoteRotation(String parent, SwerveKinodynamics swerveKinodynamics, PIDController pidController, NotePosition24ArrayListener arrayListener) {
-        m_arrayListener = arrayListener; 
+    private final CameraAngles m_noteCamera;
+    public ManualWithNoteRotation(String parent, SwerveKinodynamics swerveKinodynamics, PIDController pidController, CameraAngles noteCamera) {
+        m_noteCamera = noteCamera; 
         m_pidController = pidController;
         m_swerveKinodynamics = swerveKinodynamics;
         m_name = Names.append(parent, this);
@@ -41,10 +41,10 @@ public class DriveWithNoteRotation {
         // clip the input to the unit circle
         double dtheta;
         // System.out.println("EE");
-        if (m_arrayListener.getX() == null) {
+        if (m_noteCamera.getX() == null) {
             dtheta = 0;
         } else {
-            dtheta = m_arrayListener.getX();
+            dtheta = m_noteCamera.getX();
         }
 
         Twist2d clipped = DriveUtil.clampTwist(new Twist2d(input.dx,input.dy,m_pidController.calculate(dtheta, 

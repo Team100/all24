@@ -9,7 +9,6 @@ import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
-import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
@@ -67,6 +66,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
+import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
@@ -91,7 +91,8 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private final Alliance m_alliance;
-
+    private final CameraAngles m_noteCamera;
+    
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -177,6 +178,8 @@ public class RobotContainer {
 
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
         notePositionDetector.enable();
+
+        m_noteCamera = new CameraAngles(5, 67.5, 50, 832, 616, 1, notePositionDetector);
 
         Blip24ArrayListener listener = new Blip24ArrayListener();
         listener.enable();
@@ -365,7 +368,7 @@ public class RobotContainer {
                         omegaController,
                         driverControl::target,
                         driverControl::trigger,
-                        notePositionDetector));
+                        m_noteCamera));
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));

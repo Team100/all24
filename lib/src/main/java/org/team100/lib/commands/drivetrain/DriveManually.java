@@ -4,11 +4,10 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
+import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -16,6 +15,8 @@ import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
+import org.team100.lib.util.CameraAngles;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -50,7 +51,7 @@ public class DriveManually extends Command100 {
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
     private final ManualWithHeading m_manualWithHeading;
     private final ManualWithTargetLock m_manualWithTargetLock;
-    private final DriveWithNoteRotation m_driveWithNoteRotation;
+    private final ManualWithNoteRotation m_driveWithNoteRotation;
 
     ManualMode.Mode currentManualMode = null;
 
@@ -65,7 +66,7 @@ public class DriveManually extends Command100 {
             PIDController omegaController,
             Supplier<Translation2d> target,
             BooleanSupplier trigger,
-            NotePosition24ArrayListener arrayListener) {
+            CameraAngles noteCamera) {
         m_mode = mode;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -87,11 +88,11 @@ public class DriveManually extends Command100 {
                 thetaController,
                 omegaController,
                 trigger);
-        m_driveWithNoteRotation = new DriveWithNoteRotation(
+        m_driveWithNoteRotation = new ManualWithNoteRotation(
                 m_name,
                 swerveKinodynamics,
                 thetaController,
-                arrayListener);
+                noteCamera);
         addRequirements(m_drive);
     }
 
@@ -153,6 +154,10 @@ public class DriveManually extends Command100 {
                         m_manualWithHeading.apply(currentPose, input), dt);
                 break;
             case LOCKED:
+                m_drive.driveInFieldCoords(
+                        m_manualWithTargetLock.apply(state, input), dt);
+                break;
+            case DRIVE_TO_NOTE:
                 m_drive.driveInFieldCoords(
                         m_manualWithTargetLock.apply(state, input), dt);
                 break;

@@ -2,11 +2,6 @@ package org.team100.lib.localization;
 
 import java.util.EnumSet;
 
-import org.opencv.core.Point;
-import org.team100.lib.util.CameraAngles;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;

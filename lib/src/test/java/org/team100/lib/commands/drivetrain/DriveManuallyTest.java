@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.util.CameraAngles;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -41,7 +41,7 @@ class DriveManuallyTest extends Fixtured {
                 omegaController,
                 () -> null,
                 () -> false,
-                new NotePosition24ArrayListener());
+                new CameraAngles());
 
         command.initialize();
 
