@@ -35,7 +35,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  * 
  * In particular, the maximum spin rate is likely to seem quite high. Do not
  * lower it here.
- */
+ */ 
 public class SwerveKinodynamics {
     private final Telemetry t = Telemetry.get();
 
