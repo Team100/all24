@@ -115,17 +115,17 @@ public class SelfTestRunner extends Command {
 
         if (kTestMechanisms) {
             // mechanism tests
-            // IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
-            // addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
+            IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
+            addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
 
-            // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
-            // addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
+            IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
+            addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
 
-            // AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
-            // addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
+            AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
+            addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
 
-            // ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
-            // addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
+            ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
+            addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
         }
 
         // since we print to the console we don't want warning noise

@@ -9,6 +9,7 @@ import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
+import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
@@ -106,14 +107,14 @@ public class RobotContainer {
     final Monitor m_monitor;
 
     // Identity-specific fields
-    // final IndexerSubsystem m_indexer;
-    // final AmpSubsystem m_amp;
+    final IndexerSubsystem m_indexer;
+    final AmpSubsystem m_amp;
     // private final ClimberSubsystem m_climber;
-    // final Shooter m_shooter;
-    // final Intake m_intake;
+    final Shooter m_shooter;
+    final Intake m_intake;
 
     // Commands
-    // private final PivotAmp m_pivotAmp;
+    private final PivotAmp m_pivotAmp;
 
     private final String m_name;
 
@@ -168,17 +169,17 @@ public class RobotContainer {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        // VisionDataProvider visionDataProvider = new VisionDataProvider(
-        //         m_layout,
-        //         poseEstimator,
-        //         poseEstimator::getEstimatedPosition);
-        // visionDataProvider.enable();
+        VisionDataProvider visionDataProvider = new VisionDataProvider(
+                m_layout,
+                poseEstimator,
+                poseEstimator::getEstimatedPosition);
+        visionDataProvider.enable();
 
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
         notePositionDetector.enable();
 
-        // Blip24ArrayListener listener = new Blip24ArrayListener();
-        // listener.enable();
+        Blip24ArrayListener listener = new Blip24ArrayListener();
+        listener.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
@@ -188,12 +189,12 @@ public class RobotContainer {
                 swerveLocal,
                 driverControl::speed);
 
-        // m_intake = IntakeFactory.get();
-        // m_shooter = ShooterFactory.get();
+        m_intake = IntakeFactory.get();
+        m_shooter = ShooterFactory.get();
 
-        // m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
-        // m_amp = new AmpSubsystem(28, 39);
-        // m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
+        m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
+        m_amp = new AmpSubsystem(28, 39);
+        m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         // show mode locks slow speed.
 
@@ -291,21 +292,21 @@ public class RobotContainer {
 
         // TODO: run the intake if the camera sees a note.
 
-        // m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
         // operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
 
         // operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
 
-        // whileTrue(operatorControl::intake, new IntakeNote(m_intake, m_indexer));
+        whileTrue(operatorControl::intake, new IntakeNote(m_intake, m_indexer));
 
-        // whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
+        whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
 
-        // whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
+        whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
 
         // TODO: spin up the shooter whenever the robot is in range.
 
-        // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-        // whileTrue(operatorControl::shooter, m_shooter.run(m_shooter::forward));
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        whileTrue(operatorControl::shooter, m_shooter.run(m_shooter::forward));
 
         /*
          * 
@@ -366,10 +367,10 @@ public class RobotContainer {
                         driverControl::trigger,
                         notePositionDetector));
 
-        // m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-        // m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        // m_amp.setDefaultCommand(m_pivotAmp);
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        m_amp.setDefaultCommand(m_pivotAmp);
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.
