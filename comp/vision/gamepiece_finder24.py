@@ -33,11 +33,12 @@ class Camera(Enum):
 class GamePieceFinder:
 
     def __init__(self, serial, topic_name, camera_params):
-        self.object_lower = (90 , 100, 200)
+        self.object_lower = (90 , 90, 200)
         self.serial = serial
         self.object_higher = (120, 255, 255)
         self.width = camera_params[0]
         self.height = camera_params[1]
+        self.frame_time = 0
         self.theta = 0
         self.topic_name = topic_name
         self.initialize_nt()    
@@ -82,8 +83,8 @@ class GamePieceFinder:
         objects = []
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
-            # if (cnt_height < 50):
-            #     continue
+            if (cnt_width/cnt_height < 1):
+                continue
             if (cnt_width == 832 and cnt_height == 616):
                 continue
             if ():
@@ -126,11 +127,10 @@ class GamePieceFinder:
         # print(buffer.shape)
         # img = img.reshape((self.height, self.width))
         img_bgr = cv2.cvtColor(img, cv2.COLOR_YUV420p2BGR)
-        # img_bgr = img_bgr[201:401,:,:]
+        # img_bgr = img_bgr[201:616,:,:]
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
         objects = self.find_object(img_hsv)
-        self.frame_time = time.time()
         current_time = time.time()
         total_et = current_time - self.frame_time
         self.frame_time = current_time

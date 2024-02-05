@@ -44,10 +44,11 @@ public class DriveWithNoteRotation {
         if (m_arrayListener.getX() == null) {
             dtheta = 0;
         } else {
-            dtheta = 1.0 * m_arrayListener.getX()/1.5;
+            dtheta = m_arrayListener.getX();
         }
+
         Twist2d clipped = DriveUtil.clampTwist(new Twist2d(input.dx,input.dy,m_pidController.calculate(dtheta, 
-        0)/2), 1.0);
+        0)), 1.0);
         // scale to max in both translation and rotation
         t.log(Level.DEBUG, m_name, "twist", clipped);
         Twist2d preferRot = m_swerveKinodynamics.preferRotation(clipped);

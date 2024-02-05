@@ -2,7 +2,11 @@ package org.team100.lib.localization;
 
 import java.util.EnumSet;
 
+import org.opencv.core.Point;
+import org.team100.lib.util.CameraAngles;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
@@ -54,10 +58,6 @@ public class NotePosition24ArrayListener {
             return null;
         }
         if (positions != null) {
-            double l = MathUtil.interpolate(0, 222, 1);
-            double e = MathUtil.interpolate(222, 283.6, 1);
-            double d = MathUtil.interpolate(283.6, 314.4, 1);
-            double f = MathUtil.interpolate(314.4, 329.8, 1);
             double x = positions[0].getX();
             return (x-416)/416;
         }
@@ -65,13 +65,12 @@ public class NotePosition24ArrayListener {
     }
 
     public Double getY() {
-        if (latestTime < Timer.getFPGATimestamp()-1/10) {
+        if (latestTime < Timer.getFPGATimestamp()-0.1) {
             return null;
         }
         if (positions != null) {
-        double y = positions[0].getY();
-        System.out.println("Y: " + (y-308)/308);
-        return (y-308)/308;
+            double y = positions[0].getY();
+            return (y-308)/308;
         }
         return null;
     }
