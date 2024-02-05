@@ -330,9 +330,9 @@ public class RobotContainer {
         // TODO: stop when note is accpeted using optical detector.
         // TODO: shoot only when the shooter is ready.
 
-        // m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
-        // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
+        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+        whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
+        whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
         // (m_amp.inPosition())));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
