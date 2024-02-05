@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,13 +17,18 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
   private CANSparkMax m_motor1;
   private CANSparkMax m_motor2;
+  private RelativeEncoder m_encoderLeft;
+  private RelativeEncoder m_encoderRight;
+
+
 
   @Override
   public void robotInit() {
     // m_robotContainer = new RobotContainer();
     m_motor1 = new CANSparkMax(3, MotorType.kBrushless);
     m_motor2 = new CANSparkMax(6, MotorType.kBrushless);
-
+    m_encoderLeft = m_motor1.getEncoder();
+    m_encoderRight = m_motor2.getEncoder();
     // m_pidController1 = m_motor1.getPIDController();
     // m_pidController2 = m_motor2.getPIDController();
 
@@ -34,7 +40,17 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_motor1.set(1);
-    m_motor2.set(-.7);
+    m_motor2.set(-1);
+    
+    
+    // if(m_encoderLeft.getVelocity() > 6000 && m_encoderRight.getVelocity() > 6000){
+    //   System.out.println("AHHH");
+    // }
+
+    System.out.println(m_encoderLeft.getVelocity());
+    System.out.println(m_encoderRight.getVelocity());
+
+    
   }
 
   @Override

@@ -52,6 +52,8 @@ public class DrumShooter extends Shooter {
                 30,
                 40,
                 -40);
+
+                
         switch (Identity.instance) {
             case COMP_BOT:
             case BETA_BOT:
