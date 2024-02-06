@@ -1,5 +1,6 @@
 package org.team100.lib.util;
 
+import org.team100.lib.config.Identity;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
@@ -22,14 +23,21 @@ public class CameraAngles {
     private final Telemetry t = Telemetry.get();
 
     /**
-     * @param downwardAngleDegrees The angle downward the camera is in degrees, this is including half of the view of the camera 
-     * @param horzFOVDegrees The horizontal field of view of the camera in degrees
-     * @param vertFOVDegrees The vertical field of view of the camera in degrees
-     * @param horzResolution The amount of pixels horizontally across the video of the PI
-     * @param vertResolution The amount of pixels vertically across the video of the PI
-     * @param cameraHeightMeters The height of the camera in meters
-     * @param notePosition24ArrayListener Class which gets the x and a values of the object detected from the PI
-     * @param swerve The swerve drivetrain
+     * @param downwardAngleDegrees        The angle downward the camera is in
+     *                                    degrees, this is including half of the
+     *                                    view of the camera
+     * @param horzFOVDegrees              The horizontal field of view of the camera
+     *                                    in degrees
+     * @param vertFOVDegrees              The vertical field of view of the camera
+     *                                    in degrees
+     * @param horzResolution              The amount of pixels horizontally across
+     *                                    the video of the PI
+     * @param vertResolution              The amount of pixels vertically across the
+     *                                    video of the PI
+     * @param cameraHeightMeters          The height of the camera in meters
+     * @param notePosition24ArrayListener Class which gets the x and a values of the
+     *                                    object detected from the PI
+     * @param swerve                      The swerve drivetrain
      */
     public CameraAngles(
             double downwardAngleDegrees,
@@ -59,7 +67,7 @@ public class CameraAngles {
             double x = -1.0 * m_cameraHeightMeters
                     * Math.tan(m_notePosition24ArrayListener.getY().get()
                             * (Math.toRadians(m_vertFOVDegrees / m_vertResolution))
-                            + Math.toRadians(90 - m_vertFOVDegrees/2 - m_downwardAngleDegrees));
+                            + Math.toRadians(90 - m_vertFOVDegrees / 2 - m_downwardAngleDegrees));
             t.log(Level.DEBUG, "Camera Angles", "x: ", x);
             return x;
         }
@@ -73,12 +81,12 @@ public class CameraAngles {
     public double getX(double vertPixels) {
         double x = -1.0 * m_cameraHeightMeters
                 * Math.tan(vertPixels * (Math.toRadians(m_vertFOVDegrees / m_vertResolution))
-                        + Math.toRadians(90 - m_vertFOVDegrees/2 - m_downwardAngleDegrees));
+                        + Math.toRadians(90 - m_vertFOVDegrees / 2 - m_downwardAngleDegrees));
         return x;
     }
 
     /**
-     * @return A field relative translational x  value of an object in a camera in
+     * @return A field relative translational x value of an object in a camera in
      *         meters
      */
     public Double fieldRelativeX() {
@@ -174,9 +182,14 @@ public class CameraAngles {
      *         translation and radians for rotation
      */
     public Pose2d fieldRelativePose2d() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return m_swerve.getPose().transformBy(robotRelativeTransform2d());
+        switch (Identity.instance) {
+            case BETA_BOT:
+                if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
+                    return m_swerve.getPose().transformBy(robotRelativeTransform2d());
+                }
+                return null;
+            default:
+                return new Pose2d(8, 4, new Rotation2d());
         }
-        return null;
     }
 }

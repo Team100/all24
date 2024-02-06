@@ -66,7 +66,6 @@ public class DriveWithProfile extends Command100 {
     @Override
     public void execute100(double dt) {
         if (m_robotRelativeGoal.get() != null) {
-            System.out.println("WORKIGN");
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
