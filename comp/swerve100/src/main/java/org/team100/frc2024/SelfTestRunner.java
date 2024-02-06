@@ -11,6 +11,7 @@ import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.selftest.BatterySelfTest;
@@ -82,6 +83,7 @@ public class SelfTestRunner extends Command {
             PIDController thetaController = new PIDController(3.5, 0, 0);
             thetaController.enableContinuousInput(-Math.PI, Math.PI);
             PIDController omegaController = new PIDController(3.5, 0, 0);
+            CameraAngles cameraAngles = new CameraAngles(0,0,0,0,0,0,new NotePosition24ArrayListener(),drivetrain);
             DriveManually driveManually = new DriveManually(
                     () -> ManualMode.Mode.MODULE_STATE,
                     driveManuallyTest::treatment,
@@ -93,7 +95,7 @@ public class SelfTestRunner extends Command {
                     omegaController,
                     () -> null,
                     () -> false,
-                    new CameraAngles());
+                    cameraAngles);
             addCase(driveManuallyTest, driveManually);
 
             // this only tests the end-state
