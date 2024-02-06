@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -30,6 +31,7 @@ class DriveManuallyTest extends Fixtured {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
+        CameraAngles cameraAngles = new CameraAngles(0,0,0,0,0,0,new NotePosition24ArrayListener(),robotDrive);
         DriveManually command = new DriveManually(
                 mode,
                 twistSupplier,
@@ -41,7 +43,7 @@ class DriveManuallyTest extends Fixtured {
                 omegaController,
                 () -> null,
                 () -> false,
-                new CameraAngles());
+                cameraAngles);
 
         command.initialize();
 

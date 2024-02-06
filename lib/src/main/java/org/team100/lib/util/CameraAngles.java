@@ -1,5 +1,6 @@
 package org.team100.lib.util;
 
+
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
@@ -38,17 +39,6 @@ public class CameraAngles {
         m_cameraHeightMeters = cameraHeightMeters;
         m_notePosition24ArrayListener = notePosition24ArrayListener;
         m_robot = robot;
-    }
-
-    public CameraAngles(){
-        m_downwardAngleDegrees = 0;
-        m_horzFOVDegrees = 0;
-        m_vertFOVDegrees = 0;
-        m_horzResolution = 0;
-        m_vertResolution = 0;
-        m_cameraHeightMeters = 0;
-        m_notePosition24ArrayListener = new NotePosition24ArrayListener();
-        m_robot = new SwerveDriveSubsystem(null, null, null, null);
     }
 
     /**

@@ -140,7 +140,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     }
 
     public static PIDController theta() {
-        PIDController pid = new PIDController(1, 0, 0);
+        PIDController pid = new PIDController(3.5, 0, 0);
         pid.setIntegratorRange(-0.01, 0.01);
         pid.setTolerance(0.01); // 0.5 degrees
         pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
