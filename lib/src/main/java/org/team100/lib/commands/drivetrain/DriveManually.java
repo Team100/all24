@@ -93,7 +93,7 @@ public class DriveManually extends Command100 {
             m_name,
             swerveKinodynamics,
             heading,
-            () -> noteCamera.Translation2d(),
+            () -> noteCamera.FieldRelativeTranslation2d(),
             thetaController,
             omegaController,
             trigger);
@@ -101,7 +101,7 @@ public class DriveManually extends Command100 {
             m_name,
             swerveKinodynamics,
             heading,
-            () -> noteCamera.Translation2d(),
+            () -> noteCamera.FieldRelativeTranslation2d(),
             thetaController,
             omegaController,
             trigger);

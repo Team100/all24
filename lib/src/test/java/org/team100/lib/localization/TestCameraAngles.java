@@ -13,7 +13,7 @@ class TestCameraAngles extends Fixtured {
         {
 
          SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
-            CameraAngles camera = new CameraAngles(5, 67.5, 50, 832, 616, 1, new NotePosition24ArrayListener(),swerveDriveSubsystem);
+            CameraAngles camera = new CameraAngles(30, 67.5, 50, 832, 616, 1, new NotePosition24ArrayListener(),swerveDriveSubsystem);
                assertEquals(0,camera.getY(416,200),0.0001);
                assertEquals(-0.7,camera.getX(0),0.001);
         }
