@@ -126,7 +126,7 @@ public class CameraAngles {
      */
     public double getY(double horzPixels, double vertPixels) {
         double x = getX(vertPixels);
-        double y = x
+        double y = -1.0 * x
                 * Math.tan(Math.toRadians(m_horzFOVDegrees) * (horzPixels
                         - m_horzResolution / 2) / m_horzResolution);
         return y;
@@ -171,8 +171,7 @@ public class CameraAngles {
      */
     public Transform2d robotRelativeTransform2d() {
         if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return new Transform2d(getX() + 1, getY(), new Rotation2d(-1.0 * (Math.toRadians(m_horzFOVDegrees)
-                    * (m_notePosition24ArrayListener.getX().get() - m_horzResolution / 2) / m_horzResolution)));
+            return new Transform2d(getX() + 1, getY(), new Rotation2d(getAngleToNote()));
         }
         return null;
     }
@@ -189,7 +188,8 @@ public class CameraAngles {
                 }
                 return null;
             default:
-                return new Pose2d(8, 4, new Rotation2d());
+                Translation2d e = (new Translation2d(8,4)).minus(m_swerve.getPose().getTranslation());
+                return new Pose2d(8, 4, new Rotation2d(Math.atan2(e.getY(),e.getX())));
         }
     }
 }
