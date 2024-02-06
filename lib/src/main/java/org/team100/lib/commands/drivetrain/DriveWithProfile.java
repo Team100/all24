@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -25,7 +25,7 @@ public class DriveWithProfile extends Command100 {
     // trajectory supplier.
     private final Supplier<Pose2d> m_robotRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
-    private final HolonomicDriveController3 m_controller;
+    private final HolonomicDriveController100 m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
@@ -42,7 +42,7 @@ public class DriveWithProfile extends Command100 {
     public DriveWithProfile(
             Supplier<Pose2d> robotRelativeGoal,
             SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController3 controller,
+            HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
         m_robotRelativeGoal = robotRelativeGoal;
         m_swerve = drivetrain;
@@ -84,7 +84,7 @@ public class DriveWithProfile extends Command100 {
         // State100 thetaGoalRaw = new State100(m_robotRelativeGoal.get().getRotation().getRadians(),0,0);
         thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, thetaGoal);
         SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
-        Twist2d goal = m_controller.calculate(m_swerve.getPose(), goalState);
+        Twist2d goal = m_controller.calculate(m_swerve.getState(), goalState);
         m_swerve.driveInFieldCoords(goal, 0.02);
         } else {
             System.out.println("Detection error");

@@ -40,6 +40,8 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
+import org.team100.lib.controller.FullStateDriveController;
+import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -218,6 +220,9 @@ public class RobotContainer {
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
+        HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
+
+
         whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
         m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
@@ -272,7 +277,7 @@ public class RobotContainer {
 
         //Drive With Profile
         whileTrue(operatorControl::driveToNote,
-                new DriveWithProfile(() -> m_noteCamera.fieldRelativePose2d(), m_drive, controller, swerveKinodynamics));
+                new DriveWithProfile(() -> m_noteCamera.fieldRelativePose2d(), m_drive, dthetaController, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
