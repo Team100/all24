@@ -188,8 +188,10 @@ public class CameraAngles {
                 }
                 return null;
             default:
-                Translation2d e = (new Translation2d(8,4)).minus(m_swerve.getPose().getTranslation());
-                return new Pose2d(8, 4, new Rotation2d(Math.atan2(e.getY(),e.getX())));
+                double x = 15;
+                double y = 1;
+                Translation2d e = (new Translation2d(x,y)).minus(m_swerve.getPose().getTranslation());
+                return new Pose2d(x, y, new Rotation2d(Math.atan2(e.getY(),e.getX())));
         }
     }
 }
