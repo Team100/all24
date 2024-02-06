@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.frc2024.motion.drivetrain;
 
 import org.team100.frc2024.FieldConstants;
 import org.team100.lib.motion.drivetrain.SwerveState;

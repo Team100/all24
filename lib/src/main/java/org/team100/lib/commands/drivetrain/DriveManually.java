@@ -171,6 +171,7 @@ public class DriveManually extends Command100 {
             case SHOOTER_LOCK:
                 m_drive.driveInFieldCoords(
                     m_driveWithShooterLock.apply(state, input), dt);
+                break;
             default:
                 // do nothing
                 break;
