@@ -100,8 +100,10 @@ public abstract class JoystickControl implements DriverControl {
             return new Translation2d(6, 4);
         } else {
             // default target is kinda mid-field
-            return new Translation2d(8, 4);
+            return new Translation2d(0.431985, 5.446929);
         }
+
+        // return new Translation2d(0.431985, 5.446929);
     }
 
     @Override
