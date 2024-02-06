@@ -33,9 +33,9 @@ class Camera(Enum):
 class GamePieceFinder:
 
     def __init__(self, serial, topic_name, camera_params):
-        self.object_lower = (90 , 70, 200)
+        self.object_lower = (95 , 100, 200)
         self.serial = serial
-        self.object_higher = (120, 255, 255)
+        self.object_higher = (115, 255, 255)
         self.width = camera_params[0]
         self.height = camera_params[1]
         self.frame_time = 0
@@ -180,7 +180,7 @@ def main():
         "FrameDurationLimits": (5000, 33333),  # 41 fps
         # noise reduction takes time
         "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-        "AwbEnable": False,
+        "AwbEnable": True,
         # "AeEnable": False,
         # "AnalogueGain": 1.0
     },

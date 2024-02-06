@@ -52,6 +52,7 @@ public class DriveManually extends Command100 {
     private final ManualWithHeading m_manualWithHeading;
     private final ManualWithTargetLock m_manualWithTargetLock;
     private final ManualWithNoteRotation m_driveWithNoteRotation;
+    private final ManualWithTargetLock m_manualFieldRelativeWithNoteRotation;
 
     ManualMode.Mode currentManualMode = null;
 
@@ -89,10 +90,21 @@ public class DriveManually extends Command100 {
                 omegaController,
                 trigger);
         m_driveWithNoteRotation = new ManualWithNoteRotation(
-                m_name,
-                swerveKinodynamics,
-                thetaController,
-                noteCamera);
+            m_name,
+            swerveKinodynamics,
+            heading,
+            () -> noteCamera.Translation2d(),
+            thetaController,
+            omegaController,
+            trigger);
+        m_manualFieldRelativeWithNoteRotation = new ManualWithTargetLock(
+            m_name,
+            swerveKinodynamics,
+            heading,
+            () -> noteCamera.Translation2d(),
+            thetaController,
+            omegaController,
+            trigger);
         addRequirements(m_drive);
     }
 
@@ -143,7 +155,7 @@ public class DriveManually extends Command100 {
                 break;
             case ROBOT_RELATIVE_FACING_NOTE:
                 m_drive.setChassisSpeeds(
-                        m_driveWithNoteRotation.apply(input), dt);
+                        m_driveWithNoteRotation.apply(state, input), dt);
                 break;
             case FIELD_RELATIVE_TWIST:
                 m_drive.driveInFieldCoords(
@@ -157,6 +169,9 @@ public class DriveManually extends Command100 {
                 m_drive.driveInFieldCoords(
                         m_manualWithTargetLock.apply(state, input), dt);
                 break;
+            case FIELD_RELATIVE_LOCKED_ON_NOTE:
+                m_drive.driveInFieldCoords(
+                        m_manualFieldRelativeWithNoteRotation.apply(state, input), dt);
             default:
                 // do nothing
                 break;

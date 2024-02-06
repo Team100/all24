@@ -41,10 +41,10 @@ public class PerspectiveTest {
         // these are guesses, completely different from the actual camera
         // TODO: do a real calibration; note it depends on the camera angle.
         List<Point> srcpts = new ArrayList<Point>();
-        srcpts.add(new Point(366, 666));
-        srcpts.add(new Point(466, 666));
-        srcpts.add(new Point(316, 566));
-        srcpts.add(new Point(516, 566));
+        srcpts.add(new Point(389, 643));
+        srcpts.add(new Point(389, 189));
+        srcpts.add(new Point(498, 555));
+        srcpts.add(new Point(498, 277));
         return Converters.vector_Point2f_to_Mat(srcpts);
     }
 

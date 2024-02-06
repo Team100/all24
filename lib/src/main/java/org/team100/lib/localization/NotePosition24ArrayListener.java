@@ -1,6 +1,7 @@
 package org.team100.lib.localization;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -51,30 +52,22 @@ public class NotePosition24ArrayListener {
     /**
      * @return The x position in the camera in pixels, 0 should be the left of the screen
     */
-    public Double getX() {
-        if (latestTime < Timer.getFPGATimestamp()-0.1) {
-            return null;
-        }
-        if (positions != null) {
-            double x = positions[0].getX();
-            return x;
-        }
-        return null;
+    public Optional<Double> getX() {
+            double xd = positions[0].getX();
+            Double x = xd;
+            Optional<Double> e = Optional.of(x);
+            return e;
     }
 
     /**
      * @return The y position in the camera in pixels, 0 should be the bottom of the screen 
     */
-    public Double getY() {
-        if (latestTime < Timer.getFPGATimestamp()-0.1) {
-            return null;
+    public Optional<Double> getY() {
+            double dy = positions[0].getY();
+            Double y = -1.0 * (dy-616);
+            Optional<Double> e = Optional.of(y);
+            return e;
         }
-        if (positions != null) {
-            double y = positions[0].getY();
-            return -1.0 * (y-616);
-        }
-        return null;
-    }
 
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
