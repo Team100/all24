@@ -3,7 +3,6 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
@@ -12,9 +11,10 @@ import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.drive.FalconDriveMotor;
-import org.team100.lib.motor.turning.FalconTurningMotor;
+import org.team100.lib.motor.MotorWithEncoder100;
+import org.team100.lib.motor.drive.DriveMotorFactory;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
@@ -30,7 +30,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double kWheelDiameterM = 0.1015;
     // see wcproducts.com, this is the "fast" ratio.
     private static final double kDriveReduction = 5.50;
-    private static final double driveEncoderDistancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
     /**
      * @param name                  like "front left" or whatever
@@ -88,19 +87,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
-        FalconDriveMotor driveMotor = new FalconDriveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = DriveMotorFactory.driveMotor(
                 name,
-                driveMotorCanId,
-                true,
                 currentLimit,
-                kDriveReduction,
-                kWheelDiameterM,
+                driveMotorCanId,
                 pidConstants,
-                feedforwardConstants);
-        FalconDriveEncoder driveEncoder = new FalconDriveEncoder(
-                name,
-                driveMotor,
-                driveEncoderDistancePerTurn);
+                feedforwardConstants,
+                kDriveReduction,
+                kWheelDiameterM);
         PIDController driveController = new PIDController( //
                 0.1, // kP //1.2
                 0, // kI //0.3
@@ -114,7 +108,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new SelectableVelocityServo<>(
                 name,
                 driveMotor,
-                driveEncoder,
+                driveMotor,
                 driveController,
                 driveFeedforward);
     }
@@ -132,7 +126,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             PIDConstants lowLevelPID,
             FeedforwardConstants lowLevelFeedforward) {
         final double turningGearRatio = 1.0;
-        FalconTurningMotor turningMotor = new FalconTurningMotor(
+        Motor100<Angle100> turningMotor = DriveMotorFactory.turningMotor(
                 name,
                 turningMotorCanId,
                 motorPhase,
