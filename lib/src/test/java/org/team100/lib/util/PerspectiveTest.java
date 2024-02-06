@@ -38,8 +38,6 @@ public class PerspectiveTest {
         // this is the image of the calibration square as seen by the camera
         // width is 832 so center is 416
         // height is 616 so center is 308.
-        // these are guesses, completely different from the actual camera
-        // TODO: do a real calibration; note it depends on the camera angle.
         List<Point> srcpts = new ArrayList<Point>();
         srcpts.add(new Point(389, 643));
         srcpts.add(new Point(389, 189));
