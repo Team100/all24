@@ -45,6 +45,16 @@ public class TrajectoryPlanner {
                 max_accel);
     }
 
+    public Trajectory100 generateTrajectory100(boolean reversed,
+            final List<Pose2d> waypoints,
+            final List<Rotation2d> headings,
+            final List<TimingConstraint> constraints,
+            double start_vel,
+            double end_vel,
+            SwerveKinodynamics limits){
+        return generateTrajectory(reversed, waypoints, headings, constraints, start_vel, end_vel, limits.getMaxDriveVelocityM_S(), limits.getMaxDriveAccelerationM_S2());
+    }
+
     public Trajectory100 generateTrajectory(
             boolean reversed,
             final List<Pose2d> waypoints,

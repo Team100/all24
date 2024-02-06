@@ -15,6 +15,7 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
+import org.team100.frc2024.motion.shooter.ShooterTable;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -22,6 +23,7 @@ import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
+import org.team100.lib.commands.drivetrain.DriveWithTrajectory;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ManualMode;
@@ -80,6 +82,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
@@ -211,7 +214,7 @@ public class RobotContainer {
 
         ManualMode manualMode = new ManualMode();
 
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, Math.PI));
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, 0));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -254,13 +257,15 @@ public class RobotContainer {
         whileTrue(driverControl::never, CommandMaker.choreo(choreoTrajectory, m_drive));
 
         // playing with trajectory followers
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        TrajectoryConfig config = new TrajectoryConfig(5, 5);
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
 
         // field center, roughly, facing to the left.
-        Pose2d goal = new Pose2d(8, 4, GeometryUtil.kRotation90);
+        Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         whileTrue(driverControl::never, follower);
+
+        
 
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);
@@ -274,8 +279,12 @@ public class RobotContainer {
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        whileTrue(driverControl::actualCircle,
+        whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
+
+        whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
+
+        // whileTrue(driverControl::test, new RunCommand (() -> ShooterTable.instance.getAngle(10.0)));
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
@@ -341,7 +350,7 @@ public class RobotContainer {
         // m_climber.setDefaultCommand(m_climber.run(() ->
         // m_climber.set(operatorControl.climberState())));
 
-        whileTrue(driverControl::test, CommandMaker.choreo(Choreo.getTrajectory("fourpiecev3"), m_drive));
+        // whileTrue(driverControl::test, CommandMaker.choreo(Choreo.getTrajectory("curvyField"), m_drive));
 
         ///////////////////////////
         //

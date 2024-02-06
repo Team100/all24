@@ -9,9 +9,10 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
-import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
+ import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.sensors.HeadingInterface;
@@ -51,6 +52,7 @@ public class DriveManually extends Command100 {
     private final ManualWithHeading m_manualWithHeading;
     private final ManualWithTargetLock m_manualWithTargetLock;
     private final DriveWithNoteRotation m_driveWithNoteRotation;
+    private final ManualWithShooterLock m_driveWithShooterLock;
 
     ManualMode.Mode currentManualMode = null;
 
@@ -92,6 +94,15 @@ public class DriveManually extends Command100 {
                 swerveKinodynamics,
                 thetaController,
                 arrayListener);
+
+        m_driveWithShooterLock = new ManualWithShooterLock(
+                m_name,
+                swerveKinodynamics,
+                heading,
+                thetaController,
+                omegaController,
+                0.25);
+
         addRequirements(m_drive);
     }
 
@@ -120,6 +131,7 @@ public class DriveManually extends Command100 {
             // there's state in there we'd like to forget
             m_manualWithHeading.reset(m_drive.getPose());
             m_manualWithTargetLock.reset(m_drive.getPose());
+            m_driveWithShooterLock.reset(m_drive.getPose());
         }
 
         // input in [-1,1] control units
@@ -156,10 +168,18 @@ public class DriveManually extends Command100 {
                 m_drive.driveInFieldCoords(
                         m_manualWithTargetLock.apply(state, input), dt);
                 break;
+            case SHOOTER_LOCK:
+                m_drive.driveInFieldCoords(
+                    m_driveWithShooterLock.apply(state, input), dt);
             default:
                 // do nothing
                 break;
+
+            
         }
+
+
+
     }
 
     @Override
