@@ -51,7 +51,7 @@ public class DriveManually extends Command100 {
     private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
     private final ManualWithHeading m_manualWithHeading;
     private final ManualWithTargetLock m_manualWithTargetLock;
-    private final ManualWithNoteRotation m_driveWithNoteRotation;
+    private final ManualWithNoteRotation m_manualWithNoteRotation;
     private final ManualWithTargetLock m_manualFieldRelativeWithNoteRotation;
 
     ManualMode.Mode currentManualMode = null;
@@ -89,7 +89,7 @@ public class DriveManually extends Command100 {
                 thetaController,
                 omegaController,
                 trigger);
-        m_driveWithNoteRotation = new ManualWithNoteRotation(
+        m_manualWithNoteRotation = new ManualWithNoteRotation(
             m_name,
             swerveKinodynamics,
             heading,
@@ -133,6 +133,8 @@ public class DriveManually extends Command100 {
             // there's state in there we'd like to forget
             m_manualWithHeading.reset(m_drive.getPose());
             m_manualWithTargetLock.reset(m_drive.getPose());
+            m_manualFieldRelativeWithNoteRotation.reset(m_drive.getPose());
+            m_manualWithNoteRotation.reset(m_drive.getPose());
         }
 
         // input in [-1,1] control units
@@ -155,7 +157,7 @@ public class DriveManually extends Command100 {
                 break;
             case ROBOT_RELATIVE_FACING_NOTE:
                 m_drive.setChassisSpeeds(
-                        m_driveWithNoteRotation.apply(state, input), dt);
+                        m_manualWithNoteRotation.apply(state, input), dt);
                 break;
             case FIELD_RELATIVE_TWIST:
                 m_drive.driveInFieldCoords(

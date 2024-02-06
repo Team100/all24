@@ -271,7 +271,7 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         //Drive With Profile
-        whileTrue(driverControl::driveToNote,
+        whileTrue(operatorControl::driveToNote,
                 new DriveWithProfile(() -> m_noteCamera.fieldRelativePose2d(), m_drive, controller, swerveKinodynamics));
 
         // 254 FF follower

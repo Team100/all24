@@ -56,6 +56,11 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public boolean driveToNote() {
+        return m_controller.getRightBumper();
+    }
+
+    @Override
     public double climberState() {
         return deadband(clamp(-1.0 * m_controller.getRightY(), 1), kDeadband, 1);
     }

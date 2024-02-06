@@ -26,6 +26,10 @@ public interface OperatorControl {
         return false;
     }
 
+    default boolean driveToNote() {
+        return false;
+    }
+
     default double shooterSpeed() {
         return 0;
     }
