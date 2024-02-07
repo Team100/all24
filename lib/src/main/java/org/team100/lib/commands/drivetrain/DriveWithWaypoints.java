@@ -10,8 +10,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.JSON.JSONParser;
-import org.team100.lib.JSON.TrajectoryList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,8 +51,7 @@ public class DriveWithWaypoints extends Command100 {
 //   private final List<Pose2d> m_waypoints;
 //   private final List<Rotation2d> m_headings;
   private final Pose2d m_goal;
-  private final List<Pose2d> m_waypoints;
-  private final List<Rotation2d> m_headings;
+
 
 
   public DriveWithWaypoints(SwerveDriveSubsystem drivetrain,
@@ -112,28 +109,28 @@ public class DriveWithWaypoints extends Command100 {
     // }
       
     // poses = getWaypoints(internalWaypoints.get(0), internalWaypoints.get(1));
-    List<Pose2d> internalWaypoints = m_waypoints;
-    List<Rotation2d> internalHeadings = m_headings;
+    // List<Pose2d> internalWaypoints = m_waypoints;
+    // List<Rotation2d> internalHeadings = m_headings;
     
-    internalWaypoints.add(0, m_swerve.getPose());
-    internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
+    // internalWaypoints.add(0, m_swerve.getPose());
+    // internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
     
     List<Pose2d> poses = new ArrayList<>();
 
-    System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
-    System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
+    // System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
+    // System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
 
-    System.out.println("WAYPOINTS GLOBAL" + m_waypoints);
-    System.out.println("WAYPOINTS INTERNA SIZE:" + m_waypoints.size());
+    // System.out.println("WAYPOINTS GLOBAL" + m_waypoints);
+    // System.out.println("WAYPOINTS INTERNA SIZE:" + m_waypoints.size());
 
 
-    for(int i = 0; i < internalWaypoints.size(); i+=2){
+    // for(int i = 0; i < internalWaypoints.size(); i+=2){
 
-        List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
-        poses.add(posi.get(0));
-        poses.add(posi.get(1));
+    //     List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
+    //     poses.add(posi.get(0));
+    //     poses.add(posi.get(1));
       
-    }
+    // }
           
 
     List<TimingConstraint> constraints = List.of(
