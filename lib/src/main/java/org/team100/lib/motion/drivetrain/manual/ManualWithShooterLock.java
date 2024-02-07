@@ -1,9 +1,8 @@
-package org.team100.frc2024.motion.drivetrain.manual;
+package org.team100.lib.motion.drivetrain.manual;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -17,6 +16,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.ShooterUtil;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
