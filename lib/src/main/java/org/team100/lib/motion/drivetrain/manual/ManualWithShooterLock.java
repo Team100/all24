@@ -1,8 +1,8 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.frc2024.motion.drivetrain.manual;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -16,7 +16,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
-import org.team100.lib.util.ShooterUtil;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -56,7 +55,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
-    private DoubleSupplier m_shooterVelocity;
+    private final double m_scale;
 
     public ManualWithShooterLock(
             String parent, 
@@ -64,12 +63,12 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             HeadingInterface heading,
             PIDController thetaController,
             PIDController omegaController,
-            DoubleSupplier shooterVelocity) {
+            double scale) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_shooterVelocity = shooterVelocity;
+        m_scale = scale;
         
         m_name = Names.append(parent, this);
         m_trigger = () -> false;
@@ -100,9 +99,10 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
 
         Translation2d currentTranslation = state.pose().getTranslation();
-        ShooterUtil.updateTranslationFromEdge(state, 0.25);
-        Translation2d target = ShooterUtil.getOffsetTranslation(state, m_shooterVelocity.getAsDouble());
+        Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
+
+
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -204,6 +204,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Rotation2d relativeBearing = bearing.minus(course);
         double speed = GeometryUtil.norm(state.twist());
         return speed * relativeBearing.getSin() / range;
+    }
+
+    static void aimWhileMoving(Rotation2d bearing, SwerveState state){
+
+            //its the shooter util code but robot moving vec is y velocity and angle in rads is bearing
+
+
     }
 
 }
