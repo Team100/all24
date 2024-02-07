@@ -123,6 +123,21 @@ public class DriveManually extends Command100 {
                 });
     }
 
+    public void register(String name, boolean isDefault, WeirdChassisSpeedDriver d) {
+        addName(name, isDefault);
+        m_drivers.put(
+                name,
+                new Driver() {
+                    public void apply(SwerveState s, Twist2d t, double dt) {
+                        m_drive.setChassisSpeeds(d.apply(s, t), dt);
+                    }
+
+                    public void reset(Pose2d p) {
+                        d.reset(p);
+                    }
+                });
+    }
+
     public void register(String name, boolean isDefault, ChassisSpeedDriver d) {
         addName(name, isDefault);
         m_drivers.put(

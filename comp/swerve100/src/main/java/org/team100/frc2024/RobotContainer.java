@@ -59,10 +59,10 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -387,11 +387,14 @@ public class RobotContainer {
                 new ManualChassisSpeeds(m_name, swerveKinodynamics));
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
-                new DriveWithNoteRotation(
-                        m_name,
-                        swerveKinodynamics,
-                        thetaController,
-                        notePositionDetector));
+                new ManualWithNoteRotation(
+                    m_name,
+                    swerveKinodynamics,
+                    m_heading,
+                    m_noteDetector::FieldRelativeTranslation2d,
+                    thetaController,
+                    omegaController,
+                    driverControl::trigger));
 
         driveManually.register("FIELD_RELATIVE_TWIST", false,
                 new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
@@ -404,6 +407,16 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+
+        driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
+        new ManualWithTargetLock(
+                                m_name,
+                                swerveKinodynamics,
+                                m_heading,
+                                m_noteDetector::FieldRelativeTranslation2d,
+                                thetaController,
+                                omegaController,
+                                driverControl::trigger));
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(

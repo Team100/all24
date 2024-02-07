@@ -3,6 +3,8 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
+import org.team100.lib.commands.drivetrain.WeirdChassisSpeedDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -35,7 +37,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class ManualWithNoteRotation {
+public class ManualWithNoteRotation implements WeirdChassisSpeedDriver{
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
@@ -78,6 +80,7 @@ public class ManualWithNoteRotation {
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
+    
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
@@ -94,6 +97,7 @@ public class ManualWithNoteRotation {
      * @param input control units [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
+    
     public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
