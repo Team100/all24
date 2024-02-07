@@ -1,22 +1,7 @@
 {
-  "FMS": {
-    "window": {
-      "visible": false
-    }
-  },
   "Keyboard 0 Settings": {
     "window": {
       "visible": true
-    }
-  },
-  "Keyboard 1 Settings": {
-    "window": {
-      "visible": true
-    }
-  },
-  "System Joysticks": {
-    "window": {
-      "visible": false
     }
   },
   "keyboardJoysticks": [
@@ -31,6 +16,7 @@
           "incKey": 83
         },
         {
+          "decKey": 69,
           "decayRate": 0.0,
           "incKey": 82,
           "keyRate": 0.009999999776482582
@@ -39,8 +25,8 @@
       "axisCount": 3,
       "buttonCount": 6,
       "buttonKeys": [
-        81,
-        69,
+        342,
+        -1,
         90,
         88,
         -1,
@@ -68,29 +54,15 @@
         {
           "decKey": 73,
           "incKey": 75
-        },
-        {},
-        {},
-        {
-          "decKey": 79,
-          "incKey": 80
-        },
-        {
-          "decKey": 44,
-          "incKey": 46
         }
       ],
-      "axisCount": 6,
-      "buttonCount": 8,
+      "axisCount": 2,
+      "buttonCount": 4,
       "buttonKeys": [
-        -1,
-        50,
-        51,
-        52,
-        53,
-        54,
-        55,
-        56
+        77,
+        44,
+        46,
+        47
       ],
       "povCount": 0
     },
@@ -126,10 +98,6 @@
   "robotJoysticks": [
     {
       "guid": "Keyboard0"
-    },
-    {
-      "guid": "Keyboard1"
     }
-  ],
-  "useEnableDisableHotkeys": true
+  ]
 }

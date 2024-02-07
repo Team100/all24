@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.sensors.HeadingInterface;
@@ -54,6 +55,7 @@ public class DriveManually extends Command100 {
     private final ManualWithTargetLock m_manualWithTargetLock;
     private final ManualWithNoteRotation m_manualWithNoteRotation;
     private final ManualWithTargetLock m_manualFieldRelativeWithNoteRotation;
+    private final ManualWithShooterLock m_driveWithShooterLock;
 
     ManualMode.Mode currentManualMode = null;
 
@@ -106,6 +108,13 @@ public class DriveManually extends Command100 {
             thetaController,
             omegaController,
             trigger);
+        m_driveWithShooterLock = new ManualWithShooterLock(
+                m_name,
+                swerveKinodynamics,
+                heading,
+                thetaController,
+                omegaController,
+                0.25);
         addRequirements(m_drive);
     }
 
@@ -136,6 +145,7 @@ public class DriveManually extends Command100 {
             m_manualWithTargetLock.reset(m_drive.getPose());
             m_manualFieldRelativeWithNoteRotation.reset(m_drive.getPose());
             m_manualWithNoteRotation.reset(m_drive.getPose());
+            m_driveWithShooterLock.reset(m_drive.getPose());
         }
 
         // input in [-1,1] control units
@@ -175,10 +185,18 @@ public class DriveManually extends Command100 {
             case FIELD_RELATIVE_LOCKED_ON_NOTE:
                 m_drive.driveInFieldCoords(
                         m_manualFieldRelativeWithNoteRotation.apply(state, input), dt);
+            case SHOOTER_LOCK:
+                m_drive.driveInFieldCoords(
+                    m_driveWithShooterLock.apply(state, input), dt);
             default:
                 // do nothing
                 break;
+
+            
         }
+
+
+
     }
 
     @Override
