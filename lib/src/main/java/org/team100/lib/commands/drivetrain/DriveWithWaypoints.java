@@ -46,23 +46,23 @@ public class DriveWithWaypoints extends Command100 {
   private final DriveMotionController m_controller;
   private final SwerveKinodynamics m_limits;
   private static final Telemetry t = Telemetry.get();
-  private final List<Pose2d> m_waypoints;
-  private final List<Rotation2d> m_headings;
-
+//   private final List<Pose2d> m_waypoints;
+//   private final List<Rotation2d> m_headings;
+  private final Pose2d m_goal;
 
   public DriveWithWaypoints(SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            List<Pose2d> waypoints,
-            List<Rotation2d> headings) {
+            Pose2d goal) {
     // Use addRequirements() here to declare subsystem dependencies.
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_limits = limits;
-        m_waypoints = waypoints;
-        m_headings = headings;
+        m_goal = goal;
+        // m_waypoints = waypoints;
+        // m_headings = headings;
 
         
 
@@ -74,29 +74,37 @@ public class DriveWithWaypoints extends Command100 {
   @Override
   public void initialize100() {
 
-    List<Pose2d> internalWaypoints = m_waypoints;
-    List<Rotation2d> internalHeadings = m_headings;
+    final Pose2d start = m_swerve.getPose();
+    final double startVelocity = 0;
+    final Pose2d end = m_goal;
+    final double endVelocity = 0;
+
+    List<Pose2d> waypointsNew = new ArrayList<>()
+    List<Pose2d> waypointsM = getWaypoints(start, end);
+    List<Rotation2d> headings = List.of(
+      start.getRotation(),
+      end.getRotation());
+
+    // List<Pose2d> internalWaypoints = new ArrayList<>(m_waypoints);
+    // List<Rotation2d> internalHeadings = new ArrayList<>(m_headings);
     
-    internalWaypoints.add(0, m_swerve.getPose());
-    internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
+    // internalWaypoints.add(0, m_swerve.getPose());
+    // internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
     
-    List<Pose2d> poses = new ArrayList<>();
+    // List<Pose2d> poses = new ArrayList<>();
 
-    System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
-    System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
+    // System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
+    // System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
 
-    System.out.println("WAYPOINTS GLOBAL" + m_waypoints);
-    System.out.println("WAYPOINTS INTERNA SIZE:" + m_waypoints.size());
+    // for(int i = 0; i < internalWaypoints.size(); i+=2){
 
-
-    for(int i = 0; i < internalWaypoints.size(); i+=2){
-
-        List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
-        poses.add(posi.get(0));
-        poses.add(posi.get(1));
+    //     List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
+    //     poses.add(posi.get(0));
+    //     poses.add(posi.get(1));
       
-    }
+    // }
       
+    // poses = getWaypoints(internalWaypoints.get(0), internalWaypoints.get(1));
     
 
     List<TimingConstraint> constraints = List.of(
@@ -110,8 +118,8 @@ public class DriveWithWaypoints extends Command100 {
     Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
-                        internalWaypoints,
-                        internalHeadings,
+                        waypointsM,
+                        headings,
                         constraints,
                         0,
                         0,
