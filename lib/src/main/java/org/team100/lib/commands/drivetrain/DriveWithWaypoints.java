@@ -79,7 +79,7 @@ public class DriveWithWaypoints extends Command100 {
     final Pose2d end = m_goal;
     final double endVelocity = 0;
 
-    List<Pose2d> waypointsNew = new ArrayList<>()
+    List<Pose2d> waypointsNew = new ArrayList<>();
     List<Pose2d> waypointsM = getWaypoints(start, end);
     List<Rotation2d> headings = List.of(
       start.getRotation(),
