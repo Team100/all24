@@ -26,7 +26,10 @@ public class ShooterUtil {
                                                 FieldConstants.SHOOTER_RIGHT_SIDE_Y);
 
         m_goal = new Translation2d(FieldConstants.SHOOTER_CENTER_X, offsetDistance);
+    }
 
+    public static  Translation2d getGoalTranslation() {
+        return m_goal;
     }
 
     public static Translation2d getOffsetTranslation(SwerveState state, double shooterVelocity){
