@@ -50,8 +50,7 @@ public class NoteDetector {
      * @return A robot relative angle in radians to the note
      */
     public double getAngleToNote() {
-        return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
-                m_notePosition24ArrayListener.getY().get());
+        return m_cameraAngles.getAngle(getX(), getY());
     }
 
     /**
