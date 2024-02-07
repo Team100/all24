@@ -63,7 +63,6 @@ public class OperatorControlProxy implements OperatorControl {
     public boolean doSomething() {
         return m_operatorControl.doSomething();
     }
-
     @Override
     public boolean index() {
         return m_operatorControl.index();

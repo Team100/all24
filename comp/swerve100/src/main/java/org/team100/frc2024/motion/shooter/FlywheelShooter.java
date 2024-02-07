@@ -52,7 +52,6 @@ public class FlywheelShooter extends Shooter {
                 -40);
         switch (Identity.instance) {
             case COMP_BOT:
-            case BETA_BOT:
             //TODO tune kV
                 leftShooter = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Left",

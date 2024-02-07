@@ -28,8 +28,8 @@ public class NotePosition24Struct implements Struct<NotePosition24> {
 
     @Override
     public NotePosition24 unpack(ByteBuffer bb) {
-        int x = bb.getInt(0);
-        int y = bb.getInt(1);
+        int x = bb.getInt();
+        int y = bb.getInt();
         return new NotePosition24(x,y);
     }
 

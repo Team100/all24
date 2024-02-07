@@ -33,11 +33,12 @@ class Camera(Enum):
 class GamePieceFinder:
 
     def __init__(self, serial, topic_name, camera_params):
-        self.object_lower = (90 , 200, 225)
+        self.object_lower = (95 , 100, 200)
         self.serial = serial
-        self.object_higher = (120, 255, 255)
+        self.object_higher = (115, 255, 255)
         self.width = camera_params[0]
         self.height = camera_params[1]
+        self.frame_time = 0
         self.theta = 0
         self.topic_name = topic_name
         self.initialize_nt()    
@@ -52,8 +53,9 @@ class GamePieceFinder:
         # self.inst.setServer("10.107.191.21")
         self.inst.setServer("10.1.0.2")
         # Table for vision output information
-        topic_name = "vision/" + self.serial
+        topic_name = "noteVision/" + self.serial
         self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
+        self.vision_camera = self.inst.getDoubleTopic(topic_name + "/camera").publish()
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
@@ -82,12 +84,12 @@ class GamePieceFinder:
         objects = []
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
-            # if (cnt_height < 50):
-            #     continue
+            if (cnt_width/cnt_height < 1):
+                continue
             if (cnt_width == 832 and cnt_height == 616):
                 continue
             if ():
-                (cnt_height < 5 or cnt_width < 5)
+                (cnt_height < 10 or cnt_width < 10)
                 continue
             mmnts = cv2.moments(c)
             if (mmnts["m00"] == 0):
@@ -126,11 +128,10 @@ class GamePieceFinder:
         # print(buffer.shape)
         # img = img.reshape((self.height, self.width))
         img_bgr = cv2.cvtColor(img, cv2.COLOR_YUV420p2BGR)
-        # img_bgr = img_bgr[201:401,:,:]
+        # img_bgr = img_bgr[201:616,:,:]
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
         objects = self.find_object(img_hsv)
-        self.frame_time = time.time()
         current_time = time.time()
         total_et = current_time - self.frame_time
         self.frame_time = current_time
@@ -180,7 +181,7 @@ def main():
         "FrameDurationLimits": (5000, 33333),  # 41 fps
         # noise reduction takes time
         "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-        "AwbEnable": False,
+        "AwbEnable": True,
         # "AeEnable": False,
         # "AnalogueGain": 1.0
     },
@@ -202,6 +203,7 @@ def main():
     topic_name = "pieces"
     serial = getserial()
     output = GamePieceFinder(serial,topic_name, camera_params)
+    output.self.vision_camera.set(camera.camera_properties['Model'])
     camera.start()
     try:
         while True:

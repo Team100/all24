@@ -10,6 +10,8 @@ import org.team100.frc2024.selftest.ShooterSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
+import org.team100.lib.config.NoteDetector;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
@@ -21,6 +23,7 @@ import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.selftest.SquareSelfTest;
 import org.team100.lib.selftest.VeeringSelfTest;
+import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
 

@@ -3,7 +3,6 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
@@ -23,7 +22,7 @@ import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.commands.drivetrain.DriveWithTrajectory;
+import org.team100.lib.commands.drivetrain.DriveWithProfile;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Oscillate;
@@ -37,10 +36,12 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.NoteDetector;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
+import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -73,6 +74,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
+import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
@@ -97,7 +99,9 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private final Alliance m_alliance;
-
+    private final CameraAngles m_cameraAngles;
+    private final NoteDetector m_noteDetector;
+    
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -194,6 +198,8 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
+        m_cameraAngles = new CameraAngles(30, 67.5, 50, 832, 616, 0.71, 0, 0);
+        m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
@@ -219,6 +225,9 @@ public class RobotContainer {
         onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, 0));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
+
+        HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
+
 
         whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
@@ -271,6 +280,10 @@ public class RobotContainer {
         DriveMotionController drivePID = new DrivePIDFController(false);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
+
+        //Drive With Profile
+        whileTrue(driverControl::driveToNote,
+                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);

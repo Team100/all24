@@ -40,6 +40,11 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
+    public boolean driveToNote() {
+        return m_controller.getLeftStickButton();
+    }
+
+    @Override
     public boolean resetRotation180() {
         return m_controller.getRawButton(8);
     }
