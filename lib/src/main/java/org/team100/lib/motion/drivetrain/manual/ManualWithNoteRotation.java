@@ -3,7 +3,6 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.commands.drivetrain.WeirdChassisSpeedDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -95,7 +94,7 @@ public class ManualWithNoteRotation implements WeirdChassisSpeedDriver{
      * 
      * @param state from the drivetrain
      * @param input control units [-1,1]
-     * @return feasible field-relative velocity in m/s and rad/s
+     * @return Working on this, theta overshoots for some reason
      */
     
     public ChassisSpeeds apply(SwerveState state, Twist2d input) {

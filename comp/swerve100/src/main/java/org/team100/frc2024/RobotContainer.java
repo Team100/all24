@@ -435,7 +435,7 @@ public class RobotContainer {
                         m_heading,
                         thetaController,
                         omegaController,
-                        0.25));
+                        m_shooter::getVelocity));
 
         m_drive.setDefaultCommand(driveManually);
 

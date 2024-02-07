@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.drivetrain.manual;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
@@ -55,7 +56,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
-    private final double m_scale;
+    private DoubleSupplier m_shooterVelocity;
 
     public ManualWithShooterLock(
             String parent, 
@@ -63,12 +64,12 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             HeadingInterface heading,
             PIDController thetaController,
             PIDController omegaController,
-            double scale) {
+            DoubleSupplier shooterVelocity) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_scale = scale;
+        m_shooterVelocity = shooterVelocity;
         
         m_name = Names.append(parent, this);
         m_trigger = () -> false;
@@ -99,7 +100,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
 
         Translation2d currentTranslation = state.pose().getTranslation();
-        Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
+        Translation2d target = ShooterUtil.getOffsetTranslation(state, m_shooterVelocity.getAsDouble());
         Rotation2d bearing = bearing(currentTranslation, target);
 
         // take the short path

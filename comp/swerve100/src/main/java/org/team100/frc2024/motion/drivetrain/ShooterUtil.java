@@ -10,22 +10,18 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 
-/** Add your docs here. */
 public class ShooterUtil {
 
-    public static Translation2d getOffsetTranslation(SwerveState state, double kScale){
-        Translation2d currentTranslation = state.pose().getTranslation();
+    public static Translation2d getOffsetTranslation(SwerveState state, double shooterVelocity){
+        double distanceHorizontal = state.y().v();
 
-        Translation2d shooterCenter = new Translation2d(FieldConstants.SHOOTER_CENTER_X, 
-                                                       FieldConstants.SHOOTER_CENTER_Y);
+        double horizontalOffsetDistance = FieldConstants.SHOOTER_CENTER_Y + -1.0*  distanceHorizontal / shooterVelocity * (Math.abs(state.translation().getY()-FieldConstants.SHOOTER_CENTER_Y));
 
-        double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
+        double distanceVertical = state.x().v();
 
-        double offsetDistance = MathUtil.clamp( FieldConstants.SHOOTER_CENTER_Y + distanceHorizontal * -1 * kScale, 
-                                                FieldConstants.SHOOTER_LEFT_SIDE_Y, 
-                                                FieldConstants.SHOOTER_RIGHT_SIDE_Y);
+        double verticalOffsetDistance = FieldConstants.SHOOTER_CENTER_X + -1.0 * distanceVertical / shooterVelocity * (Math.abs(state.translation().getX()-FieldConstants.SHOOTER_CENTER_X));
 
-        return new Translation2d(FieldConstants.SHOOTER_CENTER_X, offsetDistance);
+        return new Translation2d(verticalOffsetDistance, horizontalOffsetDistance);
 
     }
 
