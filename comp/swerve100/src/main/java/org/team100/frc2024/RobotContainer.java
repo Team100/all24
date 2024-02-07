@@ -9,13 +9,13 @@ import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
+import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
-import org.team100.frc2024.motion.shooter.ShooterTable;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -26,7 +26,6 @@ import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithTrajectory;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
-import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ResetPose;
@@ -58,6 +57,12 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
+import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
+import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
+import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
+import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -82,7 +87,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
@@ -212,8 +216,6 @@ public class RobotContainer {
         onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-        ManualMode manualMode = new ManualMode();
-
         onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, 0));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
@@ -265,8 +267,6 @@ public class RobotContainer {
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         whileTrue(driverControl::never, follower);
 
-        
-
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);
         whileTrue(driverControl::never,
@@ -282,9 +282,11 @@ public class RobotContainer {
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
+        whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics,
+                "src/main/deploy/choreo/crossField.traj"));
 
-        // whileTrue(driverControl::test, new RunCommand (() -> ShooterTable.instance.getAngle(10.0)));
+        // whileTrue(driverControl::test, new RunCommand (() ->
+        // ShooterTable.instance.getAngle(10.0)));
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
@@ -350,7 +352,8 @@ public class RobotContainer {
         // m_climber.setDefaultCommand(m_climber.run(() ->
         // m_climber.set(operatorControl.climberState())));
 
-        // whileTrue(driverControl::test, CommandMaker.choreo(Choreo.getTrajectory("curvyField"), m_drive));
+        // whileTrue(driverControl::test,
+        // CommandMaker.choreo(Choreo.getTrajectory("curvyField"), m_drive));
 
         ///////////////////////////
         //
@@ -361,19 +364,53 @@ public class RobotContainer {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0.5, 0, 0);
 
-        m_drive.setDefaultCommand(
-                new DriveManually(
-                        manualMode,
-                        driverControl::twist,
-                        m_drive,
-                        m_heading,
+        DriveManually driveManually = new DriveManually(driverControl::twist, m_drive);
+
+        driveManually.register("MODULE_STATE", false,
+                new SimpleManualModuleStates(m_name, swerveKinodynamics));
+
+        driveManually.register("ROBOT_RELATIVE_CHASSIS_SPEED", false,
+                new ManualChassisSpeeds(m_name, swerveKinodynamics));
+
+        driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
+                new DriveWithNoteRotation(
+                        m_name,
                         swerveKinodynamics,
+                        thetaController,
+                        notePositionDetector));
+
+        driveManually.register("FIELD_RELATIVE_TWIST", false,
+                new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
+
+        driveManually.register("SNAPS", true,
+                new ManualWithHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
                         driverControl::desiredRotation,
                         thetaController,
-                        omegaController,
+                        omegaController));
+
+        driveManually.register("LOCKED", false,
+                new ManualWithTargetLock(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
                         driverControl::target,
-                        driverControl::trigger,
-                        notePositionDetector));
+                        thetaController,
+                        omegaController,
+                        driverControl::trigger));
+
+        driveManually.register("SHOOTER_LOCK", false,
+                new ManualWithShooterLock(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        thetaController,
+                        omegaController,
+                        0.25));
+
+        m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));

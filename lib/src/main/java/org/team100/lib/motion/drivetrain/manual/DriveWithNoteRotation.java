@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.manual;
 
+import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
@@ -8,6 +9,7 @@ import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 /**
@@ -16,7 +18,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The x and y are mapped directly to the
  * corresponding ChassisSpeeds components (and scaled).
  */
-public class DriveWithNoteRotation {
+public class DriveWithNoteRotation implements ChassisSpeedDriver {
     private final PIDController m_pidController;
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
@@ -33,10 +35,8 @@ public class DriveWithNoteRotation {
      * Changes input to ignore rotational input
      * Clips the input to the unit circle, scales to maximum (not simultaneously
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
-     *
-     * @param input in control units, [-1,1]
-     * @return feasible chassis speeds in m/s and rad/s
      */
+    @Override
     public ChassisSpeeds apply(Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(new Twist2d(input.dx,input.dy,m_pidController.calculate(m_arrayListener.getX(), 416)), 1.0);
@@ -51,5 +51,10 @@ public class DriveWithNoteRotation {
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
         t.log(Level.DEBUG, m_name, "speeds", speeds);
         return speeds;
+    }
+
+    @Override
+    public void reset(Pose2d p) {
+        //
     }
 }

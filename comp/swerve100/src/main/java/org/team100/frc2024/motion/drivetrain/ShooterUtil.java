@@ -28,4 +28,8 @@ public class ShooterUtil {
         return new Translation2d(FieldConstants.SHOOTER_CENTER_X, offsetDistance);
 
     }
+
+    private ShooterUtil() {
+        //
+    }
 }
