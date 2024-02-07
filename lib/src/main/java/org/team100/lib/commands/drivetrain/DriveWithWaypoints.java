@@ -78,7 +78,7 @@ public class DriveWithWaypoints extends Command100 {
     List<Rotation2d> internalHeadings = m_headings;
     
     internalWaypoints.add(0, m_swerve.getPose());
-    internalHeadings.add(0, m_swerve.getPose().getRotation());""?                                                                                                             m                                                                                                                                                                                                                                                                                                                    
+    internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
     
     List<Pose2d> poses = new ArrayList<>();
 
