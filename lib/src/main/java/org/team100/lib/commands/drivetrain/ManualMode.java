@@ -25,7 +25,7 @@ public class ManualMode implements Supplier<ManualMode.Mode> {
         /** Field-relative dx and dy, rotational target lock */
         LOCKED,
         /** Field-relative dx and dy, rotational target lock on note*/
-        FIELD_RELATIVE_LOCKED_ON_NOTE
+        FIELD_RELATIVE_LOCKED_ON_NOTE,
         /**Locks on to the Shooter */
         SHOOTER_LOCK
     }
