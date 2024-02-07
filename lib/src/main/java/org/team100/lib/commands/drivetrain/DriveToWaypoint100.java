@@ -89,7 +89,7 @@ public class DriveToWaypoint100 extends Command100 {
                         kMaxVelM_S,
                         kMaxAccelM_S_S);
 
-        TrajectoryVisualization.setViz(trajectory);
+        // TrajectoryVisualization.setViz(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));

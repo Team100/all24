@@ -3,6 +3,7 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
@@ -22,7 +23,6 @@ import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
-import org.team100.lib.commands.drivetrain.DriveWithTrajectory;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Oscillate;
@@ -43,6 +43,7 @@ import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -56,6 +57,7 @@ import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
@@ -252,6 +254,8 @@ public class RobotContainer {
         whileTrue(driverControl::never,
                 new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+        
+        // whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller, null));
 
         // one-meter square with reset at the corners
         whileTrue(driverControl::never,
@@ -274,7 +278,7 @@ public class RobotContainer {
         // field center, roughly, facing to the left.
         Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
         Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
-        whileTrue(driverControl::never, follower);
+        // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false);
@@ -293,14 +297,20 @@ public class RobotContainer {
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
+        // whileTrue(driverControl::test,
+        //         new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics,
-                "src/main/deploy/choreo/crossField.traj"));
+        whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner, drivePID, swerveKinodynamics));
 
-        // whileTrue(driverControl::test, new RunCommand (() ->
-        // ShooterTable.instance.getAngle(10.0)));
+        // whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
+
+        SwerveState testState = new SwerveState(
+            new State100(1, -3),
+            new State100(1, -1), null
+        );
+        // RunCommand run = new RunCommand(() -> ShooterUtil.getAngleWhileMoving(10, 7, testState), m_shooter);
+
+        // whileTrue(driverControl::test, run);
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
