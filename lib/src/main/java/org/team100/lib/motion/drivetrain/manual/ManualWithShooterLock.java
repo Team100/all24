@@ -100,6 +100,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
 
         Translation2d currentTranslation = state.pose().getTranslation();
+        ShooterUtil.updateTranslationFromEdge(state, 0.25);
         Translation2d target = ShooterUtil.getOffsetTranslation(state, m_shooterVelocity.getAsDouble());
         Rotation2d bearing = bearing(currentTranslation, target);
 
