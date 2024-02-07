@@ -2,8 +2,10 @@ package org.team100.lib.motion.drivetrain.manual;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.controller.State100;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -26,7 +28,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  */
-public class ManualWithHeading {
+public class ManualWithHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
@@ -90,7 +92,9 @@ public class ManualWithHeading {
      * @param twist1_1    control units, [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    public Twist2d apply(Pose2d currentPose, Twist2d twist1_1) {
+    public Twist2d apply(SwerveState state, Twist2d twist1_1) {
+        Pose2d currentPose = state.pose();
+
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(twist1_1, 1.0);
 

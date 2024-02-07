@@ -1,8 +1,9 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.frc2024.motion.drivetrain.manual;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
+import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -34,7 +35,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class ManualWithShooterLock {
+public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
@@ -77,6 +78,7 @@ public class ManualWithShooterLock {
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
+    @Override
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
@@ -88,11 +90,8 @@ public class ManualWithShooterLock {
     /**
      * Clips the input to the unit circle, scales to maximum (not simultaneously
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
-     * 
-     * @param state from the drivetrain
-     * @param input control units [-1,1]
-     * @return feasible field-relative velocity in m/s and rad/s
      */
+    @Override
     public Twist2d apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);

@@ -8,16 +8,15 @@ import org.team100.frc2024.selftest.IndexerSelfTest;
 import org.team100.frc2024.selftest.IntakeSelfTest;
 import org.team100.frc2024.selftest.ShooterSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.ManualMode;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
-import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.selftest.BatterySelfTest;
-import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.DefenseSelfTest;
 import org.team100.lib.selftest.DriveManuallySelfTest;
+import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.selftest.SquareSelfTest;
@@ -25,7 +24,6 @@ import org.team100.lib.selftest.VeeringSelfTest;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -79,21 +77,10 @@ public class SelfTestRunner extends Command {
             // treatment is a specific manual input, supplied by the test case.
             DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
 
-            PIDController thetaController = new PIDController(3.5, 0, 0);
-            thetaController.enableContinuousInput(-Math.PI, Math.PI);
-            PIDController omegaController = new PIDController(3.5, 0, 0);
-            DriveManually driveManually = new DriveManually(
-                    () -> ManualMode.Mode.MODULE_STATE,
-                    driveManuallyTest::treatment,
-                    drivetrain,
-                    m_container.m_heading,
-                    SwerveKinodynamicsFactory.forTest(),
-                    () -> null,
-                    thetaController,
-                    omegaController,
-                    () -> null,
-                    () -> false,
-                    new NotePosition24ArrayListener());
+            DriveManually driveManually = new DriveManually(driveManuallyTest::treatment, drivetrain);
+            driveManually.register("MODULE_STATE", false,
+                    new SimpleManualModuleStates("foo", SwerveKinodynamicsFactory.forTest()));
+            driveManually.overrideMode(() -> "MODULE_STATE");
             addCase(driveManuallyTest, driveManually);
 
             // this only tests the end-state

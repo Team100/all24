@@ -1,29 +1,21 @@
 package org.team100.lib.commands.drivetrain;
 
-import java.util.function.BooleanSupplier;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
- import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
-import org.team100.lib.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
-import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
-import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
-import edu.wpi.first.math.controller.PIDController;
+import org.team100.lib.telemetry.NamedChooser;
+
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Manual drivetrain control.
@@ -39,70 +31,29 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * Chooser.
  */
 public class DriveManually extends Command100 {
-    private final Supplier<ManualMode.Mode> m_mode;
+
+    private static final SendableChooser<String> m_manualModeChooser = new NamedChooser<>("Manual Drive Mode") {
+    };
+
+    private Supplier<String> m_mode;
     /**
      * Velocity control in control units, [-1,1] on all axes. This needs to be
      * mapped to a feasible velocity control as early as possible.
      */
     private final Supplier<Twist2d> m_twistSupplier;
     private final SwerveDriveSubsystem m_drive;
-    private final SimpleManualModuleStates m_manualModuleStates;
-    private final ManualChassisSpeeds m_manualChassisSpeeds;
-    private final ManualFieldRelativeSpeeds m_manualFieldRelativeSpeeds;
-    private final ManualWithHeading m_manualWithHeading;
-    private final ManualWithTargetLock m_manualWithTargetLock;
-    private final DriveWithNoteRotation m_driveWithNoteRotation;
-    private final ManualWithShooterLock m_driveWithShooterLock;
+    private final Map<String, Driver> m_drivers;
+    private final Driver m_defaultDriver;
 
-    ManualMode.Mode currentManualMode = null;
+    String currentManualMode = null;
 
-    public DriveManually(
-            Supplier<ManualMode.Mode> mode,
-            Supplier<Twist2d> twistSupplier,
-            SwerveDriveSubsystem robotDrive,
-            HeadingInterface heading,
-            SwerveKinodynamics swerveKinodynamics,
-            Supplier<Rotation2d> desiredRotation,
-            PIDController thetaController,
-            PIDController omegaController,
-            Supplier<Translation2d> target,
-            BooleanSupplier trigger,
-            NotePosition24ArrayListener arrayListener) {
-        m_mode = mode;
+    public DriveManually(Supplier<Twist2d> twistSupplier, SwerveDriveSubsystem robotDrive) {
+        m_mode = m_manualModeChooser::getSelected;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
-        m_manualModuleStates = new SimpleManualModuleStates(m_name, swerveKinodynamics);
-        m_manualChassisSpeeds = new ManualChassisSpeeds(m_name, swerveKinodynamics);
-        m_manualFieldRelativeSpeeds = new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics);
-        m_manualWithHeading = new ManualWithHeading(
-                m_name,
-                swerveKinodynamics,
-                heading,
-                desiredRotation,
-                thetaController,
-                omegaController);
-        m_manualWithTargetLock = new ManualWithTargetLock(
-                m_name,
-                swerveKinodynamics,
-                heading,
-                target,
-                thetaController,
-                omegaController,
-                trigger);
-        m_driveWithNoteRotation = new DriveWithNoteRotation(
-                m_name,
-                swerveKinodynamics,
-                thetaController,
-                arrayListener);
-
-        m_driveWithShooterLock = new ManualWithShooterLock(
-                m_name,
-                swerveKinodynamics,
-                heading,
-                thetaController,
-                omegaController,
-                0.25);
-
+        m_defaultDriver = stop();
+        m_drivers = new HashMap<>();
+        SmartDashboard.putData(m_manualModeChooser);
         addRequirements(m_drive);
     }
 
@@ -117,73 +68,108 @@ public class DriveManually extends Command100 {
         SwerveModuleState[] currentStates = m_drive.moduleStates();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
+        Pose2d p = m_drive.getPose();
+        for (Driver d : m_drivers.values()) {
+            d.reset(p);
+        }
     }
 
     @Override
     public void execute100(double dt) {
-        ManualMode.Mode manualMode = m_mode.get();
+        String manualMode = m_mode.get();
         if (manualMode == null) {
             return;
         }
 
-        if (manualMode != currentManualMode) {
+        if (!(manualMode.equals(currentManualMode))) {
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
-            m_manualWithHeading.reset(m_drive.getPose());
-            m_manualWithTargetLock.reset(m_drive.getPose());
-            m_driveWithShooterLock.reset(m_drive.getPose());
+            Pose2d p = m_drive.getPose();
+            for (Driver d : m_drivers.values()) {
+                d.reset(p);
+            }
         }
 
         // input in [-1,1] control units
         Twist2d input = m_twistSupplier.get();
         SwerveState state = m_drive.getState();
-        Pose2d currentPose = state.pose();
-
-        /**
-         * None of these transformers pay attention to feasibility. Feasibility is
-         * enforced by the drivetrain setpoint generator and desaturator.
-         */
-        switch (manualMode) {
-            case MODULE_STATE:
-                m_drive.setRawModuleStates(
-                        m_manualModuleStates.apply(input));
-                break;
-            case ROBOT_RELATIVE_CHASSIS_SPEED:
-                m_drive.setChassisSpeeds(
-                        m_manualChassisSpeeds.apply(input), dt);
-                break;
-            case ROBOT_RELATIVE_FACING_NOTE:
-                m_drive.setChassisSpeeds(
-                        m_driveWithNoteRotation.apply(input), dt);
-                break;
-            case FIELD_RELATIVE_TWIST:
-                m_drive.driveInFieldCoords(
-                        m_manualFieldRelativeSpeeds.apply(input), dt);
-                break;
-            case SNAPS:
-                m_drive.driveInFieldCoords(
-                        m_manualWithHeading.apply(currentPose, input), dt);
-                break;
-            case LOCKED:
-                m_drive.driveInFieldCoords(
-                        m_manualWithTargetLock.apply(state, input), dt);
-                break;
-            case SHOOTER_LOCK:
-                m_drive.driveInFieldCoords(
-                    m_driveWithShooterLock.apply(state, input), dt);
-            default:
-                // do nothing
-                break;
-
-            
-        }
-
-
+        Driver d = m_drivers.getOrDefault(manualMode, m_defaultDriver);
+        d.apply(state, input, dt);
 
     }
 
     @Override
     public void end(boolean interrupted) {
         m_drive.stop();
+    }
+
+    // for testing only
+    public void overrideMode(Supplier<String> mode) {
+        m_mode = mode;
+    }
+
+    public void register(String name, boolean isDefault, ModuleStateDriver d) {
+        addName(name, isDefault);
+        m_drivers.put(
+                name,
+                new Driver() {
+                    public void apply(SwerveState s, Twist2d t, double dt) {
+                        m_drive.setRawModuleStates(d.apply(t));
+                    }
+
+                    public void reset(Pose2d p) {
+                        //
+                    }
+                });
+    }
+
+    public void register(String name, boolean isDefault, ChassisSpeedDriver d) {
+        addName(name, isDefault);
+        m_drivers.put(
+                name,
+                new Driver() {
+                    public void apply(SwerveState s, Twist2d t, double dt) {
+                        m_drive.setChassisSpeeds(d.apply(t), dt);
+                    }
+
+                    public void reset(Pose2d p) {
+                        d.reset(p);
+                    }
+                });
+    }
+
+    public void register(String name, boolean isDefault, FieldRelativeDriver d) {
+        addName(name, isDefault);
+        m_drivers.put(
+                name,
+                new Driver() {
+                    public void apply(SwerveState s, Twist2d t, double dt) {
+                        m_drive.driveInFieldCoords(d.apply(s, t), dt);
+                    }
+
+                    public void reset(Pose2d p) {
+                        d.reset(p);
+                    }
+                });
+    }
+
+    //////////////
+
+    private Driver stop() {
+        return new Driver() {
+            public void apply(SwerveState s, Twist2d t, double dt) {
+                m_drive.stop();
+            }
+
+            public void reset(Pose2d p) {
+                //
+            }
+        };
+    }
+
+    private void addName(String name, boolean isDefault) {
+        m_manualModeChooser.addOption(name, name);
+        if (isDefault)
+            m_manualModeChooser.setDefaultOption(name, name);
     }
 }
