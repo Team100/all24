@@ -3,7 +3,7 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.drivetrain.WeirdChassisSpeedDriver;
+import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -36,7 +36,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class ManualWithNoteRotation implements WeirdChassisSpeedDriver{
+public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
@@ -59,7 +59,7 @@ public class ManualWithNoteRotation implements WeirdChassisSpeedDriver{
     Pose2d m_prevPose;
 
     public ManualWithNoteRotation(
-            String parent, 
+            String parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Translation2d> target,
@@ -79,7 +79,6 @@ public class ManualWithNoteRotation implements WeirdChassisSpeedDriver{
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
-    
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
@@ -94,9 +93,13 @@ public class ManualWithNoteRotation implements WeirdChassisSpeedDriver{
      * 
      * @param state from the drivetrain
      * @param input control units [-1,1]
-     * @return Working on this, theta overshoots for some reason
+     * @return feasible robot-relative velocity in m/s and rad/s
      */
-    
+
+    public ChassisSpeeds apply(Twist2d input) {
+        return new ChassisSpeeds();
+    }
+
     public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);

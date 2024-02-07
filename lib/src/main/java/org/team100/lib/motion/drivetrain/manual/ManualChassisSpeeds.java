@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.manual;
 
 import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -46,6 +47,11 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver{
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
         t.log(Level.DEBUG, m_name, "speeds", speeds);
         return speeds;
+    }
+
+    @Override
+    public ChassisSpeeds apply(SwerveState state, Twist2d input) {
+        return new ChassisSpeeds();
     }
 
     @Override
