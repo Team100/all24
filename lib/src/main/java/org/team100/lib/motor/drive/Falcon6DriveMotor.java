@@ -232,6 +232,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
         v.FeedForward = kFF;
         v.Acceleration = motorRev_S2;
+        v.EnableFOC = true;
         m_motor.setControl(v);
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);

@@ -199,6 +199,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
         v.FeedForward = kFF;
         v.Acceleration = motorRev_S2;
+        v.EnableFOC = true;
         m_motor.setControl(v);
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
