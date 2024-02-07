@@ -53,8 +53,9 @@ class GamePieceFinder:
         # self.inst.setServer("10.107.191.21")
         self.inst.setServer("10.1.0.2")
         # Table for vision output information
-        topic_name = "vision/" + self.serial
+        topic_name = "noteVision/" + self.serial
         self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
+        self.vision_camera = self.inst.getDoubleTopic(topic_name + "/camera").publish()
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
@@ -202,6 +203,7 @@ def main():
     topic_name = "pieces"
     serial = getserial()
     output = GamePieceFinder(serial,topic_name, camera_params)
+    output.self.vision_camera.set(camera.camera_properties['Model'])
     camera.start()
     try:
         while True:

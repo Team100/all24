@@ -65,8 +65,7 @@ public class NotePosition24ArrayListener {
                 Optional<Double> e = Optional.of(x);
                 return e;
             default:
-                Double g = 416.0;
-                return Optional.of(g);
+                return Optional.empty();
         }
     }
 
@@ -82,14 +81,13 @@ public class NotePosition24ArrayListener {
                 Optional<Double> e = Optional.of(y);
                 return e;
             default:
-                Double g = 0.0;
-                return Optional.of(g);
+                return Optional.empty();
         }
     }
 
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
-                new String[] { "vision" },
+                new String[] { "noteVision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::consumeValues);
     }

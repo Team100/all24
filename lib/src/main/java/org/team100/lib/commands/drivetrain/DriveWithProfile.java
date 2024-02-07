@@ -23,7 +23,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 public class DriveWithProfile extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
-    private final Supplier<Pose2d> m_robotRelativeGoal;
+    private final Supplier<Pose2d> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
     private final SwerveKinodynamics m_limits;
@@ -40,11 +40,11 @@ public class DriveWithProfile extends Command100 {
      * @param limits
      */
     public DriveWithProfile(
-            Supplier<Pose2d> robotRelativeGoal,
+            Supplier<Pose2d> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
-        m_robotRelativeGoal = robotRelativeGoal;
+        m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;
         m_limits = limits;
@@ -65,21 +65,21 @@ public class DriveWithProfile extends Command100 {
 
     @Override
     public void execute100(double dt) {
-        if (m_robotRelativeGoal.get() != null) {
+        if (m_fieldRelativeGoal.get() != null) {
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
         Rotation2d bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, m_robotRelativeGoal.get().getRotation().getRadians()));
+                Math100.getMinDistance(measurement, m_fieldRelativeGoal.get().getRotation().getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new State100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
                 thetaSetpoint.v());
         State100 thetaGoal = new State100(bearing.getRadians(), 0);
-        State100 xGoalRaw = new State100(m_robotRelativeGoal.get().getX(),0,0);
+        State100 xGoalRaw = new State100(m_fieldRelativeGoal.get().getX(),0,0);
         xSetpoint = xProfile.calculate(0.02, xSetpoint, xGoalRaw);
-        State100 yGoalRaw = new State100(m_robotRelativeGoal.get().getY(),0,0);
+        State100 yGoalRaw = new State100(m_fieldRelativeGoal.get().getY(),0,0);
         ySetpoint = yProfile.calculate(0.02, ySetpoint, yGoalRaw);
         // State100 thetaGoalRaw = new State100(m_robotRelativeGoal.get().getRotation().getRadians(),0,0);
         thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, thetaGoal);

@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.config.NoteDetector;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -67,7 +68,7 @@ public class DriveManually extends Command100 {
             PIDController omegaController,
             Supplier<Translation2d> target,
             BooleanSupplier trigger,
-            CameraAngles noteCamera) {
+            NoteDetector noteDetector) {
         m_mode = mode;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -93,7 +94,7 @@ public class DriveManually extends Command100 {
             m_name,
             swerveKinodynamics,
             heading,
-            () -> noteCamera.FieldRelativeTranslation2d(),
+            noteDetector::FieldRelativeTranslation2d,
             thetaController,
             omegaController,
             trigger);
@@ -101,7 +102,7 @@ public class DriveManually extends Command100 {
             m_name,
             swerveKinodynamics,
             heading,
-            () -> noteCamera.FieldRelativeTranslation2d(),
+            noteDetector::FieldRelativeTranslation2d,
             thetaController,
             omegaController,
             trigger);

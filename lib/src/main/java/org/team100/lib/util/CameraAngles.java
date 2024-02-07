@@ -1,16 +1,5 @@
 package org.team100.lib.util;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.localization.NotePosition24ArrayListener;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-
 public class CameraAngles {
     private final double m_downwardAngleDegrees;
     private final double m_horzFOVDegrees;
@@ -18,26 +7,26 @@ public class CameraAngles {
     private final double m_horzResolution;
     private final double m_vertResolution;
     private final double m_cameraHeightMeters;
-    private final SwerveDriveSubsystem m_swerve;
-    private final NotePosition24ArrayListener m_notePosition24ArrayListener;
-    private final Telemetry t = Telemetry.get();
+    private final double m_xOffset;
+    private final double m_yOffset;
 
     /**
-     * @param downwardAngleDegrees        The angle downward the camera is in
-     *                                    degrees, this is including half of the
-     *                                    view of the camera
-     * @param horzFOVDegrees              The horizontal field of view of the camera
-     *                                    in degrees
-     * @param vertFOVDegrees              The vertical field of view of the camera
-     *                                    in degrees
-     * @param horzResolution              The amount of pixels horizontally across
-     *                                    the video of the PI
-     * @param vertResolution              The amount of pixels vertically across the
-     *                                    video of the PI
-     * @param cameraHeightMeters          The height of the camera in meters
-     * @param notePosition24ArrayListener Class which gets the x and a values of the
-     *                                    object detected from the PI
-     * @param swerve                      The swerve drivetrain
+     * @param downwardAngleDegrees The angle downward the camera is in
+     *                             degrees, this is including half of the
+     *                             view of the camera
+     * @param horzFOVDegrees       The horizontal field of view of the camera
+     *                             in degrees
+     * @param vertFOVDegrees       The vertical field of view of the camera
+     *                             in degrees
+     * @param horzResolution       The amount of pixels horizontally across
+     *                             the video of the PI
+     * @param vertResolution       The amount of pixels vertically across the
+     *                             video of the PI
+     * @param cameraHeightMeters   The height of the camera in meters
+     * @param xOffset              The x offset of the camera in meters relative to
+     *                             the center of the drivetrain
+     * @param yOffset              The y offset of the camera in meters relative to
+     *                             the center of the drivetrain
      */
     public CameraAngles(
             double downwardAngleDegrees,
@@ -46,32 +35,30 @@ public class CameraAngles {
             double horzResolution,
             double vertResolution,
             double cameraHeightMeters,
-            NotePosition24ArrayListener notePosition24ArrayListener,
-            SwerveDriveSubsystem swerve) {
+            double xOffset,
+            double yOffset) {
         m_downwardAngleDegrees = downwardAngleDegrees;
         m_horzFOVDegrees = horzFOVDegrees;
         m_vertFOVDegrees = vertFOVDegrees;
         m_horzResolution = horzResolution;
         m_vertResolution = vertResolution;
         m_cameraHeightMeters = cameraHeightMeters;
-        m_notePosition24ArrayListener = notePosition24ArrayListener;
-        m_swerve = swerve;
+        m_xOffset = xOffset;
+        m_yOffset = yOffset;
     }
 
     /**
-     * @return A robot relative translational x value of an object in a camera in
-     *         meters
+     * Creates a camera angles class with no peramters, this is purely for testing and sim
      */
-    public Double getX() {
-        if (m_notePosition24ArrayListener.getY() != null) {
-            double x = -1.0 * m_cameraHeightMeters
-                    * Math.tan(m_notePosition24ArrayListener.getY().get()
-                            * (Math.toRadians(m_vertFOVDegrees / m_vertResolution))
-                            + Math.toRadians(90 - m_vertFOVDegrees / 2 - m_downwardAngleDegrees));
-            t.log(Level.DEBUG, "Camera Angles", "x: ", x);
-            return x;
-        }
-        return null;
+    public CameraAngles() {
+        m_downwardAngleDegrees = 0;
+        m_horzFOVDegrees = 0;
+        m_vertFOVDegrees = 0;
+        m_horzResolution = 0;
+        m_vertResolution = 0;
+        m_cameraHeightMeters = 0;
+        m_xOffset = 0;
+        m_yOffset = 0;
     }
 
     /**
@@ -82,42 +69,7 @@ public class CameraAngles {
         double x = -1.0 * m_cameraHeightMeters
                 * Math.tan(vertPixels * (Math.toRadians(m_vertFOVDegrees / m_vertResolution))
                         + Math.toRadians(90 - m_vertFOVDegrees / 2 - m_downwardAngleDegrees));
-        return x;
-    }
-
-    /**
-     * @return A field relative translational x value of an object in a camera in
-     *         meters
-     */
-    public Double fieldRelativeX() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return fieldRelativePose2d().getX();
-        }
-        return null;
-    }
-
-    /**
-     * @return A robot relative angle in radians to the note
-     */
-    public double getAngleToNote() {
-        return -1.0 * (Math.toRadians(m_horzFOVDegrees)
-                * (m_notePosition24ArrayListener.getX().get() - m_horzResolution / 2) / m_horzResolution);
-    }
-
-    /**
-     * @return A robot relative translational y value of an object in a camera in
-     *         meters
-     */
-    public Double getY() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            double x = getX();
-            double y = -1.0 * x
-                    * Math.tan(Math.toRadians(m_horzFOVDegrees)
-                            * (m_notePosition24ArrayListener.getX().get() - m_horzResolution / 2) / m_horzResolution);
-            t.log(Level.DEBUG, "Camera Angles", "y: ", y);
-            return y;
-        }
-        return null;
+        return x - m_xOffset;
     }
 
     /**
@@ -129,69 +81,12 @@ public class CameraAngles {
         double y = -1.0 * x
                 * Math.tan(Math.toRadians(m_horzFOVDegrees) * (horzPixels
                         - m_horzResolution / 2) / m_horzResolution);
-        return y;
+        return y - m_yOffset;
     }
-
     /**
-     * @return A field relative translational y value of an object in a camera in
-     *         meters
+     * @return A robot relative angle in radians to the note
      */
-    public Double fieldRelativeY() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return fieldRelativePose2d().getY();
-        }
-        return null;
-    }
-
-    /**
-     * @return A robot relative translational value of an object in a camera in
-     *         meters
-     */
-    public Translation2d RobotRelativeTranslation2d() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return new Translation2d(getX(), getY());
-        }
-        return null;
-    }
-
-    /**
-     * @return A field relative translational value of an object in a camera in
-     *         meters
-     */
-    public Translation2d FieldRelativeTranslation2d() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return new Translation2d(fieldRelativeX(), fieldRelativeY());
-        }
-        return null;
-    }
-
-    /**
-     * @return A robot relative Transform2d value of an object in a camera in meters
-     *         for translation and radians for rotation
-     */
-    public Transform2d robotRelativeTransform2d() {
-        if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-            return new Transform2d(getX() + 1, getY(), new Rotation2d(getAngleToNote()));
-        }
-        return null;
-    }
-
-    /**
-     * @return A field relative Pose2d value of an object in a camera in meters for
-     *         translation and radians for rotation
-     */
-    public Pose2d fieldRelativePose2d() {
-        switch (Identity.instance) {
-            case BETA_BOT:
-                if (m_notePosition24ArrayListener.getY() != null && m_notePosition24ArrayListener.getX() != null) {
-                    return m_swerve.getPose().transformBy(robotRelativeTransform2d());
-                }
-                return null;
-            default:
-                double x = 15;
-                double y = 1;
-                Translation2d e = (new Translation2d(x,y)).minus(m_swerve.getPose().getTranslation());
-                return new Pose2d(x, y, new Rotation2d(Math.atan2(e.getY(),e.getX())));
-        }
+    public double getAngle(double horzPixels, double vertPixels) {
+            return Math.atan2(getY(horzPixels, vertPixels),getX(vertPixels));
     }
 }

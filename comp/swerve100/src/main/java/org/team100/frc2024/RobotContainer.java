@@ -36,11 +36,11 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.NoteDetector;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
-import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
@@ -93,7 +93,8 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private final Alliance m_alliance;
-    private final CameraAngles m_noteCamera;
+    private final CameraAngles m_cameraAngles;
+    private final NoteDetector m_noteDetector;
     
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -191,7 +192,8 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-        m_noteCamera = new CameraAngles(30, 67.5, 50, 832, 616, 0.71, notePositionDetector, m_drive);
+        m_cameraAngles = new CameraAngles(30, 67.5, 50, 832, 616, 0.71, 0, 0);
+        m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();
@@ -277,7 +279,7 @@ public class RobotContainer {
 
         //Drive With Profile
         whileTrue(operatorControl::driveToNote,
-                new DriveWithProfile(() -> m_noteCamera.fieldRelativePose2d(), m_drive, dthetaController, swerveKinodynamics));
+                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController, swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
@@ -376,7 +378,7 @@ public class RobotContainer {
                         omegaController,
                         driverControl::target,
                         driverControl::trigger,
-                        m_noteCamera));
+                        m_noteDetector));
 
         m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));

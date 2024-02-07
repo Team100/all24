@@ -39,6 +39,8 @@ public class PerspectiveTest {
         // width is 832 so center is 416
         // height is 616 so center is 308.
         List<Point> srcpts = new ArrayList<Point>();
+        //These numbers were gotten from putting getting points on the field from a camera 30 degrees down 
+        // You can also calculate this using the getX() and getY() functions
         srcpts.add(new Point(389, 643));
         srcpts.add(new Point(389, 189));
         srcpts.add(new Point(498, 555));
