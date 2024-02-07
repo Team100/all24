@@ -58,7 +58,6 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
              -50);
         switch (Identity.instance) {
             case COMP_BOT:
-            case BETA_BOT:
 
                 beamBreak1 = new DigitalInput(4);
                 // beamBreak2 = new DigitalInput(8);

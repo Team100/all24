@@ -49,7 +49,6 @@ public class IntakeWheel extends Intake {
                 -20.0);
         switch (Identity.instance) {
             case COMP_BOT:
-            case BETA_BOT:
             //TODO tune kV
                 intakeMotor = ServoFactory.limitedNeoVelocityServo(
                         m_name, wheelID, false, kCurrentLimit, params, m_lowLevelFeedforwardConstants, m_velocityConstants);
