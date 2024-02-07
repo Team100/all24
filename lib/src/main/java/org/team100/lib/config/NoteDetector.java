@@ -104,7 +104,8 @@ public class NoteDetector {
             case BETA_BOT:
                     return m_swerve.getPose().transformBy(robotRelativeTransform2d());
             default:
-                return new Pose2d();
+            //I want the sim to go to a pose similar to how it would attack a note, so I am putting the angle of attack equal to 0,0 with the angle to that point, is there a better way to do this?
+                return new Pose2d(0,0,new Rotation2d(Math.atan2(-1.0 * m_swerve.getPose().getY(),-1.0 * m_swerve.getPose().getX())));
         }
     }
 }
