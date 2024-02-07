@@ -1,18 +1,24 @@
 package org.team100.lib.localization;
 
 import java.util.EnumSet;
+import java.util.Optional;
+
+import org.team100.lib.config.Identity;
 
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
+import edu.wpi.first.wpilibj.Timer;
 
 /** For testing the NotePosition struct array */
 public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
     NotePosition24[] positions;
+    double latestTime = 0;
+
     void consumeValues(NetworkTableEvent e) {
         ValueEventData ve = e.valueData;
         NetworkTableValue v = ve.value;
@@ -32,29 +38,56 @@ public class NotePosition24ArrayListener {
             try {
                 synchronized (m_buf) {
                     positions = m_buf.readArray(b);
+                    latestTime = Timer.getFPGATimestamp();
                 }
             } catch (RuntimeException ex) {
                 return;
             }
+
             for (NotePosition24 position : positions) {
                 // this is where you would do something useful with the payload
-                System.out.println(fields[1] + " " + position);
+                // System.out.println(fields[1] + " " + position);
             }
         } else {
             System.out.println("note weird vision update key: " + name);
         }
     }
 
-    public int getX() {
-        return positions[0].getX();
+    /**
+     * @return The x position in the camera in pixels, 0 should be the left of the
+     *         screen
+     */
+    public Optional<Double> getX() {
+        switch (Identity.instance) {
+            case BETA_BOT:
+                double xd = positions[0].getX();
+                Double x = xd;
+                Optional<Double> e = Optional.of(x);
+                return e;
+            default:
+                return Optional.empty();
+        }
     }
-    public int getY() {
-        return positions[0].getY();
+
+    /**
+     * @return The y position in the camera in pixels, 0 should be the bottom of the
+     *         screen
+     */
+    public Optional<Double> getY() {
+        switch (Identity.instance) {
+            case BETA_BOT:
+                double dy = positions[0].getY();
+                Double y = -1.0 * (dy - 616);
+                Optional<Double> e = Optional.of(y);
+                return e;
+            default:
+                return Optional.empty();
+        }
     }
 
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
-                new String[] { "vision" },
+                new String[] { "noteVision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::consumeValues);
     }

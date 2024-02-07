@@ -5,20 +5,93 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "1025",
-      "maximized": "1",
+      "height": "1130",
+      "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1878",
-      "xpos": "0",
-      "ypos": "40"
+      "width": "2212",
+      "xpos": "161",
+      "ypos": "203"
+    }
+  },
+  "Table": {
+    "0x50E3C1A4,2": {
+      "Column 0  Width": "190",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "19"
+    },
+    "0x542B5671,2": {
+      "Column 0  Width": "151",
+      "Column 1  Width": "171",
+      "RefScale": "10"
+    },
+    "0x965B9C9E,2": {
+      "Column 0  Width": "70",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "7"
+    },
+    "0xE56EC1C2,4": {
+      "Column 0  Weight": "1.0000",
+      "Column 1  Weight": "1.0000",
+      "Column 2  Weight": "1.0000",
+      "Column 3  Weight": "1.0000"
     }
   },
   "Window": {
+    "###/SmartDashboard/AmpSubsystem": {
+      "Collapsed": "0",
+      "Pos": "483,155",
+      "Size": "109,111"
+    },
+    "###/SmartDashboard/ClimberSubsystem": {
+      "Collapsed": "0",
+      "Pos": "496,118",
+      "Size": "128,109"
+    },
+    "###/SmartDashboard/DrumShooter": {
+      "Collapsed": "0",
+      "Pos": "1866,22",
+      "Size": "108,112"
+    },
+    "###/SmartDashboard/FlushOften": {
+      "Collapsed": "0",
+      "Pos": "94,73",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/FlywheelShooter": {
+      "Collapsed": "0",
+      "Pos": "377,114",
+      "Size": "115,111"
+    },
+    "###/SmartDashboard/IndexerSubsystem": {
+      "Collapsed": "0",
+      "Pos": "365,39",
+      "Size": "112,111"
+    },
+    "###/SmartDashboard/IntakeWheel": {
+      "Collapsed": "0",
+      "Pos": "363,155",
+      "Size": "115,110"
+    },
     "###/SmartDashboard/Manual Drive Mode": {
       "Collapsed": "0",
-      "Pos": "60,60",
+      "Pos": "119,94",
       "Size": "200,48"
+    },
+    "###/SmartDashboard/Swerve Viz/_Front Left_SimulatedSwerveModule": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "526,178",
+      "Size": "361,66"
+    },
+    "###/SmartDashboard/annunciator": {
+      "Collapsed": "0",
+      "Pos": "267,266",
+      "Size": "133,133"
     },
     "###/field": {
       "Collapsed": "0",
@@ -37,18 +110,24 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
+      "Pos": "1919,795",
+      "Size": "1053,1077"
+    },
+    "###Keyboard 1 Settings": {
+    "###Keyboard 0 Settings": {
+      "Collapsed": "0",
       "Pos": "321,134",
       "Size": "300,560"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "373,551",
-      "Size": "1312,323"
+      "Pos": "459,310",
+      "Size": "484,355"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "437,227",
-      "Size": "1312,253"
+      "Pos": "1005,181",
+      "Size": "1391,910"
     },
     "###Other Devices": {
       "Collapsed": "0",

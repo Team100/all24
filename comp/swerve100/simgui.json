@@ -29,6 +29,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -39,6 +44,346 @@
         "window": {
           "visible": true
         }
+      }
+    }
+  },
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
+    "retained": {
+      "AmpSubsystem": {
+        "Left": {
+          "NeoTurningEncoder": {
+            "open": true
+          },
+          "NeoTurningMotor": {
+            "open": true
+          },
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "Right": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "PositionServo": {
+            "Goal": {
+              "open": true
+            },
+            "Setpoint": {
+              "open": true
+            },
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Bottom Roller": {
+        "OutboardVelocityServo": {
+          "open": true
+        },
+        "velocity": {
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "ClimberSubsystem": {
+        "Left": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Command100": {
+        "DriveManually": {
+          "ManualChassisSpeeds": {
+            "open": true
+          },
+          "SimpleManualModuleStates": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "DrumShooter": {
+        "Bottom": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "NeoDriveMotor": {
+            "open": true
+          },
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        },
+        "Top": {
+          "open": true
+        },
+        "open": true
+      },
+      "Experiments": {
+        "string[]##v_/Experiments/enabled": {
+          "open": true
+        }
+      },
+      "FlywheelShooter": {
+        "Left": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Indexer": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "IndexerSubsystem": {
+        "NeoDriveEncoder": {
+          "open": true
+        },
+        "NeoDriveMotor": {
+          "open": true
+        },
+        "open": true
+      },
+      "IntakeSubsystem": {
+        "Bottom Roller": {
+          "open": true
+        },
+        "Top Roller": {
+          "open": true
+        }
+      },
+      "IntakeWheel": {
+        "NeoDriveEncoder": {
+          "open": true
+        },
+        "NeoDriveMotor": {
+          "open": true
+        },
+        "OutboardVelocityServo": {
+          "open": true
+        },
+        "SimulatedEncoder": {
+          "open": true
+        },
+        "SimulatedMotor": {
+          "open": true
+        },
+        "open": true
+      },
+      "Rear Right": {
+        "Drive": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          }
+        },
+        "Turning": {
+          "OutboardVelocityServo": {
+            "open": true
+          }
+        },
+        "open": true
+      },
+      "Right Climber": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "Right Shooter": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          }
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "Swerve Modules": {
+        "Front Left": {
+          "Drive": {
+            "open": true
+          },
+          "Turning": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "SwerveDriveSubsystem": {
+        "open": true,
+        "pose": {
+          "open": true,
+          "translation": {
+            "open": true
+          }
+        },
+        "swerve": {
+          "open": true
+        }
+      },
+      "SwerveLocal": {
+        "AsymSwerveSetpointGenerator": {
+          "CapsizeAccelerationLimiter": {
+            "open": true
+          },
+          "DriveAccelerationLimiter": {
+            "open": true
+          },
+          "SteeringRateLimiter": {
+            "open": true
+          }
+        }
+      },
+      "SwerveUtil": {
+        "open": true
+      },
+      "Top Roller": {
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "command": {
+        "DriveManually": {
+          "ManualWithHeading": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "field": {
+        "double[]##v_//field/robot": {
+          "open": true
+        }
+      },
+      "swerve": {
+        "acceleration": {
+          "open": true
+        },
+        "state": {
+          "open": true,
+          "x": {
+            "open": true
+          },
+          "y": {
+            "open": true
+          }
+        }
+      },
+      "swervelocal": {
+        "desired chassis speed": {
+          "open": true
+        },
+        "implied speed": {
+          "open": true
+        },
+        "setpoint chassis speed": {
+          "open": true
+        }
+      }
+    },
+    "transitory": {
+      "SmartDashboard": {
+        "AmpSubsystem": {
+          "SideRoot": {
+            "Boom": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "vision": {
+        "10000000e31d4a24": {
+          "Blip24[]##v_vision/10000000e31d4a24/blips": {
+            "Blip24##v_[0]": {
+              "Transform3d##v_pose": {
+                "Translation3d##v_translation": {
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
       }
     }
   },
