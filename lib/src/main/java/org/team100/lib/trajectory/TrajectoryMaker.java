@@ -42,6 +42,13 @@ public class TrajectoryMaker {
                 x -> restToRest(config, x.getTranslation(), x.getTranslation().plus(new Translation2d(0, -1))));
     }
 
+    // public static List<Trajectory> amp(SwerveKinodynamics kinodynamics, Pose2d initialPose){
+    //     TrajectoryConfig config = kinodynamics.newTrajectoryConfig(1, 1);
+
+
+
+    // }
+
     /** From current to x+1 */
     public static Trajectory line(SwerveKinodynamics kinodynamics, Pose2d initial) {
         TrajectoryConfig config = kinodynamics.newTrajectoryConfig(1, 1);
