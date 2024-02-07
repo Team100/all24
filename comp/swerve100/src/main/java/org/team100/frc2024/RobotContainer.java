@@ -9,6 +9,7 @@ import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
+import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
@@ -64,7 +65,6 @@ import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
-import org.team100.lib.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -445,7 +445,7 @@ public class RobotContainer {
                         m_heading,
                         thetaController,
                         omegaController,
-                        m_shooter::getVelocity));
+                        0.25));
 
         m_drive.setDefaultCommand(driveManually);
 
