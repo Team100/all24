@@ -122,11 +122,14 @@ public class DrivePursuitController implements DriveMotionController {
             Util.warn("No preview!");
             return new ChassisSpeeds();
         }
+
+
         TimedPose lookahead_state = preview.get().state();
         t.log(Level.DEBUG, m_name,"lookahead state", lookahead_state);
 
         double actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
         double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.get().velocityM_S());
+
         // Find the Point on the Trajectory that is Lookahead Distance Away
         while (actual_lookahead_distance < adaptive_lookahead_distance &&
                 m_iter.getRemainingProgress() > lookahead_time) {
@@ -139,6 +142,8 @@ public class DrivePursuitController implements DriveMotionController {
             lookahead_state = preview2.get().state();
             actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
         }
+
+        
 
         // If the Lookahead Point's Distance is less than the Lookahead Distance
         // transform it so it is the lookahead distance away
@@ -306,5 +311,13 @@ public class DrivePursuitController implements DriveMotionController {
             dir *= -1;
         }
         return OptionalDouble.of(dt);
+    }
+    public static boolean isPointInsideRectangle(double pointX, double pointY, double rectangleX, double rectangleY, double rectangleWidth, double rectangleHeight) {
+        // Check if the point is within the bounds of the rectangle
+        boolean isInsideX = pointX >= rectangleX && pointX <= rectangleX + rectangleWidth;
+        boolean isInsideY = pointY >= rectangleY && pointY <= rectangleY + rectangleHeight;
+
+        // Return true only if the point is inside both X and Y bounds
+        return isInsideX && isInsideY;
     }
 }

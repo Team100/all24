@@ -17,12 +17,12 @@
   "Window": {
     "###/SmartDashboard/Manual Drive Mode": {
       "Collapsed": "0",
-      "Pos": "60,60",
+      "Pos": "139,74",
       "Size": "415,72"
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "873,69",
+      "Pos": "1236,380",
       "Size": "1330,925"
     },
     "###FMS": {
@@ -37,13 +37,13 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "321,134",
+      "Pos": "724,188",
       "Size": "300,560"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "373,551",
-      "Size": "1312,323"
+      "Pos": "411,153",
+      "Size": "994,578"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
@@ -54,6 +54,11 @@
       "Collapsed": "0",
       "Pos": "1793,35",
       "Size": "437,1216"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "493,555",
+      "Size": "1409,775"
     },
     "###System Joysticks": {
       "Collapsed": "0",

@@ -28,6 +28,7 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.DriveUtil;
 
 import com.choreo.lib.Choreo;
+import com.ctre.phoenix6.signals.Licensing_IsSeasonPassedValue;
 import com.ctre.phoenix6.signals.System_StateValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -38,27 +39,33 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class DriveWithTrajectory extends Command100 {
+public class DriveWithWaypoints extends Command100 {
   /** Creates a new DriveWithTrajectory. */
   private final SwerveDriveSubsystem m_swerve;
   private final TrajectoryPlanner m_planner;
   private final DriveMotionController m_controller;
   private final SwerveKinodynamics m_limits;
-  private final String m_fileName;
   private static final Telemetry t = Telemetry.get();
+  private final List<Pose2d> m_waypoints;
+  private final List<Rotation2d> m_headings;
 
 
-  public DriveWithTrajectory(SwerveDriveSubsystem drivetrain,
+  public DriveWithWaypoints(SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            String fileName) {
+            List<Pose2d> waypoints,
+            List<Rotation2d> headings) {
     // Use addRequirements() here to declare subsystem dependencies.
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_limits = limits;
-        m_fileName = fileName;
+        m_waypoints = waypoints;
+        m_headings = headings;
+
+        
+
         addRequirements(m_swerve);
   }
 
@@ -66,20 +73,31 @@ public class DriveWithTrajectory extends Command100 {
   // Called when the command is initially scheduled.
   @Override
   public void initialize100() {
-    TrajectoryList trajectoryList = JSONParser.getTrajectoryList(m_fileName);
-    trajectoryList.removeLastIndex();
-    List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
-    List<Rotation2d> headings = trajectoryList.getRotationArray();
 
-    // headings.remove(0);
-    // headings.add(new Rotation2d());
+    List<Pose2d> internalWaypoints = m_waypoints;
+    List<Rotation2d> internalHeadings = m_headings;
+    
+    internalWaypoints.add(0, m_swerve.getPose());
+    internalHeadings.add(0, m_swerve.getPose().getRotation());""?                                                                                                             m                                                                                                                                                                                                                                                                                                                    
+    
+    List<Pose2d> poses = new ArrayList<>();
+
+    System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
+    System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
+
+    System.out.println("WAYPOINTS GLOBAL" + m_waypoints);
+    System.out.println("WAYPOINTS INTERNA SIZE:" + m_waypoints.size());
 
 
-    // System.out.println("POSE AFTER LENGTH: " + poses.size());
-    // System.out.println("HEADINGS LENGTH: " + headings.size());
-    // System.out.println("POSE B4 LENGTH: " + trajectoryList.getPoseArray().size());
+    for(int i = 0; i < internalWaypoints.size(); i+=2){
 
-    // System.out.println("THIS IS THE ORIGINAL TRAJEC LIST" + trajectoryList.getPoseArray());
+        List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
+        poses.add(posi.get(0));
+        poses.add(posi.get(1));
+      
+    }
+      
+    
 
     List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(m_limits));
@@ -92,8 +110,8 @@ public class DriveWithTrajectory extends Command100 {
     Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
-                        poses,
-                        headings,
+                        internalWaypoints,
+                        internalHeadings,
                         constraints,
                         0,
                         0,
@@ -172,4 +190,14 @@ public class DriveWithTrajectory extends Command100 {
         return waypointsM;
         
     }
+
+    private static List<Pose2d> getWaypoints(Pose2d p0, Pose2d p1) {
+      Translation2d t0 = p0.getTranslation();
+      Translation2d t1 = p1.getTranslation();
+      Rotation2d theta = t1.minus(t0).getAngle();
+      return List.of(
+              new Pose2d(t0, theta),
+              new Pose2d(t1, theta));
+  }
+   
 }

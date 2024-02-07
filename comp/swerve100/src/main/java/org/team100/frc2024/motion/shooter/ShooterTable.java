@@ -20,7 +20,7 @@ public class ShooterTable {
     }
 
     public double getAngle(double m){
-        System.out.println(m_table.get(m));
+        // System.out.println(m_table.get(m));
         return m_table.get(m);
     }
 

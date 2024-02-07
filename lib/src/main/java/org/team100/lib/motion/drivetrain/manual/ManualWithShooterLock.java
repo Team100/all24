@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
@@ -102,6 +103,8 @@ public class ManualWithShooterLock {
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
+
+
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -203,6 +206,13 @@ public class ManualWithShooterLock {
         Rotation2d relativeBearing = bearing.minus(course);
         double speed = GeometryUtil.norm(state.twist());
         return speed * relativeBearing.getSin() / range;
+    }
+
+    static void aimWhileMoving(Rotation2d bearing, SwerveState state){
+
+            //its the shooter util code but robot moving vec is y velocity and angle in rads is bearing
+
+
     }
 
 }
