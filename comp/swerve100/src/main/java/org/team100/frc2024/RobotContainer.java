@@ -102,7 +102,7 @@ public class RobotContainer {
     private final Alliance m_alliance;
     private final CameraAngles m_cameraAngles;
     private final NoteDetector m_noteDetector;
-    
+
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -229,7 +229,6 @@ public class RobotContainer {
 
         HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
 
-
         whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
         m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
@@ -282,9 +281,10 @@ public class RobotContainer {
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
-        //Drive With Profile
+        // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController, swerveKinodynamics));
+                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
+                        swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
@@ -388,13 +388,13 @@ public class RobotContainer {
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
                 new ManualWithNoteRotation(
-                    m_name,
-                    swerveKinodynamics,
-                    m_heading,
-                    m_noteDetector::FieldRelativeTranslation2d,
-                    thetaController,
-                    omegaController,
-                    driverControl::trigger));
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        m_noteDetector::FieldRelativeTranslation2d,
+                        thetaController,
+                        omegaController,
+                        driverControl::trigger));
 
         driveManually.register("FIELD_RELATIVE_TWIST", false,
                 new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
@@ -409,14 +409,14 @@ public class RobotContainer {
                         omegaController));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
-        new ManualWithTargetLock(
-                                m_name,
-                                swerveKinodynamics,
-                                m_heading,
-                                m_noteDetector::FieldRelativeTranslation2d,
-                                thetaController,
-                                omegaController,
-                                driverControl::trigger));
+                new ManualWithTargetLock(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        m_noteDetector::FieldRelativeTranslation2d,
+                        thetaController,
+                        omegaController,
+                        driverControl::trigger));
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
