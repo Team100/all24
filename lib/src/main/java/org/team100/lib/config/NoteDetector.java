@@ -35,7 +35,23 @@ public class NoteDetector {
      *         meters
      */
     public double getX() {
-        return m_cameraAngles.getX(m_notePosition24ArrayListener.getY().get());
+        double f = Math.atan2(m_swerve.getPose().getX(),m_swerve.getPose().getY());
+        double l = Math.PI/2+f;
+        double d = m_swerve.getPose().getRotation().getRadians()-l;
+        double no = m_swerve.getPose().getTranslation().getNorm();
+        // Translation2d e = m_swerve.getPose().getTranslation();
+        //     double angle = m_swerve.getPose().getRotation().getRadians();
+        //     double anglee = e.getAngle().getRadians()-angle;
+            double x = no*Math.cos(d);
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                return m_cameraAngles.getX(m_notePosition24ArrayListener.getY().get());
+            case BLANK:
+                return x;
+            default:
+                return x;
+        }
     }
 
     /**
@@ -43,15 +59,23 @@ public class NoteDetector {
      *         meters
      */
     public Double fieldRelativeX() {
-            return fieldRelativePose2d().getX();
+        return fieldRelativePose2d().getX();
     }
 
     /**
      * @return A robot relative angle in radians to the note
      */
     public double getAngleToNote() {
-        return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
-                m_notePosition24ArrayListener.getY().get());
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
+                        m_notePosition24ArrayListener.getY().get());
+            case BLANK:
+                return Math.atan2(getY(), getX());
+            default:
+                return Math.atan2(getY(), getX());
+        }
     }
 
     /**
@@ -59,8 +83,21 @@ public class NoteDetector {
      *         meters
      */
     public Double getY() {
-        return m_cameraAngles.getY(m_notePosition24ArrayListener.getX().get(),
-                m_notePosition24ArrayListener.getY().get());
+        double f = Math.atan2(m_swerve.getPose().getX(),m_swerve.getPose().getY());
+        double l = f;
+        double d = m_swerve.getPose().getRotation().getRadians()-l;
+        double no = m_swerve.getPose().getTranslation().getNorm();
+        double y = no*Math.sin(d);
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                return m_cameraAngles.getY(m_notePosition24ArrayListener.getX().get(),
+                        m_notePosition24ArrayListener.getY().get());
+            case BLANK:
+                return y;
+            default:
+                return y;
+        }
     }
 
     /**
@@ -68,7 +105,7 @@ public class NoteDetector {
      *         meters
      */
     public Double fieldRelativeY() {
-            return fieldRelativePose2d().getY();
+        return fieldRelativePose2d().getY();
     }
 
     /**
@@ -76,7 +113,7 @@ public class NoteDetector {
      *         meters
      */
     public Translation2d RobotRelativeTranslation2d() {
-            return new Translation2d(getX(), getY());
+        return new Translation2d(getX(), getY());
     }
 
     /**
@@ -84,7 +121,7 @@ public class NoteDetector {
      *         meters
      */
     public Translation2d FieldRelativeTranslation2d() {
-            return new Translation2d(fieldRelativeX(), fieldRelativeY());
+        return new Translation2d(fieldRelativeX(), fieldRelativeY());
     }
 
     /**
@@ -92,7 +129,7 @@ public class NoteDetector {
      *         for translation and radians for rotation
      */
     public Transform2d robotRelativeTransform2d() {
-            return new Transform2d(getX(), getY(), new Rotation2d(getAngleToNote()));
+        return new Transform2d(getX(), getY(), new Rotation2d(getAngleToNote()));
     }
 
     /**
@@ -100,12 +137,6 @@ public class NoteDetector {
      *         translation and radians for rotation
      */
     public Pose2d fieldRelativePose2d() {
-        switch (Identity.instance) {
-            case BETA_BOT:
-                    return m_swerve.getPose().transformBy(robotRelativeTransform2d());
-            default:
-            //I want the sim to go to a pose similar to how it would attack a note, so I am putting the angle of attack equal to 0,0 with the angle to that point, is there a better way to do this?
-                return new Pose2d(0,0,new Rotation2d(Math.atan2(-1.0 * m_swerve.getPose().getY(),-1.0 * m_swerve.getPose().getX())));
-        }
+        return m_swerve.getPose().transformBy(robotRelativeTransform2d());
     }
 }
