@@ -152,6 +152,7 @@ public class HolonomicDriveController100 {
         PIDController pid = new PIDController(1.5, 0, 0);
         pid.setIntegratorRange(-0.01, 0.01);
         pid.setTolerance(0.01); // 0.5 degrees
+        pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
         return pid;
     }
 }
