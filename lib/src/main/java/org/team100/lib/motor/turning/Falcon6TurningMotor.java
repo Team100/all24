@@ -34,18 +34,18 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 1.0;
+    private static final double staticFrictionSpeedLimitRev_S = 0.1;
 
     /**
      * Friction feedforward in volts, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.375;
+    private static final double staticFrictionFFVolts = 0.375/20;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
      */
-    private static final double dynamicFrictionFFVolts = 0.27;
+    private static final double dynamicFrictionFFVolts = 0.27/30;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
@@ -63,7 +63,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * Proportional feedback coefficient for the controller. The error is measured
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
-    private static final double outboardP = 0.1;
+    private static final double outboardP = 1/2048;
 
     /**
      * For voltage compensation, the maximum output voltage.
@@ -105,10 +105,10 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         m_gearRatio = kGearRatio;
         // the serve module steering gear is inverted
         if (motorPhase == MotorPhase.FORWARD) {
-            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
             // m_motor.setInverted(InvertType.None);
         } else {
-            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
+            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
             // m_motor.setInverted(InvertType.InvertMotorOutput);
         }
 
@@ -186,6 +186,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double wheelRev_S2 = accelRad_S_S / (2 * Math.PI);
         double motorRev_S = outputRev_S * m_gearRatio;
+        motorRev_S = 0;
+        accelRad_S_S = 0;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
         // double motorRev_100ms = motorRev_S / 10;
         // double motorTick_100ms = motorRev_100ms * ticksPerRevolution;
@@ -197,7 +199,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double kFF = frictionFF + velocityFF + accelFF;
 
         VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
-        v.FeedForward = kFF;
+        // v.FeedForward = kFF;
+        v.withFeedForward(kFF);
         v.Acceleration = motorRev_S2;
         v.EnableFOC = true;
         m_motor.setControl(v);
@@ -205,7 +208,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
         // DemandType.ArbitraryFeedForward, kFF);
 
-        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
+        // t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
         // t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
@@ -226,7 +229,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     @Override
     public void periodic() {
         // m_rawVelocity = m_motor.getSelectedSensorVelocity();
-        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble()/m_gearRatio;
 
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
@@ -240,28 +243,28 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     /** Velocity feedforward in duty cycle units [-1, 1] */
     private static double velocityFF(double desiredMotorRev_S) {
-        return velocityFFVoltS_Rev * desiredMotorRev_S / saturationVoltage;
+        return velocityFFVoltS_Rev * desiredMotorRev_S ;
     }
 
     /** Frictional feedforward in duty cycle units [-1, 1] */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction / saturationVoltage;
+            return staticFrictionFFVolts * direction ;
         }
-        return dynamicFrictionFFVolts * direction / saturationVoltage;
+        return dynamicFrictionFFVolts * direction;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelRad_S_S) {
-        return accelFFVoltS2_Rad * accelRad_S_S / saturationVoltage;
+        return accelFFVoltS2_Rad * accelRad_S_S ;
     }
 
     private double getErrorRev_S() {
         double errorTick_100ms = m_error;
-        double errorRev_100ms = errorTick_100ms / ticksPerRevolution;
+        double errorRev_100ms = errorTick_100ms ;
         return errorRev_100ms * 10;
     }
 }

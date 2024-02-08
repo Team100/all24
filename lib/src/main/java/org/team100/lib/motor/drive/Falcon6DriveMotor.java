@@ -31,13 +31,13 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 3.5;
+    private static final double staticFrictionSpeedLimitRev_S = 0.1;
 
     /**
      * Friction feedforward in volts, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.18;
+    private static final double staticFrictionFFVolts = 0.03;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
@@ -45,14 +45,14 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * This value seems very low, perhaps because the falcon closed-loop control is
      * compensating?
      */
-    private static final double dynamicFrictionFFVolts = 0.01;
+    private static final double dynamicFrictionFFVolts = 0.019;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
      * volt-seconds per revolution. Since saturation is 11 volts and free speed is
      * about 100 rev/s, this is about 0.11.
      */
-    private static final double velocityFFVoltS_Rev = 0.11;
+    private static final double velocityFFVoltS_Rev = 0.06;
 
     /**
      * Placeholder for accel feedforward.
@@ -60,10 +60,8 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private static final double accelFFVoltS2_M = 0;
 
     /**
-     * Proportional feedback coefficient for the controller. The error is measured
-     * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
-    private static final double outboardP = 0.05;
+    private static final double outboardP = 0;
 
     /**
      * The Falcon 500 onboard sensor.
@@ -107,7 +105,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
             throw new IllegalArgumentException();
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
-
         m_distancePerTurn = wheelDiameter * Math.PI / kDriveReduction;
 
         m_motor = new TalonFX(canId);
@@ -146,10 +143,10 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         // m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
         if (motorPhase) {
-            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
             // m_motor.setInverted(InvertType.None);
         } else {
-            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
+            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
             // m_motor.setInverted(InvertType.InvertMotorOutput);
         }
 
@@ -231,12 +228,13 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
         VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
         v.FeedForward = kFF;
-        v.Acceleration = motorRev_S2;
         v.EnableFOC = true;
+        v.withFeedForward(kFF);
+        v.Acceleration = motorRev_S2;
         m_motor.setControl(v);
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
-
+        t.log(Level.DEBUG, m_name, "motor input [-1,1]", motorRev_S);
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
@@ -282,7 +280,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     public void periodic() {
         // m_rawPosition = m_motor.getSelectedSensorPosition();
         m_rawPosition = m_motor.getPosition().getValueAsDouble();
-        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble()/m_gearRatio;
 
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
@@ -334,28 +332,28 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction / saturationVoltage;
+            return staticFrictionFFVolts * direction ;
         }
-        return dynamicFrictionFFVolts * direction / saturationVoltage;
+        return dynamicFrictionFFVolts * direction ;
     }
 
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
     private static double velocityFF(double desiredMotorRev_S) {
-        return velocityFFVoltS_Rev * desiredMotorRev_S / saturationVoltage;
+        return velocityFFVoltS_Rev * desiredMotorRev_S ;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
+        return accelFFVoltS2_M * accelM_S_S ;
     }
 
     private double getErrorRev_S() {
         double errorTick_100ms = m_error;
-        double errorRev_100ms = errorTick_100ms / ticksPerRevolution;
+        double errorRev_100ms = errorTick_100ms ;
         return errorRev_100ms * 10;
     }
 }
