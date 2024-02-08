@@ -59,6 +59,8 @@ public class DriveWithTrajectory extends Command100 {
   // Called when the command is initially scheduled.
   @Override
   public void initialize100() {
+    System.out.println("DRIVE WITH TRAJEC STARTING");
+
     TrajectoryList trajectoryList = JSONParser.getTrajectoryList(m_fileName);
     trajectoryList.removeLastIndex();
     List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
@@ -93,7 +95,7 @@ public class DriveWithTrajectory extends Command100 {
                         5,
                         5);
 
-    TrajectoryVisualization.setViz(trajectory);
+    // TrajectoryVisualization.setViz(trajectory);
 
     TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
@@ -123,6 +125,7 @@ public class DriveWithTrajectory extends Command100 {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    System.out.println("DRIVE WITH TRAJEC ENDING");
     m_swerve.stop();
     TrajectoryVisualization.clear();
   }

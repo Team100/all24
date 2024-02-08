@@ -99,5 +99,6 @@
     {
       "guid": "Keyboard0"
     }
-  ]
+  ],
+  "useEnableDisableHotkeys": true
 }

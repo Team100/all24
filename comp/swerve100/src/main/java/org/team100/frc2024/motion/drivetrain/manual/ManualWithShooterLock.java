@@ -56,6 +56,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
     private final double m_scale;
+    private boolean isAligned;
 
     public ManualWithShooterLock(
             String parent, 
@@ -69,7 +70,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_scale = scale;
-        
+        isAligned = false;
         m_name = Names.append(parent, this);
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
@@ -102,12 +103,17 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
 
+        t.log(Level.DEBUG, m_name, "bearing", bearing);
 
 
         // take the short path
         double measurement = currentRotation.getRadians();
         bearing = new Rotation2d(
                 Math100.getMinDistance(measurement, bearing.getRadians()));
+
+        checkBearing(bearing, currentRotation);
+
+        t.log(Level.DEBUG, m_name, "Bearing Check", bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.
         m_thetaSetpoint = new State100(
@@ -131,6 +137,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
+
+        t.log(Level.DEBUG, m_name, "target", target);
         t.log(Level.DEBUG, m_name, "theta/setpoint", m_thetaSetpoint);
         t.log(Level.DEBUG, m_name, "theta/measurement", measurement);
         t.log(Level.DEBUG, m_name, "theta/error", m_thetaController.getPositionError());
@@ -185,9 +193,12 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
      * If the robot and/or target is moving, then the shooting solution needs to
      * lead or lag the target.
      */
-    static Rotation2d bearing(Translation2d robot, Translation2d target) {
+    Rotation2d bearing(Translation2d robot, Translation2d target) {
+
         return target.minus(robot).getAngle();
     }
+
+    
 
     /**
      * Apparent motion of the target, NWU rad/s.
@@ -205,6 +216,20 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double speed = GeometryUtil.norm(state.twist());
         return speed * relativeBearing.getSin() / range;
     }
+
+    public void checkBearing(Rotation2d bearing, Rotation2d currentRotation){
+        if(Math.abs(bearing.minus(currentRotation).getDegrees()) < 20){
+            isAligned = true;
+        } else {
+            isAligned = false;
+        }
+    }
+
+    public boolean isAligned(){
+        return isAligned;
+    }
+
+    
 
     static void aimWhileMoving(Rotation2d bearing, SwerveState state){
 
