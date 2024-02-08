@@ -36,23 +36,9 @@ public class NoteDetector {
      *         meters
      */
     public double getX() {
-        double f = Math.atan2(m_swerve.getPose().getX(), m_swerve.getPose().getY());
-        double l = MathUtil.angleModulus(Math.PI / 2 + f);
-        double d = m_swerve.getPose().getRotation().getRadians() - l;
-        double no = m_swerve.getPose().getTranslation().getNorm();
-        // Translation2d e = m_swerve.getPose().getTranslation();
-        // double angle = m_swerve.getPose().getRotation().getRadians();
-        // double anglee = e.getAngle().getRadians()-angle;
-        double x = no * Math.cos(d);
-        switch (Identity.instance) {
-            case BETA_BOT:
-            case COMP_BOT:
-                return m_cameraAngles.getX(m_notePosition24ArrayListener.getY().get());
-            case BLANK:
-                return x;
-            default:
-                return x;
-        }
+
+        return m_cameraAngles.getX(m_notePosition24ArrayListener.getY().get());
+
     }
 
     /**
@@ -78,9 +64,9 @@ public class NoteDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-        return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
-                m_notePosition24ArrayListener.getY().get());
-                case BLANK:
+                return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
+                        m_notePosition24ArrayListener.getY().get());
+            case BLANK:
                 return MathUtil.angleModulus(m_swerve.getPose().getTranslation().getAngle().getRadians() + Math.PI);
             default:
                 return MathUtil.angleModulus(m_swerve.getPose().getTranslation().getAngle().getRadians() + Math.PI);
