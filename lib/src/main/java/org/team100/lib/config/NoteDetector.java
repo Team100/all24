@@ -81,9 +81,9 @@ public class NoteDetector {
         return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
                 m_notePosition24ArrayListener.getY().get());
                 case BLANK:
-                return MathUtil.angleModulus(FieldRelativeTranslation2d().getAngle().getRadians() + Math.PI);
+                return MathUtil.angleModulus(m_swerve.getPose().getTranslation().getAngle().getRadians() + Math.PI);
             default:
-                return MathUtil.angleModulus(FieldRelativeTranslation2d().getAngle().getRadians() + Math.PI);
+                return MathUtil.angleModulus(m_swerve.getPose().getTranslation().getAngle().getRadians() + Math.PI);
         }
 
     }
