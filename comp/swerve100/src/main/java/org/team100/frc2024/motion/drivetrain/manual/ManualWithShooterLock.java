@@ -1,8 +1,8 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.frc2024.motion.drivetrain.manual;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -35,7 +35,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class ManualWithTargetLock implements FieldRelativeDriver {
+public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
@@ -46,7 +46,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
-    private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final String m_name;
@@ -56,22 +55,23 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
+    private final double m_scale;
 
-    public ManualWithTargetLock (
+    public ManualWithShooterLock(
             String parent, 
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
-            Supplier<Translation2d> target,
             PIDController thetaController,
             PIDController omegaController,
-            BooleanSupplier trigger) {
+            double scale) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
-        m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
+        m_scale = scale;
+        
         m_name = Names.append(parent, this);
-        m_trigger = trigger;
+        m_trigger = () -> false;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed);
@@ -90,10 +90,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     /**
      * Clips the input to the unit circle, scales to maximum (not simultaneously
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
-     * 
-     * @param state from the drivetrain
-     * @param input control units [-1,1]
-     * @return feasible field-relative velocity in m/s and rad/s
      */
     @Override
     public Twist2d apply(SwerveState state, Twist2d input) {
@@ -103,8 +99,10 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
 
         Translation2d currentTranslation = state.pose().getTranslation();
-        Translation2d target = m_target.get();
+        Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
+
+
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -206,6 +204,13 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         Rotation2d relativeBearing = bearing.minus(course);
         double speed = GeometryUtil.norm(state.twist());
         return speed * relativeBearing.getSin() / range;
+    }
+
+    static void aimWhileMoving(Rotation2d bearing, SwerveState state){
+
+            //its the shooter util code but robot moving vec is y velocity and angle in rads is bearing
+
+
     }
 
 }

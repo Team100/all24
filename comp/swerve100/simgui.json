@@ -29,6 +29,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -43,18 +48,188 @@
     }
   },
   "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
     "retained": {
-      "DrivePursuitController": {
-        "lookahead state": {
-          "open": true,
-          "posestate": {
-            "open": true,
-            "pose": {
-              "open": true,
-              "rotation": {
-                "open": true
-              }
-            }
+      "AmpSubsystem": {
+        "Left": {
+          "NeoTurningEncoder": {
+            "open": true
+          },
+          "NeoTurningMotor": {
+            "open": true
+          },
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "Right": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "PositionServo": {
+            "Goal": {
+              "open": true
+            },
+            "Setpoint": {
+              "open": true
+            },
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Bottom Roller": {
+        "OutboardVelocityServo": {
+          "open": true
+        },
+        "velocity": {
+          "Velocity Servo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "ClimberSubsystem": {
+        "Left": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Command100": {
+        "DriveManually": {
+          "ManualChassisSpeeds": {
+            "open": true
+          },
+          "SimpleManualModuleStates": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "DrumShooter": {
+        "Bottom": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "NeoDriveMotor": {
+            "open": true
+          },
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        },
+        "Top": {
+          "open": true
+        },
+        "open": true
+      },
+      "Experiments": {
+        "string[]##v_/Experiments/enabled": {
+          "open": true
+        }
+      },
+      "FlywheelShooter": {
+        "Left": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Indexer": {
+        "encoder": {
+          "NeoDriveEncoder": {
+            "open": true
+          },
+          "open": true
+        },
+        "velocity": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "IndexerSubsystem": {
+        "NeoDriveEncoder": {
+          "open": true
+        },
+        "NeoDriveMotor": {
+          "open": true
+        },
+        "open": true
+      },
+      "IntakeSubsystem": {
+        "Bottom Roller": {
+          "open": true
+        },
+        "Top Roller": {
+          "open": true
+        }
+      },
+      "IntakeWheel": {
+        "NeoDriveEncoder": {
+          "open": true
+        },
+        "NeoDriveMotor": {
+          "open": true
+        },
+        "OutboardVelocityServo": {
+          "open": true
+        },
+        "SimulatedEncoder": {
+          "open": true
+        },
+        "SimulatedMotor": {
+          "open": true
+        },
+        "open": true
+      },
+      "Rear Right": {
+        "Drive": {
+          "OutboardVelocityServo": {
+            "open": true
+          },
+          "SimulatedEncoder": {
+            "open": true
+          },
+          "SimulatedMotor": {
+            "open": true
+          }
+        },
+        "Turning": {
+          "OutboardVelocityServo": {
+            "open": true
           }
         },
         "open": true
@@ -66,7 +241,6 @@
           "translation": {
             "open": true
           }
-        }
       }
     }
   },

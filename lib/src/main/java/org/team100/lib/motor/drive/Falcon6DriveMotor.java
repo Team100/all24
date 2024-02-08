@@ -1,6 +1,6 @@
 package org.team100.lib.motor.drive;
 
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -25,7 +25,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * 
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
-public class Falcon6DriveMotor implements Motor100<Distance100> {
+public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      * The speed, below which, static friction applies, in motor revolutions per
@@ -80,6 +80,7 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
     private final double m_gearRatio;
     private final double m_wheelDiameter;
     private final String m_name;
+    private final double m_distancePerTurn;
 
     /** Current position, updated in periodic(). */
     private double m_rawPosition;
@@ -89,6 +90,11 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
     private double m_output;
     /** Current motor error, updated in periodic() */
     private double m_error;
+
+        /** updated in periodic() */
+        private double m_positionM;
+        /** updated in periodic() */
+        private double m_velocityM_S;
 
     public Falcon6DriveMotor(
             String name,
@@ -101,6 +107,8 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
             throw new IllegalArgumentException();
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
+
+        m_distancePerTurn = wheelDiameter * Math.PI / kDriveReduction;
 
         m_motor = new TalonFX(canId);
 
@@ -192,6 +200,9 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
     }
 
+        //////////////////
+    // motor methods
+
     @Override
     public void setDutyCycle(double output) {
         DutyCycleOut d = new DutyCycleOut(output);
@@ -221,6 +232,7 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
         VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
         v.FeedForward = kFF;
         v.Acceleration = motorRev_S2;
+        v.EnableFOC = true;
         m_motor.setControl(v);
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
@@ -243,12 +255,12 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
         m_motor.close();
     }
 
-    /**
-     * @return integrated sensor position in sensor units (1/2048 turn).
-     */
-    public double getPosition() {
-        return m_rawPosition;
-    }
+    // /**
+    //  * @return integrated sensor position in sensor units (1/2048 turn).
+    //  */
+    // public double getPosition() {
+    //     return m_rawPosition;
+    // }
 
     /**
      * @return integrated sensor velocity in rev per sec
@@ -270,13 +282,20 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
     public void periodic() {
         // m_rawPosition = m_motor.getSelectedSensorPosition();
         m_rawPosition = m_motor.getPosition().getValueAsDouble();
-        
         m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
         m_error = m_motor.getClosedLoopError().getValueAsDouble();
+
+        m_positionM = m_rawPosition * m_distancePerTurn;
+        m_velocityM_S = m_velocityRev_S * m_distancePerTurn;
+
         t.log(Level.DEBUG, m_name, "position (rev)", m_rawPosition);
+        t.log(Level.DEBUG, m_name, "position (m)", m_positionM);
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_velocityRev_S);
+        t.log(Level.DEBUG, m_name, "velocity (m_s)", m_velocityM_S);
+
         t.log(Level.DEBUG, m_name, "output [-1,1]", m_output);
         t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
         // t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getTemperature());
@@ -284,6 +303,28 @@ public class Falcon6DriveMotor implements Motor100<Distance100> {
         t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());        
         // t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());        
     }
+
+    //////////////////////////
+    // encoder methods
+
+
+        /** Position in meters */
+        @Override
+        public double getPosition() {
+            return m_positionM;
+        }
+    
+        /** Velocity in meters/sec */
+        @Override
+        public double getRate() {
+            return m_velocityM_S;
+        }
+    
+        @Override
+        public void reset() {
+            resetPosition();
+            m_positionM = 0;
+        }
 
     ///////////////////////////////////////////////////////////////
 

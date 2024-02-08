@@ -2,7 +2,6 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.encoder.drive.FalconDriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.motion.components.PositionServo;
@@ -10,7 +9,8 @@ import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motor.drive.FalconDriveMotor;
+import org.team100.lib.motor.MotorWithEncoder100;
+import org.team100.lib.motor.drive.DriveMotorFactory;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
@@ -32,7 +32,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     // the true value is 6.67 but the measured value is 90% of that,
     // maybe because the wheel measurement is wrong.
     private static final double kDriveReduction = 6.67 * 9 / 10;
-    private static final double driveEncoderDistancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
     // andymark ma3 encoder is 1:1
     private static final double turningGearRatio = 1.0;
 
@@ -74,19 +73,15 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
-        FalconDriveMotor driveMotor = new FalconDriveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = DriveMotorFactory.driveMotor(
                 name,
-                driveMotorCanId,
-                true,
                 currentLimit,
-                kDriveReduction,
-                kWheelDiameterM,
+                driveMotorCanId,
                 pidConstants,
-                feedforwardConstants);
-        FalconDriveEncoder driveEncoder = new FalconDriveEncoder(
-                name,
-                driveMotor,
-                driveEncoderDistancePerTurn);
+                feedforwardConstants,
+                kDriveReduction,
+                kWheelDiameterM);
+
         PIDController driveController = new PIDController( //
                 0.1, // kP
                 0, // kI
@@ -97,7 +92,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         return new SelectableVelocityServo<>(
                 name,
                 driveMotor,
-                driveEncoder,
+                driveMotor,
                 driveController,
                 driveFeedforward);
     }

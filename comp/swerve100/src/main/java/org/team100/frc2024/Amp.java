@@ -50,6 +50,12 @@ public class Amp extends SequentialCommandGroup {
         // new DriveToWaypoint100(new Pose2d(7.715937, 6.669663, new Rotation2d(0)), m_swerve, planner, controller, limits)
         // new DriveToWaypoint100(new Pose2d(1.892994, 7.747878, new Rotation2d(0)), m_swerve, planner, controller, limits)
 
+        //     waypoints.add(new Pose2d(10.701702, 1.557158, new Rotation2d()));
+        //     headings.add(new Rotation2d());
+    
+        new DriveWithWaypoints(m_swerve, planner, controller, limits, waypoints, headings)
+
+        // new DriveToWaypoint100(new Pose2d(10.701702, 1.557158, new Rotation2d(0)), m_swerve, planner, controller, limits)
     );
   }
 }

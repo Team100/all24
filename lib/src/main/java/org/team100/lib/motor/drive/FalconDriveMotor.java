@@ -2,7 +2,7 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -13,7 +13,6 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -51,7 +50,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Details on CAN bus status frame timing:
  * https://v5.docs.ctr-electronics.com/en/latest/ch18_CommonAPI.html#setting-status-frame-periods
  */
-public class FalconDriveMotor implements Motor100<Distance100> {
+public class FalconDriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      * The speed, below which, static friction applies, in motor revolutions per
@@ -104,6 +103,7 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     private final double m_gearRatio;
     private final double m_wheelDiameter;
     private final String m_name;
+    private final double m_distancePerPulse;
 
     /** Current position, updated in periodic(). */
     private double m_rawPosition;
@@ -113,6 +113,11 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     private double m_output;
     /** Current motor error, updated in periodic() */
     private double m_error;
+
+    /** updated in periodic() */
+    private double m_positionM;
+    /** updated in periodic() */
+    private double m_velocityM_S;
 
     public FalconDriveMotor(
             String name,
@@ -132,13 +137,18 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
 
+        double distancePerTurn = wheelDiameter * Math.PI / kDriveReduction;
+        m_distancePerPulse = distancePerTurn / 2048;
+
         m_motor = new TalonFX(canId);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
 
         // configure current limits
-        m_motor.configStatorCurrentLimit(
-                new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+        // note we don't actually care what the stator limit is, we just want to limit
+        // the battery draw.
+        // m_motor.configStatorCurrentLimit(
+        // new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
         m_motor.configSupplyCurrentLimit(
                 new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
 
@@ -176,6 +186,9 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         m_name = Names.append(name, this);
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
     }
+
+    //////////////////
+    // motor methods
 
     @Override
     public void setDutyCycle(double output) {
@@ -220,7 +233,7 @@ public class FalconDriveMotor implements Motor100<Distance100> {
     /**
      * @return integrated sensor position in sensor units (1/2048 turn).
      */
-    public double getPosition() {
+    public double getRawPosition() {
         return m_rawPosition;
     }
 
@@ -245,15 +258,46 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         m_rawVelocity = m_motor.getSelectedSensorVelocity();
         m_output = m_motor.getMotorOutputPercent();
         m_error = m_motor.getClosedLoopError();
+
+        m_positionM = m_rawPosition * m_distancePerPulse;
+    
+        // sensor velocity is 1/2048ths of a turn per 100ms
+        m_velocityM_S = m_rawVelocity * 10 * m_distancePerPulse;
+
         t.log(Level.DEBUG, m_name, "position (raw)", m_rawPosition);
+        t.log(Level.DEBUG, m_name, "position (m)", m_positionM);
         t.log(Level.DEBUG, m_name, "velocity (raw)", m_rawVelocity);
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", currentMotorRev_S());
+        t.log(Level.DEBUG, m_name, "velocity (m_s)", m_velocityM_S);
+
         t.log(Level.DEBUG, m_name, "output [-1,1]", m_output);
         t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getTemperature());
-        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent());        
-        t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());        
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent());
+        t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());
     }
+
+    //////////////////////////
+    // encoder methods
+
+    /** Position in meters */
+    @Override
+    public double getPosition() {
+        return m_positionM;
+    }
+
+    /** Velocity in meters/sec */
+    @Override
+    public double getRate() {
+        return m_velocityM_S;
+    }
+
+    @Override
+    public void reset() {
+        resetPosition();
+        m_positionM = 0;
+    }
+
 
     ///////////////////////////////////////////////////////////////
 
@@ -297,4 +341,7 @@ public class FalconDriveMotor implements Motor100<Distance100> {
         double errorRev_100ms = errorTick_100ms / ticksPerRevolution;
         return errorRev_100ms * 10;
     }
+
+ 
+
 }

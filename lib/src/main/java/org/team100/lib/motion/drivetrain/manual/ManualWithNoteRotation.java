@@ -3,7 +3,6 @@ package org.team100.lib.motion.drivetrain.manual;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -23,6 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * Manual cartesian control, with rotational control based on a target position.
@@ -35,7 +35,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class ManualWithTargetLock implements FieldRelativeDriver {
+public class ManualWithNoteRotation {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
@@ -57,7 +57,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
 
-    public ManualWithTargetLock (
+    public ManualWithNoteRotation(
             String parent, 
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
@@ -78,7 +78,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
-    @Override
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
@@ -95,8 +94,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
      * @param input control units [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    @Override
-    public Twist2d apply(SwerveState state, Twist2d input) {
+    public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
@@ -123,13 +121,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
         m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
-
-        // this is user input scaled to m/s and rad/s
-        Twist2d scaledInput = DriveUtil.scale(
-                clipped,
-                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
@@ -147,10 +138,10 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
+        Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, omega);
 
         // desaturate to feasibility by preferring the rotational velocity.
-        twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
+        twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
 
         // this name needs to be exactly "/field/target" for glass.
         t.log(Level.DEBUG, "field", "target", new double[] {
@@ -175,7 +166,14 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         }
 
         m_prevPose = state.pose();
-        return twistWithLockM_S;
+        ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
+                twistWithLock,
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
+        // desaturate to feasibility
+        ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
+        return speeds;
     }
 
     /**

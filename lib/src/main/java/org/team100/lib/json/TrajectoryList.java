@@ -1,4 +1,4 @@
-package org.team100.lib.JSON;
+package org.team100.lib.json;
 
 import java.util.List;
 

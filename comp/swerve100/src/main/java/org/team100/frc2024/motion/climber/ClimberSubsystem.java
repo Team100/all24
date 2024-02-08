@@ -59,7 +59,6 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                 -3);
         switch (Identity.instance) {
             case COMP_BOT:
-            case BETA_BOT:
             //TODO tune kV
                 s1 = ServoFactory.neoDistanceServo(
                         m_name + "/Left",

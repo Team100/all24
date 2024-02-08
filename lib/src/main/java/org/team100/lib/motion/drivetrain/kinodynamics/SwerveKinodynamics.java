@@ -35,7 +35,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  * 
  * In particular, the maximum spin rate is likely to seem quite high. Do not
  * lower it here.
- */
+ */ 
 public class SwerveKinodynamics {
     private final Telemetry t = Telemetry.get();
 
@@ -340,7 +340,7 @@ public class SwerveKinodynamics {
         double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
 
         if (xySpeed < 1e-12) {
-            return new ChassisSpeeds(0, 0, Math.signum(speeds.omegaRadiansPerSecond) * maxOmega);
+            return new ChassisSpeeds(0, 0, Math.min(speeds.omegaRadiansPerSecond, maxOmega));
         }
         if (Math.abs(speeds.omegaRadiansPerSecond) < 1e-12) {
             return new ChassisSpeeds(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);

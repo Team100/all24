@@ -82,6 +82,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public boolean driveToNote() {
+        return m_driverControl.driveToNote();
+    }
+
+    @Override
     public Translation2d target() {
         return m_driverControl.target();
     }

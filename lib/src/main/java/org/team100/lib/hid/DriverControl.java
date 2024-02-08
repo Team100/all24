@@ -56,6 +56,10 @@ public interface DriverControl {
         return null;
     }
 
+    default boolean driveToNote() {
+        return false;
+    }
+
     default boolean trigger() {
         return false;
     }

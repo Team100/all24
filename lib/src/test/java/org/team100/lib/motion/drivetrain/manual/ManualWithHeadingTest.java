@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -35,7 +36,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                "foo", 
+                "foo",
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -46,7 +47,7 @@ class ManualWithHeadingTest {
 
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
 
-        Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
         verify(0, 0, 0, twistM_S);
 
         // with a non-null desired rotation we're in snap mode
@@ -54,7 +55,7 @@ class ManualWithHeadingTest {
         desiredRotation = null;
 
         twist1_1 = new Twist2d(0, 0, 1);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
         // with a nonzero desired twist, we're out of snap mode
         assertNull(m_manualWithHeading.m_goal);
 
@@ -70,7 +71,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                "foo", 
+                "foo",
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -86,7 +87,7 @@ class ManualWithHeadingTest {
 
         Twist2d twist1_1 = new Twist2d(0, 0, 1);
 
-        Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, new Twist2d()), twist1_1);
 
         // not in snap mode
         assertNull(m_manualWithHeading.m_goal);
@@ -94,7 +95,7 @@ class ManualWithHeadingTest {
 
         twist1_1 = new Twist2d(1, 0, 0);
 
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         assertNull(m_manualWithHeading.m_goal);
         verify(1, 0, 0, twistM_S);
     }
@@ -110,7 +111,7 @@ class ManualWithHeadingTest {
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                "foo", 
+                "foo",
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -129,7 +130,7 @@ class ManualWithHeadingTest {
         // no user input
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
 
-        Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, new Twist2d()), twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         // but at t0 it hasn't started yet.
@@ -152,7 +153,7 @@ class ManualWithHeadingTest {
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         assertEquals(1.085, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
@@ -163,7 +164,7 @@ class ManualWithHeadingTest {
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.55, 0.2);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         assertEquals(0.284, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
@@ -173,7 +174,7 @@ class ManualWithHeadingTest {
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // there should be no more profile to follow
@@ -192,7 +193,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithHeading m_manualWithHeading = new ManualWithHeading(
-                "foo", 
+                "foo",
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -208,7 +209,7 @@ class ManualWithHeadingTest {
 
         Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
 
-        Twist2d twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, new Twist2d()), twist1_1);
 
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
@@ -223,7 +224,7 @@ class ManualWithHeadingTest {
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         // profile gets half v
         assertEquals(1.085, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
@@ -235,7 +236,7 @@ class ManualWithHeadingTest {
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         // profile gets half v
         assertEquals(0.285, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
@@ -246,7 +247,7 @@ class ManualWithHeadingTest {
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
-        twistM_S = m_manualWithHeading.apply(currentPose, twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be no more profile to follow
         verify(0, 0, 0, twistM_S);
