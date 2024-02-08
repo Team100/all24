@@ -96,10 +96,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
      * @return feasible robot-relative velocity in m/s and rad/s
      */
 
-    public ChassisSpeeds apply(Twist2d input) {
-        return new ChassisSpeeds();
-    }
-
     public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
