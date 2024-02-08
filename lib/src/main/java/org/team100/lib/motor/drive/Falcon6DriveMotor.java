@@ -61,7 +61,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      */
-    private static final double outboardP = 0;
+    private static final double outboardP = 1/2048;
 
     /**
      * The Falcon 500 onboard sensor.
