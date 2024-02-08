@@ -26,7 +26,7 @@ public class DriveMotorFactory {
             FeedforwardConstants feedforwardConstants,
             double driveReduction,
             double wheelDiameterM) {
-        if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT ) {
+        if (Identity.instance == Identity.COMP_BOT) {
             return new Falcon6DriveMotor(
                     name,
                     driveMotorCanId,
@@ -54,7 +54,7 @@ public class DriveMotorFactory {
             double gearRatio,
             PIDConstants lowLevelPID,
             FeedforwardConstants lowLevelFeedforward) {
-        if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT ) {
+        if (Identity.instance == Identity.COMP_BOT) {
             return new Falcon6TurningMotor(
                     name,
                     turningMotorCanId,
