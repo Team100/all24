@@ -186,8 +186,6 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double wheelRev_S2 = accelRad_S_S / (2 * Math.PI);
         double motorRev_S = outputRev_S * m_gearRatio;
-        motorRev_S = 0;
-        accelRad_S_S = 0;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
         // double motorRev_100ms = motorRev_S / 10;
         // double motorTick_100ms = motorRev_100ms * ticksPerRevolution;
@@ -208,7 +206,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
         // DemandType.ArbitraryFeedForward, kFF);
 
-        // t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
         // t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
