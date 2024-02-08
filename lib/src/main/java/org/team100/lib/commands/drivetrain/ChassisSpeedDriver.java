@@ -11,7 +11,6 @@ public interface ChassisSpeedDriver {
      * @param input control units, [-1,1]
      * @return feasible chassis speeds in m/s and rad/s
      */
-    ChassisSpeeds apply(Twist2d input);
 
     ChassisSpeeds apply(SwerveState state, Twist2d input);
 

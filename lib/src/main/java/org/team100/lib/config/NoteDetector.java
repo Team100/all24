@@ -4,6 +4,7 @@ import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.CameraAngles;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -35,14 +36,14 @@ public class NoteDetector {
      *         meters
      */
     public double getX() {
-        double f = Math.atan2(m_swerve.getPose().getX(),m_swerve.getPose().getY());
-        double l = Math.PI/2+f;
-        double d = m_swerve.getPose().getRotation().getRadians()-l;
+        double f = Math.atan2(m_swerve.getPose().getX(), m_swerve.getPose().getY());
+        double l = MathUtil.angleModulus(Math.PI / 2 + f);
+        double d = m_swerve.getPose().getRotation().getRadians() - l;
         double no = m_swerve.getPose().getTranslation().getNorm();
         // Translation2d e = m_swerve.getPose().getTranslation();
-        //     double angle = m_swerve.getPose().getRotation().getRadians();
-        //     double anglee = e.getAngle().getRadians()-angle;
-            double x = no*Math.cos(d);
+        // double angle = m_swerve.getPose().getRotation().getRadians();
+        // double anglee = e.getAngle().getRadians()-angle;
+        double x = no * Math.cos(d);
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
@@ -59,7 +60,15 @@ public class NoteDetector {
      *         meters
      */
     public Double fieldRelativeX() {
-        return fieldRelativePose2d().getX();
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                return fieldRelativePose2d().getX();
+            case BLANK:
+                return 0.0;
+            default:
+                return 0.0;
+        }
     }
 
     /**
@@ -69,13 +78,14 @@ public class NoteDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
-                        m_notePosition24ArrayListener.getY().get());
-            case BLANK:
-                return Math.atan2(getY(), getX());
+        return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
+                m_notePosition24ArrayListener.getY().get());
+                case BLANK:
+                return MathUtil.angleModulus(FieldRelativeTranslation2d().getAngle().getRadians() + Math.PI);
             default:
-                return Math.atan2(getY(), getX());
+                return MathUtil.angleModulus(FieldRelativeTranslation2d().getAngle().getRadians() + Math.PI);
         }
+
     }
 
     /**
@@ -83,21 +93,8 @@ public class NoteDetector {
      *         meters
      */
     public Double getY() {
-        double f = Math.atan2(m_swerve.getPose().getX(),m_swerve.getPose().getY());
-        double l = f;
-        double d = m_swerve.getPose().getRotation().getRadians()-l;
-        double no = m_swerve.getPose().getTranslation().getNorm();
-        double y = no*Math.sin(d);
-        switch (Identity.instance) {
-            case BETA_BOT:
-            case COMP_BOT:
-                return m_cameraAngles.getY(m_notePosition24ArrayListener.getX().get(),
-                        m_notePosition24ArrayListener.getY().get());
-            case BLANK:
-                return y;
-            default:
-                return y;
-        }
+        return m_cameraAngles.getY(m_notePosition24ArrayListener.getX().get(),
+                m_notePosition24ArrayListener.getY().get());
     }
 
     /**
@@ -105,7 +102,15 @@ public class NoteDetector {
      *         meters
      */
     public Double fieldRelativeY() {
-        return fieldRelativePose2d().getY();
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                return fieldRelativePose2d().getY();
+            case BLANK:
+                return 0.0;
+            default:
+                return 0.0;
+        }
     }
 
     /**

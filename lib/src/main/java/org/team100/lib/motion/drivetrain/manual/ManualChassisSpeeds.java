@@ -32,8 +32,7 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver{
      * Clips the input to the unit circle, scales to maximum (not simultaneously
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
      */
-    @Override
-    public ChassisSpeeds apply(Twist2d input) {
+    public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
         // scale to max in both translation and rotation
@@ -49,12 +48,6 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver{
         return speeds;
     }
 
-    @Override
-    public ChassisSpeeds apply(SwerveState state, Twist2d input) {
-        return new ChassisSpeeds();
-    }
-
-    @Override
     public void reset(Pose2d p) {
         //
     }
