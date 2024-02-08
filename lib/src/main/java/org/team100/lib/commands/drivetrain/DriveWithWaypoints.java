@@ -4,6 +4,14 @@
 
 package org.team100.lib.commands.drivetrain;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.team100.lib.JSON.JSONParser;
+import org.team100.lib.JSON.TrajectoryList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,12 +30,18 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.DriveUtil;
 
+import com.choreo.lib.Choreo;
+import com.ctre.phoenix6.signals.Licensing_IsSeasonPassedValue;
+import com.ctre.phoenix6.signals.System_StateValue;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+
 
 public class DriveWithWaypoints extends Command100 {
   /** Creates a new DriveWithTrajectory. */
@@ -36,6 +50,9 @@ public class DriveWithWaypoints extends Command100 {
   private final DriveMotionController m_controller;
   private final SwerveKinodynamics m_limits;
   private static final Telemetry t = Telemetry.get();
+//   private final List<Pose2d> m_waypoints;
+//   private final List<Rotation2d> m_headings;
+  private final Pose2d m_goal;
   private final List<Pose2d> m_waypoints;
   private final List<Rotation2d> m_headings;
 
@@ -44,15 +61,15 @@ public class DriveWithWaypoints extends Command100 {
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            List<Pose2d> waypoints,
-            List<Rotation2d> headings) {
+            Pose2d goal) {
     // Use addRequirements() here to declare subsystem dependencies.
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_limits = limits;
-        m_waypoints = waypoints;
-        m_headings = headings;
+        m_goal = goal;
+        // m_waypoints = waypoints;
+        // m_headings = headings;
 
         
 
@@ -64,6 +81,37 @@ public class DriveWithWaypoints extends Command100 {
   @Override
   public void initialize100() {
 
+    final Pose2d start = m_swerve.getPose();
+    final double startVelocity = 0;
+    final Pose2d end = m_goal;
+    final double endVelocity = 0;
+
+    List<Pose2d> waypointsNew = new ArrayList<>();
+    List<Pose2d> waypointsM = getWaypoints(start, end);
+    List<Rotation2d> headings = List.of(
+      start.getRotation(),
+      end.getRotation());
+
+    // List<Pose2d> internalWaypoints = new ArrayList<>(m_waypoints);
+    // List<Rotation2d> internalHeadings = new ArrayList<>(m_headings);
+    
+    // internalWaypoints.add(0, m_swerve.getPose());
+    // internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
+    
+    // List<Pose2d> poses = new ArrayList<>();
+
+    // System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
+    // System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
+
+    // for(int i = 0; i < internalWaypoints.size(); i+=2){
+
+    //     List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
+    //     poses.add(posi.get(0));
+    //     poses.add(posi.get(1));
+      
+    // }
+      
+    // poses = getWaypoints(internalWaypoints.get(0), internalWaypoints.get(1));
     List<Pose2d> internalWaypoints = m_waypoints;
     List<Rotation2d> internalHeadings = m_headings;
     
@@ -86,8 +134,7 @@ public class DriveWithWaypoints extends Command100 {
         poses.add(posi.get(1));
       
     }
-      
-    
+          
 
     List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(m_limits));
@@ -100,8 +147,8 @@ public class DriveWithWaypoints extends Command100 {
     Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
-                        internalWaypoints,
-                        internalHeadings,
+                        waypointsM,
+                        headings,
                         constraints,
                         0,
                         0,

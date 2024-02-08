@@ -101,7 +101,7 @@
     "###FMS": {
       "Collapsed": "0",
       "Pos": "8,945",
-      "Size": "136,154"
+      "Size": "442,194"
     },
     "###Joysticks": {
       "Collapsed": "0",
@@ -110,13 +110,6 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "1919,795",
-      "Size": "1053,1077"
-    },
-    "###Keyboard 1 Settings": {
-    "###Keyboard 0 Settings": {
-      "Collapsed": "0",
-      "Pos": "321,134",
       "Size": "300,560"
     },
     "###NetworkTables": {
