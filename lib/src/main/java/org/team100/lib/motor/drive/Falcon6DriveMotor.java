@@ -26,7 +26,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
 public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
-    //TODO Tune ff for amps
+    // TODO Tune ff for amps
     /**
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
@@ -47,7 +47,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      */
     private static final double dynamicFrictionFFAmps = 0.01;
 
-     /**
+    /**
      * Velocity feedforward in amps
      */
     private static final double velocityFFAmps_Rev = 0.11;
@@ -59,7 +59,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      */
-    //TODO Fix PID
+    // TODO Fix PID
     private static final double outboardP = .001;
 
     private final Telemetry t = Telemetry.get();
