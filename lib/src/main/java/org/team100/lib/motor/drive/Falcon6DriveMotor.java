@@ -47,10 +47,8 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      */
     private static final double dynamicFrictionFFAmps = 0.01;
 
-    /**
-     * Velocity feedforward in units of amps per motor revolution per second, or
-     * amp-seconds per revolution. Since saturation is 11 amps and free speed is
-     * about 100 rev/s, this is about 0.11.
+     /**
+     * Velocity feedforward in amps
      */
     private static final double velocityFFAmps_Rev = 0.11;
 
