@@ -4,9 +4,12 @@ import java.util.Optional;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.spline.PoseWithCurvature;
@@ -184,6 +187,33 @@ public class GeometryUtil {
 
     public static Twist2d toTwist2d(ChassisSpeeds x) {
         return new Twist2d(x.vxMetersPerSecond, x.vyMetersPerSecond, x.omegaRadiansPerSecond);
+    }
+
+    /**
+     * Transform the camera-coordinates translation to NWU coordinates. Note an
+     * additional transform will be required to account for the camera offset
+     * relative to the robot.
+     * 
+     * @param zForward translation in camera coordinates, z-forward
+     * @return translation in WPI coordinates, x-forward.
+     */
+    public static Translation3d zForwardToXForward(Translation3d zForward) {
+        return new Translation3d(zForward.getZ(), -zForward.getX(), -zForward.getY());
+    }
+
+    /**
+     * Transform the camera-coordinates rotation to NWU coordinates. Note an
+     * additional transform will be required to account for the camera orientation
+     * relative to the robot.
+     * 
+     * @param zforward rotation in camera coordinates, z-forward
+     * @return rotation in WPI coordinates x-forward
+     */
+    public static Rotation3d zForwardToXForward(Rotation3d zforward) {
+        Quaternion q = zforward.getQuaternion();
+        Quaternion q2 = new Quaternion(q.getW(), q.getZ(), -q.getX(), -q.getY());
+        return new Rotation3d(q2);
+
     }
 
 }

@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
@@ -52,7 +53,38 @@ public class PoseEstimationHelper {
                 tagInFieldCoords,
                 blip,
                 robotRotationInFieldCoordsFromGyro);
+    }
 
+    /**
+     * ALERT: the new python code uses a different result type so this might be
+     * wrong.
+     * 
+     * TODO: check that the resulting transform is correct.
+     */
+    public static Pose3d getRobotPoseInFieldCoords(
+            Transform3d cameraInRobotCoords,
+            Pose3d tagInFieldCoords,
+            Blip24 blip,
+            Rotation3d robotRotationInFieldCoordsFromGyro,
+            double thresholdMeters) {
+
+        Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
+
+        if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
+            t.log(Level.DEBUG, m_name, "rotation_source", "CAMERA");
+            return getRobotPoseInFieldCoords(
+                    cameraInRobotCoords,
+                    tagInFieldCoords,
+                    blip);
+        }
+
+        t.log(Level.DEBUG, m_name, "rotation_source", "GYRO");
+
+        return getRobotPoseInFieldCoords(
+                cameraInRobotCoords,
+                tagInFieldCoords,
+                blip,
+                robotRotationInFieldCoordsFromGyro);
     }
 
     /**
@@ -67,6 +99,21 @@ public class PoseEstimationHelper {
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
             Blip blip) {
+        Transform3d tagInCameraCoords = blipToTransform(blip);
+        Pose3d cameraInFieldCoords = toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
+        return applyCameraOffset(cameraInFieldCoords, cameraInRobotCoords);
+    }
+
+    /**
+     * ALERT: the new python code uses a different result type so this might be
+     * wrong.
+     * 
+     * TODO: check that the resulting transform is correct.
+     */
+    public static Pose3d getRobotPoseInFieldCoords(
+            Transform3d cameraInRobotCoords,
+            Pose3d tagInFieldCoords,
+            Blip24 blip) {
         Transform3d tagInCameraCoords = blipToTransform(blip);
         Pose3d cameraInFieldCoords = toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
         return applyCameraOffset(cameraInFieldCoords, cameraInRobotCoords);
@@ -120,6 +167,35 @@ public class PoseEstimationHelper {
                 cameraInRobotCoords);
     }
 
+    /**
+     * ALERT: the new python code uses a different result type so this might be
+     * wrong.
+     * 
+     * TODO: check that the resulting pose is correct.
+     */
+    public static Pose3d getRobotPoseInFieldCoords(
+            Transform3d cameraInRobotCoords,
+            Pose3d tagInFieldCoords,
+            Blip24 blip,
+            Rotation3d robotRotationInFieldCoordsFromGyro) {
+        Rotation3d cameraRotationInFieldCoords = cameraRotationInFieldCoords(
+                cameraInRobotCoords,
+                robotRotationInFieldCoordsFromGyro);
+        Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
+        Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
+                tagInFieldCoords.getRotation(),
+                cameraRotationInFieldCoords);
+        Transform3d tagInCameraCoords = new Transform3d(
+                tagTranslationInCameraCoords,
+                tagRotationInCameraCoords);
+        Pose3d cameraInFieldCoords = toFieldCoordinates(
+                tagInCameraCoords,
+                tagInFieldCoords);
+        return applyCameraOffset(
+                cameraInFieldCoords,
+                cameraInRobotCoords);
+    }
+
     //////////////////////////////
     //
     // package private below, don't use these.
@@ -145,6 +221,19 @@ public class PoseEstimationHelper {
     }
 
     /**
+     * ALERT: the new python code uses a different result type so this might be
+     * wrong.
+     * 
+     * TODO: check that the resulting transform is correct.
+     * 
+     * @param b
+     * @return
+     */
+    static Transform3d blipToTransform(Blip24 b) {
+        return new Transform3d(blipToTranslation(b), blipToRotation(b));
+    }
+
+    /**
      * Extract the translation from a "z-forward" blip and return the same
      * translation expressed in our usual "x-forward" NWU translation.
      * It would be possible to also consume the blip rotation matrix, if it were
@@ -153,6 +242,19 @@ public class PoseEstimationHelper {
      */
     static Translation3d blipToTranslation(Blip b) {
         return new Translation3d(b.pose_t[2][0], -1.0 * b.pose_t[0][0], -1.0 * b.pose_t[1][0]);
+    }
+
+    /**
+     * ALERT: the new python code produces a different result type so this might be
+     * wrong.
+     * 
+     * TODO: check that the resulting translation orientation is correct
+     * 
+     * @param b
+     * @return
+     */
+    static Translation3d blipToTranslation(Blip24 b) {
+        return GeometryUtil.zForwardToXForward(b.getPose().getTranslation());
     }
 
     /**
@@ -190,6 +292,24 @@ public class PoseEstimationHelper {
         }
 
         return new Rotation3d(matrix);
+    }
+
+    /**
+     * ALERT! the new python code uses a different estimator which may (probably)
+     * use a different convention for rotation -- the original AprilTag library uses
+     * Z-into-tag whereas I think the WPI convention is Z-out-of-tag.
+     * 
+     * it doesn't matter that much because we don't actually use the tag rotation
+     * for anything (we use the gyro instead), but it would be good for it to be
+     * correct.
+     * 
+     * TODO: verify the polarity of this rotation
+     * 
+     * @param b
+     * @return
+     */
+    static Rotation3d blipToRotation(Blip24 b) {
+        return GeometryUtil.zForwardToXForward(b.getPose().getRotation());
     }
 
     /**
