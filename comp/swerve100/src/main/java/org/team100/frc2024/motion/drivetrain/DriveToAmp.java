@@ -32,18 +32,23 @@ public class DriveToAmp {
 
         if(length > length1){
             List<Pose2d> pose = new ArrayList<>();
-            // pose.add(new Pose2d(waypoint2, new Rotation2d()));
+            pose.add(new Pose2d(waypoint2, new Rotation2d()));
             // pose.add(new Pose2d(centerWaypoint, new Rotation2d()));
-            TrajectoryList trajecList = JSONParser.getTrajectoryList("src/main/deploy/choreo/centerAmp.traj");
-            trajecList.removeLastIndex();
-            pose.addAll(trajecList.getPoseArray());
+            // TrajectoryList trajecList = JSONParser.getTrajectoryList("src/main/deploy/choreo/centerAmp.traj");
+            // trajecList.removeLastIndex();
+            // pose.addAll(trajecList.getPoseArray());
+            pose.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
+            pose.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
+
             return pose;
         } else{
             List<Pose2d> pose = new ArrayList<>();
             pose.add(new Pose2d(waypoint, new Rotation2d()));
-            TrajectoryList trajecList = JSONParser.getTrajectoryList("src/main/deploy/choreo/sideAmp.traj");
-            trajecList.removeLastIndex();
-            pose.addAll(trajecList.getPoseArray());
+            // TrajectoryList trajecList = JSONParser.getTrajectoryList("src/main/deploy/choreo/sideAmp.traj");
+            // trajecList.removeLastIndex();
+            // pose.addAll(trajecList.getPoseArray());
+            pose.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
+            pose.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
             
             return pose;
         }
