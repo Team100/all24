@@ -23,7 +23,7 @@ public class Blips {
      */
     protected Blips() {
         et = 0;
-        tags = new ArrayList<Blip>();
+        tags = new ArrayList<>();
     }
 
     @Override

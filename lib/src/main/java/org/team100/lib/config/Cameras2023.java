@@ -4,7 +4,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 
-/** How the cameras were configured on the 2023 robot. */
+/** How the cameras were configured on the 2023 robot.
+ * 
+ * TODO: remove this class.
+ */
 public class Cameras2023 {
 
     /**
