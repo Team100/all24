@@ -59,10 +59,6 @@ def includeDesktopSupport = true
 // Also defines JUnit 5.
 dependencies {
 
-    // jackson is used for networktables msgpack serialization.
-    // TODO: try protobuf instead
-    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.3'
-
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
     implementation 'org.json:json:20231013'
@@ -85,12 +81,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    // ejml is used by 
-    implementation "org.ejml:ejml-simple:0.43.1"
     // for test visualizations
-    implementation "org.jfree:jfreechart:1.5.3"
-
-
+    testImplementation "org.jfree:jfreechart:1.5.3"
 }
 
 test {
