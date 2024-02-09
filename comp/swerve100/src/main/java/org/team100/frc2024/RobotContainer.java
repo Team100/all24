@@ -53,7 +53,6 @@ import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.Blip24ArrayListener;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -194,9 +193,6 @@ public class RobotContainer {
 
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
         notePositionDetector.enable();
-
-        Blip24ArrayListener listener = new Blip24ArrayListener();
-        listener.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
