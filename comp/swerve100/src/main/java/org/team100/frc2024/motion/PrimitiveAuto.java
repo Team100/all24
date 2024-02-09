@@ -4,7 +4,6 @@
 
 package org.team100.frc2024.motion;
 
-import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.commands.drivetrain.DriveBackwards;
 import org.team100.lib.commands.drivetrain.DriveManually;
