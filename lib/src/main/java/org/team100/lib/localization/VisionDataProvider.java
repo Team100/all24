@@ -3,12 +3,11 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 
 import org.msgpack.jackson.dataformat.MessagePackFactory;
-import org.team100.lib.config.Cameras2023;
+import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -93,7 +92,7 @@ public class VisionDataProvider implements TableEventListener {
     public void accept(NetworkTable table, String key, NetworkTableEvent event) {
         try {
             Blips blips = objectMapper.readValue(event.valueData.value.getRaw(), Blips.class);
-            estimateRobotPose(Cameras2023::cameraOffset, poseEstimator::addVisionMeasurement, key, blips);
+            estimateRobotPose(poseEstimator::addVisionMeasurement, key, blips);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,7 +105,6 @@ public class VisionDataProvider implements TableEventListener {
      * @param blips            all the targets the camera sees right now
      */
     void estimateRobotPose(
-            Function<String, Transform3d> cameraOffsets,
             ObjDoubleConsumer<Pose2d> estimateConsumer,
             String key,
             Blips blips) {
@@ -117,7 +115,7 @@ public class VisionDataProvider implements TableEventListener {
 
             Rotation2d gyroRotation = poseSupplier.get().getRotation();
 
-            Transform3d cameraInRobotCoordinates = cameraOffsets.apply(key);
+            Transform3d cameraInRobotCoordinates = Camera.get(key).getOffset();
 
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(

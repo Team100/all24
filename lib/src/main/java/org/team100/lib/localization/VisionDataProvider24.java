@@ -3,11 +3,10 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 
-import org.team100.lib.config.Cameras2023;
+import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -129,17 +128,12 @@ public class VisionDataProvider24 {
             String cameraSerialNumber = fields[1];
 
             estimateRobotPose(
-                    Cameras2023::cameraOffset,
                     poseEstimator::addVisionMeasurement,
                     cameraSerialNumber,
                     blips);
-
-            for (Blip24 blip : blips) {
-                // this is where you would do something useful with the payload
-                System.out.println(fields[1] + " " + blip);
-            }
         } else {
-            System.out.println("weird vision update key: " + name);
+            // this event is not for us
+            // Util.println("weird vision update key: " + name);
         }
     }
 
@@ -150,10 +144,11 @@ public class VisionDataProvider24 {
      * @param blips            all the targets the camera sees right now
      */
     void estimateRobotPose(
-            Function<String, Transform3d> cameraOffsets,
             ObjDoubleConsumer<Pose2d> estimateConsumer,
             String cameraSerialNumber,
             Blip24[] blips) {
+        // this treats every sight as independent.
+        // TODO: cleverly combine sights with triangulation for more accuracy
         for (Blip24 blip : blips) {
             Optional<Pose3d> tagInFieldCordsOptional = layout.getTagPose(blip.getId());
             if (!tagInFieldCordsOptional.isPresent())
@@ -161,7 +156,7 @@ public class VisionDataProvider24 {
 
             Rotation2d gyroRotation = poseSupplier.get().getRotation();
 
-            Transform3d cameraInRobotCoordinates = cameraOffsets.apply(cameraSerialNumber);
+            Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
