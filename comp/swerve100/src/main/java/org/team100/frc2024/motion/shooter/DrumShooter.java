@@ -100,7 +100,6 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void periodic() {
-        // System.out.println("AHHHHHHHHHH");
         topRoller.periodic();
         bottomRoller.periodic();
         m_viz.periodic();
@@ -113,6 +112,12 @@ public class DrumShooter extends Shooter {
 
     @Override
     public double getVelocity() {
-        return (topRoller.getVelocity() + bottomRoller.getVelocity()) / 2;
+        switch (Identity.instance) {
+            case COMP_BOT:
+            case BETA_BOT:
+                return (topRoller.getVelocity() + bottomRoller.getVelocity()) / 2;
+            default:
+                return 15;
+        }
     }
 }

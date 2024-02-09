@@ -1,14 +1,10 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,9 +21,9 @@ public class Robot extends TimedRobot {
   private SparkMaxPIDController m_pidController1;
   private RelativeEncoder m_encoder1;
   private SparkMaxPIDController m_pidController2;
-  private RelativeEncoder m_encoder2;
-  private SparkMaxPIDController m_pidController3;
-  private RelativeEncoder m_encoder3;
+  // private RelativeEncoder m_encoder2;
+  // private SparkMaxPIDController m_pidController3;
+  // private RelativeEncoder m_encoder3;
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
  private static final double dynamicFrictionFFVolts = 0.065;
  private static final double  staticFrictionFFVolts = 0.1;
@@ -114,8 +110,8 @@ public class Robot extends TimedRobot {
     //   this.set(0);
     //   m_motor3.set(0);
     // }
-    e.set(TalonFXControlMode.PercentOutput,0.3);
-    b.set(TalonFXControlMode.PercentOutput,0.3);
+    e.set(0.3);
+    b.set(0.3);
   }
 
   @Override

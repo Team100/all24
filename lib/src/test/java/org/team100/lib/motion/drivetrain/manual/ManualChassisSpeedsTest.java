@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.manual;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
@@ -17,7 +18,7 @@ class ManualChassisSpeedsTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
         Twist2d input =  new Twist2d();
-        ChassisSpeeds speeds = manual.apply(input);
+        ChassisSpeeds speeds = manual.apply(new SwerveState(), input);
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0, speeds.vyMetersPerSecond, kDelta);
         assertEquals(0, speeds.omegaRadiansPerSecond, kDelta);
@@ -31,7 +32,7 @@ class ManualChassisSpeedsTest {
         ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
         // clipping to the unit circle, then desaturating.
         Twist2d input = new Twist2d(1, 2, 3);
-        ChassisSpeeds speeds = manual.apply(input);
+        ChassisSpeeds speeds = manual.apply(new SwerveState(), input);
 
         assertEquals(0.223, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0.447, speeds.vyMetersPerSecond, kDelta);

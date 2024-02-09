@@ -12,5 +12,4 @@ public class FieldConstants {
     public static double SHOOTER_CENTER_Y = 5.871426;
     public static double SHOOTER_CENTER_X = 0.314565;
 
-
 }
