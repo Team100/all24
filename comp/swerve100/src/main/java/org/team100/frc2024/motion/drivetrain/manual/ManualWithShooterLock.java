@@ -102,6 +102,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
 
+
+
         // take the short path
         double measurement = currentRotation.getRadians();
         bearing = new Rotation2d(
@@ -204,4 +206,10 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return speed * relativeBearing.getSin() / range;
     }
 
+    static void aimWhileMoving(Rotation2d bearing, SwerveState state){
+
+            //its the shooter util code but robot moving vec is y velocity and angle in rads is bearing
+
+
+    }
 }

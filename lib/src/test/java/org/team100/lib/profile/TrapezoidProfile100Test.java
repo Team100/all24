@@ -794,8 +794,6 @@ class TrapezoidProfile100Test {
 
     }
 
-
-
     /**
      * this is a normal profile from 0 to 1, rest-to-rest, it's a triangle profile.
      */
