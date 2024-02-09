@@ -11,7 +11,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -62,16 +62,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     /**
      */
     private static final double outboardP = .001;
-
-    /**
-     * The Falcon 500 onboard sensor.
-     */
-    private static final double ticksPerRevolution = 2048;
-
-    /**
-     * For voltage compensation, the maximum output voltage.
-     */
-    private static final double saturationVoltage = 11;
 
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;
@@ -216,7 +206,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         double accelFF = accelFF(accelM_S_S);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
+        VelocityVoltage v = new VelocityVoltage(motorRev_S);
         v.FeedForward = kFF;
         v.EnableFOC = true;
         v.Acceleration = motorRev_S2;

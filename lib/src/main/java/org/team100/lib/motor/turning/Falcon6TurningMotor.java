@@ -13,7 +13,6 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -27,7 +26,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * See {@link FalconDriveMotor} for configuration details.
  */
 public class Falcon6TurningMotor implements Motor100<Angle100> {
-    private static final double ticksPerRevolution = 2048;
     private final double m_gearRatio;
     private static final double kCurrentLimit = 40;
 
@@ -65,11 +63,6 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
     private static final double outboardP = 0.001;
-
-    /**
-     * For voltage compensation, the maximum output voltage.
-     */
-    private static final double saturationVoltage = 11;
 
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;
