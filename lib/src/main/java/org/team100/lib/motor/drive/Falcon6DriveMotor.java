@@ -31,13 +31,13 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 0.1;
+    private static final double staticFrictionSpeedLimitRev_S = 3.5;
 
     /**
      * Friction feedforward in volts, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.03;
+    private static final double staticFrictionFFVolts = 0.18;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
@@ -45,14 +45,14 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * This value seems very low, perhaps because the falcon closed-loop control is
      * compensating?
      */
-    private static final double dynamicFrictionFFVolts = 0.019;
+    private static final double dynamicFrictionFFVolts = 0.01;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
      * volt-seconds per revolution. Since saturation is 11 volts and free speed is
      * about 100 rev/s, this is about 0.11.
      */
-    private static final double velocityFFVoltS_Rev = 0.06;
+    private static final double velocityFFVoltS_Rev = 0.11;
 
     /**
      * Placeholder for accel feedforward.
@@ -61,7 +61,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      */
-    private static final double outboardP = 1/2048;
+    private static final double outboardP = .001;
 
     /**
      * The Falcon 500 onboard sensor.
@@ -89,10 +89,10 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     /** Current motor error, updated in periodic() */
     private double m_error;
 
-        /** updated in periodic() */
-        private double m_positionM;
-        /** updated in periodic() */
-        private double m_velocityM_S;
+    /** updated in periodic() */
+    private double m_positionM;
+    /** updated in periodic() */
+    private double m_velocityM_S;
 
     public Falcon6DriveMotor(
             String name,
@@ -111,7 +111,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
         // m_motor.configFactoryDefault();
         var talonFXConfigurator = m_motor.getConfigurator();
-        
+
         TalonFXConfiguration conf = new TalonFXConfiguration();
         talonFXConfigurator.apply(conf);
 
@@ -119,8 +119,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
         var motorConfigs = new MotorOutputConfigs();
         motorConfigs.NeutralMode = NeutralModeValue.Brake;
-
-
 
         var currentConfigs = new CurrentLimitsConfigs();
         // i think maybe we don't care about this?
@@ -131,13 +129,11 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         currentConfigs.SupplyCurrentLimitEnable = true;
         talonFXConfigurator.apply(currentConfigs);
 
-
-
         // // configure current limits
         // m_motor.configStatorCurrentLimit(
-        //         new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+        // new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
         // m_motor.configSupplyCurrentLimit(
-        //         new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+        // new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
 
         // use integrated sensor for status and PID feedback
         // m_motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
@@ -151,7 +147,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         }
 
         talonFXConfigurator.apply(motorConfigs);
-
 
         // configure velocity measurement sampling
         // m_motor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_10Ms);
@@ -178,7 +173,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         // m_motor.config_kD(0, 0);
         // m_motor.config_kF(0, 0);
 
-
         // set slot 0 gains
         var slot0Configs = new Slot0Configs();
         slot0Configs.kV = 0.0;
@@ -189,15 +183,11 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         // apply gains, 50 ms total timeout
         m_motor.getConfigurator().apply(slot0Configs, 0.050);
 
-
-
-
-
         m_name = Names.append(name, this);
         t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
     }
 
-        //////////////////
+    //////////////////
     // motor methods
 
     @Override
@@ -233,8 +223,9 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         v.Acceleration = motorRev_S2;
         m_motor.setControl(v);
 
-        // m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
-        t.log(Level.DEBUG, m_name, "motor input [-1,1]", motorRev_S);
+        // m_motor.set(ControlMode.Velocity, motorTick_100ms,
+        // DemandType.ArbitraryFeedForward, kFF);
+        t.log(Level.DEBUG, m_name, "motor input", motorRev_S);
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
@@ -254,10 +245,10 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     }
 
     // /**
-    //  * @return integrated sensor position in sensor units (1/2048 turn).
-    //  */
+    // * @return integrated sensor position in sensor units (1/2048 turn).
+    // */
     // public double getPosition() {
-    //     return m_rawPosition;
+    // return m_rawPosition;
     // }
 
     /**
@@ -280,7 +271,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     public void periodic() {
         // m_rawPosition = m_motor.getSelectedSensorPosition();
         m_rawPosition = m_motor.getPosition().getValueAsDouble();
-        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble()/m_gearRatio;
+        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
 
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
@@ -298,31 +289,30 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
         // t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getTemperature());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
-        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());        
-        // t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());        
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+        // t.log(Level.DEBUG, m_name, "last error code", m_motor.getLastError());
     }
 
     //////////////////////////
     // encoder methods
 
+    /** Position in meters */
+    @Override
+    public double getPosition() {
+        return m_positionM;
+    }
 
-        /** Position in meters */
-        @Override
-        public double getPosition() {
-            return m_positionM;
-        }
-    
-        /** Velocity in meters/sec */
-        @Override
-        public double getRate() {
-            return m_velocityM_S;
-        }
-    
-        @Override
-        public void reset() {
-            resetPosition();
-            m_positionM = 0;
-        }
+    /** Velocity in meters/sec */
+    @Override
+    public double getRate() {
+        return m_velocityM_S;
+    }
+
+    @Override
+    public void reset() {
+        resetPosition();
+        m_positionM = 0;
+    }
 
     ///////////////////////////////////////////////////////////////
 
@@ -332,28 +322,28 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction ;
+            return staticFrictionFFVolts * direction;
         }
-        return dynamicFrictionFFVolts * direction ;
+        return dynamicFrictionFFVolts * direction;
     }
 
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
     private static double velocityFF(double desiredMotorRev_S) {
-        return velocityFFVoltS_Rev * desiredMotorRev_S ;
+        return velocityFFVoltS_Rev * desiredMotorRev_S;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S ;
+        return accelFFVoltS2_M * accelM_S_S;
     }
 
     private double getErrorRev_S() {
         double errorTick_100ms = m_error;
-        double errorRev_100ms = errorTick_100ms ;
+        double errorRev_100ms = errorTick_100ms;
         return errorRev_100ms * 10;
     }
 }

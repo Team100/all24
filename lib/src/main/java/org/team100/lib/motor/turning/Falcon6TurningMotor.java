@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -34,18 +35,18 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 0.1;
+    private static final double staticFrictionSpeedLimitRev_S = 3.5;
 
     /**
      * Friction feedforward in volts, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.375/20;
+    private static final double staticFrictionFFVolts = 0.375;
 
     /**
      * Friction feedforward in volts, for when the mechanism is moving.
      */
-    private static final double dynamicFrictionFFVolts = 0.27/30;
+    private static final double dynamicFrictionFFVolts = 0.27;
 
     /**
      * Velocity feedforward in units of volts per motor revolution per second, or
@@ -63,7 +64,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * Proportional feedback coefficient for the controller. The error is measured
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
-    private static final double outboardP = 1/2048;
+    private static final double outboardP = 0.001;
 
     /**
      * For voltage compensation, the maximum output voltage.
@@ -196,9 +197,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double accelFF = accelFF(accelRad_S_S);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        VelocityDutyCycle v = new VelocityDutyCycle(motorRev_S);
-        // v.FeedForward = kFF;
-        v.withFeedForward(kFF);
+        VelocityVoltage v = new VelocityVoltage(motorRev_S);
+        v.FeedForward = kFF;
         v.Acceleration = motorRev_S2;
         v.EnableFOC = true;
         m_motor.setControl(v);
@@ -227,7 +227,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     @Override
     public void periodic() {
         // m_rawVelocity = m_motor.getSelectedSensorVelocity();
-        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble()/m_gearRatio;
+        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
 
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
@@ -241,14 +241,14 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     /** Velocity feedforward in duty cycle units [-1, 1] */
     private static double velocityFF(double desiredMotorRev_S) {
-        return velocityFFVoltS_Rev * desiredMotorRev_S ;
+        return velocityFFVoltS_Rev * desiredMotorRev_S;
     }
 
     /** Frictional feedforward in duty cycle units [-1, 1] */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction ;
+            return staticFrictionFFVolts * direction;
         }
         return dynamicFrictionFFVolts * direction;
     }
@@ -257,12 +257,12 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelRad_S_S) {
-        return accelFFVoltS2_Rad * accelRad_S_S ;
+        return accelFFVoltS2_Rad * accelRad_S_S;
     }
 
     private double getErrorRev_S() {
         double errorTick_100ms = m_error;
-        double errorRev_100ms = errorTick_100ms ;
+        double errorRev_100ms = errorTick_100ms;
         return errorRev_100ms * 10;
     }
 }

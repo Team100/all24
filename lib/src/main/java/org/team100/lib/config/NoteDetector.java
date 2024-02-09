@@ -61,17 +61,8 @@ public class NoteDetector {
      * @return A robot relative angle in radians to the note
      */
     public double getAngleToNote() {
-        switch (Identity.instance) {
-            case BETA_BOT:
-            case COMP_BOT:
                 return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
                         m_notePosition24ArrayListener.getY().get());
-            case BLANK:
-                return MathUtil.angleModulus(m_swerve.getPose().getTranslation().getAngle().getRadians() + Math.PI);
-            default:
-                return MathUtil.angleModulus(m_swerve.getPose().getTranslation().getAngle().getRadians() + Math.PI);
-        }
-
     }
 
     /**
@@ -101,7 +92,7 @@ public class NoteDetector {
 
     /**
      * @return A robot relative translational value of an object in a camera in
-     *         meters
+     *         meters, rot value is bearing
      */
     public Translation2d RobotRelativeTranslation2d() {
         return new Translation2d(getX(), getY());
