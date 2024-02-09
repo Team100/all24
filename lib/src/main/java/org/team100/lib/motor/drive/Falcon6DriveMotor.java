@@ -34,30 +34,30 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private static final double staticFrictionSpeedLimitRev_S = 3.5;
 
     /**
-     * Friction feedforward in volts, for when the mechanism is stopped, or nearly
+     * Friction feedforward in amps, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.18;
+    private static final double staticFrictionFFAmps = 0.18;
 
     /**
-     * Friction feedforward in volts, for when the mechanism is moving.
+     * Friction feedforward in amps, for when the mechanism is moving.
      * 
      * This value seems very low, perhaps because the falcon closed-loop control is
      * compensating?
      */
-    private static final double dynamicFrictionFFVolts = 0.01;
+    private static final double dynamicFrictionFFAmps = 0.01;
 
     /**
-     * Velocity feedforward in units of volts per motor revolution per second, or
-     * volt-seconds per revolution. Since saturation is 11 volts and free speed is
+     * Velocity feedforward in units of amps per motor revolution per second, or
+     * amp-seconds per revolution. Since saturation is 11 amps and free speed is
      * about 100 rev/s, this is about 0.11.
      */
-    private static final double velocityFFVoltS_Rev = 0.11;
+    private static final double velocityFFAmps_Rev = 0.11;
 
     /**
      * Placeholder for accel feedforward.
      */
-    private static final double accelFFVoltS2_M = 0;
+    private static final double accelFFAmps2_M = 0;
 
     /**
      */
@@ -311,23 +311,23 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction;
+            return staticFrictionFFAmps * direction;
         }
-        return dynamicFrictionFFVolts * direction;
+        return dynamicFrictionFFAmps * direction;
     }
 
     /**
      * Velocity feedforward in duty cycle units [-1, 1]
      */
     private static double velocityFF(double desiredMotorRev_S) {
-        return velocityFFVoltS_Rev * desiredMotorRev_S;
+        return velocityFFAmps_Rev * desiredMotorRev_S;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S;
+        return accelFFAmps2_M * accelM_S_S;
     }
 
     private double getErrorRev_S() {

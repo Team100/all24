@@ -37,27 +37,27 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     private static final double staticFrictionSpeedLimitRev_S = 3.5;
 
     /**
-     * Friction feedforward in volts, for when the mechanism is stopped, or nearly
+     * Friction feedforward in amps, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFVolts = 0.375;
+    private static final double staticFrictionFFAmps = 0.375;
 
     /**
-     * Friction feedforward in volts, for when the mechanism is moving.
+     * Friction feedforward in amps, for when the mechanism is moving.
      */
-    private static final double dynamicFrictionFFVolts = 0.27;
+    private static final double dynamicFrictionFFAmps = 0.27;
 
     /**
-     * Velocity feedforward in units of volts per motor revolution per second, or
-     * volt-seconds per revolution. Since saturation is 11 volts and free speed is
+     * Velocity feedforward in units of amps per motor revolution per second, or
+     * amp-seconds per revolution. Since saturation is 11 amp and free speed is
      * about 100 rev/s, this is about 0.11.
      */
-    private static final double velocityFFVoltS_Rev = 0.11;
+    private static final double velocityFFAmps_Rev = 0.11;
 
     /**
      * Placeholder for accel feedforward.
      */
-    private static final double accelFFVoltS2_Rad = 0;
+    private static final double accelFFAmps2_Rad = 0;
 
     /**
      * Proportional feedback coefficient for the controller. The error is measured
@@ -235,23 +235,23 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     /** Velocity feedforward in duty cycle units [-1, 1] */
     private static double velocityFF(double desiredMotorRev_S) {
-        return velocityFFVoltS_Rev * desiredMotorRev_S;
+        return velocityFFAmps_Rev * desiredMotorRev_S;
     }
 
     /** Frictional feedforward in duty cycle units [-1, 1] */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction;
+            return staticFrictionFFAmps * direction;
         }
-        return dynamicFrictionFFVolts * direction;
+        return dynamicFrictionFFAmps * direction;
     }
 
     /**
      * Acceleration feedforward in duty cycle units [-1, 1]
      */
     private static double accelFF(double accelRad_S_S) {
-        return accelFFVoltS2_Rad * accelRad_S_S;
+        return accelFFAmps2_Rad * accelRad_S_S;
     }
 
     private double getErrorRev_S() {
