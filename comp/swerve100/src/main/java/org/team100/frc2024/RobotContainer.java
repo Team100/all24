@@ -1,7 +1,6 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -56,7 +55,7 @@ import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Blip24ArrayListener;
 import org.team100.lib.localization.NotePosition24ArrayListener;
-import org.team100.lib.localization.VisionDataProvider;
+import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -89,7 +88,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.proto.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -155,9 +153,9 @@ public class RobotContainer {
             m_alliance = Alliance.Blue;
         }
         if (m_alliance == Alliance.Blue) {
-            m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
+            m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
         } else {
-            m_layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
+            m_layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2024-crescendo.json");
         }
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
@@ -184,7 +182,11 @@ public class RobotContainer {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        VisionDataProvider visionDataProvider = new VisionDataProvider(
+        // VisionDataProvider visionDataProvider = new VisionDataProvider(
+        //         m_layout,
+        //         poseEstimator,
+        //         poseEstimator::getEstimatedPosition);
+        VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
                 poseEstimator,
                 poseEstimator::getEstimatedPosition);

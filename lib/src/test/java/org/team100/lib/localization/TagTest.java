@@ -17,35 +17,35 @@ class TagTest {
 
     @Test
     void testBlueLayout() throws IOException {
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-chargedup.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
         /*
-         * from the blue perspective, tag 5 has small x
+         * from the blue perspective, tag 7 has small x
          * and large y, and oriented at pi theta.
          */
-        Pose3d tag5Pose = layout.getTagPose(5).get();
-        assertEquals(0.36, tag5Pose.getTranslation().getX(), kDelta); // close to baseline
-        assertEquals(6.75, tag5Pose.getTranslation().getY(), kDelta); // far to left
-        assertEquals(0.69, tag5Pose.getTranslation().getZ(), kDelta); // 2 feet up
-        assertEquals(0, tag5Pose.getRotation().getX(), kDelta);
-        assertEquals(0, tag5Pose.getRotation().getY(), kDelta);
+        Pose3d tag7Pose = layout.getTagPose(7).get();
+        assertEquals(-0.038, tag7Pose.getTranslation().getX(), kDelta); // behind the glass
+        assertEquals(5.548, tag7Pose.getTranslation().getY(), kDelta); // far to left
+        assertEquals(1.451, tag7Pose.getTranslation().getZ(), kDelta); // 1.5m feet up
+        assertEquals(0, tag7Pose.getRotation().getX(), kDelta);
+        assertEquals(0, tag7Pose.getRotation().getY(), kDelta);
         // "into the page" means facing towards the baseline, 180 degrees
-        assertEquals(Math.PI, tag5Pose.getRotation().getZ(), kDelta);
+        assertEquals(Math.PI, tag7Pose.getRotation().getZ(), kDelta);
     }
 
     @Test
     void testRedLayout() throws IOException {
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-chargedup.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2024-crescendo.json");
         /*
-         * from the red perspective, tag 5 has large x
+         * from the red perspective, tag 7 has large x
          * and small y, and oriented at zero theta.
          */
-        Pose3d tag5Pose = layout.getTagPose(5).get();
-        assertEquals(16.18, tag5Pose.getTranslation().getX(), kDelta); // far ahead
-        assertEquals(1.26, tag5Pose.getTranslation().getY(), kDelta); // close to right side
-        assertEquals(0.69, tag5Pose.getTranslation().getZ(), kDelta); // 2 feet up (as above)
-        assertEquals(0, tag5Pose.getRotation().getX(), kDelta);
-        assertEquals(0, tag5Pose.getRotation().getY(), kDelta);
+        Pose3d tag7Pose = layout.getTagPose(7).get();
+        assertEquals(16.489, tag7Pose.getTranslation().getX(), kDelta); // far ahead
+        assertEquals(2.663, tag7Pose.getTranslation().getY(), kDelta); // close to right side
+        assertEquals(1.451, tag7Pose.getTranslation().getZ(), kDelta); // 1.5m up (as above)
+        assertEquals(0, tag7Pose.getRotation().getX(), kDelta);
+        assertEquals(0, tag7Pose.getRotation().getY(), kDelta);
         // "into the page" i.e. away from the baseline, i.e. zero degrees
-        assertEquals(0, tag5Pose.getRotation().getZ(), kDelta);
+        assertEquals(0, tag7Pose.getRotation().getZ(), kDelta);
     }
 }
