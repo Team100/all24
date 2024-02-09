@@ -20,86 +20,77 @@ import edu.wpi.first.wpilibj2.command.Command;
 /** Add your docs here. */
 public class DriveToAmp {
 
-    static Translation2d waypoint = new Translation2d(10.320774, 2.098546);
-    static Translation2d waypoint2 = new Translation2d(11.693578, 4.055302);
 
-
-    public static List<Pose2d> getShortestTrajec(SwerveDriveSubsystem drive){
-        // System.out.println(drive.getPose());
-        Translation2d currentTranslation = drive.getPose().getTranslation();
-        
-        double length = currentTranslation.getDistance(waypoint);
-        double length1 = currentTranslation.getDistance(waypoint2);
-
-        if(length > length1){
-            List<Pose2d> pose = new ArrayList<>();
-            pose.add(new Pose2d(waypoint2, new Rotation2d()));
-            // pose.add(new Pose2d(centerWaypoint, new Rotation2d()));
-            // TrajectoryList trajecList = JSONParser.getTrajectoryList("src/main/deploy/choreo/centerAmp.traj");
-            // trajecList.removeLastIndex();
-            // pose.addAll(trajecList.getPoseArray());
-            pose.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
-            pose.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
-
-            return pose;
-        } else{
-            List<Pose2d> pose = new ArrayList<>();
-            pose.add(new Pose2d(waypoint, new Rotation2d()));
-            // TrajectoryList trajecList = JSONParser.getTrajectoryList("src/main/deploy/choreo/sideAmp.traj");
-            // trajecList.removeLastIndex();
-            // pose.addAll(trajecList.getPoseArray());
-            pose.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
-            pose.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
-            
-            return pose;
-        }
-
-       
-
-       
+    private static boolean isInsideRectangle(Translation2d translation2d, Translation2d rectangle, double width, double height) {
+        return (translation2d.getX() >= rectangle.getX() && translation2d.getX() <= rectangle.getX() + height) && (translation2d.getY() >= rectangle.getY() && translation2d.getY() <= rectangle.getY() + width);
     }
 
     public static List<Pose2d> getShortestTrajecNew(SwerveDriveSubsystem drive){
-        HashMap<String, Pose2d> poseMap = new HashMap<>();
+        HashMap<String, List<Pose2d>> poseMap = new HashMap<>();
         Translation2d currentTranslation = drive.getPose().getTranslation();
+        Pose2d currentPose = drive.getPose();
+        
+        List<Pose2d> sideFarStage =  new ArrayList<>();
 
+        List<Pose2d> centerFarStage = new ArrayList<>();
         
-        
-        poseMap.put("Side Far Stage", new Pose2d(10.320774, 2.098546, new Rotation2d()));
-        poseMap.put("Center Far Stage", new Pose2d(11.693578, 4.055302, new Rotation2d()));
-        poseMap.put("Center Stage", new Pose2d(5.885868, 6.359865, new Rotation2d()));
+        List<Pose2d> sideCloseStage = new ArrayList<>();
+
+        List<Pose2d> ampDirect = new ArrayList<>();        
+
+        if(isInsideRectangle(currentTranslation, new Translation2d(10.239165, 0.918635), 8, 6)){ //Inside Far Wing
+            sideFarStage.add(new Pose2d(10.009935, 2.312511, new Rotation2d()));
+            sideFarStage.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
+            sideFarStage.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
+
+            centerFarStage.add(new Pose2d(11.693578, 4.055302, new Rotation2d()));
+            centerFarStage.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
+            centerFarStage.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
+        } else if(isInsideRectangle(currentTranslation, new Translation2d(0, 0), 8, 6)){ //Inside Close Wing
+            ampDirect.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
+        } else {
+            sideCloseStage.add(new Pose2d(5.885868, 6.359865, new Rotation2d()));
+            sideCloseStage.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
+        }
+
+
+        poseMap.put("Side Far Stage", sideFarStage);
+        poseMap.put("Center Far Stage", centerFarStage);
+        poseMap.put("Side Close Stage", sideCloseStage);
+        poseMap.put("Amp Direct", ampDirect);
+
 
         // Initialize variables to keep track of the shortest distance and the corresponding Pose2d object
         double shortestDistance = Double.MAX_VALUE;
-        Pose2d closestPose = null;
         String closestKey = null;
 
         // Iterate through the HashMap entries
-        for (HashMap.Entry<String, Pose2d> entry : poseMap.entrySet()) {
-            Pose2d pose = entry.getValue();
-            double distance = currentTranslation.getDistance(pose.getTranslation());
+        for (HashMap.Entry<String, List<Pose2d>> entry : poseMap.entrySet()) {
+            
+            List<Pose2d> poses = new ArrayList<>(entry.getValue());
+
+            if(poses.size() == 0){
+                continue;
+            }
+            
+            double distance = 0;
+
+            Pose2d firstPose = currentPose;
+            Pose2d secondPose = poses.get(0);
+
+
+            distance = firstPose.getTranslation().getDistance(secondPose.getTranslation());
+            
             if (distance < shortestDistance) {
                 shortestDistance = distance;
-                closestPose = pose;
                 closestKey = entry.getKey();
             }
         }
 
-        List<Pose2d> completeWaypoints = new ArrayList<>();
 
-        if(closestKey == "Side Far Stage"){
-            completeWaypoints.add(closestPose);
-            completeWaypoints.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
-        } else if(closestKey == "Center Far Stage"){
-            completeWaypoints.add(closestPose);
-            completeWaypoints.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
-        } else {
-            completeWaypoints.add(closestPose);
-        }
+        return poseMap.get(closestKey);
 
-        completeWaypoints.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
 
-        return completeWaypoints;
 
 
     }
