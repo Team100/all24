@@ -233,12 +233,12 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     //////////////////////////////////////////////////////////////////
 
-    /** Velocity feedforward in duty cycle units [-1, 1] */
+    /** Velocity feedforward in amps */
     private static double velocityFF(double desiredMotorRev_S) {
         return velocityFFAmps_Rev * desiredMotorRev_S;
     }
 
-    /** Frictional feedforward in duty cycle units [-1, 1] */
+    /** Frictional feedforward in amps */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
@@ -248,7 +248,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     }
 
     /**
-     * Acceleration feedforward in duty cycle units [-1, 1]
+     * Acceleration feedforward in amps
      */
     private static double accelFF(double accelRad_S_S) {
         return accelFFAmps2_Rad * accelRad_S_S;

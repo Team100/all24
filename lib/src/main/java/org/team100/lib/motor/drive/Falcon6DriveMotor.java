@@ -306,7 +306,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Frictional feedforward in duty cycle units [-1, 1]
+     * Frictional feedforward in amps
      */
     private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
@@ -317,14 +317,14 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     }
 
     /**
-     * Velocity feedforward in duty cycle units [-1, 1]
+     * Velocity feedforward in amps
      */
     private static double velocityFF(double desiredMotorRev_S) {
         return velocityFFAmps_Rev * desiredMotorRev_S;
     }
 
     /**
-     * Acceleration feedforward in duty cycle units [-1, 1]
+     * Acceleration feedforward in amps
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFAmps2_M * accelM_S_S;

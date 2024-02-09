@@ -4,7 +4,6 @@ import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.CameraAngles;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -36,9 +35,7 @@ public class NoteDetector {
      *         meters
      */
     public double getX() {
-
         return m_cameraAngles.getX(m_notePosition24ArrayListener.getY().get());
-
     }
 
     /**
@@ -60,9 +57,24 @@ public class NoteDetector {
     /**
      * @return A robot relative angle in radians to the note
      */
-    public double getAngleToNote() {
-                return m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
-                        m_notePosition24ArrayListener.getY().get());
+    public Rotation2d robotRelativeAngleToNote() {
+        return new Rotation2d(m_cameraAngles.getAngle(m_notePosition24ArrayListener.getX().get(),
+                m_notePosition24ArrayListener.getY().get()));
+    }
+
+    /**
+     * @return A field relative angle in radians to the note
+     */
+    public Rotation2d fieldRelativeAngleToNote() {
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+        return fieldRelativePose2d().getRotation();
+                case BLANK:
+                return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
+            default:
+                return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
+            }
     }
 
     /**
@@ -111,7 +123,7 @@ public class NoteDetector {
      *         for translation and radians for rotation
      */
     public Transform2d robotRelativeTransform2d() {
-        return new Transform2d(getX(), getY(), new Rotation2d(getAngleToNote()));
+        return new Transform2d(getX(), getY(), robotRelativeAngleToNote());
     }
 
     /**
@@ -119,6 +131,14 @@ public class NoteDetector {
      *         translation and radians for rotation
      */
     public Pose2d fieldRelativePose2d() {
-        return m_swerve.getPose().transformBy(robotRelativeTransform2d());
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                return m_swerve.getPose().transformBy(robotRelativeTransform2d());
+            case BLANK:
+                return new Pose2d(fieldRelativeX(), fieldRelativeY(), fieldRelativeAngleToNote());
+            default:
+                return new Pose2d(fieldRelativeX(), fieldRelativeY(), fieldRelativeAngleToNote());
+        }
     }
 }
