@@ -40,7 +40,7 @@ public class Amp extends SequentialCommandGroup {
     addCommands(
         // new DriveWithWaypoints(m_swerve, planner, controller, limits, waypoint)
         //crashing cuz same points on the trajec
-        new DriveWithWaypoints(m_swerve, planner, controller, limits, () -> DriveToAmp.getShortestTrajec(m_swerve))
+        new DriveWithWaypoints(m_swerve, planner, controller, limits, () -> DriveToAmp.getShortestTrajecNew(m_swerve))
         
         // new DriveWithTrajectory(m_swerve, planner, controller, limits, "src/main/deploy/choreo/Note3to4.traj")
         // new DriveToWaypoint100(new Pose2d(10.701702, 1.557158, new Rotation2d(0)), m_swerve, planner, controller, limits),

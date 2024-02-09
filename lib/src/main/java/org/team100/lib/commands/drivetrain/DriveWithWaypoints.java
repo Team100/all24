@@ -121,7 +121,7 @@ public class DriveWithWaypoints extends Command100 {
                         5,
                         5);
 
-    TrajectoryVisualization.setViz(trajectory);
+    // TrajectoryVisualization.setViz(trajectory);
 
     TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));

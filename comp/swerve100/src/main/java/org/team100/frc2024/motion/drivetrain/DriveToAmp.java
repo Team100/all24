@@ -5,6 +5,7 @@
 package org.team100.frc2024.motion.drivetrain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.team100.lib.commands.drivetrain.JSONParser;
@@ -21,7 +22,7 @@ public class DriveToAmp {
 
     static Translation2d waypoint = new Translation2d(10.320774, 2.098546);
     static Translation2d waypoint2 = new Translation2d(11.693578, 4.055302);
-    static Translation2d centerWaypoint = new Translation2d(8.641554, 4.082977);
+
 
     public static List<Pose2d> getShortestTrajec(SwerveDriveSubsystem drive){
         // System.out.println(drive.getPose());
@@ -56,5 +57,50 @@ public class DriveToAmp {
        
 
        
+    }
+
+    public static List<Pose2d> getShortestTrajecNew(SwerveDriveSubsystem drive){
+        HashMap<String, Pose2d> poseMap = new HashMap<>();
+        Translation2d currentTranslation = drive.getPose().getTranslation();
+
+        
+        
+        poseMap.put("Side Far Stage", new Pose2d(10.320774, 2.098546, new Rotation2d()));
+        poseMap.put("Center Far Stage", new Pose2d(11.693578, 4.055302, new Rotation2d()));
+        poseMap.put("Center Stage", new Pose2d(5.885868, 6.359865, new Rotation2d()));
+
+        // Initialize variables to keep track of the shortest distance and the corresponding Pose2d object
+        double shortestDistance = Double.MAX_VALUE;
+        Pose2d closestPose = null;
+        String closestKey = null;
+
+        // Iterate through the HashMap entries
+        for (HashMap.Entry<String, Pose2d> entry : poseMap.entrySet()) {
+            Pose2d pose = entry.getValue();
+            double distance = currentTranslation.getDistance(pose.getTranslation());
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                closestPose = pose;
+                closestKey = entry.getKey();
+            }
+        }
+
+        List<Pose2d> completeWaypoints = new ArrayList<>();
+
+        if(closestKey == "Side Far Stage"){
+            completeWaypoints.add(closestPose);
+            completeWaypoints.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
+        } else if(closestKey == "Center Far Stage"){
+            completeWaypoints.add(closestPose);
+            completeWaypoints.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
+        } else {
+            completeWaypoints.add(closestPose);
+        }
+
+        completeWaypoints.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
+
+        return completeWaypoints;
+
+
     }
 }
