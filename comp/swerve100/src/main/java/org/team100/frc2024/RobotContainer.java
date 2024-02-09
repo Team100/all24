@@ -304,7 +304,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test,
         //         new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner, drivePID, swerveKinodynamics));
+        whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner, drivePID, swerveKinodynamics));
 
         // whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
 
@@ -447,7 +447,7 @@ public class RobotContainer {
                         omegaController,
                         0.25);
 
-        whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics));
+        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics));
 
         m_drive.setDefaultCommand(driveManually);
 

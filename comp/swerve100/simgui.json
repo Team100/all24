@@ -80,6 +80,15 @@
           }
         },
         "open": true
+      },
+      "SwerveDriveSubsystem": {
+        "open": true,
+        "pose": {
+          "open": true,
+          "translation": {
+            "open": true
+          }
+        }
       }
     }
   },
