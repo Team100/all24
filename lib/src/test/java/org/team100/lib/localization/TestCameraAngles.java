@@ -13,6 +13,8 @@ class TestCameraAngles extends Fixtured {
             CameraAngles camera = new CameraAngles(30, 67.5, 50, 832, 616, 1, 0,0);
                assertEquals(0,camera.getY(416,200),0.0001);
                assertEquals(-0.7,camera.getX(0),0.001);
-        }
+               assertEquals(416,camera.getInverseY(1,0),0.001);
+               assertEquals(123.2,camera.getInverseX(1),0.001);
+            }
     }
 }
