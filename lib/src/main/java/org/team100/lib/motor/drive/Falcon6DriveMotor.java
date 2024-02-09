@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -26,7 +27,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
 public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
-
+    //TODO Tune ff for amps
     /**
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
@@ -61,6 +62,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      */
+    //TODO Fix PID
     private static final double outboardP = .001;
 
     private final Telemetry t = Telemetry.get();
@@ -206,15 +208,14 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         double accelFF = accelFF(accelM_S_S);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        VelocityVoltage v = new VelocityVoltage(motorRev_S);
+        VelocityTorqueCurrentFOC v = new VelocityTorqueCurrentFOC(motorRev_S);
         v.FeedForward = kFF;
-        v.EnableFOC = true;
         v.Acceleration = motorRev_S2;
         m_motor.setControl(v);
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
         // DemandType.ArbitraryFeedForward, kFF);
-        t.log(Level.DEBUG, m_name, "motor input", motorRev_S);
+        t.log(Level.DEBUG, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);

@@ -26,6 +26,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * See {@link FalconDriveMotor} for configuration details.
  */
 public class Falcon6TurningMotor implements Motor100<Angle100> {
+    //TODO Tune ff for amps
     private final double m_gearRatio;
     private static final double kCurrentLimit = 40;
 
@@ -62,6 +63,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * Proportional feedback coefficient for the controller. The error is measured
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
+    //TODO Fix PID
     private static final double outboardP = 0.001;
 
     private final Telemetry t = Telemetry.get();
@@ -198,7 +200,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
         // DemandType.ArbitraryFeedForward, kFF);
-
+        t.log(Level.DEBUG, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
