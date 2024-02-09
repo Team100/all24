@@ -53,7 +53,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private static final double velocityFFAmps_Rev = 0.11;
 
     /**
-     * Placeholder for accel feedforward.
+     * Accel feedforward in amps
      */
     private static final double accelFFAmps2_M = 0;
 

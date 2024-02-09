@@ -53,7 +53,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     private static final double velocityFFAmps_Rev = 0.11;
 
     /**
-     * Placeholder for accel feedforward.
+     * Accel feedforward in amps
      */
     private static final double accelFFAmps2_Rad = 0;
 
