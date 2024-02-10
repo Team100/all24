@@ -105,7 +105,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
                     true,
                     currentLimit,
                     kDriveReduction,
-                    kWheelDiameterM);
+                    kWheelDiameterM,
+                    pidConstants,
+                    feedforwardConstants);
         } else {
             return new FalconDriveMotor(
                     name,

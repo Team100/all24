@@ -94,7 +94,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private static final double kDriveCurrentLimit = 60;
+    private static final double kDriveCurrentLimit = 80;
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;

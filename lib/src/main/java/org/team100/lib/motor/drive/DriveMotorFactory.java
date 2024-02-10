@@ -33,7 +33,9 @@ public class DriveMotorFactory {
                     true,
                     currentLimit,
                     driveReduction,
-                    wheelDiameterM);
+                    wheelDiameterM,
+                    pidConstants,
+                    feedforwardConstants);
         } else {
             return new FalconDriveMotor(
                     name,
@@ -59,7 +61,9 @@ public class DriveMotorFactory {
                     name,
                     turningMotorCanId,
                     motorPhase,
-                    gearRatio);
+                    gearRatio,
+                    lowLevelPID,
+                    lowLevelFeedforward);
         } else {
             return new FalconTurningMotor(
                     name,
