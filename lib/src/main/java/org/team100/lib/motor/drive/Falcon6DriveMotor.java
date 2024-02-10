@@ -43,9 +43,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /**
      * Friction feedforward in amps, for when the mechanism is moving.
-     * 
-     * This value seems very low, perhaps because the falcon closed-loop control is
-     * compensating?
      */
     private final double dynamicFrictionFFAmps;
 
@@ -217,7 +214,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
         // DemandType.ArbitraryFeedForward, kFF);
-        t.log(Level.DEBUG, m_name, m_name, wheelRev_S);
+        t.log(Level.DEBUG, m_name, "module input (RPS)", wheelRev_S);
         t.log(Level.DEBUG, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
