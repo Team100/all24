@@ -57,7 +57,7 @@ class DriveToWaypoint3Test extends Fixtured {
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
-                .blueLayout("2023-chargedup.json");
+                .blueLayout("2024-crescendo.json");
 
         TrajectoryConfig config = SwerveKinodynamicsFactory.get().newTrajectoryConfig(4, 2);
 

@@ -112,42 +112,38 @@ class VisionDataProviderTest {
     @Test
     void testEstimateRobotPose() throws IOException {
         Supplier<Pose2d> robotPose = () -> GeometryUtil.kPoseZero; // always at the origin
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-chargedup.json");
-        VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
+                .redLayout("2024-crescendo.json");
+        // VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotPose);
 
         String key = "foo";
-        // in red layout blip 5 is on the other side of the field
-        Blip blip = new Blip(5,
-                new double[][] { // we don't actually use this
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] {
-                        { 0 },
-                        { 0 },
-                        { 1 } });// one meter range (Z forward)
+        // in red layout blip 7 is on the other side of the field
+
+        // one meter range (Z forward)
+        Blip24 blip = new Blip24(7, new Transform3d(new Translation3d(0, 0, 1), new Rotation3d()));
+
         // verify tag 5 location
-        Pose3d tagPose = layout.getTagPose(5).get();
-        assertEquals(16.18, tagPose.getX(), kDelta);
-        assertEquals(1.26, tagPose.getY(), kDelta);
-        assertEquals(0.69, tagPose.getZ(), kDelta);
+        Pose3d tagPose = layout.getTagPose(7).get();
+        assertEquals(16.489, tagPose.getX(), kDelta);
+        assertEquals(2.663, tagPose.getY(), kDelta);
+        assertEquals(1.451, tagPose.getZ(), kDelta);
         assertEquals(0, tagPose.getRotation().getX(), kDelta);
         assertEquals(0, tagPose.getRotation().getY(), kDelta);
         assertEquals(0, tagPose.getRotation().getZ(), kDelta);
 
-        Blips blips = new Blips();
-        blips.tags.add(blip);
+        Blip24[] blips = new Blip24[] {
+                blip
+        };
         final List<Pose2d> poseEstimate = new ArrayList<Pose2d>();
         final List<Double> timeEstimate = new ArrayList<Double>();
         vdp.estimateRobotPose(
-                (i) -> new Transform3d(),
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
                 }, key, blips);
         // do it twice to convince vdp it's a good estimate
         vdp.estimateRobotPose(
-                (i) -> new Transform3d(),
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
@@ -155,8 +151,8 @@ class VisionDataProviderTest {
         assertEquals(1, poseEstimate.size());
         assertEquals(1, timeEstimate.size());
         Pose2d result = poseEstimate.get(0);
-        assertEquals(15.18, result.getX(), kDelta); // target is one meter in front
-        assertEquals(1.26, result.getY(), kDelta); // same y as target
+        assertEquals(15.489, result.getX(), kDelta); // target is one meter in front
+        assertEquals(2.663, result.getY(), kDelta); // same y as target
         assertEquals(0, result.getRotation().getRadians(), kDelta); // facing along x
     }
 
@@ -164,44 +160,36 @@ class VisionDataProviderTest {
     void testEstimateRobotPose2() throws IOException {
         // robot is panned right 45
         Supplier<Pose2d> robotPose = () -> new Pose2d(0, 0, new Rotation2d(-Math.PI / 4)); // just for rotation
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-chargedup.json");
-        VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
+                .redLayout("2024-crescendo.json");
+        // VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotPose);
 
         String key = "foo";
-        // in red layout blip 5 is on the other side of the field
+        // in red layout blip 7 is on the other side of the field
         double rot = Math.sqrt(2) / 2;
         // because the tag is nearby we use the tag rotation so make it correct.
-        Blip blip = new Blip(5,
-                new double[][] { // pan left in camera frame = -y rot
-                        { rot, 0, -rot },
-                        { 0, 1, 0 },
-                        { rot, 0, rot } },
-                new double[][] {
-                        { 0 },
-                        { 0 },
-                        { Math.sqrt(2) } }); // diagonal
+        // diagonal
+        Blip24 blip = new Blip24(7, new Transform3d(new Translation3d(0, 0, Math.sqrt(2)), new Rotation3d(0, -rot, 0)));
         // verify tag 5 location
-        Pose3d tagPose = layout.getTagPose(5).get();
-        assertEquals(16.18, tagPose.getX(), kDelta);
-        assertEquals(1.26, tagPose.getY(), kDelta);
-        assertEquals(0.69, tagPose.getZ(), kDelta);
+        Pose3d tagPose = layout.getTagPose(7).get();
+        assertEquals(16.489, tagPose.getX(), kDelta);
+        assertEquals(2.663, tagPose.getY(), kDelta);
+        assertEquals(1.451, tagPose.getZ(), kDelta);
         assertEquals(0, tagPose.getRotation().getX(), kDelta);
         assertEquals(0, tagPose.getRotation().getY(), kDelta);
         assertEquals(0, tagPose.getRotation().getZ(), kDelta);
 
-        Blips blips = new Blips();
-        blips.tags.add(blip);
+        Blip24[] blips = new Blip24[] { blip };
         final List<Pose2d> poseEstimate = new ArrayList<Pose2d>();
         final List<Double> timeEstimate = new ArrayList<Double>();
         vdp.estimateRobotPose(
-                (i) -> new Transform3d(),
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
                 }, key, blips);
         // two good estimates are required
         vdp.estimateRobotPose(
-                (i) -> new Transform3d(),
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
@@ -209,8 +197,8 @@ class VisionDataProviderTest {
         assertEquals(1, poseEstimate.size());
         assertEquals(1, timeEstimate.size());
         Pose2d result = poseEstimate.get(0);
-        assertEquals(15.18, result.getX(), kDelta); // target is one meter in front
-        assertEquals(2.26, result.getY(), kDelta); // one meter to the left
+        assertEquals(15.489, result.getX(), kDelta); // target is one meter in front
+        assertEquals(3.663, result.getY(), kDelta); // one meter to the left
         assertEquals(-Math.PI / 4, result.getRotation().getRadians(), kDelta); // facing diagonal
     }
 }

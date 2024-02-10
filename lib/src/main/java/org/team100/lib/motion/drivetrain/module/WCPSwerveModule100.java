@@ -54,10 +54,10 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Drive drive,
             MotorPhase motorPhase) {
         name = m_name + "/" + name;
-        PIDConstants drivePidConstants = new PIDConstants(0.05);
-        PIDConstants turningPidConstants = new PIDConstants(0.1);
-        FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon();
-        FeedforwardConstants driveFeedforwardConstants = FeedforwardConstants.makeWCPSwerveDriveFalcon();
+        PIDConstants drivePidConstants = new PIDConstants(8);
+        PIDConstants turningPidConstants = new PIDConstants(5);
+        FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon6();
+        FeedforwardConstants driveFeedforwardConstants = FeedforwardConstants.makeWCPSwerveDriveFalcon6();
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
@@ -81,7 +81,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> driveServo(
+    private static VelocityServo<Distance100>  driveServo(
             String name,
             double currentLimit,
             int driveMotorCanId,

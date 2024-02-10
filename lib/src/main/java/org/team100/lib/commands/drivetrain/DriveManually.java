@@ -129,7 +129,7 @@ public class DriveManually extends Command100 {
                 name,
                 new Driver() {
                     public void apply(SwerveState s, Twist2d t, double dt) {
-                        m_drive.setChassisSpeeds(d.apply(t), dt);
+                        m_drive.setChassisSpeeds(d.apply(s,t), dt);
                     }
 
                     public void reset(Pose2d p) {

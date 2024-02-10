@@ -1,7 +1,6 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -56,18 +55,17 @@ import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.Blip24ArrayListener;
 import org.team100.lib.localization.NotePosition24ArrayListener;
-import org.team100.lib.localization.VisionDataProvider;
+import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.DriveWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -91,7 +89,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.proto.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -99,7 +96,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private static final double kDriveCurrentLimit = 60;
+    private static final double kDriveCurrentLimit = 80;
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;
@@ -108,7 +105,7 @@ public class RobotContainer {
     private final Alliance m_alliance;
     private final CameraAngles m_cameraAngles;
     private final NoteDetector m_noteDetector;
-    
+
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -157,9 +154,9 @@ public class RobotContainer {
             m_alliance = Alliance.Blue;
         }
         if (m_alliance == Alliance.Blue) {
-            m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2023-studies.json");
+            m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
         } else {
-            m_layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2023-studies.json");
+            m_layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2024-crescendo.json");
         }
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
@@ -186,7 +183,11 @@ public class RobotContainer {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        VisionDataProvider visionDataProvider = new VisionDataProvider(
+        // VisionDataProvider visionDataProvider = new VisionDataProvider(
+        //         m_layout,
+        //         poseEstimator,
+        //         poseEstimator::getEstimatedPosition);
+        VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
                 poseEstimator,
                 poseEstimator::getEstimatedPosition);
@@ -194,9 +195,6 @@ public class RobotContainer {
 
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
         notePositionDetector.enable();
-
-        Blip24ArrayListener listener = new Blip24ArrayListener();
-        listener.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
 
@@ -234,7 +232,6 @@ public class RobotContainer {
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
         HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
-
 
         whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
@@ -290,9 +287,10 @@ public class RobotContainer {
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
-        //Drive With Profile
+        // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController, swerveKinodynamics));
+                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
+                        swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true);
@@ -401,11 +399,14 @@ public class RobotContainer {
                 new ManualChassisSpeeds(m_name, swerveKinodynamics));
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
-                new DriveWithNoteRotation(
+                new ManualWithNoteRotation(
                         m_name,
                         swerveKinodynamics,
+                        m_heading,
+                        m_noteDetector::FieldRelativeTranslation2d,
                         thetaController,
-                        notePositionDetector));
+                        omegaController,
+                        driverControl::trigger));
 
         driveManually.register("FIELD_RELATIVE_TWIST", false,
                 new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
@@ -418,6 +419,16 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+
+        driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
+                new ManualWithTargetLock(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        m_noteDetector::FieldRelativeTranslation2d,
+                        thetaController,
+                        omegaController,
+                        driverControl::trigger));
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(

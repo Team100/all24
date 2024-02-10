@@ -21,6 +21,8 @@ import edu.wpi.first.math.numbers.N3;
  * 
  * Note since we don't trust the camera rotation output we really don't need to
  * do this.
+ * 
+ * TODO: remove this, i think we don't do it anymore.
  */
 class QuaternionTest {
     private static final double kDelta = 0.01;

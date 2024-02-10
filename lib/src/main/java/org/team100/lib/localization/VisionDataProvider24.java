@@ -3,18 +3,14 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 
-import org.msgpack.jackson.dataformat.MessagePackFactory;
-import org.team100.lib.config.Cameras2023;
+import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -24,16 +20,31 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTable.TableEventListener;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.networktables.ValueEventData;
+import edu.wpi.first.util.struct.StructBuffer;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Extracts robot pose estimates from camera input.
+ * 
+ * This "24" version uses the "struct" method instead of the "msgpack" method,
+ * which matches the TagFinder24 code on the camera.
  */
-public class VisionDataProvider implements TableEventListener {
+public class VisionDataProvider24 {
+    /**
+     * Time between events in reality and their appearance here; the average
+     * end-to-end latency of the camera, detection code, network tables, and rio
+     * looping.
+     * 
+     * Note this latency varies a little bit, depending on the relative timing of
+     * the camera frame and the rio loop.
+     * 
+     * TODO: use the correct timing instead of this average.
+     */
+    private static final double kTotalLatencySeconds = 0.075;
     /**
      * If the tag is closer than this threshold, then the camera's estimate of tag
      * rotation might be more accurate than the gyro, so we use the camera's
@@ -53,8 +64,7 @@ public class VisionDataProvider implements TableEventListener {
     private final Telemetry t = Telemetry.get();
 
     private final Supplier<Pose2d> poseSupplier;
-    // TODO: remove object mapper, use struct instead.
-    private final ObjectMapper objectMapper;
+
     private final SwerveDrivePoseEstimator poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final String m_name;
@@ -62,7 +72,10 @@ public class VisionDataProvider implements TableEventListener {
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
 
-    public VisionDataProvider(
+    // reuse the buffer since it takes some time to make
+    private StructBuffer<Blip24> m_buf = StructBuffer.create(Blip24.struct);
+
+    public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
             SwerveDrivePoseEstimator poseEstimator,
             Supplier<Pose2d> poseSupplier) throws IOException {
@@ -72,15 +85,14 @@ public class VisionDataProvider implements TableEventListener {
         this.poseEstimator = poseEstimator;
         this.poseSupplier = poseSupplier;
         m_name = Names.name(this);
-
-        objectMapper = new ObjectMapper(new MessagePackFactory());
     }
 
     /** Start listening for updates. */
     public void enable() {
-        NetworkTable vision_table = NetworkTableInstance.getDefault().getTable("Vision");
-        // Listen to ALL the updates in the vision table. :-)
-        vision_table.addListener(EnumSet.of(NetworkTableEvent.Kind.kValueAll), this);
+        NetworkTableInstance.getDefault().addListener(
+                new String[] { "vision" },
+                EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+                this::accept);
     }
 
     /**
@@ -88,35 +100,63 @@ public class VisionDataProvider implements TableEventListener {
      * 
      * @param event the event to accept
      */
-    @Override
-    public void accept(NetworkTable table, String key, NetworkTableEvent event) {
-        try {
-            Blips blips = objectMapper.readValue(event.valueData.value.getRaw(), Blips.class);
-            estimateRobotPose(Cameras2023::cameraOffset, poseEstimator::addVisionMeasurement, key, blips);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void accept(NetworkTableEvent e) {
+        ValueEventData ve = e.valueData;
+        NetworkTableValue v = ve.value;
+        String name = ve.getTopic().getName();
+        String[] fields = name.split("/");
+        if (fields.length != 3)
+            return;
+        if (fields[2].equals("fps")) {
+            // FPS is not used by the robot
+        } else if (fields[2].equals("latency")) {
+            // latency is not used by the robot
+        } else if (fields[2].equals("blips")) {
+            // decode the way StructArrayEntryImpl does
+            byte[] b = v.getRaw();
+            if (b.length == 0)
+                return;
+            Blip24[] blips;
+            try {
+                synchronized (m_buf) {
+                    blips = m_buf.readArray(b);
+                }
+            } catch (RuntimeException ex) {
+                return;
+            }
+            // the ID of the camera
+            String cameraSerialNumber = fields[1];
+
+            estimateRobotPose(
+                    poseEstimator::addVisionMeasurement,
+                    cameraSerialNumber,
+                    blips);
+        } else {
+            // this event is not for us
+            // Util.println("weird vision update key: " + name);
         }
     }
 
     /**
      * @param estimateConsumer is the pose estimator but exposing it here makes it
      *                         easier to test.
-     * @param key              the camera identity, obtained from proc/cpuinfo
+     * @param cameraSerialNumber              the camera identity, obtained from proc/cpuinfo
      * @param blips            all the targets the camera sees right now
      */
     void estimateRobotPose(
-            Function<String, Transform3d> cameraOffsets,
-            BiConsumer<Pose2d, Double> estimateConsumer,
-            String key,
-            Blips blips) {
-        for (Blip blip : blips.tags) {
-            Optional<Pose3d> tagInFieldCordsOptional = layout.getTagPose(blip.id);
+            ObjDoubleConsumer<Pose2d> estimateConsumer,
+            String cameraSerialNumber,
+            Blip24[] blips) {
+        // this treats every sight as independent.
+        // TODO: cleverly combine sights with triangulation for more accuracy
+        for (Blip24 blip : blips) {
+            Optional<Pose3d> tagInFieldCordsOptional = layout.getTagPose(blip.getId());
             if (!tagInFieldCordsOptional.isPresent())
                 continue;
 
             Rotation2d gyroRotation = poseSupplier.get().getRotation();
 
-            Transform3d cameraInRobotCoordinates = cameraOffsets.apply(key);
+            Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
@@ -138,9 +178,13 @@ public class VisionDataProvider implements TableEventListener {
             t.log(Level.DEBUG, m_name, "Tag Rotation", tagRotation.getAngle());
 
             if (lastRobotInFieldCoords != null) {
-                double distanceM = GeometryUtil.distance(lastRobotInFieldCoords,currentRobotinFieldCoords);
+                double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
                 if (distanceM <= kVisionChangeToleranceMeters) {
-                    estimateConsumer.accept(currentRobotinFieldCoords, Timer.getFPGATimestamp() - .075);
+                    // this hard limit excludes false positives, which were a bigger problem in 2023
+                    // due to the coarse tag family used. in 2024 this might not be an issue.
+                    // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
+                    // distance.
+                    estimateConsumer.accept(currentRobotinFieldCoords, Timer.getFPGATimestamp() - kTotalLatencySeconds);
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;

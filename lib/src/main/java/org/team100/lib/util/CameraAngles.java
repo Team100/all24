@@ -48,7 +48,8 @@ public class CameraAngles {
     }
 
     /**
-     * Creates a camera angles class with no peramters, this is purely for testing and sim
+     * Creates a camera angles class with no peramters, this is purely for testing
+     * and sim
      */
     public CameraAngles() {
         m_downwardAngleDegrees = 0;
@@ -83,10 +84,29 @@ public class CameraAngles {
                         - m_horzResolution / 2) / m_horzResolution);
         return y - m_yOffset;
     }
+
+    /**
+     * @return A camera vertical pixel measurement given a translational x value
+     */
+    public double getInverseX(double forwardMeters) {
+        double x = (m_vertResolution * (Math.atan((forwardMeters + m_xOffset) / m_cameraHeightMeters)
+                - Math.toRadians(90 - m_vertFOVDegrees/2 - m_downwardAngleDegrees)))
+                / Math.toRadians(m_vertFOVDegrees);
+        return x;
+    }
+
+    /**
+     * @return A camera horizontal pixel measurement given an x and y translational value, 0 is 416 pixels, or centerscreen
+     */
+    public double getInverseY(double forwardMeters, double sideMeters) {
+        double y = m_horzResolution * (Math.atan((sideMeters+m_yOffset)/(forwardMeters+m_xOffset))/Math.toRadians(m_horzFOVDegrees)) + m_horzResolution/2;
+        return y;
+    }
+
     /**
      * @return A robot relative angle in radians to the note
      */
     public double getAngle(double horzPixels, double vertPixels) {
-            return Math.atan2(getY(horzPixels, vertPixels),getX(vertPixels));
+        return Math.atan2(getY(horzPixels, vertPixels), getX(vertPixels));
     }
 }

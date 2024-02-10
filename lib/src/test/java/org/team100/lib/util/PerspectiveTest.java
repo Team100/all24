@@ -15,7 +15,7 @@ import org.opencv.utils.Converters;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
 
-public class PerspectiveTest {
+class PerspectiveTest {
 
     public PerspectiveTest() throws IOException {
         CameraServerCvJNI.forceLoad();
@@ -59,8 +59,8 @@ public class PerspectiveTest {
         System.out.println(transform.dump());
 
         // try feeding one of the sample points above into the transform
-        int xPixels = 366;
-        int yPixels = 666;
+        int xPixels = 389;
+        int yPixels = 643;
         Mat src1 = new Mat(3,1,CvType.CV_64F);
         src1.put(0,0,xPixels);
         src1.put(1,0,yPixels);
@@ -69,9 +69,8 @@ public class PerspectiveTest {
         dst1 = dst1.mul(Mat.ones(3,1,CvType.CV_64F), 1/dst1.get(2,0)[0]);
         // this is the real-world coordinate.
         System.out.println(dst1.dump());
-        //TODO fix this test
-        // assertEquals(1.5, dst1.get(0,0)[0], 0.001);
-        // assertEquals(0.5, dst1.get(1,0)[0], 0.001);
+        assertEquals(1.5, dst1.get(0,0)[0], 0.001);
+        assertEquals(0.5, dst1.get(1,0)[0], 0.001);
     }
 
 }
