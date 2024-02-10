@@ -33,7 +33,7 @@ public class SwerveKinodynamicsFactory {
                 // this is used for tests and simulation; if you change it you should fix all
                 // the broken tests.
                 // TODO: make tests specify kinodynamics instead.
-                return new SwerveKinodynamics(4, 2, 3, 13, 20 * Math.PI, 0.5, 0.5, 0.3);
+                return new SwerveKinodynamics(4, 4, 4, 13, 20 * Math.PI, 0.5, 0.5, 0.3);
             case BETA_BOT:
                 return new SwerveKinodynamics(5, 5, 7, 13, 20 * Math.PI, 0.491, 0.765, 0.3);
             default:

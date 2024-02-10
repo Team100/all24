@@ -312,12 +312,5 @@ public class DrivePursuitController implements DriveMotionController {
         }
         return OptionalDouble.of(dt);
     }
-    public static boolean isPointInsideRectangle(double pointX, double pointY, double rectangleX, double rectangleY, double rectangleWidth, double rectangleHeight) {
-        // Check if the point is within the bounds of the rectangle
-        boolean isInsideX = pointX >= rectangleX && pointX <= rectangleX + rectangleWidth;
-        boolean isInsideY = pointY >= rectangleY && pointY <= rectangleY + rectangleHeight;
-
-        // Return true only if the point is inside both X and Y bounds
-        return isInsideX && isInsideY;
-    }
+    
 }

@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.json.JSONParser;
-import org.team100.lib.json.TrajectoryList;
+// import org.team100.lib.json.JSONParser;
+// import org.team100.lib.json.TrajectoryList;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
@@ -59,7 +59,11 @@ public class DriveWithTrajectory extends Command100 {
   // Called when the command is initially scheduled.
   @Override
   public void initialize100() {
+    System.out.println("DRIVE WITH TRAJEC STARTING");
+
     TrajectoryList trajectoryList = JSONParser.getTrajectoryList(m_fileName);
+    // TrajectoryList trajectoryList = new TrajectoryList(null, null);
+
     trajectoryList.removeLastIndex();
     List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
     List<Rotation2d> headings = trajectoryList.getRotationArray();
@@ -123,6 +127,7 @@ public class DriveWithTrajectory extends Command100 {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    System.out.println("DRIVE WITH TRAJEC ENDING");
     m_swerve.stop();
     TrajectoryVisualization.clear();
   }
