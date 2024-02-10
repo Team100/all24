@@ -40,7 +40,8 @@ public class AmpUtil {
 
         List<Pose2d> ampDirect = new ArrayList<>();        
 
-        if(isInsideRectangle(currentTranslation, new Translation2d(10.239165, 0.918635), 8, 6)){ //Inside Far Wing
+        if(isInsideRectangle(currentTranslation, new Translation2d(10, 0), 8, 6)){ //Inside Far Wing
+            System.out.println("AHHHHHHHHHHH");
             rightSideFarStage.add(new Pose2d(10.009935, 2.312511, new Rotation2d()));
             rightSideFarStage.add(new Pose2d(7.682685, 6.063078, new Rotation2d()));
             rightSideFarStage.add(new Pose2d(1.715115, 7.334519, new Rotation2d()));
@@ -96,6 +97,8 @@ public class AmpUtil {
                 closestKey = entry.getKey();
             }
         }
+
+        System.out.println("CLOSEST" + closestKey);
 
 
         return poseMap.get(closestKey);
