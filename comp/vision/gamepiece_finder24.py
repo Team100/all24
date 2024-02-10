@@ -194,6 +194,7 @@ def main():
     camera.configure(camera_config)
     print(camera.camera_controls)
     serial = getserial()
+    print(camera.camera_properties['Model'])
     identity = Camera(serial)
     if identity == Camera.REAR or identity == Camera.FRONT:
         camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
@@ -203,7 +204,6 @@ def main():
     topic_name = "pieces"
     serial = getserial()
     output = GamePieceFinder(serial,topic_name, camera_params)
-    output.self.vision_camera.set(camera.camera_properties['Model'])
     camera.start()
     try:
         while True:
