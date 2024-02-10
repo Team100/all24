@@ -1,5 +1,7 @@
 package org.team100.lib.motor.drive;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -31,13 +33,13 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 3.5;
+    private final double staticFrictionSpeedLimitRev_S = 3.5;
 
     /**
      * Friction feedforward in amps, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFAmps = 7;
+    private final double staticFrictionFFAmps;
 
     /**
      * Friction feedforward in amps, for when the mechanism is moving.
@@ -45,22 +47,20 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * This value seems very low, perhaps because the falcon closed-loop control is
      * compensating?
      */
-    private static final double dynamicFrictionFFAmps = 5;
+    private final double dynamicFrictionFFAmps;
 
     /**
      * Velocity feedforward in amps
      */
-    private static final double velocityFFAmps_Rev = 0.5;
+    private final double velocityFFAmps_Rev;
 
     /**
      * Accel feedforward in amps
      */
-    private static final double accelFFAmps2_M = 0;
+    private final double accelFFAmps2_M;
 
     /**
      */
-    // TODO Fix PID
-    private static final double outboardP = 8;
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;
     private final double m_gearRatio;
@@ -88,7 +88,13 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
             boolean motorPhase,
             double currentLimit,
             double kDriveReduction,
-            double wheelDiameter) {
+            double wheelDiameter,
+            PIDConstants lowLevelVelocityConstants,
+            FeedforwardConstants lowLevelFeedforwardConstants) {
+        velocityFFAmps_Rev = lowLevelFeedforwardConstants.getkV();
+        accelFFAmps2_M = lowLevelFeedforwardConstants.getkA();
+        dynamicFrictionFFAmps = lowLevelFeedforwardConstants.getkDS();
+        staticFrictionFFAmps = lowLevelFeedforwardConstants.getkSS();
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_wheelDiameter = wheelDiameter;
@@ -164,9 +170,9 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         // set slot 0 gains
         var slot0Configs = new Slot0Configs();
         slot0Configs.kV = 0.0;
-        slot0Configs.kP = outboardP;
-        slot0Configs.kI = 0.0;
-        slot0Configs.kD = 0.0;
+        slot0Configs.kP = lowLevelVelocityConstants.getP();
+        slot0Configs.kI = lowLevelVelocityConstants.getI();
+        slot0Configs.kD = lowLevelVelocityConstants.getD();
 
         // apply gains, 50 ms total timeout
         m_motor.getConfigurator().apply(slot0Configs, 0.050);
@@ -263,7 +269,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
         m_error = m_motor.getClosedLoopError().getValueAsDouble();
-        
+
         m_positionM = m_rawPosition * m_distancePerTurn;
         m_velocityM_S = m_velocityRev_S * m_distancePerTurn;
 
@@ -306,7 +312,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     /**
      * Frictional feedforward in amps
      */
-    private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
             return staticFrictionFFAmps * direction;
@@ -317,14 +323,14 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     /**
      * Velocity feedforward in amps
      */
-    private static double velocityFF(double desiredMotorRev_S) {
+    private double velocityFF(double desiredMotorRev_S) {
         return velocityFFAmps_Rev * desiredMotorRev_S;
     }
 
     /**
      * Acceleration feedforward in amps
      */
-    private static double accelFF(double accelM_S_S) {
+    private double accelFF(double accelM_S_S) {
         return accelFFAmps2_M * accelM_S_S;
     }
 

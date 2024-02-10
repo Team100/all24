@@ -1,5 +1,7 @@
 package org.team100.lib.motor.turning;
 
+import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.FalconDriveMotor;
@@ -26,7 +28,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * See {@link FalconDriveMotor} for configuration details.
  */
 public class Falcon6TurningMotor implements Motor100<Angle100> {
-    //TODO Tune ff for amps
+    // TODO Tune ff for amps
     private final double m_gearRatio;
     private static final double kCurrentLimit = 40;
 
@@ -40,30 +42,22 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * Friction feedforward in amps, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFAmps = 0;
+    private final double staticFrictionFFAmps;
 
     /**
      * Friction feedforward in amps, for when the mechanism is moving.
      */
-    private static final double dynamicFrictionFFAmps = 5;
+    private final double dynamicFrictionFFAmps;
 
     /**
      * Velocity feedforward in amps
      */
-    private static final double velocityFFAmps_Rev = 0.1;
+    private final double velocityFFAmps_Rev;
 
     /**
      * Accel feedforward in amps
      */
-    private static final double accelFFAmps2_Rad = 0;
-
-    /**
-     * Proportional feedback coefficient for the controller. The error is measured
-     * in sensor units (ticks per 100ms), and the full scale output is 1023.
-     */
-    //TODO Fix PID
-    private static final double outboardP = 5;
-
+    private final double accelFFAmps2_Rad;
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;
     private final String m_name;
@@ -79,7 +73,13 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
             String name,
             int canId,
             MotorPhase motorPhase,
-            double kGearRatio) {
+            double kGearRatio,
+            PIDConstants lowLevelVelocityConstants,
+            FeedforwardConstants lowLevelFeedforwardConstants) {
+        velocityFFAmps_Rev = lowLevelFeedforwardConstants.getkV();
+        accelFFAmps2_Rad = lowLevelFeedforwardConstants.getkA();
+        dynamicFrictionFFAmps = lowLevelFeedforwardConstants.getkDS();
+        staticFrictionFFAmps = lowLevelFeedforwardConstants.getkSS();
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
@@ -153,11 +153,10 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
         // set slot 0 gains
         var slot0Configs = new Slot0Configs();
-        slot0Configs.kV = 0.0;
-        slot0Configs.kP = outboardP;
-        slot0Configs.kI = 0.0;
-        slot0Configs.kD = 0.0;
-
+        slot0Configs.kV = 0;
+        slot0Configs.kP = lowLevelVelocityConstants.getP();
+        slot0Configs.kI = lowLevelVelocityConstants.getI();
+        slot0Configs.kD = lowLevelVelocityConstants.getD();
         // apply gains, 50 ms total timeout
         m_motor.getConfigurator().apply(slot0Configs, 0.050);
 
@@ -232,12 +231,12 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     //////////////////////////////////////////////////////////////////
 
     /** Velocity feedforward in amps */
-    private static double velocityFF(double desiredMotorRev_S) {
+    private double velocityFF(double desiredMotorRev_S) {
         return velocityFFAmps_Rev * desiredMotorRev_S;
     }
 
     /** Frictional feedforward in amps */
-    private static double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
             return staticFrictionFFAmps * direction;
@@ -248,7 +247,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     /**
      * Acceleration feedforward in amps
      */
-    private static double accelFF(double accelRad_S_S) {
+    private double accelFF(double accelRad_S_S) {
         return accelFFAmps2_Rad * accelRad_S_S;
     }
 
