@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.frc2024.motion.ShooterUtil;
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;

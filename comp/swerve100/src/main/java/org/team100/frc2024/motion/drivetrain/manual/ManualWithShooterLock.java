@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.drivetrain.manual;
 
 import java.util.function.BooleanSupplier;
 
-import org.team100.frc2024.motion.ShooterUtil;
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
