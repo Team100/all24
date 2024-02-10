@@ -40,17 +40,17 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * Friction feedforward in amps, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFAmps = 0.375;
+    private static final double staticFrictionFFAmps = 0;
 
     /**
      * Friction feedforward in amps, for when the mechanism is moving.
      */
-    private static final double dynamicFrictionFFAmps = 0.27;
+    private static final double dynamicFrictionFFAmps = 5;
 
     /**
      * Velocity feedforward in amps
      */
-    private static final double velocityFFAmps_Rev = 0.11;
+    private static final double velocityFFAmps_Rev = 0.1;
 
     /**
      * Accel feedforward in amps
@@ -62,7 +62,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      * in sensor units (ticks per 100ms), and the full scale output is 1023.
      */
     //TODO Fix PID
-    private static final double outboardP = 0.001;
+    private static final double outboardP = 5;
 
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;

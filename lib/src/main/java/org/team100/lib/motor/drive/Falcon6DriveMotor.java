@@ -37,7 +37,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * Friction feedforward in amps, for when the mechanism is stopped, or nearly
      * so.
      */
-    private static final double staticFrictionFFAmps = 0.18;
+    private static final double staticFrictionFFAmps = 7;
 
     /**
      * Friction feedforward in amps, for when the mechanism is moving.
@@ -45,12 +45,12 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * This value seems very low, perhaps because the falcon closed-loop control is
      * compensating?
      */
-    private static final double dynamicFrictionFFAmps = 0.01;
+    private static final double dynamicFrictionFFAmps = 5;
 
     /**
      * Velocity feedforward in amps
      */
-    private static final double velocityFFAmps_Rev = 0.11;
+    private static final double velocityFFAmps_Rev = 0.5;
 
     /**
      * Accel feedforward in amps
@@ -60,8 +60,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     /**
      */
     // TODO Fix PID
-    private static final double outboardP = .001;
-
+    private static final double outboardP = 8;
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;
     private final double m_gearRatio;
@@ -212,6 +211,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
         // m_motor.set(ControlMode.Velocity, motorTick_100ms,
         // DemandType.ArbitraryFeedForward, kFF);
+        t.log(Level.DEBUG, m_name, m_name, wheelRev_S);
         t.log(Level.DEBUG, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
@@ -263,7 +263,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         // m_output = m_motor.getMotorOutputPercent();
         m_output = m_motor.getDutyCycle().getValueAsDouble();
         m_error = m_motor.getClosedLoopError().getValueAsDouble();
-
+        
         m_positionM = m_rawPosition * m_distancePerTurn;
         m_velocityM_S = m_velocityRev_S * m_distancePerTurn;
 
