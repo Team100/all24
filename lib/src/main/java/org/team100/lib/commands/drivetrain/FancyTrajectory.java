@@ -45,7 +45,7 @@ public class FancyTrajectory extends Command100 {
             TrajectoryPlanner planner,
             SwerveKinodynamics limits) {
         m_robotDrive = robotDrive;
-        m_controller = new DrivePIDFController(false);
+        m_controller = new DrivePIDFController(false, 2.4, 2.4);
         m_planner = planner;
         m_limits = limits;
         addRequirements(m_robotDrive);
