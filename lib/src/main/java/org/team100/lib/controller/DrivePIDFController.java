@@ -28,7 +28,6 @@ public class DrivePIDFController implements DriveMotionController {
     private Pose2d error = new Pose2d();
     private double m_kPCart;
     private double m_kPTheta;
-    private double m_kP;
 
 
     public DrivePIDFController(boolean feedforwardOnly, double kPCart, double kPTheta) {

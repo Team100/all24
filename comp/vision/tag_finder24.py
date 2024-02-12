@@ -175,8 +175,7 @@ class TagFinder:
             t = pose.translation()
             self.draw_text(
                 image,
-                f"t: {t.z:4.1f},{-t.x:4.1f},{-
-                                             t.y:4.1f}",
+                f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
                 (c_x - 50, c_y + 40),
             )
 
