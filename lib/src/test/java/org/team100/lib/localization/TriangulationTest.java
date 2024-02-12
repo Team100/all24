@@ -142,20 +142,27 @@ class TriangulationTest {
      */
     @Test
     void testVectors() {
-        Translation2d T1 = new Translation2d(1, -1);
-        Translation2d T2 = new Translation2d(1, 1);
+        Translation2d T1 = new Translation2d(1, 1);
+        Translation2d T2 = new Translation2d(1, -1);
+        Matrix<N2,N1> t1 = MatBuilder.fill(Nat.N2(),Nat.N1(),T1.getX(),T1.getY());
+        Matrix<N2,N1> t2 = MatBuilder.fill(Nat.N2(),Nat.N1(),T2.getX(),T2.getY());
         Translation2d T = T2.minus(T1);
+        assertEquals(0, T.getX(), kDelta);
+        // from +y to -y, left to right
+        assertEquals(-2, T.getY(), kDelta);
         Matrix<N2,N1> t = MatBuilder.fill(Nat.N2(),Nat.N1(),T.getX(),T.getY());
         
         // unit vectors
-        Rotation2d r1 = new Rotation2d(-Math.PI / 4);
-        Rotation2d r2 = new Rotation2d(-3 * Math.PI / 4);
+        // left side
+        Rotation2d r1 = new Rotation2d(-3*Math.PI / 4);
+        // right side
+        Rotation2d r2 = new Rotation2d(3 * Math.PI / 4);
         Translation2d d1 = new Translation2d(1, r1);
-        assertEquals(0.707,d1.getX(),kDelta);
+        assertEquals(-0.707,d1.getX(),kDelta);
         assertEquals(-0.707,d1.getY(),kDelta);
         Translation2d d2 = new Translation2d(1, r2);
         assertEquals(-0.707,d2.getX(),kDelta);
-        assertEquals(-0.707,d2.getY(),kDelta);
+        assertEquals(0.707,d2.getY(),kDelta);
 
         Matrix<N2, N2> d = MatBuilder.fill(Nat.N2(), Nat.N2(), d1.getX(), -d2.getX(), d1.getY(), -d2.getY());
         Matrix<N2,N1> lambda = d.solve(t);
@@ -163,7 +170,7 @@ class TriangulationTest {
         assertEquals(Math.sqrt(2), lambda.get(1, 0), kDelta);
 
         Matrix<N2,N2> D = MatBuilder.fill(Nat.N2(), Nat.N2(), d1.getX(), d2.getX(), d1.getY(), d2.getY());
-        Matrix<N2,N1> X = D.times(lambda).times(0.5);
+        Matrix<N2,N1> X = D.times(lambda).plus(t1).plus(t2).times(0.5);
         Translation2d x = new Translation2d(X.get(0,0),X.get(1,0));
         assertEquals(0, x.getX(), kDelta);
         assertEquals(0, x.getY(), kDelta);

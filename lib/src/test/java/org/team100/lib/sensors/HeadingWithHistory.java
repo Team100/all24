@@ -88,14 +88,14 @@ public class HeadingWithHistory implements HeadingInterface {
     /**
      * @param timestampSeconds fpga time
      */
-    public Rotation2d sample(double timestampSeconds) {
+    public Optional<Rotation2d> sample(double timestampSeconds) {
         Optional<InterpolationRecord> sample = m_buffer.getSample(timestampSeconds);
 
         // this should really never happen
         if (sample.isEmpty())
-            return null;
+            return Optional.empty();
 
-        return sample.get().gyroAngle;
+        return Optional.of(sample.get().gyroAngle);
     }
 
 }

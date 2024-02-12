@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.DoubleFunction;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
@@ -116,7 +116,8 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testEstimateRobotPose() throws IOException {
-        DoubleFunction<Rotation2d> robotRotation = (t) -> GeometryUtil.kRotationZero; // always at the origin
+        // always at the origin
+        DoubleFunction<Optional<Rotation2d>> robotRotation = (t) -> Optional.of(GeometryUtil.kRotationZero);
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
         // VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
@@ -164,7 +165,7 @@ class VisionDataProviderTest implements Timeless {
     @Test
     void testEstimateRobotPose2() throws IOException {
         // robot is panned right 45, translation is ignored.
-        DoubleFunction<Rotation2d> robotRotation = (t) -> new Rotation2d(-Math.PI / 4);
+        DoubleFunction<Optional<Rotation2d>> robotRotation = (t) -> Optional.of(new Rotation2d(-Math.PI / 4));
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
         VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotRotation);
@@ -237,7 +238,7 @@ class VisionDataProviderTest implements Timeless {
         HeadingWithHistory hist = new HeadingWithHistory(mock);
 
         // rotation from the camera instant
-        mock.rotation =  new Rotation2d(-Math.PI / 4);
+        mock.rotation = new Rotation2d(-Math.PI / 4);
 
         // stick the current reading into the buffer.
         hist.periodic();
@@ -245,16 +246,15 @@ class VisionDataProviderTest implements Timeless {
         // let 75ms pass.
         stepTime(0.075);
 
-
         // this rotation is from the current instant.
         // say the robot is turning at about 10 rad/s, say 10.472 for convenience.
         // then 75ms after the blip measurement below, the rotation is now zero.
-        DoubleFunction<Rotation2d> robotRotation = hist::sample;
+        DoubleFunction<Optional<Rotation2d>> robotRotation = hist::sample;
 
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
         VisionDataProvider24 vdp = new VisionDataProvider24(
-            layout, null, robotRotation);
+                layout, null, robotRotation);
 
         // the robot *was* panned 45 right 75ms ago.
         // camera sees the tag straight ahead in the center of the frame,

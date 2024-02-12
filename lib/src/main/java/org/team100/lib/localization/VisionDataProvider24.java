@@ -12,9 +12,9 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -64,7 +64,7 @@ public class VisionDataProvider24 {
 
     private final Telemetry t = Telemetry.get();
 
-    private final DoubleFunction<Rotation2d> rotationSupplier;
+    private final DoubleFunction<Optional<Rotation2d>> rotationSupplier;
 
     private final SwerveDrivePoseEstimator100 poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
@@ -85,7 +85,7 @@ public class VisionDataProvider24 {
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
             SwerveDrivePoseEstimator100 poseEstimator,
-            DoubleFunction<Rotation2d> rotationSupplier) throws IOException {
+            DoubleFunction<Optional<Rotation2d>> rotationSupplier) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
         this.layout = layout;
@@ -159,6 +159,14 @@ public class VisionDataProvider24 {
 
         // Estimated instant represented by the blips
         double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTime);
+
+        if (optionalGyroRotation.isEmpty()) {
+            Util.warn("No gyro rotation available!");
+            return;
+        }
+        
+        Rotation2d gyroRotation = optionalGyroRotation.get();
 
         // this treats every sight as independent.
         // TODO: cleverly combine sights with triangulation for more accuracy
@@ -167,7 +175,6 @@ public class VisionDataProvider24 {
             if (!tagInFieldCordsOptional.isPresent())
                 continue;
 
-            Rotation2d gyroRotation = rotationSupplier.apply(frameTime);
 
             Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
