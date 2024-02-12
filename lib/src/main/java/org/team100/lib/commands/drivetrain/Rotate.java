@@ -58,7 +58,7 @@ public class Rotate extends Command100 {
         tc.setTolerance(kXToleranceRad, kVToleranceRad_S);
         // in testing, the default theta p causes overshoot, but i think this isn't a
         // real effect.
-        tc.setP(1);
+        tc.setP(3.5);
 
         m_controller = new HolonomicDriveController3(xc, yc, tc);
         m_heading = heading;
@@ -79,6 +79,8 @@ public class Rotate extends Command100 {
         m_profile = new TrapezoidProfile100(c, 0.05);
         // first align the wheels
         m_steeringAligned = false;
+
+        System.out.println("ROT STARTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
     }
 
     private void resetRefTheta(double dt) {
@@ -138,6 +140,8 @@ public class Rotate extends Command100 {
 
     @Override
     public void end(boolean isInterupted) {
+        System.out.println("ROT EDDDDDDDDDDDDDD");
+
         m_robotDrive.stop();
     }
 }

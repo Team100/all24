@@ -47,6 +47,7 @@ import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
+import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -91,18 +92,19 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private static final double kDriveCurrentLimit = 80;
+    private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
-    private final Alliance m_alliance;
+    private Alliance m_alliance;
     private final CameraAngles m_cameraAngles;
     private final NoteDetector m_noteDetector;
 
@@ -153,6 +155,10 @@ public class RobotContainer {
             m_allianceSelector = null;
             m_alliance = Alliance.Blue;
         }
+
+        m_alliance = Alliance.Red;
+
+
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
         } else {
@@ -176,12 +182,13 @@ public class RobotContainer {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        SwerveDrivePoseEstimator poseEstimator = swerveKinodynamics.newPoseEstimator(
+        //TODO the max value is a hack for the pose estimator to ignore gyro updates. Without it the gyro offset keeps updating in the wrong places. Find the real problem
+        SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 VecBuilder.fill(0.5, 0.5, 0.5),
-                VecBuilder.fill(0.1, 0.1, 0.4));
+                VecBuilder.fill(0.1, 0.1, Double.MAX_VALUE));
 
         // VisionDataProvider visionDataProvider = new VisionDataProvider(
         //         m_layout,
@@ -224,7 +231,9 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, 0));
@@ -283,7 +292,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false);
+        DriveMotionController drivePID = new DrivePIDFController(false, 2.4, 2.4);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -293,7 +302,7 @@ public class RobotContainer {
                         swerveKinodynamics));
 
         // 254 FF follower
-        DriveMotionController driveFF = new DrivePIDFController(true);
+        DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
 
@@ -302,7 +311,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test,
         //         new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner, drivePID, swerveKinodynamics));
+        // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner, drivePID, swerveKinodynamics));
 
         // whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
 
@@ -458,7 +467,7 @@ public class RobotContainer {
                         omegaController,
                         0.25);
 
-        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics));
+        whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
         m_drive.setDefaultCommand(driveManually);
 

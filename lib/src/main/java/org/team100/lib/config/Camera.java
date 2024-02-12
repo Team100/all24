@@ -13,19 +13,19 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public enum Camera {
     /**
-     * Gamma shooter
+     * BETA Back
      */
-    A("1000000013c9c96c",
+    A("10000000caeaae82",
             new Transform3d(
-                    new Translation3d(0, 0.26035, 0.37465),
-                    new Rotation3d(0, 0, 1.57))),
+                    new Translation3d(0.165, 0, 0.73),
+                    new Rotation3d(0, -0.383972, Math.PI))),
     /**
-     * Gamma amp-placer
+     *BETA front
      */
-    B("100000004e0a1fb9",
+    B("1000000013c9c96c",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(0.17, 0, 0.73),
+                    new Rotation3d(0, -0.279253, 0))),
     /**
      * Gamma intake
      */

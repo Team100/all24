@@ -64,7 +64,7 @@ class DriveMotionPlannerTest {
         Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(false, new PathDistanceSampler(traj), 2,
                 Arrays.asList(), start_vel, end_vel, max_vel, max_accel);
 
-        DriveMotionController controller = new DrivePIDFController(false);
+        DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         controller.setTrajectory(traj_iterator);
@@ -89,7 +89,7 @@ class DriveMotionPlannerTest {
 
     @Test
     void testAllTrajectories() {
-        DrivePIDFController controller = new DrivePIDFController(false);
+        DrivePIDFController controller = new DrivePIDFController(false, 2.4, 2.4);
         TrajectoryPlanner tPlanner = new TrajectoryPlanner(kSmoothKinematicLimits);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
         generator.generateTrajectories();
