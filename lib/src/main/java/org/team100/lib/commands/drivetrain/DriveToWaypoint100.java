@@ -2,7 +2,6 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -17,6 +16,7 @@ import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.ShooterUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;

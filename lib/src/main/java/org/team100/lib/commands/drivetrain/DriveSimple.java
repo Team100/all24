@@ -5,8 +5,8 @@
 package org.team100.lib.commands.drivetrain;
 
 
-import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.manual.ManualWithShooterLock;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;

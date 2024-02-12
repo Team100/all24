@@ -4,7 +4,6 @@
 
 package org.team100.frc2024.motion;
 
-import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.commands.drivetrain.DriveBackwards;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveSimple;
@@ -13,6 +12,7 @@ import org.team100.lib.commands.drivetrain.DriveWithTrajectory;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
