@@ -9,11 +9,14 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
  * Methods return NWU, counterclockwise positive.
  */
 public interface HeadingInterface extends Subsystem {
-    /** NWU coordinates in rad: counterclockwise positive. */
+    /**
+     * NWU coordinates in rad: counterclockwise positive.
+     */
     Rotation2d getHeadingNWU();
 
-    /** Rate in rad/s: counterclockwise positive. */
+    /**
+     * Rate in rad/s: counterclockwise positive.
+     */
     double getHeadingRateNWU();
 
-    
 }

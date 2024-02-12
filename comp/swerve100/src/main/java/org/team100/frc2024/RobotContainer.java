@@ -183,14 +183,10 @@ public class RobotContainer {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        // VisionDataProvider visionDataProvider = new VisionDataProvider(
-        //         m_layout,
-        //         poseEstimator,
-        //         poseEstimator::getEstimatedPosition);
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
                 poseEstimator,
-                poseEstimator::getEstimatedPosition);
+                () -> poseEstimator.getEstimatedPosition().getRotation());
         visionDataProvider.enable();
 
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();

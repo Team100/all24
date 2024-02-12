@@ -3,8 +3,8 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.function.DoubleFunction;
 import java.util.function.ObjDoubleConsumer;
-import java.util.function.Supplier;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.GeometryUtil;
@@ -63,7 +63,7 @@ public class VisionDataProvider24 {
 
     private final Telemetry t = Telemetry.get();
 
-    private final Supplier<Pose2d> poseSupplier;
+    private final DoubleFunction<Rotation2d> rotationSupplier;
 
     private final SwerveDrivePoseEstimator poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
@@ -75,15 +75,21 @@ public class VisionDataProvider24 {
     // reuse the buffer since it takes some time to make
     private StructBuffer<Blip24> m_buf = StructBuffer.create(Blip24.struct);
 
+    /**
+     * @param layout
+     * @param poseEstimator
+     * @param rotationSupplier rotation for the given time in seconds
+     * @throws IOException
+     */
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
             SwerveDrivePoseEstimator poseEstimator,
-            Supplier<Pose2d> poseSupplier) throws IOException {
+            DoubleFunction<Rotation2d> rotationSupplier) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
         this.layout = layout;
         this.poseEstimator = poseEstimator;
-        this.poseSupplier = poseSupplier;
+        this.rotationSupplier = rotationSupplier;
         m_name = Names.name(this);
     }
 
@@ -138,15 +144,19 @@ public class VisionDataProvider24 {
     }
 
     /**
-     * @param estimateConsumer is the pose estimator but exposing it here makes it
-     *                         easier to test.
-     * @param cameraSerialNumber              the camera identity, obtained from proc/cpuinfo
-     * @param blips            all the targets the camera sees right now
+     * @param estimateConsumer   is the pose estimator but exposing it here makes it
+     *                           easier to test.
+     * @param cameraSerialNumber the camera identity, obtained from proc/cpuinfo
+     * @param blips              all the targets the camera sees right now
      */
     void estimateRobotPose(
             ObjDoubleConsumer<Pose2d> estimateConsumer,
             String cameraSerialNumber,
             Blip24[] blips) {
+
+        // Estimated instant represented by the blips
+        double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+
         // this treats every sight as independent.
         // TODO: cleverly combine sights with triangulation for more accuracy
         for (Blip24 blip : blips) {
@@ -154,7 +164,7 @@ public class VisionDataProvider24 {
             if (!tagInFieldCordsOptional.isPresent())
                 continue;
 
-            Rotation2d gyroRotation = poseSupplier.get().getRotation();
+            Rotation2d gyroRotation = rotationSupplier.apply(frameTime);
 
             Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
@@ -184,7 +194,7 @@ public class VisionDataProvider24 {
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                     // distance.
-                    estimateConsumer.accept(currentRobotinFieldCoords, Timer.getFPGATimestamp() - kTotalLatencySeconds);
+                    estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;

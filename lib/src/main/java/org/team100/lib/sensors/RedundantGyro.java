@@ -53,6 +53,7 @@ public class RedundantGyro implements RedundantGyroInterface {
      * 
      * @returns yaw in degrees [-180,180]
      */
+    @Override
     public float getRedundantYawNED() {
         float yawDeg = 0;
         int inputs = 0;
@@ -74,7 +75,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : yawDeg / inputs;
 
-        t.log(Level.DEBUG, m_name, "Yaw NED (rad)", result);
+        t.log(Level.DEBUG, m_name, "Yaw NED (deg)", result);
 
         return result;
     }
@@ -82,6 +83,7 @@ public class RedundantGyro implements RedundantGyroInterface {
     /**
      * @returns pitch in degrees [-180,180]
      */
+    @Override
     public float getRedundantPitch() {
         float pitchDeg = 0;
         int inputs = 0;
@@ -113,6 +115,7 @@ public class RedundantGyro implements RedundantGyroInterface {
     /**
      * @returns roll in degrees [-180,180]
      */
+    @Override
     public float getRedundantRoll() {
         float rollDeg = 0;
         int inputs = 0;
@@ -145,6 +148,7 @@ public class RedundantGyro implements RedundantGyroInterface {
      * 
      * @returns rate in deg/sec
      */
+    @Override
     public float getRedundantGyroRateNED() {
         float rateDeg_S = 0;
         int inputs = 0;
@@ -167,7 +171,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : rateDeg_S / inputs;
 
-        t.log(Level.DEBUG, m_name, "Rate NED (rad/s)", result);
+        t.log(Level.DEBUG, m_name, "Rate NED (deg/s)", result);
 
         return result;
     }
