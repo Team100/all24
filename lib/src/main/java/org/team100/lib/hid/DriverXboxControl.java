@@ -138,11 +138,16 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean actualCircle() {
-        return m_controller.getBButton();
+        return false;
     }
 
     @Override
     public boolean annunicatorTest() {
         return m_controller.getStartButton();
+    }
+
+    @Override
+    public boolean test(){
+        return m_controller.getBButton();
     }
 }

@@ -7,6 +7,7 @@ import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 
 import org.team100.lib.config.Camera;
+import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -57,7 +58,7 @@ public class VisionDataProvider24 {
      * Set this to some large number (e.g. 100) to disable gyro-derived rotation and
      * always use the camera.
      */
-    private static final double kTagRotationBeliefThresholdMeters = 0.5;
+    private static final double kTagRotationBeliefThresholdMeters = 0;
     /** Discard results further than this from the previous one. */
     private static final double kVisionChangeToleranceMeters = 0.1;
 
@@ -65,7 +66,7 @@ public class VisionDataProvider24 {
 
     private final Supplier<Pose2d> poseSupplier;
 
-    private final SwerveDrivePoseEstimator poseEstimator;
+    private final SwerveDrivePoseEstimator100 poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final String m_name;
 
@@ -77,7 +78,7 @@ public class VisionDataProvider24 {
 
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
-            SwerveDrivePoseEstimator poseEstimator,
+            SwerveDrivePoseEstimator100 poseEstimator,
             Supplier<Pose2d> poseSupplier) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
@@ -100,6 +101,8 @@ public class VisionDataProvider24 {
      * 
      * @param event the event to accept
      */
+
+    
     public void accept(NetworkTableEvent e) {
         ValueEventData ve = e.valueData;
         NetworkTableValue v = ve.value;
@@ -161,6 +164,9 @@ public class VisionDataProvider24 {
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
                     0, 0, gyroRotation.getRadians());
+
+            t.log(Level.DEBUG, m_name, "Tag In Field Cords", tagInFieldCordsOptional.get().toPose2d());
+
 
             Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                     cameraInRobotCoordinates,

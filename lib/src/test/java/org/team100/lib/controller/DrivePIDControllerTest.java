@@ -69,7 +69,7 @@ class DrivePIDControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
-        DrivePIDFController controller = new DrivePIDFController(false);
+        DrivePIDFController controller = new DrivePIDFController(false, 2.4, 2.4);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,

@@ -114,6 +114,7 @@ public class PoseEstimationHelper {
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
             Blip24 blip) {
+                
         Transform3d tagInCameraCoords = blipToTransform(blip);
         Pose3d cameraInFieldCoords = toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
         return applyCameraOffset(cameraInFieldCoords, cameraInRobotCoords);
@@ -178,19 +179,35 @@ public class PoseEstimationHelper {
             Pose3d tagInFieldCoords,
             Blip24 blip,
             Rotation3d robotRotationInFieldCoordsFromGyro) {
+
         Rotation3d cameraRotationInFieldCoords = cameraRotationInFieldCoords(
                 cameraInRobotCoords,
                 robotRotationInFieldCoordsFromGyro);
+                
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
+        
+        t.log(Level.DEBUG, m_name, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
+        t.log(Level.DEBUG, m_name, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
+        
+        
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
+
+        t.log(Level.DEBUG, m_name, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+    
+
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
                 tagRotationInCameraCoords);
+    
+
         Pose3d cameraInFieldCoords = toFieldCoordinates(
                 tagInCameraCoords,
                 tagInFieldCoords);
+        
+        t.log(Level.DEBUG, m_name, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+
         return applyCameraOffset(
                 cameraInFieldCoords,
                 cameraInRobotCoords);

@@ -1,6 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.Command100;
@@ -42,7 +43,7 @@ public class DriveToWaypoint100 extends Command100 {
     private final DriveMotionController m_controller;
     private final SwerveKinodynamics m_limits;
 
-    private final boolean m_useRotationForEnd;
+    private final Supplier<Rotation2d> m_endRotation;
 
     /**
      * @param goal
@@ -62,7 +63,7 @@ public class DriveToWaypoint100 extends Command100 {
         m_planner = planner;
         m_controller = controller;
         m_limits = limits;
-        m_useRotationForEnd = false;
+        m_endRotation = null;
         addRequirements(m_swerve);
     }
 
@@ -72,13 +73,13 @@ public class DriveToWaypoint100 extends Command100 {
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            boolean useRotationForEnd) {
+            Supplier<Rotation2d> endRotation) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_limits = limits;
-        m_useRotationForEnd = useRotationForEnd;
+        m_endRotation = endRotation;
         addRequirements(m_swerve);
     }
 
@@ -90,10 +91,11 @@ public class DriveToWaypoint100 extends Command100 {
         Pose2d end = m_goal;
         final double endVelocity = 0;
 
-        if (m_useRotationForEnd) {
-            end = new Pose2d(end.getTranslation(), ShooterUtil.getRobotRotationToSpeaker(end.getTranslation(), 0.25));
+        
+        if(m_endRotation != null){
+            end = new Pose2d(end.getTranslation(), m_endRotation.get());
         }
-
+        
         List<Pose2d> waypointsM = getWaypoints(start, end);
 
         List<Rotation2d> headings = List.of(
