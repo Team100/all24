@@ -274,9 +274,8 @@ def main():
     print("\nCONTROLS")
     print(camera.camera_controls)
     print("MODEL")
+    print(camera.camera_properties['Model'])
     
-
-
     # Roborio IP: 10.1.0.2
     # Pi IP: 10.1.0.21
 

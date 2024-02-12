@@ -83,7 +83,6 @@ public class DriveToWaypoint100 extends Command100 {
         addRequirements(m_swerve);
     }
 
-
     @Override
     public void initialize100() {
         System.out.println("DRIVE TO WAYPOINT");
@@ -135,7 +134,7 @@ public class DriveToWaypoint100 extends Command100 {
                 currentSpeed.vyMetersPerSecond,
                 currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
-        
+
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
