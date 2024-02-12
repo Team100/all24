@@ -3,8 +3,8 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.function.DoubleFunction;
 import java.util.function.ObjDoubleConsumer;
-import java.util.function.Supplier;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
@@ -12,9 +12,9 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -64,7 +64,7 @@ public class VisionDataProvider24 {
 
     private final Telemetry t = Telemetry.get();
 
-    private final Supplier<Pose2d> poseSupplier;
+    private final DoubleFunction<Optional<Rotation2d>> rotationSupplier;
 
     private final SwerveDrivePoseEstimator100 poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
@@ -76,15 +76,21 @@ public class VisionDataProvider24 {
     // reuse the buffer since it takes some time to make
     private StructBuffer<Blip24> m_buf = StructBuffer.create(Blip24.struct);
 
+    /**
+     * @param layout
+     * @param poseEstimator
+     * @param rotationSupplier rotation for the given time in seconds
+     * @throws IOException
+     */
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
             SwerveDrivePoseEstimator100 poseEstimator,
-            Supplier<Pose2d> poseSupplier) throws IOException {
+            DoubleFunction<Optional<Rotation2d>> rotationSupplier) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
         this.layout = layout;
         this.poseEstimator = poseEstimator;
-        this.poseSupplier = poseSupplier;
+        this.rotationSupplier = rotationSupplier;
         m_name = Names.name(this);
     }
 
@@ -141,15 +147,27 @@ public class VisionDataProvider24 {
     }
 
     /**
-     * @param estimateConsumer is the pose estimator but exposing it here makes it
-     *                         easier to test.
-     * @param cameraSerialNumber              the camera identity, obtained from proc/cpuinfo
-     * @param blips            all the targets the camera sees right now
+     * @param estimateConsumer   is the pose estimator but exposing it here makes it
+     *                           easier to test.
+     * @param cameraSerialNumber the camera identity, obtained from proc/cpuinfo
+     * @param blips              all the targets the camera sees right now
      */
     void estimateRobotPose(
             ObjDoubleConsumer<Pose2d> estimateConsumer,
             String cameraSerialNumber,
             Blip24[] blips) {
+
+        // Estimated instant represented by the blips
+        double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTime);
+
+        if (optionalGyroRotation.isEmpty()) {
+            Util.warn("No gyro rotation available!");
+            return;
+        }
+        
+        Rotation2d gyroRotation = optionalGyroRotation.get();
+
         // this treats every sight as independent.
         // TODO: cleverly combine sights with triangulation for more accuracy
         for (Blip24 blip : blips) {
@@ -157,7 +175,6 @@ public class VisionDataProvider24 {
             if (!tagInFieldCordsOptional.isPresent())
                 continue;
 
-            Rotation2d gyroRotation = poseSupplier.get().getRotation();
 
             Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
@@ -190,7 +207,7 @@ public class VisionDataProvider24 {
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                     // distance.
-                    estimateConsumer.accept(currentRobotinFieldCoords, Timer.getFPGATimestamp() - kTotalLatencySeconds);
+                    estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;

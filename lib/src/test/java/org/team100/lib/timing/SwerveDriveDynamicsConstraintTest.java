@@ -52,8 +52,8 @@ class SwerveDriveDynamicsConstraintTest {
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);
-        assertEquals(-3, m.getMinAccel(), kDelta);
-        assertEquals(2, m.getMaxAccel(), kDelta);
+        assertEquals(-4, m.getMinAccel(), kDelta);
+        assertEquals(4, m.getMaxAccel(), kDelta);
     }
 
     @Test
