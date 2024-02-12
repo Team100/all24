@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Constraints100;
@@ -303,13 +304,13 @@ public class SwerveKinodynamics {
                 m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
     }
 
-    public SwerveDrivePoseEstimator newPoseEstimator(
+    public SwerveDrivePoseEstimator100 newPoseEstimator(
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
-        return new SwerveDrivePoseEstimator(
+        return new SwerveDrivePoseEstimator100(
                 m_kinematics,
                 gyroAngle,
                 modulePositions,
