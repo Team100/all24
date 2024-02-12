@@ -55,7 +55,6 @@ class GamePieceFinder:
         # Table for vision output information
         topic_name = "noteVision/" + self.serial
         self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
-        self.vision_camera = self.inst.getDoubleTopic(topic_name + "/camera").publish()
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
