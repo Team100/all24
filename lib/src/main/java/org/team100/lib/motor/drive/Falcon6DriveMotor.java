@@ -13,7 +13,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -207,7 +207,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         double accelFF = accelFF(accelM_S_S);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        VelocityTorqueCurrentFOC v = new VelocityTorqueCurrentFOC(motorRev_S);
+        VelocityVoltage v = new VelocityVoltage(motorRev_S);
         v.FeedForward = kFF;
         v.Acceleration = motorRev_S2;
         m_motor.setControl(v);
