@@ -30,10 +30,7 @@ class Blip24:
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
 
-    FRONT = "1000000013c9c96c"  # "2"
-    REAR = "100000004e0a1fb9"  # "1"
-    LEFT = "10000000a7c673d9"  # "4"
-    RIGHT = "10000000a7a892c0"  # "3"
+    FRONT = "1000000013c9c96c"  # "FRONT"
     UNKNOWN = None
 
     @classmethod
@@ -42,12 +39,13 @@ class Camera(Enum):
 
 
 class TagFinder:
-    def __init__(self, serial, width, height):
+    def __init__(self, serial, width, height, model):
         self.frame_time = time.time()
         # the cpu serial number
         self.serial = serial
         self.width = width
         self.height = height
+        self.model = model
 
         # for the driver view
         scale = 0.25
@@ -64,15 +62,31 @@ class TagFinder:
         # self.at_detector.addFamily("tag16h5")
 
         # TODO: calibrate the cameras, these numbers are probably wrong
-        self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-            robotpy_apriltag.AprilTagPoseEstimator.Config(
-                0.1651,  # tagsize 6.5 inches
-                666,  # fx
-                666,  # fy
-                width / 2,  # cx
-                height / 2,  # cy
+
+        if(self.model == "imx708_wide"):
+            print("IS WIDE ANGLE")
+            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
+                robotpy_apriltag.AprilTagPoseEstimator.Config(
+                    0.1651,  # tagsize 6.5 inches
+                    475,  # fx
+                    475,  # fy
+                    width / 2,  # cx
+                    height / 2,  # cy
+                )
+            ) 
+        else:
+            print("IS NOT WIDE ANGLE")
+            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
+                robotpy_apriltag.AprilTagPoseEstimator.Config(
+                    0.1651,  # tagsize 6.5 inches
+                    666,  # fx
+                    666,  # fy
+                    width / 2,  # cx
+                    height / 2,  # cy
+                )
             )
-        )
+        
+        
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def analyze(self, request):
@@ -161,7 +175,8 @@ class TagFinder:
             t = pose.translation()
             self.draw_text(
                 image,
-                f"t: {-t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
+                f"t: {t.z:4.1f},{-t.x:4.1f},{-
+                                             t.y:4.1f}",
                 (c_x - 50, c_y + 40),
             )
 
@@ -188,6 +203,8 @@ class TagFinder:
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
+
+
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Blip24).publish().set(
@@ -235,7 +252,7 @@ def main():
             # fast shutter means more gain
             # "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-            "ExposureTime": 3000,
+            # "ExposureTime": 3000,
             # limit auto: go as fast as possible but no slower than 30fps
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
@@ -245,8 +262,8 @@ def main():
 
     serial = getserial()
     identity = Camera(serial)
-    if identity == Camera.REAR or identity == Camera.FRONT:
-        camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+    # if identity == Camera.FRONT:
+    #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
 
     print("\nREQUESTED CONFIG")
     print(camera_config)
@@ -256,11 +273,19 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
+    print("MODEL")
+    
+
 
     # Roborio IP: 10.1.0.2
     # Pi IP: 10.1.0.21
 
-    output = TagFinder(serial, width, height)
+    model = camera.camera_properties["Model"]
+
+    output = TagFinder(serial, width, height, model)
+
+    
+
     camera.start()
     try:
         while True:

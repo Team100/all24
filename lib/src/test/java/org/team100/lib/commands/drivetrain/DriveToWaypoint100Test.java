@@ -17,7 +17,7 @@ class DriveToWaypoint100Test extends Fixtured {
     @Test
     void testWithPID() {
         TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
-        DriveMotionController controller = new DrivePIDFController(false);
+        DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
                 fixture.swerveKinodynamics);
@@ -59,7 +59,7 @@ class DriveToWaypoint100Test extends Fixtured {
     @Test
     void testWithFF() {
         TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
-        DriveMotionController controller = new DrivePIDFController(true);
+        DriveMotionController controller = new DrivePIDFController(true, 2.4, 2.4);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
                 fixture.swerveKinodynamics);

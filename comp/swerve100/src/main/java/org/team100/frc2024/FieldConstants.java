@@ -4,12 +4,27 @@
 
 package org.team100.frc2024;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
 /** Add your docs here. */
 public class FieldConstants {
+    public double SHOOTER_LEFT_SIDE_Y = 0 ;
+    public double SHOOTER_RIGHT_SIDE_Y = 0; //
+    public double SHOOTER_CENTER_Y = 0;
+    public double SHOOTER_CENTER_X = 0;
 
-    public static double SHOOTER_LEFT_SIDE_Y = 5.158404 ;
-    public static double SHOOTER_RIGHT_SIDE_Y = 5.955059 ; //
-    public static double SHOOTER_CENTER_Y = 5.596386;
-    public static double SHOOTER_CENTER_X = 0.314565;
+    public static final FieldConstants instance = get();
 
+    public static FieldConstants get(){
+        if(DriverStation.getAlliance().get() == Alliance.Blue){
+            return new FieldConstantsBlue();
+        }
+
+        return new FieldConstantsRed();
+    }
+
+    
 }
+
+

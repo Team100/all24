@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.InitCommand;
 import org.team100.lib.commands.Subsystem100;
+import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -33,7 +34,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
-    private final SwerveDrivePoseEstimator m_poseEstimator;
+    private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
@@ -47,7 +48,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
-            SwerveDrivePoseEstimator poseEstimator,
+            SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,
             Supplier<DriverControl.Speed> speed) {
         m_heading = heading;
@@ -63,7 +64,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
         stop();
         // this needs to be exactly "/field/.type" for glass.
-        t.log(Level.INFO, "field", ".type", "Field2d");
+        // t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
     /**
@@ -91,7 +92,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateAcceleration(dt);
         updateState();
 
+
+        t.log(Level.DEBUG, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
         t.log(Level.DEBUG, m_name, "pose", m_pose);
+        t.log(Level.DEBUG, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
+
         t.log(Level.DEBUG, m_name, "pose array", new double[] {m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians()});
         t.log(Level.DEBUG, m_name, "velocity", m_velocity);
         t.log(Level.DEBUG, m_name, "acceleration", m_accel);

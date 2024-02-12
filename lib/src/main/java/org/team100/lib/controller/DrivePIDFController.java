@@ -26,9 +26,15 @@ public class DrivePIDFController implements DriveMotionController {
     private TrajectoryTimeIterator m_iter;
     private double m_prevTimeS;
     private Pose2d error = new Pose2d();
+    private double m_kPCart;
+    private double m_kPTheta;
+    private double m_kP;
 
-    public DrivePIDFController(boolean feedforwardOnly) {
+
+    public DrivePIDFController(boolean feedforwardOnly, double kPCart, double kPTheta) {
         m_feedforwardOnly = feedforwardOnly;
+        m_kPCart = kPCart;
+        m_kPTheta = kPTheta;
         m_name = Names.name(this);
     }
 
@@ -61,7 +67,7 @@ public class DrivePIDFController implements DriveMotionController {
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, mSetpoint.get());
         if (m_feedforwardOnly)
             return u_FF;
-        ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement, mSetpoint.get());
+        ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement, mSetpoint.get(), m_kPCart, m_kPTheta);
         return u_FF.plus(u_FB);
     }
 
