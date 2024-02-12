@@ -9,7 +9,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.Supplier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class DriveWithWaypoints extends Command100 {
   private static final Telemetry t = Telemetry.get();
 //   private final List<Pose2d> m_waypoints;
 //   private final List<Rotation2d> m_headings;
-  private final Pose2d m_goal;
+  private final Supplier<List<Pose2d>> m_goal;
 
 
 
@@ -58,7 +58,7 @@ public class DriveWithWaypoints extends Command100 {
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            Pose2d goal) {
+            Supplier<List<Pose2d>> goal) {
     // Use addRequirements() here to declare subsystem dependencies.
         m_swerve = drivetrain;
         m_planner = planner;
@@ -79,59 +79,26 @@ public class DriveWithWaypoints extends Command100 {
   public void initialize100() {
 
     final Pose2d start = m_swerve.getPose();
-    final double startVelocity = 0;
-    final Pose2d end = m_goal;
-    final double endVelocity = 0;
-
-    List<Pose2d> waypointsNew = new ArrayList<>();
-    List<Pose2d> waypointsM = getWaypoints(start, end);
-    List<Rotation2d> headings = List.of(
-      start.getRotation(),
-      end.getRotation());
-
-    // List<Pose2d> internalWaypoints = new ArrayList<>(m_waypoints);
-    // List<Rotation2d> internalHeadings = new ArrayList<>(m_headings);
+    final Pose2d end = m_goal.get().get(0);
     
-    // internalWaypoints.add(0, m_swerve.getPose());
-    // internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
+
+    List<Pose2d> newWaypointM = new ArrayList<>(m_goal.get());
+    newWaypointM.add(0, start);
+
+    List<Rotation2d> headings = new ArrayList<>();
+
+    for(int i = 0; i < newWaypointM.size(); i++){
+      headings.add(newWaypointM.get(i).getRotation());
+    }
+
+    newWaypointM = getWaypointsList(newWaypointM);
+
+    System.out.println("NEW WAYPOINT LENGHT" + newWaypointM.size());
+    System.out.println("HEADINGS LENGHT" + headings.size());
+
+
+    // List<Pose2d> waypointsM = getWaypoints(start, end);
     
-    // List<Pose2d> poses = new ArrayList<>();
-
-    // System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
-    // System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
-
-    // for(int i = 0; i < internalWaypoints.size(); i+=2){
-
-    //     List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
-    //     poses.add(posi.get(0));
-    //     poses.add(posi.get(1));
-      
-    // }
-      
-    // poses = getWaypoints(internalWaypoints.get(0), internalWaypoints.get(1));
-    // List<Pose2d> internalWaypoints = m_waypoints;
-    // List<Rotation2d> internalHeadings = m_headings;
-    
-    // internalWaypoints.add(0, m_swerve.getPose());
-    // internalHeadings.add(0, m_swerve.getPose().getRotation());                                                                                                                                                                                                                                                                     
-    
-    List<Pose2d> poses = new ArrayList<>();
-
-    // System.out.println("WAYPOINTS INTERNA:" + internalWaypoints);
-    // System.out.println("WAYPOINTS INTERNA SIZE:" + internalWaypoints.size());
-
-    // System.out.println("WAYPOINTS GLOBAL" + m_waypoints);
-    // System.out.println("WAYPOINTS INTERNA SIZE:" + m_waypoints.size());
-
-
-    // for(int i = 0; i < internalWaypoints.size(); i+=2){
-
-    //     List<Pose2d> posi = getWaypoints(internalWaypoints.get(i), internalWaypoints.get(i + 1));
-    //     poses.add(posi.get(0));
-    //     poses.add(posi.get(1));
-      
-    // }
-          
 
     List<TimingConstraint> constraints = List.of(
                 new CentripetalAccelerationConstraint(m_limits));
@@ -141,10 +108,12 @@ public class DriveWithWaypoints extends Command100 {
     double start_vel = 0;
     double end_vel = 0;
 
+    System.out.println(newWaypointM);
+
     Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
-                        waypointsM,
+                        newWaypointM,
                         headings,
                         constraints,
                         0,
@@ -152,7 +121,7 @@ public class DriveWithWaypoints extends Command100 {
                         5,
                         5);
 
-    TrajectoryVisualization.setViz(trajectory);
+    // TrajectosryVisualization.setViz(trajectory);
 
     TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
@@ -192,46 +161,33 @@ public class DriveWithWaypoints extends Command100 {
    return m_controller.isDone();
   }
 
-  private static List<Pose2d> getWaypoints(List<Pose2d> m) {
-        List<Pose2d> waypointsM = new ArrayList<>();
-        // System.out.println("THIS IS M" + m);
-        for(int i = 0; i < m.size()-1; i+=1){
-            //Handles case for the last trajectory point
-            // if(i == m.size() -1 ){
-            //     System.out.println("GOING");
-            //     Translation2d t0 = m.get(i).getTranslation();
-            //     Translation2d t1 = m.get(i-1).getTranslation();
-            //     Rotation2d theta = t1.minus(t0).getAngle();
-            //     System.out.println(new Pose2d(t0, theta));
-            //     waypointsM.add(new Pose2d(t0, theta));
-            // } else {
-                Translation2d t0 = m.get(i).getTranslation();
-                Translation2d t1 = m.get(i+1).getTranslation();
-                Rotation2d theta = t1.minus(t0).getAngle();
-                waypointsM.add(new Pose2d(t0, theta));
-            // }
+  private static List<Pose2d> getWaypointsList(List<Pose2d> m) {
+      // Translation2d t0 = m.get(0).getTranslation();
+      // Translation2d t1 = m.get(1).getTranslation();
+      // Rotation2d theta = t1.minus(t0).getAngle();
+      // return List.of(
+      //         new Pose2d(t0, theta),
+      //         new Pose2d(t1, theta));
+    
+      List<Pose2d> waypointsM = new ArrayList<>();
+      for(int i = 0; i < m.size()-1; i+=1){
+          Translation2d t0 = m.get(i).getTranslation();
+          Translation2d t1 = m.get(i+1).getTranslation();
+          Rotation2d theta = t1.minus(t0).getAngle();
+          waypointsM.add(new Pose2d(t0, theta));
+      }
+
+      Translation2d t0 = m.get(m.size()-1).getTranslation();
+      Translation2d t1 = m.get(m.size()-2).getTranslation();
+      Rotation2d theta = t0.minus(t1).getAngle();
+      // double newTheta = 180 - theta.getDegrees();
+      waypointsM.add(new Pose2d(t0, theta));  
             
 
-        }
-
-        //Last Value
-        Translation2d t0 = m.get(m.size()-1).getTranslation();
-        Translation2d t1 = m.get(m.size()-2).getTranslation();
-        Rotation2d theta = t1.minus(t0).getAngle();
-
-        waypointsM.add(new Pose2d(t0, theta));
-
-        return waypointsM;
+      return waypointsM;
         
-    }
-
-    private static List<Pose2d> getWaypoints(Pose2d p0, Pose2d p1) {
-      Translation2d t0 = p0.getTranslation();
-      Translation2d t1 = p1.getTranslation();
-      Rotation2d theta = t1.minus(t0).getAngle();
-      return List.of(
-              new Pose2d(t0, theta),
-              new Pose2d(t1, theta));
   }
+
+    
    
 }

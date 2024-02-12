@@ -29,7 +29,7 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Telemetry Level": {
+      "/SmartDashboard/UseSetpointGenerator": {
         "window": {
           "visible": true
         }
@@ -48,187 +48,34 @@
     }
   },
   "NetworkTables": {
-    "Persistent Values": {
-      "open": false
-    },
     "retained": {
-      "AmpSubsystem": {
-        "Left": {
-          "NeoTurningEncoder": {
-            "open": true
-          },
-          "NeoTurningMotor": {
-            "open": true
-          },
-          "OutboardVelocityServo": {
-            "open": true
-          },
-          "SimulatedEncoder": {
-            "open": true
-          },
-          "SimulatedMotor": {
-            "open": true
-          },
-          "open": true
-        },
-        "Right": {
-          "OutboardVelocityServo": {
-            "open": true
-          },
-          "PositionServo": {
-            "Goal": {
-              "open": true
-            },
-            "Setpoint": {
-              "open": true
-            },
-            "open": true
-          },
-          "SimulatedEncoder": {
-            "open": true
-          },
-          "open": true
-        },
-        "open": true
-      },
-      "Bottom Roller": {
-        "OutboardVelocityServo": {
-          "open": true
-        },
-        "velocity": {
-          "Velocity Servo": {
-            "open": true
-          },
-          "open": true
-        }
-      },
-      "ClimberSubsystem": {
-        "Left": {
-          "OutboardVelocityServo": {
-            "open": true
-          },
-          "SimulatedEncoder": {
-            "open": true
-          },
-          "SimulatedMotor": {
-            "open": true
-          },
-          "open": true
-        },
-        "open": true
-      },
       "Command100": {
-        "DriveManually": {
-          "ManualChassisSpeeds": {
-            "open": true
-          },
-          "SimpleManualModuleStates": {
+        "DriveToWaypoint100": {
+          "chassis speeds": {
             "open": true
           },
           "open": true
         }
       },
-      "DrumShooter": {
-        "Bottom": {
-          "NeoDriveEncoder": {
-            "open": true
-          },
-          "NeoDriveMotor": {
-            "open": true
-          },
-          "OutboardVelocityServo": {
-            "open": true
-          },
+      "DrivePursuitController": {
+        "current state": {
           "open": true
         },
-        "Top": {
-          "open": true
-        },
-        "open": true
-      },
-      "Experiments": {
-        "string[]##v_/Experiments/enabled": {
-          "open": true
-        }
-      },
-      "FlywheelShooter": {
-        "Left": {
-          "OutboardVelocityServo": {
-            "open": true
-          },
-          "SimulatedEncoder": {
-            "open": true
-          },
-          "SimulatedMotor": {
-            "open": true
-          },
-          "open": true
-        },
-        "open": true
-      },
-      "Indexer": {
-        "encoder": {
-          "NeoDriveEncoder": {
-            "open": true
-          },
-          "open": true
-        },
-        "velocity": {
-          "OutboardVelocityServo": {
-            "open": true
-          },
-          "open": true
-        }
-      },
-      "IndexerSubsystem": {
-        "NeoDriveEncoder": {
-          "open": true
-        },
-        "NeoDriveMotor": {
-          "open": true
-        },
-        "open": true
-      },
-      "IntakeSubsystem": {
-        "Bottom Roller": {
-          "open": true
-        },
-        "Top Roller": {
-          "open": true
-        }
-      },
-      "IntakeWheel": {
-        "NeoDriveEncoder": {
-          "open": true
-        },
-        "NeoDriveMotor": {
-          "open": true
-        },
-        "OutboardVelocityServo": {
-          "open": true
-        },
-        "SimulatedEncoder": {
-          "open": true
-        },
-        "SimulatedMotor": {
-          "open": true
-        },
-        "open": true
-      },
-      "Rear Right": {
-        "Drive": {
-          "OutboardVelocityServo": {
-            "open": true
-          },
-          "SimulatedEncoder": {
-            "open": true
-          },
-          "SimulatedMotor": {
+        "error": {
+          "open": true,
+          "translation": {
             "open": true
           }
         },
-        "Turning": {
-          "OutboardVelocityServo": {
+        "open": true
+      },
+      "RobotContainer": {
+        "ManualWithShooterLock": {
+          "bearing": {
+            "open": true
+          },
+          "open": true,
+          "target": {
             "open": true
           }
         },
@@ -241,10 +88,17 @@
           "translation": {
             "open": true
           }
+        }
       }
     }
   },
   "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Server": {
+      "open": true
+    },
     "visible": true
   },
   "Plot": {
@@ -257,7 +111,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 695,
+          "height": 671,
           "series": [
             {
               "color": [
@@ -266,7 +120,31 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT://///DrivePursuitController/lookahead state/posestate/pose/translation/x"
+              "id": "NT://RobotContainer/ManualWithShooterLock/bearing/rad"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 455,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:///DrivePursuitController/error/translation/x"
             },
             {
               "color": [
@@ -275,7 +153,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT://///DrivePursuitController/lookahead state/posestate/pose/translation/y"
+              "id": "NT:///DrivePursuitController/error/translation/y"
             }
           ]
         }
