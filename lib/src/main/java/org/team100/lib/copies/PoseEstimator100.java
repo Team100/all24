@@ -8,6 +8,8 @@ import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -159,6 +161,7 @@ public class PoseEstimator100<T extends WheelPositions<T>> {
         Optional<PoseEstimator100<T>.InterpolationRecord> sample = m_poseBuffer.getSample(timestampSeconds);
         if (sample.isEmpty())
             return Optional.empty();
+        // return Optional.of(sample.get().gyroAngle);
         return Optional.of(sample.get().poseMeters.getRotation());
     }
 

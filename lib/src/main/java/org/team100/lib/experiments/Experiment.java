@@ -32,5 +32,9 @@ public enum Experiment {
     /**
      * Show mode locks slow speed for younger drivers.
      */
-    ShowMode
+    ShowMode,
+    /**
+     * Use multiple april tags to triangulate position
+     */
+    Triangulate
 }
