@@ -214,4 +214,21 @@ class TriangulationTest {
         assertEquals(0, x.getX(), kDelta);
         assertEquals(0, x.getY(), kDelta);
     }
+
+    @Test
+    void testTriangulationHelper1() {
+        // tag locations
+        Translation2d T1 = new Translation2d(1, 1);
+        Translation2d T2 = new Translation2d(1, -1);
+
+        // sights
+        Rotation2d r1 = new Rotation2d(Math.PI / 4);
+        Rotation2d r2 = new Rotation2d(-Math.PI / 4);
+
+        Translation2d x = TriangulationHelper.solve(T1, T2, r1, r2);
+        assertEquals(0, x.getX(), kDelta);
+        assertEquals(0, x.getY(), kDelta);
+    }
+
+    
 }
