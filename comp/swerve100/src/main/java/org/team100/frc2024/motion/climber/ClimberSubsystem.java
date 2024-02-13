@@ -60,7 +60,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
         switch (Identity.instance) {
             case COMP_BOT:
             //TODO tune kV
-                s1 = ServoFactory.neoDistanceServo(
+                s1 = ServoFactory.neoVortexDistanceServo(
                         m_name + "/Left",
                         leftClimberID,
                         false,
@@ -69,7 +69,7 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
                         new PIDController(1, 0, 0),
                         m_lowLevelFeedforwardConstants,
                         m_velocityPIDConstants);
-                s2 = ServoFactory.neoDistanceServo(
+                s2 = ServoFactory.neoVortexDistanceServo(
                         m_name + "/Right",
                         rightClimberID,
                         true,
