@@ -216,10 +216,10 @@ public class VisionDataProvider24 {
         if (Experiments.instance.enabled(Experiment.Triangulate)) {
             // if multiple tags are in view, triangulate to get another (perhaps more
             // accurate) estimate
-            if (blips.length > 1) {
-                for (int i = 0; i < blips.length - 1; i++) {
-                    Blip24 b0 = blips[i];
-                    Blip24 b1 = blips[i + 1];
+            for (int i = 0; i < blips.length - 1; i++) {
+                Blip24 b0 = blips[i];
+                for (int j = i + 1; j < blips.length; ++j) {
+                    Blip24 b1 = blips[j];
 
                     Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(b0.getId());
                     Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(b1.getId());
@@ -264,6 +264,7 @@ public class VisionDataProvider24 {
                     lastRobotInFieldCoords = currentRobotinFieldCoords;
                 }
             }
+
         }
     }
 }
