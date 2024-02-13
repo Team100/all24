@@ -200,6 +200,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+
         // t.log(Level.DEBUG, m_name, "desired speed 2048ths_100ms", motorTick_100ms);
     }
 
