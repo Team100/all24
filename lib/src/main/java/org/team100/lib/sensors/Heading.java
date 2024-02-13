@@ -5,6 +5,8 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
  * To make sure we calculate heading the same way everywhere. This is NWU,
@@ -16,32 +18,36 @@ public class Heading implements HeadingInterface {
     private final RedundantGyroInterface m_gyro;
     private final String m_name;
 
+    // updated by periodic.
+    private Rotation2d m_currentHeadingNWU;
+    private double m_currentHeadingRateNWU;
+
     public Heading(RedundantGyroInterface gyro) {
         m_gyro = gyro;
         m_name = Names.name(this);
+        // initialize
+        periodic();
+        // please call periodic().
+        CommandScheduler.getInstance().registerSubsystem(this);
     }
 
     @Override
     public Rotation2d getHeadingNWU() {
-        double yawNED = m_gyro.getRedundantYawNED();
-        // invert NED to get NWU
-        Rotation2d result = Rotation2d.fromDegrees(-1.0 * yawNED);
-        t.log(Level.DEBUG, m_name, "heading (deg)", result.getDegrees());
-        t.log(Level.DEBUG, m_name, "Heading (rad)", result.getRadians());
-        return result;
+        return m_currentHeadingNWU;
     }
 
     @Override
     public double getHeadingRateNWU() {
-        double rateNED = m_gyro.getRedundantGyroRateNED();
-        // invert NED to get NWU
-        return -1.0 * rateNED;
+        return m_currentHeadingRateNWU;
     }
 
     @Override
-    public void periodic(){
-        t.log(Level.DEBUG, m_name, "Heading NWU", getHeadingNWU());
-        t.log(Level.DEBUG, m_name, "Heading Rate NWU", getHeadingRateNWU());
+    public void periodic() {
+        // invert NED to get NWU
+        m_currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getRedundantYawNED());
+        m_currentHeadingRateNWU = Units.degreesToRadians(-1.0 * m_gyro.getRedundantGyroRateNED());
+        t.log(Level.DEBUG, m_name, "Heading NWU", m_currentHeadingNWU);
+        t.log(Level.DEBUG, m_name, "Heading Rate NWU (rad_s)", m_currentHeadingRateNWU);
     }
 
 }

@@ -361,8 +361,8 @@ class AsymSwerveSetpointGeneratorTest {
 
         // the turn is pretty slow
         setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds, 0.02);
-        assertEquals(4.939, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
-        assertEquals(0.048, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(4.919, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0.064, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
         assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
     }
 }
