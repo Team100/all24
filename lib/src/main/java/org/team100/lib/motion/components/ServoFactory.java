@@ -6,11 +6,15 @@ import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
+import org.team100.lib.encoder.drive.NeoVortexDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
+import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
+import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
+import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
@@ -117,6 +121,45 @@ public class ServoFactory {
                 Angle100.instance);
     }
 
+    /**
+     * Position control using velocity feedforward and proportional feedback.
+     * Velocity control using outboard SparkMax controller.
+     */
+    public static PositionServoInterface<Angle100> neoVortexAngleServo(
+            String name,
+            int canId,
+            MotorPhase motorPhase,
+            int currentLimit,
+            SysParam param,
+            PIDController controller, 
+            FeedforwardConstants lowLevelFeedforwardConstants,
+            PIDConstants lowLevelVelocityConstants) {
+        NeoVortexTurningMotor motor = new NeoVortexTurningMotor(
+                name,
+                canId,
+                motorPhase,
+                currentLimit,
+                param.gearRatio(),
+                lowLevelFeedforwardConstants,
+                lowLevelVelocityConstants);
+        NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(
+                name,
+                motor,
+                param.gearRatio());
+        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new PositionServo<>(
+                name,
+                vServo,
+                encoder,
+                param.maxVelM_S(),
+                controller,
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
+                Angle100.instance);
+    }
+
     public static PositionServoInterface<Angle100> simulatedAngleServo(
             String name,
             SysParam param,
@@ -165,6 +208,46 @@ public class ServoFactory {
                 lowLevelFeedforwardConstants,
                 lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
+                name,
+                motor,
+                param.wheelDiameter() * Math.PI);
+        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new PositionServo<>(
+                name,
+                vServo,
+                encoder,
+                param.maxVelM_S(),
+                controller,
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
+                Distance100.instance);
+    }
+
+     /**
+     * Position control using velocity feedforward and proportional feedback.
+     * Velocity control using outboard SparkMax controller.
+     */
+    public static PositionServoInterface<Distance100> neoVortexDistanceServo(
+            String name,
+            int canId,
+            boolean motorPhase,
+            int currentLimit,
+            SysParam param,
+            PIDController controller,
+            FeedforwardConstants lowLevelFeedforwardConstants,
+            PIDConstants lowLevelVelocityConstants) {
+        NeoVortexDriveMotor motor = new NeoVortexDriveMotor(
+                name,
+                canId,
+                motorPhase,
+                currentLimit,
+                param.gearRatio(),
+                param.wheelDiameter(),
+                lowLevelFeedforwardConstants,
+                lowLevelVelocityConstants);
+        Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
                 name,
                 motor,
                 param.wheelDiameter() * Math.PI);
