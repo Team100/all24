@@ -55,13 +55,7 @@ class TagFinder:
         self.initialize_nt()
 
         self.at_detector = robotpy_apriltag.AprilTagDetector()
-
-        # TODO: use this
         self.at_detector.addFamily("tag36h11")
-        # TODO: remove this
-        # self.at_detector.addFamily("tag16h5")
-
-        # TODO: calibrate the cameras, these numbers are probably wrong
 
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
@@ -264,12 +258,7 @@ class TagFinder:
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
 
-        # address for joel's desktop machine
-        # TODO don't use this
-        # self.inst.setServer("192.168.3.18")
-
         # roboRio address. windows machines can impersonate this for simulation.
-        # TODO use for prod
         self.inst.setServer("10.1.0.2")
 
         topic_name = "vision/" + self.serial
@@ -302,7 +291,7 @@ def main():
     camera = Picamera2()
 
     model = camera.camera_properties["Model"]
-    print("MODEL " + model)
+    print("\nMODEL " + model)
 
     if model == "imx708_wide":
         print("V3 Wide Camera")
@@ -347,6 +336,7 @@ def main():
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # "ExposureTime": 3000,
             # limit auto: go as fast as possible but no slower than 30fps
+            # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
