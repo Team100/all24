@@ -290,7 +290,8 @@
       }
     ],
     "field": {
-      "length": 16.451,
+      "original length which is wrong": 16.451,
+      "length": 16.541,
       "width": 8.211
     }
   }
