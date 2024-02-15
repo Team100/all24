@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
+import java.util.function.ObjDoubleConsumer;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.sensors.HeadingWithHistory;
 import org.team100.lib.sensors.MockHeading;
@@ -321,6 +324,41 @@ class VisionDataProviderTest implements Timeless {
         Rotation2d b = Rotation2d.fromDegrees(340);
         Rotation2d c = a.interpolate(b, 0.5);
         assertEquals(-5, c.getDegrees(), kDelta);
+
+    }
+
+    Optional<Rotation2d> rot = Optional.of(new Rotation2d(3*Math.PI/4));
+
+    @Test
+    void testCase1() throws IOException {
+        System.out.println("test case 1");
+        // the case from 2/14
+        // robot 45 degrees to the right (negative), so 135 degrees
+        // x = 2.2m, y = - 1.3 m from the center speaker tag
+        // camera B
+        // camera to tag 4: z=2.4, x=0, y=0 (approx)
+        // camera to tag 3: z=2.8, x=0.1, y=0.1 (approx)
+        // tag 4 in red is at about (0, 2.5)
+        // tag 3 in red is at about (0, 3)
+
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
+                .redLayout("2024-crescendo.json");
+        DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> rot;
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+
+        Blip24 tag4 = new Blip24(4, new Transform3d(new Translation3d(0, 0, 2.4),
+                new Rotation3d()));
+        Blip24 tag3 = new Blip24(3, new Transform3d(new Translation3d(0.1, 0.1, 2.8),
+                new Rotation3d()));
+        Blip24[] tags = new Blip24[] { tag3, tag4 };
+
+        ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
+            System.out.println(coord);
+        };
+
+        Experiments.instance.testOverride(Experiment.Triangulate, true);
+        vdp.estimateRobotPose(estimateConsumer, "1000000013c9c96c", tags);
+        vdp.estimateRobotPose(estimateConsumer, "1000000013c9c96c", tags);
 
     }
 }

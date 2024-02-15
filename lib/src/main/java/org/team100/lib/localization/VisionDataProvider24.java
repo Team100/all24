@@ -62,7 +62,9 @@ public class VisionDataProvider24 {
      */
     private static final double kTagRotationBeliefThresholdMeters = 0;
     /** Discard results further than this from the previous one. */
-    private static final double kVisionChangeToleranceMeters = 0.1;
+    // TODO put this back
+    // private static final double kVisionChangeToleranceMeters = 0.1;
+    private static final double kVisionChangeToleranceMeters = 1;
 
     private final Telemetry t = Telemetry.get();
 
@@ -208,6 +210,9 @@ public class VisionDataProvider24 {
                     // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                     // distance.
                     estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                } else {
+                    System.out.println("IGNORE " + blip);
+                    System.out.println("distance " + distanceM);
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;
