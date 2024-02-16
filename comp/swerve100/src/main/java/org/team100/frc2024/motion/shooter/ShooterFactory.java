@@ -9,10 +9,9 @@ public class ShooterFactory {
     public static Shooter get() {
         switch (Identity.instance) {
             case COMP_BOT:
-                return new FlywheelShooter(7, 8);
             case BETA_BOT:
             default:
-                return new DrumShooter(5, 4);
+                return new DrumShooter(5, 4, 0, 0,  0); //Definitely real numbers
         }
     }
 

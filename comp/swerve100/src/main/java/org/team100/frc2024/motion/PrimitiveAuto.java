@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion;
 
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
@@ -33,24 +34,24 @@ public class PrimitiveAuto extends SequentialCommandGroup {
     // Pose2d goal2 = new Pose2d(2.228950, 5.510457, new Rotation2d(Math.PI));
     // Pose2d goal3 = new Pose2d(2.393838, 4.552123, new Rotation2d(Math.PI));
     // Pose2d goal4 = new Pose2d(3.250814, 3.176323, new Rotation2d(Math.PI));
-    TrajectoryConfig config = new TrajectoryConfig(2, 2);
-    StraightLineTrajectory maker = new StraightLineTrajectory(config);
+    // TrajectoryConfig config = new TrajectoryConfig(4, 5);
+    // StraightLineTrajectory maker = new StraightLineTrajectory(config);
 
-    Pose2d goal = new Pose2d(2.581925, 3.910345, new Rotation2d(0));
-    Pose2d goal2 = new Pose2d(2.603629, 2.572347, new Rotation2d());
-    Pose2d goal3 = new Pose2d(2.752244, 1.180354, new Rotation2d());
+    Pose2d goal = new Pose2d(2.29, 1.06, new Rotation2d(0));
+    Pose2d goal2 = new Pose2d(2.34, 2.85, new Rotation2d());
+    Pose2d goal3 = new Pose2d(2.52, 1.06, new Rotation2d());
 
 
     
 
     addCommands(
-        // new DriveToWaypoint100(goal, m_drive, planner, pidfController, limits, () -> new Rotation2d())
-        new DriveToWaypoint3(goal, m_drive, maker, new HolonomicDriveController3())
+        new DriveToWaypoint100(goal, m_drive, planner, pidfController, limits, () -> ShooterUtil.getRobotRotationToSpeaker(goal.getTranslation(), 0.25))
+        // new DriveToWaypoint3(goal, m_drive, maker, new HolonomicDriveController3())
         // new ParallelDeadlineGroup(new DriveBackwards(m_drive, 0.05), new IntakeWithSensor()),
         // new DriveSimple(m_drive, shooterLock),
         // new WaitCommand(1),
         // new Rotate(m_drive, heading, limits, 0)
-        // new DriveToWaypoint100(goal2, m_drive, planner, pidfController, limits, true),
+        // new DriveToWaypoint100(goal2, m_drive, planner, pidfController, limits, () -> ShooterUtil.getRobotRotationToSpeaker(goal2.getTranslation(), 0.25))
         // new ParallelDeadlineGroup(new DriveBackwards(m_drive, 0.05), new IntakeWithSensor()),
         // new DriveSimple(m_drive, shooterLock),
         // new Rotate(m_drive, heading, limits, 0),

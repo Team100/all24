@@ -1,5 +1,8 @@
 package org.team100.frc2024.motion.intake;
 
+import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.Sensors;
+import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -7,8 +10,12 @@ import org.team100.lib.config.SysParam;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.SpeedingVisualization;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 /**
  * Direct-drive roller intake
@@ -28,83 +35,130 @@ public class IntakeRoller extends Intake {
      * Surface velocity of whatever is turning in the intake.
      */
     private static final double kIntakeVelocityM_S = 3;
+    private static final double kCenteringVelocityM_S = 3;
+
     private final String m_name;
-    private final LimitedVelocityServo<Distance100> topRoller;
-    private final LimitedVelocityServo<Distance100> bottomRoller;
+    private final LimitedVelocityServo<Distance100> intakeRoller;
+    private final LimitedVelocityServo<Distance100> centeringWheels;
+    private final LimitedVelocityServo<Distance100> superRollers;
+
     private final SpeedingVisualization m_viz;
-    private final PIDConstants m_velocityConstants;
-    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
+    private final Sensors m_sensors;
+    private final Telemetry t;
 
-    public IntakeRoller(int topCAN, int bottomCAN) {
-        m_velocityConstants = new PIDConstants(0.0001, 0, 0);
-        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
+    public IntakeRoller(Sensors sensors, int intakeCAN, int centerCAN, int superCAN) {
+
         m_name = Names.name(this);
-        SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(
-                1,
-                0.05,
-                15,
-                10,
-                -10);
 
+        m_sensors = sensors;
+
+        t = Telemetry.get();
+
+        SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
+        SysParam centeringParameter = SysParam.limitedNeoVelocityServoSystem(1, 0.05, 15, 10, -10);
+
+               
         switch (Identity.instance) {
             case COMP_BOT:
             //TODO tune kV
-                topRoller = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Top Roller",
-                        topCAN,
+                intakeRoller = ServoFactory.limitedNeoVelocityServo(
+                        m_name + "/Intake Roller",
+                        intakeCAN,
                         false,
                         kCurrentLimit,
                         rollerParameter,
-                        m_lowLevelFeedforwardConstants,
-                        m_velocityConstants);
-                bottomRoller = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Bottom Roller",
-                        bottomCAN,
+                        new FeedforwardConstants(0.122,0,0.1,0.065),
+                        new PIDConstants(0.0001, 0, 0));
+                centeringWheels = ServoFactory.limitedNeoVelocityServo(
+                        m_name + "/Center Wheels",
+                        centerCAN,
+                        false,
+                        kCurrentLimit,
+                        centeringParameter,
+                        new FeedforwardConstants(0.122,0,0.1,0.065),
+                        new PIDConstants(0.0001, 0, 0));
+                superRollers = ServoFactory.limitedNeoVelocityServo(
+                        m_name + "/Super Roller",
+                        superCAN,
                         false,
                         kCurrentLimit,
                         rollerParameter,
-                        m_lowLevelFeedforwardConstants,
-                        m_velocityConstants);
+                        new FeedforwardConstants(0.122,0,0.1,0.065),
+                        new PIDConstants(0.0001, 0, 0));
                 break;
             case BLANK:
             default:
-                topRoller = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Top Roller",
+                intakeRoller = ServoFactory.limitedSimulatedVelocityServo(
+                        m_name + "/Intake Roller",
                         rollerParameter);
-                bottomRoller = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Bottom Roller",
+                centeringWheels = ServoFactory.limitedSimulatedVelocityServo(
+                        m_name + "/Center Wheels",
+                        centeringParameter);
+                superRollers = ServoFactory.limitedSimulatedVelocityServo(
+                        m_name + "/Center Wheels",
                         rollerParameter);
         }
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
+    //All you have to do is set the state once and it handles the rest. No need for commands 
+    public void intakeSmart() {
+        if(m_sensors.getFeederSensor()){
+            intakeRoller.setVelocity(0);
+            centeringWheels.setVelocity(0);
+            superRollers.setVelocity(0);
+            RobotState100.changeIntakeState(IntakeState100.STOP);
+        } else {
+            intakeRoller.setVelocity(kIntakeVelocityM_S);
+            centeringWheels.setVelocity(kCenteringVelocityM_S);
+            superRollers.setVelocity(kIntakeVelocityM_S);
+        }
+        
+
+    }
+
     @Override
-    public void intake() {
-        topRoller.setVelocity(kIntakeVelocityM_S);
-        bottomRoller.setVelocity(kIntakeVelocityM_S);
+    public void intake(){
+        // System.out.println("INTAKING");
+        intakeRoller.setVelocity(kIntakeVelocityM_S);
+        centeringWheels.setVelocity(kCenteringVelocityM_S);
+        superRollers.setVelocity(kIntakeVelocityM_S);
     }
 
     @Override
     public void outtake() {
-        topRoller.setVelocity(-1.0 * kIntakeVelocityM_S);
-        bottomRoller.setVelocity(-1.0 * kIntakeVelocityM_S);
+
+        intakeRoller.setVelocity(-kIntakeVelocityM_S);
+        centeringWheels.setVelocity(-kCenteringVelocityM_S);
+        superRollers.setVelocity(-kIntakeVelocityM_S);
     }
 
     @Override
     public void stop() {
-        topRoller.stop();
-        bottomRoller.stop();
+        System.out.println("STOPPPP");
+        intakeRoller.stop();
+        centeringWheels.stop();
+        superRollers.stop();
     }
 
     @Override
     public void periodic() {
-        topRoller.periodic();
-        bottomRoller.periodic();
+        if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
+            t.log(Level.DEBUG, m_name, "STATE", 2);
+        } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
+            t.log(Level.DEBUG, m_name, "STATE", 1);
+        }else if(RobotState100.getIntakeState() == IntakeState100.STOP){
+            t.log(Level.DEBUG, m_name, "STATE", 0);
+        }
+
+        intakeRoller.periodic();
+        centeringWheels.periodic();
+        superRollers.periodic();
         m_viz.periodic();
     }
 
     @Override
     public double getVelocity() {
-        return (topRoller.getVelocity() + bottomRoller.getVelocity()) / 2;
+        return intakeRoller.getVelocity();
     }
 }

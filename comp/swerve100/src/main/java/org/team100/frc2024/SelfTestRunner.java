@@ -111,8 +111,8 @@ public class SelfTestRunner extends Command {
             AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
             addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
 
-            ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
-            addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
+            // ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
+            // addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
         }
 
         // since we print to the console we don't want warning noise

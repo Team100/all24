@@ -32,8 +32,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class DriveToWaypoint100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
-    private static final double kMaxVelM_S = 3;
-    private static final double kMaxAccelM_S_S = 2;
+    private static final double kMaxVelM_S = 4;
+    private static final double kMaxAccelM_S_S = 4;
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
@@ -146,6 +146,8 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("DRIVE TO FINISHEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

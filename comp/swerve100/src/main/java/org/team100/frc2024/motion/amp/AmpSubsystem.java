@@ -28,7 +28,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final PositionServoInterface<Angle100> ampAngleServoLeft;
     private final PositionServoInterface<Angle100> ampAngleServoRight;
     private final AngularVisualization m_viz;
-    private final PIDController m_armPositionPIDController; 
+    private final PIDConstants m_armPositionConstants; 
     private final PIDConstants m_armVelocityPIDConstants; 
     private final FeedforwardConstants m_lowLevelFeedforwardConstants;
 
@@ -42,12 +42,9 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 5)
                 ;
 
-        m_armPositionPIDController = new PIDController(2.5, 0.1, 0);
+        m_armPositionConstants = new PIDConstants(2.5, 0.1, 0);
         m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
         m_armVelocityPIDConstants = new PIDConstants(0.0001, 0, 0);
-
-
-        SmartDashboard.putData("Arm PID Position Controller", m_armPositionPIDController);
 
 
 
@@ -60,7 +57,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         MotorPhase.FORWARD,
                         kCurrentLimit,
                         m_params,
-                        m_armPositionPIDController, //2.5 0.1
+                        m_armPositionConstants, //2.5 0.1
                         m_lowLevelFeedforwardConstants,
                         m_armVelocityPIDConstants); //Where did this come from?
 
@@ -70,7 +67,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                         MotorPhase.REVERSE,
                         kCurrentLimit,
                         m_params,
-                        m_armPositionPIDController,
+                        m_armPositionConstants,
                         m_lowLevelFeedforwardConstants,
                         m_armVelocityPIDConstants);
                 break;
@@ -100,6 +97,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         ampAngleServoRight.setPosition(value);
         ampAngleServoLeft.setPosition(value);
     }
+
+
 
     public void stop() {
         ampAngleServoRight.stop();
