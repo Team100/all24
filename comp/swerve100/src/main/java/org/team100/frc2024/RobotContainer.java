@@ -206,7 +206,7 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-        m_cameraAngles = new CameraAngles(30, 67.5, 50, 832, 616, 0.71, 0, 0);
+        m_cameraAngles = new CameraAngles(Math.toRadians(30), 0.71, 0, 0);
         m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
 
         m_intake = IntakeFactory.get();
