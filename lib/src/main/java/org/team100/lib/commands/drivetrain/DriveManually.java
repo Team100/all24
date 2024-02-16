@@ -104,11 +104,16 @@ public class DriveManually extends Command100 {
         m_drive.stop();
     }
 
-    // for testing only
+    /**
+     * Override the driver mode.
+     * 
+     * For testing only.
+     */
     public void overrideMode(Supplier<String> mode) {
         m_mode = mode;
     }
 
+    /** Register a driver for module state mode */
     public void register(String name, boolean isDefault, ModuleStateDriver d) {
         addName(name, isDefault);
         m_drivers.put(
@@ -124,6 +129,7 @@ public class DriveManually extends Command100 {
                 });
     }
 
+    /** Register a driver for robot-relative speed mode */
     public void register(String name, boolean isDefault, ChassisSpeedDriver d) {
         addName(name, isDefault);
         m_drivers.put(
@@ -139,6 +145,7 @@ public class DriveManually extends Command100 {
                 });
     }
 
+    /** Register a driver for field-relative speed mode */
     public void register(String name, boolean isDefault, FieldRelativeDriver d) {
         addName(name, isDefault);
         m_drivers.put(
