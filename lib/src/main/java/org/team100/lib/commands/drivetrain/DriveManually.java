@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
@@ -52,7 +53,7 @@ public class DriveManually extends Command100 {
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
         m_defaultDriver = stop();
-        m_drivers = new HashMap<>();
+        m_drivers = new ConcurrentHashMap<>();
         SmartDashboard.putData(m_manualModeChooser);
         addRequirements(m_drive);
     }

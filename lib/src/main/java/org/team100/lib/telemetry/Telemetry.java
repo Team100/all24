@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -90,7 +91,7 @@ public class Telemetry {
      */
     private Telemetry() {
         inst = NetworkTableInstance.getDefault();
-        pubs = new HashMap<>();
+        pubs = new ConcurrentHashMap<>();
         m_levelChooser = TelemetryLevelChooser.get();
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);

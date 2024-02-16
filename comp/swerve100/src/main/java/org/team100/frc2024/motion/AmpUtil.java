@@ -7,6 +7,8 @@ package org.team100.frc2024.motion;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.team100.lib.commands.drivetrain.JSONParser;
 import org.team100.lib.commands.drivetrain.TrajectoryList;
@@ -26,7 +28,7 @@ public class AmpUtil {
     }
 
     public static List<Pose2d> getShortestTrajecNew(SwerveDriveSubsystem drive){
-        HashMap<String, List<Pose2d>> poseMap = new HashMap<>();
+        Map<String, List<Pose2d>> poseMap = new ConcurrentHashMap<>();
         Translation2d currentTranslation = drive.getPose().getTranslation();
         Pose2d currentPose = drive.getPose();
         

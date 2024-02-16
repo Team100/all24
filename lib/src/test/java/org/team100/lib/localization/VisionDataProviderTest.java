@@ -356,7 +356,7 @@ class VisionDataProviderTest implements Timeless {
             System.out.println(coord);
         };
 
-        Experiments.instance.testOverride(Experiment.Triangulate, true);
+        Experiments.instance.testOverride(Experiment.Triangulate, false);
         vdp.estimateRobotPose(estimateConsumer, "1000000013c9c96c", tags);
         vdp.estimateRobotPose(estimateConsumer, "1000000013c9c96c", tags);
     }
