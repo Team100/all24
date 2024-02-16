@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 @ExcludeFromJacocoGeneratedReport
 public class OscillateSelfTest extends Command {
     private static final double kExpectedDuration = 10;
+    // abort if the robot moves too far
     private static final double kMaxDistance = 1.5;
 
     private final SwerveDriveSubsystem m_drivetrain;
