@@ -8,6 +8,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.NotePoseDetector;
 import org.team100.lib.util.CameraAngles;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableEvent;
@@ -94,7 +95,7 @@ public class NotePosition24ArrayListener {
     private void addVisionMeasurement(Consumer<Translation2d> estimateConsumer, String ID) {
         Transform3d cameraInRobotCoordinates = Camera.get(ID).getOffset();
         CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
-        Translation2d d = e.getTranslation2d(getY().get(), getX().get());
+        Translation2d d = e.getTranslation2d(new Rotation3d(0, getY().get(), getX().get()));
         estimateConsumer.accept(d);
     }
 

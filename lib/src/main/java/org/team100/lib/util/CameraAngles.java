@@ -1,5 +1,6 @@
 package org.team100.lib.util;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -40,9 +41,9 @@ public class CameraAngles {
      * @return A robot relative translational y value of an object in a camera in
      *         meters
      */
-    public Translation2d getTranslation2d(double vertRotToTargetRads, double horzRotToTargetRads) {
-        double x = getX(vertRotToTargetRads);
-        double y = x * Math.tan(horzRotToTargetRads + m_yawRads);
+    public Translation2d getTranslation2d(Rotation3d cameraObject) {
+        double x = getX(cameraObject.getY());
+        double y = x * Math.tan(cameraObject.getZ() + m_yawRads);
         return new Translation2d(x, y + m_yOffset);
     }
 }

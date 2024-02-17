@@ -17,8 +17,8 @@ class TestCameraAngles extends Fixtured {
         {
             Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0,Math.toRadians(60),0));
             CameraAngles camera = new CameraAngles(e);
-            Translation2d testTranslation1 = camera.getTranslation2d(0, 0);
-            Translation2d testTranslation2 = camera.getTranslation2d(Math.toRadians(-25), Math.toRadians(10));
+            Translation2d testTranslation1 = camera.getTranslation2d(new Rotation3d());
+            Translation2d testTranslation2 = camera.getTranslation2d(new Rotation3d(0, Math.toRadians(-25), Math.toRadians(10)));
                assertEquals(0,testTranslation1.getY(),0.0001);
                assertEquals(0.7,testTranslation2.getX(),0.001);
                assertEquals(0.123465481082,testTranslation2.getY(),0.001);
@@ -32,7 +32,7 @@ class TestCameraAngles extends Fixtured {
         {
             Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0,Math.toRadians(45),0));
             CameraAngles camera = new CameraAngles(e);
-            Translation2d testTranslation1 = camera.getTranslation2d(0, 0);
+            Translation2d testTranslation1 = camera.getTranslation2d(new Rotation3d());
                assertEquals(1,testTranslation1.getX(),0.0001);
             }
     }
