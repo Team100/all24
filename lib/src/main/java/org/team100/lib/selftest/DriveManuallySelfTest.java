@@ -10,6 +10,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * This test drives +x for 1 m at about 0.5 m/s
+ */
 @ExcludeFromJacocoGeneratedReport
 public class DriveManuallySelfTest extends Command {
     private static final double kExpectedDuration = 2;
