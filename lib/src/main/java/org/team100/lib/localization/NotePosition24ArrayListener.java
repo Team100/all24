@@ -2,9 +2,18 @@ package org.team100.lib.localization;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.ObjDoubleConsumer;
 
+import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.NotePoseDetector;
+import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.util.CameraAngles;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
@@ -17,7 +26,12 @@ public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
     NotePosition24[] positions;
+    NotePoseDetector m_notePoseDetector;
     double latestTime = 0;
+
+    public NotePosition24ArrayListener(NotePoseDetector notePoseDetector) {
+        this.m_notePoseDetector = notePoseDetector;
+    }
 
     void consumeValues(NetworkTableEvent e) {
         ValueEventData ve = e.valueData;
@@ -43,11 +57,7 @@ public class NotePosition24ArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
-
-            for (NotePosition24 position : positions) {
-                // this is where you would do something useful with the payload
-                // System.out.println(fields[1] + " " + position);
-            }
+            addVisionMeasurement(m_notePoseDetector::update, fields[1]);
         } else {
             System.out.println("note weird vision update key: " + name);
         }
@@ -57,12 +67,12 @@ public class NotePosition24ArrayListener {
      * @return The x position in the camera in pixels, 0 should be the left of the
      *         screen
      */
-    public Optional<Double> getX() {
+    private Optional<Double> getX() {
         switch (Identity.instance) {
             case BETA_BOT:
+            case COMP_BOT:
                 double xd = positions[0].getX();
-                Double x = xd;
-                Optional<Double> e = Optional.of(x);
+                Optional<Double> e = Optional.of(xd);
                 return e;
             default:
                 return Optional.empty();
@@ -73,16 +83,23 @@ public class NotePosition24ArrayListener {
      * @return The y position in the camera in pixels, 0 should be the bottom of the
      *         screen
      */
-    public Optional<Double> getY() {
+    private Optional<Double> getY() {
         switch (Identity.instance) {
             case BETA_BOT:
+            case COMP_BOT:
                 double dy = positions[0].getY();
-                Double y = -1.0 * (dy - 616);
-                Optional<Double> e = Optional.of(y);
+                Optional<Double> e = Optional.of(dy);
                 return e;
             default:
                 return Optional.empty();
         }
+    }
+
+    private void addVisionMeasurement(Consumer<Translation2d> estimateConsumer, String ID) {
+        Transform3d cameraInRobotCoordinates = Camera.get(ID).getOffset();
+        CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
+        Translation2d d = e.getTranslation2d(getY().get(), getX().get());
+        estimateConsumer.accept(d);
     }
 
     public void enable() {

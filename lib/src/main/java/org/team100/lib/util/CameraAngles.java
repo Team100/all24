@@ -1,42 +1,25 @@
 package org.team100.lib.util;
 
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+
 public class CameraAngles {
-    private final double m_downwardAngleRads;
-    private final double m_horzAngle = 0;
+    private final double m_pitchRads;
+    private final double m_yawRads;
     private final double m_cameraHeightMeters;
     private final double m_xOffset;
     private final double m_yOffset;
 
     /**
-     * @param downwardAngleRads The angle downward the camera is in
-     *                             radians, this is including half of the
-     *                             view of the camera
-     * @param cameraHeightMeters   The height of the camera in meters
-     * @param xOffset              The x offset of the camera in meters relative to
-     *                             the center of the drivetrain
-     * @param yOffset              The y offset of the camera in meters relative to
-     *                             the center of the drivetrain
+     * @param cameraInRobotCoordinates The transform3d of the camera in robot pose
      */
     public CameraAngles(
-            double downwardAngleRads,
-            double cameraHeightMeters,
-            double xOffset,
-            double yOffset) {
-        m_downwardAngleRads = downwardAngleRads;
-        m_cameraHeightMeters = cameraHeightMeters;
-        m_xOffset = xOffset;
-        m_yOffset = yOffset;
-    }
-
-    /**
-     * Creates a camera angles class with no peramters, this is purely for testing
-     * and sim
-     */
-    public CameraAngles() {
-        m_downwardAngleRads = 0;
-        m_cameraHeightMeters = 0;
-        m_xOffset = 0;
-        m_yOffset = 0;
+            Transform3d cameraInRobotCoordinates) {
+        m_pitchRads = cameraInRobotCoordinates.getRotation().getY();
+        m_yawRads = cameraInRobotCoordinates.getRotation().getZ();
+        m_cameraHeightMeters = cameraInRobotCoordinates.getZ();
+        m_xOffset = cameraInRobotCoordinates.getX();
+        m_yOffset = cameraInRobotCoordinates.getY();
     }
 
     /**
@@ -44,10 +27,10 @@ public class CameraAngles {
      * @return A robot relative translational x value of an object in a camera in
      *         meters
      */
-    public double getX(double vertFOVRads) {
-        double x = -1.0 * m_cameraHeightMeters
-                * Math.tan(vertFOVRads + Math.PI/2 - m_downwardAngleRads);
-        return x - m_xOffset;
+    private double getX(double vertRotToTargetRads) {
+        double x = m_cameraHeightMeters
+                * Math.tan(vertRotToTargetRads + m_pitchRads);
+        return x + m_xOffset;
     }
 
     /**
@@ -55,10 +38,10 @@ public class CameraAngles {
      * @return A robot relative translational y value of an object in a camera in
      *         meters
      */
-    public double getY(double vertFOVRads, double horzFOVRads) {
-        double x = -1.0 * getX(vertFOVRads);
-        double y = x * Math.tan(horzFOVRads + m_horzAngle);
-        return y - m_yOffset;
+    public Translation2d getTranslation2d(double vertRotToTargetRads, double horzRotToTargetRads) {
+        double x = getX(vertRotToTargetRads);
+        double y = x * Math.tan(horzRotToTargetRads + m_yawRads);
+        return new Translation2d(x, y + m_yOffset);
     }
 
     // /**
@@ -78,11 +61,4 @@ public class CameraAngles {
     //     double y = m_horzResolution * (Math.atan((sideMeters+m_yOffset)/(forwardMeters+m_xOffset))/Math.toRadians(m_horzFOVDegrees)) + m_horzResolution/2;
     //     return y;
     // }
-
-    /**
-     * @return A robot relative angle in radians to the note
-     */
-    public double getAngle(double horzFOVRads, double vertFOVRads) {
-        return Math.atan2(getY(horzFOVRads, vertFOVRads), getX(vertFOVRads));
-    }
 }

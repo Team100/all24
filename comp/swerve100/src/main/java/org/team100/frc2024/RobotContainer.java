@@ -39,7 +39,7 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.NoteDetector;
+import org.team100.lib.config.NotePoseDetector;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
@@ -105,8 +105,7 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private Alliance m_alliance;
-    private final CameraAngles m_cameraAngles;
-    private final NoteDetector m_noteDetector;
+    private final NotePoseDetector m_noteDetector;
 
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -195,8 +194,9 @@ public class RobotContainer {
                 poseEstimator,
                 poseEstimator::getSampledRotation);
         visionDataProvider.enable();
+        m_noteDetector = new NotePoseDetector(poseEstimator);
 
-        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
+        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(m_noteDetector);
         notePositionDetector.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
@@ -206,8 +206,6 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-        m_cameraAngles = new CameraAngles(Math.toRadians(30), 0.71, 0, 0);
-        m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();

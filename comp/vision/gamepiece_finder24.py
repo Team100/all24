@@ -11,7 +11,7 @@ from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
 from wpimath.geometry import Transform3d
 from wpiutil import wpistruct
-
+import math
 
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
@@ -51,8 +51,8 @@ class GamePieceFinder:
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
             self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
-            self.horzFOV = 80
-            self.vertFOV = 63
+            self.horzFOV = math.radians(80)
+            self.vertFOV = math.radians(63)
             self.dist = np.array(
                 [
                     [
@@ -76,8 +76,8 @@ class GamePieceFinder:
         elif self.model == "imx219":
             print("V2 CAMERA (NOT WIDE ANGLE)")
             self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.vertFOV = 50
-            self.horzFOV = 64
+            self.vertFOV = math.radians(50)
+            self.horzFOV = math.radians(64)
             self.dist = np.array(
                 [
                     [
@@ -101,8 +101,8 @@ class GamePieceFinder:
         else:
             print("UNKNOWN CAMERA")
             self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.vertFOV = 45
-            self.horzFOV = 45
+            self.vertFOV = math.radians(45)
+            self.horzFOV = math.radians(45)
             self.dist = np.array(
                 [
                     [
@@ -197,14 +197,10 @@ class GamePieceFinder:
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
-            xAngle = ((cY - (self.height/2))/self.height)*self.vertFOV
-            yAngle = ((cX - (self.width/2))/self.width)*self.horzFOV
-            # translation_x = (cX-self.width/2)* \
-            #     (self.object_height*math.cos(self.theta)/cnt_height)
-            # translation_y = (cY-self.height/2) * \
-            #     (self.object_height*math.cos(self.theta)/cnt_height)
-            # translation_z = (self.object_height*self.scale_factor*math.cos(self.theta))/(cnt_height)
-            objects.append(NotePosition(xAngle, yAngle))
+            pitchRad = ((cY - (self.height/2))/self.height)*self.vertFOV
+            yawRad = ((cX - (self.width/2))/self.width)*self.horzFOV
+            # Puts up angle to the target from the POV of the camera
+            objects.append(NotePosition(yawRad, pitchRad))
             self.draw_result(img_bgr, c, cX, cY)
             
         self.output_stream.putFrame(img_bgr)
