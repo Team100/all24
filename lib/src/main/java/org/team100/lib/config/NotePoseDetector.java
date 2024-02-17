@@ -1,6 +1,7 @@
 package org.team100.lib.config;
 
-import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.localization.NotePosition24ArrayListener;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -8,22 +9,19 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class NotePoseDetector {
-    private final SwerveDrivePoseEstimator100 m_swervePose;
-    private Translation2d m_robotRelativeNoteTranslation = new Translation2d();
+    private final SwerveDriveSubsystem m_swerve;
+    private final NotePosition24ArrayListener m_notePosition24ArrayListener;
 
     /**
-     * @param swervePose The swerve pose estimator
+     * @param notePosition24ArrayListener Class which gets the x and a values of the
+     *                                    object detected from the PI
+     * @param swerve                      The swerve drivetrain
      */
     public NotePoseDetector(
-            SwerveDrivePoseEstimator100 swervePose) {
-        m_swervePose = swervePose;
-    }
-
-    /**
-     * Updates the pose detector with the correct robot relative pose
-     */
-    public void update(Translation2d robotRelativeNoteTranslation) {
-        m_robotRelativeNoteTranslation = robotRelativeNoteTranslation;
+            NotePosition24ArrayListener notePosition24ArrayListener,
+            SwerveDriveSubsystem swerve) {
+        m_notePosition24ArrayListener = notePosition24ArrayListener;
+        m_swerve = swerve;
     }
 
     /**
@@ -31,7 +29,7 @@ public class NotePoseDetector {
      *         meters
      */
     public double getX() {
-        return m_robotRelativeNoteTranslation.getX();
+        return m_notePosition24ArrayListener.getX().get();
     }
 
     /**
@@ -54,7 +52,7 @@ public class NotePoseDetector {
      * @return A robot relative angle in radians to the note
      */
     public Rotation2d robotRelativeAngleToNote() {
-        return m_robotRelativeNoteTranslation.getAngle();
+        return m_notePosition24ArrayListener.getTranslation2d().get().getAngle();
     }
 
     /**
@@ -64,14 +62,12 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                return fieldRelativePose2d().getRotation();
-            case BLANK:
-                return FieldRelativeTranslation2d().minus(m_swervePose.getEstimatedPosition().getTranslation())
-                        .getAngle();
+        return fieldRelativePose2d().getRotation();
+                case BLANK:
+                return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
             default:
-                return FieldRelativeTranslation2d().minus(m_swervePose.getEstimatedPosition().getTranslation())
-                        .getAngle();
-        }
+                return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
+            }
     }
 
     /**
@@ -79,7 +75,7 @@ public class NotePoseDetector {
      *         meters
      */
     public Double getY() {
-        return m_robotRelativeNoteTranslation.getY();
+        return m_notePosition24ArrayListener.getY().get();
     }
 
     /**
@@ -103,7 +99,7 @@ public class NotePoseDetector {
      *         meters, rot value is bearing
      */
     public Translation2d RobotRelativeTranslation2d() {
-        return m_robotRelativeNoteTranslation;
+        return m_notePosition24ArrayListener.getTranslation2d().get();
     }
 
     /**
@@ -119,7 +115,7 @@ public class NotePoseDetector {
      *         for translation and radians for rotation
      */
     public Transform2d robotRelativeTransform2d() {
-        return new Transform2d(m_robotRelativeNoteTranslation, robotRelativeAngleToNote());
+        return new Transform2d(RobotRelativeTranslation2d(), robotRelativeAngleToNote());
     }
 
     /**
@@ -130,7 +126,7 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                return m_swervePose.getEstimatedPosition().transformBy(robotRelativeTransform2d());
+                return m_swerve.getPose().transformBy(robotRelativeTransform2d());
             case BLANK:
                 return new Pose2d(fieldRelativeX(), fieldRelativeY(), fieldRelativeAngleToNote());
             default:

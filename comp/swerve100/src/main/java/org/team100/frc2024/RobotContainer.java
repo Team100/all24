@@ -79,7 +79,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
-import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
@@ -194,9 +193,8 @@ public class RobotContainer {
                 poseEstimator,
                 poseEstimator::getSampledRotation);
         visionDataProvider.enable();
-        m_noteDetector = new NotePoseDetector(poseEstimator);
+        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
 
-        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(m_noteDetector);
         notePositionDetector.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
@@ -206,6 +204,8 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
+            
+        m_noteDetector = new NotePoseDetector(notePositionDetector,m_drive);
 
         m_intake = IntakeFactory.get();
         m_shooter = ShooterFactory.get();

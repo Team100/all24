@@ -23,7 +23,7 @@ public class NotePosition24Struct implements Struct<NotePosition24> {
 
     @Override
     public String getSchema() {
-        return "int x,int y";
+        return "int yaw,int pitch";
     }
 
     @Override
@@ -35,8 +35,8 @@ public class NotePosition24Struct implements Struct<NotePosition24> {
 
     @Override
     public void pack(ByteBuffer bb, NotePosition24 value) {
-        bb.putInt(value.getX());
-        bb.putInt(value.getY());
+        bb.putInt(value.getYaw());
+        bb.putInt(value.getPitch());
     }
 
 }

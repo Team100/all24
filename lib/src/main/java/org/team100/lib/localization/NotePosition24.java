@@ -1,26 +1,26 @@
 package org.team100.lib.localization;
 
 public class NotePosition24 {
-    private final int x;
-    private final int y;
+    private final int yaw;
+    private final int pitch;
 
     // Yaw and Pitch angles to object in camera
-    public NotePosition24(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public NotePosition24(int yaw, int pitch) {
+        this.yaw = yaw;
+        this.pitch = pitch;
     }
 
-    public int getX() {
-        return this.x;
+    public int getYaw() {
+        return this.yaw;
     }
 
-    public int getY() {
-        return this.y;
+    public int getPitch() {
+        return this.pitch;
     }
 
     @Override
     public String toString() {
-        return "NotePosition [x=" + x + ", y=" + y + "]";
+        return "NotePosition [yaw=" + yaw + ", pitch=" + pitch + "]";
     }
 
     public static final NotePosition24Struct struct = new NotePosition24Struct();

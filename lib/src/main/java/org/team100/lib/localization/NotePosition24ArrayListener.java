@@ -2,10 +2,8 @@ package org.team100.lib.localization;
 
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.NotePoseDetector;
 import org.team100.lib.util.CameraAngles;
 
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -23,12 +21,8 @@ public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
     NotePosition24[] positions;
-    NotePoseDetector m_notePoseDetector;
+    Translation2d translation;
     double latestTime = 0;
-
-    public NotePosition24ArrayListener(NotePoseDetector notePoseDetector) {
-        this.m_notePoseDetector = notePoseDetector;
-    }
 
     void consumeValues(NetworkTableEvent e) {
         ValueEventData ve = e.valueData;
@@ -54,21 +48,62 @@ public class NotePosition24ArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
-            addVisionMeasurement(m_notePoseDetector::update, fields[1]);
+            updateMeasurement(fields[1]);
         } else {
             System.out.println("note weird vision update key: " + name);
         }
     }
 
-    /**
-     * @return The x position in the camera in pixels, 0 should be the left of the
-     *         screen
-     */
-    private Optional<Double> getX() {
+    private Optional<Double> optionalX(double position) {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                double xd = positions[0].getX();
+                Optional<Double> e = Optional.of(position);
+                return e;
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private Optional<Double> optionalY(double position) {
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                Optional<Double> e = Optional.of(position);
+                return e;
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private void updateMeasurement(String ID) {
+        Transform3d cameraInRobotCoordinates = Camera.get(ID).getOffset();
+        CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
+        double dx = positions[0].getYaw();
+        double dy = positions[0].getPitch();
+        translation = e.getTranslation2d(new Rotation3d(0, optionalY(dy).get(), optionalX(dx).get()));
+    }
+
+    public Optional<Translation2d> getTranslation2d() {
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                Optional<Translation2d> e = Optional.of(translation);
+                return e;
+            default:
+                return Optional.empty();
+        }
+    }
+
+   
+    /**
+     * @return The yaw to the object in the camera, 0 is center
+     */
+    public Optional<Double> getX() {
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+                double xd = translation.getX();
                 Optional<Double> e = Optional.of(xd);
                 return e;
             default:
@@ -77,28 +112,19 @@ public class NotePosition24ArrayListener {
     }
 
     /**
-     * @return The y position in the camera in pixels, 0 should be the bottom of the
-     *         screen
+     * @return The pitch to the object in the camera, 0 is center
      */
-    private Optional<Double> getY() {
+    public Optional<Double> getY() {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                double dy = positions[0].getY();
+                double dy = translation.getY();
                 Optional<Double> e = Optional.of(dy);
                 return e;
             default:
                 return Optional.empty();
         }
     }
-
-    private void addVisionMeasurement(Consumer<Translation2d> estimateConsumer, String ID) {
-        Transform3d cameraInRobotCoordinates = Camera.get(ID).getOffset();
-        CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
-        Translation2d d = e.getTranslation2d(new Rotation3d(0, getY().get(), getX().get()));
-        estimateConsumer.accept(d);
-    }
-
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
                 new String[] { "noteVision" },
