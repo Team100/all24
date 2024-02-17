@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 public class NotePosition24 {
     private final int x;
     private final int y;
+    //Yaw and Pitch angles 
     public NotePosition24(int x, int y) {
         this.x = x;
         this.y = y;

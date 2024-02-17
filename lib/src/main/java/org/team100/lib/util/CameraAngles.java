@@ -23,7 +23,8 @@ public class CameraAngles {
     }
 
     /**
-     *         0 should be center of FOV
+     * 0 should be center of FOV
+     * 
      * @return A robot relative translational x value of an object in a camera in
      *         meters
      */
@@ -34,7 +35,8 @@ public class CameraAngles {
     }
 
     /**
-     *         0 should be center of FOV 
+     * 0 should be center of FOV
+     * 
      * @return A robot relative translational y value of an object in a camera in
      *         meters
      */
@@ -43,22 +45,4 @@ public class CameraAngles {
         double y = x * Math.tan(horzRotToTargetRads + m_yawRads);
         return new Translation2d(x, y + m_yOffset);
     }
-
-    // /**
-    //  * @return A camera vertical pixel measurement given a translational x value
-    //  */
-    // public double getInverseX(double forwardMeters) {
-    //     double x = (m_vertResolution * (Math.atan((forwardMeters + m_xOffset) / m_cameraHeightMeters)
-    //             - Math.toRadians(90 - m_vertFOVDegrees/2 - m_downwardAngleRads)))
-    //             / Math.toRadians(m_vertFOVDegrees);
-    //     return x;
-    // }
-
-    // /**
-    //  * @return A camera horizontal pixel measurement given an x and y translational value, 0 is 416 pixels, or centerscreen
-    //  */
-    // public double getInverseY(double forwardMeters, double sideMeters) {
-    //     double y = m_horzResolution * (Math.atan((sideMeters+m_yOffset)/(forwardMeters+m_xOffset))/Math.toRadians(m_horzFOVDegrees)) + m_horzResolution/2;
-    //     return y;
-    // }
 }

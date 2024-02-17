@@ -3,15 +3,11 @@ package org.team100.lib.localization;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.ObjDoubleConsumer;
-
 import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.NotePoseDetector;
-import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.util.CameraAngles;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableEvent;

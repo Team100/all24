@@ -64,12 +64,14 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-        return fieldRelativePose2d().getRotation();
-                case BLANK:
-                return FieldRelativeTranslation2d().minus(m_swervePose.getEstimatedPosition().getTranslation()).getAngle();
+                return fieldRelativePose2d().getRotation();
+            case BLANK:
+                return FieldRelativeTranslation2d().minus(m_swervePose.getEstimatedPosition().getTranslation())
+                        .getAngle();
             default:
-                return FieldRelativeTranslation2d().minus(m_swervePose.getEstimatedPosition().getTranslation()).getAngle();
-            }
+                return FieldRelativeTranslation2d().minus(m_swervePose.getEstimatedPosition().getTranslation())
+                        .getAngle();
+        }
     }
 
     /**
