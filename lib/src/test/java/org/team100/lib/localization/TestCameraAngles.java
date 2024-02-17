@@ -36,4 +36,15 @@ class TestCameraAngles extends Fixtured {
                assertEquals(1,testTranslation1.getX(),0.0001);
             }
     }
+
+    @Test
+    void differentCameraAngles1() {
+        {
+            Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0,Math.toRadians(60),0));
+            CameraAngles camera = new CameraAngles(e);
+            Translation2d testTranslation1 = camera.getTranslation2d(new Rotation3d());
+            System.out.println(testTranslation1.getX());
+               assertEquals(Math.sqrt(3),testTranslation1.getX(),0.0001);
+            }
+    }
 }
