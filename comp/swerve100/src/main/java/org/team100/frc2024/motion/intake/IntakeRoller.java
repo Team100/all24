@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
  */
 public class IntakeRoller extends Intake {
     // TODO: tune the current limit
-    private static final int kCurrentLimit = 30;
+    private static final int kCurrentLimit = 40;
 
     /**
      * Surface velocity of whatever is turning in the intake.
@@ -72,7 +72,7 @@ public class IntakeRoller extends Intake {
                 centeringWheels = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Center Wheels",
                         centerCAN,
-                        false,
+                        true,
                         kCurrentLimit,
                         centeringParameter,
                         new FeedforwardConstants(0.122,0,0.1,0.065),
@@ -80,7 +80,7 @@ public class IntakeRoller extends Intake {
                 superRollers = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Super Roller",
                         superCAN,
-                        false,
+                        true,
                         kCurrentLimit,
                         rollerParameter,
                         new FeedforwardConstants(0.122,0,0.1,0.065),

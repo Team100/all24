@@ -8,6 +8,7 @@ import org.team100.frc2024.RobotState100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
+
 public class ShooterDefault extends Command {
   /** Creates a new ShooterDefault. */
 

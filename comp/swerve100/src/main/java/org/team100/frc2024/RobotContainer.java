@@ -80,6 +80,7 @@ import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.LocalADStarAK;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -88,6 +89,7 @@ import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -220,8 +222,8 @@ public class RobotContainer {
         m_intake = IntakeFactory.get(m_sensors);
         m_shooter = ShooterFactory.get();
 
-        m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
-        m_amp = new AmpSubsystem(28, 39);
+        m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
+        m_amp = new AmpSubsystem(19);
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         // show mode locks slow speed.
@@ -355,6 +357,9 @@ public class RobotContainer {
 
         whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
 
+        
+
+        
         // TODO: spin up the shooter whenever the robot is in range.
 
         // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));

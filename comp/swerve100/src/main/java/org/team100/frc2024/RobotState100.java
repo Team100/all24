@@ -23,7 +23,7 @@ public class RobotState100 {
     public static State100 currentRobotState = State100.SHOOTING;
     public static ShooterState100 currentShooterState = ShooterState100.DEFAULTSHOOT;
     public static AmpState100 currentAmpState = AmpState100.NONE;
-    public static IntakeState100 currentIntakeState = IntakeState100.STOP;
+    public static IntakeState100 currentIntakeState = IntakeState100.INTAKE;
 
 
     public void changeRobotState(State100 state){

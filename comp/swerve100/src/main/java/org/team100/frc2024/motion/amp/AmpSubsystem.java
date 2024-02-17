@@ -25,8 +25,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServoInterface<Angle100> ampAngleServoLeft;
-    private final PositionServoInterface<Angle100> ampAngleServoRight;
+    private final PositionServoInterface<Angle100> ampAngleServo;
     private final AngularVisualization m_viz;
     private final PIDConstants m_armPositionConstants; 
     private final PIDConstants m_armVelocityPIDConstants; 
@@ -34,7 +33,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
 
 
-    public AmpSubsystem(int leftPivotID, int rightPivotID) {
+    public AmpSubsystem(int pivotID) {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
@@ -51,36 +50,23 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         switch (Identity.instance) {
             case COMP_BOT:
                 //TODO tune kV
-                ampAngleServoLeft = ServoFactory.neoAngleServo(
+                ampAngleServo = ServoFactory.neoAngleServo(
                         m_name + "/Left",
-                        leftPivotID,
+                        pivotID,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
                         m_params,
                         m_armPositionConstants, //2.5 0.1
                         m_lowLevelFeedforwardConstants,
                         m_armVelocityPIDConstants); //Where did this come from?
-
-                ampAngleServoRight = ServoFactory.neoAngleServo(
-                        m_name + "/Right",
-                        rightPivotID,
-                        MotorPhase.REVERSE,
-                        kCurrentLimit,
-                        m_params,
-                        m_armPositionConstants,
-                        m_lowLevelFeedforwardConstants,
-                        m_armVelocityPIDConstants);
                 break;
             case BLANK:
             default:
-                ampAngleServoLeft = ServoFactory.simulatedAngleServo(
+                ampAngleServo = ServoFactory.simulatedAngleServo(
                         m_name + "/Left",
                         m_params,
                         new PIDController(1, 0, 0));
-                ampAngleServoRight = ServoFactory.simulatedAngleServo(
-                        m_name + "/Right",
-                        m_params,
-                        new PIDController(1, 0, 0));
+                
         }
         m_viz = new AngularVisualization(m_name, this);
     }
@@ -94,20 +80,19 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
-        ampAngleServoRight.setPosition(value);
-        ampAngleServoLeft.setPosition(value);
+        ampAngleServo.setPosition(value);
     }
 
 
 
     public void stop() {
-        ampAngleServoRight.stop();
-        ampAngleServoLeft.stop();
+        ampAngleServo.stop();
     }
 
     @Override
     public double getPositionRad() {
-        return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) / 2;
+        // return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) / 2;
+        return ampAngleServo.getPosition();
     }
 
     public boolean inPosition() {
@@ -117,8 +102,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     @Override
     public void periodic() {
-        ampAngleServoRight.periodic();
-        ampAngleServoLeft.periodic();
+        ampAngleServo.periodic();
         m_viz.periodic();
     }
 }

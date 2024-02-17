@@ -35,7 +35,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
-    private final SwerveLocal m_swerveLocal;
+    public final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
 
