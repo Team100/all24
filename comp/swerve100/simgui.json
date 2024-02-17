@@ -7,6 +7,7 @@
       "/SmartDashboard/DrumShooter": "Mechanism2d",
       "/SmartDashboard/FlushOften": "String Chooser",
       "/SmartDashboard/IndexerSubsystem": "Mechanism2d",
+      "/SmartDashboard/IntakeRoller": "Mechanism2d",
       "/SmartDashboard/IntakeWheel": "Mechanism2d",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
@@ -17,6 +18,7 @@
       "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/Triangulate": "String Chooser",
       "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
@@ -24,11 +26,6 @@
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Manual Drive Mode": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/UseSetpointGenerator": {
         "window": {
           "visible": true
@@ -67,6 +64,9 @@
         },
         "open": true
       },
+      "IntakeRoller": {
+        "open": true
+      },
       "RobotContainer": {
         "ManualWithShooterLock": {
           "bearing": {
@@ -76,11 +76,9 @@
           "target": {
             "open": true
           }
-        },
-        "open": true
+        }
       },
       "SwerveDriveSubsystem": {
-        "open": true,
         "pose": {
           "open": true,
           "translation": {
@@ -130,7 +128,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 455,
+          "height": 871,
           "series": [
             {
               "color": [
@@ -149,6 +147,100 @@
                 1.0
               ],
               "id": "NT:///DrivePursuitController/error/translation/y"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 397,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/DrumShooter/Angle"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <3>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": -8,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/IntakeRoller/Atate"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 320
+        }
+      ]
+    },
+    "Plot <5>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 549,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/IntakeRoller/STATE"
             }
           ]
         }

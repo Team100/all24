@@ -189,13 +189,19 @@ public class PoseEstimationHelper {
         t.log(Level.DEBUG, m_name, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
         t.log(Level.DEBUG, m_name, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
         
-        
+        System.out.println("TAG TRANLSAION IN CAM COORDS :" +  tagTranslationInCameraCoords.toTranslation2d());
+        System.out.println("CAMERA ROT IN FIELD COORDS: " + cameraRotationInFieldCoords.toRotation2d());  
+              
+        System.out.println("TAG IN FIELD COORDS COOORDS"+ tagInFieldCoords.toPose2d());        
+
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
         t.log(Level.DEBUG, m_name, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
     
+
+        System.out.println("TAG ROTATION IN CAM COOORDS"+ tagRotationInCameraCoords.toRotation2d());        
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -206,6 +212,7 @@ public class PoseEstimationHelper {
                 tagInCameraCoords,
                 tagInFieldCoords);
         
+        System.out.println("CAM IN FIELD COORDS:::: " + cameraInFieldCoords.toPose2d());
         t.log(Level.DEBUG, m_name, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
@@ -347,6 +354,8 @@ public class PoseEstimationHelper {
     static Pose3d toFieldCoordinates(Transform3d tagInCameraCords, Pose3d tagInFieldCords) {
         // First invert the camera-to-tag transform, obtaining tag-to-camera.
         Transform3d cameraInTagCords = tagInCameraCords.inverse();
+        // Transform3d cameraInTagCords = tagInCameraCords;
+
         // Then compose field-to-tag with tag-to-camera to get field-to-camera.
         return tagInFieldCords.transformBy(cameraInTagCords);
     }

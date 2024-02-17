@@ -24,16 +24,16 @@ public class ShooterUtil {
     public static Translation2d getOffsetTranslation(SwerveState state, double kScale){
         Translation2d currentTranslation = state.pose().getTranslation();
 
-        Translation2d shooterCenter = new Translation2d(FieldConstants.instance.SHOOTER_CENTER_X, 
-                                                       FieldConstants.instance.SHOOTER_CENTER_Y);
+        Translation2d shooterCenter = new Translation2d(FieldConstants.instance.getShooterCenterX(), 
+                                                       FieldConstants.instance.getShooterCenterY());
 
         double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
         
-         double offsetDistance = MathUtil.clamp( FieldConstants.instance.SHOOTER_CENTER_Y + distanceHorizontal * -1 * kScale, 
-                                                FieldConstants.instance.SHOOTER_LEFT_SIDE_Y, 
-                                                FieldConstants.instance.SHOOTER_RIGHT_SIDE_Y);
+         double offsetDistance = MathUtil.clamp( FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 * kScale, 
+                                                FieldConstants.instance.getShooterLeftSideY(), 
+                                                FieldConstants.instance.getShooterRightSideY());
 
-        return new Translation2d(FieldConstants.instance.SHOOTER_CENTER_X, offsetDistance);
+        return new Translation2d(FieldConstants.instance.getShooterCenterX(), offsetDistance);
 
     }
 
@@ -42,16 +42,16 @@ public class ShooterUtil {
     public static Translation2d getOffsetTranslation(Translation2d currTranslation, double kScale){
         Translation2d currentTranslation = currTranslation;
 
-        Translation2d shooterCenter = new Translation2d(FieldConstants.instance.SHOOTER_CENTER_X, 
-                                                       FieldConstants.instance.SHOOTER_CENTER_Y);
+        Translation2d shooterCenter = new Translation2d(FieldConstants.instance.getShooterCenterX(), 
+                                                       FieldConstants.instance.getShooterCenterY());
 
         double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
 
-        double offsetDistance = MathUtil.clamp( FieldConstants.instance.SHOOTER_CENTER_Y + distanceHorizontal * -1 * kScale, 
-                                                FieldConstants.instance.SHOOTER_LEFT_SIDE_Y, 
-                                                FieldConstants.instance.SHOOTER_RIGHT_SIDE_Y);
+        double offsetDistance = MathUtil.clamp( FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 * kScale, 
+                                                FieldConstants.instance.getShooterLeftSideY(), 
+                                                FieldConstants.instance.getShooterRightSideY());
 
-        return new Translation2d(FieldConstants.instance.SHOOTER_CENTER_X, offsetDistance);
+        return new Translation2d(FieldConstants.instance.getShooterCenterX(), offsetDistance);
 
     }
 
@@ -59,6 +59,7 @@ public class ShooterUtil {
         Translation2d currentTranslation = translation;
         Translation2d target = getOffsetTranslation(translation, kScale);
 
+        // System.out.println("FIELD CONSTANTS INSTANCE " + FieldConstants.instance.getShooterCenterX());
         return target.minus(currentTranslation).getAngle();
 
     }

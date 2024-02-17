@@ -19,7 +19,7 @@ public class FeedforwardConstants {
 
     //TODO tune the static and dynamic friction
     public static FeedforwardConstants makeWCPSwerveTurningFalcon6() {
-        return new FeedforwardConstants(0.11, 0, 0.18, 0.01);
+        return new FeedforwardConstants(0.16, 0, 0.08, 0.1);
     }
     
     public static FeedforwardConstants makeWCPSwerveDriveFalcon() {
@@ -28,6 +28,8 @@ public class FeedforwardConstants {
 
     public static FeedforwardConstants makeWCPSwerveDriveFalcon6() {
         return new FeedforwardConstants(0.11, 0, 0.375, 0.27);
+        // return new FeedforwardConstants(0, 0, 0, 0);
+
     }
 
     public FeedforwardConstants() {

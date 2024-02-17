@@ -59,7 +59,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         switch (Identity.instance) {
             case COMP_BOT:
 
-                beamBreak1 = new DigitalInput(4);
+                // beamBreak1 = new DigitalInput(4);
                 // beamBreak2 = new DigitalInput(8);
 
                 //TODO tune kV

@@ -34,6 +34,18 @@ public interface OperatorControl {
         return false;
     }
 
+    default boolean rampAndPivot(){
+        return false;
+    }
+
+    default boolean feed(){
+        return false;
+    }
+
+    default void pov(){
+        
+    }
+
     default boolean intake() {
         return false;
     }

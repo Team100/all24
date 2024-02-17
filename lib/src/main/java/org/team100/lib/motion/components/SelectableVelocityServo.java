@@ -67,6 +67,8 @@ public class SelectableVelocityServo<T extends Measure100> implements VelocitySe
         m_encoder.reset();
     }
 
+
+
     @Override
     public void setVelocity(double setpoint) {
         if (Double.isNaN(setpoint))
