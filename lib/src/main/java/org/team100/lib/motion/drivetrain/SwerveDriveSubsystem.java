@@ -35,7 +35,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
-    private final SwerveLocal m_swerveLocal;
+    public final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
 
@@ -64,7 +64,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
         stop();
         // this needs to be exactly "/field/.type" for glass.
-        t.log(Level.INFO, "field", ".type", "Field2d");
+        // t.log(Level.INFO, "field", ".type", "Field2d"); //This seems to throw an error sometimes
     }
 
     /**

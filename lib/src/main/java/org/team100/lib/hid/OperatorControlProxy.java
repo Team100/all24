@@ -132,4 +132,16 @@ public class OperatorControlProxy implements OperatorControl {
     public boolean selfTestEnable() {
         return m_operatorControl.selfTestEnable();
     }
+
+    public boolean rampAndPivot(){
+        return m_operatorControl.rampAndPivot();
+    }
+
+    public boolean feed(){
+        return m_operatorControl.feed();
+    }
+
+    public void pov(){
+        m_operatorControl.pov();
+    }
 }

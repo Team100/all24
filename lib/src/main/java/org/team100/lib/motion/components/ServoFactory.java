@@ -92,7 +92,7 @@ public class ServoFactory {
             MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
-            PIDController controller, 
+            PIDConstants controller, 
             FeedforwardConstants lowLevelFeedforwardConstants,
             PIDConstants lowLevelVelocityConstants) {
         NeoTurningMotor motor = new NeoTurningMotor(
@@ -116,7 +116,7 @@ public class ServoFactory {
                 vServo,
                 encoder,
                 param.maxVelM_S(),
-                controller,
+                new PIDController(controller.getP(), controller.getI(), controller.getD()),
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Angle100.instance);
     }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.PrimitiveAuto;
@@ -14,9 +15,12 @@ import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
+import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.shooter.Shooter;
+import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
+import org.team100.lib.barcode.Sensor;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -76,6 +80,7 @@ import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.LocalADStarAK;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -83,6 +88,7 @@ import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -94,10 +100,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private static final double kDriveCurrentLimit = 60;
+    private static final double kDriveCurrentLimit = 40;
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;
@@ -126,6 +133,7 @@ public class RobotContainer {
     // private final ClimberSubsystem m_climber;
     final Shooter m_shooter;
     final Intake m_intake;
+    final Sensors m_sensors;
 
     // Commands
     private final PivotAmp m_pivotAmp;
@@ -167,6 +175,8 @@ public class RobotContainer {
 
         m_indicator = new LEDIndicator(8);
 
+        m_sensors = new Sensors(1, 2, 3); //Definitely real numbers
+
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
@@ -207,11 +217,11 @@ public class RobotContainer {
             
         m_noteDetector = new NotePoseDetector(notePositionDetector,m_drive);
 
-        m_intake = IntakeFactory.get();
+        m_intake = IntakeFactory.get(m_sensors);
         m_shooter = ShooterFactory.get();
 
-        m_indexer = new IndexerSubsystem(30); // NEED CAN FOR AMP MOTOR //5
-        m_amp = new AmpSubsystem(28, 39);
+        m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
+        m_amp = new AmpSubsystem(19);
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         // show mode locks slow speed.
@@ -226,11 +236,11 @@ public class RobotContainer {
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
         // onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
 
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 0, 0, 0));
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -286,7 +296,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 2.4, 2.4);
+        DriveMotionController drivePID = new DrivePIDFController(false, 2.8, 2);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -327,6 +337,9 @@ public class RobotContainer {
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
+        // whileTrue(driverControl::test, new TestCommand("TEST"));
+        // whileTrue(driverControl::test, new TestCommand("TEST 333"));
+
         ///////////////// OPERATOR V2//////////////////////////
 
         // TODO: run the intake if the camera sees a note.
@@ -342,10 +355,13 @@ public class RobotContainer {
 
         whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
 
+        
+
+        
         // TODO: spin up the shooter whenever the robot is in range.
 
-        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-        whileTrue(operatorControl::shooter, m_shooter.run(m_shooter::forward));
+        // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        // whileTrue(operatorControl::shooter, m_shooter.run(m_shooter::forward));
 
         /*
          * 
@@ -461,12 +477,12 @@ public class RobotContainer {
                         omegaController,
                         0.25);
 
-        whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics, m_heading));
-
+        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+        whileTrue(driverControl::test, Commands.startEnd( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
         m_drive.setDefaultCommand(driveManually);
 
-        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        m_intake.setDefaultCommand(new IntakeDefault(m_intake));
+        m_shooter.setDefaultCommand(new ShooterDefault(m_shooter, m_drive));
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
         m_amp.setDefaultCommand(m_pivotAmp);
 

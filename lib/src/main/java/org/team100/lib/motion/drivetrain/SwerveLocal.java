@@ -86,6 +86,12 @@ public class SwerveLocal {
         }
     }
 
+
+    public void setChassisSpeeds(ChassisSpeeds speeds) {
+        setChassisSpeedsNormally(speeds, 0, 0.02);
+
+    }
+
     /**
      * @return true if aligned
      */

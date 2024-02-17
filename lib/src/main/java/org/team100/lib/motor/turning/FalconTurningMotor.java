@@ -191,6 +191,8 @@ public class FalconTurningMotor implements Motor100<Angle100> {
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", currentMotorRev_S());
         t.log(Level.DEBUG, m_name, "output [-1,1]", m_output);
         t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent());
+
     }
 
     //////////////////////////////////////////////////////////////////
