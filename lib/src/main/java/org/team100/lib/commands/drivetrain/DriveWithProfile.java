@@ -26,9 +26,38 @@ public class DriveWithProfile extends Command100 {
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
     private BooleanSupplier m_end;
+    private boolean m_endBoolean;
     private State100 xSetpoint;
     private State100 ySetpoint;
     private State100 thetaSetpoint;
+
+/**
+     * @param goal
+     * @param drivetrain
+     * @param controller
+     * @param limits
+     * @param end
+     */
+    public DriveWithProfile(
+            Supplier<Pose2d> fieldRelativeGoal,
+            SwerveDriveSubsystem drivetrain,
+            HolonomicDriveController100 controller,
+            SwerveKinodynamics limits,
+            boolean end) {
+        m_endBoolean = end;
+        m_fieldRelativeGoal = fieldRelativeGoal;
+        m_swerve = drivetrain;
+        m_controller = controller;
+        m_limits = limits;
+        Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
+                m_limits.getMaxAngleAccelRad_S2());
+        Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
+                m_limits.getMaxDriveAccelerationM_S2());
+        xProfile = new TrapezoidProfile100(driveContraints, 0.01);
+        yProfile = new TrapezoidProfile100(driveContraints, 0.01);
+        thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
+        addRequirements(m_swerve);
+    }
 
     /**
      * @param goal
@@ -123,8 +152,11 @@ public class DriveWithProfile extends Command100 {
 
     @Override
     public boolean isFinished() {
-        // TODO make this end when intake detects note intake
-        return m_end.getAsBoolean();
+        if (m_end != null) {
+        return m_end.getAsBoolean(); 
+        } else {
+            return m_endBoolean;
+        }
     }
 
     @Override
