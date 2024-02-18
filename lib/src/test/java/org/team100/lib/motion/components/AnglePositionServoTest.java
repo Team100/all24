@@ -27,19 +27,12 @@ class Angle100PositionServoTest {
         MockMotor100<Angle100> turningMotor = new MockMotor100<>();
         MockEncoder100<Angle100> turningEncoder = new MockEncoder100<>();
 
-
         PIDController turningController2 = new PIDController(1, 0, 0, period);
-        // turningController2.enableContinuousInput(0, 2 * Math.PI);
 
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward(1, 1, 1);
-
-        PIDController angle100Angle100VelocityController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
+        OutboardVelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
                 name,
                 turningMotor,
-                turningEncoder,
-                angle100Angle100VelocityController,
-                turningFeedforward);
+                turningEncoder);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         PositionServo<Angle100> servo = new PositionServo<>(
@@ -57,16 +50,5 @@ class Angle100PositionServoTest {
         assertEquals(0.5, servo.getSetpoint().x(), kDelta);
         assertEquals(1.0, servo.getSetpoint().v(), kDelta);
         assertEquals(1, turningMotor.velocity, kDelta);
-
-        Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, false);
-
-        servo.setPosition(1);
-        servo.periodic();
-        assertEquals(1.0, turningMotor.output, kDelta);
-        assertEquals(1.0, turningMotor.velocity, kDelta);
-
-        servo.stop();
-        assertEquals(0, turningMotor.output, kDelta);
-        assertEquals(1.0, turningMotor.velocity, kDelta);
     }
 }
