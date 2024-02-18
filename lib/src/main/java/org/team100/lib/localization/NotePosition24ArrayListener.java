@@ -21,7 +21,7 @@ public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
     NotePosition24[] positions;
-    Translation2d translation;
+    private String id;
     double latestTime = 0;
 
     void consumeValues(NetworkTableEvent e) {
@@ -29,6 +29,7 @@ public class NotePosition24ArrayListener {
         NetworkTableValue v = ve.value;
         String name = ve.getTopic().getName();
         String[] fields = name.split("/");
+        id = fields[1];
         if (fields.length != 3)
             return;
         if (fields[2].equals("fps")) {
@@ -48,7 +49,6 @@ public class NotePosition24ArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
-            updateMeasurement(fields[1]);
         } else {
             System.out.println("note weird vision update key: " + name);
         }
@@ -76,19 +76,19 @@ public class NotePosition24ArrayListener {
         }
     }
 
-    private void updateMeasurement(String ID) {
-        Transform3d cameraInRobotCoordinates = Camera.get(ID).getOffset();
+    private Translation2d getTranslationNonOptional() {
+        Transform3d cameraInRobotCoordinates = Camera.get(id).getOffset();
         CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
         double dx = positions[0].getYaw();
         double dy = positions[0].getPitch();
-        translation = e.getTranslation2d(new Rotation3d(0, optionalY(dy).get(), optionalX(dx).get()));
+        return e.getTranslation2d(new Rotation3d(0, optionalY(dy).get(), optionalX(dx).get()));
     }
 
     public Optional<Translation2d> getTranslation2d() {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                Optional<Translation2d> e = Optional.of(translation);
+                Optional<Translation2d> e = Optional.of(getTranslationNonOptional());
                 return e;
             default:
                 return Optional.empty();
@@ -100,30 +100,18 @@ public class NotePosition24ArrayListener {
      * @return The yaw to the object in the camera, 0 is center
      */
     public Optional<Double> getX() {
-        switch (Identity.instance) {
-            case BETA_BOT:
-            case COMP_BOT:
-                double xd = translation.getX();
+                double xd = getTranslationNonOptional().getX();
                 Optional<Double> e = Optional.of(xd);
                 return e;
-            default:
-                return Optional.empty();
         }
-    }
 
     /**
      * @return The pitch to the object in the camera, 0 is center
      */
     public Optional<Double> getY() {
-        switch (Identity.instance) {
-            case BETA_BOT:
-            case COMP_BOT:
-                double dy = translation.getY();
+                double dy = getTranslationNonOptional().getY();
                 Optional<Double> e = Optional.of(dy);
                 return e;
-            default:
-                return Optional.empty();
-        }
     }
     public void enable() {
         NetworkTableInstance.getDefault().addListener(

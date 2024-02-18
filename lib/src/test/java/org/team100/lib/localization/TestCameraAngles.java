@@ -13,7 +13,7 @@ import org.team100.lib.motion.drivetrain.Fixtured;
 
 class TestCameraAngles extends Fixtured {
     @Test
-    void testCameraAngles() {
+    void testCameraAngles1() {
         {
             Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0,Math.toRadians(60),0));
             CameraAngles camera = new CameraAngles(e);
@@ -28,7 +28,7 @@ class TestCameraAngles extends Fixtured {
     }
 
     @Test
-    void differentCameraAngles() {
+    void testCameraAngles2() {
         {
             Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0,Math.toRadians(45),0));
             CameraAngles camera = new CameraAngles(e);
@@ -38,13 +38,23 @@ class TestCameraAngles extends Fixtured {
     }
 
     @Test
-    void differentCameraAngles1() {
+    void testCameraAngles3() {
         {
             Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0,Math.toRadians(60),0));
             CameraAngles camera = new CameraAngles(e);
             Translation2d testTranslation1 = camera.getTranslation2d(new Rotation3d());
-            System.out.println(testTranslation1.getX());
                assertEquals(Math.sqrt(3),testTranslation1.getX(),0.0001);
+            }
+    }
+
+    @Test
+    void testCameraAngles4() {
+        {
+            Transform3d e = new Transform3d(1, 1, 1, new Rotation3d(0,Math.toRadians(60),0));
+            CameraAngles camera = new CameraAngles(e);
+            Translation2d testTranslation1 = camera.getTranslation2d(new Rotation3d());
+               assertEquals(Math.sqrt(3)+1,testTranslation1.getX(),0.0001);
+               assertEquals(1,testTranslation1.getY(),0.0001);
             }
     }
 }
