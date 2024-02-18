@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.amp;
 
+import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -9,10 +10,14 @@ import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.AngularVisualization;
 import org.team100.lib.motion.simple.Positioning;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -25,47 +30,44 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServoInterface<Angle100> ampAngleServo;
+    private final GravityServo ampAngleServo;
     private final AngularVisualization m_viz;
-    private final PIDConstants m_armPositionConstants; 
-    private final PIDConstants m_armVelocityPIDConstants; 
-    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
+ 
 
 
-
+    
     public AmpSubsystem(int pivotID) {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                9,
-                5)
+                50,
+                50)
                 ;
-
-        m_armPositionConstants = new PIDConstants(2.5, 0.1, 0);
-        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
-        m_armVelocityPIDConstants = new PIDConstants(0.0001, 0, 0);
-
-
 
         switch (Identity.instance) {
             case COMP_BOT:
                 //TODO tune kV
-                ampAngleServo = ServoFactory.neoAngleServo(
-                        m_name + "/Left",
-                        pivotID,
-                        MotorPhase.FORWARD,
-                        kCurrentLimit,
-                        m_params,
-                        m_armPositionConstants, //2.5 0.1
-                        m_lowLevelFeedforwardConstants,
-                        m_armVelocityPIDConstants); //Where did this come from?
+                ampAngleServo = new GravityServo(
+                    "AMMMPPPPPPPPPP", 
+                    m_params, 
+                    new PIDController(0.5, 0, 0), 
+                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                    pivotID, 
+                    0.02, 
+                    -0.06
+                );
                 break;
             case BLANK:
             default:
-                ampAngleServo = ServoFactory.simulatedAngleServo(
-                        m_name + "/Left",
-                        m_params,
-                        new PIDController(1, 0, 0));
+                ampAngleServo = new GravityServo(
+                    m_name, 
+                    m_params, 
+                    new PIDController(1, 0, 0), 
+                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                    pivotID, 
+                    0.02, 
+                    -0.06
+                );
                 
         }
         m_viz = new AngularVisualization(m_name, this);
@@ -81,6 +83,10 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      */
     public void setAmpPosition(double value) {
         ampAngleServo.setPosition(value);
+    }
+
+    public void reset() {
+        ampAngleServo.reset();
     }
 
 

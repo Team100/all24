@@ -34,27 +34,29 @@ public class ShooterDefault extends Command {
 
     switch(RobotState100.getRobotState()){
         case SHOOTING:
-            switch(RobotState100.getShooterState()){
-                case DEFAULTSHOOT:
-                    m_shooter.pivotAndRamp(m_drive, kThreshold);
-                    break;
-                case FEED:
-                    m_shooter.feed();
-                    break;
-                case READYTOSHOOT:
-                    m_shooter.pivotAndRamp(m_drive, kThreshold); // pivots and ramps before anything
-                    if(m_shooter.readyToShoot(m_drive)){ //if angle and rotation is good enough
-                        m_shooter.feed(); //if velocity is good enough then shoot it
-                    }
-                    break;
-                case DOWN:
-                    m_shooter.setAngle(0.0);
-                    break;
-                default:
-                    m_shooter.pivotAndRamp(m_drive, kThreshold);
-                    break;
+            // switch(RobotState100.getShooterState()){
+            //     case DEFAULTSHOOT:
+            //         m_shooter.pivotAndRamp(m_drive, kThreshold);
+            //         break;
+            //     case FEED:
+            //         m_shooter.feed();
+            //         break;
+            //     case READYTOSHOOT:
+            //         m_shooter.pivotAndRamp(m_drive, kThreshold); // pivots and ramps before anything
+            //         if(m_shooter.readyToShoot(m_drive)){ //if angle and rotation is good enough
+            //             m_shooter.feed(); //if velocity is good enough then shoot it
+            //         }
+            //         break;
+            //     case DOWN:
+            //         m_shooter.setAngle(0.0);
+            //         break;
+            //     default:
+            //         m_shooter.pivotAndRamp(m_drive, kThreshold);
+            //         break;
 
-            }
+            // }
+            System.out.println("SHOOOOT");
+            m_shooter.feed();
         case AMPING:
             m_shooter.stop();
         case NONE:
