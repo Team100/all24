@@ -31,7 +31,6 @@ public class Experiments {
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
-            Experiment.UseClosedLoopVelocity,
             Experiment.UseSetpointGenerator,
             Experiment.UseInitialVelocity,
             Experiment.OscillateDirect);

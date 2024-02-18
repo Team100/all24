@@ -4,13 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.units.Angle100;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 class Angle100VelocityServoTest {
     @Test
@@ -19,27 +14,17 @@ class Angle100VelocityServoTest {
         String name = "test";
         MockMotor100<Angle100> motor = new MockMotor100<>();
         MockEncoder100<Angle100> encoder = new MockEncoder100<>();
-        PIDController controller = new PIDController(1, 0, 0);
 
-        SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(1, 1, 1);
 
-        SelectableVelocityServo<Angle100> servo = new SelectableVelocityServo<>(
+        OutboardVelocityServo<Angle100> servo = new OutboardVelocityServo<>(
                 name,
                 motor,
-                encoder,
-                controller,
-                feedforward);
+                encoder);
 
-        Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, true);
 
         servo.setVelocity(0.5);
         assertEquals(0.5, motor.velocity, 0.001);
         
-        Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, false);
 
-        servo.setVelocity(1.0);
-        assertEquals(1, motor.output, 0.001);
-        servo.stop();
-        assertEquals(0, motor.output, 0.001);
     }
 }

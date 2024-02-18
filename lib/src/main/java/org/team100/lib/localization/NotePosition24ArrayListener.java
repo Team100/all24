@@ -46,6 +46,7 @@ public class NotePosition24ArrayListener {
                     positions = m_buf.readArray(b);
                     latestTime = Timer.getFPGATimestamp();
                 }
+              positions
             } catch (RuntimeException ex) {
                 return;
             }

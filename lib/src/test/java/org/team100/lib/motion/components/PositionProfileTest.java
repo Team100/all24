@@ -42,13 +42,10 @@ class PositionProfileTest implements Timeless {
      */
     @Test
     void testTrapezoid() {
-        PIDController vController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
+        OutboardVelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
-                encoder,
-                vController,
-                feedforward);
+                encoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
@@ -65,13 +62,10 @@ class PositionProfileTest implements Timeless {
 
     @Test
     void testProfile() {
-        PIDController vController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
+        OutboardVelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
-                encoder,
-                vController,
-                feedforward);
+                encoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
@@ -111,13 +105,10 @@ class PositionProfileTest implements Timeless {
 
     @Test
     void testExponential() {
-        PIDController vController = new PIDController(5, 0, 0, period);
-        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
+        OutboardVelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
-                encoder,
-                vController,
-                feedforward);
+                encoder);
         ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.EXPONENTIAL);
         servo = new PositionServo<>(
                 name,

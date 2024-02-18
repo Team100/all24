@@ -135,7 +135,7 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void stop() {
-        System.out.println("STOPPPP");
+        // System.out.println("STOPPPP");
         intakeRoller.stop();
         centeringWheels.stop();
         superRollers.stop();
