@@ -11,7 +11,7 @@ import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.SimulatedMotor;
-import org.team100.lib.motor.drive.DriveMotorFactory;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Distance100;
@@ -42,14 +42,15 @@ public class SimpleSubsystemFactory {
     private SimpleSubsystem getDefault() {
         FeedforwardConstants FeedforwardConstants = new FeedforwardConstants();
         PIDConstants pidConstants = new PIDConstants(1);
-        MotorWithEncoder100<Distance100> motor = DriveMotorFactory.driveMotor(
+        MotorWithEncoder100<Distance100> motor = new Falcon6DriveMotor(
                 "simple/drive",
+                1,
+                true,
                 10,
                 1,
-                pidConstants,
-                FeedforwardConstants,
                 1,
-                1);
+                pidConstants,
+                FeedforwardConstants);
 
         VelocityServo<Distance100> velocityServo = new OutboardVelocityServo<>(
                 "simple/velocity",

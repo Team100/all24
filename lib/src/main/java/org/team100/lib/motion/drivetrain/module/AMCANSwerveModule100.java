@@ -10,7 +10,7 @@ import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorWithEncoder100;
-import org.team100.lib.motor.drive.DriveMotorFactory;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
@@ -72,14 +72,15 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
-        MotorWithEncoder100<Distance100> driveMotor = DriveMotorFactory.driveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
-                currentLimit,
                 driveMotorCanId,
-                pidConstants,
-                feedforwardConstants,
+                true,
+                currentLimit,
                 kDriveReduction,
-                kWheelDiameterM);
+                kWheelDiameterM,
+                pidConstants,
+                feedforwardConstants);
 
         return new OutboardVelocityServo<>(
                 name,

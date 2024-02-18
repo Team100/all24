@@ -14,7 +14,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
-import org.team100.lib.motor.drive.DriveMotorFactory;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
+import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
@@ -53,11 +54,11 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Drive drive,
             MotorPhase motorPhase) {
         name = m_name + "/" + name;
-        PIDConstants drivePidConstants = new PIDConstants(0.35); //8
-        PIDConstants turningPidConstants = new PIDConstants(0.22); //5
+        PIDConstants drivePidConstants = new PIDConstants(0.35); // 8
+        PIDConstants turningPidConstants = new PIDConstants(0.22); // 5
         FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon6();
         FeedforwardConstants driveFeedforwardConstants = FeedforwardConstants.makeWCPSwerveDriveFalcon6();
-        
+
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
@@ -81,20 +82,21 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100>  driveServo(
+    private static VelocityServo<Distance100> driveServo(
             String name,
             double currentLimit,
             int driveMotorCanId,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
-        MotorWithEncoder100<Distance100> driveMotor = DriveMotorFactory.driveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
-                currentLimit,
                 driveMotorCanId,
-                pidConstants,
-                feedforwardConstants,
+                true,
+                currentLimit,
                 kDriveReduction,
-                kWheelDiameterM);
+                kWheelDiameterM,
+                pidConstants,
+                feedforwardConstants);
         return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
@@ -114,7 +116,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             PIDConstants lowLevelPID,
             FeedforwardConstants lowLevelFeedforward) {
         final double turningGearRatio = 1.0;
-        Motor100<Angle100> turningMotor = DriveMotorFactory.turningMotor(
+        Motor100<Angle100> turningMotor = new Falcon6TurningMotor(
                 name,
                 turningMotorCanId,
                 motorPhase,
