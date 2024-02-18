@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
-    NotePosition24[] positions;
+    NotePosition24[] positions = new NotePosition24[0];
     double latestTime = 0;
 
     void consumeValues(NetworkTableEvent e) {
