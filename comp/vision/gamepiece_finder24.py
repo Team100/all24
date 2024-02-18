@@ -16,8 +16,8 @@ import math
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
 class NotePosition:
-    x: int
-    y: int
+    x: float
+    y: float
 
 
 class Camera(Enum):
@@ -42,8 +42,8 @@ class GamePieceFinder:
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (0, 100, 100)
-        self.object_higher = (25, 255, 255)
+        self.object_lower = (0,200, 100)
+        self.object_higher = (18, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
@@ -175,28 +175,27 @@ class GamePieceFinder:
         objects = []
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
-
             # reject anything taller than it is wide
-            if cnt_width / cnt_height < 1:
+            if cnt_width / cnt_height < 1.2:
                 continue
 
             # reject big bounding box
             if cnt_width > self.width / 2 or cnt_height > self.height / 2:
                 continue
 
-            # reject small bounding box
-            if cnt_height < 10 or cnt_width < 10:
+            if (cnt_height < 20 or cnt_width < 20) and cnt_width/cnt_height < 3:
                 continue
 
             mmnts = cv2.moments(c)
             # reject too small (m00 is in pixels)
             # TODO: make this adjustable at runtime
             # to pick out distant targets
-            if mmnts["m00"] < 500:
+            if mmnts["m00"] < 100:
                 continue
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
+            
             pitchRad = math.atan(cY/self.mtx[1,1])
             yawRad = math.atan(cX/self.mtx[0,0])
             # Puts up angle to the target from the POV of the camera
@@ -285,11 +284,12 @@ def main():
         lores={"format": "YUV420", "size": (width, height)},
         controls={
             # no duration limit => sacrifice speed for color
-            # "FrameDurationLimits": (5000, 33333),  # 41 fps
+            # "FrameDurationLimits": (33333, 33333),  # 41 fps
             # noise reduction takes time
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-            "AwbEnable": True,
-            # "AeEnable": False,
+            "AwbEnable": False,
+            "AeEnable": False,
+            "ExposureTime": 10000,
             # "AnalogueGain": 1.0
         },
     )

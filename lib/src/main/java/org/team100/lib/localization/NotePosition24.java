@@ -1,20 +1,20 @@
 package org.team100.lib.localization;
 
 public class NotePosition24 {
-    private final int yaw;
-    private final int pitch;
+    private final float yaw;
+    private final float pitch;
 
     // Yaw and Pitch angles to object in camera
-    public NotePosition24(int yaw, int pitch) {
+    public NotePosition24(float yaw, float pitch) {
         this.yaw = yaw;
         this.pitch = pitch;
     }
 
-    public int getYaw() {
+    public float getYaw() {
         return this.yaw;
     }
 
-    public int getPitch() {
+    public float getPitch() {
         return this.pitch;
     }
 

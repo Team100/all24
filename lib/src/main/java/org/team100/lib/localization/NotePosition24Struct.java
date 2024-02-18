@@ -18,25 +18,25 @@ public class NotePosition24Struct implements Struct<NotePosition24> {
 
     @Override
     public int getSize() {
-        return kSizeInt32 + kSizeInt32;
+        return kSizeFloat + kSizeFloat;
     }
 
     @Override
     public String getSchema() {
-        return "int yaw,int pitch";
+        return "float yaw,float pitch";
     }
 
     @Override
     public NotePosition24 unpack(ByteBuffer bb) {
-        int x = bb.getInt();
-        int y = bb.getInt();
+        float x = bb.getFloat();
+        float y = bb.getFloat();
         return new NotePosition24(x,y);
     }
 
     @Override
     public void pack(ByteBuffer bb, NotePosition24 value) {
-        bb.putInt(value.getYaw());
-        bb.putInt(value.getPitch());
+        bb.putFloat(value.getYaw());
+        bb.putFloat(value.getPitch());
     }
 
 }

@@ -46,7 +46,6 @@ public class NotePosition24ArrayListener {
                     positions = m_buf.readArray(b);
                     latestTime = Timer.getFPGATimestamp();
                 }
-              positions
             } catch (RuntimeException ex) {
                 return;
             }
@@ -96,24 +95,24 @@ public class NotePosition24ArrayListener {
         }
     }
 
-   
     /**
      * @return The yaw to the object in the camera, 0 is center
      */
     public Optional<Double> getX() {
-                double xd = getTranslationNonOptional().getX();
-                Optional<Double> e = Optional.of(xd);
-                return e;
-        }
+        double xd = getTranslationNonOptional().getX();
+        Optional<Double> e = Optional.of(xd);
+        return e;
+    }
 
     /**
      * @return The pitch to the object in the camera, 0 is center
      */
     public Optional<Double> getY() {
-                double dy = getTranslationNonOptional().getY();
-                Optional<Double> e = Optional.of(dy);
-                return e;
+        double dy = getTranslationNonOptional().getY();
+        Optional<Double> e = Optional.of(dy);
+        return e;
     }
+
     public void enable() {
         NetworkTableInstance.getDefault().addListener(
                 new String[] { "noteVision" },
