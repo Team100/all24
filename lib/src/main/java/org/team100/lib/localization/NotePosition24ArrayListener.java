@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
-    NotePosition24[] positions;
+    NotePosition24[] positions= new NotePosition24[0];
     private String id;
     double latestTime = 0;
 
@@ -76,22 +76,28 @@ public class NotePosition24ArrayListener {
         }
     }
 
-    private Translation2d getTranslationNonOptional() {
-        Transform3d cameraInRobotCoordinates = Camera.get(id).getOffset();
-        CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
-        double dx = positions[0].getYaw();
-        double dy = positions[0].getPitch();
-        return e.getTranslation2d(new Rotation3d(0, optionalY(dy).get(), optionalX(dx).get()));
-    }
-
-    public Optional<Translation2d> getTranslation2d() {
+    public Translation2d getTranslation2d() {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                Optional<Translation2d> e = Optional.of(getTranslationNonOptional());
-                return e;
+            if (positions != null && latestTime > Timer.getFPGATimestamp()-0.1) {
+                Transform3d cameraInRobotCoordinates = Camera.get(id).getOffset();
+                CameraAngles e = new CameraAngles(cameraInRobotCoordinates);
+                Double dx = null;
+                Double dy = null;
+                for (NotePosition24 note : positions) {
+                    if (note.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
+                    double s = note.getYaw();
+                    dx = s;
+                    double ss = note.getPitch();
+                    dy = ss;
+                    return e.getTranslation2d(new Rotation3d(0, optionalY(dy).get(), optionalX(dx).get()));
+                    }
+                }
+                    return null;
+                }
             default:
-                return Optional.empty();
+                return null;
         }
     }
 
@@ -99,7 +105,7 @@ public class NotePosition24ArrayListener {
      * @return The yaw to the object in the camera, 0 is center
      */
     public Optional<Double> getX() {
-        double xd = getTranslationNonOptional().getX();
+        double xd = getTranslation2d().getX();
         Optional<Double> e = Optional.of(xd);
         return e;
     }
@@ -108,7 +114,7 @@ public class NotePosition24ArrayListener {
      * @return The pitch to the object in the camera, 0 is center
      */
     public Optional<Double> getY() {
-        double dy = getTranslationNonOptional().getY();
+        double dy = getTranslation2d().getY();
         Optional<Double> e = Optional.of(dy);
         return e;
     }

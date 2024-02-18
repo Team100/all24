@@ -52,7 +52,10 @@ public class NotePoseDetector {
      * @return A robot relative angle in radians to the note
      */
     public Rotation2d robotRelativeAngleToNote() {
-        return m_notePosition24ArrayListener.getTranslation2d().get().getAngle();
+        if (m_notePosition24ArrayListener.getTranslation2d() == null) {
+            return m_swerve.getPose().getRotation();
+        }
+        return m_notePosition24ArrayListener.getTranslation2d().getAngle();
     }
 
     /**
@@ -99,7 +102,10 @@ public class NotePoseDetector {
      *         meters, rot value is bearing
      */
     public Translation2d RobotRelativeTranslation2d() {
-        return m_notePosition24ArrayListener.getTranslation2d().get();
+        if (m_notePosition24ArrayListener.getTranslation2d() == null) {
+            return m_swerve.getPose().getTranslation();
+        }
+        return m_notePosition24ArrayListener.getTranslation2d();
     }
 
     /**
