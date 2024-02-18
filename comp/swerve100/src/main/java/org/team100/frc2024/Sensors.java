@@ -16,16 +16,14 @@ public class Sensors {
 
     public Sensors(int port1, int port2, int port3){
 
-        // intakeSensor = new DigitalInput(port1);
+        intakeSensor = new DigitalInput(port1);
         // superStructureSensor = new DigitalInput(port2);
         // feederSensor = new DigitalInput(port3);
         
     }
 
-    public boolean getIntakeSensor(){
-        // return intakeSensor.get();
-        return false;
-
+    public boolean objectInIntake(){
+        return !intakeSensor.get();
     }
 
     public boolean getSuperSensor(){
