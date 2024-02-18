@@ -6,9 +6,9 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
+import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.Motor100;
@@ -21,7 +21,6 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
     private static final String m_name = Names.name(WCPSwerveModule100.class);
@@ -96,22 +95,10 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 feedforwardConstants,
                 kDriveReduction,
                 kWheelDiameterM);
-        PIDController driveController = new PIDController( //
-                0.1, // kP //1.2
-                0, // kI //0.3
-                0.0); // kD
-        // Note very low windup limit.
-        driveController.setIntegratorRange(-0.01, 0.01);
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
-                0.06, // kS
-                0.3, // kV
-                0.025); // kA
-        return new SelectableVelocityServo<>(
+        return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
-                driveMotor,
-                driveController,
-                driveFeedforward);
+                driveMotor);
     }
 
     private static PositionServoInterface<Angle100> turningServo(
@@ -141,23 +128,10 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningOffset,
                 turningGearRatio,
                 drive);
-        PIDController angleVelocityController = new PIDController(
-                0.3, // kP
-                0, // kI
-                0, // kD
-                dt);
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                0.0006, // kS: Multiplied by around 20 of previous value as that is how much we changed
-                        // P by 0.0005
-                0.005, // kV: Since we are decreasing the value of how much the PID system does we need
-                       // to conpensate for making feedforward larger as well
-                0); // kA
-        VelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
+        VelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
                 name,
                 turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
+                turningEncoder);
 
         PIDController turningPositionController = new PIDController(
                 1.9, // kP

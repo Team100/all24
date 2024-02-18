@@ -9,10 +9,6 @@ public enum Experiment {
      */
     UseSetpointGenerator,
     /**
-     * Offload simple servo velocity to the controller
-     */
-    UseClosedLoopVelocity,
-    /**
      * Use initial state in trajectory generation
      */
     UseInitialVelocity,
