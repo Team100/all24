@@ -20,7 +20,7 @@ public enum Camera {
                     new Translation3d(0.165, 0, 0.73),
                     new Rotation3d(0, -0.383972, Math.PI))),
     /**
-     *BETA front
+     * BETA front
      */
     // B("1000000013c9c96c",
     //         new Transform3d(
@@ -59,6 +59,21 @@ public enum Camera {
                     new Translation3d(0, 0.2413, 0.3937),
                     new Rotation3d(0, 0, 0))),
 
+    TEST1("test1",
+            new Transform3d(
+                    new Translation3d(),
+                    new Rotation3d(0, Math.PI / 4, 0))),
+
+    TEST2("test2",
+            new Transform3d(
+                    new Translation3d(1, 0, 0),
+                    new Rotation3d())),
+    
+    TEST3("test3",
+            new Transform3d(
+                    new Translation3d(0, 0, 0),
+                    new Rotation3d(0, Math.PI/6, 0))),
+                    
     UNKNOWN(null, new Transform3d());
 
     private static Map<String, Camera> cameras = new HashMap<>();

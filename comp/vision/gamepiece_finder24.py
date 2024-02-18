@@ -1,21 +1,24 @@
+import dataclasses
+import time
+from enum import Enum
+
 import cv2
 import libcamera
 import numpy as np
-import time
-from enum import Enum
 
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
 from wpimath.geometry import Transform3d
-import dataclasses
 from wpiutil import wpistruct
+
 
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
 class NotePosition:
     x: int
     y: int
+
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
@@ -29,30 +32,102 @@ class Camera(Enum):
     @classmethod
     def _missing_(cls, value):
         return Camera.UNKNOWN
-    
-class GamePieceFinder:
 
-    def __init__(self, serial, topic_name, camera_params):
-        self.object_lower = (95 , 100, 200)
+
+class GamePieceFinder:
+    def __init__(self, serial, width, height, model):
         self.serial = serial
-        self.object_higher = (115, 255, 255)
-        self.width = camera_params[0]
-        self.height = camera_params[1]
+        self.width = width
+        self.height = height
+        self.model = model
+
+        # opencv hue values are 0-180, half the usual number
+        self.object_lower = (0, 100, 100)
+        self.object_higher = (25, 255, 255)
         self.frame_time = 0
         self.theta = 0
-        self.topic_name = topic_name
-        self.initialize_nt()    
-        self.output_stream = CameraServer.putVideo("Processed", self.width, self.height)
+        self.initialize_nt()
+
+        if self.model == "imx708_wide":
+            print("V3 WIDE CAMERA")
+            self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
+            self.dist = np.array(
+                [
+                    [
+                        -1.18341279e00,
+                        7.13453990e-01,
+                        7.90204163e-04,
+                        -7.38879856e-04,
+                        -2.94529084e-03,
+                        -1.14073111e00,
+                        6.16356154e-01,
+                        5.86094708e-02,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                    ]
+                ]
+            )
+        elif self.model == "imx219":
+            print("V2 CAMERA (NOT WIDE ANGLE)")
+            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
+            self.dist = np.array(
+                [
+                    [
+                        2.26767723e-02,
+                        3.92792657e01,
+                        5.34833047e-04,
+                        -1.76949201e-03,
+                        -6.59779907e01,
+                        -5.75883422e-02,
+                        3.81831051e01,
+                        -6.37029103e01,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                    ]
+                ]
+            )
+        else:
+            print("UNKNOWN CAMERA")
+            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
+            self.dist = np.array(
+                [
+                    [
+                        2.26767723e-02,
+                        3.92792657e01,
+                        5.34833047e-04,
+                        -1.76949201e-03,
+                        -6.59779907e01,
+                        -5.75883422e-02,
+                        3.81831051e01,
+                        -6.37029103e01,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                    ]
+                ]
+            )
+
+        self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def initialize_nt(self):
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = NetworkTableInstance.getDefault()
         self.inst.startClient4("gamepiece_finder24")
-        # this is always the RIO IP address; set a matching static IP on your
-        # laptop if you're using this in simulation.
-        # self.inst.setServer("10.107.191.21")
+
+        # roboRio address. windows machines can impersonate this for simulation.
         self.inst.setServer("10.1.0.2")
-        # Table for vision output information
+
         topic_name = "noteVision/" + self.serial
         self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
         self.vision_latency = self.inst.getDoubleTopic(
@@ -61,52 +136,71 @@ class GamePieceFinder:
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", NotePosition).publish().set(
-            NotePosition(0,0)
+            NotePosition(0, 0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/NotePosition24", NotePosition
         ).publish()
 
-    def find_object(self, img):
-        range = cv2.inRange(img, self.object_lower, self.object_higher)
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
-        floodfill = range.copy()
-        h, w = range.shape[:2]
-        mask = np.zeros((h+2, w+2), np.uint8)
-        cv2.floodFill(floodfill, mask, (0,0), 255)
+    def find_object(self, img_yuv):
+
+        # this says YUV->RGB but it actually makes BGR.
+        # github.com/raspberrypi/picamera2/issues/848
+        img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
+
+        img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
+
+        img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+        img_hsv = np.ascontiguousarray(img_hsv)
+
+        img_range = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+
+        floodfill = img_range.copy()
+        h, w = img_range.shape[:2]
+        mask = np.zeros((h + 2, w + 2), np.uint8)
+        cv2.floodFill(floodfill, mask, (0, 0), 255)
         floodfill_inv = cv2.bitwise_not(floodfill)
-        img_floodfill = range | floodfill_inv
+        img_floodfill = img_range | floodfill_inv
         median = cv2.medianBlur(img_floodfill, 5)
         contours, hierarchy = cv2.findContours(
-            median, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            median, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+        )
         objects = []
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
-            if (cnt_width/cnt_height < 1):
+
+            # reject anything taller than it is wide
+            if cnt_width / cnt_height < 1:
                 continue
-            if (cnt_width == 832 and cnt_height == 616):
+
+            # reject big bounding box
+            if cnt_width > self.width / 2 or cnt_height > self.height / 2:
                 continue
-            if ():
-                (cnt_height < 10 or cnt_width < 10)
+
+            # reject small bounding box
+            if cnt_height < 10 or cnt_width < 10:
                 continue
+
             mmnts = cv2.moments(c)
-            if (mmnts["m00"] == 0):
+            # reject too small (m00 is in pixels)
+            # TODO: make this adjustable at runtime
+            # to pick out distant targets
+            if mmnts["m00"] < 500:
                 continue
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
-            
+
             # translation_x = (cX-self.width/2)* \
             #     (self.object_height*math.cos(self.theta)/cnt_height)
             # translation_y = (cY-self.height/2) * \
             #     (self.object_height*math.cos(self.theta)/cnt_height)
             # translation_z = (self.object_height*self.scale_factor*math.cos(self.theta))/(cnt_height)
-            objects.append(
-                NotePosition(cX,cY)
-            )
-            self.draw_result(img_rgb, c, cX, cY)
-        self.output_stream.putFrame(img_rgb)
+            objects.append(NotePosition(cX, cY))
+            self.draw_result(img_bgr, c, cX, cY)
+            
+        self.output_stream.putFrame(img_bgr)
         return objects
 
     def draw_result(self, img, cnt, cX, cY):
@@ -115,35 +209,30 @@ class GamePieceFinder:
         cv2.circle(img, (int(cX), int(cY)), 7, (0, 0, 0), -1)
         # cv2.putText(img, f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}", (int(cX) - 20, int(cY) - 20),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-        
 
     def analyze(self, request):
-        
-        buffer = request.make_array("lores")
+        img_yuv = request.make_array("lores")
         metadata = request.get_metadata()
 
-        # img = np.frombuffer(buffer, dtype=np.uint8)
-        img = buffer
-        # print(buffer.shape)
-        # img = img.reshape((self.height, self.width))
-        img_bgr = cv2.cvtColor(img, cv2.COLOR_YUV420p2BGR)
-        # img_bgr = img_bgr[201:616,:,:]
-        img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
-        img_hsv = np.ascontiguousarray(img_hsv)
-        objects = self.find_object(img_hsv)
+        objects = self.find_object(img_yuv)
+
         current_time = time.time()
         total_et = current_time - self.frame_time
         self.frame_time = current_time
+
         fps = 1 / total_et
+
         self.vision_nt_struct.set(objects)
         self.vision_fps.set(fps)
+
         sensor_timestamp = metadata["SensorTimestamp"]
         # include all the work above in the latency
         system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
         time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
         self.vision_latency.set(time_delta_ms)
         self.inst.flush()
-        
+
+
 def getserial():
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
@@ -151,58 +240,73 @@ def getserial():
                 return line[10:26]
     return ""
 
+
 def main():
     print("main")
-    fullwidth = 1664
-    fullheight = 1232
-    width = 832
-    height = 616
-    # option 3: tiny, trade speed for detection distance; two circles, three squraes, ~40ms
-    # width=448
-    # height=308
-    # fast path
-    # width=640
-    # height=480
-    # medium crop
-    # width=1920
-    # height=1080
 
     camera = Picamera2()
+
+    model = camera.camera_properties["Model"]
+    print("\nMODEL " + model)
+
+    if model == "imx708_wide":
+        print("V3 Wide Camera")
+        # full frame is 4608x2592; this is 2x2
+        fullwidth = 2304
+        fullheight = 1296
+        # medium detection resolution, compromise speed vs range
+        width = 1152
+        height = 648
+    elif model == "imx219":
+        print("V2 Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1664  # slightly larger than the detector, to match stride
+        fullheight = 1232
+        # medium detection resolution, compromise speed vs range
+        width = 832
+        height = 616
+    else:
+        print("UNKNOWN CAMERA: " + model)
+        fullwidth = 100
+        fullheight = 100
+        width = 100
+        height = 100
+
     camera_config = camera.create_still_configuration(
-    # one buffer to write, one to read, one in between so we don't have to wait
-    buffer_count=6,
-    main={
-        "format": "YUV420",
-        "size": (fullwidth, fullheight),
-    },
-    lores={"format": "YUV420", "size": (width, height)},
+        # one buffer to write, one to read, one in between so we don't have to wait
+        buffer_count=2,
+        main={
+            "format": "YUV420",
+            "size": (fullwidth, fullheight),
+        },
+        lores={"format": "YUV420", "size": (width, height)},
         controls={
-        "FrameDurationLimits": (5000, 33333),  # 41 fps
-        # noise reduction takes time
-        "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-        "AwbEnable": True,
-        # "AeEnable": False,
-        # "AnalogueGain": 1.0
-    },
-)
-    print("REQUESTED")
-    print(camera_config)
-    camera.align_configuration(camera_config)
-    print("ALIGNED")
-    print(camera_config)
-    camera.configure(camera_config)
-    print(camera.camera_controls)
+            # no duration limit => sacrifice speed for color
+            # "FrameDurationLimits": (5000, 33333),  # 41 fps
+            # noise reduction takes time
+            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "AwbEnable": True,
+            # "AeEnable": False,
+            # "AnalogueGain": 1.0
+        },
+    )
+
     serial = getserial()
-    print(camera.camera_properties['Model'])
     identity = Camera(serial)
     if identity == Camera.REAR or identity == Camera.FRONT:
         camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
-    # Roborio IP: 10.1.0.2
-    # Pi IP: 10.1.0.21
-    camera_params = [width, 616]
-    topic_name = "pieces"
-    serial = getserial()
-    output = GamePieceFinder(serial,topic_name, camera_params)
+
+    print("\nREQUESTED CONFIG")
+    print(camera_config)
+    camera.align_configuration(camera_config)
+    print("\nALIGNED CONFIG")
+    print(camera_config)
+    camera.configure(camera_config)
+    print("\nCONTROLS")
+    print(camera.camera_controls)
+
+    output = GamePieceFinder(serial, width, height, model)
+
     camera.start()
     try:
         while True:
@@ -213,4 +317,6 @@ def main():
                 request.release()
     finally:
         camera.stop()
+
+
 main()

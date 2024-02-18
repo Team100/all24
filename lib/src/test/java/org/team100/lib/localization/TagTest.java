@@ -40,7 +40,7 @@ class TagTest {
          * and small y, and oriented at zero theta.
          */
         Pose3d tag7Pose = layout.getTagPose(7).get();
-        assertEquals(16.489, tag7Pose.getTranslation().getX(), kDelta); // far ahead
+        assertEquals(16.5791, tag7Pose.getTranslation().getX(), kDelta); // far ahead
         assertEquals(2.663, tag7Pose.getTranslation().getY(), kDelta); // close to right side
         assertEquals(1.451, tag7Pose.getTranslation().getZ(), kDelta); // 1.5m up (as above)
         assertEquals(0, tag7Pose.getRotation().getX(), kDelta);

@@ -63,6 +63,7 @@ public class VisionDataProvider24 {
     private static final double kTagRotationBeliefThresholdMeters = 0;
     /** Discard results further than this from the previous one. */
     private static final double kVisionChangeToleranceMeters = 0.1;
+    // private static final double kVisionChangeToleranceMeters = 1;
 
     private final Telemetry t = Telemetry.get();
 
@@ -177,7 +178,7 @@ public class VisionDataProvider24 {
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, m_name, "Tag Rotation", tagRotation.getAngle());
-            System.out.println("TAG ROT: " + tagRotation.getAngle());
+
             Optional<Pose3d> tagInFieldCordsOptional = layout.getTagPose(blip.getId());
             if (!tagInFieldCordsOptional.isPresent())
                 continue;
@@ -187,8 +188,7 @@ public class VisionDataProvider24 {
                     0, 0, gyroRotation.getRadians());
 
             t.log(Level.DEBUG, m_name, "Tag In Field Cords", tagInFieldCordsOptional.get().toPose2d());
-            System.out.println("THIS IS THE ACTUAL TAG POSE: " + tagInFieldCordsOptional.get().toPose2d());
-            
+
             Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                     cameraInRobotCoordinates,
                     tagInFieldCordsOptional.get(),
@@ -201,7 +201,6 @@ public class VisionDataProvider24 {
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
             t.log(Level.DEBUG, m_name, "pose", currentRobotinFieldCoords);
 
-            System.out.println("THE POSe OF the BOT IS: " + currentRobotinFieldCoords);
             if (lastRobotInFieldCoords != null) {
                 double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
                 if (distanceM <= kVisionChangeToleranceMeters) {
@@ -209,7 +208,12 @@ public class VisionDataProvider24 {
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                     // distance.
-                    // estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                    estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                } else {
+                    System.out.println("IGNORE " + currentRobotinFieldCoords);
+                    System.out.println("previous " + lastRobotInFieldCoords);
+                    System.out.println("blip " + blip);
+                    System.out.println("distance " + distanceM);
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;
@@ -261,6 +265,11 @@ public class VisionDataProvider24 {
                             // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                             // distance.
                             estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                        } else {
+                            System.out.println("triangulation too far");
+                            System.out.println("IGNORE " + currentRobotinFieldCoords);
+                            System.out.println("previous " + lastRobotInFieldCoords);
+                            System.out.println("distance " + distanceM);
                         }
                     }
                     lastRobotInFieldCoords = currentRobotinFieldCoords;

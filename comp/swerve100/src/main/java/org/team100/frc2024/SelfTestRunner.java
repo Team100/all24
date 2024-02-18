@@ -46,7 +46,8 @@ public class SelfTestRunner extends Command {
     private static final boolean kTestDrivetrain = false;
     private static final boolean kTestOscillate = false;
     private static final boolean kTestVeering = false;
-    private static final boolean kTestMechanisms = true;
+    private static final boolean kTestMechanisms = false;
+    private static final boolean kTestVision = true;
 
     private static final int kLimit = 10;
     private final RobotContainer m_container;
@@ -113,6 +114,13 @@ public class SelfTestRunner extends Command {
 
             // ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
             // addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
+        }
+
+        if (kTestVision) {
+            // Oscillate is a good choice for vision since it uses acceleration-limited profiles
+            // and relatively slow speed.  This moves back and forth in x, using
+            // module direct mode.
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
         }
 
         // since we print to the console we don't want warning noise

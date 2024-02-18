@@ -55,27 +55,95 @@ class TagFinder:
         self.initialize_nt()
 
         self.at_detector = robotpy_apriltag.AprilTagDetector()
-
-        # TODO: use this
         self.at_detector.addFamily("tag36h11")
-        # TODO: remove this
-        # self.at_detector.addFamily("tag16h5")
 
-        # TODO: calibrate the cameras, these numbers are probably wrong
-
-        if(self.model == "imx708_wide"):
-            print("IS WIDE ANGLE")
+        if self.model == "imx708_wide":
+            print("V3 WIDE CAMERA")
+            self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
+            self.dist = np.array(
+                [
+                    [
+                        -1.18341279e00,
+                        7.13453990e-01,
+                        7.90204163e-04,
+                        -7.38879856e-04,
+                        -2.94529084e-03,
+                        -1.14073111e00,
+                        6.16356154e-01,
+                        5.86094708e-02,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                    ]
+                ]
+            )
             self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
                 robotpy_apriltag.AprilTagPoseEstimator.Config(
                     0.1651,  # tagsize 6.5 inches
-                    475,  # fx
-                    475,  # fy
+                    497,  # fx
+                    498,  # fy
                     width / 2,  # cx
                     height / 2,  # cy
                 )
-            ) 
+            )
+        elif self.model == "imx219":
+            print("V2 CAMERA (NOT WIDE ANGLE)")
+            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
+            self.dist = np.array(
+                [
+                    [
+                        2.26767723e-02,
+                        3.92792657e01,
+                        5.34833047e-04,
+                        -1.76949201e-03,
+                        -6.59779907e01,
+                        -5.75883422e-02,
+                        3.81831051e01,
+                        -6.37029103e01,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                    ]
+                ]
+            )
+            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
+                robotpy_apriltag.AprilTagPoseEstimator.Config(
+                    0.1651,  # tagsize 6.5 inches
+                    658,  # fx
+                    660,  # fy
+                    width / 2,  # cx
+                    height / 2,  # cy
+                )
+            )
         else:
-            print("IS NOT WIDE ANGLE")
+            print("UNKNOWN CAMERA")
+            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
+            self.dist = np.array(
+                [
+                    [
+                        2.26767723e-02,
+                        3.92792657e01,
+                        5.34833047e-04,
+                        -1.76949201e-03,
+                        -6.59779907e01,
+                        -5.75883422e-02,
+                        3.81831051e01,
+                        -6.37029103e01,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                        0.00000000e00,
+                    ]
+                ]
+            )
             self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
                 robotpy_apriltag.AprilTagPoseEstimator.Config(
                     0.1651,  # tagsize 6.5 inches
@@ -85,8 +153,7 @@ class TagFinder:
                     height / 2,  # cy
                 )
             )
-        
-        
+
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def analyze(self, request):
@@ -107,6 +174,8 @@ class TagFinder:
         # for now use the full frame
         # TODO: probably remove this
         img = img[: self.height, : self.width]
+
+        img = cv2.undistort(img, self.mtx, self.dist)
 
         result = self.at_detector.detect(img)
 
@@ -142,7 +211,7 @@ class TagFinder:
         # now do the drawing (after the NT payload is written)
         # none of this is particularly fast or important for prod,
         # TODO: consider disabling it after dev is done
-        # self.draw_text(img, f"fps {fps:.1f}", (5, 65))
+        self.draw_text(img, f"fps {fps:.1f}", (5, 65))
         # self.draw_text(img, f"latency(ms) {time_delta_ms:.0f}", (5, 105))
 
         # shrink the driver view to avoid overloading the radio
@@ -189,12 +258,7 @@ class TagFinder:
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
 
-        # address for joel's desktop machine
-        # TODO don't use this
-        # self.inst.setServer("192.168.3.18")
-
         # roboRio address. windows machines can impersonate this for simulation.
-        # TODO use for prod
         self.inst.setServer("10.1.0.2")
 
         topic_name = "vision/" + self.serial
@@ -202,8 +266,6 @@ class TagFinder:
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
-
-
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Blip24).publish().set(
@@ -225,14 +287,35 @@ def getserial():
 
 
 def main():
-    # full frame, 2x2, to set the detector mode to widest angle possible
-    fullwidth = 1664  # slightly larger than the detector, to match stride
-    fullheight = 1232
-    # medium detection resolution, compromise speed vs range
-    width = 832
-    height = 616
 
     camera = Picamera2()
+
+    model = camera.camera_properties["Model"]
+    print("\nMODEL " + model)
+
+    if model == "imx708_wide":
+        print("V3 Wide Camera")
+        # full frame is 4608x2592; this is 2x2
+        fullwidth = 2304
+        fullheight = 1296
+        # medium detection resolution, compromise speed vs range
+        width = 1152
+        height = 648
+    elif model == "imx219":
+        print("V2 Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1664  # slightly larger than the detector, to match stride
+        fullheight = 1232
+        # medium detection resolution, compromise speed vs range
+        width = 832
+        height = 616
+    else:
+        print("UNKNOWN CAMERA: " + model)
+        fullwidth = 100
+        fullheight = 100
+        width = 100
+        height = 100
+
     camera_config = camera.create_still_configuration(
         # 2 buffers => low latency (32-48 ms), low fps (15-20)
         # 5 buffers => mid latency (40-55 ms), high fps (22-28)
@@ -253,6 +336,7 @@ def main():
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # "ExposureTime": 3000,
             # limit auto: go as fast as possible but no slower than 30fps
+            # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
@@ -272,17 +356,8 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
-    print("MODEL")
-    print(camera.camera_properties['Model'])
-    
-    # Roborio IP: 10.1.0.2
-    # Pi IP: 10.1.0.21
-
-    model = camera.camera_properties["Model"]
 
     output = TagFinder(serial, width, height, model)
-
-    
 
     camera.start()
     try:
