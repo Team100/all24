@@ -47,16 +47,36 @@ public class SwerveModuleCollection {
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 11,
-                                AnalogTurningEncoder.class, 30, 0, 0.708328, kinodynamics, Drive.DIRECT, MotorPhase.FORWARD),
+                                AnalogTurningEncoder.class,
+                                30,
+                                0,
+                                0.708328,
+                                kinodynamics, Drive.DIRECT,
+                                MotorPhase.FORWARD),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 12,
-                                AnalogTurningEncoder.class, 32, 1, 0.659267, kinodynamics, Drive.DIRECT, MotorPhase.FORWARD),
+                                AnalogTurningEncoder.class,
+                                32,
+                                1,
+                                0.659267,
+                                kinodynamics, Drive.DIRECT,
+                                MotorPhase.FORWARD),
                         WCPSwerveModule100.get(
                                 kRearLeft, currentLimit, 21,
-                                AnalogTurningEncoder.class, 31, 2, 0.396148, kinodynamics, Drive.DIRECT, MotorPhase.FORWARD),
+                                AnalogTurningEncoder.class,
+                                31,
+                                2,
+                                0.396148,
+                                kinodynamics, Drive.DIRECT,
+                                MotorPhase.FORWARD),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 22,
-                                AnalogTurningEncoder.class, 33, 3, 0.109823, kinodynamics, Drive.DIRECT, MotorPhase.FORWARD));
+                                AnalogTurningEncoder.class,
+                                33,
+                                3,
+                                0.109823,
+                                kinodynamics, Drive.DIRECT,
+                                MotorPhase.FORWARD));
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
@@ -97,18 +117,34 @@ public class SwerveModuleCollection {
             case BETA_BOT:
                 Util.println("************** WCP MODULES using DIO 0,1,2,3 **************");
                 return new SwerveModuleCollection(
-                       WCPSwerveModule100.get(
+                        WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 3,
-                                DutyCycleTurningEncoder.class, 34, 2, 0.792486, kinodynamics, Drive.INVERSE, MotorPhase.REVERSE), //1
+                                DutyCycleTurningEncoder.class,
+                                34,
+                                2,
+                                0.792486,
+                                kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 22,
-                                DutyCycleTurningEncoder.class, 25, 1, 0.047100, kinodynamics, Drive.INVERSE, MotorPhase.REVERSE), //0
+                                DutyCycleTurningEncoder.class,
+                                25,
+                                1,
+                                0.896253,
+                                kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearLeft, currentLimit, 13,
-                                DutyCycleTurningEncoder.class, 12, 3, 0.134011, kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
+                                DutyCycleTurningEncoder.class,
+                                12,
+                                3,
+                                0.134011,
+                                kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 11,
-                                DutyCycleTurningEncoder.class, 21, 0, 0.884858, kinodynamics, Drive.INVERSE, MotorPhase.REVERSE));
+                                DutyCycleTurningEncoder.class,
+                                21,
+                                0,
+                                0.884858,
+                                kinodynamics, Drive.INVERSE, MotorPhase.REVERSE));
             default:
                 Util.println("WARNING: using default module collection");
                 return new SwerveModuleCollection(
