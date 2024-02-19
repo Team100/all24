@@ -22,7 +22,7 @@ public class CameraAngles {
      *         meters
      */
     public Translation2d getTranslation2d(Rotation3d cameraObject) {
-        double x = m_cameraInRobotCoordinates.getZ() * Math.tan(cameraObject.getY() + m_cameraInRobotCoordinates.getRotation().getY());
+        double x = m_cameraInRobotCoordinates.getZ() * Math.tan(cameraObject.getY() + Math.PI/2 - m_cameraInRobotCoordinates.getRotation().getY());
         double y = x * Math.tan(cameraObject.getZ() + m_cameraInRobotCoordinates.getRotation().getZ());
         return new Translation2d(x + m_cameraInRobotCoordinates.getX(), y + m_cameraInRobotCoordinates.getY());
     }
