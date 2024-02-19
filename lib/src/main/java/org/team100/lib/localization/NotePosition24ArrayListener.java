@@ -84,7 +84,6 @@ public class NotePosition24ArrayListener {
         }
 
     public void enable() {
-        System.out.println("ENABLING");
         NetworkTableInstance.getDefault().addListener(
                 new String[] { "noteVision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),

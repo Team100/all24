@@ -301,8 +301,8 @@ public class RobotContainer {
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
-                        swerveKinodynamics, m_sensors.objectInIntake()));
+                new DriveWithProfile(m_noteDetector.fieldRelativePose2d(new Rotation2d()).get(), m_drive, dthetaController,
+                        swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
@@ -421,7 +421,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        () -> m_noteDetector.FieldRelativeTranslation2d(new Rotation2d()).get(),
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -443,7 +443,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        () -> m_noteDetector.FieldRelativeTranslation2d(new Rotation2d()).get(),
                         thetaController,
                         omegaController,
                         driverControl::trigger));
