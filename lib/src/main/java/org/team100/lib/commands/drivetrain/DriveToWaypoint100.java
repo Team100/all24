@@ -84,7 +84,6 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void initialize100() {
-        System.out.println("DRIVE TO WAYPOINT");
         final Pose2d start = m_swerve.getPose();
         final double startVelocity = 0;
         Pose2d end = m_goal;
@@ -146,8 +145,6 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("DRIVE TO FINISHEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
-
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

@@ -2,6 +2,8 @@ package org.team100.lib.localization;
 
 import java.util.EnumSet;
 
+import org.team100.lib.util.Util;
+
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
@@ -39,10 +41,10 @@ public class Blip24ArrayListener {
             }
             for (Blip24 blip : blips) {
                 // this is where you would do something useful with the payload
-                System.out.println(fields[1] + " " + blip);
+                // System.out.println(fields[1] + " " + blip);
             }
         } else {
-            System.out.println("weird vision update key: " + name);
+            Util.warn("weird vision update key: " + name);
         }
     }
 

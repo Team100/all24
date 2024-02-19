@@ -59,7 +59,6 @@ public class ShooterUtil {
         Translation2d currentTranslation = translation;
         Translation2d target = getOffsetTranslation(translation, kScale);
 
-        // System.out.println("FIELD CONSTANTS INSTANCE " + FieldConstants.instance.getShooterCenterX());
         return target.minus(currentTranslation).getAngle();
 
     }
@@ -86,8 +85,8 @@ public class ShooterUtil {
 
         double angleWhileMovingDegrees = angleWhileMoving * 180 / Math.PI;
 
-        System.out.println("RESULTANT VECTOR: " + angleWhileMovingDegrees);
-        System.out.println("OG VECTOR: " + angleWithoutMoving);
+        // System.out.println("RESULTANT VECTOR: " + angleWhileMovingDegrees);
+        // System.out.println("OG VECTOR: " + angleWithoutMoving);
 
         return angleWhileMoving;
 
@@ -105,8 +104,8 @@ public class ShooterUtil {
 
         Vector2d resultingVector = Vector2d.sub(stationaryRobotVector, robotMovingVector);
         
-        System.out.println("RESULTANT VECTOR: " + resultingVector.getTheta().getDegrees());
-        System.out.println("OG VECTOR: " + angleWithoutMoving); 
+        // System.out.println("RESULTANT VECTOR: " + resultingVector.getTheta().getDegrees());
+        // System.out.println("OG VECTOR: " + angleWithoutMoving); 
 
         return resultingVector.getTheta().getDegrees();
 
