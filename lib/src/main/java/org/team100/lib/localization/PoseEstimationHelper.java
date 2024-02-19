@@ -27,12 +27,12 @@ public class PoseEstimationHelper {
     private static final String m_name = Names.name(PoseEstimationHelper.class);
 
     public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
-            double x = cameraInRobotCoordinates.getZ() * Math.tan(cameraObject.getY() + Math.PI/2 - cameraInRobotCoordinates.getRotation().getY());
-            double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
+            double x = cameraInRobotCoordinates.getZ() * Math.tan(-1.0 * cameraObject.getY() + Math.PI/2 - cameraInRobotCoordinates.getRotation().getY());
+            double y = x * Math.tan(-1.0 * cameraObject.getZ() - cameraInRobotCoordinates.getRotation().getZ());
             return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
     }
 
-    public static Pose2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d ) {
+    public static Pose2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d) {
         return currentPose.transformBy(new Transform2d(RobotRelativeTranslation2d, RobotRelativeTranslation2d.getAngle()));
     }
 
