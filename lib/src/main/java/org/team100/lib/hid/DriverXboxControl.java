@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.XboxController;
  * This is a Logitech F310 or similar.
  */
 public class DriverXboxControl implements DriverControl {
-    private static final double kDeadband = 0.02;
+    private static final double kDeadband = 0.05;
     private static final double kExpo = 0.5;
     private final Telemetry t = Telemetry.get();
     private final XboxController m_controller;
