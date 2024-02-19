@@ -104,8 +104,6 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
     /** Direct velocity control for testing */
     @Override
     public void setVelocity(double velocity) {
-        // m_velocitySetpoint = m_profile.calculate(0.02, m_velocitySetpoint, new
-        // State100(velocity, 0, 0));
         m_servo.setVelocity(velocity);
     }
 
