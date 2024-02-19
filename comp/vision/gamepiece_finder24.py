@@ -51,8 +51,6 @@ class GamePieceFinder:
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
             self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
-            self.horzFOV = math.radians(80)
-            self.vertFOV = math.radians(63)
             self.dist = np.array(
                 [
                     [
@@ -76,8 +74,6 @@ class GamePieceFinder:
         elif self.model == "imx219":
             print("V2 CAMERA (NOT WIDE ANGLE)")
             self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.vertFOV = math.radians(50)
-            self.horzFOV = math.radians(64)
             self.dist = np.array(
                 [
                     [
@@ -101,8 +97,6 @@ class GamePieceFinder:
         else:
             print("UNKNOWN CAMERA")
             self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.vertFOV = math.radians(45)
-            self.horzFOV = math.radians(45)
             self.dist = np.array(
                 [
                     [
@@ -123,7 +117,8 @@ class GamePieceFinder:
                     ]
                 ]
             )
-
+        self.horzFOV = 2 * math.atan(self.mtx[0,2]/self.mtx[0,0])
+        self.horzFOV = 2 * math.atan(self.mtx[1,2]/self.mtx[1,1])
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def initialize_nt(self):
