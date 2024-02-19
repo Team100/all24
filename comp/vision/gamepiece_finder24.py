@@ -191,8 +191,8 @@ class GamePieceFinder:
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            pitchRad = math.atan(cY/self.mtx[1,1])-self.vertFOV/2
-            yawRad = self.horzFOV/2 - math.atan(cX/self.mtx[0,0])
+            pitchRad = math.atan((self.height/2-cY)/self.mtx[1,1])
+            yawRad = math.atan((cX-self.width/2)/self.mtx[0,0])
             # Puts up angle to the target from the POV of the camera
             objects.append(NotePosition(yawRad, pitchRad))
             self.draw_result(img_bgr, c, cX, cY)
