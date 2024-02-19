@@ -21,9 +21,6 @@ public interface PositionServoInterface<T extends Measure100> {
     /** Direct velocity control for testing */
     void setVelocity(double velocity);
 
-    /** Direct duty cycle for testing */
-    void setDutyCycle(double dutyCycle);
-
     /**
      * @return Current position measurement. For distance this is meters, for angle
      *         this is radians.

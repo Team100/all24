@@ -20,12 +20,7 @@ public class NullPositionServo<T extends Measure100> implements PositionServoInt
     public void setVelocity(double velocity) {
         // 
     }
-
-    @Override
-    public void setDutyCycle(double dutyCycle) {
-        //
-    }
-
+    
     @Override
     public double getPosition() {
         return 0.0;
