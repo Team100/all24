@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
  * Swerve steering motor using PWM control.
  */
 public class PWMTurningMotor implements Motor100<Angle100> {
+    /** Very much not calibrated. */
+    private static final double kV = 0.1;
     private final Telemetry t = Telemetry.get();
     private final PWMMotorController m_motor;
     private final String m_name;
@@ -38,11 +40,11 @@ public class PWMTurningMotor implements Motor100<Angle100> {
     }
 
     /**
-     * PWM does not support closed-loop velocity control. 
+     * Velocity is just kV feedforward and that's all.
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2) {
-        throw new UnsupportedOperationException("PWM turning motor does not implement closed loop velocity.");
+        m_motor.set(kV * outputRad_S);
     }
 
     @Override

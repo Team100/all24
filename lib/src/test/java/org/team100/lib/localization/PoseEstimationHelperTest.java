@@ -349,7 +349,7 @@ class PoseEstimationHelperTest {
         assertEquals(0, tagInCameraCoords.getRotation().getZ(), kDelta);
 
         // "raw" layout, which is "out of the page" tag orientation.
-        // which is WRONG WRONG WRONG 
+        // which is WRONG WRONG WRONG
         Path path = Filesystem.getDeployDirectory().toPath().resolve("2024-crescendo.json");
         AprilTagFieldLayout layout = new AprilTagFieldLayout(path);
         layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
@@ -419,6 +419,42 @@ class PoseEstimationHelperTest {
         assertEquals(0, cameraInFieldCoords.getRotation().getY(), kDelta);
         // camera is facing back towards the wall
         assertEquals(Math.PI, cameraInFieldCoords.getRotation().getZ(), kDelta);
+    }
+
+    @Test
+    void testAngleToTarget() {
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d();
+            Blip24 blip = new Blip24(7, new Transform3d(0, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(0, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d(0, 0, 0, new Rotation3d(0, 0, Math.PI / 2));
+            Blip24 blip = new Blip24(7, new Transform3d(0, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(Math.PI / 2, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d(0, 0, 0, new Rotation3d(0, 0, Math.PI / 2));
+            Blip24 blip = new Blip24(7, new Transform3d(1, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(Math.PI / 4, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1.414, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+        {
+            // this very strange camera angle is 90 tilt up, then 90 around (global) z, so
+            // the right side of the camera is pointing forward
+            Transform3d cameraInRobotCoordinates = new Transform3d(0, 0, 0,
+                    new Rotation3d(0, -Math.PI / 2, Math.PI / 2));
+            // this should end up straight ahead
+            Blip24 blip = new Blip24(7, new Transform3d(1, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(0, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
     }
 
 }

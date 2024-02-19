@@ -41,8 +41,4 @@ public class SimpleSubsystem extends SubsystemBase implements Positioning {
     public void setVelocity(double v) {
         m_actuator.setVelocity(v);
     }
-
-    public void setDutyCycle(double u) {
-        m_actuator.setDutyCycle(u);
-    }
 }
