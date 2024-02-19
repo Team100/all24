@@ -3,10 +3,14 @@ package org.team100.lib.localization;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.Filesystem;
 
 /**
  * Remind myself what's in the JSON file.
@@ -17,7 +21,8 @@ class TagTest {
 
     @Test
     void testBlueLayout() throws IOException {
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
+                .blueLayout("2024-crescendo.json");
         /*
          * from the blue perspective, tag 7 has small x
          * and large y, and oriented at pi theta.
@@ -34,7 +39,8 @@ class TagTest {
 
     @Test
     void testRedLayout() throws IOException {
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2024-crescendo.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
+                .redLayout("2024-crescendo.json");
         /*
          * from the red perspective, tag 7 has large x
          * and small y, and oriented at zero theta.
@@ -46,6 +52,25 @@ class TagTest {
         assertEquals(0, tag7Pose.getRotation().getX(), kDelta);
         assertEquals(0, tag7Pose.getRotation().getY(), kDelta);
         // "into the page" i.e. away from the baseline, i.e. zero degrees
+        assertEquals(0, tag7Pose.getRotation().getZ(), kDelta);
+    }
+
+    @Test
+    void testRaw() throws IOException {
+        Path path = Filesystem.getDeployDirectory().toPath().resolve("2024-crescendo.json");
+        AprilTagFieldLayout layout = new AprilTagFieldLayout(path);
+        // blue side, tag seven
+        layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+        Pose3d tag7Pose = layout.getTagPose(7).get();
+
+        // on our side, x is ~zero.
+        assertEquals(-0.038, tag7Pose.getTranslation().getX(), kDelta); // behind the glass
+        assertEquals(5.548, tag7Pose.getTranslation().getY(), kDelta); // far to left
+        assertEquals(1.451, tag7Pose.getTranslation().getZ(), kDelta); // 1.5m feet up
+
+        assertEquals(0, tag7Pose.getRotation().getX(), kDelta);
+        assertEquals(0, tag7Pose.getRotation().getY(), kDelta);
+        // raw rotation is "out of the page"
         assertEquals(0, tag7Pose.getRotation().getZ(), kDelta);
     }
 }

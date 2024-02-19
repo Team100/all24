@@ -22,12 +22,21 @@ import edu.wpi.first.wpilibj.Filesystem;
  * would have to sprinkle inversions here and there, which would result in bugs.
  * 
  * @see https://github.com/AprilRobotics/apriltag/wiki/AprilTag-User-Guide#coordinate-system
+ * 
+ * in 2024 the pose returned from the camera has zero rotation when facing the tag, which corresponds to the "inward normal" orientation.
+ * 
+ * the 2024 game map retains the "outward normal" orientation, and we're using the WPILib wrapper
+ * around the Apriltag library, which does NOT invert the canonical tag orientation.
+ * 
+ * AprilTagPoseEstimator.cpp seems to wrap the apriltag library, and then transform the
+ * returned pose array into WPI the domain object with no adjustment (i.e. it uses the raw
+ * rotation matrix, orthogonalized)
  */
 public class AprilTagFieldLayoutWithCorrectOrientation {
     // Inverts yaw
     private static final Transform3d kFix = new Transform3d(
             new Translation3d(),
-            new Rotation3d(0, 0, 0)); //Maybe its Math.PI???
+            new Rotation3d(0, 0, Math.PI));
     private final AprilTagFieldLayout layout;
 
     // this is private because i don't want the red/blue enum in our code.
