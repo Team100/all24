@@ -101,10 +101,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio, turningDrive);
-        VelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
-                name,
-                turningMotor,
-                turningEncoder);
         PIDController turningPositionController = new PIDController(
                 5, // kP
                 0, // kI
@@ -115,7 +111,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
