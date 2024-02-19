@@ -159,7 +159,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         if (m_target == null) {
-            omega = 0;
+            omega = scaledInput.dtheta;
         }
         Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
 

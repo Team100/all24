@@ -152,7 +152,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         if (m_target == null) {
-            omega = 0;
+            omega = clipped.dtheta;
         }
         Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, omega);
 
