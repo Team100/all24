@@ -50,7 +50,7 @@ public class NotePosition24ArrayListener {
             }
             for (NotePosition24 position : positions) {
                 // this is where you would do something useful with the payload
-                System.out.println(fields[1] + " " + position);
+                // System.out.println(fields[1] + " " + position);
             }
         } else {
             System.out.println("note weird vision update key: " + name);
@@ -67,9 +67,8 @@ public class NotePosition24ArrayListener {
         Optional<Double> x = Optional.empty();
         Transform3d cameraInRobotCoordinates = Camera.get(id).getOffset();
         CameraAngles ed = new CameraAngles(cameraInRobotCoordinates);
-        for (NotePosition24 note : positions) {
-            System.out.println("POSITIONS");
-            if (note.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
+        for (NotePosition24 position : positions) {
+            if (position.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
             double dy = positions[0].getPitch();
             Double yz = dy;
             y = Optional.of(yz);
