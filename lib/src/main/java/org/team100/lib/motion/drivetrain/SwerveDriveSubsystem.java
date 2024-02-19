@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class SwerveDriveSubsystem extends Subsystem100 {
     // multiply field-relative speeds for medium and slow modes.
     private static final double kMedium = 0.5;
-    private static final double kSlow = 0.1;
+    private static final double kSlow = 0.25;
 
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;

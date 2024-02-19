@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.WheelPositions;
@@ -55,7 +54,7 @@ public class PoseEstimator100<T extends WheelPositions<T>> {
     private final Matrix<N3, N3> m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
 
     private static final double kBufferDuration = 1.5;
-    private final TimeInterpolatableBuffer<InterpolationRecord> m_poseBuffer = TimeInterpolatableBuffer
+    private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer = TimeInterpolatableBuffer100
             .createBuffer(kBufferDuration);
 
     /**
