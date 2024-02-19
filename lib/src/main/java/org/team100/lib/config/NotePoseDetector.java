@@ -28,8 +28,8 @@ public class NotePoseDetector {
      * @return A robot relative translational x value of an object in a camera in
      *         meters
      */
-    public double getX() {
-        return m_notePosition24ArrayListener.getX().get();
+    public Double getX() {
+         return RobotRelativeTranslation2d().getX();
     }
 
     /**
@@ -40,9 +40,9 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                return fieldRelativePose2d().getX();
             case BLANK:
-                return 0.0;
+                return fieldRelativePose2d().getX();
+                // return 0.0;
             default:
                 return 0.0;
         }
@@ -52,10 +52,10 @@ public class NotePoseDetector {
      * @return A robot relative angle in radians to the note
      */
     public Rotation2d robotRelativeAngleToNote() {
-        if (m_notePosition24ArrayListener.getTranslation2d() == null) {
-            return m_swerve.getPose().getRotation();
+        if (m_notePosition24ArrayListener.getTranslation2d()[0].isPresent()) {
+        return RobotRelativeTranslation2d().getAngle();
         }
-        return m_notePosition24ArrayListener.getTranslation2d().getAngle();
+        return new Rotation2d();
     }
 
     /**
@@ -65,9 +65,9 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
+            case BLANK:
         return fieldRelativePose2d().getRotation();
-                case BLANK:
-                return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
+                // return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
             default:
                 return FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
             }
@@ -77,9 +77,9 @@ public class NotePoseDetector {
      * @return A robot relative translational y value of an object in a camera in
      *         meters
      */
-    public Double getY() {
-        return m_notePosition24ArrayListener.getY().get();
-    }
+    public double getY() {
+            return RobotRelativeTranslation2d().getY();
+        }
 
     /**
      * @return A field relative translational y value of an object in a camera in
@@ -89,9 +89,9 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                return fieldRelativePose2d().getY();
             case BLANK:
-                return 0.0;
+                return fieldRelativePose2d().getY();
+                // return 0.0;
             default:
                 return 0.0;
         }
@@ -102,10 +102,10 @@ public class NotePoseDetector {
      *         meters, rot value is bearing
      */
     public Translation2d RobotRelativeTranslation2d() {
-        if (m_notePosition24ArrayListener.getTranslation2d() == null) {
-            return m_swerve.getPose().getTranslation();
+        if (m_notePosition24ArrayListener.getTranslation2d()[0].isPresent()) {
+        return m_notePosition24ArrayListener.getTranslation2d()[0].get();
         }
-        return m_notePosition24ArrayListener.getTranslation2d();
+        return new Translation2d();
     }
 
     /**
@@ -132,9 +132,9 @@ public class NotePoseDetector {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
-                return m_swerve.getPose().transformBy(robotRelativeTransform2d());
             case BLANK:
-                return new Pose2d(fieldRelativeX(), fieldRelativeY(), fieldRelativeAngleToNote());
+                return m_swerve.getPose().transformBy(robotRelativeTransform2d());
+                // return new Pose2d(fieldRelativeX(), fieldRelativeY(), fieldRelativeAngleToNote());
             default:
                 return new Pose2d(fieldRelativeX(), fieldRelativeY(), fieldRelativeAngleToNote());
         }
