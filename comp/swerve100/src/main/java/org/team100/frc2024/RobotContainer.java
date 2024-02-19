@@ -41,7 +41,6 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.NotePoseDetector;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
@@ -107,7 +106,6 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private Alliance m_alliance;
-    private final NotePoseDetector m_noteDetector;
 
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -200,7 +198,7 @@ public class RobotContainer {
                 poseEstimator::getSampledRotation,
                 m_alliance);
         visionDataProvider.enable();
-        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
+        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
         notePositionDetector.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
@@ -211,7 +209,6 @@ public class RobotContainer {
                 swerveLocal,
                 driverControl::speed);
             
-        m_noteDetector = new NotePoseDetector(notePositionDetector,m_drive);
 
         m_intake = IntakeFactory.get(m_sensors);
         m_shooter = ShooterFactory.get();
@@ -297,8 +294,8 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // Drive With Profile
-        whileTrue(() -> (driverControl.driveToNote() && m_noteDetector.RobotRelativeTranslation2d().isPresent()),
-                new DriveWithProfile(m_noteDetector.fieldRelativePose2d(new Rotation2d()), m_drive, dthetaController,
+        whileTrue(() -> (driverControl.driveToNote() && notePositionDetector.getPose2d()[0].isPresent()),
+                new DriveWithProfile(() -> notePositionDetector.getPose2d()[0], m_drive, dthetaController,
                         swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
@@ -418,7 +415,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        () -> notePositionDetector.getTranslation2d()[0],
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -439,7 +436,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        () -> notePositionDetector.getTranslation2d()[0],
                         thetaController,
                         omegaController,
                         driverControl::trigger));

@@ -10,9 +10,12 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 
@@ -22,6 +25,16 @@ import edu.wpi.first.math.numbers.N3;
 public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
     private static final String m_name = Names.name(PoseEstimationHelper.class);
+
+    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
+            double x = cameraInRobotCoordinates.getZ() * Math.tan(cameraObject.getY() + Math.PI/2 - cameraInRobotCoordinates.getRotation().getY());
+            double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
+            return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
+    }
+
+    public static Pose2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d ) {
+        return currentPose.transformBy(new Transform2d(RobotRelativeTranslation2d, RobotRelativeTranslation2d.getAngle()));
+    }
 
     /**
      * Calculate robot pose.
