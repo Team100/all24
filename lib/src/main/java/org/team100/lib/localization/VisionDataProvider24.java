@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
 import java.util.function.ObjDoubleConsumer;
 
@@ -28,6 +29,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -72,6 +74,7 @@ public class VisionDataProvider24 {
     private final SwerveDrivePoseEstimator100 poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final String m_name;
+    private final Alliance m_alliance;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -88,12 +91,14 @@ public class VisionDataProvider24 {
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
             SwerveDrivePoseEstimator100 poseEstimator,
-            DoubleFunction<Optional<Rotation2d>> rotationSupplier) throws IOException {
+            DoubleFunction<Optional<Rotation2d>> rotationSupplier,
+            Alliance alliance) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
         this.layout = layout;
         this.poseEstimator = poseEstimator;
         this.rotationSupplier = rotationSupplier;
+        m_alliance = alliance;
         m_name = Names.name(this);
     }
 
@@ -138,8 +143,11 @@ public class VisionDataProvider24 {
             // the ID of the camera
             String cameraSerialNumber = fields[1];
 
+            // TODO: add a real firing solution consumer.
             estimateRobotPose(
                     poseEstimator::addVisionMeasurement,
+                    f -> {
+                    },
                     cameraSerialNumber,
                     blips);
         } else {
@@ -155,13 +163,14 @@ public class VisionDataProvider24 {
      * @param blips              all the targets the camera sees right now
      */
     void estimateRobotPose(
-            ObjDoubleConsumer<Pose2d> estimateConsumer,
+            final ObjDoubleConsumer<Pose2d> estimateConsumer,
+            Consumer<Translation2d> firingSolutionConsumer,
             String cameraSerialNumber,
-            Blip24[] blips) {
-        Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
+            final Blip24[] blips) {
+        final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
         // Estimated instant represented by the blips
-        double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+        final double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
         Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTime);
 
         if (optionalGyroRotation.isEmpty()) {
@@ -169,29 +178,64 @@ public class VisionDataProvider24 {
             return;
         }
 
-        Rotation2d gyroRotation = optionalGyroRotation.get();
+        final Rotation2d gyroRotation = optionalGyroRotation.get();
 
-        // this treats every sight as independent.
-        // TODO: cleverly combine sights with triangulation for more accuracy
+        estimateFromBlips(estimateConsumer, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
+
+        if (Experiments.instance.enabled(Experiment.Triangulate)) {
+            triangulate(estimateConsumer, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
+        }
+
+        firingSolution(firingSolutionConsumer, blips, cameraInRobotCoordinates);
+
+    }
+
+    /**
+     * a firing solution is a robot-relative translation2d to the correct target --
+     * 7 if we're blue, 5 if we're red.
+     * 
+     * @param firingSolutionConsumer
+     * @param blips
+     * @param cameraInRobotCoordinates
+     */
+    private void firingSolution(Consumer<Translation2d> firingSolutionConsumer, final Blip24[] blips,
+            final Transform3d cameraInRobotCoordinates) {
+        for (Blip24 blip : blips) {
+            if ((blip.getId() == 7 && m_alliance == Alliance.Blue) ||
+                    (blip.getId() == 5 && m_alliance == Alliance.Red)) {
+                firingSolutionConsumer.accept(
+                        PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
+                                .getTranslation().toTranslation2d());
+            }
+        }
+    }
+
+    private void estimateFromBlips(
+            final ObjDoubleConsumer<Pose2d> estimateConsumer,
+            final Blip24[] blips,
+            final Transform3d cameraInRobotCoordinates,
+            final double frameTime,
+            final Rotation2d gyroRotation) {
         for (Blip24 blip : blips) {
 
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, m_name, "Tag Rotation", tagRotation.getAngle());
 
-            Optional<Pose3d> tagInFieldCordsOptional = layout.getTagPose(blip.getId());
-            if (!tagInFieldCordsOptional.isPresent())
+            Optional<Pose3d> tagInFieldCoordsOptional = layout.getTagPose(blip.getId());
+            if (!tagInFieldCoordsOptional.isPresent())
                 continue;
 
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
                     0, 0, gyroRotation.getRadians());
 
-            t.log(Level.DEBUG, m_name, "Tag In Field Cords", tagInFieldCordsOptional.get().toPose2d());
+            Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
+            t.log(Level.DEBUG, m_name, "Tag In Field Cords", tagInFieldCoords.toPose2d());
 
             Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                     cameraInRobotCoordinates,
-                    tagInFieldCordsOptional.get(),
+                    tagInFieldCoords,
                     blip,
                     robotRotationInFieldCoordsFromGyro,
                     kTagRotationBeliefThresholdMeters);
@@ -199,6 +243,7 @@ public class VisionDataProvider24 {
             Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
 
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
+
             t.log(Level.DEBUG, m_name, "pose", currentRobotinFieldCoords);
 
             if (lastRobotInFieldCoords != null) {
@@ -216,66 +261,68 @@ public class VisionDataProvider24 {
                     System.out.println("distance " + distanceM);
                 }
             }
+
             lastRobotInFieldCoords = currentRobotinFieldCoords;
+
         }
+    }
 
-        if (Experiments.instance.enabled(Experiment.Triangulate)) {
-            // if multiple tags are in view, triangulate to get another (perhaps more
-            // accurate) estimate
-            for (int i = 0; i < blips.length - 1; i++) {
-                Blip24 b0 = blips[i];
-                for (int j = i + 1; j < blips.length; ++j) {
-                    Blip24 b1 = blips[j];
+    private void triangulate(ObjDoubleConsumer<Pose2d> estimateConsumer, Blip24[] blips,
+            Transform3d cameraInRobotCoordinates, double frameTime, Rotation2d gyroRotation) {
+        // if multiple tags are in view, triangulate to get another (perhaps more
+        // accurate) estimate
+        for (int i = 0; i < blips.length - 1; i++) {
+            Blip24 b0 = blips[i];
+            for (int j = i + 1; j < blips.length; ++j) {
+                Blip24 b1 = blips[j];
 
-                    Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(b0.getId());
-                    Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(b1.getId());
+                Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(b0.getId());
+                Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(b1.getId());
 
-                    if (!tagInFieldCordsOptional0.isPresent())
-                        continue;
-                    if (!tagInFieldCordsOptional1.isPresent())
-                        continue;
+                if (!tagInFieldCordsOptional0.isPresent())
+                    continue;
+                if (!tagInFieldCordsOptional1.isPresent())
+                    continue;
 
-                    Translation2d T0 = tagInFieldCordsOptional0.get().getTranslation().toTranslation2d();
-                    Translation2d T1 = tagInFieldCordsOptional1.get().getTranslation().toTranslation2d();
+                Translation2d T0 = tagInFieldCordsOptional0.get().getTranslation().toTranslation2d();
+                Translation2d T1 = tagInFieldCordsOptional1.get().getTranslation().toTranslation2d();
 
-                    // in camera frame
-                    Transform3d t0 = PoseEstimationHelper.blipToTransform(b0);
-                    Transform3d t1 = PoseEstimationHelper.blipToTransform(b1);
+                // in camera frame
+                Transform3d t0 = PoseEstimationHelper.blipToTransform(b0);
+                Transform3d t1 = PoseEstimationHelper.blipToTransform(b1);
 
-                    // in robot frame
-                    Transform3d rf0 = t0.plus(cameraInRobotCoordinates);
-                    Transform3d rf1 = t1.plus(cameraInRobotCoordinates);
+                // in robot frame
+                Transform3d rf0 = t0.plus(cameraInRobotCoordinates);
+                Transform3d rf1 = t1.plus(cameraInRobotCoordinates);
 
-                    // in 2d
-                    Translation2d tr0 = rf0.getTranslation().toTranslation2d();
-                    Translation2d tr1 = rf1.getTranslation().toTranslation2d();
+                // in 2d
+                Translation2d tr0 = rf0.getTranslation().toTranslation2d();
+                Translation2d tr1 = rf1.getTranslation().toTranslation2d();
 
-                    // rotations
-                    Rotation2d r0 = tr0.getAngle();
-                    Rotation2d r1 = tr1.getAngle();
+                // rotations
+                Rotation2d r0 = tr0.getAngle();
+                Rotation2d r1 = tr1.getAngle();
 
-                    Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
-                    Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
+                Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
+                Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
 
-                    if (lastRobotInFieldCoords != null) {
-                        double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
-                        if (distanceM <= kVisionChangeToleranceMeters) {
-                            // this hard limit excludes false positives, which were a bigger problem in 2023
-                            // due to the coarse tag family used. in 2024 this might not be an issue.
-                            // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
-                            // distance.
-                            estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
-                        } else {
-                            System.out.println("triangulation too far");
-                            System.out.println("IGNORE " + currentRobotinFieldCoords);
-                            System.out.println("previous " + lastRobotInFieldCoords);
-                            System.out.println("distance " + distanceM);
-                        }
+                if (lastRobotInFieldCoords != null) {
+                    double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
+                    if (distanceM <= kVisionChangeToleranceMeters) {
+                        // this hard limit excludes false positives, which were a bigger problem in 2023
+                        // due to the coarse tag family used. in 2024 this might not be an issue.
+                        // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
+                        // distance.
+                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                    } else {
+                        System.out.println("triangulation too far");
+                        System.out.println("IGNORE " + currentRobotinFieldCoords);
+                        System.out.println("previous " + lastRobotInFieldCoords);
+                        System.out.println("distance " + distanceM);
                     }
-                    lastRobotInFieldCoords = currentRobotinFieldCoords;
                 }
+                lastRobotInFieldCoords = currentRobotinFieldCoords;
             }
-
         }
     }
 }
