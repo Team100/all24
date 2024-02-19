@@ -63,8 +63,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_state = new SwerveState();
 
         stop();
-        // this needs to be exactly "/field/.type" for glass.
-        // t.log(Level.INFO, "field", ".type", "Field2d"); //This seems to throw an error sometimes
+        // @joel: this needs to be exactly "/field/.type" for glass.
+        // @sanjan: This seems to throw an error sometimes
+        // @joel: if you take it out then it breaks glass.  what's the error?
+        t.log(Level.INFO, "field", ".type", "Field2d"); 
     }
 
     /**
