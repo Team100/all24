@@ -89,7 +89,6 @@ public class DriveToWaypoint100 extends Command100 {
         final double startVelocity = 0;
         Pose2d end = m_goal;
         final double endVelocity = 0;
-
         
         if(m_endRotation != null){
             end = new Pose2d(end.getTranslation(), m_endRotation.get());
@@ -114,6 +113,11 @@ public class DriveToWaypoint100 extends Command100 {
                         endVelocity,
                         kMaxVelM_S,
                         kMaxAccelM_S_S);
+
+        if (trajectory.length() == 0) {
+            end(false);
+            return;
+        }
 
         // TrajectoryVisualization.setViz(trajectory);
 

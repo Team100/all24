@@ -1,4 +1,11 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -34,7 +41,6 @@
       "/field": {
         "builtin": "",
         "height": 8.210550308227539,
-        "image": "C:\\Users\\sanja\\Downloads\\2024-field.png",
         "width": 16.541748046875,
         "window": {
           "visible": true
@@ -43,6 +49,9 @@
     }
   },
   "NetworkTables": {
+    "Retained Values": {
+      "open": false
+    },
     "retained": {
       "Command100": {
         "DriveToWaypoint100": {
@@ -104,7 +113,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 671,
+          "height": 683,
           "series": [
             {
               "color": [
@@ -117,7 +126,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <1>": {
       "plots": [
@@ -218,9 +230,12 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 320
+          "height": 332
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <5>": {
       "plots": [
@@ -231,7 +246,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 549,
+          "height": 561,
           "series": [
             {
               "color": [
@@ -244,7 +259,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }

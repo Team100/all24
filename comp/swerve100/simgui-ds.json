@@ -1,4 +1,14 @@
 {
+  "FMS": {
+    "window": {
+      "visible": false
+    }
+  },
+  "Joysticks": {
+    "window": {
+      "visible": false
+    }
+  },
   "Keyboard 0 Settings": {
     "window": {
       "visible": true
@@ -16,31 +26,21 @@
           "incKey": 83
         },
         {
+          "decKey": 262,
           "decayRate": 0.0,
+          "incKey": 263,
           "keyRate": 0.009999999776482582
         }
       ],
       "axisCount": 3,
       "buttonCount": 6,
       "buttonKeys": [
-        342,
-        -1,
-        90,
-        88,
-        -1,
-        76
-      ],
-      "povConfig": [
-        {
-          "key0": 328,
-          "key135": 323,
-          "key180": 322,
-          "key225": 321,
-          "key270": 324,
-          "key315": 327,
-          "key45": 329,
-          "key90": 326
-        }
+        49,
+        50,
+        51,
+        52,
+        53,
+        54
       ],
       "povCount": 1
     },
@@ -66,10 +66,7 @@
     },
     {
       "axisConfig": [
-        {
-          "decKey": 263,
-          "incKey": 262
-        },
+        {},
         {
           "decKey": 265,
           "incKey": 264

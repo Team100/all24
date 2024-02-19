@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
+import org.team100.frc2024.motion.PrimitiveAuto;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
@@ -473,8 +474,8 @@ public class RobotContainer {
                         omegaController,
                         0.25);
 
-        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics, m_heading));
-        whileTrue(driverControl::test, Commands.startEnd( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+        // whileTrue(driverControl::test, Commands.startEnd( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
         m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));
