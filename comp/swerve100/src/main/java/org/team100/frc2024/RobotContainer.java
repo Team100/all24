@@ -204,7 +204,6 @@ public class RobotContainer {
                 poseEstimator::getSampledRotation);
         visionDataProvider.enable();
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
-
         notePositionDetector.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);

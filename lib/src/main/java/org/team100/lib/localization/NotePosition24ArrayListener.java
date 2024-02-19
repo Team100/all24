@@ -28,19 +28,14 @@ public class NotePosition24ArrayListener {
         String name = ve.getTopic().getName();
         String[] fields = name.split("/");
         id = fields[1];
-        System.out.println("Huh");
         if (fields.length != 3){
-            System.out.println("Ruh roh");
             return;
         }
         if (fields[2].equals("fps")) {
-            System.out.println("Ruh roh");
             // FPS is not used by the robot
         } else if (fields[2].equals("latency")) {
-            System.out.println("Ruh roh");
             // latency is not used by the robot
         } else if (fields[2].equals("NotePosition24")) {
-            System.out.println("yay");
             // decode the way StructArrayEntryImpl does
             byte[] b = v.getRaw();
             if (b.length == 0)
@@ -72,7 +67,6 @@ public class NotePosition24ArrayListener {
         Optional<Double> x = Optional.empty();
         Transform3d cameraInRobotCoordinates = Camera.get(id).getOffset();
         CameraAngles ed = new CameraAngles(cameraInRobotCoordinates);
-        
         for (NotePosition24 note : positions) {
             System.out.println("POSITIONS");
             if (note.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
@@ -91,8 +85,9 @@ public class NotePosition24ArrayListener {
         }
 
     public void enable() {
+        System.out.println("ENABLING");
         NetworkTableInstance.getDefault().addListener(
-                new String[] { "vision" },
+                new String[] { "noteVision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::consumeValues);
     }

@@ -118,7 +118,7 @@ class GamePieceFinder:
                 ]
             )
         self.horzFOV = 2 * math.atan(self.mtx[0,2]/self.mtx[0,0])
-        self.horzFOV = 2 * math.atan(self.mtx[1,2]/self.mtx[1,1])
+        self.vertFOV = 2 * math.atan(self.mtx[1,2]/self.mtx[1,1])
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def initialize_nt(self):
