@@ -42,10 +42,8 @@ class GamePieceFinder:
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        # self.object_lower = (0,200, 100)
-        # self.object_higher = (18, 255, 255)
-        self.object_lower = (0, 100, 20)
-        self.object_higher = (20, 255, 45)
+        self.object_lower = (0,200, 100)
+        self.object_higher = (18, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
@@ -199,7 +197,7 @@ class GamePieceFinder:
             objects.append(NotePosition(yawRad, pitchRad))
             self.draw_result(img_bgr, c, cX, cY)
             
-        self.output_stream.putFrame(img_range)
+        self.output_stream.putFrame(img_bgr)
         return objects
 
     def draw_result(self, img, cnt, cX, cY):
