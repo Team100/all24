@@ -18,17 +18,16 @@ import edu.wpi.first.wpilibj.Timer;
 
 /** For testing the NotePosition struct array */
 public class NotePosition24ArrayListener {
-    private String id;
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
-    NotePosition24[] positions = new NotePosition24[0];
+    Optional<Translation2d>[] notes;
     double latestTime = 0;
+
     void consumeValues(NetworkTableEvent e) {
         ValueEventData ve = e.valueData;
         NetworkTableValue v = ve.value;
         String name = ve.getTopic().getName();
         String[] fields = name.split("/");
-        id = fields[1];
-        if (fields.length != 3){
+        if (fields.length != 3) {
             return;
         }
         if (fields[2].equals("fps")) {
@@ -40,6 +39,7 @@ public class NotePosition24ArrayListener {
             byte[] b = v.getRaw();
             if (b.length == 0)
                 return;
+            NotePosition24[] positions;
             try {
                 synchronized (m_buf) {
                     positions = m_buf.readArray(b);
@@ -48,7 +48,22 @@ public class NotePosition24ArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
+            notes = new Optional[] { Optional.empty() };
+            int noteNum = 0;
+            Optional<Double> y = Optional.empty();
+            Optional<Double> x = Optional.empty();
+            Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
+            CameraAngles ed = new CameraAngles(cameraInRobotCoordinates);
             for (NotePosition24 position : positions) {
+                if (position.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
+                    double dy = positions[0].getPitch();
+                    Double yz = dy;
+                    y = Optional.of(yz);
+                    double xd = positions[0].getYaw();
+                    Double dv = xd;
+                    x = Optional.of(dv);
+                    notes[noteNum] = Optional.of(ed.getTranslation2d(new Rotation3d(0, y.get(), x.get())));
+                }
                 // this is where you would do something useful with the payload
                 // System.out.println(fields[1] + " " + position);
             }
@@ -58,30 +73,11 @@ public class NotePosition24ArrayListener {
     }
 
     /**
-     * @return The y position in the camera in pixels, 0 should be the bottom of the screen 
-    */
+     * @return The translation of the note, robot relative
+     */
     public Optional<Translation2d>[] getTranslation2d() {
-        Optional<Translation2d>[] notes = new Optional[]{Optional.empty()};
-        int noteNum = 0;
-        Optional<Double> y = Optional.empty();
-        Optional<Double> x = Optional.empty();
-        Transform3d cameraInRobotCoordinates = Camera.get(id).getOffset();
-        CameraAngles ed = new CameraAngles(cameraInRobotCoordinates);
-        for (NotePosition24 position : positions) {
-            if (position.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
-            double dy = positions[0].getPitch();
-            Double yz = dy;
-            y = Optional.of(yz);
-            double xd = positions[0].getYaw();
-            Double v = xd;
-            x = Optional.of(v);
-            notes[noteNum] = Optional.of(ed.getTranslation2d(new Rotation3d(0,y.get(),x.get())));
-            } else {
-                // System.out.println("False positive from above");
-            }
-        }
         return notes;
-        }
+    }
 
     public void enable() {
         NetworkTableInstance.getDefault().addListener(

@@ -25,7 +25,7 @@ public class DriveWithProfile extends Command100 {
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-    private BooleanSupplier m_end;
+    private final BooleanSupplier m_end;
     private State100 xSetpoint;
     private State100 ySetpoint;
     private State100 thetaSetpoint;
@@ -48,9 +48,9 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2());
+                m_limits.getMaxAngleAccelRad_S2()/2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2());
+                m_limits.getMaxDriveAccelerationM_S2()/2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -76,9 +76,9 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2());
+                m_limits.getMaxAngleAccelRad_S2()/2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2());
+                m_limits.getMaxDriveAccelerationM_S2()/2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -104,9 +104,9 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2());
+                m_limits.getMaxAngleAccelRad_S2()/2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2());
+                m_limits.getMaxDriveAccelerationM_S2()/2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
