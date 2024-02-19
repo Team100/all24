@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -15,6 +16,7 @@ import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 public class DriveWithProfile extends Command100 {
@@ -48,9 +50,9 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2()/2);
+                m_limits.getMaxAngleAccelRad_S2() / 2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2()/2);
+                m_limits.getMaxDriveAccelerationM_S2() / 2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -76,9 +78,42 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2()/2);
+                m_limits.getMaxAngleAccelRad_S2() / 2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2()/2);
+                m_limits.getMaxDriveAccelerationM_S2() / 2);
+        xProfile = new TrapezoidProfile100(driveContraints, 0.01);
+        yProfile = new TrapezoidProfile100(driveContraints, 0.01);
+        thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
+        addRequirements(m_swerve);
+    }
+
+    /**
+     * @param goal
+     * @param drivetrain
+     * @param controller
+     * @param limits
+     * @param end
+     */
+    public DriveWithProfile(
+            Optional<Pose2d> fieldRelativeGoal,
+            SwerveDriveSubsystem drivetrain,
+            HolonomicDriveController100 controller,
+            SwerveKinodynamics limits,
+            BooleanSupplier end) {
+        m_swerve = drivetrain;
+        if (fieldRelativeGoal.isPresent()) {
+            m_fieldRelativeGoal = () -> fieldRelativeGoal.get();
+            m_end = end;
+        } else {
+            m_fieldRelativeGoal = () -> m_swerve.getPose();
+            m_end = () -> true;
+        }
+        m_controller = controller;
+        m_limits = limits;
+        Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
+                m_limits.getMaxAngleAccelRad_S2() / 2);
+        Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
+                m_limits.getMaxDriveAccelerationM_S2() / 2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -104,9 +139,9 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2()/2);
+                m_limits.getMaxAngleAccelRad_S2() / 2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2()/2);
+                m_limits.getMaxDriveAccelerationM_S2() / 2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -130,9 +165,9 @@ public class DriveWithProfile extends Command100 {
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2()/2);
+                m_limits.getMaxAngleAccelRad_S2() / 2);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2()/2);
+                m_limits.getMaxDriveAccelerationM_S2() / 2);
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -171,7 +206,7 @@ public class DriveWithProfile extends Command100 {
             Twist2d goal = m_controller.calculate(m_swerve.getState(), goalState);
             m_swerve.driveInFieldCoords(goal, dt);
         } else {
-            System.out.println("Detection error");
+            System.out.println("Drive goal error");
             m_swerve.driveInFieldCoords(new Twist2d(), dt);
         }
     }

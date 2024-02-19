@@ -2,6 +2,7 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.IntakeState100;
@@ -67,6 +68,7 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -95,6 +97,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -300,8 +303,8 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // Drive With Profile
-        whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector.fieldRelativePose2d(new Rotation2d()).get(), m_drive, dthetaController,
+        whileTrue(() -> (driverControl.driveToNote() && m_noteDetector.RobotRelativeTranslation2d().isPresent()),
+                new DriveWithProfile(m_noteDetector.fieldRelativePose2d(new Rotation2d()), m_drive, dthetaController,
                         swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
@@ -421,7 +424,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        () -> m_noteDetector.FieldRelativeTranslation2d(new Rotation2d()).get(),
+                        m_noteDetector::FieldRelativeTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -437,13 +440,12 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
-
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
-                new ManualWithTargetLock(
+                new FieldManualWithNoteRotation(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        () -> m_noteDetector.FieldRelativeTranslation2d(new Rotation2d()).get(),
+                        m_noteDetector::FieldRelativeTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));

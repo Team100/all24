@@ -27,26 +27,6 @@ public class NotePoseDetector {
     }
 
     /**
-     * @return A field relative angle in radians to the note
-     */
-    public Optional<Rotation2d> fieldRelativeAngleToNote(Rotation2d angle) {
-        switch (Identity.instance) {
-            case BETA_BOT:
-            case COMP_BOT:
-            case BLANK:
-                if (fieldRelativePose2d(angle).isPresent()) {
-                    return Optional.of(fieldRelativePose2d(angle).get().getRotation());
-                }
-                return Optional.empty();
-            // return
-            // FieldRelativeTranslation2d().minus(m_swerve.getPose().getTranslation()).getAngle();
-            default:
-                return Optional.of(
-                        FieldRelativeTranslation2d(angle).get().minus(m_swerve.getPose().getTranslation()).getAngle());
-        }
-    }
-
-    /**
      * @return A robot relative translational value of an object in a camera in
      *         meters, rot value is bearing
      */
@@ -61,17 +41,17 @@ public class NotePoseDetector {
      * @return A field relative translational value of an object in a camera in
      *         meters
      */
-    public Optional<Translation2d> FieldRelativeTranslation2d(Rotation2d angle) {
+    public Optional<Translation2d> FieldRelativeTranslation2d() {
         switch (Identity.instance) {
             case BETA_BOT:
             case COMP_BOT:
             case BLANK:
-                if (fieldRelativePose2d(angle).isPresent()) {
-                    return Optional.of(fieldRelativePose2d(angle).get().getTranslation());
+                if (fieldRelativePose2d().isPresent()) {
+                    return Optional.of(fieldRelativePose2d().get().getTranslation());
                 }
                 return Optional.empty();
             default:
-                return Optional.of(new Translation2d());
+                return Optional.empty();
         }
     }
 
@@ -91,7 +71,27 @@ public class NotePoseDetector {
                 return Optional.empty();
             default:
                 return Optional
-                        .of(new Pose2d(FieldRelativeTranslation2d(angle).get(), fieldRelativeAngleToNote(angle).get()));
+                        .of(new Pose2d(FieldRelativeTranslation2d().get(), FieldRelativeTranslation2d().get().minus(m_swerve.getPose().getTranslation()).getAngle()));
+        }
+    }
+
+    /**
+     * @return A field relative Pose2d value of an object in a camera in meters for
+     *         translation and radians for rotation
+     */
+    public Optional<Pose2d> fieldRelativePose2d() {
+        switch (Identity.instance) {
+            case BETA_BOT:
+            case COMP_BOT:
+            case BLANK:
+                if (RobotRelativeTranslation2d().isPresent()) {
+                    return Optional.of(
+                            m_swerve.getPose().transformBy(new Transform2d(RobotRelativeTranslation2d().get(), RobotRelativeTranslation2d().get().getAngle())));
+                }
+                return Optional.empty();
+            default:
+                return Optional
+                        .of(new Pose2d(FieldRelativeTranslation2d().get(), FieldRelativeTranslation2d().get().minus(m_swerve.getPose().getTranslation()).getAngle()));
         }
     }
 }

@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
 /** For testing the NotePosition struct array */
 public class NotePosition24ArrayListener {
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
-    Optional<Translation2d>[] notes;
+    Optional<Translation2d>[] notes = new Optional[] { Optional.empty() };;
     double latestTime = 0;
 
     void consumeValues(NetworkTableEvent e) {
