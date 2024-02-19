@@ -130,11 +130,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningOffset,
                 turningGearRatio,
                 drive);
-        VelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
-                name,
-                turningMotor,
-                turningEncoder);
-
         PIDController turningPositionController = new PIDController(
                 1.9, // kP
                 0.06, // kI
@@ -146,7 +141,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

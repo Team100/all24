@@ -40,9 +40,6 @@ public class SimpleManual extends Command {
             return;
         }
         switch (manualMode) {
-            case DUTY_CYCLE:
-                m_simple.setDutyCycle(kMaxDutyCycle * m_input.getAsDouble());
-                break;
             case VELOCITY:
                 m_simple.setVelocity(kMaxVelocity * m_input.getAsDouble());
                 break;
@@ -57,6 +54,6 @@ public class SimpleManual extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        m_simple.setDutyCycle(0);
+        m_simple.setVelocity(0);
     }
 }

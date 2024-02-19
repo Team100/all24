@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class SimpleManualMode implements Supplier<SimpleManualMode.Mode> {
     public enum Mode {
-        DUTY_CYCLE,
         VELOCITY,
         POSITION
     }
@@ -25,8 +24,8 @@ public class SimpleManualMode implements Supplier<SimpleManualMode.Mode> {
             m_manualModeChooser.addOption(mode.name(), mode);
         }
         m_manualModeChooser.setDefaultOption(
-                Mode.DUTY_CYCLE.name(),
-                Mode.DUTY_CYCLE);
+                Mode.VELOCITY.name(),
+                Mode.VELOCITY);
         SmartDashboard.putData(m_manualModeChooser);
     }
 

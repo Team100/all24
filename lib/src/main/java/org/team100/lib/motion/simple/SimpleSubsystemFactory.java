@@ -5,10 +5,8 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
-import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
@@ -52,15 +50,11 @@ public class SimpleSubsystemFactory {
                 pidConstants,
                 FeedforwardConstants);
 
-        VelocityServo<Distance100> velocityServo = new OutboardVelocityServo<>(
-                "simple/velocity",
-                motor,
-                motor);
         PIDController positionController = new PIDController(1, 0, 0);
 
         PositionServoInterface<Distance100> actuator = new PositionServo<>(
                 "simple/position",
-                velocityServo,
+                motor,
                 motor,
                 10,
                 positionController,
@@ -79,15 +73,10 @@ public class SimpleSubsystemFactory {
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
 
-        VelocityServo<Distance100> velocityServo = new OutboardVelocityServo<>(
-                "simple/velocity",
-                motor,
-                encoder);
-
         PIDController positionController = new PIDController(1, 0, 0);
         PositionServoInterface<Distance100> actuator = new PositionServo<>(
                 "simple/position",
-                velocityServo,
+                motor,
                 encoder,
                 10,
                 positionController,

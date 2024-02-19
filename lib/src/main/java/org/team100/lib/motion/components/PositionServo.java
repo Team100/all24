@@ -2,6 +2,7 @@ package org.team100.lib.motion.components;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -10,13 +11,14 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Positional control on top of a velocity servo.
+ * Positional control.
  */
 public class PositionServo<T extends Measure100> implements PositionServoInterface<T> {
     private final Telemetry t = Telemetry.get();
-    private final VelocityServo<T> m_servo;
+    private final Motor100<T> m_motor;
     private final Encoder100<T> m_encoder;
     private final double m_maxVel;
     private final PIDController m_controller;
@@ -27,13 +29,16 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
+    // for calculating acceleration
+    private double previousSetpoint = 0;
+    private double prevTime;
 
     /**
      * @param name may not start with a slash
      */
     public PositionServo(
             String name,
-            VelocityServo<T> servo,
+            Motor100<T> motor,
             Encoder100<T> encoder,
             double maxVel,
             PIDController controller,
@@ -41,7 +46,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
             T instance) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_servo = servo;
+        m_motor = motor;
         m_encoder = encoder;
         m_maxVel = maxVel;
         m_controller = controller;
@@ -61,6 +66,8 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
     public void reset() {
         m_controller.reset();
         m_setpoint = new State100(getPosition(), getVelocity());
+        prevTime = Timer.getFPGATimestamp();
+        m_encoder.reset();
     }
 
     /**
@@ -86,7 +93,9 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
         double u_TOTAL = u_FB + u_FF;
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
-        m_servo.setVelocity(u_TOTAL);
+
+        m_motor.setVelocity(u_TOTAL, accel(u_TOTAL));
+        t.log(Level.DEBUG, m_name, "Desired velocity setpoint", u_TOTAL);
 
         m_controller.setIntegratorRange(0, 0.1);
 
@@ -104,15 +113,8 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
     /** Direct velocity control for testing */
     @Override
     public void setVelocity(double velocity) {
-        // m_velocitySetpoint = m_profile.calculate(0.02, m_velocitySetpoint, new
-        // State100(velocity, 0, 0));
-        m_servo.setVelocity(velocity);
-    }
-
-    /** Direct duty cycle for testing */
-    @Override
-    public void setDutyCycle(double dutyCycle) {
-        m_servo.setDutyCycle(dutyCycle);
+        m_motor.setVelocity(velocity, accel(velocity));
+        t.log(Level.DEBUG, m_name, "Desired velocity setpoint", velocity);
     }
 
     /**
@@ -126,7 +128,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
     @Override
     public double getVelocity() {
-        return m_servo.getVelocity();
+        return m_encoder.getRate();
     }
 
     @Override
@@ -158,7 +160,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
     @Override
     public void stop() {
-        m_servo.stop();
+        m_motor.stop();
     }
 
     @Override
@@ -175,6 +177,24 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
     @Override
     public void periodic() {
         m_encoder.periodic();
-        m_servo.periodic();
+        m_motor.periodic();
+    }
+
+        ////////////////////////////////////////////////
+
+    /**
+     * there will be some jitter in dt, which will result in a small amount of
+     * jitter in acceleration, and since this is a trailing difference there will be
+     * a tiny bit of delay, compared to the actual profile. If this is
+     * a problem, rewrite the profile class to expose the acceleration state and use
+     * that instead.
+     */
+    private double accel(double setpoint) {
+        double now = Timer.getFPGATimestamp();
+        double dt = now - prevTime;
+        prevTime = now;
+        double accel = (setpoint - previousSetpoint) / dt;
+        previousSetpoint = setpoint;
+        return accel;
     }
 }
