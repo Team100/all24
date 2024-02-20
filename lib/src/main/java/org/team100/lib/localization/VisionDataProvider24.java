@@ -18,12 +18,16 @@ import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
@@ -39,6 +43,14 @@ import edu.wpi.first.wpilibj.Timer;
  * which matches the TagFinder24 code on the camera.
  */
 public class VisionDataProvider24 {
+    /**
+     * Standard deviation of pose estimate, as a fraction of target range.
+     * This is a guess based on figure 5 in the Apriltag2 paper:
+     * https://april.eecs.umich.edu/media/media/pdfs/wang2016iros.pdf
+     * The error is much worse at very long range but I don't think that
+     * matters for us.
+     */
+    private static final double kRelativeError = 0.05;
     /**
      * Time between events in reality and their appearance here; the average
      * end-to-end latency of the camera, detection code, network tables, and rio
@@ -84,7 +96,7 @@ public class VisionDataProvider24 {
 
     /**
      * @param layout
-     * @param poseEstimator
+     * @param poseEstimator can be null for testing.
      * @param rotationSupplier rotation for the given time in seconds
      * @throws IOException
      */
@@ -216,8 +228,12 @@ public class VisionDataProvider24 {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
-                if (Experiments.instance.enabled(Experiment.HeedVision))
+                if (Experiments.instance.enabled(Experiment.HeedVision)) {
+                    double distance = translation2d.getNorm();
+                    if (poseEstimator != null)
+                        poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distance));
                     firingSolutionConsumer.accept(translation2d);
+                }
             }
         }
     }
@@ -264,10 +280,11 @@ public class VisionDataProvider24 {
                 if (distanceM <= kVisionChangeToleranceMeters) {
                     // this hard limit excludes false positives, which were a bigger problem in 2023
                     // due to the coarse tag family used. in 2024 this might not be an issue.
-                    // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
-                    // distance.
-                    if (Experiments.instance.enabled(Experiment.HeedVision))
+                    if (Experiments.instance.enabled(Experiment.HeedVision)) {
+                        if (poseEstimator != null)
+                            poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
                         estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                    }
                 } else {
                     // System.out.println("IGNORE " + currentRobotinFieldCoords);
                     // System.out.println("previous " + lastRobotInFieldCoords);
@@ -332,10 +349,11 @@ public class VisionDataProvider24 {
                     if (distanceM <= kVisionChangeToleranceMeters) {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
-                        // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
-                        // distance.
-                        if (Experiments.instance.enabled(Experiment.HeedVision))
+                        if (Experiments.instance.enabled(Experiment.HeedVision)) {
+                            if (poseEstimator != null)
+                                poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
                             estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                        }
                     } else {
                         // System.out.println("triangulation too far");
                         // System.out.println("IGNORE " + currentRobotinFieldCoords);
@@ -346,6 +364,12 @@ public class VisionDataProvider24 {
                 lastRobotInFieldCoords = currentRobotinFieldCoords;
             }
         }
-
     }
+
+    /** This is an educated guess. */
+    static Matrix<N3, N1> visionMeasurementStdDevs(double distanceM) {
+        double stddev = kRelativeError * distanceM;
+        return VecBuilder.fill(stddev, stddev, Double.MAX_VALUE);
+    }
+
 }
