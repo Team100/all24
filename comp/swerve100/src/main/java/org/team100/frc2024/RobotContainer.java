@@ -248,7 +248,8 @@ public class RobotContainer {
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         // on xbox this is left bumper
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
+        // 5 feet in front of the target on the red side
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.524, 2.667, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
