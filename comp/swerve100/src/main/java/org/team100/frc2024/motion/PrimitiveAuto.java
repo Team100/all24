@@ -37,7 +37,7 @@ public class PrimitiveAuto extends SequentialCommandGroup {
     // TrajectoryConfig config = new TrajectoryConfig(4, 5);
     // StraightLineTrajectory maker = new StraightLineTrajectory(config);
 
-    Pose2d goal = new Pose2d(2.29, 1.06, new Rotation2d(0));
+    Pose2d goal = new Pose2d(2.29, 1.06, new Rotation2d());
     Pose2d goal2 = new Pose2d(2.34, 2.85, new Rotation2d());
     Pose2d goal3 = new Pose2d(2.52, 1.06, new Rotation2d());
 

@@ -107,12 +107,12 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
 
         m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
+        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
 
-        t.register(Level.DEBUG, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
-        t.register(Level.DEBUG, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
-        t.register(Level.DEBUG, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
-        t.register(Level.DEBUG, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
+        t.register(Level.TRACE, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
+        t.register(Level.TRACE, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
+        t.register(Level.TRACE, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
+        t.register(Level.TRACE, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
     }
 
     private void setP(double p) {
@@ -141,7 +141,7 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
+        t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
     }
 
     @Override
@@ -168,10 +168,10 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
 
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
-        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
-        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
-        t.log(Level.DEBUG, m_name, "desired speed (rev_s)", motorRevs_S);
+        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFF);
+        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRevs_S);
     }
 
     public void resetPosition() {
@@ -198,11 +198,11 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
     public void periodic() {
         m_encoderPosition = m_encoder.getPosition();
         m_encoderVelocity = m_encoder.getVelocity();
-        t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
-        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
-        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
-        t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
-        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
+        t.log(Level.TRACE, m_name, "position (rev)", m_encoderPosition);
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+        t.log(Level.TRACE, m_name, "current (A)", m_motor.getOutputCurrent());
+        t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());
     }
 
     /////////////////////////////////////////////////////////////////

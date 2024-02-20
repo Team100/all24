@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
+import org.team100.frc2024.motion.PrimitiveAuto;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
@@ -25,6 +26,7 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveToState100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
@@ -91,6 +93,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -322,6 +325,9 @@ public class RobotContainer {
         // whileTrue(driverControl::test,
         // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
+        whileTrue(driverControl::test,
+                new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
+
         // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
         // drivePID, swerveKinodynamics));
 
@@ -483,8 +489,10 @@ public class RobotContainer {
 
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+
         whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
                 () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+      
         m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));

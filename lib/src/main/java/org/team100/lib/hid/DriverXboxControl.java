@@ -71,9 +71,9 @@ public class DriverXboxControl implements DriverControl {
             dy = 0;
         }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
-        t.log(Level.DEBUG, m_name, "Xbox/right y", m_controller.getRightY());
-        t.log(Level.DEBUG, m_name, "Xbox/right x", m_controller.getRightX());
-        t.log(Level.DEBUG, m_name, "Xbox/left x", m_controller.getLeftX());
+        t.log(Level.TRACE, m_name, "Xbox/right y", m_controller.getRightY());
+        t.log(Level.TRACE, m_name, "Xbox/right x", m_controller.getRightX());
+        t.log(Level.TRACE, m_name, "Xbox/left x", m_controller.getLeftX());
         return new Twist2d(dx, dy, dtheta);
     }
 

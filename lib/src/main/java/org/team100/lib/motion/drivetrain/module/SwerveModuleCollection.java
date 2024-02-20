@@ -6,7 +6,6 @@ import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.util.Util;
 

@@ -45,7 +45,7 @@ public class JointMotor implements Motor100<Angle100> {
 
         m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
+        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
     }
 
     @Override

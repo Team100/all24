@@ -81,20 +81,20 @@ public class HolonomicDriveController100 {
         double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
         double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
         double omega = thetaFF + thetaFB + omegaFB;
-        t.log(Level.DEBUG, m_name, "u_FF/x", xFF);
-        t.log(Level.DEBUG, m_name, "u_FF/y", yFF);
-        t.log(Level.DEBUG, m_name, "u_FF/theta", thetaFF);
-        t.log(Level.DEBUG, m_name, "u_FB/x", xFB);
-        t.log(Level.DEBUG, m_name, "u_FB/y", yFB);
-        t.log(Level.DEBUG, m_name, "u_FB/theta", thetaFB);
-        t.log(Level.DEBUG, m_name, "measurement", currentPose);
+        t.log(Level.TRACE, m_name, "u_FF/x", xFF);
+        t.log(Level.TRACE, m_name, "u_FF/y", yFF);
+        t.log(Level.TRACE, m_name, "u_FF/theta", thetaFF);
+        t.log(Level.TRACE, m_name, "u_FB/x", xFB);
+        t.log(Level.TRACE, m_name, "u_FB/y", yFB);
+        t.log(Level.TRACE, m_name, "u_FB/theta", thetaFB);
+        t.log(Level.TRACE, m_name, "measurement", currentPose);
 
-        t.log(Level.DEBUG, m_name, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.DEBUG, m_name, "setpoint/y", m_yController.getSetpoint());
-        t.log(Level.DEBUG, m_name, "setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.DEBUG, m_name, "error/x", m_xController.getPositionError());
-        t.log(Level.DEBUG, m_name, "error/y", m_yController.getPositionError());
-        t.log(Level.DEBUG, m_name, "error/theta", m_thetaController.getPositionError());
+        t.log(Level.TRACE, m_name, "setpoint/x", m_xController.getSetpoint());
+        t.log(Level.TRACE, m_name, "setpoint/y", m_yController.getSetpoint());
+        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaController.getSetpoint());
+        t.log(Level.TRACE, m_name, "error/x", m_xController.getPositionError());
+        t.log(Level.TRACE, m_name, "error/y", m_yController.getPositionError());
+        t.log(Level.TRACE, m_name, "error/theta", m_thetaController.getPositionError());
 
         return new Twist2d(xFF + xFB, yFF + yFB, omega);
     }

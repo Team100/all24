@@ -118,7 +118,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = targetMotion(state, target);
-        t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
+        t.log(Level.TRACE, m_name, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -133,15 +133,15 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        t.log(Level.DEBUG, m_name, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "theta/measurement", measurement);
-        t.log(Level.DEBUG, m_name, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.DEBUG, m_name, "theta/fb", thetaFB);
+        t.log(Level.TRACE, m_name, "theta/setpoint", m_thetaSetpoint);
+        t.log(Level.TRACE, m_name, "theta/measurement", measurement);
+        t.log(Level.TRACE, m_name, "theta/error", m_thetaController.getPositionError());
+        t.log(Level.TRACE, m_name, "theta/fb", thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        t.log(Level.DEBUG, m_name, "omega/reference", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "omega/measurement", headingRate);
-        t.log(Level.DEBUG, m_name, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.DEBUG, m_name, "omega/fb", omegaFB);
+        t.log(Level.TRACE, m_name, "omega/reference", m_thetaSetpoint);
+        t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
+        t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
+        t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -153,7 +153,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
         // this name needs to be exactly "/field/target" for glass.
-        t.log(Level.DEBUG, "field", "target", new double[] {
+        t.log(Level.TRACE, "field", "target", new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -168,7 +168,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            t.log(Level.DEBUG, "field", "ball", new double[] {
+            t.log(Level.TRACE, "field", "ball", new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

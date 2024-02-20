@@ -123,12 +123,12 @@ public class Rotate extends Command100 {
         double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did
-        t.log(Level.DEBUG, m_name, "errorX", refTheta.x() - headingMeasurement);
-        t.log(Level.DEBUG, m_name, "errorV", refTheta.v() - headingRate);
-        t.log(Level.DEBUG, m_name, "measurementX", headingMeasurement);
-        t.log(Level.DEBUG, m_name, "measurementV", headingRate);
-        t.log(Level.DEBUG, m_name, "refX", refTheta.x());
-        t.log(Level.DEBUG, m_name, "refV", refTheta.v());
+        t.log(Level.TRACE, m_name, "errorX", refTheta.x() - headingMeasurement);
+        t.log(Level.TRACE, m_name, "errorV", refTheta.v() - headingRate);
+        t.log(Level.TRACE, m_name, "measurementX", headingMeasurement);
+        t.log(Level.TRACE, m_name, "measurementV", headingRate);
+        t.log(Level.TRACE, m_name, "refX", refTheta.x());
+        t.log(Level.TRACE, m_name, "refV", refTheta.v());
     }
 
     @Override

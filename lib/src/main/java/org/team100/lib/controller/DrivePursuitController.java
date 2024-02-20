@@ -99,7 +99,7 @@ public class DrivePursuitController implements DriveMotionController {
             return null;
         }
 
-        t.log(Level.DEBUG, m_name,"current state", measurement);
+        t.log(Level.TRACE, m_name,"current state", measurement);
         if (isDone()) {
             Util.println("Done!");
             return new ChassisSpeeds();
@@ -110,10 +110,10 @@ public class DrivePursuitController implements DriveMotionController {
             Util.warn("No setpoint!");
             return new ChassisSpeeds();
         }
-        t.log(Level.DEBUG, m_name,"setpoint", mSetpoint.get());
+        t.log(Level.TRACE, m_name,"setpoint", mSetpoint.get());
 
         Pose2d mError = DriveMotionControllerUtil.getError(measurement, mSetpoint.get());
-        t.log(Level.DEBUG, m_name,"error", mError);
+        t.log(Level.TRACE, m_name,"error", mError);
 
         double lookahead_time = kPathLookaheadTime;
 
@@ -125,7 +125,7 @@ public class DrivePursuitController implements DriveMotionController {
 
 
         TimedPose lookahead_state = preview.get().state();
-        t.log(Level.DEBUG, m_name,"lookahead state", lookahead_state);
+        t.log(Level.TRACE, m_name,"lookahead state", lookahead_state);
 
         double actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
         double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.get().velocityM_S());
@@ -159,12 +159,12 @@ public class DrivePursuitController implements DriveMotionController {
                             0.0),
                     lookahead_state.getTimeS(), lookahead_state.velocityM_S(), lookahead_state.acceleration());
         }
-        t.log(Level.DEBUG, m_name, "updated lookahead state", lookahead_state);
+        t.log(Level.TRACE, m_name, "updated lookahead state", lookahead_state);
 
         // Find the vector between robot's current position and the lookahead state
         Translation2d lookaheadTranslation = lookahead_state.state().getTranslation()
                 .minus(measurement.getTranslation());
-        t.log(Level.DEBUG, m_name,"lookahead translation", lookaheadTranslation);
+        t.log(Level.TRACE, m_name,"lookahead translation", lookaheadTranslation);
 
         // Set the steering direction as the direction of the vector
         Rotation2d steeringDirection = lookaheadTranslation.getAngle();
@@ -194,7 +194,7 @@ public class DrivePursuitController implements DriveMotionController {
                 steeringVector.getY() * m_limits.getMaxDriveVelocityM_S(),
                 0.0);
 
-        t.log(Level.DEBUG, m_name,"pursuit speeds", chassisSpeeds);
+        t.log(Level.TRACE, m_name,"pursuit speeds", chassisSpeeds);
 
         chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond
                 + kPositionkP * mError.getTranslation().getX();
@@ -223,7 +223,7 @@ public class DrivePursuitController implements DriveMotionController {
         if (!sample_point.isPresent()) {
             return Optional.empty();
         }
-        t.log(Level.DEBUG, m_name,"sample point", sample_point.get());
+        t.log(Level.TRACE, m_name,"sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 

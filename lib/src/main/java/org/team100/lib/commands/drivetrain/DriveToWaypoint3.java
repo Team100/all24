@@ -94,14 +94,14 @@ public class DriveToWaypoint3 extends Command100 {
             }
         }
 
-        t.log(Level.DEBUG, m_name, "Aligned", m_steeringAligned);
-        t.log(Level.DEBUG, m_name, "Desired X", desiredState.poseMeters.getX());
-        t.log(Level.DEBUG, m_name, "Desired Y", desiredState.poseMeters.getY());
-        t.log(Level.DEBUG, m_name, "Pose X", m_swerve.getPose().getX());
-        t.log(Level.DEBUG, m_name, "Pose Y", m_swerve.getPose().getY());
-        t.log(Level.DEBUG, m_name, "Desired Rot", m_goal.getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "Time", curTime);
+        t.log(Level.TRACE, m_name, "Aligned", m_steeringAligned);
+        t.log(Level.TRACE, m_name, "Desired X", desiredState.poseMeters.getX());
+        t.log(Level.TRACE, m_name, "Desired Y", desiredState.poseMeters.getY());
+        t.log(Level.TRACE, m_name, "Pose X", m_swerve.getPose().getX());
+        t.log(Level.TRACE, m_name, "Pose Y", m_swerve.getPose().getY());
+        t.log(Level.TRACE, m_name, "Desired Rot", m_goal.getRotation().getRadians());
+        t.log(Level.TRACE, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.TRACE, m_name, "Time", curTime);
     }
 
     @Override

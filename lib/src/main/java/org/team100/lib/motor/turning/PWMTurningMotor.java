@@ -25,13 +25,13 @@ public class PWMTurningMotor implements Motor100<Angle100> {
         m_motor = new VictorSP(channel);
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
-        t.log(Level.DEBUG, m_name, "Device ID", channel);
+        t.log(Level.TRACE, m_name, "Device ID", channel);
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
+        t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
     }
 
     @Override

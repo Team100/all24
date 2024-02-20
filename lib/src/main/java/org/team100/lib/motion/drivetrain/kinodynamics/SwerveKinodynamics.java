@@ -103,15 +103,15 @@ public class SwerveKinodynamics {
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
 
-        t.register(Level.DEBUG, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
+        t.register(Level.TRACE, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
                 this::setMaxDriveVelocityM_S);
-        t.register(Level.DEBUG, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
+        t.register(Level.TRACE, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
                 this::setMaxDriveAccelerationM_S2);
-        t.register(Level.DEBUG, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
+        t.register(Level.TRACE, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
                 this::setMaxDriveDecelerationM_S2);
-        t.register(Level.DEBUG, Names.name(this), "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
+        t.register(Level.TRACE, Names.name(this), "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
                 this::setMaxSteeringVelocityRad_S);
-        t.register(Level.DEBUG, Names.name(this), "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
+        t.register(Level.TRACE, Names.name(this), "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
                 this::setMaxSteeringAccelerationRad_S2);
     }
 

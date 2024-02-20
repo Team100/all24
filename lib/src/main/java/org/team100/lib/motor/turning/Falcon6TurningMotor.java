@@ -120,14 +120,14 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         m_motor.getConfigurator().apply(slot0Configs, 0.050);
 
         m_name = Names.append(name, this);
-        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
+        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
     }
 
     @Override
     public void setDutyCycle(double output) {
         DutyCycleOut d = new DutyCycleOut(output);
         m_motor.setControl(d);
-        t.log(Level.DEBUG, m_name, "desired duty cycle [-1,1]", output);
+        t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
     }
 
     /**
@@ -150,11 +150,11 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         v.Acceleration = motorRev_S2;
         m_motor.setControl(v);
 
-        t.log(Level.DEBUG, m_name, "motor input (RPS)", motorRev_S);
-        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFFVolts);
-        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFFVolts);
-        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFFVolts);
-        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+        t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFFVolts);
+        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
     }
 
     @Override
@@ -172,9 +172,9 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
         m_outputDutyCycle = m_motor.getDutyCycle().getValueAsDouble();
         m_errorRev_S = m_motor.getClosedLoopError().getValueAsDouble();
-        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_velocityRev_S);
-        t.log(Level.DEBUG, m_name, "output [-1,1]", m_outputDutyCycle);
-        t.log(Level.DEBUG, m_name, "error (rev_s)", getErrorRev_S());
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocityRev_S);
+        t.log(Level.TRACE, m_name, "output [-1,1]", m_outputDutyCycle);
+        t.log(Level.TRACE, m_name, "error (rev_s)", getErrorRev_S());
     }
 
     //////////////////////////////////////////////////////////////////

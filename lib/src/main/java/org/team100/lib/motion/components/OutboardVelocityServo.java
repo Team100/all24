@@ -51,14 +51,14 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
             throw new IllegalArgumentException("setpoint is NaN");
         m_setpoint = setpoint;
         m_motor.setVelocity(setpoint, accel(setpoint));
-        t.log(Level.DEBUG, m_name, "Desired setpoint", setpoint);
+        t.log(Level.TRACE, m_name, "Desired setpoint", setpoint);
     }
 
     /** Direct control for testing. */
     @Override
     public void setDutyCycle(double dutyCycle) {
         m_motor.setDutyCycle(dutyCycle);
-        t.log(Level.DEBUG, m_name, "Desired duty cycle [-1,1]", dutyCycle);
+        t.log(Level.TRACE, m_name, "Desired duty cycle [-1,1]", dutyCycle);
     }
 
     /**
