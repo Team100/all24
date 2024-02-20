@@ -56,14 +56,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Telemetry {
     public enum Level {
-        /** log nothing for maximum speed */
+        /** Log nothing for maximum speed */
         SILENT(1),
+        /** Serious problems */
+        ERROR(2),
+        /** Not-serious problems */
+        WARN(3),
         /** useful for normal operations */
-        INFO(2),
+        INFO(4),
         /** primarily useful during development */
-        DEBUG(3),
+        DEBUG(5),
         /** slow, shows absolutely everything */
-        TRACE(4);
+        TRACE(6);
 
         private int priority;
 
