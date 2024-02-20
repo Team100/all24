@@ -101,7 +101,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private static final double kDriveCurrentLimit = 40;
+    private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;
@@ -159,6 +159,10 @@ public class RobotContainer {
             m_allianceSelector = null;
             m_alliance = Alliance.Blue;
         }
+
+        // *************************
+        //
+        // override the alliance logic.
 
         m_alliance = Alliance.Red;
 
@@ -235,13 +239,20 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive,
-        // GeometryUtil.kRotationZero));
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
+        // this actually sets the rotation to zero.
+        // on xbox this is "back"
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
+        // this is @sanjan's version from some sort of vision testing in february
+        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
+        // 2.44346));
+
+        // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
+        // on xbox this is left bumper
+        // 5 feet in front of the target on the red side
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.524, 2.667, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -316,6 +327,7 @@ public class RobotContainer {
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
         // whileTrue(driverControl::test,
         // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
+
         whileTrue(driverControl::test,
                 new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
 
@@ -481,9 +493,10 @@ public class RobotContainer {
 
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
-        // whileTrue(driverControl::test, Commands.startEnd( () ->
-        // RobotState100.changeIntakeState(IntakeState100.INTAKE), () ->
-        // RobotState100.changeIntakeState(IntakeState100.STOP)));
+
+        whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+                () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+      
         m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));

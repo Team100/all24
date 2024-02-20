@@ -335,7 +335,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase1() throws IOException {
-        System.out.println("test case 1");
+        // System.out.println("test case 1");
         // the case from 2/14
         // robot 45 degrees to the right (negative), so 135 degrees
         // x = 2.2m, y = - 1.3 m from the center speaker tag
@@ -359,7 +359,7 @@ class VisionDataProviderTest implements Timeless {
         Blip24[] tags = new Blip24[] { tag3, tag4 };
 
         ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
-            System.out.println(coord);
+            // System.out.println(coord);
         };
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
@@ -468,7 +468,7 @@ class VisionDataProviderTest implements Timeless {
         Blip24[] tags = new Blip24[] { tag3, tag4 };
 
         ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
-            System.out.println(coord);
+            // System.out.println(coord);
             assertEquals(0.96, coord.getX(), kDelta);
             assertEquals(2.66, coord.getY(), kDelta);
         };
@@ -577,7 +577,7 @@ class VisionDataProviderTest implements Timeless {
         Blip24[] tags = new Blip24[] { tag4 };
 
         ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
-            System.out.println(coord);
+            // System.out.println(coord);
             assertEquals(0.96, coord.getX(), kDelta);
             assertEquals(3.66, coord.getY(), kDelta);
         };
@@ -614,7 +614,7 @@ class VisionDataProviderTest implements Timeless {
         Blip24[] tags = new Blip24[] { tag4 };
 
         ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
-            System.out.println(coord);
+            // System.out.println(coord);
             assertEquals(0.96, coord.getX(), kDelta);
             assertEquals(1.66, coord.getY(), kDelta);
         };
@@ -652,7 +652,7 @@ class VisionDataProviderTest implements Timeless {
         Blip24[] tags = new Blip24[] { tag4 };
 
         ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
-            System.out.println(coord);
+            // System.out.println(coord);
             assertEquals(0.96, coord.getX(), kDelta);
             assertEquals(1.66, coord.getY(), kDelta);
         };
@@ -691,7 +691,7 @@ class VisionDataProviderTest implements Timeless {
         Blip24[] tags = new Blip24[] { tag4 };
 
         ObjDoubleConsumer<Pose2d> estimateConsumer = (coord, time) -> {
-            System.out.println(coord);
+            // System.out.println(coord);
             assertEquals(0.96, coord.getX(), kDelta);
             assertEquals(1.66, coord.getY(), kDelta);
         };

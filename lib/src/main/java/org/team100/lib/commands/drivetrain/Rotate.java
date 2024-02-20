@@ -79,8 +79,6 @@ public class Rotate extends Command100 {
         m_profile = new TrapezoidProfile100(c, 0.05);
         // first align the wheels
         m_steeringAligned = false;
-
-        System.out.println("ROT STARTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
     }
 
     private void resetRefTheta(double dt) {
@@ -140,8 +138,7 @@ public class Rotate extends Command100 {
 
     @Override
     public void end(boolean isInterupted) {
-        System.out.println("ROT EDDDDDDDDDDDDDD");
-
+        // System.out.println("ROT EDDDDDDDDDDDDDD");
         m_robotDrive.stop();
     }
 }

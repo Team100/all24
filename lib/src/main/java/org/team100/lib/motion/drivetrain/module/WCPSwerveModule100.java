@@ -24,12 +24,26 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    /**
+     * Flipped belt ratios.
+     */
+    public enum DriveRatio {
+        FAST(5.5), MEDIUM(6.55);
+
+        private double m_ratio;
+
+        DriveRatio(double ratio) {
+            m_ratio = ratio;
+        }
+    }
+
     private static final String m_name = Names.name(WCPSwerveModule100.class);
 
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.1015;
-    // see wcproducts.com, this is the "fast" ratio.
-    private static final double kDriveReduction = 5.50;
+    // flipped belt ratios
+    private static final double kDriveReductionFast = 5.50;
+    private static final double kDriveReductionMedium = 6.55;
 
     /**
      * @param name                  like "front left" or whatever
@@ -46,6 +60,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             String name,
             double currentLimit,
             int driveMotorCanId,
+            DriveRatio ratio,
             Class<? extends Encoder100<Angle100>> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -63,6 +78,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 name + "/Drive",
                 currentLimit,
                 driveMotorCanId,
+                ratio,
                 drivePidConstants,
                 driveFeedforwardConstants);
 
@@ -86,6 +102,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             String name,
             double currentLimit,
             int driveMotorCanId,
+            DriveRatio ratio,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
         MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
@@ -93,7 +110,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveMotorCanId,
                 true,
                 currentLimit,
-                kDriveReduction,
+                ratio.m_ratio,
                 kWheelDiameterM,
                 pidConstants,
                 feedforwardConstants);

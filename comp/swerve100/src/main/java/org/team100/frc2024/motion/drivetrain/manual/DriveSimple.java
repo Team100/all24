@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.team100.frc2024.motion.drivetrain.manual;
 
 
@@ -16,15 +12,12 @@ public class DriveSimple extends Command {
   ManualWithShooterLock m_driver;
   SwerveDriveSubsystem m_swerve;
   public DriveSimple(SwerveDriveSubsystem swerve, ManualWithShooterLock driver) {
-    // Use addRequirements() here to declare subsystem dependencies.
     m_driver = driver;
     m_swerve = swerve;
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    System.out.println("SHOOTER LOCK");
     m_driver.reset(m_swerve.getPose());
   }
 
@@ -35,17 +28,13 @@ public class DriveSimple extends Command {
     m_swerve.driveInFieldCoords(twist, 0.02);
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("SHOOTER ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
     m_swerve.stop();
   }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return m_driver.isAligned();
-    // return false;
   }
 }

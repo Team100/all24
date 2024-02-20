@@ -50,20 +50,12 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
                 break;
         }
 
-        
-
-
         t.log(Level.DEBUG, m_name, "channel", m_encoder.getSourceChannel());
     }
 
     @Override
     public double getPosition() {
         return m_positionRad;
-    }
-
-    public double getWrappedPosition(){
-        return MathUtil.angleModulus(m_positionRad);
-        
     }
 
     @Override
@@ -73,7 +65,10 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
 
     @Override
     public void reset() {
-        m_encoder.reset();
+        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want. but this might be wrong
+        // for some other reason
+        // m_encoder.reset();
         m_positionRad = 0;
     }
 
@@ -86,7 +81,8 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     public void periodic() {
         updatePosition();
         updateRate();
-        t.log(Level.DEBUG, m_name, "position (rad) ROBOT USES THIS (COUNTER CLOCKWISE IS POSITIVE)", m_encoder.getDistance());
+        t.log(Level.DEBUG, m_name, "position (rad) ROBOT USES THIS (COUNTER CLOCKWISE IS POSITIVE)",
+                m_encoder.getDistance());
         t.log(Level.DEBUG, m_name, "position (turns) USE FOR OFFSETS", m_encoder.get());
         t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
         t.log(Level.DEBUG, m_name, "Wrapped position rads (absolute)", getWrappedPosition());
@@ -116,6 +112,10 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         prevTime = time;
 
         m_rateRad_S = dx / dt;
+    }
+
+    private double getWrappedPosition() {
+        return MathUtil.angleModulus(m_positionRad);
     }
 
 }

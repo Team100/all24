@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.XboxController;
  * This is a Logitech F310 or similar.
  */
 public class DriverXboxControl implements DriverControl {
-    private static final double kDeadband = 0.02;
+    private static final double kDeadband = 0.05;
     private static final double kExpo = 0.5;
     private final Telemetry t = Telemetry.get();
     private final XboxController m_controller;
@@ -78,16 +78,6 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public boolean driveSlow() {
-        return m_controller.getLeftBumper();
-    }
-
-    @Override
-    public boolean driveMedium() {
-        return m_controller.getRightBumper();
-    }
-
-    @Override
     public Speed speed() {
         if (m_controller.getLeftBumper())
             return Speed.SLOW;
@@ -98,7 +88,9 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean resetPose() {
-        return m_controller.getLeftBumper();
+        // @joel 2/19/24 removed this for slow mode instead
+        // return m_controller.getLeftBumper();
+        return m_controller.getRightStickButton();
     }
 
     @Override
@@ -124,7 +116,9 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean rotate0() {
-        return m_controller.getLeftBumper();
+        // @joel 2/19/24 removed so slow mode works
+        // return m_controller.getLeftBumper();
+        return false;
     }
 
     @Override

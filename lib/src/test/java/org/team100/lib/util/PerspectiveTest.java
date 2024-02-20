@@ -57,7 +57,7 @@ class PerspectiveTest {
         Mat dst = calibrationSquareInWorldCoordinatesMeters();
 
         Mat transform = Imgproc.getPerspectiveTransform(src, dst);
-        System.out.println(transform.dump());
+        // System.out.println(transform.dump());
 
         // try feeding one of the sample points above into the transform
         int xPixels = 389;
@@ -69,7 +69,7 @@ class PerspectiveTest {
         Mat dst1 = transform.matMul(src1);
         dst1 = dst1.mul(Mat.ones(3, 1, CvType.CV_64F), 1 / dst1.get(2, 0)[0]);
         // this is the real-world coordinate.
-        System.out.println(dst1.dump());
+        // System.out.println(dst1.dump());
         assertEquals(1.5, dst1.get(0, 0)[0], 0.001);
         assertEquals(0.5, dst1.get(1, 0)[0], 0.001);
     }

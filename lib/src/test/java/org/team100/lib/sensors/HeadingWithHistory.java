@@ -3,9 +3,10 @@ package org.team100.lib.sensors;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.team100.lib.copies.TimeInterpolatableBuffer100;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -55,7 +56,7 @@ public class HeadingWithHistory implements HeadingInterface {
 
     private final HeadingInterface m_delegate;
     private static final double kBufferDuration = 1.5;
-    private final TimeInterpolatableBuffer<InterpolationRecord> m_buffer = TimeInterpolatableBuffer
+    private final TimeInterpolatableBuffer100<InterpolationRecord> m_buffer = TimeInterpolatableBuffer100
             .createBuffer(kBufferDuration);
 
     public HeadingWithHistory(HeadingInterface delegate) {
