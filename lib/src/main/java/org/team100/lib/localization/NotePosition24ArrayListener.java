@@ -93,7 +93,6 @@ public class NotePosition24ArrayListener {
         if (latestTime > Timer.getFPGATimestamp() - 0.1) {
             return Tnotes;
         }
-
         return new Optional[] { Optional.empty() };
     }
 
