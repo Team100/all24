@@ -221,8 +221,6 @@ public class PoseEstimator100<T extends WheelPositions<T>> {
 
         // Step 2: Measure the twist between the odometry pose and the vision pose.
         var twist = sample.get().poseMeters.log(visionRobotPoseMeters);
-        System.out.println("VISION: " + visionRobotPoseMeters);
-        System.out.println("ODOMETRY: " + m_odometry.getPoseMeters());
         // Step 3: We should not trust the twist entirely, so instead we scale this
         // twist by a Kalman
         // gain matrix representing how much we trust vision measurements compared to

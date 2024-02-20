@@ -145,8 +145,8 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
 
         // this name needs to be exactly "/field/target" for glass.
         t.log(Level.TRACE, "field", "target", new double[] {
-                target.getX(),
-                target.getY(),
+                target.get().getX(),
+                target.get().getY(),
                 0 });
 
         // this is just for simulation
