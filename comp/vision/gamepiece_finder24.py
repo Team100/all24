@@ -28,14 +28,15 @@ class Camera(Enum):
 
 class GamePieceFinder:
     def __init__(self, serial, width, height, model):
+        self.num = 0
         self.serial = serial
         self.width = width
         self.height = height
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (0,200, 100)
-        self.object_higher = (18, 255, 255)
+        self.object_lower = (4,200, 100)
+        self.object_higher = (12, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
@@ -137,7 +138,6 @@ class GamePieceFinder:
         ).publish()
 
     def find_object(self, img_yuv):
-
         # this says YUV->RGB but it actually makes BGR.
         # github.com/raspberrypi/picamera2/issues/848
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
@@ -165,7 +165,7 @@ class GamePieceFinder:
             # reject anything taller than it is wide
             if cnt_width / cnt_height < 1.2:
                 continue
-
+            self.num = self.num + 1
             # reject big bounding box
             if cnt_width > self.width / 2 or cnt_height > self.height / 2:
                 continue
@@ -186,11 +186,11 @@ class GamePieceFinder:
             pitchRad = math.atan((cY-self.height/2)/self.mtx[1,1])
             yawRad = math.atan((self.width/2-cX)/self.mtx[0,0])
             # Puts up angle to the target from the POV of the camera
-            rotation = Rotation3d(0, pitchRad, yawRad)
+            rotation = Rotation3d(self.num, pitchRad, yawRad)
             objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
             
-        self.output_stream.putFrame(img_bgr)
+        self.output_stream.putFrame(img_range)
         return objects
 
     def draw_result(self, img, cnt, cX, cY):
@@ -277,7 +277,7 @@ def main():
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
             "AwbEnable": False,
             "AeEnable": False,
-            "ExposureTime": 10000,
+            "ExposureTime": 30000,
             # "AnalogueGain": 1.0
         },
     )

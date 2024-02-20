@@ -311,7 +311,7 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // Drive With Profile
-        whileTrue(() -> (driverControl.driveToNote() && notePositionDetector.getTranslation2d().isPresent()),
+        whileTrue(driverControl::driveToNote,
                 new DriveWithProfile(notePositionDetector::getTranslation2d, m_drive, dthetaController,
                         swerveKinodynamics, m_sensors::objectInIntake));
 
