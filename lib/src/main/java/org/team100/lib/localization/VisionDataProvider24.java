@@ -306,25 +306,24 @@ public class VisionDataProvider24 {
                 Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
                 Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
 
-                    if (lastRobotInFieldCoords != null) {
-                        double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
-                        if (distanceM <= kVisionChangeToleranceMeters) {
-                            // this hard limit excludes false positives, which were a bigger problem in 2023
-                            // due to the coarse tag family used. in 2024 this might not be an issue.
-                            // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
-                            // distance.
-                            estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
-                        } else {
-                            // System.out.println("triangulation too far");
-                            // System.out.println("IGNORE " + currentRobotinFieldCoords);
-                            // System.out.println("previous " + lastRobotInFieldCoords);
-                            // System.out.println("distance " + distanceM);
-                        }
+                if (lastRobotInFieldCoords != null) {
+                    double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
+                    if (distanceM <= kVisionChangeToleranceMeters) {
+                        // this hard limit excludes false positives, which were a bigger problem in 2023
+                        // due to the coarse tag family used. in 2024 this might not be an issue.
+                        // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
+                        // distance.
+                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                    } else {
+                        // System.out.println("triangulation too far");
+                        // System.out.println("IGNORE " + currentRobotinFieldCoords);
+                        // System.out.println("previous " + lastRobotInFieldCoords);
+                        // System.out.println("distance " + distanceM);
                     }
-                    lastRobotInFieldCoords = currentRobotinFieldCoords;
                 }
+                lastRobotInFieldCoords = currentRobotinFieldCoords;
             }
-
         }
+
     }
 }
