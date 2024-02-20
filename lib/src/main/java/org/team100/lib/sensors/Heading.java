@@ -46,8 +46,8 @@ public class Heading implements HeadingInterface {
         // invert NED to get NWU
         m_currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getRedundantYawNED());
         m_currentHeadingRateNWU = Units.degreesToRadians(-1.0 * m_gyro.getRedundantGyroRateNED());
-        t.log(Level.DEBUG, m_name, "Heading NWU", m_currentHeadingNWU);
-        t.log(Level.DEBUG, m_name, "Heading Rate NWU (rad_s)", m_currentHeadingRateNWU);
+        t.log(Level.TRACE, m_name, "Heading NWU", m_currentHeadingNWU);
+        t.log(Level.TRACE, m_name, "Heading Rate NWU (rad_s)", m_currentHeadingRateNWU);
     }
 
 }

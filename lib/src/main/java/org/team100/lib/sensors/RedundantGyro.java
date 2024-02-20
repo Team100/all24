@@ -75,7 +75,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : yawDeg / inputs;
 
-        t.log(Level.DEBUG, m_name, "Yaw NED (deg)", result);
+        t.log(Level.TRACE, m_name, "Yaw NED (deg)", result);
 
         return result;
     }
@@ -107,7 +107,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : pitchDeg / inputs;
 
-        t.log(Level.DEBUG, m_name, "Pitch (deg)", result);
+        t.log(Level.TRACE, m_name, "Pitch (deg)", result);
 
         return result;
     }
@@ -138,7 +138,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : rollDeg / inputs;
 
-        t.log(Level.DEBUG, m_name, "Roll (deg)", result);
+        t.log(Level.TRACE, m_name, "Roll (deg)", result);
 
         return result;
     }
@@ -171,34 +171,34 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : rateDeg_S / inputs;
 
-        t.log(Level.DEBUG, m_name, "Rate NED (deg/s)", result);
+        t.log(Level.TRACE, m_name, "Rate NED (deg/s)", result);
 
         return result;
     }
 
     private void connected1(boolean connected) {
-        t.log(Level.DEBUG, m_name,"Gyro 1/Connected", connected);
+        t.log(Level.TRACE, m_name,"Gyro 1/Connected", connected);
     }
 
     private void connected2(boolean connected) {
-        t.log(Level.DEBUG, m_name, "Gyro 2/Connected", connected);
+        t.log(Level.TRACE, m_name, "Gyro 2/Connected", connected);
     }
 
     private void totalConnected(int connected) {
-        t.log(Level.DEBUG, m_name,"Total Connected", connected);
+        t.log(Level.TRACE, m_name,"Total Connected", connected);
     }
 
     private void logStuff() {
-        t.log(Level.DEBUG, m_name,"Gyro 1/Angle (deg)", m_gyro1.getAngle());
-        t.log(Level.DEBUG, m_name,"Gyro 1/Fused (deg)", m_gyro1.getFusedHeading());
-        t.log(Level.DEBUG, m_name,"Gyro 1/Yaw", m_gyro1.getYaw());
-        t.log(Level.DEBUG, m_name,"Gyro 1/Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
-        t.log(Level.DEBUG, m_name,"Gyro 1/Compass Heading (deg)", m_gyro1.getCompassHeading());
+        t.log(Level.TRACE, m_name,"Gyro 1/Angle (deg)", m_gyro1.getAngle());
+        t.log(Level.TRACE, m_name,"Gyro 1/Fused (deg)", m_gyro1.getFusedHeading());
+        t.log(Level.TRACE, m_name,"Gyro 1/Yaw", m_gyro1.getYaw());
+        t.log(Level.TRACE, m_name,"Gyro 1/Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
+        t.log(Level.TRACE, m_name,"Gyro 1/Compass Heading (deg)", m_gyro1.getCompassHeading());
 
-        t.log(Level.DEBUG, m_name,"Gyro 2/Angle (deg)", m_gyro2.getAngle());
-        t.log(Level.DEBUG, m_name,"Gyro 2/Fused (deg)", m_gyro2.getFusedHeading());
-        t.log(Level.DEBUG, m_name,"Gyro 2/Yaw", m_gyro2.getYaw());
-        t.log(Level.DEBUG, m_name,"Gyro 2/Angle Mod 360 (deg)", m_gyro2.getAngle() % 360);
-        t.log(Level.DEBUG, m_name,"Gyro 2/Compass Heading (deg)", m_gyro2.getCompassHeading());
+        t.log(Level.TRACE, m_name,"Gyro 2/Angle (deg)", m_gyro2.getAngle());
+        t.log(Level.TRACE, m_name,"Gyro 2/Fused (deg)", m_gyro2.getFusedHeading());
+        t.log(Level.TRACE, m_name,"Gyro 2/Yaw", m_gyro2.getYaw());
+        t.log(Level.TRACE, m_name,"Gyro 2/Angle Mod 360 (deg)", m_gyro2.getAngle() % 360);
+        t.log(Level.TRACE, m_name,"Gyro 2/Compass Heading (deg)", m_gyro2.getCompassHeading());
     }
 }

@@ -78,7 +78,7 @@ public class ArmSubsystem extends SubsystemBase {
         ArmAngles position = new ArmAngles(
                 MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(m_lowerArmEncoder.getPosition())),
                 MathUtil.angleModulus(m_upperMeasurementFilter.calculate(m_upperArmEncoder.getPosition())));
-        t.log(Level.DEBUG, m_name, "position", position);
+        t.log(Level.TRACE, m_name, "position", position);
         return position;
     }
 
@@ -89,7 +89,7 @@ public class ArmSubsystem extends SubsystemBase {
         double th2 = position.th2 - m_previousPosition.th2;
         m_previousPosition = position;
         ArmAngles velocity = new ArmAngles(th1 * 50, th2 * 50);
-        t.log(Level.DEBUG, m_name, "velocity", velocity);
+        t.log(Level.TRACE, m_name, "velocity", velocity);
         return velocity;
     }
 

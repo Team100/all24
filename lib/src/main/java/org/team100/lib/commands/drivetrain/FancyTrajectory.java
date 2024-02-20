@@ -89,7 +89,7 @@ public class FancyTrajectory extends Command100 {
         ChassisSpeeds currentSpeed = m_robotDrive.speeds(dt);
         Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        t.log(Level.TRACE, m_name, "chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output, dt);
     }
 

@@ -103,15 +103,15 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        t.log(Level.DEBUG, m_name, "u_FB", u_FB);
-        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
-        t.log(Level.DEBUG, m_name, "u_TOTAL", u_TOTAL);
+        t.log(Level.TRACE, m_name, "u_FB", u_FB);
+        t.log(Level.TRACE, m_name, "u_FF", u_FF);
+        t.log(Level.TRACE, m_name, "u_TOTAL", u_TOTAL);
         t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Goal", m_goal);
         t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
         t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
-        t.log(Level.DEBUG, m_name, "Controller Position Error", m_controller.getPositionError());
-        t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
+        t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
+        t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
     }
 
     /** Direct velocity control for testing */

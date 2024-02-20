@@ -21,12 +21,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     public static SimulatedSwerveModule100 get(
             String name,
             SwerveKinodynamics kinodynamics) {
-
+        name = m_name + "/" + name;
         VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
         PositionServoInterface<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
-
-        name = m_name + "/" + name;
-        
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
