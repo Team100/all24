@@ -15,8 +15,12 @@ import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 /**
  * Arm motor from 2023.
+ * 
+ * Velocity is feedforward only.
  */
 public class JointMotor implements Motor100<Angle100> {
+    /** Very much not calibrated. */
+    private static final double kV = 0.1;
     private final Telemetry t = Telemetry.get();
     private final CANSparkMax m_motor;
     private final String m_name;
@@ -41,7 +45,7 @@ public class JointMotor implements Motor100<Angle100> {
 
         m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
+        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
     }
 
     @Override
@@ -50,11 +54,11 @@ public class JointMotor implements Motor100<Angle100> {
     }
 
     /**
-     * Velocity control is not supported.
+     * Velocity is just kV feedforward and that's all.
      */
     @Override
     public void setVelocity(double velocity, double accel) {
-        throw new UnsupportedOperationException();
+        m_motor.set(kV * velocity);
     }
 
     @Override

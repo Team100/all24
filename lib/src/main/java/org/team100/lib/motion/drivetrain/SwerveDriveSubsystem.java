@@ -15,7 +15,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -30,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class SwerveDriveSubsystem extends Subsystem100 {
     // multiply field-relative speeds for medium and slow modes.
     private static final double kMedium = 0.5;
-    private static final double kSlow = 0.1;
+    private static final double kSlow = 0.15;
 
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
@@ -63,8 +62,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_state = new SwerveState();
 
         stop();
-        // this needs to be exactly "/field/.type" for glass.
-        // t.log(Level.INFO, "field", ".type", "Field2d"); //This seems to throw an error sometimes
+        // @joel: this needs to be exactly "/field/.type" for glass.
+        // @sanjan: This seems to throw an error sometimes
+        // @joel: if you take it out then it breaks glass.  what's the error?
+        t.log(Level.INFO, "field", ".type", "Field2d"); 
     }
 
     /**
@@ -93,19 +94,19 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateState();
 
 
-        t.log(Level.DEBUG, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
+        t.log(Level.TRACE, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
         t.log(Level.DEBUG, m_name, "pose", m_pose);
-        t.log(Level.DEBUG, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
+        t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
 
-        t.log(Level.DEBUG, m_name, "pose array", new double[] {m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians()});
-        t.log(Level.DEBUG, m_name, "velocity", m_velocity);
-        t.log(Level.DEBUG, m_name, "acceleration", m_accel);
+        t.log(Level.TRACE, m_name, "pose array", new double[] {m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians()});
+        t.log(Level.TRACE, m_name, "velocity", m_velocity);
+        t.log(Level.TRACE, m_name, "acceleration", m_accel);
         t.log(Level.DEBUG, m_name, "state", m_state);
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        t.log(Level.DEBUG, "field", "robot", new double[] {
+        t.log(Level.INFO, "field", "robot", new double[] {
                 m_pose.getX(),
                 m_pose.getY(),
                 m_pose.getRotation().getDegrees()
@@ -154,7 +155,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         DriverControl.Speed speed = m_speed.get();
         if (Experiments.instance.enabled(Experiment.ShowMode))
             speed = DriverControl.Speed.SLOW;
-        t.log(Level.DEBUG, m_name, "control_speed", speed);
+        t.log(Level.TRACE, m_name, "control_speed", speed);
         switch (speed) {
             case SLOW:
                 twist = GeometryUtil.scale(twist, kSlow);

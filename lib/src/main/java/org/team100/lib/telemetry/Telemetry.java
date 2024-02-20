@@ -1,7 +1,6 @@
 package org.team100.lib.telemetry;
 
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,10 +56,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Telemetry {
     public enum Level {
+        /** Log nothing for maximum speed */
+        SILENT(1),
+        /** Serious problems */
+        ERROR(2),
+        /** Not-serious problems */
+        WARN(3),
         /** useful for normal operations */
-        INFO(1),
+        INFO(4),
         /** primarily useful during development */
-        DEBUG(2);
+        DEBUG(5),
+        /** slow, shows absolutely everything */
+        TRACE(6);
 
         private int priority;
 
@@ -96,9 +103,17 @@ public class Telemetry {
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }
+
+        // ***********************************
+        // DEFAULT LEVEL
+        //
+        // set this to SILENT unless you want the logs for analysis
+
         Util.warn("Setting default telemetry to DEBUG.  Fix this for comp.");
         m_levelChooser.setDefaultOption(Level.DEBUG.name(), Level.DEBUG);
         // m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
+
+
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
         m_levelUpdater = new Notifier(this::updateLevel);

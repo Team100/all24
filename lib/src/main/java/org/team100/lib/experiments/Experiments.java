@@ -31,10 +31,10 @@ public class Experiments {
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
-            Experiment.UseClosedLoopVelocity,
             Experiment.UseSetpointGenerator,
             Experiment.UseInitialVelocity,
-            Experiment.OscillateDirect);
+            Experiment.OscillateDirect,
+            Experiment.HeedVision);
 
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(

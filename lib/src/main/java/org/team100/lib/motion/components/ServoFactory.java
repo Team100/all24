@@ -108,15 +108,15 @@ public class ServoFactory {
                 name,
                 motor,
                 param.gearRatio());
-
         
         VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
                 name,
                 motor,
                 encoder);
+
         return new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 param.maxVelM_S(),
                 new PIDController(controller.getP(), controller.getI(), controller.getD()),
@@ -190,13 +190,9 @@ public class ServoFactory {
                 name,
                 motor,
                 param.gearRatio());
-        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
         return new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 param.maxVelM_S(),
                 controller,
@@ -215,13 +211,9 @@ public class ServoFactory {
               1,
               0, // minimum hard stop
                2); // maximum hard stop
-        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
         return new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 param.maxVelM_S(),
                 controller,
@@ -255,13 +247,9 @@ public class ServoFactory {
                 name,
                 motor,
                 param.wheelDiameter() * Math.PI);
-        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
         return new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 param.maxVelM_S(),
                 controller,
@@ -295,13 +283,9 @@ public class ServoFactory {
                 name,
                 motor,
                 param.wheelDiameter() * Math.PI);
-        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
         return new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 param.maxVelM_S(),
                 controller,
@@ -315,13 +299,9 @@ public class ServoFactory {
             PIDController controller) {
         SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name);
         Encoder100<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
-        VelocityServo<Distance100> vServo = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
         return new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 param.maxVelM_S(),
                 controller,

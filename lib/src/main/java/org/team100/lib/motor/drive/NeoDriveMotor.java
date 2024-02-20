@@ -92,11 +92,11 @@ public class NeoDriveMotor implements Motor100<Distance100> {
 
         m_name = Names.append(name, this);
 
-        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceId());
-        t.register(Level.DEBUG, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
-        t.register(Level.DEBUG, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
-        t.register(Level.DEBUG, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
-        t.register(Level.DEBUG, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
+        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
+        t.register(Level.TRACE, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
+        t.register(Level.TRACE, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
+        t.register(Level.TRACE, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
+        t.register(Level.TRACE, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
     }
 
     private void setP(double p) {
@@ -125,7 +125,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name, "Output", output);
+        t.log(Level.TRACE, m_name, "Output", output);
     }
 
     @Override
@@ -157,10 +157,10 @@ public class NeoDriveMotor implements Motor100<Distance100> {
 
         m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.DEBUG, m_name, "friction feedforward [-1,1]", frictionFF);
-        t.log(Level.DEBUG, m_name, "velocity feedforward [-1,1]", velocityFF);
-        t.log(Level.DEBUG, m_name, "accel feedforward [-1,1]", accelFF);
-        t.log(Level.DEBUG, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFF);
+        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFF);
+        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
     }
 
     @Override
@@ -202,6 +202,8 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
         t.log(Level.DEBUG, m_name, "RPM", m_motor.getEncoder().getVelocity());
+
+
 
     }
 

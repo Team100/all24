@@ -6,30 +6,44 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
+import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
-import org.team100.lib.motor.drive.DriveMotorFactory;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
+import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    /**
+     * Flipped belt ratios.
+     */
+    public enum DriveRatio {
+        FAST(5.5), MEDIUM(6.55);
+
+        private double m_ratio;
+
+        DriveRatio(double ratio) {
+            m_ratio = ratio;
+        }
+    }
+
     private static final String m_name = Names.name(WCPSwerveModule100.class);
 
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.1015;
-    // see wcproducts.com, this is the "fast" ratio.
-    private static final double kDriveReduction = 5.50;
+    // flipped belt ratios
+    private static final double kDriveReductionFast = 5.50;
+    private static final double kDriveReductionMedium = 6.55;
 
     /**
      * @param name                  like "front left" or whatever
@@ -46,6 +60,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             String name,
             double currentLimit,
             int driveMotorCanId,
+            DriveRatio ratio,
             Class<? extends Encoder100<Angle100>> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -54,15 +69,16 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Drive drive,
             MotorPhase motorPhase) {
         name = m_name + "/" + name;
-        PIDConstants drivePidConstants = new PIDConstants(0.35); //8
-        PIDConstants turningPidConstants = new PIDConstants(0.22); //5
+        PIDConstants drivePidConstants = new PIDConstants(0.35); // 8
+        PIDConstants turningPidConstants = new PIDConstants(0.22); // 5
         FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon6();
         FeedforwardConstants driveFeedforwardConstants = FeedforwardConstants.makeWCPSwerveDriveFalcon6();
-        
+
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
                 driveMotorCanId,
+                ratio,
                 drivePidConstants,
                 driveFeedforwardConstants);
 
@@ -82,36 +98,26 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100>  driveServo(
+    private static VelocityServo<Distance100> driveServo(
             String name,
             double currentLimit,
             int driveMotorCanId,
+            DriveRatio ratio,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
-        MotorWithEncoder100<Distance100> driveMotor = DriveMotorFactory.driveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
-                currentLimit,
                 driveMotorCanId,
+                true,
+                currentLimit,
+                ratio.m_ratio,
+                kWheelDiameterM,
                 pidConstants,
-                feedforwardConstants,
-                kDriveReduction,
-                kWheelDiameterM);
-        PIDController driveController = new PIDController( //
-                0.1, // kP //1.2
-                0, // kI //0.3
-                0.0); // kD
-        // Note very low windup limit.
-        driveController.setIntegratorRange(-0.01, 0.01);
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
-                0.06, // kS
-                0.3, // kV
-                0.025); // kA
-        return new SelectableVelocityServo<>(
+                feedforwardConstants);
+        return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
-                driveMotor,
-                driveController,
-                driveFeedforward);
+                driveMotor);
     }
 
     private static PositionServoInterface<Angle100> turningServo(
@@ -127,7 +133,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             PIDConstants lowLevelPID,
             FeedforwardConstants lowLevelFeedforward) {
         final double turningGearRatio = 1.0;
-        Motor100<Angle100> turningMotor = DriveMotorFactory.turningMotor(
+        Motor100<Angle100> turningMotor = new Falcon6TurningMotor(
                 name,
                 turningMotorCanId,
                 motorPhase,
@@ -141,24 +147,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningOffset,
                 turningGearRatio,
                 drive);
-        PIDController angleVelocityController = new PIDController(
-                0.3, // kP
-                0, // kI
-                0, // kD
-                dt);
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                0.0006, // kS: Multiplied by around 20 of previous value as that is how much we changed
-                        // P by 0.0005
-                0.005, // kV: Since we are decreasing the value of how much the PID system does we need
-                       // to conpensate for making feedforward larger as well
-                0); // kA
-        VelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
-                name,
-                turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
-
         PIDController turningPositionController = new PIDController(
                 1.9, // kP
                 0.06, // kI
@@ -170,7 +158,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

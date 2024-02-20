@@ -13,7 +13,6 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 class PositionProfileTest implements Timeless {
     boolean dump = false;
@@ -24,7 +23,6 @@ class PositionProfileTest implements Timeless {
     private final MockEncoder100<Distance100> encoder;
     private final double period;
     private final PIDController controller2;
-    private final SimpleMotorFeedforward feedforward;
     private PositionServo<Distance100> servo;
 
     public PositionProfileTest() {
@@ -33,7 +31,6 @@ class PositionProfileTest implements Timeless {
         encoder = new MockEncoder100<>();
         period = 0.1;
         controller2 = new PIDController(5, 0, 0, period);
-        feedforward = new SimpleMotorFeedforward(1, 1, 1);
     }
 
     /**
@@ -42,17 +39,10 @@ class PositionProfileTest implements Timeless {
      */
     @Test
     void testTrapezoid() {
-        PIDController vController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
-                name,
-                motor,
-                encoder,
-                vController,
-                feedforward);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 1,
                 controller2,
@@ -65,17 +55,10 @@ class PositionProfileTest implements Timeless {
 
     @Test
     void testProfile() {
-        PIDController vController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
-                name,
-                motor,
-                encoder,
-                vController,
-                feedforward);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 1,
                 controller2,
@@ -111,17 +94,10 @@ class PositionProfileTest implements Timeless {
 
     @Test
     void testExponential() {
-        PIDController vController = new PIDController(5, 0, 0, period);
-        SelectableVelocityServo<Distance100> vServo = new SelectableVelocityServo<>(
-                name,
-                motor,
-                encoder,
-                vController,
-                feedforward);
         ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.EXPONENTIAL);
         servo = new PositionServo<>(
                 name,
-                vServo,
+                motor,
                 encoder,
                 1,
                 controller2,

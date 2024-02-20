@@ -51,7 +51,6 @@ public class RobotState100 {
     }
 
     public static void changeIntakeState(IntakeState100 state){
-        System.out.println("I AM BEING CALLED RIGHT NOW");
         currentIntakeState = state;
     }
 

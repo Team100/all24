@@ -21,10 +21,25 @@ import org.team100.lib.util.Util;
  * lower it here.
  */
 public class SwerveKinodynamicsFactory {
+    // Feb 18 driver testing. remove this after that.
+    private static final boolean USE_OLD_LIMITS = false;
+
     public static SwerveKinodynamics get() {
         switch (Identity.instance) {
             case COMP_BOT:
-                return new SwerveKinodynamics(4, 2, 3, 13, 20 * Math.PI, 0.491, 0.765, 0.3);
+                // these numbers are a guess based on the betabot numbers.
+                // the comp but uses the "fast" ratio and FOC falcons
+                // so should be a bit higher top speed and less acceleration.
+                // TODO: measure the comp bot.
+                return new SwerveKinodynamics(
+                        5, // max vel m/s
+                        20, // max accel m/s/s
+                        50, // max decel m/s/s
+                        20, // max module steering rate rad/s
+                        60, // max module steering accel rad/s/s
+                        0.491, // wheelbase m
+                        0.765, // wheelbase m
+                        0.2); // vcg m (guess)
             case SWERVE_TWO:
                 return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.380, 0.445, 0.3);
             case SWERVE_ONE:
@@ -35,7 +50,31 @@ public class SwerveKinodynamicsFactory {
                 // TODO: make tests specify kinodynamics instead.
                 return new SwerveKinodynamics(4, 4, 4, 13, 20 * Math.PI, 0.5, 0.5, 0.3);
             case BETA_BOT:
-                return new SwerveKinodynamics(4, 3, 7, 13, 20 * Math.PI, 0.4826, 0.4826, 0.3);
+                 // these numbers were extracted from module mode acceleration
+                // runs as shown in this spreadsheet
+                // https://docs.google.com/spreadsheets/d/1x0WEDIYosVBrsz37VXPEEmLB6-AuLnmwBp_mgozKFI0
+                // the actual profile is exponential. these numbers represent the maximum tangent
+                // so that the result will be snappy at low speed, and unable to meet its
+                // setpoints at high speed.
+                // note the betabot uses the "medium" speed ratio
+                // and falcons with FOC -- these data were taken when the gear ratio was
+                // misconfigured so i reduced them accordingly.
+                // also i observed the steering speed and reduced it a bit.
+                // the beta bot has very low VCG.
+                // TODO: exponential setpoint generator to better match reality.
+
+                if (USE_OLD_LIMITS) {
+                    return new SwerveKinodynamics(5, 5, 7, 13, 20 * Math.PI, 0.4826, 0.4826, 0.3);
+                }
+                return new SwerveKinodynamics(
+                        4.2, // max vel m/s
+                        17, // max accel m/s/s
+                        40, // max decel m/s/s
+                        16, // max module steering rate rad/s
+                        40, // max module steering accel rad/s/s
+                        0.4826, // track m
+                        0.4826, // wheelbase m
+                        0.15); // vcg m
             default:
                 Util.warn("Using default kinodynamics");
                 return new SwerveKinodynamics(5, 5, 5, 13, 20 * Math.PI, 0.5, 0.5, 0.3);

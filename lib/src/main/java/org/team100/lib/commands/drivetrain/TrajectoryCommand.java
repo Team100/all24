@@ -60,13 +60,13 @@ public class TrajectoryCommand extends Command100 {
 
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        t.log(Level.DEBUG, m_name, "Desired X", desiredState.poseMeters.getX());
-        t.log(Level.DEBUG, m_name, "Desired Y", desiredState.poseMeters.getY());
-        t.log(Level.DEBUG, m_name, "Pose X", m_swerve.getPose().getX());
-        t.log(Level.DEBUG, m_name, "Pose Y", m_swerve.getPose().getY());
-        t.log(Level.DEBUG, m_name, "Desired Rot", lastState.poseMeters.getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "Time", curTime);
+        t.log(Level.TRACE, m_name, "Desired X", desiredState.poseMeters.getX());
+        t.log(Level.TRACE, m_name, "Desired Y", desiredState.poseMeters.getY());
+        t.log(Level.TRACE, m_name, "Pose X", m_swerve.getPose().getX());
+        t.log(Level.TRACE, m_name, "Pose Y", m_swerve.getPose().getY());
+        t.log(Level.TRACE, m_name, "Desired Rot", lastState.poseMeters.getRotation().getRadians());
+        t.log(Level.TRACE, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.TRACE, m_name, "Time", curTime);
     }
 
     @Override

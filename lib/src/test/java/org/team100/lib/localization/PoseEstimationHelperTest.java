@@ -3,14 +3,18 @@ package org.team100.lib.localization;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.Filesystem;
 
 class PoseEstimationHelperTest {
     private static final double kDelta = 0.01;
@@ -315,6 +319,142 @@ class PoseEstimationHelperTest {
         assertEquals(0, robotPoseInFieldCoords.getRotation().getX(), kDelta);
         assertEquals(0, robotPoseInFieldCoords.getRotation().getY(), kDelta);
         assertEquals(0, robotPoseInFieldCoords.getRotation().getZ(), kDelta);
+    }
+
+    @Test
+    void testTagRotationIncorrect() throws IOException {
+        // this illustrates the WRONG WRONG WRONG tag orientation.
+
+        // say we're playing blue, on the blue side, looking at tag 7.
+        // the robot is facing 180, and the camera returns this.
+        // note that the camera code returns the identity rotation when
+        // it's looking straight at a tag, which implies "into the page"
+        // orientation.
+        Blip blip = new Blip(7,
+                new double[][] {
+                        { 1, 0, 0 },
+                        { 0, 1, 0 },
+                        { 0, 0, 1 } },
+                new double[][] {
+                        { 0 },
+                        { 0 },
+                        { 1 } });
+
+        Transform3d tagInCameraCoords = PoseEstimationHelper.blipToTransform(blip);
+        assertEquals(1, tagInCameraCoords.getX(), kDelta);
+        assertEquals(0, tagInCameraCoords.getY(), kDelta);
+        assertEquals(0, tagInCameraCoords.getZ(), kDelta);
+        assertEquals(0, tagInCameraCoords.getRotation().getX(), kDelta);
+        assertEquals(0, tagInCameraCoords.getRotation().getY(), kDelta);
+        assertEquals(0, tagInCameraCoords.getRotation().getZ(), kDelta);
+
+        // "raw" layout, which is "out of the page" tag orientation.
+        // which is WRONG WRONG WRONG
+        Path path = Filesystem.getDeployDirectory().toPath().resolve("2024-crescendo.json");
+        AprilTagFieldLayout layout = new AprilTagFieldLayout(path);
+        layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+
+        Pose3d tagInFieldCoords = layout.getTagPose(7).get();
+
+        Pose3d cameraInFieldCoords = PoseEstimationHelper.toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
+
+        // notice this is WRONG WRONG WRONG because the raw tag rotation is also WRONG
+        assertEquals(-1.038, cameraInFieldCoords.getX(), kDelta);
+        // the tag is over to the left
+        assertEquals(5.548, cameraInFieldCoords.getY(), kDelta);
+        // tag center is about 57 inches up
+        assertEquals(1.451, cameraInFieldCoords.getZ(), kDelta);
+        assertEquals(0, cameraInFieldCoords.getRotation().getX(), kDelta);
+        assertEquals(0, cameraInFieldCoords.getRotation().getY(), kDelta);
+        // camera is facing down field which is WRONG WRONG WRONG
+        assertEquals(0, cameraInFieldCoords.getRotation().getZ(), kDelta);
+    }
+
+    @Test
+    void testTagRotationCorrect() throws IOException {
+        // this illustrates the CORRECT tag orientation.
+
+        // say we're playing blue, on the blue side, looking at tag 7.
+        // the robot is facing 180, and the camera returns this.
+        // note that the camera code returns the identity rotation when
+        // it's looking straight at a tag, which implies "into the page"
+        // orientation.
+        Blip blip = new Blip(7,
+                new double[][] {
+                        { 1, 0, 0 },
+                        { 0, 1, 0 },
+                        { 0, 0, 1 } },
+                new double[][] {
+                        { 0 },
+                        { 0 },
+                        { 1 } });
+
+        Transform3d tagInCameraCoords = PoseEstimationHelper.blipToTransform(blip);
+        assertEquals(1, tagInCameraCoords.getX(), kDelta);
+        assertEquals(0, tagInCameraCoords.getY(), kDelta);
+        assertEquals(0, tagInCameraCoords.getZ(), kDelta);
+        assertEquals(0, tagInCameraCoords.getRotation().getX(), kDelta);
+        assertEquals(0, tagInCameraCoords.getRotation().getY(), kDelta);
+        assertEquals(0, tagInCameraCoords.getRotation().getZ(), kDelta);
+
+        // first try the "corrected" layout, which is "into the page" tag orientation.
+        // this is CORRECT
+        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
+                .blueLayout("2024-crescendo.json");
+
+        Pose3d tagInFieldCoords = layout.getTagPose(7).get();
+
+        Pose3d cameraInFieldCoords = PoseEstimationHelper.toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
+
+        // the tag is a little bit behind the line, so we're a little closer to the line
+        // than 1m.
+        assertEquals(0.9619, cameraInFieldCoords.getX(), kDelta);
+        // the tag is over to the left; so is the camera
+        assertEquals(5.548, cameraInFieldCoords.getY(), kDelta);
+        // tag center is about 57 inches up; so is the camera
+        assertEquals(1.451, cameraInFieldCoords.getZ(), kDelta);
+        // zero roll
+        assertEquals(0, cameraInFieldCoords.getRotation().getX(), kDelta);
+        // zero tilt
+        assertEquals(0, cameraInFieldCoords.getRotation().getY(), kDelta);
+        // camera is facing back towards the wall
+        assertEquals(Math.PI, cameraInFieldCoords.getRotation().getZ(), kDelta);
+    }
+
+    @Test
+    void testAngleToTarget() {
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d();
+            Blip24 blip = new Blip24(7, new Transform3d(0, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(0, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d(0, 0, 0, new Rotation3d(0, 0, Math.PI / 2));
+            Blip24 blip = new Blip24(7, new Transform3d(0, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(Math.PI / 2, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d(0, 0, 0, new Rotation3d(0, 0, Math.PI / 2));
+            Blip24 blip = new Blip24(7, new Transform3d(1, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(Math.PI / 4, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1.414, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+        {
+            // this very strange camera angle is 90 tilt up, then 90 around (global) z, so
+            // the right side of the camera is pointing forward
+            Transform3d cameraInRobotCoordinates = new Transform3d(0, 0, 0,
+                    new Rotation3d(0, -Math.PI / 2, Math.PI / 2));
+            // this should end up straight ahead
+            Blip24 blip = new Blip24(7, new Transform3d(1, 0, 1, new Rotation3d()));
+            Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
+            assertEquals(0, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
+            assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
     }
 
 }

@@ -76,14 +76,6 @@ public interface DriverControl {
         return false;
     }
 
-    default boolean driveSlow() {
-        return false;
-    }
-
-    default boolean driveMedium() {
-        return false;
-    }
-
     default Speed speed() {
         return Speed.NORMAL;
     }

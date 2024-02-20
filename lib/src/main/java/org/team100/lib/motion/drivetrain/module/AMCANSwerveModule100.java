@@ -4,13 +4,13 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.SelectableVelocityServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorWithEncoder100;
-import org.team100.lib.motor.drive.DriveMotorFactory;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
@@ -18,7 +18,6 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 /**
  * For outboard closed-loop control.
@@ -73,28 +72,20 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
-        MotorWithEncoder100<Distance100> driveMotor = DriveMotorFactory.driveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
-                currentLimit,
                 driveMotorCanId,
-                pidConstants,
-                feedforwardConstants,
+                true,
+                currentLimit,
                 kDriveReduction,
-                kWheelDiameterM);
+                kWheelDiameterM,
+                pidConstants,
+                feedforwardConstants);
 
-        PIDController driveController = new PIDController( //
-                0.1, // kP
-                0, // kI
-                0); // kD
-        SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward( //
-                0.0, // kS
-                .5); // kV
-        return new SelectableVelocityServo<>(
+        return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
-                driveMotor,
-                driveController,
-                driveFeedforward);
+                driveMotor);
     }
 
     private static PositionServoInterface<Angle100> turningServo(
@@ -110,20 +101,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio, turningDrive);
-        PIDController angleVelocityController = new PIDController(
-                5, // kP
-                0, // kI
-                0, // kD
-                dt); // dt
-        SimpleMotorFeedforward turningFeedforward = new SimpleMotorFeedforward( //
-                .25, // kS
-                0.015); // kV
-        VelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
-                name,
-                turningMotor,
-                turningEncoder,
-                angleVelocityController,
-                turningFeedforward);
         PIDController turningPositionController = new PIDController(
                 5, // kP
                 0, // kI
@@ -134,7 +111,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

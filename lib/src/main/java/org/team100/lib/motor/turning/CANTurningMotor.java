@@ -124,7 +124,7 @@ public class CANTurningMotor implements Motor100<Angle100> {
         m_motor.setSensorPhase(true);
 
         m_name = Names.append(name, this);
-        t.log(Level.DEBUG, m_name, "Device ID", m_motor.getDeviceID());
+        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
     }
 
     public WPI_TalonSRX getMotor() {
@@ -134,7 +134,7 @@ public class CANTurningMotor implements Motor100<Angle100> {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.DEBUG, m_name, "Output", output);
+        t.log(Level.TRACE, m_name, "Output", output);
     }
 
     @Override
@@ -167,9 +167,9 @@ public class CANTurningMotor implements Motor100<Angle100> {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "Encoder Value",
+        t.log(Level.TRACE, m_name, "Encoder Value",
                 m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.log(Level.DEBUG, m_name, "Velocity Value",
+        t.log(Level.TRACE, m_name, "Velocity Value",
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 

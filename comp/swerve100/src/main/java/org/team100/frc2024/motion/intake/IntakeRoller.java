@@ -152,6 +152,7 @@ public class IntakeRoller extends Intake {
         centeringWheels.setDutyCycle(0);
         superRollers.setDutyCycle(0);
         m_feeder.stop(IntakeRoller.class);
+
     }
 
     @Override

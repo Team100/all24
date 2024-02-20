@@ -58,7 +58,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        t.log(Level.DEBUG, m_name, "current state", measurement);
+        t.log(Level.TRACE, m_name, "current state", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -67,10 +67,10 @@ public class DriveRamseteController implements DriveMotionController {
         if (!setpoint.isPresent()) {
             return new ChassisSpeeds();
         }
-        t.log(Level.DEBUG, m_name, "setpoint", setpoint.get());
+        t.log(Level.TRACE, m_name, "setpoint", setpoint.get());
 
         Pose2d mError = DriveMotionControllerUtil.getError(measurement, setpoint.get());
-        t.log(Level.DEBUG, m_name, "error", mError);
+        t.log(Level.TRACE, m_name, "error", mError);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
@@ -160,7 +160,7 @@ public class DriveRamseteController implements DriveMotionController {
             return Optional.empty();
         }
 
-        t.log(Level.DEBUG, m_name, "sample point", sample_point.get());
+        t.log(Level.TRACE, m_name, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 

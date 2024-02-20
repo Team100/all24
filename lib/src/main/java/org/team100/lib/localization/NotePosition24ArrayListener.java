@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.Optional;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -16,7 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class NotePosition24ArrayListener {
 
     StructBuffer<NotePosition24> m_buf = StructBuffer.create(NotePosition24.struct);
-    NotePosition24[] positions;
+    NotePosition24[] positions = new NotePosition24[0];
     double latestTime = 0;
 
     void consumeValues(NetworkTableEvent e) {
@@ -49,7 +50,7 @@ public class NotePosition24ArrayListener {
                 // System.out.println(fields[1] + " " + position);
             }
         } else {
-            System.out.println("note weird vision update key: " + name);
+            Util.warn("note weird vision update key: " + name);
         }
     }
 
@@ -58,6 +59,7 @@ public class NotePosition24ArrayListener {
      *         screen
      */
     public Optional<Double> getX() {
+        if (positions.length < 1) return Optional.empty();
         switch (Identity.instance) {
             case BETA_BOT:
                 double xd = positions[0].getX();
@@ -74,6 +76,7 @@ public class NotePosition24ArrayListener {
      *         screen
      */
     public Optional<Double> getY() {
+        if (positions.length < 1) return Optional.empty();
         switch (Identity.instance) {
             case BETA_BOT:
                 double dy = positions[0].getY();

@@ -26,6 +26,7 @@ public class GeometryUtil {
     public static final Translation2d kTranslation2dIdentity = new Translation2d();
     public static final PoseWithCurvature kPose2dWithCurvatureIdentity = new PoseWithCurvature();
     public static final Twist2d kTwist2dIdentity = new Twist2d(0.0, 0.0, 0.0);
+    public static final Rotation3d kRotation3Zero = new Rotation3d();
 
     private GeometryUtil() {
     }

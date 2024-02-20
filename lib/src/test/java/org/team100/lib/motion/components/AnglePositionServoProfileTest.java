@@ -4,15 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 class AnglePositionServoProfileTest {
     private static final double kDelta = 0.001;
@@ -22,7 +19,6 @@ class AnglePositionServoProfileTest {
     private final MockEncoder100<Angle100> encoder;
     private final double period;
     private final PIDController controller2;
-    private final SimpleMotorFeedforward feedforward;
     private final PositionServo<Angle100> servo;
 
     public AnglePositionServoProfileTest() {
@@ -32,20 +28,11 @@ class AnglePositionServoProfileTest {
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
         controller2.enableContinuousInput(-Math.PI, Math.PI);
-        feedforward = new SimpleMotorFeedforward(1, 1, 1);
-
-        PIDController angleVelocityController = new PIDController(1, 0, 0, period);
-        SelectableVelocityServo<Angle100> turningVelocityServo = new SelectableVelocityServo<>(
-                name,
-                motor,
-                encoder,
-                angleVelocityController,
-                feedforward);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                motor,
                 encoder,
                 1,
                 controller2,
@@ -60,7 +47,6 @@ class AnglePositionServoProfileTest {
      */
     @Test
     void testProfile() {
-        Experiments.instance.testOverride(Experiment.UseClosedLoopVelocity, true);
 
         verify(0.105, 0.005, 0.1);
         verify(0.209, 0.020, 0.2);
