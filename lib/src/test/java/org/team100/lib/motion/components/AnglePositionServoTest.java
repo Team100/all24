@@ -4,15 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motor.MockMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 class Angle100PositionServoTest {
     private static final double kDelta = 0.001;
@@ -29,15 +26,10 @@ class Angle100PositionServoTest {
 
         PIDController turningController2 = new PIDController(1, 0, 0, period);
 
-        OutboardVelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
-                name,
-                turningMotor,
-                turningEncoder);
-
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         PositionServo<Angle100> servo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                turningMotor,
                 turningEncoder,
                 1,
                 turningController2,

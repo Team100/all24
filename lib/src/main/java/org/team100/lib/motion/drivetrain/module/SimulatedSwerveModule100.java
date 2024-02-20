@@ -54,10 +54,6 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 1,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
-        VelocityServo<Angle100> turningVelocityServo = new OutboardVelocityServo<>(
-                name,
-                turningMotor,
-                turningEncoder);
         PIDController turningPositionController = new PIDController(
                 20, // kP
                 0, // kI
@@ -69,7 +65,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServoInterface<Angle100> turningServo = new PositionServo<>(
                 name,
-                turningVelocityServo,
+                turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

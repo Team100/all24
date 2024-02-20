@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class VisionDataProviderTest implements Timeless {
     private static final double kDelta = 0.01;
@@ -123,8 +124,7 @@ class VisionDataProviderTest implements Timeless {
         DoubleFunction<Optional<Rotation2d>> robotRotation = (t) -> Optional.of(GeometryUtil.kRotationZero);
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
-        // VisionDataProvider vdp = new VisionDataProvider(layout, null, robotPose);
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotRotation);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotRotation, Alliance.Red);
 
         String key = "foo";
         // in red layout blip 7 is on the other side of the field
@@ -150,12 +150,14 @@ class VisionDataProviderTest implements Timeless {
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
+                }, f -> {
                 }, key, blips);
         // do it twice to convince vdp it's a good estimate
         vdp.estimateRobotPose(
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
+                }, f -> {
                 }, key, blips);
         assertEquals(1, poseEstimate.size());
         assertEquals(1, timeEstimate.size());
@@ -171,7 +173,7 @@ class VisionDataProviderTest implements Timeless {
         DoubleFunction<Optional<Rotation2d>> robotRotation = (t) -> Optional.of(new Rotation2d(-Math.PI / 4));
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotRotation);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, robotRotation, Alliance.Red);
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
@@ -198,6 +200,7 @@ class VisionDataProviderTest implements Timeless {
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
+                }, f -> {
                 }, cameraSerialNumber, blips);
 
         // two good estimates are required, so do another one.
@@ -205,6 +208,7 @@ class VisionDataProviderTest implements Timeless {
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
+                }, f -> {
                 }, cameraSerialNumber, blips);
 
         assertEquals(1, poseEstimate.size());
@@ -257,7 +261,7 @@ class VisionDataProviderTest implements Timeless {
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                layout, null, robotRotation);
+                layout, null, robotRotation, Alliance.Red);
 
         // the robot *was* panned 45 right 75ms ago.
         // camera sees the tag straight ahead in the center of the frame,
@@ -286,6 +290,7 @@ class VisionDataProviderTest implements Timeless {
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
+                }, f -> {
                 }, cameraSerialNumber, blips);
 
         // two good estimates are required, so do another one.
@@ -293,6 +298,7 @@ class VisionDataProviderTest implements Timeless {
                 (p, t) -> {
                     poseEstimate.add(p);
                     timeEstimate.add(t);
+                }, f -> {
                 }, cameraSerialNumber, blips);
 
         assertEquals(1, poseEstimate.size());
@@ -342,7 +348,7 @@ class VisionDataProviderTest implements Timeless {
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
                 .redLayout("2024-crescendo.json");
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(3 * Math.PI / 4));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 2.4),
@@ -357,8 +363,10 @@ class VisionDataProviderTest implements Timeless {
         };
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
-        vdp.estimateRobotPose(estimateConsumer, "1000000013c9c96c", tags);
-        vdp.estimateRobotPose(estimateConsumer, "1000000013c9c96c", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "1000000013c9c96c", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "1000000013c9c96c", tags);
     }
 
     @Test
@@ -377,7 +385,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(Math.PI));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1),
@@ -391,11 +399,13 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test camera has zero offset
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
     }
 
-        @Test
+    @Test
     void testCase2WithOffset() throws IOException {
         // 1m in front of tag 4
         // field is 16.54 m long, 8.21 m wide
@@ -411,7 +421,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(Math.PI));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1),
@@ -425,8 +435,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test2 camera is 1m in front, so robot is 1m further away.
-        vdp.estimateRobotPose(estimateConsumer, "test2", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test2", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test2", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test2", tags);
     }
 
     @Test
@@ -445,7 +457,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(Math.PI));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag3 = new Blip24(3, new Transform3d(
                 new Translation3d(0.561, 0, 1),
@@ -463,8 +475,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, true);
         // test camera has zero offset
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
     }
 
     @Test
@@ -483,7 +497,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(Math.PI));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -497,8 +511,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test camera has zero offset
-        vdp.estimateRobotPose(estimateConsumer, "test1", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test1", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test1", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test1", tags);
     }
 
     @Test
@@ -517,7 +533,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(Math.PI));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(-1, 0, 1),
@@ -531,8 +547,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test camera has zero offset
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
     }
 
     @Test
@@ -551,7 +569,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(-3 * Math.PI / 4));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -566,8 +584,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test camera has zero offset
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
     }
 
     @Test
@@ -586,7 +606,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(3 * Math.PI / 4));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -601,8 +621,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test camera has zero offset
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test", tags);
     }
 
     @Test
@@ -622,7 +644,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(3 * Math.PI / 4));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 2),
@@ -637,8 +659,10 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test1 camera is tilted up 45 degrees
-        vdp.estimateRobotPose(estimateConsumer, "test1", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test1", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test1", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test1", tags);
     }
 
     @Test
@@ -658,7 +682,7 @@ class VisionDataProviderTest implements Timeless {
         assertEquals(1.451, tag4pose.getZ(), kDelta);
 
         DoubleFunction<Optional<Rotation2d>> rotationSupplier = (t) -> Optional.of(new Rotation2d(3 * Math.PI / 4));
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier);
+        VisionDataProvider24 vdp = new VisionDataProvider24(layout, null, rotationSupplier, Alliance.Red);
 
         // 30 degrees, long side is sqrt2, so hypotenuse is sqrt2/sqrt3/2
         Blip24 tag4 = new Blip24(4, new Transform3d(
@@ -674,7 +698,9 @@ class VisionDataProviderTest implements Timeless {
 
         Experiments.instance.testOverride(Experiment.Triangulate, false);
         // test3 camera is tilted up 30 degrees
-        vdp.estimateRobotPose(estimateConsumer, "test3", tags);
-        vdp.estimateRobotPose(estimateConsumer, "test3", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test3", tags);
+        vdp.estimateRobotPose(estimateConsumer, f -> {
+        }, "test3", tags);
     }
 }
