@@ -81,7 +81,10 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
 
     @Override
     public void reset() {
-        m_encoder.reset();
+        // ALERT!  @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want.  but this might be wrong
+        // for some other reason
+        // m_encoder.reset();
         m_positionRad = 0;
     }
 

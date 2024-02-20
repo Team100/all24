@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.team100.lib.commands.drivetrain;
 
 import java.util.ArrayList;
@@ -59,7 +55,7 @@ public class DriveWithTrajectory extends Command100 {
   // Called when the command is initially scheduled.
   @Override
   public void initialize100() {
-    System.out.println("DRIVE WITH TRAJEC STARTING");
+    // System.out.println("DRIVE WITH TRAJEC STARTING");
 
     TrajectoryList trajectoryList = JSONParser.getTrajectoryList(m_fileName);
     // TrajectoryList trajectoryList = new TrajectoryList(null, null);
@@ -124,15 +120,13 @@ public class DriveWithTrajectory extends Command100 {
      m_swerve.setChassisSpeeds(output, dt);
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("DRIVE WITH TRAJEC ENDING");
+    // System.out.println("DRIVE WITH TRAJEC ENDING");
     m_swerve.stop();
     TrajectoryVisualization.clear();
   }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
    return m_controller.isDone();
