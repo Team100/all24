@@ -330,8 +330,8 @@ public class RobotContainer {
         // whileTrue(driverControl::test,
         // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        whileTrue(driverControl::test,
-                new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
+        // whileTrue(driverControl::test,
+        //         new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
 
         // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
         // drivePID, swerveKinodynamics));
@@ -493,8 +493,8 @@ public class RobotContainer {
                 omegaController,
                 0.25);
         
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics);
-        whileTrue(driverControl::test, m_AutoMaker.note1(m_alliance));
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, drivePP, swerveKinodynamics);
+        whileTrue(driverControl::test, m_AutoMaker.threeNote(m_alliance));
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 

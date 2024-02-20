@@ -112,7 +112,7 @@ public class DriveToState100 extends Command100 {
             return;
         }
 
-        TrajectoryVisualization.setViz(trajectory);
+        // TrajectoryVisualization.setViz(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
@@ -143,7 +143,7 @@ public class DriveToState100 extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("DRIVE TO FINISHEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+        System.out.println("DRIVE TO FINISHED");
 
         m_swerve.stop();
         TrajectoryVisualization.clear();
