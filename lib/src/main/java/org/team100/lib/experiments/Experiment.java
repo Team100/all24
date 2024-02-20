@@ -32,5 +32,10 @@ public enum Experiment {
     /**
      * Use multiple april tags to triangulate position
      */
-    Triangulate
+    Triangulate,
+    /**
+     * Pay attention to camera input. It's useful to turn this off for testing and
+     * calibration.
+     */
+    HeedVision
 }
