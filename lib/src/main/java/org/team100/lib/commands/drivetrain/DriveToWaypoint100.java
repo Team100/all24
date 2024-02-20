@@ -116,6 +116,10 @@ public class DriveToWaypoint100 extends Command100 {
 
         // TrajectoryVisualization.setViz(trajectory);
 
+        if (trajectory.isEmpty()) {
+            end(false);
+            return;
+        }
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
 

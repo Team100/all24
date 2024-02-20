@@ -74,11 +74,17 @@ public class DriveToState100 extends Command100 {
         System.out.println("DRIVE TO WAYPOINT");
         Pose2d startPose = m_swerve.getPose();
         Twist2d startVelocity = m_swerve.getVelocity();
-
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
                 new Rotation2d(startVelocity.dx, startVelocity.dy));
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(),
                 new Rotation2d(m_endVelocity.dx, m_endVelocity.dy));
+
+        if (Math.hypot(startVelocity.dx, startVelocity.dy) < .01) {
+            startWaypoint = new Pose2d(startPose.getTranslation(), getRotation(startPose, m_goal));
+        }
+        if (Math.hypot(m_endVelocity.dx, m_endVelocity.dy) < .01) {
+            endWaypoint = new Pose2d(m_goal.getTranslation(), getRotation(startPose, m_goal));
+        }
 
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
@@ -146,13 +152,11 @@ public class DriveToState100 extends Command100 {
     ////////////////////////////////////////////////////
 
     /** Waypoints where the rotation points in the direction of motion. */
-    private static List<Pose2d> getWaypoints(Pose2d p0, Pose2d p1) {
+    private static Rotation2d getRotation(Pose2d p0, Pose2d p1) {
         Translation2d t0 = p0.getTranslation();
         Translation2d t1 = p1.getTranslation();
         Rotation2d theta = t1.minus(t0).getAngle();
-        return List.of(
-                new Pose2d(t0, theta),
-                new Pose2d(t1, theta));
+        return theta;
     }
 
 }

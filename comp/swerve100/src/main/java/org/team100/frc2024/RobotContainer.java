@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.PrimitiveAuto;
@@ -95,6 +96,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -164,7 +166,7 @@ public class RobotContainer {
         //
         // override the alliance logic.
 
-        m_alliance = Alliance.Red;
+        m_alliance = Alliance.Blue;
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -490,7 +492,9 @@ public class RobotContainer {
                 thetaController,
                 omegaController,
                 0.25);
-
+        
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics);
+        whileTrue(driverControl::test, m_AutoMaker.note1(m_alliance));
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
