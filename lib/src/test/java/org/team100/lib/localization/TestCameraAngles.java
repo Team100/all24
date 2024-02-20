@@ -19,7 +19,7 @@ class TestCameraAngles extends Fixtured {
             Translation2d testTranslation2 = PoseEstimationHelper.cameraRotationToRobotRelative(e,new Rotation3d(0, Math.toRadians(25), Math.toRadians(-10)));
                assertEquals(0,testTranslation1.getY(),0.0001);
                assertEquals(0.7,testTranslation2.getX(),0.001);
-               assertEquals(0.123465481082,testTranslation2.getY(),0.001);
+               assertEquals(-0.123465481082,testTranslation2.getY(),0.001);
             //    assertEquals(416,camera.getInverseY(1,0),0.001);
             //    assertEquals(123.2,camera.getInverseX(1),0.001);
             }
