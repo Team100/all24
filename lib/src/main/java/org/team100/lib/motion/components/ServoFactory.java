@@ -20,6 +20,7 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class ServoFactory {
 
@@ -107,12 +108,59 @@ public class ServoFactory {
                 name,
                 motor,
                 param.gearRatio());
+        
+        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+
         return new PositionServo<>(
                 name,
                 motor,
                 encoder,
                 param.maxVelM_S(),
                 new PIDController(controller.getP(), controller.getI(), controller.getD()),
+                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
+                Angle100.instance);
+    }
+
+
+
+    public static PositionServoInterface<Angle100> neoAngleServoOnboard(
+            String name,
+            int canId,
+            MotorPhase motorPhase,
+            int currentLimit,
+            SysParam param,
+            PIDConstants constants,
+            FeedforwardConstants feedForwardConstants) {
+        NeoTurningMotor motor = new NeoTurningMotor(
+                name,
+                canId,
+                motorPhase,
+                currentLimit,
+                param.gearRatio(),
+                new FeedforwardConstants(),
+                new PIDConstants());
+        NeoTurningEncoder encoder = new NeoTurningEncoder(
+                name,
+                motor,
+                param.gearRatio());
+
+        
+        VelocityServo<Angle100> vServo = new OnboardVelocityServo<>(
+                name,
+                motor,
+                encoder,
+                new PIDController(constants.getP(), constants.getI(), constants.getD()),
+                new SimpleMotorFeedforward(feedForwardConstants.getkV(), feedForwardConstants.getkSS()));
+
+        return new PositionServo<>(
+                name,
+                vServo,
+                encoder,
+                param.maxVelM_S(),
+                new PIDController(0, 0, 0),
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Angle100.instance);
     }

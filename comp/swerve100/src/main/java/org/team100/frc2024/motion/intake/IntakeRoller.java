@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.intake;
 import org.team100.frc2024.RobotState100;
 import org.team100.frc2024.Sensors;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -41,16 +42,19 @@ public class IntakeRoller extends Intake {
     private final LimitedVelocityServo<Distance100> intakeRoller;
     private final LimitedVelocityServo<Distance100> centeringWheels;
     private final LimitedVelocityServo<Distance100> superRollers;
+    private final FeederSubsystem m_feeder;
 
     private final SpeedingVisualization m_viz;
     private final Sensors m_sensors;
     private final Telemetry t;
 
-    public IntakeRoller(Sensors sensors, int intakeCAN, int centerCAN, int superCAN) {
+    public IntakeRoller(Sensors sensors, FeederSubsystem feeder, int intakeCAN, int centerCAN, int superCAN) {
 
         m_name = Names.name(this);
 
         m_sensors = sensors;
+
+        m_feeder = feeder;
 
         t = Telemetry.get();
 
@@ -107,11 +111,13 @@ public class IntakeRoller extends Intake {
             intakeRoller.setVelocity(0);
             centeringWheels.setVelocity(0);
             superRollers.setVelocity(0);
+            m_feeder.setVelocity(0, IntakeRoller.class);
             RobotState100.changeIntakeState(IntakeState100.STOP);
         } else {
             intakeRoller.setVelocity(kIntakeVelocityM_S);
             centeringWheels.setVelocity(kCenteringVelocityM_S);
             superRollers.setVelocity(kIntakeVelocityM_S);
+            m_feeder.feed(IntakeRoller.class);
         }
         
 
@@ -120,14 +126,20 @@ public class IntakeRoller extends Intake {
     @Override
     public void intake(){
         // System.out.println("INTAKING");
-        intakeRoller.setVelocity(kIntakeVelocityM_S);
-        centeringWheels.setVelocity(kCenteringVelocityM_S);
-        superRollers.setVelocity(kIntakeVelocityM_S);
+        // intakeRoller.setVelocity(kIntakeVelocityM_S);
+        // centeringWheels.setVelocity(kCenteringVelocityM_S);
+        // superRollers.setVelocity(kIntakeVelocityM_S);
+        // m_feeder.feed(IntakeRoller.class);
+
+        intakeRoller.setDutyCycle(0.8);
+        superRollers.setDutyCycle(0.8);
+        centeringWheels.setDutyCycle(0.5);
+
     }
 
     @Override
     public void outtake() {
-
+        m_feeder.starve(IntakeRoller.class);
         intakeRoller.setVelocity(-kIntakeVelocityM_S);
         centeringWheels.setVelocity(-kCenteringVelocityM_S);
         superRollers.setVelocity(-kIntakeVelocityM_S);
@@ -135,10 +147,12 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void stop() {
-        // System.out.println("STOPPPP");
-        intakeRoller.stop();
-        centeringWheels.stop();
-        superRollers.stop();
+        System.out.println("STOPPPP");
+        intakeRoller.setDutyCycle(0);
+        centeringWheels.setDutyCycle(0);
+        superRollers.setDutyCycle(0);
+        m_feeder.stop(IntakeRoller.class);
+
     }
 
     @Override
@@ -161,4 +175,6 @@ public class IntakeRoller extends Intake {
     public double getVelocity() {
         return intakeRoller.getVelocity();
     }
+
+    
 }

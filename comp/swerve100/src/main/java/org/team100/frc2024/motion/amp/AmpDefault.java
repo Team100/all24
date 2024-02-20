@@ -19,7 +19,9 @@ public class AmpDefault extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_amp.reset();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -28,7 +30,8 @@ public class AmpDefault extends Command {
         case AMPING:
             switch(RobotState100.getAmpState()){
                 case UP:
-                    m_amp.setAmpPosition(10);
+                    // System.out.println("AMPPPPPPPPPPPPPPP");
+                    m_amp.setAmpPosition(50);
                     break;
                 case DOWN:
                     m_amp.setAmpPosition(0);
@@ -38,9 +41,12 @@ public class AmpDefault extends Command {
                     break;
                 default:
             }
+            // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
+
         default:
 
     }
+
   }
 
   // Called once the command ends or is interrupted.
@@ -52,4 +58,6 @@ public class AmpDefault extends Command {
   public boolean isFinished() {
     return false;
   }
+
+  
 }
