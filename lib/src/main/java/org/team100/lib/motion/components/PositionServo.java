@@ -67,7 +67,11 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         m_controller.reset();
         m_setpoint = new State100(getPosition(), getVelocity());
         prevTime = Timer.getFPGATimestamp();
-        m_encoder.reset();
+
+        // ALERT!  @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want.  but this might be wrong
+        // for some other reason
+        // m_encoder.reset();
     }
 
     /**

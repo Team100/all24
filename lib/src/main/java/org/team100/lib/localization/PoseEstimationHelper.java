@@ -211,8 +211,9 @@ public class PoseEstimationHelper {
                 cameraRotationInFieldCoords);
 
         t.log(Level.DEBUG, m_name, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+    
 
-        System.out.println("TAG ROTATION IN CAM COOORDS" + tagRotationInCameraCoords.toRotation2d());
+        // System.out.println("TAG ROTATION IN CAM COOORDS"+ tagRotationInCameraCoords.toRotation2d());        
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -221,8 +222,8 @@ public class PoseEstimationHelper {
         Pose3d cameraInFieldCoords = toFieldCoordinates(
                 tagInCameraCoords,
                 tagInFieldCoords);
-
-        System.out.println("CAM IN FIELD COORDS:::: " + cameraInFieldCoords.toPose2d());
+        
+        // System.out.println("CAM IN FIELD COORDS:::: " + cameraInFieldCoords.toPose2d());
         t.log(Level.DEBUG, m_name, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(

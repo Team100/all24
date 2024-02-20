@@ -22,7 +22,7 @@ import org.team100.lib.util.Util;
  */
 public class SwerveKinodynamicsFactory {
     // Feb 18 driver testing. remove this after that.
-    private static final boolean USE_OLD_LIMITS = true;
+    private static final boolean USE_OLD_LIMITS = false;
 
     public static SwerveKinodynamics get() {
         switch (Identity.instance) {

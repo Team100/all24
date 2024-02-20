@@ -112,16 +112,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean driveSlow() {
-        return m_driverControl.driveSlow();
-    }
-
-    @Override
-    public boolean driveMedium() {
-        return m_driverControl.driveMedium();
-    }
-
-    @Override
     public Speed speed() {
         return m_driverControl.speed();
     }

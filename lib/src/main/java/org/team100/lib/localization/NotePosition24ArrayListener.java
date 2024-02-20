@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.config.Identity;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -70,7 +72,7 @@ public class NotePosition24ArrayListener {
                 // System.out.println(fields[1] + " " + position);
             }
         } else {
-            System.out.println("note weird vision update key: " + name);
+            Util.warn("note weird vision update key: " + name);
         }
     }
 

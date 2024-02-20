@@ -99,7 +99,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private static final double kDriveCurrentLimit = 40;
+    private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
     private final AutonSelector m_autonSelector;
@@ -156,8 +156,11 @@ public class RobotContainer {
             m_alliance = Alliance.Blue;
         }
 
-        m_alliance = Alliance.Red;
+        // *************************
+        //
+        // override the alliance logic.
 
+        m_alliance = Alliance.Red;
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -169,7 +172,7 @@ public class RobotContainer {
 
         m_indicator = new LEDIndicator(8);
 
-        m_sensors = new Sensors(1, 2, 3); //Definitely real numbers
+        m_sensors = new Sensors(1, 2, 3); // Definitely real numbers
 
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
@@ -184,7 +187,9 @@ public class RobotContainer {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        //TODO the max value is a hack for the pose estimator to ignore gyro updates. Without it the gyro offset keeps updating in the wrong places. Find the real problem
+        // TODO the max value is a hack for the pose estimator to ignore gyro updates.
+        // Without it the gyro offset keeps updating in the wrong places. Find the real
+        // problem
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
@@ -228,12 +233,20 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
+        // this actually sets the rotation to zero.
+        // on xbox this is "back"
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
+        // this is @sanjan's version from some sort of vision testing in february
+        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
+        // 2.44346));
+
+        // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.77, 1.07, 2.44346));
+        // on xbox this is left bumper
+        // 5 feet in front of the target on the red side
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.524, 2.667, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -262,8 +275,9 @@ public class RobotContainer {
         whileTrue(driverControl::never,
                 new TrajectoryListCommand(m_drive, controller,
                         x -> TrajectoryMaker.square(swerveKinodynamics, x)));
-        
-        // whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller, null));
+
+        // whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller,
+        // null));
 
         // one-meter square with reset at the corners
         whileTrue(driverControl::never,
@@ -306,17 +320,19 @@ public class RobotContainer {
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
         // whileTrue(driverControl::test,
-        //         new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
+        // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner, drivePID, swerveKinodynamics));
+        // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
+        // drivePID, swerveKinodynamics));
 
-        // whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner, drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
+        // whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner,
+        // drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
 
         SwerveState testState = new SwerveState(
-            new State100(1, -3),
-            new State100(1, -1), null
-        );
-        // RunCommand run = new RunCommand(() -> ShooterUtil.getAngleWhileMoving(10, 7, testState), m_shooter);
+                new State100(1, -3),
+                new State100(1, -1), null);
+        // RunCommand run = new RunCommand(() -> ShooterUtil.getAngleWhileMoving(10, 7,
+        // testState), m_shooter);
 
         // whileTrue(driverControl::test, run);
 
@@ -348,9 +364,6 @@ public class RobotContainer {
 
         whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
 
-        
-
-        
         // TODO: spin up the shooter whenever the robot is in range.
 
         // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
@@ -460,17 +473,18 @@ public class RobotContainer {
                         omegaController,
                         0.25));
 
-
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
-                        m_name,
-                        swerveKinodynamics,
-                        m_heading,
-                        thetaController,
-                        omegaController,
-                        0.25);
+                m_name,
+                swerveKinodynamics,
+                m_heading,
+                thetaController,
+                omegaController,
+                0.25);
 
-        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock, planner, drivePID, drivePP, swerveKinodynamics, m_heading));
-        whileTrue(driverControl::test, Commands.startEnd( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
+        // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+        whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+                () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
         m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));

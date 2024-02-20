@@ -67,23 +67,6 @@ public class RealFlight implements DriverControl {
         return hid.getRawButton(1);
     }
 
-    /**
-     * Use slow when the right switch is on
-     */
-    @Override
-    public boolean driveSlow() {
-        return rightSwitchOn();
-    }
-
-    /**
-     * Use medium when the left switch is on but the right one is not
-     * (slow overrides medium)
-     */
-    @Override
-    public boolean driveMedium() {
-        return leftSwitchOn() && !rightSwitchOn();
-    }
-
     @Override
     public Speed speed() {
         // left

@@ -13,22 +13,18 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public enum Camera {
     /**
-     * BETA Back
+     * BETA front
      */
     A("10000000caeaae82",
             new Transform3d(
                     new Translation3d(.1625, 0.0889, 0.762),
                     new Rotation3d(0, Math.toRadians(-18), 0))),
     /**
-     * BETA front
+     * BETA back
      */
-    // B("1000000013c9c96c",
-    //         new Transform3d(
-    //                 new Translation3d(0, 0, 0.73),
-    //                 new Rotation3d(0, -0.279253, 0))),
     B("1000000013c9c96c",
             new Transform3d(
-                    new Translation3d(.1825, -0.06985, 0.76),
+                    new Translation3d(0.1825, -0.06985, 0.76),
                     new Rotation3d(0, Math.toRadians(-24), Math.PI))),
     /**
      * Gamma intake
@@ -68,12 +64,12 @@ public enum Camera {
             new Transform3d(
                     new Translation3d(1, 0, 0),
                     new Rotation3d())),
-    
+
     TEST3("test3",
             new Transform3d(
                     new Translation3d(0, 0, 0),
-                    new Rotation3d(0, Math.PI/6, 0))),
-                    
+                    new Rotation3d(0, Math.PI / 6, 0))),
+
     UNKNOWN(null, new Transform3d());
 
     private static Map<String, Camera> cameras = new HashMap<>();
