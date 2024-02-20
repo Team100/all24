@@ -59,6 +59,7 @@ public class NotePosition24ArrayListener {
      *         screen
      */
     public Optional<Double> getX() {
+        if (positions.length < 1) return Optional.empty();
         switch (Identity.instance) {
             case BETA_BOT:
                 double xd = positions[0].getX();
@@ -75,6 +76,7 @@ public class NotePosition24ArrayListener {
      *         screen
      */
     public Optional<Double> getY() {
+        if (positions.length < 1) return Optional.empty();
         switch (Identity.instance) {
             case BETA_BOT:
                 double dy = positions[0].getY();
