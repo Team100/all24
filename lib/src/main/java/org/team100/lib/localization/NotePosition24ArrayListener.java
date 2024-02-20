@@ -31,6 +31,7 @@ public class NotePosition24ArrayListener {
     }
 
     void consumeValues(NetworkTableEvent e) {
+        System.out.println("Test");
         ValueEventData ve = e.valueData;
         NetworkTableValue v = ve.value;
         String name = ve.getTopic().getName();
@@ -56,23 +57,14 @@ public class NotePosition24ArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
-            notes = new Optional[] { Optional.empty() };
             int noteNum = 0;
-            Optional<Double> y = Optional.empty();
-            Optional<Double> x = Optional.empty();
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
             for (NotePosition24 position : positions) {
-                if (position.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
-                    double dy = position.getPitch();
-                    Double yz = dy;
-                    y = Optional.of(yz);
-                    double xd = position.getYaw();
-                    Double dv = xd;
-                    x = Optional.of(dv);
+                if (-1.0 * position.getPitch() < Math.PI / 2 - cameraInRobotCoordinates.getRotation().getY()) {
                     notes[noteNum] = Optional
                             .of(PoseEstimationHelper.convertToFieldRelative(m_poseEstimator.getEstimatedPosition(),
                                     PoseEstimationHelper.cameraRotationToRobotRelative(cameraInRobotCoordinates,
-                                            new Rotation3d(0, y.get(), x.get()))));
+                                            new Rotation3d(0, position.getPitch(), position.getYaw()))));
                     Tnotes[noteNum] = Optional.of(notes[noteNum].get().getTranslation());
                 }
                 // this is where you would do something useful with the payload
@@ -84,15 +76,25 @@ public class NotePosition24ArrayListener {
     }
 
     /**
-     * @return The translation of the note, field relative, rotation can be ignored,
-     *         as it is field relative rotation from robot to note
+     * @return The pose of the note, field relative, rotation
+     *         is field relative rotation from robot to note
      */
     public Optional<Pose2d>[] getPose2d() {
-        return notes;
+        if (latestTime > Timer.getFPGATimestamp() - 0.1) {
+            return notes;
+        }
+        return new Optional[] { Optional.empty() };
     }
 
+    /**
+     * @return The translation of the note, field relative
+     */
     public Optional<Translation2d>[] getTranslation2d() {
-        return Tnotes;
+        if (latestTime > Timer.getFPGATimestamp() - 0.1) {
+            return Tnotes;
+        }
+
+        return new Optional[] { Optional.empty() };
     }
 
     public void enable() {
