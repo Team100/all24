@@ -9,16 +9,8 @@ import numpy as np
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
-from wpimath.geometry import Transform3d
-from wpiutil import wpistruct
+from wpimath.geometry import Rotation3d
 import math
-
-@wpistruct.make_wpistruct
-@dataclasses.dataclass
-class NotePosition:
-    yaw: float
-    pitch: float
-
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
@@ -136,12 +128,12 @@ class GamePieceFinder:
         ).publish()
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
-        self.inst.getStructTopic("bugfix", NotePosition).publish().set(
-            NotePosition(0, 0)
+        self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
+            Rotation3d(0, 0, 0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
-            topic_name + "/NotePosition24", NotePosition
+            topic_name + "/Rotation3d", Rotation3d
         ).publish()
 
     def find_object(self, img_yuv):
@@ -194,7 +186,8 @@ class GamePieceFinder:
             pitchRad = math.atan((cY-self.height/2)/self.mtx[1,1])
             yawRad = math.atan((self.width/2-cX)/self.mtx[0,0])
             # Puts up angle to the target from the POV of the camera
-            objects.append(NotePosition(yawRad, pitchRad))
+            rotation = Rotation3d(0, pitchRad, yawRad)
+            objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
             
         self.output_stream.putFrame(img_bgr)
@@ -302,7 +295,7 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
-
+    print(serial)
     output = GamePieceFinder(serial, width, height, model)
 
     camera.start()

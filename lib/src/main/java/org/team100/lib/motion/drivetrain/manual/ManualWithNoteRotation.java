@@ -99,15 +99,27 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
 
     public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
-        double omega;
         Optional<Translation2d> target = m_target.get();
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
-        if (target.isPresent()) {
+        if (!target.isPresent()) {
+            Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, clipped.dtheta);
+            // desaturate to feasibility by preferring the rotational velocity.
+            twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
+
+            m_prevPose = state.pose();
+            ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
+                    twistWithLock,
+                    m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                    m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
+
+            // desaturate to feasibility
+            ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
+            return speeds;
+        }
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
         Rotation2d bearing = bearing(currentTranslation, target.get());
-
         // take the short path
         double measurement = currentRotation.getRadians();
         bearing = new Rotation2d(
@@ -138,13 +150,13 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
         t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
 
-        omega = MathUtil.clamp(
+        double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // this name needs to be exactly "/field/target" for glass.
-        t.log(Level.TRACE, "field", "target", new double[] {
+        t.log(Level.DEBUG, "field", "target", new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });
@@ -164,9 +176,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                     m_ball.getY(),
                     0 });
         }
-    } else {
-        omega = clipped.dtheta;
-    }
         Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, omega);
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
@@ -176,9 +185,9 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 twistWithLock,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
-
+        ChassisSpeeds withRot = new ChassisSpeeds(scaled.vxMetersPerSecond, scaled.vyMetersPerSecond, twistWithLock.dtheta);
         // desaturate to feasibility
-        ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
+        ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(withRot);
         return speeds;
     }
 

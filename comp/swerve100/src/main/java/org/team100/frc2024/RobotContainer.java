@@ -311,8 +311,8 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // Drive With Profile
-        whileTrue(() -> (driverControl.driveToNote() && notePositionDetector.getPose2d()[0].isPresent()),
-                new DriveWithProfile(() -> notePositionDetector.getPose2d()[0], m_drive, dthetaController,
+        whileTrue(() -> (driverControl.driveToNote() && notePositionDetector.getTranslation2d().isPresent()),
+                new DriveWithProfile(notePositionDetector::getTranslation2d, m_drive, dthetaController,
                         swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
@@ -434,7 +434,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        () -> notePositionDetector.getTranslation2d()[0],
+                        notePositionDetector::getTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -455,7 +455,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        () -> notePositionDetector.getTranslation2d()[0],
+                        notePositionDetector::getTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
