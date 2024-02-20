@@ -180,13 +180,19 @@ public class VisionDataProvider24 {
 
         final Rotation2d gyroRotation = optionalGyroRotation.get();
 
-        estimateFromBlips(estimateConsumer, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
+        estimateFromBlips(
+                estimateConsumer,
+                cameraSerialNumber,
+                blips,
+                cameraInRobotCoordinates,
+                frameTime,
+                gyroRotation);
 
         if (Experiments.instance.enabled(Experiment.Triangulate)) {
-            triangulate(estimateConsumer, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
+            triangulate(estimateConsumer, cameraSerialNumber, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
         }
 
-        firingSolution(firingSolutionConsumer, blips, cameraInRobotCoordinates);
+        firingSolution(firingSolutionConsumer, cameraSerialNumber, blips, cameraInRobotCoordinates);
 
     }
 
@@ -198,20 +204,27 @@ public class VisionDataProvider24 {
      * @param blips
      * @param cameraInRobotCoordinates
      */
-    private void firingSolution(Consumer<Translation2d> firingSolutionConsumer, final Blip24[] blips,
+    private void firingSolution(
+            Consumer<Translation2d> firingSolutionConsumer,
+            final String cameraSerialNumber,
+
+            final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates) {
         for (Blip24 blip : blips) {
             if ((blip.getId() == 7 && m_alliance == Alliance.Blue) ||
                     (blip.getId() == 5 && m_alliance == Alliance.Red)) {
-                firingSolutionConsumer.accept(
-                        PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
-                                .getTranslation().toTranslation2d());
+                Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
+                        .getTranslation().toTranslation2d();
+                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
+                if (Experiments.instance.enabled(Experiment.HeedVision))
+                    firingSolutionConsumer.accept(translation2d);
             }
         }
     }
 
     private void estimateFromBlips(
             final ObjDoubleConsumer<Pose2d> estimateConsumer,
+            final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
             final double frameTime,
@@ -220,7 +233,7 @@ public class VisionDataProvider24 {
 
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-            t.log(Level.DEBUG, m_name, "Tag Rotation", tagRotation.getAngle());
+            t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
             Optional<Pose3d> tagInFieldCoordsOptional = layout.getTagPose(blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())
@@ -231,7 +244,7 @@ public class VisionDataProvider24 {
                     0, 0, gyroRotation.getRadians());
 
             Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-            t.log(Level.DEBUG, m_name, "Tag In Field Cords", tagInFieldCoords.toPose2d());
+            t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag In Field Cords", tagInFieldCoords.toPose2d());
 
             Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                     cameraInRobotCoordinates,
@@ -244,7 +257,7 @@ public class VisionDataProvider24 {
 
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
 
-            t.log(Level.DEBUG, m_name, "pose", currentRobotinFieldCoords);
+            t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
 
             if (lastRobotInFieldCoords != null) {
                 double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
@@ -253,7 +266,8 @@ public class VisionDataProvider24 {
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                     // distance.
-                    estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                    if (Experiments.instance.enabled(Experiment.HeedVision))
+                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                 } else {
                     // System.out.println("IGNORE " + currentRobotinFieldCoords);
                     // System.out.println("previous " + lastRobotInFieldCoords);
@@ -267,8 +281,13 @@ public class VisionDataProvider24 {
         }
     }
 
-    private void triangulate(ObjDoubleConsumer<Pose2d> estimateConsumer, Blip24[] blips,
-            Transform3d cameraInRobotCoordinates, double frameTime, Rotation2d gyroRotation) {
+    private void triangulate(
+            ObjDoubleConsumer<Pose2d> estimateConsumer,
+            final String cameraSerialNumber,
+            Blip24[] blips,
+            Transform3d cameraInRobotCoordinates,
+            double frameTime,
+            Rotation2d gyroRotation) {
         // if multiple tags are in view, triangulate to get another (perhaps more
         // accurate) estimate
         for (int i = 0; i < blips.length - 1; i++) {
@@ -306,6 +325,8 @@ public class VisionDataProvider24 {
                 Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
                 Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
 
+                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
+
                 if (lastRobotInFieldCoords != null) {
                     double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
                     if (distanceM <= kVisionChangeToleranceMeters) {
@@ -313,7 +334,8 @@ public class VisionDataProvider24 {
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         // TODO: WPI docs suggest update setVisionMeasurementStdDevs proportional to
                         // distance.
-                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                        if (Experiments.instance.enabled(Experiment.HeedVision))
+                            estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                     } else {
                         // System.out.println("triangulation too far");
                         // System.out.println("IGNORE " + currentRobotinFieldCoords);
