@@ -47,7 +47,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
-    private final Supplier<Translation2d> m_target;
+    private final Supplier<Optional<Translation2d>> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final String m_name;
@@ -68,13 +68,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             BooleanSupplier trigger) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
-        if (target.get().isPresent()) {
-            m_target = () -> target.get().get();
-        } else {
-            // THIS SHOULD NEVER BE USED IN AN ACTUAL MATCH, as this command will never run
-            // if no note is detected
-            m_target = null;
-        }
+        m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.append(parent, this);
@@ -105,89 +99,85 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     @Override
     public Twist2d apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
+        double omega;
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
-        Rotation2d currentRotation = state.pose().getRotation();
-        double headingRate = m_heading.getHeadingRateNWU();
-        Translation2d target;
-        Translation2d currentTranslation = state.pose().getTranslation();
-        if (m_target == null) {
-            target = state.translation();
-        } else {
-            target = m_target.get();
-        }
-        Rotation2d bearing = bearing(currentTranslation, target);
-
-        // take the short path
-        double measurement = currentRotation.getRadians();
-        bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, bearing.getRadians()));
-
-        // make sure the setpoint uses the modulus close to the measurement.
-        m_thetaSetpoint = new State100(
-                Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
-                m_thetaSetpoint.v());
-
-        // the goal omega should match the target's apparent motion
-        double targetMotion = targetMotion(state, target);
-        t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
-
-        State100 goal = new State100(bearing.getRadians(), targetMotion);
-
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
-
-        // this is user input scaled to m/s and rad/s
+        Optional<Translation2d> target = m_target.get();
         Twist2d scaledInput = DriveUtil.scale(
                 clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        if (target.isPresent()) {
+            Rotation2d currentRotation = state.pose().getRotation();
+            double headingRate = m_heading.getHeadingRateNWU();
+            Translation2d currentTranslation = state.pose().getTranslation();
+            Rotation2d bearing = bearing(currentTranslation, target.get());
 
-        double thetaFF = m_thetaSetpoint.v();
+            // take the short path
+            double measurement = currentRotation.getRadians();
+            bearing = new Rotation2d(
+                    Math100.getMinDistance(measurement, bearing.getRadians()));
 
-        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        t.log(Level.DEBUG, m_name, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "theta/measurement", measurement);
-        t.log(Level.DEBUG, m_name, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.DEBUG, m_name, "theta/fb", thetaFB);
-        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        t.log(Level.DEBUG, m_name, "omega/reference", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "omega/measurement", headingRate);
-        t.log(Level.DEBUG, m_name, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.DEBUG, m_name, "omega/fb", omegaFB);
+            // make sure the setpoint uses the modulus close to the measurement.
+            m_thetaSetpoint = new State100(
+                    Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
+                    m_thetaSetpoint.v());
 
-        double omega = MathUtil.clamp(
-                thetaFF + thetaFB + omegaFB,
-                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        if (m_target == null) {
+            // the goal omega should match the target's apparent motion
+            double targetMotion = targetMotion(state, target.get());
+            t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
+
+            State100 goal = new State100(bearing.getRadians(), targetMotion);
+
+            m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+
+            // this is user input scaled to m/s and rad/s
+
+            double thetaFF = m_thetaSetpoint.v();
+
+            double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
+            t.log(Level.DEBUG, m_name, "theta/setpoint", m_thetaSetpoint);
+            t.log(Level.DEBUG, m_name, "theta/measurement", measurement);
+            t.log(Level.DEBUG, m_name, "theta/error", m_thetaController.getPositionError());
+            t.log(Level.DEBUG, m_name, "theta/fb", thetaFB);
+            double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+            t.log(Level.DEBUG, m_name, "omega/reference", m_thetaSetpoint);
+            t.log(Level.DEBUG, m_name, "omega/measurement", headingRate);
+            t.log(Level.DEBUG, m_name, "omega/error", m_omegaController.getPositionError());
+            t.log(Level.DEBUG, m_name, "omega/fb", omegaFB);
+
+            omega = MathUtil.clamp(
+                    thetaFF + thetaFB + omegaFB,
+                    -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                    m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
+            // this name needs to be exactly "/field/target" for glass.
+            t.log(Level.DEBUG, "field", "target", new double[] {
+                    target.get().getX(),
+                    target.get().getY(),
+                    0 });
+
+            // this is just for simulation
+            if (m_trigger.getAsBoolean()) {
+                m_ball = currentTranslation;
+                // correct for newtonian relativity
+                m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
+                        .plus(state.pose().minus(m_prevPose).getTranslation());
+            }
+            if (m_ball != null) {
+                m_ball = m_ball.plus(m_ballV);
+                // this name needs to be exactly "/field/ball" for glass.
+                t.log(Level.DEBUG, "field", "ball", new double[] {
+                        m_ball.getX(),
+                        m_ball.getY(),
+                        0 });
+            }
+        } else {
             omega = scaledInput.dtheta;
         }
         Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
 
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
-
-        // this name needs to be exactly "/field/target" for glass.
-        t.log(Level.DEBUG, "field", "target", new double[] {
-                target.getX(),
-                target.getY(),
-                0 });
-
-        // this is just for simulation
-        if (m_trigger.getAsBoolean()) {
-            m_ball = currentTranslation;
-            // correct for newtonian relativity
-            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
-                    .plus(state.pose().minus(m_prevPose).getTranslation());
-        }
-        if (m_ball != null) {
-            m_ball = m_ball.plus(m_ballV);
-            // this name needs to be exactly "/field/ball" for glass.
-            t.log(Level.DEBUG, "field", "ball", new double[] {
-                    m_ball.getX(),
-                    m_ball.getY(),
-                    0 });
-        }
-
         m_prevPose = state.pose();
         return twistWithLockM_S;
     }

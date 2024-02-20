@@ -28,7 +28,7 @@ public class PoseEstimationHelper {
 
     public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
             double x = cameraInRobotCoordinates.getZ() * Math.tan(-1.0 * cameraObject.getY() + Math.PI/2 - cameraInRobotCoordinates.getRotation().getY());
-            double y = x * Math.tan(-1.0 * cameraObject.getZ() - cameraInRobotCoordinates.getRotation().getZ());
+            double y = -1.0 * x * Math.tan(-1.0 * cameraObject.getZ() - cameraInRobotCoordinates.getRotation().getZ());
             return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
     }
 

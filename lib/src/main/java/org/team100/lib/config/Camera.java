@@ -35,8 +35,8 @@ public enum Camera {
      */
     C("10000000a7c673d9",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(0, 0, 0.3937),
+                    new Rotation3d(0, Math.toRadians(30), 0))),
     /**
      * Delta shooter
      */

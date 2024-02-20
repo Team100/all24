@@ -12,6 +12,8 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,17 +22,18 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 public class DriveWithProfile extends Command100 {
-    private final Supplier<Pose2d> m_fieldRelativeGoal;
+    private final Supplier<Optional<Pose2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-    private final BooleanSupplier m_end;
+    private BooleanSupplier m_end;
     private State100 xSetpoint;
     private State100 ySetpoint;
     private State100 thetaSetpoint;
+    private final Telemetry t = Telemetry.get();
 
     /**
      * @param goal
@@ -46,14 +49,8 @@ public class DriveWithProfile extends Command100 {
             SwerveKinodynamics limits,
             BooleanSupplier end) {
         m_swerve = drivetrain;
-        if (fieldRelativeGoal.get().isPresent()) {
-            Pose2d e = fieldRelativeGoal.get().get();
-            m_fieldRelativeGoal = () -> e;
-            m_end = end;
-        } else {
-            m_fieldRelativeGoal = null;
-            m_end = () -> true;
-        }
+        m_fieldRelativeGoal = fieldRelativeGoal;
+        m_end = end;
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
@@ -75,29 +72,34 @@ public class DriveWithProfile extends Command100 {
 
     @Override
     public void execute100(double dt) {
-        if (m_fieldRelativeGoal.get() != null) {
+        Optional<Pose2d> goal =m_fieldRelativeGoal.get();
+        if (goal.isPresent()) {
             Rotation2d currentRotation = m_swerve.getPose().getRotation();
             // take the short path
             double measurement = currentRotation.getRadians();
             Rotation2d bearing = new Rotation2d(
-                    Math100.getMinDistance(measurement, m_fieldRelativeGoal.get().getRotation().getRadians()));
-
+                    Math100.getMinDistance(measurement, goal.get().getRotation().getRadians()));
             // make sure the setpoint uses the modulus close to the measurement.
             thetaSetpoint = new State100(
                     Math100.getMinDistance(measurement, thetaSetpoint.x()),
                     thetaSetpoint.v());
             State100 thetaGoal = new State100(bearing.getRadians(), 0);
-            State100 xGoalRaw = new State100(m_fieldRelativeGoal.get().getX(), 0, 0);
+            State100 xGoalRaw = new State100(goal.get().getX(), 0, 0);
             xSetpoint = xProfile.calculate(dt, xSetpoint, xGoalRaw);
-            State100 yGoalRaw = new State100(m_fieldRelativeGoal.get().getY(), 0, 0);
+            State100 yGoalRaw = new State100(goal.get().getY(), 0, 0);
             ySetpoint = yProfile.calculate(dt, ySetpoint, yGoalRaw);
             // State100 thetaGoalRaw = new
             // State100(m_robotRelativeGoal.get().getRotation().getRadians(),0,0);
             thetaSetpoint = thetaProfile.calculate(dt, thetaSetpoint, thetaGoal);
             SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
-            Twist2d goal = m_controller.calculate(m_swerve.getState(), goalState);
-            m_swerve.driveInFieldCoords(goal, dt);
+            Twist2d TwistGoal = m_controller.calculate(m_swerve.getState(), goalState);
+            t.log(Level.DEBUG, "field", "target", new double[] {
+                goal.get().getX(),
+                goal.get().getY(),
+                0 });
+            m_swerve.driveInFieldCoords(TwistGoal, dt);
         } else {
+            m_end = () -> true;
             System.out.println("Drive goal error");
         }
     }

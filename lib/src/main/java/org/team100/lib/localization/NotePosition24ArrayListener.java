@@ -31,7 +31,6 @@ public class NotePosition24ArrayListener {
     }
 
     void consumeValues(NetworkTableEvent e) {
-        System.out.println("Test");
         ValueEventData ve = e.valueData;
         NetworkTableValue v = ve.value;
         String name = ve.getTopic().getName();

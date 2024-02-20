@@ -48,7 +48,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
-    private final Supplier<Translation2d> m_target;
+    private final Supplier<Optional<Translation2d>> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final String m_name;
@@ -69,13 +69,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
             BooleanSupplier trigger) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
-        if (target.get().isPresent()) {
-            m_target = () -> target.get().get();
-        } else {
-            // THIS SHOULD NEVER BE USED IN AN ACTUAL MATCH, as this command will never run
-            // if no note is detected
-            m_target = null;
-        }
+        m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.append(parent, this);
@@ -105,17 +99,14 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
 
     public ChassisSpeeds apply(SwerveState state, Twist2d input) {
         // clip the input to the unit circle
+        double omega;
+        Optional<Translation2d> target = m_target.get();
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
+        if (target.isPresent()) {
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
-        Translation2d target;
         Translation2d currentTranslation = state.pose().getTranslation();
-        if (m_target == null) {
-            target = state.translation();
-        } else {
-            target = m_target.get();
-        }
-        Rotation2d bearing = bearing(currentTranslation, target);
+        Rotation2d bearing = bearing(currentTranslation, target.get());
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -128,7 +119,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
-        double targetMotion = targetMotion(state, target);
+        double targetMotion = targetMotion(state, target.get());
         t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
@@ -147,22 +138,15 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         t.log(Level.DEBUG, m_name, "omega/error", m_omegaController.getPositionError());
         t.log(Level.DEBUG, m_name, "omega/fb", omegaFB);
 
-        double omega = MathUtil.clamp(
+        omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        if (m_target == null) {
-            omega = clipped.dtheta;
-        }
-        Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, omega);
-
-        // desaturate to feasibility by preferring the rotational velocity.
-        twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
 
         // this name needs to be exactly "/field/target" for glass.
         t.log(Level.DEBUG, "field", "target", new double[] {
-                target.getX(),
-                target.getY(),
+            target.get().getX(),
+            target.get().getY(),
                 0 });
 
         // this is just for simulation
@@ -180,6 +164,12 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                     m_ball.getY(),
                     0 });
         }
+    } else {
+        omega = clipped.dtheta;
+    }
+        Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, omega);
+        // desaturate to feasibility by preferring the rotational velocity.
+        twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
 
         m_prevPose = state.pose();
         ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
