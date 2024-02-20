@@ -44,7 +44,7 @@ public class FeederSubsystem extends SubsystemBase {
                 feedRoller = ServoFactory.limitedNeoVelocityServo(
                         m_name +"/Feeder", 
                         feederID, 
-                        false, 
+                        true, 
                         feederLimit,
                         feederParams, 
                         new FeedforwardConstants(0.122,0,0.1,0.065),
@@ -70,27 +70,47 @@ public class FeederSubsystem extends SubsystemBase {
 
   public void setVelocity(double velocity, Class<?> originClass){
     //Listen to beam break instead?
-      if(originClass == DrumShooter.class){
-        if(RobotState100.getShooterState() == ShooterState100.FEED){
-          feedRoller.setVelocity(velocity);
-        } else {
-          return;
-        }
-      } else if(originClass == IntakeRoller.class){
-          feedRoller.setVelocity(velocity);
+      // if(originClass == DrumShooter.class){
+      //   if(RobotState100.getShooterState() == ShooterState100.FEED){
+      //     feedRoller.setDutyCycle(0.1);
+      //   } else {
+      //     return;
+      //   }
+      // } else if(originClass == IntakeRoller.class){
+      //     // feedRoller.setVelocity(velocity);
+      //     feedRoller.setDutyCycle(0.1);
 
-      } 
+
+      // } 
+
+      
+      
+
     
 
     
   }
 
-  public void stop(){
-    feedRoller.stop();
+  public void stop (Class<?> originClass){
+    // if(originClass == DrumShooter.class){
+    //     if(RobotState100.getShooterState() == ShooterState100.FEED){
+    //       feedRoller.stop();
+    //     } else {
+    //       return;
+    //     }
+    //   } else if(originClass == IntakeRoller.class){
+    //       // feedRoller.setVelocity(velocity);
+    //       feedRoller.stop();
+
+
+    //   } 
   }
 
   @Override
   public void periodic() {
+    // System.out.println("FEEEEDD");
+    // feedRoller.setDutyCycle(1);
+
     // This method will be called once per scheduler run
     feedRoller.periodic();
   }

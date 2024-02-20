@@ -498,7 +498,8 @@ public class RobotContainer {
     }
 
     public void onTeleop(){
-
+        m_shooter.reset();
+        m_amp.reset();
     }
 
     public void onAuto(){

@@ -55,15 +55,16 @@ public class ShooterDefault extends Command {
             //         break;
 
             // }
-            System.out.println("SHOOOOT");
-            m_shooter.feed();
+            // System.out.println("SHOOOOT");
+            // m_shooter.setAngle(22.0);
+            
         case AMPING:
             m_shooter.stop();
         case NONE:
             m_shooter.stop();
         default:
-            m_shooter.stop();
-            m_shooter.setAngle(0.0);
+            // m_shooter.stop();
+            // m_shooter.setAngle(0.0);
 
             
     }

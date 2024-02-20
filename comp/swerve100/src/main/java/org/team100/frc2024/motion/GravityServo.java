@@ -14,6 +14,7 @@ import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -50,6 +51,7 @@ public class GravityServo {
 
     m_period = period;
     m_motor = new CANSparkMax(canID, MotorType.kBrushless);
+    m_motor.setIdleMode(IdleMode.kCoast);
     m_encoder = m_motor.getEncoder();
     m_name = name;
     m_params = params;
@@ -64,6 +66,7 @@ public class GravityServo {
     }
 
     public void reset(){
+        // m_encoder.setPosition(0);
         m_controller.reset();
         m_setpoint = new State100(getPosition(), 0);
     }
@@ -81,22 +84,23 @@ public class GravityServo {
 
         // use the modulus closest to the measurement.
         // note zero velocity in the goal.
-        m_goal = new State100((goal - measurement) + measurement, 0.0);
+        m_goal = new State100(goal, 0.0);
 
         m_setpoint = new State100(
-                (m_setpoint.x() - measurement) + measurement,
+                (m_setpoint.x()),
                 m_setpoint.v());
+
+        
 
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v();
+        double u_FF = m_setpoint.v() * 0.008;
 
-        // note u_FF is rad/s, so a big number, u_FB should also be a big number.
-        double gravityTorque = m_gravityScale * Math.cos(MathUtil.angleModulus(m_encoder.getPosition()));
-        double u_TOTAL = u_FB + u_FF + gravityTorque;
-        // u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxRadsM_S, m_maxRadsM_S);
-        m_motor.set(u_TOTAL * 0.01  ); //rot/s to rpm conversion
+        double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
+        double u_TOTAL = gravityTorque + u_FF + u_FB;
+
+        m_motor.set(u_TOTAL); //rot/s to rpm conversion
 
         m_controller.setIntegratorRange(0, 0.1);
 
@@ -109,6 +113,8 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
         t.log(Level.DEBUG, m_name, "Controller Position Error", m_controller.getPositionError());
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
+        t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition()/ m_params.gearRatio())));
+        t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition()/ m_params.gearRatio());
 
     }
 

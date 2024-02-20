@@ -126,10 +126,15 @@ public class IntakeRoller extends Intake {
     @Override
     public void intake(){
         // System.out.println("INTAKING");
-        intakeRoller.setVelocity(kIntakeVelocityM_S);
-        centeringWheels.setVelocity(kCenteringVelocityM_S);
-        superRollers.setVelocity(kIntakeVelocityM_S);
-        m_feeder.feed(IntakeRoller.class);
+        // intakeRoller.setVelocity(kIntakeVelocityM_S);
+        // centeringWheels.setVelocity(kCenteringVelocityM_S);
+        // superRollers.setVelocity(kIntakeVelocityM_S);
+        // m_feeder.feed(IntakeRoller.class);
+
+        intakeRoller.setDutyCycle(0.8);
+        superRollers.setDutyCycle(0.8);
+        centeringWheels.setDutyCycle(0.5);
+
     }
 
     @Override
@@ -143,10 +148,10 @@ public class IntakeRoller extends Intake {
     @Override
     public void stop() {
         System.out.println("STOPPPP");
-        intakeRoller.stop();
-        centeringWheels.stop();
-        superRollers.stop();
-        m_feeder.stop();
+        intakeRoller.setDutyCycle(0);
+        centeringWheels.setDutyCycle(0);
+        superRollers.setDutyCycle(0);
+        m_feeder.stop(IntakeRoller.class);
     }
 
     @Override
@@ -169,4 +174,6 @@ public class IntakeRoller extends Intake {
     public double getVelocity() {
         return intakeRoller.getVelocity();
     }
+
+    
 }

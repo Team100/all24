@@ -65,7 +65,11 @@ public class DrumShooter extends Shooter{
         int feederLimit = 40;
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
-        SysParam pivotParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
+        SysParam pivotParams = SysParam.neoPositionServoSystem(
+            75,
+            30,
+            30)
+            ;        
         SysParam feederParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
 
         t = Telemetry.get();
@@ -93,11 +97,12 @@ public class DrumShooter extends Shooter{
                 pivotMotor = new GravityServo(
                         m_name + "/Pivot", 
                         pivotParams, 
-                        new PIDController(1, 0, 0), //same
+                        new PIDController(0.01, 0, 0), //same
                         new TrapezoidProfile100(pivotParams.maxVelM_S(), pivotParams.maxAccelM_S2(), 0.05),
                         pivotID, 
                         0.02, 
-                        -0.06
+                        0
+
                 ); //same
 
                 m_feeder = feeder;
@@ -128,8 +133,8 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void forward() {
-        leftRoller.setVelocity(kMuzzleVelocityM_S);
-        rightRoller.setVelocity(kMuzzleVelocityM_S);
+        // leftRoller.setVelocity(kMuzzleVelocityM_S);
+        // rightRoller.setVelocity(kMuzzleVelocityM_S);
     }
 
     @Override
@@ -144,10 +149,15 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void stop() {
-        leftRoller.stop();
-        rightRoller.stop();
-        pivotMotor.stop();
-        m_feeder.stop();
+        // leftRoller.stop();
+        // rightRoller.stop();
+        // pivotMotor.stop();
+        // m_feeder.stop(DrumShooter.class);
+    }
+
+    @Override
+    public void reset(){
+        pivotMotor.reset();
     }
 
     @Override
@@ -167,6 +177,9 @@ public class DrumShooter extends Shooter{
         rightRoller.periodic();
         pivotMotor.periodic();
         m_viz.periodic();
+
+        // leftRoller.setDutyCycle(-0.1);
+        // rightRoller.setDutyCycle(-0.1);
 
         
     }

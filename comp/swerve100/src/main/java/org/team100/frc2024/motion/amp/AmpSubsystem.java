@@ -18,6 +18,7 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.CAN;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -31,6 +32,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final String m_name;
     private final SysParam m_params;
     private final GravityServo ampAngleServo;
+    private final PWM ampDrive;
+
     private final AngularVisualization m_viz;
  
 
@@ -56,6 +59,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     0.02, 
                     -0.06
                 );
+
+                ampDrive = new PWM(0);
                 break;
             case BLANK:
             default:
@@ -68,6 +73,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     0.02, 
                     -0.06
                 );
+                ampDrive = new PWM(0);
+
                 
         }
         m_viz = new AngularVisualization(m_name, this);
@@ -110,5 +117,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     public void periodic() {
         ampAngleServo.periodic();
         m_viz.periodic();
+
+        ampDrive.setSpeed(0.5);
     }
 }

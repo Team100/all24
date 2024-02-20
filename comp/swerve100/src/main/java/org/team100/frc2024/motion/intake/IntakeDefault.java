@@ -56,6 +56,7 @@ public class IntakeDefault extends Command {
             m_intake.stop();
             break;
         default:
+            
     }
   }
 

@@ -201,6 +201,8 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
+        t.log(Level.DEBUG, m_name, "RPM", m_motor.getEncoder().getVelocity());
+
     }
 
     /////////////////////////////////////////////////////////////////
