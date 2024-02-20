@@ -175,7 +175,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
                 twistWithLock,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
 
         // desaturate to feasibility
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
