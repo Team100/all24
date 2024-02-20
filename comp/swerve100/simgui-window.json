@@ -4,7 +4,10 @@
       "DockNode    ID=0x00000002 Pos=155,114 Size=415,72 Selected=0xB62C0359",
       "DockNode    ID=0x00000004 Pos=60,60 Size=1388,951 Split=Y",
       "DockNode  ID=0x00000005 Parent=0x00000004 SizeRef=947,322 Selected=0x73586B9A",
-      "DockNode  ID=0x00000001 Parent=0x00000004 SizeRef=947,319 Selected=0xF5CC1934"
+      "DockNode  ID=0x00000001 Parent=0x00000004 SizeRef=947,319 Selected=0xF5CC1934",
+      "DockNode    ID=0x00000006 Pos=1040,101 Size=756,618 Split=Y",
+      "DockNode  ID=0x00000007 Parent=0x00000006 SizeRef=162,107 Selected=0x4D123F2E",
+      "DockNode  ID=0x00000008 Parent=0x00000006 SizeRef=162,111 Selected=0xD58031C5"
     ]
   },
   "MainWindow": {
@@ -111,8 +114,9 @@
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "1055,305",
-      "Size": "767,404"
+      "DockId": "0x00000007,0",
+      "Pos": "1040,101",
+      "Size": "756,302"
     },
     "###FMS": {
       "Collapsed": "0",
@@ -126,23 +130,23 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "420,-9",
-      "Size": "1217,905"
+      "Pos": "142,91",
+      "Size": "1217,872"
     },
     "###Keyboard 1 Settings": {
       "Collapsed": "0",
-      "Pos": "320,50",
+      "Pos": "333,121",
       "Size": "300,560"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "712,254",
+      "Pos": "411,145",
       "Size": "566,456"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "697,280",
-      "Size": "975,702"
+      "Pos": "480,972",
+      "Size": "1217,905"
     },
     "###Other Devices": {
       "Collapsed": "0",
@@ -194,8 +198,9 @@
     },
     "###Timing": {
       "Collapsed": "0",
-      "Pos": "980,43",
-      "Size": "162,220"
+      "DockId": "0x00000008,0",
+      "Pos": "1040,405",
+      "Size": "756,314"
     },
     "Debug##Default": {
       "Collapsed": "0",
