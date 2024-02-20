@@ -32,13 +32,13 @@ public class DriveMotionControllerUtil {
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
         motion_direction = measurement.getRotation().unaryMinus().rotateBy(motion_direction);
-        t.log(Level.DEBUG, m_name, "motion direction", motion_direction);
+        t.log(Level.TRACE, m_name, "motion direction", motion_direction);
         return motion_direction;
     }
 
     public static ChassisSpeeds feedforward(Pose2d current_state, TimedPose setpoint) {
         final double velocity_m = setpoint.velocityM_S();
-        t.log(Level.DEBUG, m_name, "setpoint velocity", velocity_m);
+        t.log(Level.TRACE, m_name, "setpoint velocity", velocity_m);
 
         Rotation2d motion_direction = direction(current_state, setpoint);
 
@@ -48,20 +48,20 @@ public class DriveMotionControllerUtil {
         double omega = velocity_m * setpoint.state().getHeadingRate();
 
         ChassisSpeeds u_FF = new ChassisSpeeds(vx, vy, omega);
-        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
+        t.log(Level.TRACE, m_name, "u_FF", u_FF);
         return u_FF;
     }
 
     public static ChassisSpeeds feedback(Pose2d current_state, TimedPose setpoint, double kPCart, double kPTheta) {
         final Pose2d error = getError(current_state, setpoint);
-        t.log(Level.DEBUG, m_name, "error", error);
+        t.log(Level.TRACE, m_name, "error", error);
         Twist2d errorTwist = GeometryUtil.kPoseZero.log(error);
-        t.log(Level.DEBUG, m_name, "errorTwist", errorTwist);
+        t.log(Level.TRACE, m_name, "errorTwist", errorTwist);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * errorTwist.dx,
                 kPCart * errorTwist.dy,
                 kPTheta * errorTwist.dtheta);
-        t.log(Level.DEBUG, m_name, "u_FB", u_FB);
+        t.log(Level.TRACE, m_name, "u_FB", u_FB);
         return u_FB;
 
         
@@ -83,9 +83,9 @@ public class DriveMotionControllerUtil {
         );
 
         final Pose2d error = getError(current_state, setpoint);
-        t.log(Level.DEBUG, m_name, "error", error);
+        t.log(Level.TRACE, m_name, "error", error);
         Twist2d errorTwist = GeometryUtil.kPoseZero.log(error);
-        t.log(Level.DEBUG, m_name, "errorTwist", errorTwist);
+        t.log(Level.TRACE, m_name, "errorTwist", errorTwist);
 
         ChassisSpeeds u_XFB = new ChassisSpeeds(
                 kPathk * errorTwist.dx,
@@ -98,8 +98,8 @@ public class DriveMotionControllerUtil {
                 kPTheta * errorVelocityTwist.dtheta
         );
 
-        t.log(Level.DEBUG, m_name, "u_XFB", u_XFB);
-        t.log(Level.DEBUG, m_name, "u_VFB", u_VFB);
+        t.log(Level.TRACE, m_name, "u_XFB", u_XFB);
+        t.log(Level.TRACE, m_name, "u_VFB", u_VFB);
 
         return u_XFB.plus(u_VFB);
 

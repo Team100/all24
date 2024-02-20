@@ -106,7 +106,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_goal = m_latch.latchedRotation(pov, clipped);
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
-            t.log(Level.DEBUG, m_name, "mode", "free");
+            t.log(Level.TRACE, m_name, "mode", "free");
 
             // scale to max in both translation and rotation
             Twist2d twistM_S = DriveUtil.scale(
@@ -151,12 +151,12 @@ public class ManualWithHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
 
-        t.log(Level.DEBUG, m_name, "mode", "snap");
-        t.log(Level.DEBUG, m_name, "theta setpoint", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "measurement/theta", headingMeasurement);
-        t.log(Level.DEBUG, m_name, "measurement/omega", headingRate);
-        t.log(Level.DEBUG, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.DEBUG, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
+        t.log(Level.TRACE, m_name, "mode", "snap");
+        t.log(Level.TRACE, m_name, "theta setpoint", m_thetaSetpoint);
+        t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
+        t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
+        t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
+        t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

@@ -44,9 +44,9 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
         // desaturate to feasibility
         twistM_S = m_swerveKinodynamics.analyticDesaturation(twistM_S);
 
-        t.log(Level.DEBUG, m_name, "twist x m_s", twistM_S.dx);
-        t.log(Level.DEBUG, m_name, "twist y m_s", twistM_S.dy);
-        t.log(Level.DEBUG, m_name, "twist theta rad_s", twistM_S.dtheta);
+        t.log(Level.TRACE, m_name, "twist x m_s", twistM_S.dx);
+        t.log(Level.TRACE, m_name, "twist y m_s", twistM_S.dy);
+        t.log(Level.TRACE, m_name, "twist theta rad_s", twistM_S.dtheta);
         return twistM_S;
     }
 

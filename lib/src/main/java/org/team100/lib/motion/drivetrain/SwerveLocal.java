@@ -230,7 +230,7 @@ public class SwerveLocal {
         // ideally delta would be zero because our input would be feasible.
         ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
         t.log(Level.DEBUG, m_name, "setpoint delta", delta);
-        t.log(Level.DEBUG, m_name, "prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
+        t.log(Level.TRACE, m_name, "prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
         t.log(Level.DEBUG, m_name, "setpoint chassis speed", setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;
@@ -244,8 +244,8 @@ public class SwerveLocal {
 
         // log what we did, note this is not using discretization but it probably should
         ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
-        t.log(Level.DEBUG, m_name, "implied speed", speeds);
-        t.log(Level.DEBUG, m_name, "moving", isMoving(speeds));
+        t.log(Level.TRACE, m_name, "implied speed", speeds);
+        t.log(Level.TRACE, m_name, "moving", isMoving(speeds));
     }
 
     private static boolean isMoving(ChassisSpeeds speeds) {

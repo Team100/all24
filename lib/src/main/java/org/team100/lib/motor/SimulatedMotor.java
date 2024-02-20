@@ -28,7 +28,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     @Override
     public void setDutyCycle(double output) {
         output = MathUtil.clamp(output, -1, 1);
-        t.log(Level.DEBUG, m_name, "duty_cycle", output);
+        t.log(Level.TRACE, m_name, "duty_cycle", output);
         // 100% output => about 6k rpm
         setVelocity(output * 600, 0);
     }
@@ -48,7 +48,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
             throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
         // ignore accel
-        t.log(Level.DEBUG, m_name, "velocity", m_velocity);
+        t.log(Level.TRACE, m_name, "velocity", m_velocity);
     }
 
     public double getVelocity() {

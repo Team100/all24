@@ -99,17 +99,17 @@ public class FullStateServo<T extends Measure100> {
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
         m_servo.setVelocity(u_TOTAL);
 
-        t.log(Level.DEBUG, m_name, "u_XFB ", u_XFB);
-        t.log(Level.DEBUG, m_name, "u_VFB ", u_VFB);
-        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
-        t.log(Level.DEBUG, m_name, "Measurement", getPosition());
-        t.log(Level.DEBUG, m_name, "Goal", m_goal);
-        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
-        t.log(Level.DEBUG, m_name, "Position Error", m_xController.getPositionError());
-        t.log(Level.DEBUG, m_name, "Velocity Error", m_vController.getPositionError());
-        t.log(Level.DEBUG, m_name, "Position Error Velocity", m_xController.getVelocityError());
-        t.log(Level.DEBUG, m_name, "Velocity Error Velocity", m_vController.getVelocityError());
-        t.log(Level.DEBUG, m_name, "Velocity", m_servo.getVelocity());
+        t.log(Level.TRACE, m_name, "u_XFB ", u_XFB);
+        t.log(Level.TRACE, m_name, "u_VFB ", u_VFB);
+        t.log(Level.TRACE, m_name, "u_FF", u_FF);
+        t.log(Level.TRACE, m_name, "Measurement", getPosition());
+        t.log(Level.TRACE, m_name, "Goal", m_goal);
+        t.log(Level.TRACE, m_name, "Setpoint", m_setpoint);
+        t.log(Level.TRACE, m_name, "Position Error", m_xController.getPositionError());
+        t.log(Level.TRACE, m_name, "Velocity Error", m_vController.getPositionError());
+        t.log(Level.TRACE, m_name, "Position Error Velocity", m_xController.getVelocityError());
+        t.log(Level.TRACE, m_name, "Velocity Error Velocity", m_vController.getVelocityError());
+        t.log(Level.TRACE, m_name, "Velocity", m_servo.getVelocity());
     }
 
     /** Direct velocity control for testing */

@@ -49,7 +49,7 @@ public class DrivePIDFController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        t.log(Level.DEBUG, m_name, "measurement", measurement);
+        t.log(Level.TRACE, m_name, "measurement", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -62,8 +62,8 @@ public class DrivePIDFController implements DriveMotionController {
             return new ChassisSpeeds();
         }
         error = DriveMotionControllerUtil.getError(measurement, mSetpoint.get());
-        t.log(Level.DEBUG, m_name, "setpoint", mSetpoint.get());
-        t.log(Level.DEBUG, m_name, "error", error);
+        t.log(Level.TRACE, m_name, "setpoint", mSetpoint.get());
+        t.log(Level.TRACE, m_name, "error", error);
 
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, mSetpoint.get());
         if (m_feedforwardOnly)
@@ -87,7 +87,7 @@ public class DrivePIDFController implements DriveMotionController {
         if (!sample_point.isPresent()) {
             return Optional.empty();
         }
-        t.log(Level.DEBUG, m_name, "sample point", sample_point.get());
+        t.log(Level.TRACE, m_name, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 
