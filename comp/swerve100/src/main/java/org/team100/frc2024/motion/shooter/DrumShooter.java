@@ -1,5 +1,7 @@
 package org.team100.frc2024.motion.shooter;
 
+import org.team100.frc2024.motion.FeederSubsystem;
+import org.team100.frc2024.motion.GravityServo;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
@@ -12,6 +14,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
@@ -44,18 +47,17 @@ public class DrumShooter extends Shooter{
      */
     private static final double kMuzzleVelocityM_S = 30;
     private final String m_name;
-
-    private final LimitedVelocityServo<Distance100> feedRoller;
+    private final FeederSubsystem m_feeder;
     private final LimitedVelocityServo<Distance100> leftRoller;
     private final LimitedVelocityServo<Distance100> rightRoller;
-    private final PositionServoInterface<Angle100> pivotMotor;
+    private final GravityServo pivotMotor;
 
     private final SpeedingVisualization m_viz;
 
     private final Telemetry t;
 
 
-    public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit) {
+    public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit, FeederSubsystem feeder) {
         m_name = Names.name(this);
         
         int shooterCurrentLimit = 40;
@@ -63,7 +65,11 @@ public class DrumShooter extends Shooter{
         int feederLimit = 40;
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
-        SysParam pivotParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
+        SysParam pivotParams = SysParam.neoPositionServoSystem(
+            75,
+            30,
+            30)
+            ;        
         SysParam feederParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
 
         t = Telemetry.get();
@@ -88,24 +94,18 @@ public class DrumShooter extends Shooter{
                         new FeedforwardConstants(0.122,0,0.1,0.065),
                         new PIDConstants(0.0001, 0, 0));
 
-                feedRoller = ServoFactory.limitedNeoVelocityServo(
-                        m_name +"/Feeder", 
-                        feederLimit, 
-                        false, 
-                        shooterCurrentLimit,
-                        feederParams, 
-                        new FeedforwardConstants(0.122,0,0.1,0.065),
-                        new PIDConstants(0.0001, 0, 0));
-
-                pivotMotor = ServoFactory.neoAngleServo(
+                pivotMotor = new GravityServo(
                         m_name + "/Pivot", 
-                        pivotID, 
-                        MotorPhase.FORWARD, 
-                        pivotLimit, 
                         pivotParams, 
-                        new PIDConstants(1, 0, 0), //same
-                        new FeedforwardConstants(0.122,0,0.1,0.065), //These are just copied from the shooter need to be tuned
-                        new PIDConstants(0.0001, 0, 0)); //same
+                        new PIDController(0.01, 0, 0), //same
+                        new TrapezoidProfile100(pivotParams.maxVelM_S(), pivotParams.maxAccelM_S2(), 0.05),
+                        pivotID, 
+                        0.02, 
+                        0
+
+                ); //same
+
+                m_feeder = feeder;
                 break;
             case BLANK:
             default:
@@ -115,32 +115,49 @@ public class DrumShooter extends Shooter{
                 rightRoller = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Bottom",
                         shooterParams);
-                feedRoller = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Feed",
-                        shooterParams);
-                pivotMotor = ServoFactory.simulatedAngleServo(m_name + "/Pivot", pivotParams, new PIDController(1, 0, 0));
+
+                pivotMotor = new GravityServo(
+                        m_name + "/Pivot", 
+                        pivotParams, 
+                        new PIDController(1, 0, 0),
+                        new TrapezoidProfile100(pivotParams.maxVelM_S(), pivotParams.maxAccelM_S2(), 0.05),
+                        pivotID, 
+                        0.02, 
+                        -0.06
+                ); 
+
+                m_feeder = feeder;
         }
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
     @Override
     public void forward() {
-        leftRoller.setVelocity(kMuzzleVelocityM_S);
-        rightRoller.setVelocity(kMuzzleVelocityM_S);
+        // leftRoller.setVelocity(kMuzzleVelocityM_S);
+        // rightRoller.setVelocity(kMuzzleVelocityM_S);
     }
 
     @Override
     public void feed(){
-        if(readyToShoot()){
-            feedRoller.setVelocity(0.1);
-        }
-    }
+        // if(readyToShoot()){
+            // feedRoller.setVelocity(10);
+            m_feeder.feed(DrumShooter.class);
+
+        // }
+
+    };
 
     @Override
     public void stop() {
-        leftRoller.stop();
-        rightRoller.stop();
-        pivotMotor.stop();
+        // leftRoller.stop();
+        // rightRoller.stop();
+        // pivotMotor.stop();
+        // m_feeder.stop(DrumShooter.class);
+    }
+
+    @Override
+    public void reset(){
+        pivotMotor.reset();
     }
 
     @Override
@@ -160,6 +177,9 @@ public class DrumShooter extends Shooter{
         rightRoller.periodic();
         pivotMotor.periodic();
         m_viz.periodic();
+
+        // leftRoller.setDutyCycle(-0.1);
+        // rightRoller.setDutyCycle(-0.1);
 
         
     }

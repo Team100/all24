@@ -6,9 +6,11 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.PrimitiveAuto;
+import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
@@ -131,6 +133,7 @@ public class RobotContainer {
     final Shooter m_shooter;
     final Intake m_intake;
     final Sensors m_sensors;
+    final FeederSubsystem m_feeder;
 
     // Commands
     private final PivotAmp m_pivotAmp;
@@ -218,8 +221,10 @@ public class RobotContainer {
                 driverControl::speed);
             
 
-        m_intake = IntakeFactory.get(m_sensors);
-        m_shooter = ShooterFactory.get();
+        m_feeder = new FeederSubsystem(39);
+
+        m_intake = IntakeFactory.get(m_sensors, m_feeder);
+        m_shooter = ShooterFactory.get(m_feeder);
 
         m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);
@@ -236,8 +241,7 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        // this actually sets the rotation to zero.
-        // on xbox this is "back"
+
         onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
         // this is @sanjan's version from some sort of vision testing in february
@@ -246,6 +250,7 @@ public class RobotContainer {
 
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+
 
         // on xbox this is left bumper
         // 5 feet in front of the target on the red side
@@ -498,11 +503,20 @@ public class RobotContainer {
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));
         m_shooter.setDefaultCommand(new ShooterDefault(m_shooter, m_drive));
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        m_amp.setDefaultCommand(m_pivotAmp);
+        m_amp.setDefaultCommand(new AmpDefault(m_amp));
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
+    }
+
+    public void onTeleop(){
+        m_shooter.reset();
+        m_amp.reset();
+    }
+
+    public void onAuto(){
+        
     }
 
     private void whileTrue(BooleanSupplier condition, Command command) {

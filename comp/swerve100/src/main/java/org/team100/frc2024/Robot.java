@@ -50,6 +50,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        
         CommandScheduler.getInstance().run();
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");
@@ -79,6 +80,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        m_robotContainer.onAuto();
         m_robotContainer.scheduleAuton();
     }
 
@@ -90,6 +92,7 @@ public class Robot extends TimedRobot {
         MorseCodeBeep beep = m_robotContainer.m_beep;
         // beep.setDuration(1);
         beep.setMessage("K");
+        m_robotContainer.onTeleop();
         CommandScheduler.getInstance().schedule(beep);
     }
 

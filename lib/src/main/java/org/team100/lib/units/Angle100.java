@@ -15,4 +15,6 @@ public class Angle100 implements Measure100 {
     public double modulus(double x) {
         return MathUtil.angleModulus(x);
     }
+
+    
 }
