@@ -165,4 +165,9 @@ public class DriverControlProxy implements DriverControl {
     public boolean test(){
         return m_driverControl.test();
     }
+
+    @Override
+    public int pov(){
+        return m_driverControl.pov();
+    }
 }

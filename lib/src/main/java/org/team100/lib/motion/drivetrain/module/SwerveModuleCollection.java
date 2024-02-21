@@ -6,6 +6,7 @@ import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.util.Util;
 
@@ -46,37 +47,17 @@ public class SwerveModuleCollection {
                 Util.println("************** WCP MODULES using AI 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 11, WCPSwerveModule100.DriveRatio.FAST,
-                                AnalogTurningEncoder.class,
-                                30,
-                                0,
-                                0.708328,
-                                kinodynamics, Drive.DIRECT,
-                                MotorPhase.FORWARD),
+                                kFrontLeft, currentLimit, 30, DriveRatio.FAST,
+                                AnalogTurningEncoder.class, 11, 0, 0.615074, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kFrontRight, currentLimit, 12, WCPSwerveModule100.DriveRatio.FAST,
-                                AnalogTurningEncoder.class,
-                                32,
-                                1,
-                                0.659267,
-                                kinodynamics, Drive.DIRECT,
-                                MotorPhase.FORWARD),
+                                kFrontRight, currentLimit, 12, DriveRatio.FAST,
+                                AnalogTurningEncoder.class, 32, 1, 0.147709, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 21, WCPSwerveModule100.DriveRatio.FAST,
-                                AnalogTurningEncoder.class,
-                                31,
-                                2,
-                                0.396148,
-                                kinodynamics, Drive.DIRECT,
-                                MotorPhase.FORWARD),
+                                kRearLeft, currentLimit, 31, DriveRatio.FAST,
+                                AnalogTurningEncoder.class, 21, 2, 0.886266, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearRight, currentLimit, 22, WCPSwerveModule100.DriveRatio.FAST,
-                                AnalogTurningEncoder.class,
-                                33,
-                                3,
-                                0.109823,
-                                kinodynamics, Drive.DIRECT,
-                                MotorPhase.FORWARD));
+                                kRearRight, currentLimit, 22, DriveRatio.FAST,
+                                AnalogTurningEncoder.class, 33, 3, 0.303879, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE));
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(

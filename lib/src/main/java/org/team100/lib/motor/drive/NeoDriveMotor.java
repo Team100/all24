@@ -196,11 +196,15 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     public void periodic() {
         m_encoderPosition = m_encoder.getPosition();
         m_encoderVelocity = m_encoder.getVelocity();
-        t.log(Level.TRACE, m_name, "position (rev)", m_encoderPosition);
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
-        t.log(Level.TRACE, m_name, "current (A)", m_motor.getOutputCurrent());
-        t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
-        t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());
+        t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
+        t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
+        t.log(Level.DEBUG, m_name, "RPM", m_motor.getEncoder().getVelocity());
+
+
+
     }
 
     /////////////////////////////////////////////////////////////////

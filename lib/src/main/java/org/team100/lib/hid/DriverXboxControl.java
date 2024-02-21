@@ -144,4 +144,9 @@ public class DriverXboxControl implements DriverControl {
     public boolean test(){
         return m_controller.getBButton();
     }
+
+    @Override
+    public int pov(){
+        return m_controller.getPOV();
+    }
 }
