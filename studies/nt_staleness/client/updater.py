@@ -2,23 +2,19 @@
 
 import time
 import ntcore
+from wpimath.geometry import Rotation3d
 
 if __name__ == "__main__":
     inst = ntcore.NetworkTableInstance.getDefault()
     table = inst.getTable("datatable")
-    xSub = table.getDoubleTopic("x").publish(ntcore.PubSubOptions(sendAll=True))
-    ySub = table.getDoubleTopic("y").publish()
+    pub = inst.getStructArrayTopic("rot", Rotation3d).publish(
+        ntcore.PubSubOptions(keepDuplicates=True)
+    )
     inst.setServer("localhost")
     inst.startClient4("example client")
-    # x = 0
-    # y = 0
 
     while True:
         time.sleep(1)
-        xSub.set(1.0)
-        ySub.set(1.0)
-
-        # xSub.set(x)
-        # ySub.set(y)
-        # x += 1
-        # y += 1
+        print("send")
+        rots = [Rotation3d(1, 2, 3), Rotation3d(4, 5, 6)]
+        pub.set(rots)
