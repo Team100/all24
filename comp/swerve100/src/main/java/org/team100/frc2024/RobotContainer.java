@@ -253,8 +253,9 @@ public class RobotContainer {
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         // on xbox this is left bumper
-        // 5 feet in front of the target on the red side
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.524, 2.667, Math.PI));
+        // on joystick this is button 4
+        // on starting zone line lined up with note
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.4, 7, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -493,8 +494,8 @@ public class RobotContainer {
                 omegaController,
                 0.25);
         
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, drivePP, swerveKinodynamics);
-        whileTrue(driverControl::test, m_AutoMaker.threeNote(m_alliance));
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics);
+        whileTrue(driverControl::test, m_AutoMaker.start_to_note1(m_alliance));
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
