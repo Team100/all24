@@ -3,9 +3,6 @@ package org.team100.frc2024.motion;
 import java.util.List;
 
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
-import org.team100.frc2024.motion.shooter.Shooter;
-import org.team100.lib.commands.drivetrain.DriveToState100;
-import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -18,10 +15,7 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.proto.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class AutoMaker {
     public SwerveDriveSubsystem m_swerve;
@@ -30,14 +24,41 @@ public class AutoMaker {
     public List<TimingConstraint> m_constraints;
     private final double kMaxVelM_S = 4;
     private final double kMaxAccelM_S_S = 4;
+    private final double kShooterScale;
+
+    public enum Note {
+        NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8
+    }
+
+    private getTranslation(Note note) {
+        switch (note) {
+            case NOTE1:
+                return new Translation2d();
+            case NOTE2:
+                return new Translation2d();
+            case NOTE3:
+                return new Translation2d();
+            case NOTE4:
+                return new Translation2d();
+            case NOTE5:
+                return new Translation2d();
+            case NOTE6:
+                return new Translation2d();
+            case NOTE7:
+                return new Translation2d();
+            case NOTE8:
+                return new Translation2d();
+        }
+    }
 
     public AutoMaker(SwerveDriveSubsystem swerve, TrajectoryPlanner planner, DriveMotionController controller,
-            SwerveKinodynamics limits) {
+            SwerveKinodynamics limits, double shooterScale) {
         m_swerve = swerve;
         m_planner = planner;
         m_controller = controller;
         m_constraints = List.of(
                 new CentripetalAccelerationConstraint(limits));
+        kShooterScale = shooterScale;
     }
 
     public Translation2d forAlliance(Translation2d translation, Alliance alliance) {
@@ -55,20 +76,17 @@ public class AutoMaker {
         return new Pose2d(forAlliance(pose.getTranslation(), alliance), forAlliance(pose.getRotation(), alliance));
     }
 
-    public Pose2d waypointWithShooterAngle(Translation2d translation, Alliance alliance) {
-        return new Pose2d(forAlliance(translation, alliance), ShooterUtil.getRobotRotationToSpeaker(forAlliance(translation, alliance), 0).plus(new Rotation2d(Math.PI)));
+    public Pose2d waypointWithShooterAngle(Translation2d translation, Alliance alliance, boolean reversed) {
+        if (reversed) {
+            return new Pose2d(forAlliance(translation, alliance),
+                    ShooterUtil.getRobotRotationToSpeaker(forAlliance(translation, alliance), kShooterScale)
+                            .plus(new Rotation2d(Math.PI)));
+        }
+        return new Pose2d(forAlliance(translation, alliance),
+                ShooterUtil.getRobotRotationToSpeaker(forAlliance(translation, alliance), kShooterScale));
+
     }
 
-    public TrajectoryCommand100 start_to_note1(Alliance alliance) {
-        Pose2d startWaypoint = forAlliance(new Pose2d(1.4, 7, new Rotation2d()), alliance);
-        Pose2d endWaypoint = waypointWithShooterAngle(new Translation2d(2.2, 6.5), alliance);
-        List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
-        List<Rotation2d> headings = List.of(
-                new Rotation2d(Math.PI),
-                ShooterUtil.getRobotRotationToSpeaker(endWaypoint.getTranslation(), 0));
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
-                kMaxAccelM_S_S);
-        TrajectoryVisualization.setViz(trajectory);
-        return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
+    public TrajectoryCommand100 adjacentWithShooterAngle(Note noteA, Note noteB, Alliance alliance) {
     }
 }

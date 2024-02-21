@@ -16,6 +16,7 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
+import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -39,7 +40,7 @@ public class TrajectoryCommand100 extends Command100 {
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private Trajectory100 m_trajectory;
-    private SwerveKinodynamics m_limits = null;
+    private List<TimingConstraint> m_constraints = null;
     private TrajectoryPlanner m_planner = null;
     private Rotation2d m_goalHeading = null;
     private Pose2d m_goalPose = null;
@@ -56,15 +57,15 @@ public class TrajectoryCommand100 extends Command100 {
         needToGenerate = false;
         addRequirements(m_robotDrive);
     }
+
     TrajectoryCommand100(
-        Pose2d goalPose,
-        SwerveDriveSubsystem robotDrive,
-        Rotation2d goalHeading,
-        Rotation2d startDirection,
-        TrajectoryPlanner planner,
-        DriveMotionController controller,
-        SwerveKinodynamics limits
-    ) {
+            Pose2d goalPose,
+            SwerveDriveSubsystem robotDrive,
+            Rotation2d goalHeading,
+            Rotation2d startDirection,
+            TrajectoryPlanner planner,
+            DriveMotionController controller,
+            List<TimingConstraint> constraints) {
         m_robotDrive = robotDrive;
         m_controller = controller;
         m_trajectory = null;
@@ -72,31 +73,29 @@ public class TrajectoryCommand100 extends Command100 {
         m_goalHeading = goalHeading;
         m_startDirection = startDirection;
         m_planner = planner;
-        m_limits = limits;
+        m_constraints = constraints;
     }
-
 
     @Override
     public void initialize100() {
         if (needToGenerate) {
             Pose2d startingPose = m_robotDrive.getPose();
-            List<Pose2d> waypointsM = List.of(new Pose2d(m_robotDrive.getPose().getTranslation(), m_startDirection), m_goalPose);
+            List<Pose2d> waypointsM = List.of(new Pose2d(m_robotDrive.getPose().getTranslation(), m_startDirection),
+                    m_goalPose);
             List<Rotation2d> headings = List.of(
-                startingPose.getRotation(),
-                m_goalHeading);
+                    startingPose.getRotation(),
+                    m_goalHeading);
 
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
-
-                m_trajectory = m_planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        constraints,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+            m_trajectory = m_planner
+                    .generateTrajectory(
+                            false,
+                            waypointsM,
+                            headings,
+                            m_constraints,
+                            kMaxVelM_S,
+                            kMaxAccelM_S_S);
         }
+        TrajectoryVisualization.setViz(m_trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(m_trajectory));
         m_controller.setTrajectory(iter);
     }
@@ -115,5 +114,10 @@ public class TrajectoryCommand100 extends Command100 {
     @Override
     public boolean isFinished() {
         return m_controller.isDone();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        TrajectoryVisualization.clear();
     }
 }

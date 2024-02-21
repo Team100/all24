@@ -507,13 +507,13 @@ public class RobotContainer {
                 omegaController,
                 0.25);
         
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics);
-        whileTrue(driverControl::test, m_AutoMaker.start_to_note1(m_alliance));
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0);
+        whileTrue(driverControl::test, m_AutoMaker.note2_to_note1(m_alliance));
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
-        whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-                () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        // whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        //         () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
       
         m_drive.setDefaultCommand(driveManually);
 
