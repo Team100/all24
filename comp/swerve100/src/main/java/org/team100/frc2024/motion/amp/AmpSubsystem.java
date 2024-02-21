@@ -113,11 +113,15 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         return getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI;
     }
 
+    public void setDutyCycle(double value){
+        ampDrive.setSpeed(value);
+
+    }
+
     @Override
     public void periodic() {
         ampAngleServo.periodic();
         m_viz.periodic();
 
-        ampDrive.setSpeed(0.5);
     }
 }
