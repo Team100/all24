@@ -10,9 +10,11 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.MultiSubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
 import edu.wpi.first.wpilibj.Timer;
@@ -88,8 +90,11 @@ public class NotePosition24ArrayListener {
     }
 
     public void enable() {
-        NetworkTableInstance.getDefault().addListener(
-                new String[] { "noteVision" },
+        var inst = NetworkTableInstance.getDefault();
+        inst.startServer();
+        MultiSubscriber sub = new MultiSubscriber(inst, new String[] { "noteVision" }, PubSubOption.keepDuplicates(true));
+        inst.addListener(
+                sub,
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::consumeValues);
     }
