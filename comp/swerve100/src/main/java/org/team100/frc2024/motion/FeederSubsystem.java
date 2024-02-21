@@ -68,6 +68,17 @@ public class FeederSubsystem extends SubsystemBase {
     
   }
 
+  public void feed(){
+    feedRoller.setDutyCycle(0.5);
+    
+  }
+
+  public void stop(){
+    feedRoller.setDutyCycle(0);
+    
+  }
+
+
   public void setVelocity(double velocity, Class<?> originClass){
     //Listen to beam break instead?
       // if(originClass == DrumShooter.class){

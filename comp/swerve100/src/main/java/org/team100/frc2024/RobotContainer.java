@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
@@ -16,6 +18,7 @@ import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
+import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
@@ -100,6 +103,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
@@ -225,6 +229,8 @@ public class RobotContainer {
         m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
 
         m_feeder = new FeederSubsystem(39);
+
+        m_feeder.setDefaultCommand(new FeederDefault(m_feeder));
 
         m_intake = IntakeFactory.get(m_sensors, m_feeder);
         m_shooter = ShooterFactory.get(m_feeder);
@@ -376,8 +382,9 @@ public class RobotContainer {
 
         whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
 
-        whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
+        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.DOWN)));
 
+        whileTrue(operatorControl::ramp, new StartEndCommand( () -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT), () -> RobotState100.changeShooterState(ShooterState100.STOP)));
         // TODO: spin up the shooter whenever the robot is in range.
 
         // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));

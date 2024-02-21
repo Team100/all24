@@ -209,6 +209,13 @@ public class DrumShooter extends Shooter{
         return leftRoller.getVelocity() > 30 && rightRoller.getVelocity() > 30;
     }
 
+    public void setDutyCycle(double value) {
+        //TODO get real values here
+        // leftRoller.setDutyCycle(value);
+        // rightRoller.setDutyCycle(value);
+        leftRoller.setDutyCycle(-1);
+        rightRoller.setDutyCycle(-1);
+    }
     public double getVelocity() {
         switch (Identity.instance) {
             case COMP_BOT:
