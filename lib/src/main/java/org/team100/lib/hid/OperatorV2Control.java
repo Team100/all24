@@ -36,6 +36,11 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public boolean ramp(){
+        return m_controller.getYButton();
+    }
+
+    @Override
     public boolean feed(){
         return m_controller.getRightBumper();
     }

@@ -4,7 +4,9 @@
 
 package org.team100.frc2024.motion.amp;
 
+import org.team100.frc2024.Robot;
 import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.RobotState100.IntakeState100;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -45,6 +47,10 @@ public class AmpDefault extends Command {
 
         default:
 
+    }
+
+    if(RobotState100.currentIntakeState == IntakeState100.INTAKE){
+        m_amp.setDutyCycle(0.5);
     }
 
   }
