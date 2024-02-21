@@ -190,7 +190,7 @@ class GamePieceFinder:
             objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
             
-        self.output_stream.putFrame(img_range)
+        self.output_stream.putFrame(img_bgr)
         return objects
 
     def draw_result(self, img, cnt, cX, cY):
