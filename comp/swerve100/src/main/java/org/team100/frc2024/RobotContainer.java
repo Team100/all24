@@ -13,6 +13,7 @@ import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.PrimitiveAuto;
+import org.team100.frc2024.motion.AutoMaker.Note;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
@@ -508,7 +509,7 @@ public class RobotContainer {
                 0.25);
         
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0);
-        whileTrue(driverControl::test, m_AutoMaker.note2_to_note1(m_alliance));
+        whileTrue(driverControl::test, m_AutoMaker.adjacentWithShooterAngle(Note.NOTE1, Note.NOTE2, m_alliance));
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
