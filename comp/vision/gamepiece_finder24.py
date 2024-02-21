@@ -8,17 +8,11 @@ import numpy as np
 
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
+import ntcore as nt
+
 from picamera2 import Picamera2
-from wpimath.geometry import Transform3d
-from wpiutil import wpistruct
-
-
-@wpistruct.make_wpistruct
-@dataclasses.dataclass
-class NotePosition:
-    x: int
-    y: int
-
+from wpimath.geometry import Rotation3d
+import math
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
@@ -42,8 +36,8 @@ class GamePieceFinder:
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (0, 100, 100)
-        self.object_higher = (25, 255, 255)
+        self.object_lower = (4,200, 100)
+        self.object_higher = (12, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
@@ -117,7 +111,8 @@ class GamePieceFinder:
                     ]
                 ]
             )
-
+        self.horzFOV = 2 * math.atan(self.mtx[0,2]/self.mtx[0,0])
+        self.vertFOV = 2 * math.atan(self.mtx[1,2]/self.mtx[1,1])
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def initialize_nt(self):
@@ -135,16 +130,15 @@ class GamePieceFinder:
         ).publish()
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
-        self.inst.getStructTopic("bugfix", NotePosition).publish().set(
-            NotePosition(0, 0)
+        self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
+            Rotation3d(0, 0, 0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
-            topic_name + "/NotePosition24", NotePosition
-        ).publish()
+            topic_name + "/Rotation3d", Rotation3d
+        ).publish(nt.PubSubOptions(keepDuplicates=True))
 
     def find_object(self, img_yuv):
-
         # this says YUV->RGB but it actually makes BGR.
         # github.com/raspberrypi/picamera2/issues/848
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
@@ -169,38 +163,34 @@ class GamePieceFinder:
         objects = []
         for c in contours:
             _, _, cnt_width, cnt_height = cv2.boundingRect(c)
-
             # reject anything taller than it is wide
-            if cnt_width / cnt_height < 1:
+            if cnt_width / cnt_height < 1.2:
                 continue
-
             # reject big bounding box
             if cnt_width > self.width / 2 or cnt_height > self.height / 2:
                 continue
 
-            # reject small bounding box
-            if cnt_height < 10 or cnt_width < 10:
+            if (cnt_height < 20 or cnt_width < 20) and cnt_width/cnt_height < 3:
                 continue
 
             mmnts = cv2.moments(c)
             # reject too small (m00 is in pixels)
             # TODO: make this adjustable at runtime
             # to pick out distant targets
-            if mmnts["m00"] < 500:
+            if mmnts["m00"] < 100:
                 continue
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            # translation_x = (cX-self.width/2)* \
-            #     (self.object_height*math.cos(self.theta)/cnt_height)
-            # translation_y = (cY-self.height/2) * \
-            #     (self.object_height*math.cos(self.theta)/cnt_height)
-            # translation_z = (self.object_height*self.scale_factor*math.cos(self.theta))/(cnt_height)
-            objects.append(NotePosition(cX, cY))
+            pitchRad = math.atan((cY-self.height/2)/self.mtx[1,1])
+            yawRad = math.atan((self.width/2-cX)/self.mtx[0,0])
+            # Puts up angle to the target from the POV of the camera
+            rotation = Rotation3d(0, pitchRad, yawRad)
+            objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
             
-        self.output_stream.putFrame(img_bgr)
+        self.output_stream.putFrame(img_range)
         return objects
 
     def draw_result(self, img, cnt, cX, cY):
@@ -282,11 +272,12 @@ def main():
         lores={"format": "YUV420", "size": (width, height)},
         controls={
             # no duration limit => sacrifice speed for color
-            # "FrameDurationLimits": (5000, 33333),  # 41 fps
+            # "FrameDurationLimits": (33333, 33333),  # 41 fps
             # noise reduction takes time
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-            "AwbEnable": True,
-            # "AeEnable": False,
+            "AwbEnable": False,
+            "AeEnable": False,
+            "ExposureTime": 30000,
             # "AnalogueGain": 1.0
         },
     )
@@ -304,7 +295,7 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
-
+    print(serial)
     output = GamePieceFinder(serial, width, height, model)
 
     camera.start()
