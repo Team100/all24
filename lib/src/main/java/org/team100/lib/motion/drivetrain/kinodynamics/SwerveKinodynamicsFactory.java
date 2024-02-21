@@ -50,7 +50,7 @@ public class SwerveKinodynamicsFactory {
                 // TODO: make tests specify kinodynamics instead.
                 return new SwerveKinodynamics(4, 4, 4, 13, 20 * Math.PI, 0.5, 0.5, 0.3);
             case BETA_BOT:
-                // these numbers were extracted from module mode acceleration
+                 // these numbers were extracted from module mode acceleration
                 // runs as shown in this spreadsheet
                 // https://docs.google.com/spreadsheets/d/1x0WEDIYosVBrsz37VXPEEmLB6-AuLnmwBp_mgozKFI0
                 // the actual profile is exponential. these numbers represent the maximum tangent

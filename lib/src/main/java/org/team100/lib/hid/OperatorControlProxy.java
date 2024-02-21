@@ -144,4 +144,8 @@ public class OperatorControlProxy implements OperatorControl {
     public void pov(){
         m_operatorControl.pov();
     }
+
+    public boolean ramp(){
+        return m_operatorControl.ramp();
+    }
 }

@@ -76,6 +76,10 @@ public interface OperatorControl {
         return 0;
     }
 
+    default boolean ramp() {
+        return false;
+    }
+
     // this exists to bind to commands we don't want to run,
     // but we don't want them to rot either.
     default boolean never() {

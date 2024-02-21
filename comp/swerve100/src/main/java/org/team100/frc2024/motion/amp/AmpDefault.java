@@ -4,7 +4,9 @@
 
 package org.team100.frc2024.motion.amp;
 
+import org.team100.frc2024.Robot;
 import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.RobotState100.IntakeState100;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -19,7 +21,9 @@ public class AmpDefault extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_amp.reset();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -28,7 +32,8 @@ public class AmpDefault extends Command {
         case AMPING:
             switch(RobotState100.getAmpState()){
                 case UP:
-                    m_amp.setAmpPosition(10);
+                    // System.out.println("AMPPPPPPPPPPPPPPP");
+                    m_amp.setAmpPosition(50);
                     break;
                 case DOWN:
                     m_amp.setAmpPosition(0);
@@ -38,9 +43,16 @@ public class AmpDefault extends Command {
                     break;
                 default:
             }
+            // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
+
         default:
 
     }
+
+    if(RobotState100.currentIntakeState == IntakeState100.INTAKE){
+        m_amp.setDutyCycle(0.5);
+    }
+
   }
 
   // Called once the command ends or is interrupted.
@@ -52,4 +64,6 @@ public class AmpDefault extends Command {
   public boolean isFinished() {
     return false;
   }
+
+  
 }
