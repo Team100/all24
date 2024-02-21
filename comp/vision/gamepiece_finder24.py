@@ -8,6 +8,8 @@ import numpy as np
 
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
+import ntcore as nt
+
 from picamera2 import Picamera2
 from wpimath.geometry import Rotation3d
 import math
@@ -134,7 +136,7 @@ class GamePieceFinder:
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/Rotation3d", Rotation3d
-        ).publish(keepDuplicates=True)
+        ).publish(nt.PubSubOptions(keepDuplicates=True))
 
     def find_object(self, img_yuv):
         # this says YUV->RGB but it actually makes BGR.
