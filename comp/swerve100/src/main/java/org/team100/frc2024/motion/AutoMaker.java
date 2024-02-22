@@ -13,7 +13,10 @@ import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.ejml.dense.block.MatrixOps_FDRB;
 import org.team100.frc2024.motion.drivetrain.DriveToWithDirection100;
+
+import edu.wpi.first.math.estimator.MerweScaledSigmaPoints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,8 +29,8 @@ public class AutoMaker {
     public TrajectoryPlanner m_planner;
     public DriveMotionController m_controller;
     public List<TimingConstraint> m_constraints;
-    private final double kMaxVelM_S = 2;
-    private final double kMaxAccelM_S_S = 1;
+    private final double kMaxVelM_S = 4;
+    private final double kMaxAccelM_S_S = 4;
     private final double kShooterScale;
     private final Alliance m_alliance;
 
@@ -84,22 +87,24 @@ public class AutoMaker {
         return new Pose2d(forAlliance(pose.getTranslation(), alliance), forAlliance(pose.getRotation(), alliance));
     }
 
+    public Pose2d getOffsetPose(Note note) {
+        Translation2d noteTranslation = getTranslation(note, m_alliance);
+        Rotation2d endHeading = ShooterUtil.getRobotRotationToSpeaker(noteTranslation, kShooterScale);
+        Translation2d offset = new Translation2d(.5 * endHeading.getCos(), .5 *
+                endHeading.getSin());
+        return new Pose2d(noteTranslation.plus(offset), endHeading);
+    }
+
     public TrajectoryCommand100 adjacentWithShooterAngle(Note noteA, Note noteB) {
-        Translation2d noteATranslation = getTranslation(noteA, m_alliance);
-        Translation2d noteBTranslation = getTranslation(noteB, m_alliance);
-        Rotation2d rotationToGoal = noteBTranslation.minus(noteATranslation).getAngle();
-        System.out.println(rotationToGoal);
-        Rotation2d startRotation = rotationToGoal.times(1.5);
-        Pose2d startWaypoint = new Pose2d(noteATranslation, startRotation);
-        Rotation2d endHeading = ShooterUtil.getRobotRotationToSpeaker(noteBTranslation, kShooterScale);
-        Rotation2d endRotation = endHeading.plus(new Rotation2d(Math.PI));
-        Translation2d offset = new Translation2d(-.5 * endRotation.getCos(), -.5 *
-                endRotation.getSin());
-        // Translation2d offset = new Translation2d();
-        Pose2d endWaypoint = new Pose2d(noteBTranslation.plus(offset), endRotation);
+        Pose2d noteAOffsetPose = getOffsetPose(noteA);
+        Pose2d noteBOffsetPose = getOffsetPose(noteB);
+        Translation2d noteAOffsetTranslation = noteAOffsetPose.getTranslation();
+        Translation2d noteBOffsetTranslation = noteBOffsetPose.getTranslation();
+        Rotation2d angleToGoal = noteBOffsetTranslation.minus(noteAOffsetTranslation).getAngle();
+        Pose2d startWaypoint = new Pose2d(noteAOffsetPose.getTranslation(), angleToGoal.times(1.75));
+        Pose2d endWaypoint = new Pose2d(noteBOffsetPose.getTranslation(), new Rotation2d());
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
-        List<Rotation2d> headings = List.of(ShooterUtil.getRobotRotationToSpeaker(noteATranslation, kShooterScale),
-                endHeading);
+        List<Rotation2d> headings = List.of(noteAOffsetPose.getRotation(), noteBOffsetPose.getRotation());
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);

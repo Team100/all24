@@ -73,7 +73,7 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
+// import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -466,15 +466,15 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
-        driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
-                new FieldManualWithNoteRotation(
-                        m_name,
-                        swerveKinodynamics,
-                        m_heading,
-                        notePositionDetector::getTranslation2d,
-                        thetaController,
-                        omegaController,
-                        driverControl::trigger));
+        // driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
+        //         new FieldManualWithNoteRotation(
+        //                 m_name,
+        //                 swerveKinodynamics,
+        //                 m_heading,
+        //                 notePositionDetector::getTranslation2d,
+        //                 thetaController,
+        //                 omegaController,
+        //                 driverControl::trigger));
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
