@@ -9,7 +9,7 @@ public class RobotState100 {
     }
 
     public enum ShooterState100{
-        FEED, NONE, DEFAULTSHOOT, READYTOSHOOT, DOWN
+        FEED, NONE, DEFAULTSHOOT, READYTOSHOOT, DOWN, STOP
     }
 
     public enum AmpState100{
@@ -22,11 +22,11 @@ public class RobotState100 {
 
     public static State100 currentRobotState = State100.SHOOTING;
     public static ShooterState100 currentShooterState = ShooterState100.DEFAULTSHOOT;
-    public static AmpState100 currentAmpState = AmpState100.NONE;
-    public static IntakeState100 currentIntakeState = IntakeState100.INTAKE;
+    public static AmpState100 currentAmpState = AmpState100.UP;
+    public static IntakeState100 currentIntakeState = IntakeState100.STOP;
 
 
-    public void changeRobotState(State100 state){
+    public static void changeRobotState(State100 state){
         currentRobotState = state;
     }
 

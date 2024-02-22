@@ -14,6 +14,11 @@ public abstract class Shooter extends SubsystemBase implements Speeding {
     public abstract void feed();
     public abstract double getAngle();
     public abstract double getVelocity();
+    public abstract void setDutyCycle(double value);
+
+    public abstract void
+     reset();
+
 
 
 

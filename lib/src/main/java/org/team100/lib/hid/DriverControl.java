@@ -121,4 +121,8 @@ public interface DriverControl {
     default boolean test() {
         return false;
     }
+
+    default int pov() {
+        return -1;
+    }
 }

@@ -2,18 +2,24 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
+import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.RobotState100.ShooterState100;
+import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.PrimitiveAuto;
+import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
+import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
@@ -42,7 +48,6 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.NoteDetector;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
@@ -66,6 +71,7 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -82,7 +88,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
-import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
@@ -92,12 +97,14 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
@@ -108,8 +115,6 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private Alliance m_alliance;
-    private final CameraAngles m_cameraAngles;
-    private final NoteDetector m_noteDetector;
 
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -132,6 +137,7 @@ public class RobotContainer {
     final Shooter m_shooter;
     final Intake m_intake;
     final Sensors m_sensors;
+    final FeederSubsystem m_feeder;
 
     // Commands
     private final PivotAmp m_pivotAmp;
@@ -207,8 +213,7 @@ public class RobotContainer {
                 poseEstimator::getSampledRotation,
                 m_alliance);
         visionDataProvider.enable();
-
-        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
+        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
         notePositionDetector.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
@@ -218,11 +223,14 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-        m_cameraAngles = new CameraAngles(30, 67.5, 50, 832, 616, 0.71, 0, 0);
-        m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
+            
 
-        m_intake = IntakeFactory.get(m_sensors);
-        m_shooter = ShooterFactory.get();
+        m_feeder = new FeederSubsystem(39);
+
+        m_feeder.setDefaultCommand(new FeederDefault(m_feeder));
+
+        m_intake = IntakeFactory.get(m_sensors, m_feeder);
+        m_shooter = ShooterFactory.get(m_feeder);
 
         m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);
@@ -239,8 +247,7 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        // this actually sets the rotation to zero.
-        // on xbox this is "back"
+
         onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
         // this is @sanjan's version from some sort of vision testing in february
@@ -249,6 +256,7 @@ public class RobotContainer {
 
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+
 
         // on xbox this is left bumper
         // 5 feet in front of the target on the red side
@@ -315,8 +323,8 @@ public class RobotContainer {
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
-                        swerveKinodynamics));
+                new DriveWithProfile(notePositionDetector::getTranslation2d, m_drive, dthetaController,
+                        swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
@@ -371,8 +379,9 @@ public class RobotContainer {
 
         whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
 
-        whileTrue(operatorControl::pivotToAmpPosition, new PivotToAmpPosition(m_amp));
+        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.DOWN)));
 
+        whileTrue(operatorControl::ramp, new StartEndCommand( () -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT), () -> RobotState100.changeShooterState(ShooterState100.STOP)));
         // TODO: spin up the shooter whenever the robot is in range.
 
         // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
@@ -437,7 +446,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        notePositionDetector::getTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -453,13 +462,12 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
-
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
-                new ManualWithTargetLock(
+                new FieldManualWithNoteRotation(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        notePositionDetector::getTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -502,11 +510,20 @@ public class RobotContainer {
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));
         m_shooter.setDefaultCommand(new ShooterDefault(m_shooter, m_drive));
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        m_amp.setDefaultCommand(m_pivotAmp);
+        m_amp.setDefaultCommand(new AmpDefault(m_amp));
 
         m_auton = m_drive.runInit(m_drive::defense);
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
+    }
+
+    public void onTeleop(){
+        m_shooter.reset();
+        m_amp.reset();
+    }
+
+    public void onAuto(){
+        
     }
 
     private void whileTrue(BooleanSupplier condition, Command command) {

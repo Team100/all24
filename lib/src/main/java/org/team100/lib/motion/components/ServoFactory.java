@@ -20,6 +20,7 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class ServoFactory {
 
@@ -107,6 +108,12 @@ public class ServoFactory {
                 name,
                 motor,
                 param.gearRatio());
+        
+        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+
         return new PositionServo<>(
                 name,
                 motor,
@@ -116,6 +123,10 @@ public class ServoFactory {
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
                 Angle100.instance);
     }
+
+
+
+    
 
     /**
      * Position control using velocity feedforward and proportional feedback.

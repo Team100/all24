@@ -14,6 +14,13 @@ public class PIDConstants {
        m_iZone = 0;
     }
 
+    public PIDConstants() {
+       m_p = 0;
+       m_i = 0;
+       m_d = 0;
+       m_iZone = 0;
+    }
+
     public PIDConstants(double p, double i, double d) {
        m_p = p;
        m_i = i;
