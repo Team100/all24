@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.InitCommand;
 import org.team100.lib.commands.Subsystem100;
+import org.team100.lib.config.DriverSkill;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -154,8 +155,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     public void driveInFieldCoords(Twist2d twist, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
-        if (Experiments.instance.enabled(Experiment.ShowMode))
-            speed = DriverControl.Speed.SLOW;
         t.log(Level.TRACE, m_name, "control_speed", speed);
         switch (speed) {
             case SLOW:
@@ -167,6 +166,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
             default:
                 break;
         }
+
+        // scale for driver skill; default is half speed.
+        DriverSkill.Level driverSkillLevel = DriverSkill.level();
+        t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);
+        twist = GeometryUtil.scale(twist, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 twist.dx,
@@ -198,8 +202,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
-        if (Experiments.instance.enabled(Experiment.ShowMode))
-            speed = DriverControl.Speed.SLOW;
         switch (speed) {
             case SLOW:
                 speeds = speeds.times(kSlow);
@@ -210,6 +212,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
             default:
                 break;
         }
+
+        // scale for driver skill; default is half speed.
+        DriverSkill.Level driverSkillLevel = DriverSkill.level();
+        t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);
+        speeds = speeds.times(driverSkillLevel.scale());
 
         m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }

@@ -26,10 +26,6 @@ public enum Experiment {
      */
     FlushOften,
     /**
-     * Show mode locks slow speed for younger drivers.
-     */
-    ShowMode,
-    /**
      * Use multiple april tags to triangulate position
      */
     Triangulate,
