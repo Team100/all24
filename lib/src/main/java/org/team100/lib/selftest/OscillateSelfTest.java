@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 /** Test the Oscillate command. */
 @ExcludeFromJacocoGeneratedReport
 public class OscillateSelfTest extends Command {
-    private static final double kExpectedDuration = 10;
     // abort if the robot moves too far
     private static final double kMaxDistance = 1.5;
 
@@ -22,6 +21,8 @@ public class OscillateSelfTest extends Command {
     private final Timer m_timer;
     private final boolean m_direct;
     private final boolean m_rotation;
+    private final double m_expectedDuration;
+
     private boolean terminate = false;
     private boolean prevOscillateTheta;
     private boolean prevOscillateDirect;
@@ -39,12 +40,14 @@ public class OscillateSelfTest extends Command {
             SwerveDriveSubsystem drivetrain,
             SelfTestListener listener,
             boolean direct,
-            boolean rotation) {
+            boolean rotation,
+            double expectedDuration) {
         m_drivetrain = drivetrain;
         m_listener = listener;
         m_timer = new Timer();
         m_direct = direct;
         m_rotation = rotation;
+        m_expectedDuration = expectedDuration;
     }
 
     @Override
@@ -73,7 +76,7 @@ public class OscillateSelfTest extends Command {
 
     @Override
     public boolean isFinished() {
-        return terminate || m_timer.get() > kExpectedDuration;
+        return terminate || m_timer.get() > m_expectedDuration;
     }
 
     @Override
