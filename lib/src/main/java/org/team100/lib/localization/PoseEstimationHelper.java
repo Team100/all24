@@ -10,9 +10,13 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 
@@ -22,6 +26,20 @@ import edu.wpi.first.math.numbers.N3;
 public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
     private static final String m_name = Names.name(PoseEstimationHelper.class);
+
+    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
+            double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + cameraObject.getY());
+            if (robotRelativeAngle == 0) {
+                return new Translation2d();
+            }
+            double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
+            double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
+            return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
+    }
+
+    public static Translation2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d) {
+        return currentPose.transformBy(new Transform2d(RobotRelativeTranslation2d, new Rotation2d())).getTranslation();
+    }
 
     /**
      * Calculate robot pose.
@@ -188,11 +206,10 @@ public class PoseEstimationHelper {
 
         t.log(Level.DEBUG, m_name, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
         t.log(Level.DEBUG, m_name, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
-        
-        // System.out.println("TAG TRANLSAION IN CAM COORDS :" +  tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("CAMERA ROT IN FIELD COORDS: " + cameraRotationInFieldCoords.toRotation2d());  
-              
-        // System.out.println("TAG IN FIELD COORDS COOORDS"+ tagInFieldCoords.toPose2d());        
+        // System.out.println("TAG TRANLSAION IN CAM COORDS :" + tagTranslationInCameraCoords.toTranslation2d());
+        // System.out.println("CAMERA ROT IN FIELD COORDS: " + cameraRotationInFieldCoords.toRotation2d());
+
+        // System.out.println("TAG IN FIELD COORDS COOORDS" + tagInFieldCoords.toPose2d());
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
