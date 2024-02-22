@@ -42,14 +42,21 @@ public class Oscillate extends Command100 {
     private final TriangleWave m_triangle;
     private final ParabolicWave m_parabola;
     private final Timer m_timer;
+    private final double m_period;
+
+    public double getPeriod() {
+        return m_period;
+    }
+
     private SwerveState m_initial;
 
     public Oscillate(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
-        double period = 4 * kMaxSpeed / kAccel;
-        m_square = new SquareWave(kAccel, period);
-        m_triangle = new TriangleWave(kMaxSpeed, period);
-        m_parabola = new ParabolicWave(kMaxSpeed * period / 4, period);
+        m_period = 4 * kMaxSpeed / kAccel;
+        t.log(Level.DEBUG, m_name, "period", m_period);
+        m_square = new SquareWave(kAccel, m_period);
+        m_triangle = new TriangleWave(kMaxSpeed, m_period);
+        m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
         m_timer = new Timer();
         addRequirements(m_swerve);
     }

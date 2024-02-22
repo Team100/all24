@@ -19,6 +19,8 @@ import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Timer;
+
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -219,7 +221,6 @@ public class PoseEstimator100<T extends WheelPositions<T>> {
 
         // Step 2: Measure the twist between the odometry pose and the vision pose.
         var twist = sample.get().poseMeters.log(visionRobotPoseMeters);
-
         // Step 3: We should not trust the twist entirely, so instead we scale this
         // twist by a Kalman
         // gain matrix representing how much we trust vision measurements compared to
@@ -234,6 +235,7 @@ public class PoseEstimator100<T extends WheelPositions<T>> {
                 sample.get().gyroAngle,
                 sample.get().wheelPositions,
                 sample.get().poseMeters.exp(scaledTwist));
+        
 
         // Step 6: Record the current pose to allow multiple measurements from the same
         // timestamp

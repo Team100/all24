@@ -356,7 +356,7 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
-
+    print(serial)
     output = TagFinder(serial, width, height, model)
 
     camera.start()

@@ -90,10 +90,10 @@ public class SelfTestRunner extends Command {
 
         if (kTestOscillate) {
             // these take a long time
-            addCase(new OscillateSelfTest(drivetrain, m_listener, false, false), new Oscillate(drivetrain));
-            addCase(new OscillateSelfTest(drivetrain, m_listener, false, true), new Oscillate(drivetrain));
-            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
-            addCase(new OscillateSelfTest(drivetrain, m_listener, true, true), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, false, false, 12), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, false, true, 12), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false, 12), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, true, 12), new Oscillate(drivetrain));
         }
 
         if (kTestVeering) {
@@ -120,7 +120,10 @@ public class SelfTestRunner extends Command {
             // Oscillate is a good choice for vision since it uses acceleration-limited profiles
             // and relatively slow speed.  This moves back and forth in x, using
             // module direct mode.
-            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false), new Oscillate(drivetrain));
+            Oscillate oscillate = new Oscillate(drivetrain);
+            // end up where you started
+            double expectedDuration = oscillate.getPeriod() * 4;
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false, expectedDuration), oscillate);
         }
 
         // since we print to the console we don't want warning noise
