@@ -64,8 +64,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         stop();
         // @joel: this needs to be exactly "/field/.type" for glass.
         // @sanjan: This seems to throw an error sometimes
-        // @joel: if you take it out then it breaks glass.  what's the error?
-        t.log(Level.INFO, "field", ".type", "Field2d"); 
+        // @joel: if you take it out then it breaks glass. what's the error?
+        t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
     /**
@@ -93,12 +93,12 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateAcceleration(dt);
         updateState();
 
-
         t.log(Level.TRACE, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
         t.log(Level.DEBUG, m_name, "pose", m_pose);
         t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
 
-        t.log(Level.TRACE, m_name, "pose array", new double[] {m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians()});
+        t.log(Level.TRACE, m_name, "pose array",
+                new double[] { m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians() });
         t.log(Level.TRACE, m_name, "velocity", m_velocity);
         t.log(Level.TRACE, m_name, "acceleration", m_accel);
         t.log(Level.DEBUG, m_name, "state", m_state);
@@ -142,6 +142,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     //
     // ACTUATORS
     //
+
     /**
      * Scales the supplied twist by the "speed" driver control modifier.
      * 
@@ -190,10 +191,26 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
+     * Scales the supplied ChassisSpeed by the driver speed modifier.
+     * 
      * Feasibility is enforced by the setpoint generator (if enabled) and the
      * desaturator.
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
+        DriverControl.Speed speed = m_speed.get();
+        if (Experiments.instance.enabled(Experiment.ShowMode))
+            speed = DriverControl.Speed.SLOW;
+        switch (speed) {
+            case SLOW:
+                speeds = speeds.times(kSlow);
+                break;
+            case MEDIUM:
+                speeds = speeds.times(kMedium);
+                break;
+            default:
+                break;
+        }
+
         m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -220,6 +237,19 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     public void stop() {
         m_swerveLocal.stop();
     }
+
+    public void resetPose(Pose2d robotPose) {
+        m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+        m_pose = robotPose;
+        // TODO: should we really assume we're motionless when we call this??
+        m_velocity = new Twist2d();
+        m_accel = new Twist2d();
+    }
+
+    ///////////////////////////////////////////////////////////////
+    //
+    // Observers
+    //
 
     /** Pose snapshot from periodic(). */
     public Pose2d getPose() {
@@ -258,14 +288,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         return m_state;
     }
 
-    public void resetPose(Pose2d robotPose) {
-        m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
-        m_pose = robotPose;
-        // TODO: should we really assume we're motionless when we call this??
-        m_velocity = new Twist2d();
-        m_accel = new Twist2d();
-    }
-
     /** The controllers are on the profiles. */
     public boolean[] atSetpoint() {
         return m_swerveLocal.atSetpoint();
@@ -285,6 +307,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal.close();
     }
 
+    /////////////////////////////////////////////////////////////////
+    //
+    // Private
+
     /**
      * Note this doesn't include the gyro reading directly, the estimate is
      * considerably massaged by the odometry logic.
@@ -295,13 +321,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     private void updatePosition() {
         m_poseEstimator.update(m_heading.getHeadingNWU(), m_swerveLocal.positions());
-        // {
-        // if (m_pose.aprilPresent()) {
-        // m_poseEstimator.addVisionMeasurement(
-        // m_pose.getRobotPose(0),
-        // Timer.getFPGATimestamp() - 0.3);
-        // }
-
         m_pose = m_poseEstimator.getEstimatedPosition();
     }
 
