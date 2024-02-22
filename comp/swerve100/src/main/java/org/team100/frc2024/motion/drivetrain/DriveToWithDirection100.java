@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.frc2024.motion.drivetrain;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -29,19 +29,20 @@ import edu.wpi.first.wpilibj.Timer;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToState100 extends Command100 {
+public class DriveToWithDirection100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
     private static final Telemetry t = Telemetry.get();
 
-    private final Pose2d m_goal;
-    private final Twist2d m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
+    private final Pose2d m_goalWaypoint;
+    private final Rotation2d m_goalHeading;
+    private final Rotation2d m_startDirection;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-    private final SwerveKinodynamics m_limits;
+    private final List<TimingConstraint> m_constraints;
 
     /**
      * @param goal        Pose2d
@@ -53,19 +54,21 @@ public class DriveToState100 extends Command100 {
      * @param viz         ok to be null
      */
 
-    public DriveToState100(
-            Pose2d goal,
-            Twist2d endVelocity,
-            SwerveDriveSubsystem drivetrain,
+    public DriveToWithDirection100(
+            SwerveDriveSubsystem swerve,
+            Pose2d goalWaypoint,
+            Rotation2d goalHeading,
+            Rotation2d startDirection,
             TrajectoryPlanner planner,
             DriveMotionController controller,
-            SwerveKinodynamics limits) {
-        m_goal = goal;
-        m_endVelocity = endVelocity;
-        m_swerve = drivetrain;
+            List<TimingConstraint> constraints) {
+        m_swerve = swerve;
+        m_goalWaypoint = goalWaypoint;
+        m_goalHeading = goalHeading;
+        m_startDirection = startDirection;
         m_planner = planner;
         m_controller = controller;
-        m_limits = limits;
+        m_constraints = constraints;
         addRequirements(m_swerve);
     }
 
@@ -73,37 +76,23 @@ public class DriveToState100 extends Command100 {
     public void initialize100() {
         System.out.println("DRIVE TO WAYPOINT");
         Pose2d startPose = m_swerve.getPose();
-        Twist2d startVelocity = m_swerve.getVelocity();
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
-                new Rotation2d(startVelocity.dx, startVelocity.dy));
-        Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(),
-                new Rotation2d(m_endVelocity.dx, m_endVelocity.dy));
+                m_startDirection);
 
-        if (Math.hypot(startVelocity.dx, startVelocity.dy) < .01) {
-            startWaypoint = new Pose2d(startPose.getTranslation(), getRotation(startPose, m_goal));
-        }
-        if (Math.hypot(m_endVelocity.dx, m_endVelocity.dy) < .01) {
-            endWaypoint = new Pose2d(m_goal.getTranslation(), getRotation(startPose, m_goal));
-        }
 
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
-                endWaypoint);
+                m_goalWaypoint);
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
-                m_goal.getRotation());
-
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
+                m_goalHeading);
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
                         headings,
-                        constraints,
-                        Math.hypot(startVelocity.dx, startVelocity.dy),
-                        Math.hypot(m_endVelocity.dx, m_endVelocity.dy),
+                        m_constraints,
                         kMaxVelM_S,
                         kMaxAccelM_S_S);
 
@@ -148,15 +137,4 @@ public class DriveToState100 extends Command100 {
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }
-
-    ////////////////////////////////////////////////////
-
-    /** Waypoints where the rotation points in the direction of motion. */
-    private static Rotation2d getRotation(Pose2d p0, Pose2d p1) {
-        Translation2d t0 = p0.getTranslation();
-        Translation2d t1 = p1.getTranslation();
-        Rotation2d theta = t1.minus(t0).getAngle();
-        return theta;
-    }
-
 }

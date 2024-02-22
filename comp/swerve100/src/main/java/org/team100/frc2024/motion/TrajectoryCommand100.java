@@ -34,18 +34,10 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class TrajectoryCommand100 extends Command100 {
     private final Telemetry t = Telemetry.get();
-    private final double kMaxVelM_S = 4;
-    private final double kMaxAccelM_S_S = 4;
 
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private Trajectory100 m_trajectory;
-    private List<TimingConstraint> m_constraints = null;
-    private TrajectoryPlanner m_planner = null;
-    private Rotation2d m_goalHeading = null;
-    private Pose2d m_goalPose = null;
-    private Rotation2d m_startDirection = null;
-    private boolean needToGenerate = true;
 
     public TrajectoryCommand100(
             SwerveDriveSubsystem robotDrive,
@@ -54,47 +46,11 @@ public class TrajectoryCommand100 extends Command100 {
         m_robotDrive = robotDrive;
         m_trajectory = trajectory;
         m_controller = controller;
-        needToGenerate = false;
         addRequirements(m_robotDrive);
-    }
-
-    TrajectoryCommand100(
-            Pose2d goalPose,
-            SwerveDriveSubsystem robotDrive,
-            Rotation2d goalHeading,
-            Rotation2d startDirection,
-            TrajectoryPlanner planner,
-            DriveMotionController controller,
-            List<TimingConstraint> constraints) {
-        m_robotDrive = robotDrive;
-        m_controller = controller;
-        m_trajectory = null;
-        m_goalPose = goalPose;
-        m_goalHeading = goalHeading;
-        m_startDirection = startDirection;
-        m_planner = planner;
-        m_constraints = constraints;
     }
 
     @Override
     public void initialize100() {
-        if (needToGenerate) {
-            Pose2d startingPose = m_robotDrive.getPose();
-            List<Pose2d> waypointsM = List.of(new Pose2d(m_robotDrive.getPose().getTranslation(), m_startDirection),
-                    m_goalPose);
-            List<Rotation2d> headings = List.of(
-                    startingPose.getRotation(),
-                    m_goalHeading);
-
-            m_trajectory = m_planner
-                    .generateTrajectory(
-                            false,
-                            waypointsM,
-                            headings,
-                            m_constraints,
-                            kMaxVelM_S,
-                            kMaxAccelM_S_S);
-        }
         TrajectoryVisualization.setViz(m_trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(m_trajectory));
         m_controller.setTrajectory(iter);

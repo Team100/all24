@@ -33,7 +33,6 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.DriveToState100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
@@ -175,7 +174,7 @@ public class RobotContainer {
         //
         // override the alliance logic.
 
-        m_alliance = Alliance.Blue;
+        m_alliance = Alliance.Red;
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -268,7 +267,7 @@ public class RobotContainer {
         // on xbox this is left bumper
         // on joystick this is button 4
         // on starting zone line lined up with note
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.4, 7, Math.PI));
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -330,9 +329,9 @@ public class RobotContainer {
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // Drive With Profile
-        whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
-                        swerveKinodynamics));
+        // whileTrue(driverControl::driveToNote,
+        //         new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
+        //                 swerveKinodynamics));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
@@ -508,8 +507,8 @@ public class RobotContainer {
                 omegaController,
                 0.25);
         
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0);
-        whileTrue(driverControl::test, m_AutoMaker.adjacentWithShooterAngle(Note.NOTE1, Note.NOTE2, m_alliance));
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
+        whileTrue(driverControl::test, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
