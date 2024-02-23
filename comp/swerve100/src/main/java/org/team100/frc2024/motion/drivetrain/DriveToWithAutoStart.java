@@ -33,7 +33,7 @@ public class DriveToWithAutoStart extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 4;
+    private static final double kMaxAccelM_S_S = 5;
     private static final Telemetry t = Telemetry.get();
 
     private final SwerveDriveSubsystem m_swerve;
@@ -122,7 +122,7 @@ public class DriveToWithAutoStart extends Command100 {
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeedsNormally(output, dt);
     }
 
     @Override

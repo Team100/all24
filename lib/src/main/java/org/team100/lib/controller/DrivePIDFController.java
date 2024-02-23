@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * feedback.
  */
 public class DrivePIDFController implements DriveMotionController {
-    private static final double kTolerance = 0.05;
+    private static final double kTolerance = 0.15;
     public static final Telemetry t = Telemetry.get();
     private final boolean m_feedforwardOnly;
     private final String m_name;

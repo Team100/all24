@@ -31,7 +31,7 @@ public class AutoMaker {
     public DriveMotionController m_controller;
     public List<TimingConstraint> m_constraints;
     private final double kMaxVelM_S = 4;
-    private final double kMaxAccelM_S_S = 2;
+    private final double kMaxAccelM_S_S = 5;
     private final double kShooterScale;
     private final Alliance m_alliance;
 

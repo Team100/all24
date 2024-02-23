@@ -64,7 +64,7 @@ public class TrajectoryCommand100 extends Command100 {
         Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
         t.log(Level.TRACE, m_name, "chassis speeds", output);
-        m_robotDrive.setChassisSpeeds(output, dt);
+        m_robotDrive.setChassisSpeedsNormally(output, dt);
     }
 
     @Override
