@@ -14,7 +14,7 @@ import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 import org.team100.frc2024.motion.PrimitiveAuto;
-import org.team100.frc2024.motion.AutoMaker.Note;
+import org.team100.frc2024.motion.AutoMaker.FieldPoint;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
@@ -321,7 +321,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 1.5, 2);
+        DriveMotionController drivePID = new DrivePIDFController(false, 1.5, 3);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -504,7 +504,7 @@ public class RobotContainer {
                 0.25);
         
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.fiveNoteAuto());
+        whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 

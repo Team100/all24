@@ -40,7 +40,8 @@ public class DriveToWaypoint100 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-    private final SwerveKinodynamics m_limits;
+    // private final SwerveKinodynamics m_limits;
+    private final List<TimingConstraint> m_constraints;
 
     private final Supplier<Rotation2d> m_endRotation;
 
@@ -61,7 +62,21 @@ public class DriveToWaypoint100 extends Command100 {
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        m_limits = limits;
+        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
+        m_endRotation = null;
+        addRequirements(m_swerve);
+    }
+
+    public DriveToWaypoint100(
+            Pose2d goal,
+            SwerveDriveSubsystem drivetrain,
+            TrajectoryPlanner planner,
+            DriveMotionController controller, List<TimingConstraint> constraints) {
+        m_goal = goal;
+        m_swerve = drivetrain;
+        m_planner = planner;
+        m_controller = controller;
+        m_constraints = constraints;
         m_endRotation = null;
         addRequirements(m_swerve);
     }
@@ -77,7 +92,7 @@ public class DriveToWaypoint100 extends Command100 {
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        m_limits = limits;
+        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
         m_endRotation = endRotation;
         addRequirements(m_swerve);
     }
@@ -89,26 +104,22 @@ public class DriveToWaypoint100 extends Command100 {
         Pose2d end = m_goal;
         final double endVelocity = 0;
 
-        
-        if(m_endRotation != null){
+        if (m_endRotation != null) {
             end = new Pose2d(end.getTranslation(), m_endRotation.get());
         }
-        
+
         List<Pose2d> waypointsM = getWaypoints(start, end);
 
         List<Rotation2d> headings = List.of(
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
-
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
                         headings,
-                        constraints,
+                        m_constraints,
                         startVelocity,
                         endVelocity,
                         kMaxVelM_S,
