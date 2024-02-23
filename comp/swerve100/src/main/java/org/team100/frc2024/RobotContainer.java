@@ -2,7 +2,6 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
@@ -11,11 +10,9 @@ import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
-import org.team100.frc2024.motion.PrimitiveAuto;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
-import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
@@ -44,7 +41,6 @@ import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
-import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
@@ -81,8 +77,6 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Annunciator;
-import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -97,7 +91,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -127,8 +120,10 @@ public class RobotContainer {
 
     private final SelfTestRunner m_selfTest;
     final DriveInALittleSquare m_driveInALittleSquare;
-    final MorseCodeBeep m_beep;
-    final Monitor m_monitor;
+
+    // joel 2/22/24 removing for SVR, put back after that.
+    // final MorseCodeBeep m_beep;
+    // final Monitor m_monitor;
 
     // Identity-specific fields
     final IndexerSubsystem m_indexer;
@@ -184,14 +179,15 @@ public class RobotContainer {
 
         m_sensors = new Sensors(1, 2, 3); // Definitely real numbers
 
+        // joel 2/22/24 removing for SVR, put it back after that.
         // 20 words per minute is 60 ms.
-        m_beep = new MorseCodeBeep(0.06);
+        // m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
-
-        m_monitor = new Monitor(new Annunciator(6), test);
+        // BooleanSupplier test = () -> driverControl.annunicatorTest() ||
+        // m_beep.getOutput();
+        // m_monitor = new Monitor(new Annunciator(6), test);
         // The monitor runs less frequently than the control loop.
-        robot.addPeriodic(m_monitor::periodic, 0.2);
+        // robot.addPeriodic(m_monitor::periodic, 0.2);
 
         m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
 
@@ -223,7 +219,6 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-            
 
         m_feeder = new FeederSubsystem(39);
 
@@ -247,7 +242,6 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-
         onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
         // this is @sanjan's version from some sort of vision testing in february
@@ -256,7 +250,6 @@ public class RobotContainer {
 
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
-
 
         // on xbox this is left bumper
         // 5 feet in front of the target on the red side
@@ -379,9 +372,13 @@ public class RobotContainer {
 
         whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
 
-        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.DOWN)));
+        whileTrue(operatorControl::pivotToAmpPosition,
+                new StartEndCommand(() -> RobotState100.changeAmpState(AmpState100.UP),
+                        () -> RobotState100.changeAmpState(AmpState100.DOWN)));
 
-        whileTrue(operatorControl::ramp, new StartEndCommand( () -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT), () -> RobotState100.changeShooterState(ShooterState100.STOP)));
+        whileTrue(operatorControl::ramp,
+                new StartEndCommand(() -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT),
+                        () -> RobotState100.changeShooterState(ShooterState100.STOP)));
         // TODO: spin up the shooter whenever the robot is in range.
 
         // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
@@ -504,7 +501,7 @@ public class RobotContainer {
 
         whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
                 () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-      
+
         m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));
@@ -517,13 +514,13 @@ public class RobotContainer {
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
-    public void onTeleop(){
+    public void onTeleop() {
         m_shooter.reset();
         m_amp.reset();
     }
 
-    public void onAuto(){
-        
+    public void onAuto() {
+
     }
 
     private void whileTrue(BooleanSupplier condition, Command command) {
