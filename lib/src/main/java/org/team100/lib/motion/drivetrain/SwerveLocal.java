@@ -89,7 +89,6 @@ public class SwerveLocal {
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         setChassisSpeedsNormally(speeds, 0, 0.02);
-
     }
 
     /**
@@ -211,7 +210,7 @@ public class SwerveLocal {
 
     ///////////////////////////////////////////////////////////
 
-    private void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
+    public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState[] states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
                 kDtSec);

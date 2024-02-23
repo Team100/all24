@@ -221,6 +221,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
+    public void setChassisSpeedsNormally(ChassisSpeeds speeds, double kDtSec) {
+        m_swerveLocal.setChassisSpeedsNormally(speeds, m_heading.getHeadingRateNWU(), kDtSec);
+    }
+
     /** Does not desaturate. */
     public void setRawModuleStates(SwerveModuleState[] states) {
         m_swerveLocal.setRawModuleStates(states);

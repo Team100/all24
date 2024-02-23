@@ -91,7 +91,7 @@ public class DriverXboxControl implements DriverControl {
         // @joel 2/19/24 removed this for slow mode instead
         // return m_controller.getLeftBumper();
         return m_controller.getRightStickButton();
-    }
+    } 
 
     @Override
     public Rotation2d desiredRotation() {
