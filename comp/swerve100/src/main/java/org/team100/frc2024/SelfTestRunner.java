@@ -63,11 +63,11 @@ public class SelfTestRunner extends Command {
         m_listener = new SelfTestListener();
 
         // a blocking morse code message to start the test
-        addCase(new InstantCommand(() -> m_container.m_beep.setMessage("TEST")));
-        addCase(m_container.m_beep);
-
+        // joel 2/22/24 removing for SVR, put it back after that
+        // addCase(new InstantCommand(() -> m_container.m_beep.setMessage("TEST")));
+        // addCase(m_container.m_beep);
         // this test needs no "treatment" command
-        addCase(new BatterySelfTest(m_container.m_monitor, m_listener));
+        // addCase(new BatterySelfTest(m_container.m_monitor, m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.m_drive;
 
