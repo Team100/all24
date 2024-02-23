@@ -14,7 +14,7 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.ejml.dense.block.MatrixOps_FDRB;
-import org.team100.frc2024.motion.drivetrain.DriveToWithDirection100;
+import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
 
 import edu.wpi.first.math.estimator.MerweScaledSigmaPoints;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class AutoMaker {
     public SwerveDriveSubsystem m_swerve;
@@ -30,7 +31,7 @@ public class AutoMaker {
     public DriveMotionController m_controller;
     public List<TimingConstraint> m_constraints;
     private final double kMaxVelM_S = 4;
-    private final double kMaxAccelM_S_S = 4;
+    private final double kMaxAccelM_S_S = 2;
     private final double kShooterScale;
     private final Alliance m_alliance;
 
@@ -101,7 +102,7 @@ public class AutoMaker {
         Translation2d noteAOffsetTranslation = noteAOffsetPose.getTranslation();
         Translation2d noteBOffsetTranslation = noteBOffsetPose.getTranslation();
         Rotation2d angleToGoal = noteBOffsetTranslation.minus(noteAOffsetTranslation).getAngle();
-        Pose2d startWaypoint = new Pose2d(noteAOffsetPose.getTranslation(), angleToGoal.times(1.75));
+        Pose2d startWaypoint = new Pose2d(noteAOffsetPose.getTranslation(), angleToGoal.times(1.25));
         Pose2d endWaypoint = new Pose2d(noteBOffsetPose.getTranslation(), new Rotation2d());
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(noteAOffsetPose.getRotation(), noteBOffsetPose.getRotation());
@@ -110,27 +111,42 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
-    public DriveToWithDirection100 startToNote(Note note) {
+    public DriveToWithAutoStart startToNote(Note note) {
         Translation2d noteTranslation = getTranslation(note, m_alliance);
         Rotation2d endHeading = ShooterUtil.getRobotRotationToSpeaker(noteTranslation, kShooterScale);
         Rotation2d endRotation = endHeading.plus(new Rotation2d(Math.PI));
         Translation2d offset = new Translation2d(-.5 * endRotation.getCos(), -.5 * endRotation.getSin());
         // Translation2d offset = new Translation2d();
         Pose2d endWaypoint = new Pose2d(noteTranslation.plus(offset), endRotation);
-        return new DriveToWithDirection100(m_swerve, endWaypoint, endHeading, new Rotation2d(), m_planner, m_controller,
+        return new DriveToWithAutoStart(m_swerve, endWaypoint, endHeading, m_planner, m_controller,
                 m_constraints);
+    }
+
+    public TrajectoryCommand100 tuningTrajectory() {
+        List<Pose2d> waypointsM = List.of(new Pose2d(2, 2, new Rotation2d()),
+        new Pose2d(5, 2, new Rotation2d()));
+        List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(Math.PI));
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S, kMaxAccelM_S_S);
+        return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
+    }
+
+    public TrajectoryCommand100 tuningTrajectory2() {
+        List<Pose2d> waypointsM = List.of(new Pose2d(5, 2, new Rotation2d(Math.PI)),
+        new Pose2d(2, 2, new Rotation2d(Math.PI)));
+        List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(Math.PI));
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S, kMaxAccelM_S_S);
+        return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
     public TrajectoryCommand100 note1_to_note8() {
         Translation2d note1Translation = getTranslation(Note.NOTE1, m_alliance);
-        Translation2d note7Translation = getTranslation(Note.NOTE8, m_alliance);
-        Rotation2d rotationToGoal = note7Translation.minus(note1Translation).getAngle();
-        Pose2d startWaypoint = new Pose2d(note1Translation, rotationToGoal);
-        Rotation2d endHeading = ShooterUtil.getRobotRotationToSpeaker(note7Translation, kShooterScale);
+        Translation2d note8Translation = getTranslation(Note.NOTE8, m_alliance);
+        Pose2d startWaypoint = new Pose2d(note1Translation, new Rotation2d());
+        Rotation2d endHeading = ShooterUtil.getRobotRotationToSpeaker(note8Translation, kShooterScale);
         Rotation2d endRotation = endHeading.plus(new Rotation2d(Math.PI));
         Translation2d offset = new Translation2d(-.5 * endRotation.getCos(), -.5 * endRotation.getSin());
         // Translation2d offset = new Translation2d();
-        Pose2d endWaypoint = new Pose2d(note7Translation.plus(offset), endRotation);
+        Pose2d endWaypoint = new Pose2d(note8Translation.plus(offset), endRotation);
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(ShooterUtil.getRobotRotationToSpeaker(note1Translation, kShooterScale),
                 endHeading);
@@ -147,5 +163,9 @@ public class AutoMaker {
     public SequentialCommandGroup fiveNoteAuto() {
         return new SequentialCommandGroup(startToNote(Note.NOTE3), adjacentWithShooterAngle(Note.NOTE3, Note.NOTE2),
                 adjacentWithShooterAngle(Note.NOTE2, Note.NOTE1), note1_to_note8());
+    }
+
+    public SequentialCommandGroup tuning() {
+        return new SequentialCommandGroup(tuningTrajectory(), new WaitCommand(1), tuningTrajectory2());
     }
 }

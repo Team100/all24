@@ -36,7 +36,7 @@ public class DriverSkill {
         for (Level level : Level.values()) {
             m_skillChooser.addOption(level.name(), level);
         }
-        m_skillChooser.setDefaultOption(Level.INTERMEDIATE.name(), Level.INTERMEDIATE);
+        m_skillChooser.setDefaultOption(Level.ADVANCED.name(), Level.ADVANCED);
         SmartDashboard.putData(m_skillChooser);
     }
 

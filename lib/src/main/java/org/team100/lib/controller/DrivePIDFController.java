@@ -12,6 +12,7 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Follow a 254 trajectory using velocity feedforward with optional positional
@@ -55,9 +56,13 @@ public class DrivePIDFController implements DriveMotionController {
         }
 
         Optional<TimedPose> mSetpoint = getSetpoint(timeS);
+        t.log(Level.INFO, "field", "setpoint", new double[] {
+            mSetpoint.get().state().getPose().getX(),
+            mSetpoint.get().state().getPose().getY(),
+            mSetpoint.get().state().getHeading().getRadians()});
 
-        
-
+        SmartDashboard.putNumber("setpointX", mSetpoint.get().state().getPose().getX());
+    
         if (!mSetpoint.isPresent()) {
             return new ChassisSpeeds();
         }

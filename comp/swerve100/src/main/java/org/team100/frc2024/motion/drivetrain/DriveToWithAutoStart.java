@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj.Timer;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWithDirection100 extends Command100 {
+public class DriveToWithAutoStart extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
@@ -39,7 +39,6 @@ public class DriveToWithDirection100 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;
-    private final Rotation2d m_startDirection;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
@@ -54,18 +53,16 @@ public class DriveToWithDirection100 extends Command100 {
      * @param viz         ok to be null
      */
 
-    public DriveToWithDirection100(
+    public DriveToWithAutoStart(
             SwerveDriveSubsystem swerve,
             Pose2d goalWaypoint,
             Rotation2d goalHeading,
-            Rotation2d startDirection,
             TrajectoryPlanner planner,
             DriveMotionController controller,
             List<TimingConstraint> constraints) {
         m_swerve = swerve;
         m_goalWaypoint = goalWaypoint;
         m_goalHeading = goalHeading;
-        m_startDirection = startDirection;
         m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
@@ -76,8 +73,11 @@ public class DriveToWithDirection100 extends Command100 {
     public void initialize100() {
         System.out.println("DRIVE TO WAYPOINT");
         Pose2d startPose = m_swerve.getPose();
+        Translation2d startTranslation = new Translation2d();
+        Translation2d endTranslation = m_goalWaypoint.getTranslation();
+        Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
-                m_startDirection);
+                angleToGoal);
 
 
         List<Pose2d> waypointsM = List.of(
