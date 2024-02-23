@@ -36,21 +36,21 @@ public enum Camera {
     /**
      * Delta shooter
      */
-    D("10000000a7c673da",
+    SHOOTER("10000000a7c673da",
             new Transform3d(
                     new Translation3d(0, 0.26035, 0.37465),
                     new Rotation3d(0, 0, 1.57))),
     /**
      * Delta amp-placer
      */
-    E("10000000a7c673db",
+    AMP("10000000a7c673db",
             new Transform3d(
                     new Translation3d(0, 0.2413, 0.3937),
                     new Rotation3d(0, 0, 0))),
     /**
      * Delta intake
      */
-    F("10000000a7c673dc",
+    GAME_PIECE("10000000a7c673dc",
             new Transform3d(
                     new Translation3d(0, 0.2413, 0.3937),
                     new Rotation3d(0, 0, 0))),

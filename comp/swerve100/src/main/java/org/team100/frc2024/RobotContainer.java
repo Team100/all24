@@ -177,7 +177,7 @@ public class RobotContainer {
 
         m_indicator = new LEDIndicator(8);
 
-        m_sensors = new Sensors(1, 2, 3); // Definitely real numbers
+        m_sensors = new Sensors(9, 2, 3); // Definitely real numbers
 
         // joel 2/22/24 removing for SVR, put it back after that.
         // 20 words per minute is 60 ms.
