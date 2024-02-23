@@ -284,8 +284,7 @@ def main():
 
     serial = getserial()
     identity = Camera(serial)
-    if identity == Camera.REAR or identity == Camera.FRONT:
-        camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+    camera_config["transform"] = libcamera.Transform(hflip=-1, vflip=-1)
 
     print("\nREQUESTED CONFIG")
     print(camera_config)
