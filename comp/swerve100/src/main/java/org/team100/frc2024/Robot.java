@@ -2,7 +2,6 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 
-import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -10,7 +9,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
-
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -89,11 +87,13 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().clearComposedCommands();
         m_robotContainer.cancelAuton();
-        MorseCodeBeep beep = m_robotContainer.m_beep;
-        // beep.setDuration(1);
-        beep.setMessage("K");
         m_robotContainer.onTeleop();
-        CommandScheduler.getInstance().schedule(beep);
+
+        // joel 2/22/24 removing for SVR, put it back after that.
+        // MorseCodeBeep beep = m_robotContainer.m_beep;
+        // beep.setDuration(1);
+        // beep.setMessage("K");
+        // CommandScheduler.getInstance().schedule(beep);
     }
 
     @Override
