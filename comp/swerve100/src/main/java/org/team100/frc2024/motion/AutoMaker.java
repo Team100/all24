@@ -37,7 +37,7 @@ public class AutoMaker {
     private final double kShooterScale;
     private final Alliance m_alliance;
     private final double kIntakeOffset = .381;
-    private final double kStageOpeningOffset = ;
+    private final double kStageOpeningOffset = .2;
 
     public enum FieldPoint {
         NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, WINGSHOT, STAGESHOT, STAGEOPENING
