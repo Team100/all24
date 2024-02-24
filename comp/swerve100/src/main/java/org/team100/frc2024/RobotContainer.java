@@ -7,12 +7,17 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.AutoMaker;
+
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.FeedCommand;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
+
 import org.team100.frc2024.motion.PrimitiveAuto;
+import org.team100.frc2024.motion.AutoMaker.FieldPoint;
+
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.DriveToAmp;
@@ -38,7 +43,6 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.DriveToState100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
@@ -51,11 +55,9 @@ import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
-import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.NoteDetector;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
@@ -80,6 +82,8 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
+// import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -89,14 +93,11 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Annunciator;
-import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
-import org.team100.lib.util.CameraAngles;
 import org.team100.lib.util.Names;
 
 import com.choreo.lib.Choreo;
@@ -109,6 +110,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -123,8 +125,6 @@ public class RobotContainer {
     private final int m_autonRoutine;
     private final AllianceSelector m_allianceSelector;
     private Alliance m_alliance;
-    private final CameraAngles m_cameraAngles;
-    private final NoteDetector m_noteDetector;
 
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -137,8 +137,10 @@ public class RobotContainer {
 
     private final SelfTestRunner m_selfTest;
     final DriveInALittleSquare m_driveInALittleSquare;
-    final MorseCodeBeep m_beep;
-    final Monitor m_monitor;
+
+    // joel 2/22/24 removing for SVR, put back after that.
+    // final MorseCodeBeep m_beep;
+    // final Monitor m_monitor;
 
     // Identity-specific fields
     final IndexerSubsystem m_indexer;
@@ -198,16 +200,17 @@ public class RobotContainer {
 
         m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
 
-        m_sensors = new Sensors(1, 2, 3); // Definitely real numbers
+        m_sensors = new Sensors(9, 2, 3); // Definitely real numbers
 
+        // joel 2/22/24 removing for SVR, put it back after that.
         // 20 words per minute is 60 ms.
-        m_beep = new MorseCodeBeep(0.06);
+        // m_beep = new MorseCodeBeep(0.06);
         // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() || m_beep.getOutput();
-
-        m_monitor = new Monitor(new Annunciator(6), test);
+        // BooleanSupplier test = () -> driverControl.annunicatorTest() ||
+        // m_beep.getOutput();
+        // m_monitor = new Monitor(new Annunciator(6), test);
         // The monitor runs less frequently than the control loop.
-        robot.addPeriodic(m_monitor::periodic, 0.2);
+        // robot.addPeriodic(m_monitor::periodic, 0.2);
 
         m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
 
@@ -229,8 +232,7 @@ public class RobotContainer {
                 poseEstimator::getSampledRotation,
                 m_alliance);
         visionDataProvider.enable();
-
-        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener();
+        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
         notePositionDetector.enable();
 
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
@@ -240,8 +242,6 @@ public class RobotContainer {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-        m_cameraAngles = new CameraAngles(30, 67.5, 50, 832, 616, 0.71, 0, 0);
-        m_noteDetector = new NoteDetector(m_cameraAngles, notePositionDetector, m_drive);
 
 
         m_feeder = new FeederSubsystem(39);
@@ -273,7 +273,6 @@ public class RobotContainer {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-
         onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
         // this is @sanjan's version from some sort of vision testing in february
@@ -283,10 +282,10 @@ public class RobotContainer {
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
-
         // on xbox this is left bumper
-        // 5 feet in front of the target on the red side
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.524, 2.667, Math.PI));
+        // on joystick this is button 4
+        // on starting zone line lined up with note
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -343,14 +342,14 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 2.8, 2);
+        DriveMotionController drivePID = new DrivePIDFController(false, 1.5, 3);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(m_noteDetector::fieldRelativePose2d, m_drive, dthetaController,
-                        swerveKinodynamics));
+                new DriveWithProfile(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
+                        swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
@@ -404,6 +403,8 @@ public class RobotContainer {
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
+        // TODO: spin up the shooter whenever the robot is in range.
+
         // whileTrue(operatorControl::ramp, new Ramp());
 
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
@@ -443,7 +444,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        notePositionDetector::getClosestTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -459,13 +460,12 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
-
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
-                new ManualWithTargetLock(
+                new FieldManualWithNoteRotation(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        m_noteDetector::FieldRelativeTranslation2d,
+                        notePositionDetector::getClosestTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -502,7 +502,22 @@ public class RobotContainer {
 
         // whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
         //         () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-        whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics, planner, drivePID));
+//         whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics, planner, drivePID));
+
+      ManualWithShooterLock shooterLock = new ManualWithShooterLock(
+                m_name,
+                swerveKinodynamics,
+                m_heading,
+                thetaController,
+                omegaController,
+                0.25);
+        
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
+        whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
+        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
+        // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+     
+        m_drive.setDefaultCommand(driveManually);
 
         SubsystemPriority.addSubsystem(m_drive, driveManually, Priority.ONE);
         SubsystemPriority.addSubsystem(m_shooter, new ShooterDefault(m_shooter, m_drive), Priority.TWO);
@@ -524,13 +539,14 @@ public class RobotContainer {
         ModeSelector.selectMode(operatorControl::pov);
     }
 
-    public void onTeleop(){
+ 
+    public void onTeleop() {
         m_shooter.reset();
         m_amp.reset();
     }
 
-    public void onAuto(){
-        
+    public void onAuto() {
+
     }
 
     private void whileTrue(BooleanSupplier condition, Command command) {

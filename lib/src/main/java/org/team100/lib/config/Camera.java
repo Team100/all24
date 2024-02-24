@@ -17,7 +17,7 @@ public enum Camera {
      */
     A("10000000caeaae82",
             new Transform3d(
-                    new Translation3d(0.1625, 0.0889, 0.762),
+                    new Translation3d(.1625, 0.0889, 0.762),
                     new Rotation3d(0, Math.toRadians(-18), 0))),
     /**
      * BETA back
@@ -26,35 +26,39 @@ public enum Camera {
             new Transform3d(
                     new Translation3d(0.1825, -0.06985, 0.76),
                     new Rotation3d(0, Math.toRadians(-24), Math.PI))),
-
     /**
      * Gamma intake
      */
     C("10000000a7c673d9",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(0, 0, 0.75),
+                    new Rotation3d(0, Math.toRadians(30), 0))),
     /**
      * Delta shooter
      */
-    D("10000000a7c673da",
+    SHOOTER("10000000a7c673da",
             new Transform3d(
                     new Translation3d(0, 0.26035, 0.37465),
                     new Rotation3d(0, 0, 1.57))),
     /**
      * Delta amp-placer
      */
-    E("10000000a7c673db",
+    AMP("10000000a7c673db",
             new Transform3d(
                     new Translation3d(0, 0.2413, 0.3937),
                     new Rotation3d(0, 0, 0))),
     /**
      * Delta intake
      */
-    F("10000000a7c673dc",
+    GAME_PIECE("10000000a7c673dc",
             new Transform3d(
                     new Translation3d(0, 0.2413, 0.3937),
                     new Rotation3d(0, 0, 0))),
+    
+    G("10000000a7a892c0",
+            new Transform3d(
+                    new Translation3d(0, 0, 1),
+                    new Rotation3d(0, Math.toRadians(30), 0))),           
 
     TEST1("test1",
             new Transform3d(

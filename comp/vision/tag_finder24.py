@@ -30,7 +30,13 @@ class Blip24:
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
 
-    FRONT = "1000000013c9c96c"  # "FRONT"
+    A = "10000000caeaae82"  # "BETA FRONT"
+    B = "1000000013c9c96c"  # "BETA BACK"
+    C = "10000000a7c673d9"  # "GAMMA INTAKE"
+    SHOOTER = "10000000a7c673da"  # "DELTA SHOOTER"
+    AMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
+    GAME_PIECE = "10000000a7c673dc"  # "DELTA INTAKE"
+    G = "10000000a7a892c0"  # ""
     UNKNOWN = None
 
     @classmethod
@@ -356,7 +362,7 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
-
+    print(serial)
     output = TagFinder(serial, width, height, model)
 
     camera.start()
