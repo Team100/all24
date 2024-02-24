@@ -1,5 +1,6 @@
 package org.team100.lib.indicator;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -13,19 +14,23 @@ import edu.wpi.first.wpilibj.util.Color;
  * Use sthe AddressableLED feature of the RoboRIO.
  */
 public class LEDIndicator {
-    private static final int kStripLength = 60;
+    private static final int kStripLength = 256;
+    private static final double brightnessScaler = 50.0/255.0;
+    private State currentColor;
     
     /**
      * This enum exists to prepopulate the buffers, so they can be set atomically,
      * which is faster.
      */
     public enum State {
-        BLACK(new Color(0, 0, 0)),
-        RED(new Color(255, 0, 0)),
-        GREEN(new Color(0, 0, 255)),
-        PURPLE(new Color(255, 100, 0)),
-        YELLOW(new Color(255, 0, 80)),
-        ORANGE(new Color(255, 0, 30));
+        BLACK(new Color((int)(0*brightnessScaler), (int)(0*brightnessScaler), (int)(0*brightnessScaler))),
+        RED(new Color((int)(255*brightnessScaler), (int)(0*brightnessScaler), (int)(0*brightnessScaler))),
+        GREEN(new Color((int)(0*brightnessScaler), (int)(255*brightnessScaler), (int)(0*brightnessScaler))),
+        BLUE(new Color((int)(0*brightnessScaler),(int)(0*brightnessScaler),(int)(255*brightnessScaler))),
+        PURPLE(new Color((int)(255*brightnessScaler), (int)(0*brightnessScaler), (int)(255*brightnessScaler))),
+        YELLOW(new Color((int)(255*brightnessScaler), (int)(255*brightnessScaler), (int)(0*brightnessScaler))),
+        WHITE(new Color ((int)(255*brightnessScaler),(int)(255*brightnessScaler),(int)(255*brightnessScaler))),
+        ORANGE(new Color((int)(255*brightnessScaler), (int)(80*brightnessScaler), (int)(0*brightnessScaler)));
 
         private final Color color;
 
@@ -49,7 +54,7 @@ public class LEDIndicator {
         led = new AddressableLED(port);
         led.setLength(kStripLength);
         led.start();
-        set(State.ORANGE);
+        set(State.BLACK);
     }
 
     public void set(State s) {
@@ -58,5 +63,19 @@ public class LEDIndicator {
 
     public void close() {
         led.close();
+    }
+
+    public void displayTeam100() {
+        AddressableLEDBuffer buffer = new AddressableLEDBuffer(kStripLength);
+        for (int i = 0; i < kStripLength; i++) {
+            if( Arrays.asList(165,153,154,155,156,157,158,138,139,140,141,129,134,122,123,124,125,106,107,108,109,97,102,90,91,92,93).contains(i) ){
+                currentColor = State.WHITE;
+            }
+            else {
+                currentColor = State.ORANGE;
+            }
+            buffer.setLED(i, currentColor.color);
+        }
+        led.setData(buffer);
     }
 }
