@@ -1,5 +1,6 @@
 package org.team100.lib.util;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,11 +33,11 @@ public class NotePicker {
      *               right top IDs are 1-11
      * @return The field relative translation of the note you want to go for
      */
-    public static Optional<Translation2d> autoNotePick(Optional<Translation2d[]> notes, int noteID) {
+    public static Optional<Translation2d> autoNotePick(Optional<ArrayList<Translation2d>> notes, int noteID) {
         if (!notes.isPresent()) {
             return Optional.empty();
         }
-        Translation2d[] Tnotes = notes.get();
+        ArrayList<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : Tnotes) {
@@ -58,11 +59,11 @@ public class NotePicker {
      * @param swervePose the pose of the swerve drivetrain
      * @return The field relative translation of the closest note
      */
-    public static Optional<Translation2d> closestNote(Optional<Translation2d[]> notes, Pose2d swervePose) {
+    public static Optional<Translation2d> closestNote(Optional<ArrayList<Translation2d>> notes, Pose2d swervePose) {
         if (!notes.isPresent()) {
             return Optional.empty();
         }
-        Translation2d[] Tnotes = notes.get();
+        ArrayList<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : Tnotes) {

@@ -2,6 +2,7 @@ package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,9 @@ public class NotePickerTest {
     }
     @Test
     void testObviousPick() {
-        Translation2d[] e = {new Translation2d(), new Translation2d(10,10)};
+        ArrayList<Translation2d> e = new ArrayList<>();
+        e.add(new Translation2d());
+        e.add(new Translation2d(10,10));
         Translation2d expected = NotePicker.closestNote(Optional.of(e), new Pose2d()).get();
         Translation2d expected2 = NotePicker.closestNote(Optional.of(e), new Pose2d(new Translation2d(10,10), new Rotation2d())).get();
         assertEquals(expected, new Translation2d());
@@ -28,29 +31,40 @@ public class NotePickerTest {
     }
     @Test
     void testLessObviousPick() {
-        Translation2d[] e = {new Translation2d(), new Translation2d(1,1)};
+        ArrayList<Translation2d> e = new ArrayList<>();
+        e.add(new Translation2d()); 
+        e.add(new Translation2d(1,1));
         Translation2d expected = NotePicker.closestNote(Optional.of(e), new Pose2d(new Translation2d(0.6,0.6), new Rotation2d())).get();
         assertEquals(expected, new Translation2d(1,1));
     }
 
     @Test
     void testAutoNotePickObvious() {
-        Translation2d[] e = {new Translation2d(), new Translation2d(1,1), new Translation2d(2.9, 0.77)};
+        ArrayList<Translation2d> e = new ArrayList<>();
+        e.add(new Translation2d()); 
+        e.add(new Translation2d(1,1)); 
+        e.add(new Translation2d(2.9, 0.77));
         Translation2d expected = NotePicker.autoNotePick(Optional.of(e), 1).get();
         assertEquals(expected, new Translation2d(2.9, 0.77));
     }
     
     @Test
     void testAutoNotePickLessObvious() {
-        Translation2d[] e = {new Translation2d(), new Translation2d(2.8,0.77), new Translation2d(2.9, 0.77)};
+        ArrayList<Translation2d> e = new ArrayList<>();
+        e.add(new Translation2d()); 
+        e.add(new Translation2d(1,1)); 
+        e.add(new Translation2d(2.9, 0.77));
         Translation2d expected = NotePicker.autoNotePick(Optional.of(e), 1).get();
         assertEquals(expected, new Translation2d(2.9, 0.77));
     }
 
     @Test
     void tsetFar() {
-        Translation2d[] e = {new Translation2d(10,10), new Translation2d(41,41), new Translation2d(23.9, 0.377)};
-        Optional<Translation2d> expected = NotePicker.autoNotePick(Optional.of(e), 1);
+        ArrayList<Translation2d> e = new ArrayList<>();
+        e.add(new Translation2d(10,10)); 
+        e.add(new Translation2d(41,41)); 
+        e.add(new Translation2d(22.9, 0.77));
+            Optional<Translation2d> expected = NotePicker.autoNotePick(Optional.of(e), 1);
         assertEquals(expected, Optional.empty());
     }
 }
