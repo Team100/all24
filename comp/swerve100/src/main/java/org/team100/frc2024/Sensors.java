@@ -28,6 +28,7 @@ public class Sensors {
 
     public boolean getIntakeSensor(){
         // return intakeSensor.get();
+        return true;
     }
   
     public boolean objectInIntake(){

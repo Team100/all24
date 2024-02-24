@@ -4,7 +4,6 @@
 
 package org.team100.frc2024.motion.amp;
 
-import org.team100.lib.commands.drivetrain.DriveToState100;
 import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
 import org.team100.lib.commands.drivetrain.DriveWithProfile2;
