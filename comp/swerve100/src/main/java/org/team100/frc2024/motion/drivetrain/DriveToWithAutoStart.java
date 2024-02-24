@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.frc2024.motion.drivetrain;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -29,90 +29,63 @@ import edu.wpi.first.wpilibj.Timer;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWaypoint100 extends Command100 {
+public class DriveToWithAutoStart extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 4;
+    private static final double kMaxAccelM_S_S = 5;
     private static final Telemetry t = Telemetry.get();
 
-    private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
+    private final Pose2d m_goalWaypoint;
+    private final Rotation2d m_goalHeading;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-    // private final SwerveKinodynamics m_limits;
     private final List<TimingConstraint> m_constraints;
 
-    private final Supplier<Rotation2d> m_endRotation;
-
     /**
-     * @param goal
-     * @param drivetrain
-     * @param planner
-     * @param controller
-     * @param viz        ok to be null
+     * @param goal        Pose2d
+     * @param endVelocity Twist2d
+     * @param drivetrain  SwerveDriveSubsystem
+     * @param planner     TrajectoryPlanner
+     * @param controller  DriveMotionController
+     * @param limits      SwerveKinodynamics
+     * @param viz         ok to be null
      */
-    public DriveToWaypoint100(
-            Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
+
+    public DriveToWithAutoStart(
+            SwerveDriveSubsystem swerve,
+            Pose2d goalWaypoint,
+            Rotation2d goalHeading,
             TrajectoryPlanner planner,
             DriveMotionController controller,
-            SwerveKinodynamics limits) {
-        m_goal = goal;
-        m_swerve = drivetrain;
-        m_planner = planner;
-        m_controller = controller;
-        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
-        m_endRotation = null;
-        addRequirements(m_swerve);
-    }
-
-    public DriveToWaypoint100(
-            Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
-            DriveMotionController controller, List<TimingConstraint> constraints) {
-        m_goal = goal;
-        m_swerve = drivetrain;
+            List<TimingConstraint> constraints) {
+        m_swerve = swerve;
+        m_goalWaypoint = goalWaypoint;
+        m_goalHeading = goalHeading;
         m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
-        m_endRotation = null;
-        addRequirements(m_swerve);
-    }
-
-    public DriveToWaypoint100(
-            Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
-            DriveMotionController controller,
-            SwerveKinodynamics limits,
-            Supplier<Rotation2d> endRotation) {
-        m_goal = goal;
-        m_swerve = drivetrain;
-        m_planner = planner;
-        m_controller = controller;
-        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
-        m_endRotation = endRotation;
         addRequirements(m_swerve);
     }
 
     @Override
     public void initialize100() {
-        final Pose2d start = m_swerve.getPose();
-        final double startVelocity = 0;
-        Pose2d end = m_goal;
-        final double endVelocity = 0;
+        System.out.println("DRIVE TO WAYPOINT");
+        Pose2d startPose = m_swerve.getPose();
+        Translation2d startTranslation = new Translation2d();
+        Translation2d endTranslation = m_goalWaypoint.getTranslation();
+        Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
+        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
+                angleToGoal);
 
-        if (m_endRotation != null) {
-            end = new Pose2d(end.getTranslation(), m_endRotation.get());
-        }
 
-        List<Pose2d> waypointsM = getWaypoints(start, end);
-
+        List<Pose2d> waypointsM = List.of(
+                startWaypoint,
+                m_goalWaypoint);
         List<Rotation2d> headings = List.of(
-                start.getRotation(),
-                end.getRotation());
+                startPose.getRotation(),
+                m_goalHeading);
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
@@ -120,17 +93,16 @@ public class DriveToWaypoint100 extends Command100 {
                         waypointsM,
                         headings,
                         m_constraints,
-                        startVelocity,
-                        endVelocity,
                         kMaxVelM_S,
                         kMaxAccelM_S_S);
 
-        TrajectoryVisualization.setViz(trajectory);
-
-        if (trajectory.isEmpty()) {
+        if (trajectory.length() == 0) {
             end(false);
             return;
         }
+
+        // TrajectoryVisualization.setViz(trajectory);
+
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
 
@@ -150,7 +122,7 @@ public class DriveToWaypoint100 extends Command100 {
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeedsNormally(output, dt);
     }
 
     @Override
@@ -160,20 +132,9 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("DRIVE TO FINISHED");
+
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }
-
-    ////////////////////////////////////////////////////
-
-    /** Waypoints where the rotation points in the direction of motion. */
-    private static List<Pose2d> getWaypoints(Pose2d p0, Pose2d p1) {
-        Translation2d t0 = p0.getTranslation();
-        Translation2d t1 = p1.getTranslation();
-        Rotation2d theta = t1.minus(t0).getAngle();
-        return List.of(
-                new Pose2d(t0, theta),
-                new Pose2d(t1, theta));
-    }
-
 }

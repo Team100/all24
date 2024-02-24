@@ -6,10 +6,16 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.AutoMaker;
+
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
+
+import org.team100.frc2024.motion.PrimitiveAuto;
+import org.team100.frc2024.motion.AutoMaker.FieldPoint;
+
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.PivotAmp;
@@ -28,7 +34,6 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.DriveToState100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
@@ -67,7 +72,7 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
+// import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -94,6 +99,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -252,8 +258,9 @@ public class RobotContainer {
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
 
         // on xbox this is left bumper
-        // 5 feet in front of the target on the red side
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, 1.524, 2.667, Math.PI));
+        // on joystick this is button 4
+        // on starting zone line lined up with note
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -310,7 +317,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 2.8, 2);
+        DriveMotionController drivePID = new DrivePIDFController(false, 1.5, 3);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -329,8 +336,8 @@ public class RobotContainer {
         // whileTrue(driverControl::test,
         // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
-        whileTrue(driverControl::test,
-                new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
+        // whileTrue(driverControl::test,
+        //         new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
 
         // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
         // drivePID, swerveKinodynamics));
@@ -495,13 +502,12 @@ public class RobotContainer {
                 thetaController,
                 omegaController,
                 0.25);
-
+        
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
+        whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
-
-        whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-                () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-
+     
         m_drive.setDefaultCommand(driveManually);
 
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));
