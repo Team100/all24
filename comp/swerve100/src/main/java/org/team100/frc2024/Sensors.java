@@ -19,7 +19,7 @@ public class Sensors {
 
     public Sensors(int port1, int port2, int port3){
 
-        // intakeSensor = new DigitalInput(port1);
+        intakeSensor = new DigitalInput(port1);
         // superStructureSensor = new DigitalInput(port2);
         feederSensor = new DigitalInput(9);
         m_timer.restart();
@@ -27,15 +27,9 @@ public class Sensors {
     }
 
     public boolean getIntakeSensor(){
-        // return intakeSensor.get();
-        return true;
+        return intakeSensor.get();
     }
-  
-    public boolean objectInIntake(){
-        // return !intakeSensor.get();
-        return false;
-    }
-
+     
     public boolean getSuperSensor(){
 
         
