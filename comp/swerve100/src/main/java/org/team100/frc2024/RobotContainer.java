@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
+import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.motion.AutoMaker;
 
 import org.team100.frc2024.RobotState100.ShooterState100;
+import org.team100.frc2024.motion.FeedCommand;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
@@ -18,7 +20,11 @@ import org.team100.frc2024.motion.AutoMaker.FieldPoint;
 
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
+import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.amp.PivotAmp;
+import org.team100.frc2024.motion.amp.PivotToAmpPosition;
+import org.team100.frc2024.motion.climber.ClimberDefault;
+import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
@@ -26,9 +32,12 @@ import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
+import org.team100.frc2024.motion.shooter.Ramp;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
+import org.team100.lib.SubsystemPriority;
+import org.team100.lib.SubsystemPriority.Priority;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -63,6 +72,7 @@ import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
+import org.team100.lib.indicator.LEDStrip;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.NotePosition24ArrayListener;
@@ -135,12 +145,14 @@ public class RobotContainer {
     // Identity-specific fields
     final IndexerSubsystem m_indexer;
     final AmpSubsystem m_amp;
-    // private final ClimberSubsystem m_climber;
+    private final ClimberSubsystem m_climber;
     final Shooter m_shooter;
     final Intake m_intake;
     final Sensors m_sensors;
     final FeederSubsystem m_feeder;
 
+    final DriverControl driverControl;
+    final OperatorControl operatorControl;
     // Commands
     private final PivotAmp m_pivotAmp;
 
@@ -149,18 +161,22 @@ public class RobotContainer {
     public RobotContainer(TimedRobot robot) throws IOException {
         m_name = Names.name(this);
 
-        final DriverControl driverControl = new DriverControlProxy();
-        final OperatorControl operatorControl = new OperatorControlProxy();
+        driverControl = new DriverControlProxy();
+        operatorControl = new OperatorControlProxy();
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         // these devices only currently exist on the comp bot
         if (Identity.instance == Identity.COMP_BOT) {
             // digital inputs 0, 1, 2, 3.
-            m_autonSelector = new AutonSelector();
-            m_autonRoutine = m_autonSelector.routine();
+            // m_autonSelector = new AutonSelector();
+            // m_autonRoutine = m_autonSelector.routine();
             // digital inputs 4, 5
-            m_allianceSelector = new AllianceSelector();
-            m_alliance = m_allianceSelector.alliance();
+            // m_allianceSelector = new AllianceSelector();
+            // m_alliance = m_allianceSelector.alliance();
+            m_autonSelector = null;
+            m_autonRoutine = 0;
+            m_allianceSelector = null;
+            m_alliance = Alliance.Blue;
         } else {
             m_autonSelector = null;
             m_autonRoutine = 0;
@@ -182,7 +198,7 @@ public class RobotContainer {
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
 
-        m_indicator = new LEDIndicator(8);
+        m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
 
         m_sensors = new Sensors(9, 2, 3); // Definitely real numbers
 
@@ -227,16 +243,24 @@ public class RobotContainer {
                 swerveLocal,
                 driverControl::speed);
 
+
         m_feeder = new FeederSubsystem(39);
 
-        m_feeder.setDefaultCommand(new FeederDefault(m_feeder));
 
-        m_intake = IntakeFactory.get(m_sensors, m_feeder);
+        m_intake = IntakeFactory.get(m_sensors);
+
+
+
+
         m_shooter = ShooterFactory.get(m_feeder);
 
         m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
+
+        m_climber = new ClimberSubsystem(60, 61);
+
+
 
         // show mode locks slow speed.
 
@@ -364,55 +388,24 @@ public class RobotContainer {
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
-        // whileTrue(driverControl::test, new TestCommand("TEST"));
-        // whileTrue(driverControl::test, new TestCommand("TEST 333"));
 
-        ///////////////// OPERATOR V2//////////////////////////
+        whileTrue(operatorControl::intake,  new StartEndCommand( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
-        // TODO: run the intake if the camera sees a note.
+        whileTrue(operatorControl::outtake, new StartEndCommand( () -> RobotState100.changeIntakeState(IntakeState100.OUTTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
-        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        // operatorControl.intake().whileTrue(m_intake.run(m_intake::intake));
+        whileTrue(operatorControl::ramp,  new StartEndCommand( () -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT), () -> RobotState100.changeShooterState(ShooterState100.STOP)));
 
-        // operatorControl.outtake().whileTrue(m_intake.run(m_intake::outtake));
+        whileTrue(operatorControl::feed,  new StartEndCommand( () -> RobotState100.changeFeederState(FeederState100.FEED), () -> RobotState100.changeFeederState(FeederState100.STOP)));
 
-        whileTrue(operatorControl::intake, new IntakeNote(m_intake, m_indexer));
+        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.NONE)));
 
-        whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
+        whileTrue(operatorControl::pivotToDownPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.DOWN), () -> RobotState100.changeAmpState(AmpState100.NONE)));
 
-        whileTrue(operatorControl::pivotToAmpPosition,
-                new StartEndCommand(() -> RobotState100.changeAmpState(AmpState100.UP),
-                        () -> RobotState100.changeAmpState(AmpState100.DOWN)));
+        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
-        whileTrue(operatorControl::ramp,
-                new StartEndCommand(() -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT),
-                        () -> RobotState100.changeShooterState(ShooterState100.STOP)));
         // TODO: spin up the shooter whenever the robot is in range.
 
-        // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-        // whileTrue(operatorControl::shooter, m_shooter.run(m_shooter::forward));
-
-        /*
-         * 
-         * this is another way to do speed control
-         * 
-         * final double kMaxShooterVelocity = 30.0;
-         * m_shooter.setDefaultCommand(
-         * m_shooter.run(
-         * () -> m_shooter.setVelocity(
-         * kMaxShooterVelocity * operatorControl.shooterSpeed())));
-         * 
-         * the midi control can do it too
-         * 
-         * m_shooter.setDefaultCommand(
-         * m_shooter.run(
-         * () -> m_shooter.setVelocity(
-         * kMaxShooterVelocity * thirdControl.shooterSpeed())));
-         */
-
-        // TODO: intake whenever intake is running.
-        // TODO: stop when note is accpeted using optical detector.
-        // TODO: shoot only when the shooter is ready.
+        // whileTrue(operatorControl::ramp, new Ramp());
 
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
         whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
@@ -496,7 +489,22 @@ public class RobotContainer {
                         omegaController,
                         0.25));
 
-        ManualWithShooterLock shooterLock = new ManualWithShooterLock(
+        // ManualWithShooterLock shooterLock = new ManualWithShooterLock(
+        //         m_name,
+        //         swerveKinodynamics,
+        //         m_heading,
+        //         thetaController,
+        //         omegaController,
+        //         0.25);
+
+        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
+        // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+
+        // whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        //         () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+//         whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics, planner, drivePID));
+
+      ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
                 swerveKinodynamics,
                 m_heading,
@@ -511,16 +519,27 @@ public class RobotContainer {
      
         m_drive.setDefaultCommand(driveManually);
 
-        m_intake.setDefaultCommand(new IntakeDefault(m_intake));
-        m_shooter.setDefaultCommand(new ShooterDefault(m_shooter, m_drive));
-        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        m_amp.setDefaultCommand(new AmpDefault(m_amp));
+        SubsystemPriority.addSubsystem(m_drive, driveManually, Priority.ONE);
+        SubsystemPriority.addSubsystem(m_shooter, new ShooterDefault(m_shooter, m_drive), Priority.TWO);
+        SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
+        SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
+        SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis, operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
+        SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
+
+        //Registers the subsystems so that they run with the specified priority
+        SubsystemPriority.registerWithPriority();
 
         m_auton = m_drive.runInit(m_drive::defense);
+
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
+    public void beforeCommandCycle(){
+        ModeSelector.selectMode(operatorControl::pov);
+    }
+
+ 
     public void onTeleop() {
         m_shooter.reset();
         m_amp.reset();
@@ -559,19 +578,19 @@ public class RobotContainer {
     }
 
     public void ledStart() {
-        m_indicator.set(State.ORANGE);
+        // m_indicator.set(State.ORANGE);
     }
 
     public void ledStop() {
-        m_indicator.close();
+        // m_indicator.close();
     }
 
     public void red() {
-        m_indicator.set(State.RED);
+        // m_indicator.set(State.RED);
     }
 
     public void green() {
-        m_indicator.set(State.GREEN);
+        // m_indicator.set(State.GREEN);
     }
 
     // this keeps the tests from conflicting via the use of simulated HAL ports.
@@ -580,7 +599,7 @@ public class RobotContainer {
             m_autonSelector.close();
         if (m_allianceSelector != null)
             m_allianceSelector.close();
-        m_indicator.close();
+        // m_indicator.close();
         m_modules.close();
     }
 

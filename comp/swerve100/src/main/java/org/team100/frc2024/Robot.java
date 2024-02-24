@@ -48,7 +48,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        
+        m_robotContainer.beforeCommandCycle();
         CommandScheduler.getInstance().run();
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");

@@ -96,6 +96,7 @@
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/SmartDashboard/elevator": "Mechanism2d",
+
       "/field": "Field2d"
     },
     "windows": {
