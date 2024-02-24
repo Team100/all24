@@ -323,7 +323,7 @@ public class RobotContainer {
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(notePositionDetector::getTranslation2d, m_drive, dthetaController,
+                new DriveWithProfile(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
                         swerveKinodynamics, m_sensors::objectInIntake));
 
         // 254 FF follower
@@ -450,7 +450,7 @@ public class RobotContainer {
                         m_name,
                         swerveKinodynamics,
                         m_heading,
-                        notePositionDetector::getTranslation2d,
+                        notePositionDetector::getClosestTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -466,15 +466,15 @@ public class RobotContainer {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
-        // driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
-        //         new FieldManualWithNoteRotation(
-        //                 m_name,
-        //                 swerveKinodynamics,
-        //                 m_heading,
-        //                 notePositionDetector::getTranslation2d,
-        //                 thetaController,
-        //                 omegaController,
-        //                 driverControl::trigger));
+        driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
+                new FieldManualWithNoteRotation(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        notePositionDetector::getClosestTranslation2d,
+                        thetaController,
+                        omegaController,
+                        driverControl::trigger));
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
