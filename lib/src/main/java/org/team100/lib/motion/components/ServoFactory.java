@@ -5,12 +5,14 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.drive.Falcon6DriveEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.drive.NeoVortexDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
@@ -67,6 +69,43 @@ public class ServoFactory {
                 param.maxAccelM_S2(),
                 param.maxDecelM_S2());
     }
+
+    public static LimitedVelocityServo<Distance100> limitedVelocityFalconServo(
+            String name,
+            int canId,
+            boolean motorPhase,
+            int currentLimit,
+            SysParam param,
+            FeedforwardConstants lowLevelFeedforwardConstants,
+            PIDConstants lowLevelVelocityConstants) {
+
+        Falcon6DriveMotor motor = new Falcon6DriveMotor(
+                name,
+                canId,
+                motorPhase,
+                currentLimit,
+                param.gearRatio(),
+                param.wheelDiameter(),
+                lowLevelVelocityConstants,
+                lowLevelFeedforwardConstants
+                );
+                
+        Falcon6DriveEncoder encoder = new Falcon6DriveEncoder(
+                name,
+                motor,
+                param.wheelDiameter() * Math.PI);
+                
+        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
+                name,
+                motor,
+                encoder);
+        return new LimitedVelocityServo<>(v,
+                param.maxVelM_S(),
+                param.maxAccelM_S2(),
+                param.maxDecelM_S2());
+    }
+        
+
 
     public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
             String name,

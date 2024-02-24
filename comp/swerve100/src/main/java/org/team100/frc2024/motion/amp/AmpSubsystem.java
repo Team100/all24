@@ -43,28 +43,30 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                50,
-                50)
+                100,
+                100)
                 ;
 
         switch (Identity.instance) {
             case COMP_BOT:
                 //TODO tune kV
                 ampAngleServo = new GravityServo(
+                    5,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
-                    new PIDController(0.5, 0, 0), 
+                    new PIDController(0, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
                     -0.06
                 );
 
-                ampDrive = new PWM(0);
+                ampDrive = new PWM(1);
                 break;
             case BLANK:
             default:
                 ampAngleServo = new GravityServo(
+                    5,
                     m_name, 
                     m_params, 
                     new PIDController(1, 0, 0), 
@@ -73,7 +75,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     0.02, 
                     -0.06
                 );
-                ampDrive = new PWM(0);
+                ampDrive = new PWM(1);
 
                 
         }
@@ -89,14 +91,20 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
-        ampAngleServo.setPosition(value);
+        ampAngleServo.set(value);
     }
 
     public void reset() {
         ampAngleServo.reset();
     }
 
+    public void feed() {
+        ampDrive.setSpeed(0.5);
+    }
 
+    public void stopFeed() {
+        ampDrive.setSpeed(0);
+    }
 
     public void stop() {
         ampAngleServo.stop();
@@ -122,6 +130,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     public void periodic() {
         ampAngleServo.periodic();
         m_viz.periodic();
+
+        
 
     }
 }
