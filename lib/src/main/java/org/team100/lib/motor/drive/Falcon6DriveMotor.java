@@ -33,7 +33,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * The speed, below which, static friction applies, in motor revolutions per
      * second.
      */
-    private static final double staticFrictionSpeedLimitRev_S = 3.5;
+    private static final double staticFrictionSpeedLimitRev_S = 0.1;
 
     /**
      * Friction feedforward in amps, for when the mechanism is stopped, or nearly

@@ -11,10 +11,10 @@ public abstract class Shooter extends SubsystemBase implements Speeding {
     public abstract boolean readyToShoot(SwerveDriveSubsystem m_drive);
     public abstract void pivotAndRamp(SwerveDriveSubsystem m_drive, double kThreshold);
     public abstract void setAngle(Double angle);
-    public abstract void feed();
     public abstract double getAngle();
     public abstract double getVelocity();
     public abstract void setDutyCycle(double value);
+
 
     public abstract void
      reset();

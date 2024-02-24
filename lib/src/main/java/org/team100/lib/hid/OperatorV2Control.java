@@ -46,14 +46,27 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override 
-    public void pov(){
-        EventLoop loop = new EventLoop();
-        loop.bind(() -> System.out.println("AHH"));
-        m_controller.povUp(loop);
+    public int pov(){
+        return m_controller.getPOV();
     }
 
     @Override
     public boolean selfTestEnable() {
         return m_controller.getStartButton();
+    }
+
+    @Override
+    public double getLeftAxis(){
+        return -m_controller.getLeftY();
+    }
+
+    @Override
+    public double getRightAxis(){
+        return -m_controller.getRightY();
+    }
+
+    @Override
+    public boolean getClimberOveride(){
+        return m_controller.getLeftBumper();
     }
 }

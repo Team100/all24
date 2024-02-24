@@ -43,8 +43,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                50,
-                50)
+                40,
+                40)
                 ;
 
         switch (Identity.instance) {
@@ -53,14 +53,14 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 ampAngleServo = new GravityServo(
                     "AMMMPPPPPPPPPP", 
                     m_params, 
-                    new PIDController(0.5, 0, 0), 
+                    new PIDController(0, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
                     -0.06
                 );
 
-                ampDrive = new PWM(0);
+                ampDrive = new PWM(1);
                 break;
             case BLANK:
             default:
@@ -73,7 +73,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     0.02, 
                     -0.06
                 );
-                ampDrive = new PWM(0);
+                ampDrive = new PWM(1);
 
                 
         }
@@ -89,7 +89,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
-        ampAngleServo.setPosition(value);
+        ampAngleServo.setPositionWithSteadyState(value);
     }
 
     public void reset() {
@@ -122,6 +122,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     public void periodic() {
         ampAngleServo.periodic();
         m_viz.periodic();
+
+        
 
     }
 }
