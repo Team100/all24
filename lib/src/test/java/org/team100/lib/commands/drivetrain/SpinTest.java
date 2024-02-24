@@ -38,12 +38,12 @@ class SpinTest extends Fixtured implements Timeless {
         // test drivetrain is 0.5m on a side, thus radius
         // of about 0.353 m. so 0.5 rad/s
 
-        assertEquals(-0.088, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0.08, fixture.drive.desiredStates()[1].speedMetersPerSecond, kDelta);
+        assertEquals(-0.176, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(0.176, fixture.drive.desiredStates()[1].speedMetersPerSecond, kDelta);
         assertEquals(Math.PI / 4, fixture.drive.desiredStates()[1].angle.getRadians(), kDelta);
-        assertEquals(-0.088, fixture.drive.desiredStates()[2].speedMetersPerSecond, kDelta);
+        assertEquals(-0.176, fixture.drive.desiredStates()[2].speedMetersPerSecond, kDelta);
         assertEquals(Math.PI / 4, fixture.drive.desiredStates()[2].angle.getRadians(), kDelta);
-        assertEquals(0.088, fixture.drive.desiredStates()[3].speedMetersPerSecond, kDelta);
+        assertEquals(0.176, fixture.drive.desiredStates()[3].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[3].angle.getRadians(), kDelta);
     }
 
