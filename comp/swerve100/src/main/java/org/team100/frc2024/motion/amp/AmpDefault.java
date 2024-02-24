@@ -33,14 +33,13 @@ public class AmpDefault extends Command {
             switch(RobotState100.getAmpState()){
                 case UP:
                     // System.out.println("AMPPPPPPPPPPPPPPP");
-                    m_amp.setAmpPosition(110);
+                    m_amp.setAmpPosition(0.1);
                     break;
                 case DOWN:
+                    m_amp.setAmpPosition(-0.1);
+                    break;
+                case NONE:
                     m_amp.setAmpPosition(0);
-                    break;
-                case FEED:
-                    m_amp.setAmpPosition(5);
-                    break;
                 default:
             }
             // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");

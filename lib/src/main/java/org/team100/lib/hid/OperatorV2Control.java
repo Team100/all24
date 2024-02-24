@@ -27,7 +27,7 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean outtake(){
-        return m_controller.getAButton();
+        return m_controller.getBButton();
     }
 
     @Override
@@ -37,12 +37,12 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean ramp(){
-        return m_controller.getYButton();
+        return m_controller.getAButton();
     }
 
     @Override
     public boolean feed(){
-        return m_controller.getRightBumper();
+        return m_controller.getYButton();
     }
 
     @Override 
@@ -67,6 +67,22 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean getClimberOveride(){
+        // return m_controller.getLeftBumper();
+        return false;
+    }
+
+     @Override
+    public boolean pivotToAmpPosition(){
         return m_controller.getLeftBumper();
+    }
+
+    @Override
+    public boolean pivotToDownPosition(){
+        return m_controller.getRightBumper();
+    }
+
+    @Override
+    public boolean feedToAmp(){
+        return m_controller.getLeftStickButton();
     }
 }

@@ -7,6 +7,7 @@ package org.team100.frc2024.motion.intake;
 import org.team100.frc2024.Robot;
 import org.team100.frc2024.RobotState100;
 import org.team100.frc2024.Sensors;
+import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.FeederSubsystem;
@@ -49,8 +50,11 @@ public class FeederDefault extends Command {
 
     if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
         m_feeder.feed();
+    } else if(RobotState100.getFeederState() == FeederState100.FEED) {
+        m_feeder.feed();
     } else {
         m_feeder.stop();
+
     }
 
     // if(RobotState100.getIntakeState() == IntakeState100.INTAKE){

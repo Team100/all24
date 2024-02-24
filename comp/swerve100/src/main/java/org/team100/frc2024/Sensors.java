@@ -21,7 +21,7 @@ public class Sensors {
 
         // intakeSensor = new DigitalInput(port1);
         // superStructureSensor = new DigitalInput(port2);
-        feederSensor = new DigitalInput(1);
+        feederSensor = new DigitalInput(9);
         m_timer.restart();
         
     }

@@ -43,14 +43,15 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                40,
-                40)
+                100,
+                100)
                 ;
 
         switch (Identity.instance) {
             case COMP_BOT:
                 //TODO tune kV
                 ampAngleServo = new GravityServo(
+                    5,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
                     new PIDController(0, 0, 0), 
@@ -65,6 +66,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
             case BLANK:
             default:
                 ampAngleServo = new GravityServo(
+                    5,
                     m_name, 
                     m_params, 
                     new PIDController(1, 0, 0), 
@@ -89,14 +91,20 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
-        ampAngleServo.setPositionWithSteadyState(value);
+        ampAngleServo.set(value);
     }
 
     public void reset() {
         ampAngleServo.reset();
     }
 
+    public void feed() {
+        ampDrive.setSpeed(0.5);
+    }
 
+    public void stopFeed() {
+        ampDrive.setSpeed(0);
+    }
 
     public void stop() {
         ampAngleServo.stop();

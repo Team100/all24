@@ -60,12 +60,11 @@ public class ShooterDefault extends Command {
             switch(RobotState100.getShooterState()){
                 case DEFAULTSHOOT:
                     // System.out.println("AHHHHHHHHH");
-                    // m_shooter.setDutyCycle(1);
+                    m_shooter.forward();
                     m_shooter.setAngle(21.5);
                     break;
                 case STOP:
                     // System.out.println("NOOOOOOOOOOOOOOOOOOO");
-
                     m_shooter.stop();
                     break;
                 default:
@@ -77,7 +76,7 @@ public class ShooterDefault extends Command {
             
         case AMPING:
             // m_shooter.stop();
-            System.out.println("AMPIIING");
+            // System.out.println("AMPIIING");
             break;
         case NONE:
             // m_shooter.stop();

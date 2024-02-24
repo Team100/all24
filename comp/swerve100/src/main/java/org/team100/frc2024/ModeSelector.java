@@ -17,8 +17,7 @@ public class ModeSelector {
             if(pov.get() == 90){
                 RobotState100.changeRobotState(State100.SHOOTING);
             } else if(pov.get() == 180){
-                // System.out.println("AHH");
-
+                System.out.println("AHH");
                 RobotState100.changeRobotState(State100.AMPING);
             } else if(pov.get() == 270){
                 RobotState100.changeRobotState(State100.NONE);

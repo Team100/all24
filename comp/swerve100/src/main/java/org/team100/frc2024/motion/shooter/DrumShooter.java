@@ -83,7 +83,7 @@ public class DrumShooter extends Shooter{
                 MotorWithEncoder100<Distance100> leftMotor = new Falcon6DriveMotor(
                     m_name + "/Left",
                     leftID,
-                    true,
+                    false,
                     currentLimit,
                     1,
                     0.1,
@@ -108,6 +108,7 @@ public class DrumShooter extends Shooter{
 
 
                 pivotMotor = new GravityServo(
+                        40,
                         m_name + "/Pivot", 
                         pivotParams, 
                         new PIDController(0.07, 0.0, 0.000), //same
@@ -129,6 +130,7 @@ public class DrumShooter extends Shooter{
                         shooterParams);
 
                 pivotMotor = new GravityServo(
+                        40,
                         m_name + "/Pivot", 
                         pivotParams, 
                         new PIDController(1, 0, 0),
@@ -144,17 +146,17 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void forward() {
-        // leftRoller.setVelocity(kMuzzleVelocityM_S);
-        // rightRoller.setVelocity(kMuzzleVelocityM_S);
+        leftRoller.setVelocity(20);
+        rightRoller.setVelocity(20);
     }
 
     @Override
     public void stop() {
         // System.out.println("ZEEEEEROOOOOOOOOOOOOOO");
 
-        // leftRoller.setDutyCycle(0);
-        // rightRoller.setDutyCycle(0);
-        // pivotMotor.stop();
+        leftRoller.setDutyCycle(0);
+        rightRoller.setDutyCycle(0);
+        pivotMotor.setDutyCycle(0);
         // m_feeder.stop(DrumShooter.class);
     }
 
@@ -211,11 +213,27 @@ public class DrumShooter extends Shooter{
     }
 
     public void setDutyCycle(double value) {
-        // leftRoller.setDutyCycle(value);
-        // rightRoller.setDutyCycle(value);
+        leftRoller.setDutyCycle(value);
+        rightRoller.setDutyCycle(value);
 
 
     }
+
+    public double getPivotPosition(){
+        return pivotMotor.getRawPosition();
+    }
+
+    public void setPivotPosition(double value){
+        pivotMotor.setPosition(value);
+    }
+
+    public void feed(){
+        leftRoller.setDutyCycle(0.1);
+        rightRoller.setDutyCycle(0.1);
+
+    }
+
+
     public double getVelocity() {
         switch (Identity.instance) {
             case COMP_BOT:

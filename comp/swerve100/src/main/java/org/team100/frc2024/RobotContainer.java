@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
+import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
+import org.team100.frc2024.motion.FeedCommand;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
@@ -388,13 +390,21 @@ public class RobotContainer {
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
 
-        whileTrue(operatorControl::intake, new IntakeNote(m_intake, m_indexer));
+        whileTrue(operatorControl::intake,  new StartEndCommand( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
-        whileTrue(operatorControl::outtake, new OuttakeNote(m_intake, m_indexer));
+        whileTrue(operatorControl::outtake, new StartEndCommand( () -> RobotState100.changeIntakeState(IntakeState100.OUTTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
-        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.DOWN)));
+        whileTrue(operatorControl::ramp,  new StartEndCommand( () -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT), () -> RobotState100.changeShooterState(ShooterState100.STOP)));
 
-        whileTrue(operatorControl::ramp, new Ramp());
+        whileTrue(operatorControl::feed,  new StartEndCommand( () -> RobotState100.changeFeederState(FeederState100.FEED), () -> RobotState100.changeFeederState(FeederState100.STOP)));
+
+        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.NONE)));
+
+        whileTrue(operatorControl::pivotToDownPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.DOWN), () -> RobotState100.changeAmpState(AmpState100.NONE)));
+
+        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
+
+        // whileTrue(operatorControl::ramp, new Ramp());
 
         m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
         whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));

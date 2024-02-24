@@ -160,4 +160,8 @@ public class OperatorControlProxy implements OperatorControl {
     public boolean getClimberOveride(){
         return  m_operatorControl.getClimberOveride();
     }
+
+    public boolean feedToAmp(){
+        return  m_operatorControl.feedToAmp();
+    }
 }

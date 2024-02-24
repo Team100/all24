@@ -130,6 +130,8 @@ public class ClimberSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         
+        // s1.set(-1);
+        // s2.set(-1);
 
         Telemetry.get().log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", s1.getEncoder().getPosition());
         Telemetry.get().log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", s2.getEncoder().getPosition());

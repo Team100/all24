@@ -101,4 +101,12 @@ public interface OperatorControl {
     default boolean getClimberOveride(){
         return false;
     }
+
+    default boolean pivotToDownPosition(){
+        return false;
+    }
+
+    default boolean feedToAmp(){
+        return false;
+    }
 }

@@ -33,6 +33,7 @@ public class GravityServo {
     double m_maxRadsM_S;
     Telemetry t = Telemetry.get();
     double m_gravityScale;
+    int kCurrentLimit;
 
 
 
@@ -40,6 +41,7 @@ public class GravityServo {
     private State100 m_setpoint = new State100(0, 0);
 
     public GravityServo(
+        int currentLimit,
         String name,
         SysParam params,
         PIDController controller,
@@ -60,6 +62,8 @@ public class GravityServo {
     m_controller.setTolerance(0.02);
     m_profile = profile;
     m_gravityScale = gravityScale;
+    kCurrentLimit = currentLimit;
+    m_motor.setSmartCurrentLimit(currentLimit);
 
     
 
@@ -80,6 +84,7 @@ public class GravityServo {
     public double getRawPosition() {
         return m_encoder.getPosition();
     }
+    
     
     public void setPosition(double goal) {
         double measurement = m_encoder.getPosition();
@@ -157,13 +162,13 @@ public class GravityServo {
         double u_FF = m_setpoint.v() * 0.008; //rot/s to rpm conversion
 
         double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
-        double u_TOTAL = gravityTorque + u_FF + u_FB;
+        double u_TOTAL = gravityTorque + u_FF;
         
-        if(diff < 0.1){
-            m_motor.set(0.05);
-        } else {
+        // if(diff < 0.1){
+        //     m_motor.set(0.05);
+        // } else {
             m_motor.set(u_TOTAL); 
-        }
+        // }
 
 
         m_controller.setIntegratorRange(0, 0.1);
@@ -183,7 +188,14 @@ public class GravityServo {
     }
     public void periodic(){
         t.log(Level.DEBUG, m_name, "Get Raw Position", getRawPosition());
+        t.log(Level.DEBUG, m_name, "AMPS", m_motor.getOutputCurrent());
 
+
+
+    }
+
+    public void set(double value) {
+       m_motor.set(value);
 
     }
 
