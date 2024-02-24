@@ -433,7 +433,7 @@ public class RobotContainer {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(1.5, 0, 0);
+        PIDController thetaController = new PIDController(1.7, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0.5, 0, 0);
 

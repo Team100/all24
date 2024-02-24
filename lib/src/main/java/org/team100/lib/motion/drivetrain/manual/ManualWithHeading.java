@@ -34,7 +34,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
      */
-    private static final double kRotationSpeed = 0.5;
+    private static final double kRotationSpeed = 0.2;
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
@@ -122,7 +122,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_goal = new Rotation2d(
                 Math100.getMinDistance(headingMeasurement, m_goal.getRadians()));
 
-        // use the modulus cloest to the measurement
+        // use the modulus closest to the measurement
         m_thetaSetpoint = new State100(
                 Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
