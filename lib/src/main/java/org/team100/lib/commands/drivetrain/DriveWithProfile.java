@@ -50,11 +50,15 @@ public class DriveWithProfile extends Command100 {
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits,
             BooleanSupplier end) {
-                count = 0;
-                previousGoal = null;
+        count = 0;
+        previousGoal = null;
         m_swerve = drivetrain;
         m_fieldRelativeGoal = fieldRelativeGoal;
-        m_end = end;
+        if (end.getAsBoolean() == false) {
+            m_end = end;
+        } else {
+            m_end = () -> false;
+        }
         m_controller = controller;
         m_limits = limits;
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
@@ -82,7 +86,7 @@ public class DriveWithProfile extends Command100 {
                 return;
             goal = previousGoal;
             count++;
-            if (count == 50){
+            if (count == 50) {
                 return;
             }
             // return;
@@ -99,7 +103,7 @@ public class DriveWithProfile extends Command100 {
         thetaSetpoint = new State100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
                 thetaSetpoint.v());
-                
+
         State100 thetaGoal = new State100(bearing.getRadians(), 0);
         State100 xGoalRaw = new State100(goal.get().getX(), 0, 0);
         xSetpoint = xProfile.calculate(dt, xSetpoint, xGoalRaw);
