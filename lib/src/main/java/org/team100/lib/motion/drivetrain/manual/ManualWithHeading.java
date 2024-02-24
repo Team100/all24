@@ -64,7 +64,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_latch = new HeadingLatch();
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
-                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed);
+                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * .1);
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 

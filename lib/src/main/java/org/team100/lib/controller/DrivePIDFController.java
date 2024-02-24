@@ -56,10 +56,6 @@ public class DrivePIDFController implements DriveMotionController {
         }
 
         Optional<TimedPose> mSetpoint = getSetpoint(timeS);
-        t.log(Level.INFO, "field", "setpoint", new double[] {
-            mSetpoint.get().state().getPose().getX(),
-            mSetpoint.get().state().getPose().getY(),
-            mSetpoint.get().state().getHeading().getRadians()});
 
         SmartDashboard.putNumber("setpointX", mSetpoint.get().state().getPose().getX());
     
