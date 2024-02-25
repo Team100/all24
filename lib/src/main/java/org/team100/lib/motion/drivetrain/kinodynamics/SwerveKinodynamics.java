@@ -147,7 +147,7 @@ public class SwerveKinodynamics {
             throw new IllegalArgumentException();
 
         m_fronttrack = fronttrack;
-        m_backtrack = fronttrack;
+        m_backtrack = backtrack;
         m_wheelbase = wheelbase;
         m_vcg = vcg;
         // distance from center to wheel
