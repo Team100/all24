@@ -342,7 +342,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 1.5, 3);
+        DriveMotionController drivePID = new DrivePIDFController(false, 1.3, 1);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -427,9 +427,9 @@ public class RobotContainer {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(1.5, 0, 0);
+        PIDController thetaController = new PIDController(1.7, 0, 0); //1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0.5, 0, 0);
+        PIDController omegaController = new PIDController(0, 0, 0); //.5
 
         DriveManually driveManually = new DriveManually(driverControl::twist, m_drive);
 
