@@ -41,7 +41,8 @@ public class SwerveKinodynamics {
     private final Telemetry t = Telemetry.get();
 
     // geometry
-    private final double m_track;
+    private final double m_fronttrack;
+    private final double m_backtrack;
     private final double m_wheelbase;
     private final double m_radius;
     private final double m_vcg;
@@ -87,14 +88,73 @@ public class SwerveKinodynamics {
         if (wheelbase < 0.1)
             throw new IllegalArgumentException();
 
-        m_track = track;
+        m_fronttrack = track;
+        m_backtrack = track;
         m_wheelbase = wheelbase;
         m_vcg = vcg;
         // distance from center to wheel
         m_radius = Math.hypot(track / 2, m_wheelbase / 2);
-        m_kinematics = get(m_track, m_wheelbase);
+        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase);
         // fulcrum is the distance from the center to the nearest edge.
-        double fulcrum = Math.min(m_track / 2, m_wheelbase / 2);
+        double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
+        m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
+
+        setMaxDriveVelocityM_S(maxDriveVelocity);
+        setMaxDriveAccelerationM_S2(maxDriveAcceleration);
+        setMaxDriveDecelerationM_S2(maxDriveDeceleration);
+        setMaxSteeringVelocityRad_S(maxSteeringVelocity);
+        setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
+
+        t.register(Level.TRACE, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
+                this::setMaxDriveVelocityM_S);
+        t.register(Level.TRACE, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
+                this::setMaxDriveAccelerationM_S2);
+        t.register(Level.TRACE, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
+                this::setMaxDriveDecelerationM_S2);
+        t.register(Level.TRACE, Names.name(this), "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
+                this::setMaxSteeringVelocityRad_S);
+        t.register(Level.TRACE, Names.name(this), "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
+                this::setMaxSteeringAccelerationRad_S2);
+    }
+
+    /**
+     * Use the factory
+     * 
+     * @param maxDriveVelocity        module drive speed m/s
+     * @param maxDriveAcceleration    module drive accel m/s^2
+     * @param maxDriveDeceleration    module drive decel m/s^2. Should be higher
+     *                                than accel limit, this is a positive number.
+     * @param maxSteeringVelocity     module steering axis rate rad/s
+     * @param maxSteeringAcceleration module steering axis accel rad/s^2
+     * @param fronttrack              meters
+     * @param backtrack               meters
+     * @param wheelbase               meters
+     * @param vcg                     vertical center of gravity, meters
+     */
+    SwerveKinodynamics(
+            double maxDriveVelocity,
+            double maxDriveAcceleration,
+            double maxDriveDeceleration,
+            double maxSteeringVelocity,
+            double maxSteeringAcceleration,
+            double fronttrack,
+            double backtrack,
+            double wheelbase,
+            double vcg) {
+        if (fronttrack < 0.1 || backtrack < 0.1)
+            throw new IllegalArgumentException();
+        if (wheelbase < 0.1)
+            throw new IllegalArgumentException();
+
+        m_fronttrack = fronttrack;
+        m_backtrack = fronttrack;
+        m_wheelbase = wheelbase;
+        m_vcg = vcg;
+        // distance from center to wheel
+        m_radius = Math.hypot((fronttrack+backtrack) / 4, m_wheelbase / 2);
+        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase);
+        // fulcrum is the distance from the center to the nearest edge.
+        double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
 
         setMaxDriveVelocityM_S(maxDriveVelocity);
@@ -148,7 +208,7 @@ public class SwerveKinodynamics {
         // this assumes the robot is a uniform rectangular cuboid.
         double accel = Math.max(m_MaxDriveAccelerationM_S2, m_MaxDriveDecelerationM_S2);
         m_maxAngleAccelRad_S2 = 12 * accel * m_radius
-                / (m_track * m_track + m_wheelbase * m_wheelbase);
+                / (m_fronttrack * m_fronttrack + m_wheelbase * m_wheelbase);
     }
 
     private void setSteeringProfile() {
@@ -220,12 +280,12 @@ public class SwerveKinodynamics {
                 getMaxDriveAccelerationM_S2());
     }
 
-    private static SwerveDriveKinematics get(double track, double wheelbase) {
+    private static SwerveDriveKinematics get(double fronttrack,double backtrack, double wheelbase) {
         return new SwerveDriveKinematics(
-                new Translation2d(wheelbase / 2, track / 2),
-                new Translation2d(wheelbase / 2, -track / 2),
-                new Translation2d(-wheelbase / 2, track / 2),
-                new Translation2d(-wheelbase / 2, -track / 2));
+                new Translation2d(wheelbase / 2, fronttrack / 2),
+                new Translation2d(wheelbase / 2, -fronttrack / 2),
+                new Translation2d(-wheelbase / 2, backtrack / 2),
+                new Translation2d(-wheelbase / 2, -backtrack / 2));
     }
 
     public void resetHeadings(Rotation2d... moduleHeadings) {

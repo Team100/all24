@@ -37,8 +37,9 @@ public class SwerveKinodynamicsFactory {
                         50, // max decel m/s/s
                         20, // max module steering rate rad/s
                         60, // max module steering accel rad/s/s
+                        0.491, // front wheelbase m
+                        0.44, // back wheelbase m
                         0.491, // wheelbase m
-                        0.765, // wheelbase m
                         0.2); // vcg m (guess)
             case SWERVE_TWO:
                 return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.380, 0.445, 0.3);

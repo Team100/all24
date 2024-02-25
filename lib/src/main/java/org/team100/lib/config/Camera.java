@@ -38,22 +38,22 @@ public enum Camera {
      */
     SHOOTER("10000000a7c673da",
             new Transform3d(
-                    new Translation3d(0, 0.26035, 0.37465),
+                    new Translation3d(0, 0.26035, 0.5),
                     new Rotation3d(0, 0, 1.57))),
     /**
      * Delta amp-placer
      */
     AMP("10000000a7c673db",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
+                    new Translation3d(0, 0.2413, 0.5),
                     new Rotation3d(0, 0, 0))),
     /**
      * Delta intake
      */
     GAME_PIECE("10000000a7c673dc",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(0.321, 0.025, .29),
+                    new Rotation3d(0, Math.toRadians(25), Math.PI))),
     
     G("10000000a7a892c0",
             new Transform3d(
