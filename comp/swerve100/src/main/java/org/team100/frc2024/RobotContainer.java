@@ -151,6 +151,8 @@ public class RobotContainer {
     final Shooter m_shooter;
     final Intake m_intake;
     final Sensors m_sensors;
+    final LEDSubsystem m_ledSubsystem;
+
     final FeederSubsystem m_feeder;
 
     final DriverControl driverControl;
@@ -199,8 +201,6 @@ public class RobotContainer {
         }
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
-
-        m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
 
         m_sensors = new Sensors(9, 2, 3); // Definitely real numbers
 
@@ -251,9 +251,12 @@ public class RobotContainer {
 
         m_intake = IntakeFactory.get(m_sensors);
 
+        LEDStrip strip1 = new LEDStrip(160, 0);
+        
+        m_indicator = new LEDIndicator(0, strip1);
 
-
-
+        m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors);
+        
         m_shooter = ShooterFactory.get(m_feeder);
 
         m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
