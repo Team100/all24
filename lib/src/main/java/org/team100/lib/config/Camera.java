@@ -38,15 +38,15 @@ public enum Camera {
      */
     SHOOTER("10000000a7c673da",
             new Transform3d(
-                    new Translation3d(0, 0.26035, 0.5),
-                    new Rotation3d(0, 0, 1.57))),
+                    new Translation3d(.09, -.2748, 0.5),
+                    new Rotation3d(0, Math.toRadians(-30), 0))),
     /**
      * Delta amp-placer
      */
     AMP("10000000a7c673db",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.5),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(-0.03, -.2748, 0.5),
+                    new Rotation3d(0, Math.toRadians(-40), Math.PI))),
     /**
      * Delta intake
      */
