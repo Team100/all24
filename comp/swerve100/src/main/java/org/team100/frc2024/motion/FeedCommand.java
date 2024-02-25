@@ -49,7 +49,7 @@ public class FeedCommand extends Command {
         m_feeder.feed();
         m_intake.intake();
         m_shooter.feed();
-        m_amp.feed();
+        m_amp.driveFeeder(-value);
     }
     
   }
@@ -58,7 +58,7 @@ public class FeedCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     m_shooter.stop();
-    m_amp.stopFeed();
+    m_amp.driveFeeder(0);
 
 
   }

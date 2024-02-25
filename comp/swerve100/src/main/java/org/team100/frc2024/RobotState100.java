@@ -13,7 +13,7 @@ public class RobotState100 {
     }
 
     public enum AmpState100{
-        UP, DOWN, FEED, NONE
+        UP, DOWN, FEED, OUTTAKE, NONE
     }
 
     public enum IntakeState100{
@@ -24,7 +24,7 @@ public class RobotState100 {
         FEED, STOP
     }
 
-    public static State100 currentRobotState = State100.AMPING;
+    public static State100 currentRobotState = State100.SHOOTING;
     public static ShooterState100 currentShooterState = ShooterState100.STOP;
     public static AmpState100 currentAmpState = AmpState100.NONE;
     public static IntakeState100 currentIntakeState = IntakeState100.STOP;

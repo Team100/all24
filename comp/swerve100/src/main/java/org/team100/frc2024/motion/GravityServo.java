@@ -6,11 +6,15 @@ package org.team100.frc2024.motion;
 
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
+import org.team100.lib.encoder.AnalogEncoder100;
 import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.SparkMaxEncoder;
+import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -20,6 +24,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 
+//TODO I will fix this shitty shitty shitty class after SVR - Sanjan 
 /** Add your docs here. */
 public class GravityServo {
 
@@ -28,7 +33,7 @@ public class GravityServo {
     PIDController m_controller;
     Profile100 m_profile;
     CANSparkMax m_motor;
-    RelativeEncoder m_encoder;
+    Encoder100<Distance100> m_encoder;
     private final double m_period;
     double m_maxRadsM_S;
     Telemetry t = Telemetry.get();
@@ -41,6 +46,7 @@ public class GravityServo {
     private State100 m_setpoint = new State100(0, 0);
 
     public GravityServo(
+        CANSparkMax motor,
         int currentLimit,
         String name,
         SysParam params,
@@ -48,13 +54,15 @@ public class GravityServo {
         Profile100 profile,
         int canID,
         double period,
-        double gravityScale
+        double gravityScale,
+        Encoder100<Distance100> encoder
     ){
-
+    
+    
     m_period = period;
-    m_motor = new CANSparkMax(canID, MotorType.kBrushless);
+    m_motor = motor;
     m_motor.setIdleMode(IdleMode.kCoast);
-    m_encoder = m_motor.getEncoder();
+    m_encoder = encoder;
     m_name = name;
     m_params = params;
     m_controller = controller;
@@ -152,6 +160,9 @@ public class GravityServo {
                 (m_setpoint.x()),
                 m_setpoint.v());
 
+        System.out.println("SETPOINT XXXXX" + m_setpoint.x());
+
+
         
 
         double diff = m_goal.x() - m_setpoint.x();
@@ -159,10 +170,10 @@ public class GravityServo {
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.008; //rot/s to rpm conversion
+        // double u_FF = m_setpoint.v() * 2; //rot/s to rpm conversion
 
         double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
-        double u_TOTAL = gravityTorque + u_FF;
+        double u_TOTAL = gravityTorque + u_FB;
         
         // if(diff < 0.1){
         //     m_motor.set(0.05);
@@ -174,7 +185,8 @@ public class GravityServo {
         m_controller.setIntegratorRange(0, 0.1);
 
         t.log(Level.DEBUG, m_name, "u_FB", u_FB);
-        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
+        // t.log(Level.DEBUG, m_name, "u_FF", u_FF);
+        t.log(Level.DEBUG, m_name, "GRAVITY", gravityTorque);
         t.log(Level.DEBUG, m_name, "u_TOTAL", u_TOTAL);
         t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Goal", m_goal);
@@ -189,6 +201,8 @@ public class GravityServo {
     public void periodic(){
         t.log(Level.DEBUG, m_name, "Get Raw Position", getRawPosition());
         t.log(Level.DEBUG, m_name, "AMPS", m_motor.getOutputCurrent());
+        t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
+
 
 
 
