@@ -61,7 +61,7 @@ public class ShooterDefault extends Command {
                 case DEFAULTSHOOT:
                     // System.out.println("AHHHHHHHHH");
                     m_shooter.forward();
-                    m_shooter.setAngle(21.5);
+                    m_shooter.setAngle(23.0); //22.5a   
                     break;
                 case STOP:
                     // System.out.println("NOOOOOOOOOOOOOOOOOOO");

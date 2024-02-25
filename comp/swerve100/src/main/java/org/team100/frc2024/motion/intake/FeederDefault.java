@@ -49,7 +49,7 @@ public class FeederDefault extends Command {
     // System.out.println("FEEDER DEFAULT IS RUNNING");
 
     if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
-        m_feeder.feed();
+        m_feeder.intake();
     } else if(RobotState100.getFeederState() == FeederState100.FEED) {
         m_feeder.feed();
     } else {

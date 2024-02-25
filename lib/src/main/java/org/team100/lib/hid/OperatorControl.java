@@ -109,4 +109,8 @@ public interface OperatorControl {
     default boolean feedToAmp(){
         return false;
     }
+
+    default boolean outtakeFromAmp(){
+        return false;
+    }
 }
