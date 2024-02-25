@@ -39,7 +39,7 @@ public enum Camera {
     SHOOTER("10000000a7c673da",
             new Transform3d(
                     new Translation3d(.09, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-30), 0))),
+                    new Rotation3d(0, Math.toRadians(-25), 0))),
     /**
      * Delta amp-placer
      */
