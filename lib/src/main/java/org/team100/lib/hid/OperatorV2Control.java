@@ -85,4 +85,8 @@ public class OperatorV2Control implements OperatorControl {
     public boolean feedToAmp(){
         return m_controller.getLeftStickButton();
     }
+    @Override
+    public boolean outtakeFromAmp(){
+        return m_controller.getRightStickButton();
+    }
 }

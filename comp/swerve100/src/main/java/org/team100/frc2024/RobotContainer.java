@@ -16,11 +16,13 @@ import org.team100.frc2024.motion.IntakeNote;
 import org.team100.frc2024.motion.OuttakeNote;
 
 import org.team100.frc2024.motion.PrimitiveAuto;
+import org.team100.frc2024.motion.Test2;
 import org.team100.frc2024.motion.AutoMaker.FieldPoint;
 
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.DriveToAmp;
+import org.team100.frc2024.motion.amp.OuttakeCommand;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.climber.ClimberDefault;
@@ -399,9 +401,14 @@ public class RobotContainer {
 
         whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.NONE)));
 
+        // whileTrue(operatorControl::pivotToDownPosition, new Test2());
+
         whileTrue(operatorControl::pivotToDownPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.DOWN), () -> RobotState100.changeAmpState(AmpState100.NONE)));
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
+
+        whileTrue(operatorControl::outtakeFromAmp, new OuttakeCommand());
+
 
         // TODO: spin up the shooter whenever the robot is in range.
 
@@ -527,7 +534,7 @@ public class RobotContainer {
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         //Registers the subsystems so that they run with the specified priority
-        SubsystemPriority.registerWithPriority();
+        // SubsystemPriority.registerWithPriority();
 
         m_auton = m_drive.runInit(m_drive::defense);
 

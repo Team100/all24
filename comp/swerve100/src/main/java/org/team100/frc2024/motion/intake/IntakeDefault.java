@@ -58,6 +58,14 @@ public class IntakeDefault extends Command {
         default:
             
     }
+
+    switch(RobotState100.getFeederState()){
+        case FEED:
+            m_intake.runUpper();
+            break;
+        default:
+            
+    }
   }
 
   

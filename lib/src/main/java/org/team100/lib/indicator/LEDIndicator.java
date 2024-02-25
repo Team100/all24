@@ -7,6 +7,7 @@ import java.util.Map;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /**
  * An LED strip used as a signal light.
@@ -43,13 +44,11 @@ public class LEDIndicator {
 
     ArrayList<LEDStrip> leds = new ArrayList<>();
 
-    public LEDIndicator(int port, LEDStrip strip1, LEDStrip strip2) {
-        
-        leds.add(strip1);
-        leds.add(strip2);
+    public LEDIndicator(int port, LEDStrip... strips) {
 
-        for(LEDStrip s : leds){
-            totalLength += s.getLength();
+        for (LEDStrip strip : strips) {
+            leds.add(strip);
+            totalLength += strip.getLength();
         }
 
         led = new AddressableLED(port);
@@ -61,6 +60,10 @@ public class LEDIndicator {
 
         led.setData(buffer);
 
+    }
+
+    public void setStripSolid(int index, State s){
+        setStripSolid(leds.get(index), s);
     }
 
     public void setStripSolid(LEDStrip strip, State s){

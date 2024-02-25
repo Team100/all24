@@ -10,4 +10,6 @@ public abstract class Intake extends SubsystemBase implements Speeding  {
 
     public abstract void outtake();
     public abstract void stop();
+    public abstract void runUpper();
+
 }

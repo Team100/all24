@@ -38,6 +38,8 @@ public class IntakeRoller extends Intake {
      * Surface velocity of whatever is turning in the intake.
      */
     private static final double kIntakeVelocityM_S = 3;
+    private static final double kUpperIntakeM_S = 0.5;
+
     private static final double kCenteringVelocityM_S = 3;
 
     private final String m_name;
@@ -56,12 +58,9 @@ public class IntakeRoller extends Intake {
 
         m_sensors = sensors;
 
-
         t = Telemetry.get();
 
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
-        SysParam centeringParameter = SysParam.limitedNeoVelocityServoSystem(1, 0.05, 15, 10, -10);
-
 
                
         switch (Identity.instance) {
@@ -75,16 +74,8 @@ public class IntakeRoller extends Intake {
                         rollerParameter,
                         new FeedforwardConstants(0.122,0,0.1,0.065),
                         new PIDConstants(0.0001, 0, 0));
-                // centeringWheels = ServoFactory.limitedNeoVelocityServo(
-                //         m_name + "/Center Wheels",
-                //         centerCAN,
-                //         true,
-                //         kCurrentLimit,
-                //         centeringParameter,
-                //         new FeedforwardConstants(0.122,0,0.1,0.065),
-                //         new PIDConstants(0.0001, 0, 0));
 
-                centeringWheels = new PWM(0);
+                centeringWheels = new PWM(1);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Super Roller",
                         superCAN,
@@ -99,10 +90,8 @@ public class IntakeRoller extends Intake {
                 intakeRoller = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Intake Roller",
                         rollerParameter);
-                // centeringWheels = ServoFactory.limitedSimulatedVelocityServo(
-                //         m_name + "/Center Wheels",
-                //         centeringParameter);
-                centeringWheels = new PWM(0);
+
+                centeringWheels = new PWM(1);
 
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Center Wheels",
@@ -114,6 +103,7 @@ public class IntakeRoller extends Intake {
     @Override
     //All you have to do is set the state once and it handles the rest. No need for commands 
     public void intakeSmart() {
+        System.out.println("IM RUNNING");
         if(!m_sensors.getFeederSensor()){
             System.out.println("STOPING INAKE" + Timer.getFPGATimestamp());
             intakeRoller.setVelocity(0);
@@ -131,17 +121,15 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void intake(){
-        // System.out.println("INTAKING");
-        // intakeRoller.setVelocity(kIntakeVelocityM_S);
-        // centeringWheels.setVelocity(kCenteringVelocityM_S);
-        // superRollers.setVelocity(kIntakeVelocityM_S);
-        // m_feeder.feed(IntakeRoller.class);
         centeringWheels.setSpeed(0.8);
-
         intakeRoller.setDutyCycle(0.8);
         superRollers.setDutyCycle(0.8);
-        // centeringWheels.setDutyCycle(0.5);
-        // centeringWheels.setSpeed(0.8);
+
+    }
+
+     @Override
+    public void runUpper(){
+        superRollers.setDutyCycle(0.8);
 
     }
 
@@ -163,21 +151,11 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void periodic() {
-        if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
-            t.log(Level.DEBUG, m_name, "STATE", 2);
-        } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
-            t.log(Level.DEBUG, m_name, "STATE", 1);
-        }else if(RobotState100.getIntakeState() == IntakeState100.STOP){
-            t.log(Level.DEBUG, m_name, "STATE", 0);
-        }   
-
-        // System.out.println(m_sensors.getFeederSensor());
-
         intakeRoller.periodic();
-        // centeringWheels.periodic();
-
         superRollers.periodic();
         m_viz.periodic();
+
+        // System.out.println(m_sensors.getFeederSensor());
     }
 
     @Override
