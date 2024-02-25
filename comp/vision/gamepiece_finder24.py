@@ -22,7 +22,7 @@ class Camera(Enum):
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
     SHOOTER = "10000000a7c673da"  # "DELTA SHOOTER"
     AMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
-    GAME_PIECE = "10000000a7c673dc"  # "DELTA INTAKE"
+    GAME_PIECE = "10000000e31d4a24"  # "DELTA INTAKE"
     G = "10000000a7a892c0"  # ""
     UNKNOWN = None
 
@@ -145,9 +145,12 @@ class GamePieceFinder:
         # this says YUV->RGB but it actually makes BGR.
         # github.com/raspberrypi/picamera2/issues/848
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
+        serial = getserial()
+        identity = Camera(serial)
+        if identity == Camera.GAME_PIECE:
+            img_bgr = img_bgr[0:self.height,:,:]
 
         img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
-
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
@@ -192,8 +195,8 @@ class GamePieceFinder:
             rotation = Rotation3d(0, pitchRad, yawRad)
             objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
-            
-        self.output_stream.putFrame(img_bgr)
+        img_output = cv2.resize(img_bgr, (269,162)) 
+        self.output_stream.putFrame(img_output)
         return objects
 
     def draw_result(self, img, cnt, cX, cY):
