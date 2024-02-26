@@ -66,7 +66,7 @@ public class ShooterUtil {
     public static double getAngle(double distance){
         return instance.getAngle(distance);
     }
-
+    
     //Distance in Meters
     //Velocity also needs to be in M/s
 
