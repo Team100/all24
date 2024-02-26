@@ -27,33 +27,33 @@ public enum Camera {
                     new Translation3d(0.1825, -0.06985, 0.76),
                     new Rotation3d(0, Math.toRadians(-24), Math.PI))),
     /**
-     * Gamma intake
+     * 
      */
     C("10000000a7c673d9",
             new Transform3d(
                     new Translation3d(0, 0, 0.75),
                     new Rotation3d(0, Math.toRadians(30), 0))),
     /**
-     * Delta shooter
+     * Gamma shooter
      */
     SHOOTER("10000000a7c673da",
             new Transform3d(
-                    new Translation3d(0, 0.26035, 0.37465),
-                    new Rotation3d(0, 0, 1.57))),
+                    new Translation3d(.09, -.2748, 0.5),
+                    new Rotation3d(0, Math.toRadians(-20), 0))),
     /**
-     * Delta amp-placer
+     * Gamma amp-placer
      */
     AMP("10000000a7c673db",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(-0.03, -.2748, 0.5),
+                    new Rotation3d(0, Math.toRadians(-40), Math.PI))),
     /**
-     * Delta intake
+     * Gamma intake
      */
-    GAME_PIECE("10000000a7c673dc",
+    GAME_PIECE("10000000e31d4a24",
             new Transform3d(
-                    new Translation3d(0, 0.2413, 0.3937),
-                    new Rotation3d(0, 0, 0))),
+                    new Translation3d(-0.321, -0.04, .29),
+                    new Rotation3d(0, Math.toRadians(27), Math.PI))),
     
     G("10000000a7a892c0",
             new Transform3d(

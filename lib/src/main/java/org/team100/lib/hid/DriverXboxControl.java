@@ -18,12 +18,13 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public class DriverXboxControl implements DriverControl {
     private static final double kDeadband = 0.05;
-    private static final double kExpo = 0.5;
+    private static final double kExpo = 0.75;
+    private static final double kMedium = 0.5;
+    private static final double kSlow = 0.15;
     private final Telemetry t = Telemetry.get();
     private final XboxController m_controller;
     private final String m_name;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
-
     public DriverXboxControl() {
         m_controller = new XboxController(0);
         m_name = Names.name(this);
@@ -71,17 +72,25 @@ public class DriverXboxControl implements DriverControl {
             dy = 0;
         }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
+        Speed speed = speed();
         t.log(Level.TRACE, m_name, "Xbox/right y", m_controller.getRightY());
         t.log(Level.TRACE, m_name, "Xbox/right x", m_controller.getRightX());
         t.log(Level.TRACE, m_name, "Xbox/left x", m_controller.getLeftX());
-        return new Twist2d(dx, dy, dtheta);
+        switch (speed) {
+            case SLOW:
+                return new Twist2d(kSlow * dx, kSlow * dy, kSlow * dtheta);
+            case MEDIUM:
+                return new Twist2d(kMedium * dx, kMedium * dy, kMedium * dtheta);
+            default:
+                return new Twist2d(dx, dy, dtheta);
+        }
     }
 
     @Override
     public Speed speed() {
         if (m_controller.getLeftBumper())
             return Speed.SLOW;
-        if (m_controller.getRightBumper())
+        if (m_controller.getLeftTriggerAxis() > .9)
             return Speed.MEDIUM;
         return Speed.NORMAL;
     }
@@ -142,11 +151,16 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean test(){
-        return m_controller.getBButton();
+        return false;
     }
 
     @Override
     public int pov(){
         return m_controller.getPOV();
+    }
+
+    @Override
+    public boolean shooterLock(){
+        return m_controller.getBButton();
     }
 }

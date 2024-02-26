@@ -69,7 +69,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Drive drive,
             MotorPhase motorPhase) {
         name = m_name + "/" + name;
-        PIDConstants drivePidConstants = new PIDConstants(.2);
+        PIDConstants drivePidConstants = new PIDConstants(.2); //.2
         PIDConstants turningPidConstants = new PIDConstants(0.22); // 5
         FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon6();
         FeedforwardConstants driveFeedforwardConstants = FeedforwardConstants.makeWCPSwerveDriveFalcon6();
@@ -105,6 +105,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             DriveRatio ratio,
             PIDConstants pidConstants,
             FeedforwardConstants feedforwardConstants) {
+                
         MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
                 driveMotorCanId,

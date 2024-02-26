@@ -7,19 +7,27 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.encoder.SparkMaxEncoder;
 import org.team100.lib.motion.components.LimitedVelocityServo;
+import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
+import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.MotorWithEncoder100;
+import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -45,19 +53,20 @@ public class DrumShooter extends Shooter{
      * but there are many factors that affect the relationship in
      * the real world.
      */
-    private static final double kMuzzleVelocityM_S = 30;
     private final String m_name;
-    private final FeederSubsystem m_feeder;
-    private final LimitedVelocityServo<Distance100> leftRoller;
-    private final LimitedVelocityServo<Distance100> rightRoller;
-    private final GravityServo pivotMotor;
+    private final VelocityServo<Distance100>  leftRoller;
+    private final VelocityServo<Distance100>  rightRoller ;
+    private final GravityServo pivotServo;
+
+    private final CANSparkMax pivotMotor;
+
 
     private final SpeedingVisualization m_viz;
 
     private final Telemetry t;
 
 
-    public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit, FeederSubsystem feeder) {
+    public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit) {
         m_name = Names.name(this);
         
         int shooterCurrentLimit = 40;
@@ -66,9 +75,9 @@ public class DrumShooter extends Shooter{
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
         SysParam pivotParams = SysParam.neoPositionServoSystem(
-            75,
-            30,
-            30)
+            165,
+            50,
+            50)
             ;        
         SysParam feederParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
 
@@ -77,35 +86,49 @@ public class DrumShooter extends Shooter{
         switch (Identity.instance) {
             case COMP_BOT:
             //TODO tune kV
-                leftRoller = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Left",
-                        leftID,
-                        false,
-                        shooterCurrentLimit,
-                        shooterParams,
-                        new FeedforwardConstants(0.122,0,0.1,0.065),
-                        new PIDConstants(0.0001, 0, 0));
-                rightRoller = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Right",
-                        rightID,
-                        true,
-                        shooterCurrentLimit,
-                        shooterParams,
-                        new FeedforwardConstants(0.122,0,0.1,0.065),
-                        new PIDConstants(0.0001, 0, 0));
 
-                pivotMotor = new GravityServo(
+                MotorWithEncoder100<Distance100> leftMotor = new Falcon6DriveMotor(
+                    m_name + "/Left",
+                    leftID,
+                    false,
+                    currentLimit,
+                    1,
+                    0.1,
+                    new PIDConstants(0.4, 0, 0), //0.4
+                    new FeedforwardConstants(0.11,0,0,0.9)
+                );
+
+                leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftMotor);
+                        
+                MotorWithEncoder100<Distance100> rightMotor = new Falcon6DriveMotor(
+                    m_name + "/Riht",
+                    rightID,
+                    true,
+                    currentLimit,
+                    1,
+                    0.1,
+                    new PIDConstants(0.4, 0, 0), //0.4
+                    new FeedforwardConstants(0.11,0,0,0.9)
+                );
+
+                rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
+
+                pivotMotor = new CANSparkMax(pivotID, MotorType.kBrushless);
+
+                pivotServo = new GravityServo(
+                        pivotMotor,
+                        40,
                         m_name + "/Pivot", 
                         pivotParams, 
-                        new PIDController(0.01, 0, 0), //same
-                        new TrapezoidProfile100(pivotParams.maxVelM_S(), pivotParams.maxAccelM_S2(), 0.05),
+                        new PIDController(0.07, 0.0, 0.000), //same
+                        new TrapezoidProfile100(450, 450, 0.02),
                         pivotID, 
                         0.02, 
-                        0
+                        0,
+                        new SparkMaxEncoder(m_name, pivotMotor)
 
                 ); //same
 
-                m_feeder = feeder;
                 break;
             case BLANK:
             default:
@@ -116,58 +139,52 @@ public class DrumShooter extends Shooter{
                         m_name + "/Bottom",
                         shooterParams);
 
-                pivotMotor = new GravityServo(
+                pivotMotor = new CANSparkMax(pivotID, MotorType.kBrushless);
+
+                pivotServo = new GravityServo(
+                        pivotMotor,
+                        40,
                         m_name + "/Pivot", 
                         pivotParams, 
-                        new PIDController(1, 0, 0),
-                        new TrapezoidProfile100(pivotParams.maxVelM_S(), pivotParams.maxAccelM_S2(), 0.05),
+                        new PIDController(0.07, 0.0, 0.000), //same
+                        new TrapezoidProfile100(450, 450, 0.02),
                         pivotID, 
                         0.02, 
-                        -0.06
-                ); 
+                        0,
+                        new SparkMaxEncoder(m_name, pivotMotor)
 
-                m_feeder = feeder;
+                ); //same
+
         }
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
     @Override
     public void forward() {
-        // leftRoller.setVelocity(kMuzzleVelocityM_S);
-        // rightRoller.setVelocity(kMuzzleVelocityM_S);
+        leftRoller.setVelocity(30);
+        rightRoller.setVelocity(20);
     }
 
     @Override
-    public void feed(){
-        // if(readyToShoot()){
-            // feedRoller.setVelocity(10);
-            m_feeder.feed(DrumShooter.class);
-
-        // }
-
-    };
-
-    @Override
     public void stop() {
-        // leftRoller.stop();
-        // rightRoller.stop();
-        // pivotMotor.stop();
-        // m_feeder.stop(DrumShooter.class);
+        leftRoller.setDutyCycle(0);
+        rightRoller.setDutyCycle(0);
+        pivotServo.setDutyCycle(0);
     }
 
     @Override
     public void reset(){
-        pivotMotor.reset();
+        pivotServo.reset();
     }
 
     @Override
     public void setAngle(Double goal){
-        pivotMotor.setPosition(goal);
+        pivotServo.setPosition(goal);
 
     }
 
     public double getAngle(){
-        return pivotMotor.getPosition();
+        return pivotServo.getPosition();
 
     }
 
@@ -175,11 +192,9 @@ public class DrumShooter extends Shooter{
     public void periodic() {
         leftRoller.periodic();
         rightRoller.periodic();
-        pivotMotor.periodic();
+        pivotServo.periodic();
         m_viz.periodic();
-
-        // leftRoller.setDutyCycle(-0.1);
-        // rightRoller.setDutyCycle(-0.1);
+ 
 
         
     }
@@ -210,12 +225,27 @@ public class DrumShooter extends Shooter{
     }
 
     public void setDutyCycle(double value) {
-        //TODO get real values here
-        // leftRoller.setDutyCycle(value);
-        // rightRoller.setDutyCycle(value);
-        leftRoller.setDutyCycle(-1);
-        rightRoller.setDutyCycle(-1);
+        leftRoller.setDutyCycle(value);
+        rightRoller.setDutyCycle(value);
+
+
     }
+
+    public double getPivotPosition(){
+        return pivotServo.getRawPosition();
+    }
+
+    public void setPivotPosition(double value){
+        pivotServo.setPosition(value);
+    }
+
+    public void feed(){
+        leftRoller.setDutyCycle(0.1);
+        rightRoller.setDutyCycle(0.1);
+
+    }
+
+
     public double getVelocity() {
         switch (Identity.instance) {
             case COMP_BOT:

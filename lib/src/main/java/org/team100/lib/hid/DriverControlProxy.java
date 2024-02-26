@@ -48,6 +48,9 @@ public class DriverControlProxy implements DriverControl {
         if (name.contains("F310")) {
             return new DriverXboxControl();
         }
+        if (name.contains("Xbox")) {
+            return new DriverXboxControl();
+        }
         if (name.startsWith("VKBsim")) {
             return new VKBJoystick();
         }
@@ -169,5 +172,10 @@ public class DriverControlProxy implements DriverControl {
     @Override
     public int pov(){
         return m_driverControl.pov();
+    }
+
+    @Override
+    public boolean shooterLock(){
+        return m_driverControl.shooterLock();
     }
 }

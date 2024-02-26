@@ -5,6 +5,7 @@
 package org.team100.frc2024.motion.shooter;
 
 import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -60,20 +61,29 @@ public class ShooterDefault extends Command {
             switch(RobotState100.getShooterState()){
                 case DEFAULTSHOOT:
                     // System.out.println("AHHHHHHHHH");
-                    m_shooter.setDutyCycle(1);
-                    // m_shooter.setAngle(22.0);
+                    m_shooter.forward();
+                    m_shooter.setAngle(ShooterUtil.getAngle(m_drive.getPose().getX())); //22.5a   
+                    break;
                 case STOP:
-                    m_shooter.setDutyCycle(0);
+                    // System.out.println("NOOOOOOOOOOOOOOOOOOO");
+                    m_shooter.stop();
+                    break;
                 default:
                     m_shooter.setDutyCycle(0);
+                    break;
 
             }
+            break;
             
         case AMPING:
-            m_shooter.stop();
+            // m_shooter.stop();
+            // System.out.println("AMPIIING");
+            break;
         case NONE:
-            m_shooter.stop();
+            // m_shooter.stop();
+            break;
         default:
+            break;
             // m_shooter.stop();
             // m_shooter.setAngle(0.0);
 

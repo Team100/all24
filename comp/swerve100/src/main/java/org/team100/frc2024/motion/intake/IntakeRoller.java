@@ -1,8 +1,8 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.frc2024.RobotState100;
-import org.team100.frc2024.Sensors;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
@@ -16,6 +16,8 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 /**
@@ -36,30 +38,29 @@ public class IntakeRoller extends Intake {
      * Surface velocity of whatever is turning in the intake.
      */
     private static final double kIntakeVelocityM_S = 3;
+    private static final double kUpperIntakeM_S = 0.5;
+
     private static final double kCenteringVelocityM_S = 3;
 
     private final String m_name;
     private final LimitedVelocityServo<Distance100> intakeRoller;
-    private final LimitedVelocityServo<Distance100> centeringWheels;
+    // private final LimitedVelocityServo<Distance100> centeringWheels;
+    private final PWM centeringWheels;
     private final LimitedVelocityServo<Distance100> superRollers;
-    private final FeederSubsystem m_feeder;
 
     private final SpeedingVisualization m_viz;
-    private final Sensors m_sensors;
+    private final SensorInterface m_sensors;
     private final Telemetry t;
 
-    public IntakeRoller(Sensors sensors, FeederSubsystem feeder, int intakeCAN, int centerCAN, int superCAN) {
+    public IntakeRoller(SensorInterface sensors, int intakeCAN, int centerCAN, int superCAN) {
 
         m_name = Names.name(this);
 
         m_sensors = sensors;
 
-        m_feeder = feeder;
-
         t = Telemetry.get();
 
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
-        SysParam centeringParameter = SysParam.limitedNeoVelocityServoSystem(1, 0.05, 15, 10, -10);
 
                
         switch (Identity.instance) {
@@ -73,14 +74,8 @@ public class IntakeRoller extends Intake {
                         rollerParameter,
                         new FeedforwardConstants(0.122,0,0.1,0.065),
                         new PIDConstants(0.0001, 0, 0));
-                centeringWheels = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Center Wheels",
-                        centerCAN,
-                        true,
-                        kCurrentLimit,
-                        centeringParameter,
-                        new FeedforwardConstants(0.122,0,0.1,0.065),
-                        new PIDConstants(0.0001, 0, 0));
+
+                centeringWheels = new PWM(1);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Super Roller",
                         superCAN,
@@ -95,9 +90,9 @@ public class IntakeRoller extends Intake {
                 intakeRoller = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Intake Roller",
                         rollerParameter);
-                centeringWheels = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Center Wheels",
-                        centeringParameter);
+
+                centeringWheels = new PWM(1);
+
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Center Wheels",
                         rollerParameter);
@@ -105,19 +100,20 @@ public class IntakeRoller extends Intake {
         m_viz = new SpeedingVisualization(m_name, this);
     }
 
+    @Override
     //All you have to do is set the state once and it handles the rest. No need for commands 
     public void intakeSmart() {
-        if(m_sensors.getFeederSensor()){
+        System.out.println("IM RUNNING");
+        if(!m_sensors.getFeederSensor()){
+            System.out.println("STOPING INAKE" + Timer.getFPGATimestamp());
             intakeRoller.setVelocity(0);
-            centeringWheels.setVelocity(0);
+            centeringWheels.setSpeed(0);
             superRollers.setVelocity(0);
-            m_feeder.setVelocity(0, IntakeRoller.class);
             RobotState100.changeIntakeState(IntakeState100.STOP);
         } else {
             intakeRoller.setVelocity(kIntakeVelocityM_S);
-            centeringWheels.setVelocity(kCenteringVelocityM_S);
+            centeringWheels.setSpeed(0.8);
             superRollers.setVelocity(kIntakeVelocityM_S);
-            m_feeder.feed(IntakeRoller.class);
         }
         
 
@@ -125,50 +121,41 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void intake(){
-        // System.out.println("INTAKING");
-        // intakeRoller.setVelocity(kIntakeVelocityM_S);
-        // centeringWheels.setVelocity(kCenteringVelocityM_S);
-        // superRollers.setVelocity(kIntakeVelocityM_S);
-        // m_feeder.feed(IntakeRoller.class);
-
+        centeringWheels.setSpeed(0.8);
         intakeRoller.setDutyCycle(0.8);
         superRollers.setDutyCycle(0.8);
-        centeringWheels.setDutyCycle(0.5);
+
+    }
+
+     @Override
+    public void runUpper(){
+        superRollers.setDutyCycle(0.8);
 
     }
 
     @Override
     public void outtake() {
-        m_feeder.starve(IntakeRoller.class);
-        intakeRoller.setVelocity(-kIntakeVelocityM_S);
-        centeringWheels.setVelocity(-kCenteringVelocityM_S);
-        superRollers.setVelocity(-kIntakeVelocityM_S);
+        intakeRoller.setDutyCycle(-0.8);
+        centeringWheels.setSpeed(-0.8);
+        superRollers.setVelocity(-0.8);
     }
 
     @Override
     public void stop() {
         // System.out.println("STOPPPP");
         intakeRoller.setDutyCycle(0);
-        centeringWheels.setDutyCycle(0);
+        centeringWheels.setSpeed(0);
         superRollers.setDutyCycle(0);
-        m_feeder.stop(IntakeRoller.class);
 
     }
 
     @Override
     public void periodic() {
-        if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
-            t.log(Level.DEBUG, m_name, "STATE", 2);
-        } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
-            t.log(Level.DEBUG, m_name, "STATE", 1);
-        }else if(RobotState100.getIntakeState() == IntakeState100.STOP){
-            t.log(Level.DEBUG, m_name, "STATE", 0);
-        }
-
         intakeRoller.periodic();
-        centeringWheels.periodic();
         superRollers.periodic();
         m_viz.periodic();
+
+        // System.out.println(m_sensors.getFeederSensor());
     }
 
     @Override

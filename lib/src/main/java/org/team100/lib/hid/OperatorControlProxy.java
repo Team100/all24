@@ -79,6 +79,11 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
+    public boolean pivotToDownPosition() {
+        return m_operatorControl.pivotToDownPosition();
+    }
+
+    @Override
     public double shooterSpeed() {
         return m_operatorControl.shooterSpeed();
     }
@@ -141,11 +146,32 @@ public class OperatorControlProxy implements OperatorControl {
         return m_operatorControl.feed();
     }
 
-    public void pov(){
-        m_operatorControl.pov();
+    public int pov(){
+        return m_operatorControl.pov();
     }
 
     public boolean ramp(){
         return m_operatorControl.ramp();
+    }
+
+    public double getLeftAxis(){
+        return m_operatorControl.getLeftAxis();
+    }
+
+    public double getRightAxis(){
+        return  m_operatorControl.getRightAxis();
+    }
+
+    public boolean getClimberOveride(){
+        return  m_operatorControl.getClimberOveride();
+    }
+
+    public boolean feedToAmp(){
+        return  m_operatorControl.feedToAmp();
+    }
+
+    
+    public boolean outtakeFromAmp(){
+        return  m_operatorControl.outtakeFromAmp();
     }
 }

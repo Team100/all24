@@ -156,16 +156,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     public void driveInFieldCoords(Twist2d twist, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
         t.log(Level.TRACE, m_name, "control_speed", speed);
-        switch (speed) {
-            case SLOW:
-                twist = GeometryUtil.scale(twist, kSlow);
-                break;
-            case MEDIUM:
-                twist = GeometryUtil.scale(twist, kMedium);
-                break;
-            default:
-                break;
-        }
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
@@ -201,18 +191,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * desaturator.
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
-        DriverControl.Speed speed = m_speed.get();
-        switch (speed) {
-            case SLOW:
-                speeds = speeds.times(kSlow);
-                break;
-            case MEDIUM:
-                speeds = speeds.times(kMedium);
-                break;
-            default:
-                break;
-        }
-
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
         t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);

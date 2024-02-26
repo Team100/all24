@@ -22,6 +22,7 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class FeederSubsystem extends SubsystemBase {
@@ -59,69 +60,31 @@ public class FeederSubsystem extends SubsystemBase {
 
   }
 
-  public void starve(Class<?> originClass){
-    setVelocity(-kFeederVelocityM_S, originClass);
+  public void starve(){
+    feedRoller.setDutyCycle(-1);
   }
 
-  public void feed(Class<?> originClass){
-    setVelocity(kFeederVelocityM_S, originClass);
+
+  public void feed(){
+    feedRoller.setDutyCycle(1);
     
   }
 
-  public void feed(){
-    feedRoller.setDutyCycle(0.5);
+  public void intake(){
+    feedRoller.setDutyCycle(0.1);
     
   }
 
   public void stop(){
+    // System.out.println("STOPING FEED" + Timer.getFPGATimestamp());
+
     feedRoller.setDutyCycle(0);
     
   }
 
 
-  public void setVelocity(double velocity, Class<?> originClass){
-    //Listen to beam break instead?
-      // if(originClass == DrumShooter.class){
-      //   if(RobotState100.getShooterState() == ShooterState100.FEED){
-      //     feedRoller.setDutyCycle(0.1);
-      //   } else {
-      //     return;
-      //   }
-      // } else if(originClass == IntakeRoller.class){
-      //     // feedRoller.setVelocity(velocity);
-      //     feedRoller.setDutyCycle(0.1);
-
-
-      // } 
-
-      
-      
-
-    
-
-    
-  }
-
-  public void stop (Class<?> originClass){
-    // if(originClass == DrumShooter.class){
-    //     if(RobotState100.getShooterState() == ShooterState100.FEED){
-    //       feedRoller.stop();
-    //     } else {
-    //       return;
-    //     }
-    //   } else if(originClass == IntakeRoller.class){
-    //       // feedRoller.setVelocity(velocity);
-    //       feedRoller.stop();
-
-
-    //   } 
-  }
-
   @Override
   public void periodic() {
-    // System.out.println("FEEEEDD");
-    // feedRoller.setDutyCycle(1);
-
     // This method will be called once per scheduler run
     feedRoller.periodic();
   }

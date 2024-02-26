@@ -4,12 +4,18 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Positioning;
 import org.team100.lib.motion.simple.SimpleVisualization;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -30,25 +36,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * 
  * TODO: add climber to selftest.
  */
-public class ClimberSubsystem extends SubsystemBase implements Positioning {
+public class ClimberSubsystem extends SubsystemBase {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 2;
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServoInterface<Distance100> s1;
-    private final PositionServoInterface<Distance100> s2;
-    private final SimpleVisualization m_viz;
-    private final PIDConstants m_velocityPIDConstants;
-    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
-    private final PIDController m_climberPositionController;
-
+    private final CANSparkFlex s1;
+    private final CANSparkFlex s2;
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
-        m_velocityPIDConstants = new PIDConstants(0.0001, 0, 0);
-        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
-        m_climberPositionController = new PIDController(1, 0, 0);
-        SmartDashboard.putData("Climber PID Positional Controller", m_climberPositionController);
+
 
 
         m_params = new SysParam(
@@ -60,59 +58,96 @@ public class ClimberSubsystem extends SubsystemBase implements Positioning {
         switch (Identity.instance) {
             case COMP_BOT:
             //TODO tune kV
-                s1 = ServoFactory.neoVortexDistanceServo(
-                        m_name + "/Left",
-                        leftClimberID,
-                        false,
-                        kCurrentLimit,
-                        m_params,
-                        new PIDController(1, 0, 0),
-                        m_lowLevelFeedforwardConstants,
-                        m_velocityPIDConstants);
-                s2 = ServoFactory.neoVortexDistanceServo(
-                        m_name + "/Right",
-                        rightClimberID,
-                        true,
-                        kCurrentLimit,
-                        m_params,
-                        new PIDController(1, 0, 0),
-                        m_lowLevelFeedforwardConstants,
-                        m_velocityPIDConstants);
+
+                s1 = new CANSparkFlex(leftClimberID, MotorType.kBrushless);
+                s2 = new CANSparkFlex(rightClimberID, MotorType.kBrushless);
+                s2.setInverted(true);
+
+                
+                s1.setSmartCurrentLimit(40);
+                s2.setSmartCurrentLimit(40);
                 break;
             case BLANK:
             default:
-                s1 = ServoFactory.simulatedDistanceServo(
-                        m_name + "/Left",
-                        m_params,
-                        new PIDController(1, 0, 0));
-                s2 = ServoFactory.simulatedDistanceServo(
-                        m_name + "/Right",
-                        m_params,
-                        new PIDController(1, 0, 0));
+                s1 = new CANSparkFlex(60, MotorType.kBrushless);
+                s2 = new CANSparkFlex(61, MotorType.kBrushless);
+                s2.setInverted(true);
         }
-        m_viz = new SimpleVisualization(m_name, this);
+        // m_viz = new SimpleVisualization(m_name, this);
     }
 
-    /** Set velocity in meters per second */
-    public void set(double value) {
-        s1.setVelocity(value);
-        s2.setVelocity(value);
+    public void setLeftWithSoftLimits(double value){
+        if(s1.getEncoder().getPosition() > 300){
+            if(value >= 0){
+                s1.set(0);
+                return;
+            }
+        }
+
+        if(s1.getEncoder().getPosition() < 5){
+            if(value <= 0){
+                s1.set(0);
+                return;
+            }
+        }
+
+        // s1.set(value);
+
+        Telemetry.get().log(Level.DEBUG, m_name, "LEFT VALUE", value);
+
     }
 
-    public void setPosition(double value) {
-        s1.setPosition(value);
-        s2.setPosition(value);
+    public void setRightWithSoftLimits(double value){
+        if(s2.getEncoder().getPosition() > 300){
+            if(value >= 0){
+                s2.set(0);
+                return;
+            }
+        }
+
+
+        if(s2.getEncoder().getPosition() < 5){
+            if(value <= 0){
+                s2.set(0);
+                return;
+            }
+        }
+
+        // s2.set(value);
+
+        Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
+
     }
 
-    @Override
-    public double getPositionRad() {
-        return (s1.getPosition() + s2.getPosition()) / 2;
+    public void setLeft(double value){
+        // s1.set(value);
     }
 
+    public void setRight(double value){
+        // s2.set(value);
+    }
+    
     @Override
     public void periodic() {
-        s1.periodic();
-        s2.periodic();
-        m_viz.periodic();
+        
+        // s1.set(-1);
+        // s2.set(-1);
+
+        Telemetry.get().log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", s1.getEncoder().getPosition());
+        Telemetry.get().log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", s2.getEncoder().getPosition());
+
+        
+        Telemetry.get().log(Level.DEBUG, m_name, "current (A) CLIMVER 1", s1.getOutputCurrent());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "current (A) CLIMBER 2", s2.getOutputCurrent());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 1", s1.getAppliedOutput());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 2", s1.getAppliedOutput());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "RPM 1", s1.getEncoder().getVelocity());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "RPM 2", s2.getEncoder().getVelocity());
+
     }
 }

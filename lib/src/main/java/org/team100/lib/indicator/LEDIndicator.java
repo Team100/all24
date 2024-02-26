@@ -1,12 +1,14 @@
 package org.team100.lib.indicator;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /**
  * An LED strip used as a signal light.
@@ -17,6 +19,7 @@ public class LEDIndicator {
     private static final int kStripLength = 256;
     private static final double brightnessScaler = 50.0/255.0;
     private State currentColor;
+    
     
     /**
      * This enum exists to prepopulate the buffers, so they can be set atomically,
@@ -39,30 +42,59 @@ public class LEDIndicator {
         }
     }
 
-    private final Map<State, AddressableLEDBuffer> buffers;
     private final AddressableLED led;
+    private final AddressableLEDBuffer buffer;
 
-    public LEDIndicator(int port) {
-        buffers = new EnumMap<>(State.class);
-        for (State s : State.values()) {
-            AddressableLEDBuffer buffer = new AddressableLEDBuffer(kStripLength);
-            for (int i = 0; i < kStripLength; i++) {
-                buffer.setLED(i, s.color);
-            }
-            buffers.put(s, buffer);
+    private double totalLength = 0;
+
+    ArrayList<LEDStrip> leds = new ArrayList<>();
+
+    public LEDIndicator(int port, LEDStrip... strips) {
+
+        for (LEDStrip strip : strips) {
+            leds.add(strip);
+            totalLength += strip.getLength();
         }
-        led = new AddressableLED(port);
-        led.setLength(kStripLength);
+
+        led = new AddressableLED(0);
+        led.setLength(160);
+
+
+        buffer = new AddressableLEDBuffer(160);
+
+        led.setData(buffer);
         led.start();
         set(State.BLACK);
+
     }
 
-    public void set(State s) {
-        led.setData(buffers.get(s));
+    public void setStripRed(int index, State s){
+        // setStripSolid(leds.get(index), s);
+        for(int i = 0; i < 160; i++){
+            buffer.setLED(i, new Color(255, 0, 0));
+        }
+
+        led.setData(buffer);
+
     }
 
-    public void close() {
-        led.close();
+    public void setStripGreen(int index, State s){
+        // setStripSolid(leds.get(index), s);
+        for(int i = 0; i < 160; i++){
+            buffer.setLED(i, new Color(0, 0, 255));
+        }
+
+        led.setData(buffer);
+
+    }
+
+    public void setStripSolid(LEDStrip strip, State s){
+        Patterns.solid(strip, buffer, s.color);
+    }
+
+    public void setStripRainbow(LEDStrip strip){
+        Patterns.rainbow(strip, buffer);  
+
     }
 
     public void displayTeam100() {
@@ -77,5 +109,11 @@ public class LEDIndicator {
             buffer.setLED(i, currentColor.color);
         }
         led.setData(buffer);
+    }
+  
+    public void setStripChase(LEDStrip strip){
+        Color[] colors = {new Color(), new Color()};
+        Patterns.chase(colors, strip, buffer);  
+
     }
 }

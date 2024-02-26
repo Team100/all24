@@ -42,8 +42,8 @@ public interface OperatorControl {
         return false;
     }
 
-    default void pov(){
-        
+    default int pov(){
+        return 0;
     }
 
     default boolean intake() {
@@ -87,6 +87,30 @@ public interface OperatorControl {
     }
 
     default boolean selfTestEnable() {
+        return false;
+    }
+
+    default double getLeftAxis(){
+        return 1;
+    }
+
+    default double getRightAxis(){
+        return 0;
+    }
+
+    default boolean getClimberOveride(){
+        return false;
+    }
+
+    default boolean pivotToDownPosition(){
+        return false;
+    }
+
+    default boolean feedToAmp(){
+        return false;
+    }
+
+    default boolean outtakeFromAmp(){
         return false;
     }
 }
