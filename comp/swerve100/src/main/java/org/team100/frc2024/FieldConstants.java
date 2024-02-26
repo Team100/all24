@@ -37,7 +37,7 @@ public class FieldConstants {
     }
 
 
-    public static final FieldConstants instance = new FieldConstantsBlue();
+    public static final FieldConstants instance = new FieldConstantsRed();
 
     private static FieldConstants get(){
         if(DriverStation.getAlliance().get() == Alliance.Blue){
