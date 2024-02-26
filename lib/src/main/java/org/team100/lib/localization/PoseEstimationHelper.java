@@ -33,6 +33,9 @@ public class PoseEstimationHelper {
                 return new Translation2d();
             }
             double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
+            if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
+                x =-x; 
+            }
             double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
             return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
     }

@@ -33,9 +33,11 @@ class Camera(Enum):
     A = "10000000caeaae82"  # "BETA FRONT"
     B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
+
     SHOOTER = "100000004e0a1fb9"  # "DELTA SHOOTER"
     AMP = "1000000031b9d05b"  # "DELTA AMP-PLACER"
     GAME_PIECE = "10000000a7c673dc"  # "DELTA INTAKE"
+
     G = "10000000a7a892c0"  # ""
     UNKNOWN = None
 
@@ -179,7 +181,12 @@ class TagFinder:
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
         # for now use the full frame
         # TODO: probably remove this
-        img = img[: self.height, : self.width]
+        serial = getserial()
+        identity = Camera(serial)
+        if identity == Camera.SHOOTER:
+            img = img[62:554, : self.width]
+        else:        
+            img = img[: self.height, : self.width]
 
         img = cv2.undistort(img, self.mtx, self.dist)
 
@@ -227,7 +234,8 @@ class TagFinder:
 
         # for now put big images
         # TODO: turn this off for prod!!
-        self.output_stream.putFrame(img)
+        img_output = cv2.resize(img, (416,308)) 
+        self.output_stream.putFrame(img_output)
 
     def draw_result(self, image, result_item, pose: Transform3d):
         color = (255, 255, 255)
