@@ -46,9 +46,11 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.commands.drivetrain.DriveWithProfile;
+import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
+import org.team100.lib.commands.drivetrain.DriveWithWaypoints;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Oscillate;
@@ -110,6 +112,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -356,9 +359,8 @@ public class RobotContainer {
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfile(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
+                new DriveWithProfileNote(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
                         swerveKinodynamics, () -> !m_sensors.getIntakeSensor()));
-
         // 254 FF follower
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
         whileTrue(driverControl::never,
@@ -579,7 +581,7 @@ public class RobotContainer {
 
     }
 
-    private void whileTrue(BooleanSupplier condition, Command command) {
+    private void  whileTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).whileTrue(command);
     }
 

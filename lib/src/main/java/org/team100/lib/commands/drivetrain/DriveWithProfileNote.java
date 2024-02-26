@@ -4,7 +4,10 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import javax.swing.SwingConstants;
+
 import org.team100.lib.commands.Command100;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -20,8 +23,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
-public class DriveWithProfile extends Command100 {
+public class DriveWithProfileNote extends Command100 {
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
@@ -44,7 +49,7 @@ public class DriveWithProfile extends Command100 {
      * @param limits
      * @param end
      */
-    public DriveWithProfile(
+    public DriveWithProfileNote(
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
@@ -64,7 +69,7 @@ public class DriveWithProfile extends Command100 {
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
                 m_limits.getMaxAngleAccelRad_S2() / 4);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2() / 4);
+                m_limits.getMaxDriveAccelerationM_S2() );
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
@@ -94,7 +99,17 @@ public class DriveWithProfile extends Command100 {
         } else {
             count = 0;
         }
-        Rotation2d bearing = goal.get().minus(m_swerve.getPose().getTranslation()).getAngle();
+        Rotation2d bearing;
+        switch(Identity.instance) {
+            case COMP_BOT:
+            bearing = new Rotation2d(goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians()+Math.PI);
+            break;
+            default:
+            System.out.println("maybe sim?");
+            bearing = goal.get().minus(m_swerve.getPose().getTranslation()).getAngle();
+            break;
+        }
+        bearing = new Rotation2d(goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians()+Math.PI);
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
