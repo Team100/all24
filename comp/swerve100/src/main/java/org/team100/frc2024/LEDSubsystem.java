@@ -23,7 +23,13 @@ public class LEDSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     if(m_sensors.getFeederSensor()){
-        m_indicator.setStripSolid(0, State.GREEN);
+        m_indicator.setStripRed(0, State.GREEN);
+    } else {
+        m_indicator.setStripGreen(0, State.RED);
+
     }
+    System.out.println("LEDSS R RUNNINNG");
+    // m_indicator.setStripSolid(0, State.RED);
+
   }
 }

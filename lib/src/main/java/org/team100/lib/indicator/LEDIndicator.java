@@ -51,19 +51,36 @@ public class LEDIndicator {
             totalLength += strip.getLength();
         }
 
-        led = new AddressableLED(port);
-        led.setLength((int)totalLength);
+        led = new AddressableLED(0);
+        led.setLength(160);
+
+
+        buffer = new AddressableLEDBuffer(160);
+
+        led.setData(buffer);
         led.start();
 
 
-        buffer = new AddressableLEDBuffer((int)totalLength);
+    }
+
+    public void setStripRed(int index, State s){
+        // setStripSolid(leds.get(index), s);
+        for(int i = 0; i < 160; i++){
+            buffer.setLED(i, new Color(255, 0, 0));
+        }
 
         led.setData(buffer);
 
     }
 
-    public void setStripSolid(int index, State s){
-        setStripSolid(leds.get(index), s);
+    public void setStripGreen(int index, State s){
+        // setStripSolid(leds.get(index), s);
+        for(int i = 0; i < 160; i++){
+            buffer.setLED(i, new Color(0, 0, 255));
+        }
+
+        led.setData(buffer);
+
     }
 
     public void setStripSolid(LEDStrip strip, State s){

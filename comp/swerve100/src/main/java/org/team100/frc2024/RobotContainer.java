@@ -28,6 +28,7 @@ import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
+import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.FeederDefault;
@@ -150,7 +151,8 @@ public class RobotContainer {
     private final ClimberSubsystem m_climber;
     final Shooter m_shooter;
     final Intake m_intake;
-    final Sensors m_sensors;
+    final LEDSubsystem m_ledSubsystem;
+    final SensorInterface m_sensors;
     final FeederSubsystem m_feeder;
 
     final DriverControl driverControl;
@@ -202,7 +204,14 @@ public class RobotContainer {
 
         m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
 
-        m_sensors = new Sensors(9, 2, 3); // Definitely real numbers
+        switch (Identity.instance) {
+            case COMP_BOT:
+                m_sensors = new CompSensors(9, 2, 3); // Definitely real numbers
+                break;
+            default:
+                // always returns false
+                m_sensors = new MockSensors();
+        }
 
         // joel 2/22/24 removing for SVR, put it back after that.
         // 20 words per minute is 60 ms.
@@ -245,14 +254,15 @@ public class RobotContainer {
                 swerveLocal,
                 driverControl::speed);
 
-
         m_feeder = new FeederSubsystem(39);
-
 
         m_intake = IntakeFactory.get(m_sensors);
 
+        LEDStrip strip1 = new LEDStrip(160, 0);
+        
+        m_indicator = new LEDIndicator(0, strip1);
 
-
+        m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors);
 
         m_shooter = ShooterFactory.get(m_feeder);
 
@@ -261,8 +271,6 @@ public class RobotContainer {
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         m_climber = new ClimberSubsystem(60, 61);
-
-
 
         // show mode locks slow speed.
 
@@ -364,7 +372,8 @@ public class RobotContainer {
         // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
 
         // whileTrue(driverControl::test,
-        //         new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP, swerveKinodynamics));
+        // new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP,
+        // swerveKinodynamics));
 
         // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
         // drivePID, swerveKinodynamics));
@@ -390,14 +399,24 @@ public class RobotContainer {
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
+        whileTrue(operatorControl::intake,
+                new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+                        () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
-        whileTrue(operatorControl::intake,  new StartEndCommand( () -> RobotState100.changeIntakeState(IntakeState100.INTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        whileTrue(operatorControl::outtake,
+                new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.OUTTAKE),
+                        () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
-        whileTrue(operatorControl::outtake, new StartEndCommand( () -> RobotState100.changeIntakeState(IntakeState100.OUTTAKE), () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        whileTrue(operatorControl::ramp,
+                new StartEndCommand(() -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT),
+                        () -> RobotState100.changeShooterState(ShooterState100.STOP)));
 
-        whileTrue(operatorControl::ramp,  new StartEndCommand( () -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT), () -> RobotState100.changeShooterState(ShooterState100.STOP)));
+        whileTrue(operatorControl::feed, new StartEndCommand(() -> RobotState100.changeFeederState(FeederState100.FEED),
+                () -> RobotState100.changeFeederState(FeederState100.STOP)));
 
-        whileTrue(operatorControl::feed,  new StartEndCommand( () -> RobotState100.changeFeederState(FeederState100.FEED), () -> RobotState100.changeFeederState(FeederState100.STOP)));
+        whileTrue(operatorControl::pivotToAmpPosition,
+                new StartEndCommand(() -> RobotState100.changeAmpState(AmpState100.UP),
+                        () -> RobotState100.changeAmpState(AmpState100.NONE)));
 
         whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.NONE)));
 
@@ -408,6 +427,7 @@ public class RobotContainer {
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeCommand());
+
 
 
         // TODO: spin up the shooter whenever the robot is in range.
@@ -434,9 +454,9 @@ public class RobotContainer {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(1.7, 0, 0); //1.7
+        PIDController thetaController = new PIDController(1.7, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0, 0, 0); //.5
+        PIDController omegaController = new PIDController(0, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::twist, m_drive);
 
@@ -497,40 +517,46 @@ public class RobotContainer {
                         0.25));
 
         // ManualWithShooterLock shooterLock = new ManualWithShooterLock(
-        //         m_name,
-        //         swerveKinodynamics,
-        //         m_heading,
-        //         thetaController,
-        //         omegaController,
-        //         0.25);
+        // m_name,
+        // swerveKinodynamics,
+        // m_heading,
+        // thetaController,
+        // omegaController,
+        // 0.25);
 
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
-        // whileTrue(driverControl::test, Commands.startEnd(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-        //         () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-//         whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics, planner, drivePID));
+        // whileTrue(driverControl::test, Commands.startEnd(() ->
+        // RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        // whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics,
+        // planner, drivePID));
 
-      ManualWithShooterLock shooterLock = new ManualWithShooterLock(
+        ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
                 omegaController,
                 0.25);
+
+        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+
         
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
         whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
-     
+
         m_drive.setDefaultCommand(driveManually);
 
         SubsystemPriority.addSubsystem(m_drive, driveManually, Priority.ONE);
         SubsystemPriority.addSubsystem(m_shooter, new ShooterDefault(m_shooter, m_drive), Priority.TWO);
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
-        SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis, operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
+        SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
+                operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         //Registers the subsystems so that they run with the specified priority
@@ -542,11 +568,10 @@ public class RobotContainer {
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
-    public void beforeCommandCycle(){
+    public void beforeCommandCycle() {
         ModeSelector.selectMode(operatorControl::pov);
     }
 
- 
     public void onTeleop() {
         m_shooter.reset();
         m_amp.reset();
