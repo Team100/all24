@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import javax.swing.SwingConstants;
-
 import org.team100.lib.commands.Command100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController100;
@@ -69,7 +67,7 @@ public class DriveWithProfileNote extends Command100 {
         Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
                 m_limits.getMaxAngleAccelRad_S2() / 4);
         Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2() );
+                m_limits.getMaxDriveAccelerationM_S2()/2 );
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
