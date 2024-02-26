@@ -28,6 +28,7 @@ import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
+import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.indexer.IndexCommand;
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.FeederDefault;
@@ -151,6 +152,8 @@ public class RobotContainer {
     final Shooter m_shooter;
     final Intake m_intake;
     final Sensors m_sensors;
+    final LEDSubsystem m_ledSubsystem;
+
     final FeederSubsystem m_feeder;
 
     final DriverControl driverControl;
@@ -199,8 +202,6 @@ public class RobotContainer {
         }
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
-
-        m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
 
         m_sensors = new Sensors(9, 2, 3); // Definitely real numbers
 
@@ -251,8 +252,11 @@ public class RobotContainer {
 
         m_intake = IntakeFactory.get(m_sensors);
 
+        LEDStrip strip1 = new LEDStrip(160, 0);
+        
+        m_indicator = new LEDIndicator(0, strip1);
 
-
+        m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors);
 
         m_shooter = ShooterFactory.get(m_feeder);
 
@@ -410,6 +414,7 @@ public class RobotContainer {
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeCommand());
 
 
+
         // TODO: spin up the shooter whenever the robot is in range.
 
         // whileTrue(operatorControl::ramp, new Ramp());
@@ -518,6 +523,9 @@ public class RobotContainer {
                 thetaController,
                 omegaController,
                 0.25);
+
+        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+
         
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
         whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
