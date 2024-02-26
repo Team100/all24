@@ -82,8 +82,9 @@ public class DriveWithProfile extends Command100 {
     public void execute100(double dt) {
         Optional<Translation2d> goal = m_fieldRelativeGoal.get();
         if (!goal.isPresent()) {
-            if (previousGoal == null)
+            if (previousGoal == null) {
                 return;
+            }
             goal = previousGoal;
             count++;
             if (count == 50) {
