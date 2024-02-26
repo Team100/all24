@@ -53,7 +53,7 @@ public enum Camera {
     GAME_PIECE("10000000e31d4a24",
             new Transform3d(
                     new Translation3d(-0.321, -0.04, .29),
-                    new Rotation3d(0, Math.toRadians(27), 0))),
+                    new Rotation3d(0, Math.toRadians(27), Math.PI))),
     
     G("10000000a7a892c0",
             new Transform3d(
