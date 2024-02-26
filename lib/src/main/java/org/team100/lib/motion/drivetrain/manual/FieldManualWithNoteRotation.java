@@ -197,12 +197,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
      * lead or lag the target.
      */
     static Rotation2d bearing(Translation2d robot, Translation2d target) {
-        switch (Identity.instance) {
-            case COMP_BOT:
-                return new Rotation2d(target.minus(robot).getAngle().getRadians() + Math.PI);
-            default:
-                return target.minus(robot).getAngle();
-        }
+        return new Rotation2d(target.minus(robot).getAngle().getRadians() + Math.PI);
     }
 
     /**
