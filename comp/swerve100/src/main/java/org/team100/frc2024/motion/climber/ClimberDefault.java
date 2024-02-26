@@ -33,13 +33,13 @@ public class ClimberDefault extends Command {
   @Override
   public void execute() {
 
-    if(m_overideSupplier.get()){
+    // if(m_overideSupplier.get()){
+        // m_climber.setLeft(m_leftSupplier.get());
+        // m_climber.setRight(m_rightSupplier.get());
+    // } else {
         m_climber.setLeft(m_leftSupplier.get());
         m_climber.setRight(m_rightSupplier.get());
-    } else {
-        m_climber.setLeft(m_leftSupplier.get());
-        m_climber.setRight(m_rightSupplier.get());
-    }
+    // }
     
 
     

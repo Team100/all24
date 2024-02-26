@@ -13,6 +13,7 @@ import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.FeedCommand;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.IntakeNote;
+import org.team100.frc2024.motion.OuttakeCommand;
 import org.team100.frc2024.motion.OuttakeNote;
 
 import org.team100.frc2024.motion.PrimitiveAuto;
@@ -22,7 +23,7 @@ import org.team100.frc2024.motion.AutoMaker.FieldPoint;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.DriveToAmp;
-import org.team100.frc2024.motion.amp.OuttakeCommand;
+import org.team100.frc2024.motion.amp.OuttakeAmp;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.amp.PivotToAmpPosition;
 import org.team100.frc2024.motion.climber.ClimberDefault;
@@ -36,6 +37,7 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.shooter.Ramp;
+import org.team100.frc2024.motion.shooter.ResetShooterZero;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
@@ -46,6 +48,7 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.DriveWithProfile;
@@ -192,7 +195,7 @@ public class RobotContainer {
         //
         // override the alliance logic.
 
-        m_alliance = Alliance.Red;
+        m_alliance = Alliance.Blue;
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -202,11 +205,11 @@ public class RobotContainer {
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
 
-        m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
+        // m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
 
         switch (Identity.instance) {
             case COMP_BOT:
-                m_sensors = new CompSensors(9, 2, 3); // Definitely real numbers
+                m_sensors = new CompSensors(2, 9); // Definitely real numbers
                 break;
             default:
                 // always returns false
@@ -295,7 +298,7 @@ public class RobotContainer {
         // on xbox this is left bumper
         // on joystick this is button 4
         // on starting zone line lined up with note
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, Math.PI));
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, 0));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -404,8 +407,7 @@ public class RobotContainer {
                         () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
         whileTrue(operatorControl::outtake,
-                new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.OUTTAKE),
-                        () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+                new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
 
         whileTrue(operatorControl::ramp,
                 new StartEndCommand(() -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT),
@@ -426,7 +428,9 @@ public class RobotContainer {
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
-        whileTrue(operatorControl::outtakeFromAmp, new OuttakeCommand());
+        whileTrue(operatorControl::rezero, new ResetShooterZero(m_shooter));
+
+        // whileTrue(driverControl::test, new OuttakeNoteCommand());
 
 
 
@@ -544,15 +548,18 @@ public class RobotContainer {
         whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
 
         
+        // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+
+        whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
+        // whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
         m_drive.setDefaultCommand(driveManually);
 
         SubsystemPriority.addSubsystem(m_drive, driveManually, Priority.ONE);
-        SubsystemPriority.addSubsystem(m_shooter, new ShooterDefault(m_shooter, m_drive), Priority.TWO);
+        SubsystemPriority.addSubsystem(m_shooter, new ShooterDefault(m_shooter, m_drive, operatorControl::pivotUp, operatorControl::pivotDown), Priority.TWO);
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
         SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,

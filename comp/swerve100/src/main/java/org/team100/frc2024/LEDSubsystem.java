@@ -14,21 +14,21 @@ public class LEDSubsystem extends SubsystemBase {
   /** Creates a new LEDSubsystem. */
 
   LEDIndicator m_indicator;
-  Sensors m_sensors;
-  public LEDSubsystem(LEDIndicator indicator, Sensors sensors) {
+  SensorInterface m_sensors;
+  public LEDSubsystem(LEDIndicator indicator, SensorInterface sensors) {
     m_indicator = indicator;
     m_sensors = sensors;
   }
 
   @Override
   public void periodic() {
-    if(m_sensors.getFeederSensor()){
+    if(m_sensors.getFeederSensor() || m_sensors.getIntakeSensor()){
         m_indicator.setStripRed(0, State.GREEN);
     } else {
         m_indicator.setStripGreen(0, State.RED);
 
     }
-    System.out.println("LEDSS R RUNNINNG");
+    // System.out.println("LEDSS R RUNNINNG");
     // m_indicator.setStripSolid(0, State.RED);
 
   }

@@ -75,6 +75,11 @@ public class FeederSubsystem extends SubsystemBase {
     
   }
 
+  public void outtake(){
+    feedRoller.setDutyCycle(-0.1);
+    
+  }
+
   public void stop(){
     // System.out.println("STOPING FEED" + Timer.getFPGATimestamp());
 

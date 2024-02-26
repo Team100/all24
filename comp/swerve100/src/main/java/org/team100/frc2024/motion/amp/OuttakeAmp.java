@@ -10,10 +10,10 @@ import org.team100.frc2024.RobotState100.AmpState100;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class OuttakeCommand extends Command {
+public class OuttakeAmp extends Command {
   /** Creates a new OuttakeCommand. */
   AmpState100 previousState;
-  public OuttakeCommand() {
+  public OuttakeAmp() {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -26,7 +26,8 @@ public class OuttakeCommand extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+  }
 
   // Called once the command ends or is interrupted.
   @Override

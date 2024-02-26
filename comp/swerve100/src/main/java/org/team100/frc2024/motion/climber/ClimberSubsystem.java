@@ -120,11 +120,11 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public void setLeft(double value){
-        // s1.set(value);
+        s1.set(value);
     }
 
     public void setRight(double value){
-        // s2.set(value);
+        s2.set(value);
     }
     
     @Override

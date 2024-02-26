@@ -44,15 +44,12 @@ public class IntakeDefault extends Command {
     
     switch(RobotState100.getIntakeState()){
         case INTAKE:
-            // System.out.println("INTAKINGGGG");
             m_intake.intakeSmart();
             break;
         case OUTTAKE:
-            // System.out.println("OUTTTTTTT");
             m_intake.outtake();
             break;
         case STOP:
-            // System.out.println("NOOOEEEEE");
             m_intake.stop();
             break;
         default:
@@ -66,6 +63,7 @@ public class IntakeDefault extends Command {
         default:
             
     }
+
   }
 
   

@@ -39,6 +39,7 @@ public class GravityServo {
     Telemetry t = Telemetry.get();
     double m_gravityScale;
     int kCurrentLimit;
+    double[] m_softLimits;
 
 
 
@@ -55,10 +56,12 @@ public class GravityServo {
         int canID,
         double period,
         double gravityScale,
-        Encoder100<Distance100> encoder
+        Encoder100<Distance100> encoder,
+        double[] softLimits
+        
     ){
     
-    
+    m_softLimits = softLimits;
     m_period = period;
     m_motor = motor;
     m_motor.setIdleMode(IdleMode.kCoast);
@@ -89,6 +92,11 @@ public class GravityServo {
         return m_encoder.getPosition();
     }
 
+    public void rezero(){
+        m_encoder.reset();
+    }
+
+    
     public double getRawPosition() {
         return m_encoder.getPosition();
     }
@@ -147,6 +155,23 @@ public class GravityServo {
 
     public void setDutyCycle(double value){
         m_motor.set(value);
+    }
+
+    public void setWithSoftLimits(double value){
+        if(value >= 0){
+            if(m_encoder.getPosition() >= m_softLimits[1]){
+                m_motor.set(0);
+                return;
+            }
+        } else if(value <= 0){
+            if(m_encoder.getPosition() <= m_softLimits[0]){
+                m_motor.set(0);
+                return;
+            }
+        }
+
+        m_motor.set(value);
+        
     }
 
     public void setPositionWithSteadyState(double goal) {
