@@ -202,8 +202,6 @@ public class RobotContainer {
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
 
-        m_indicator = new LEDIndicator(8, new LEDStrip(0, 0), new LEDStrip(0, 0));
-
         switch (Identity.instance) {
             case COMP_BOT:
                 m_sensors = new CompSensors(9, 2, 3); // Definitely real numbers
