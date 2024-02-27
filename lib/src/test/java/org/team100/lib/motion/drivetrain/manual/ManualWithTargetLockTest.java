@@ -54,6 +54,18 @@ class ManualWithTargetLockTest {
     }
 
     @Test
+    void testTargetMotionReverse() {
+        // at the origin, moving 1m/s +x
+        Pose2d p = new Pose2d();
+        Twist2d t = new Twist2d(1, 0, 0);
+        SwerveState state = new SwerveState(p, t);
+        // target is 1m to the right
+        Translation2d target = new Translation2d(0, -1);
+        double motion = ManualWithTargetLock.targetMotion(state, target);
+        assertEquals(-1, motion, kDelta);
+    }
+
+    @Test
     void testTargetMotion2() {
         // at the origin, moving 1m/s +x
         Pose2d p = new Pose2d();
@@ -75,5 +87,17 @@ class ManualWithTargetLockTest {
         Translation2d target = new Translation2d(1, 1);
         double motion = ManualWithTargetLock.targetMotion(state, target);
         assertEquals(0.5, motion, kDelta);
+    }
+
+    @Test
+    void testTargetMotionY() {
+        // at the origin, moving 1m/s +y
+        Pose2d p = new Pose2d();
+        Twist2d t = new Twist2d(0, 1, 0);
+        SwerveState state = new SwerveState(p, t);
+        // target is dead ahead
+        Translation2d target = new Translation2d(1, 0);
+        double motion = ManualWithTargetLock.targetMotion(state, target);
+        assertEquals(-1, motion, kDelta);
     }
 }
