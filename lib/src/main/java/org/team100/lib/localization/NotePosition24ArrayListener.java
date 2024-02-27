@@ -71,7 +71,7 @@ public class NotePosition24ArrayListener {
                             cameraRotationToRobotRelative));
                 }
                 // this is where you would do something useful with the payload
-                // System.out.println(fields[1] + " " + Tnotes);
+                // System.out.println(fields[1] + " " + position.getY() + " " +
                 // position.getZ());
             }
             notes = Optional.of(Tnotes);
