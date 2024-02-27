@@ -5,7 +5,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
@@ -45,8 +44,8 @@ public class Heading implements HeadingInterface {
     public void periodic() {
         // invert NED to get NWU
         m_currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getRedundantYawNED());
-        m_currentHeadingRateNWU = Units.degreesToRadians(-1.0 * m_gyro.getRedundantGyroRateNED());
-        t.log(Level.TRACE, m_name, "Heading NWU", m_currentHeadingNWU);
+        m_currentHeadingRateNWU = Math.toRadians(-1.0 * m_gyro.getRedundantGyroRateNED());
+        t.log(Level.TRACE, m_name, "Heading NWU (rad)", m_currentHeadingNWU);
         t.log(Level.TRACE, m_name, "Heading Rate NWU (rad_s)", m_currentHeadingRateNWU);
     }
 

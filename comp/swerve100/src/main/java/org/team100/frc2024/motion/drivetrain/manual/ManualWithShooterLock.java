@@ -6,6 +6,7 @@ import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
@@ -71,7 +72,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_omegaController = omegaController;
         m_scale = scale;
         isAligned = false;
-        m_name = Names.append(parent, this);
+        m_name = "MANUALLLLL";
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -121,7 +122,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
                 m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
-        double targetMotion = targetMotion(state, target);
+        double targetMotion = TargetUtil.targetMotion(state, target);
         t.log(Level.TRACE, m_name, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
@@ -148,6 +149,9 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
         t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
         t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
+        t.log(Level.TRACE, m_name, "target motion", targetMotion);
+        t.log(Level.TRACE, m_name, "goal X", goal.x());
+
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -198,25 +202,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return target.minus(robot).getAngle();
     }
 
-    
-
-    /**
-     * Apparent motion of the target, NWU rad/s.
-     * 
-     * The theta profile goal is to move at this rate, i.e. tracking the apparent
-     * movement.
-     */
-    static double targetMotion(SwerveState state, Translation2d target) {
-        Translation2d robot = state.pose().getTranslation();
-        Translation2d translation = target.minus(robot);
-        double range = translation.getNorm();
-        Rotation2d bearing = translation.getAngle();
-        Twist2d twist = state.twist();
-        Rotation2d course = new Rotation2d(twist.dx, twist.dy);
-        Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(twist);
-        return speed * relativeBearing.getSin() / range;
-    }
 
     public void checkBearing(Rotation2d bearing, Rotation2d currentRotation){
         if(Math.abs(bearing.minus(currentRotation).getDegrees()) < 20){
