@@ -5,7 +5,7 @@ package org.team100.lib.sensors;
  */
 public interface RedundantGyroInterface {
     /**
-     * RADIANS per second, clockwise-positive NED.
+     * Degrees per second, clockwise-positive NED.
      */
     float getRedundantGyroRateNED();
 
