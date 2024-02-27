@@ -5,10 +5,14 @@ import java.util.EnumSet;
 import java.util.Optional;
 
 import org.team100.lib.config.Camera;
+import org.team100.lib.config.Identity;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.util.NotePicker;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -94,10 +98,43 @@ public class NotePosition24ArrayListener {
      * @return The translation of all the closest note, field relative
      */
     public Optional<Translation2d> getClosestTranslation2d() {
-        if (latestTime > Timer.getFPGATimestamp() - 0.1) {
-            return NotePicker.closestNote(notes, m_poseEstimator.getEstimatedPosition());
+        switch (Identity.instance) {
+            case BLANK:
+                Translation2d note = new Translation2d();
+                Pose2d pose = new Pose2d(note, new Rotation2d());
+                Translation2d relative = pose.relativeTo(m_poseEstimator.getEstimatedPosition()).getTranslation();
+                Transform3d cameraInRobotCoordinates = Camera.get("10000000e31d4a24").getOffset();
+                double pitch;
+                double x = relative.getX() - cameraInRobotCoordinates.getX();
+                if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
+                    pitch = Math.atan2(cameraInRobotCoordinates.getZ(), -1.0 * x)
+                            - cameraInRobotCoordinates.getRotation().getY();
+                } else {
+                    pitch = Math.atan2(cameraInRobotCoordinates.getZ(), x)
+                            - cameraInRobotCoordinates.getRotation().getY();
+                }
+                double y = relative.getY() - cameraInRobotCoordinates.getY();
+                double yaw = MathUtil.angleModulus(Math.atan2(y, x) - cameraInRobotCoordinates.getRotation().getZ());
+                Rotation3d rot = new Rotation3d(0, pitch, yaw);
+                if (Math.abs(pitch) > Math.toRadians(31.5) || Math.abs(yaw) > Math.toRadians(40)) {
+                    return Optional.empty();
+                }
+                Translation2d cameraRotationToRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
+                        cameraInRobotCoordinates,
+                        rot);
+                Translation2d l = PoseEstimationHelper.convertToFieldRelative(
+                        m_poseEstimator.getEstimatedPosition(),
+                        cameraRotationToRobotRelative);
+                if (Math.abs(l.minus(note).getX()) > 0.01 || Math.abs(l.minus(note).getY()) > 0.01) {
+                    return Optional.empty();
+                }
+                return Optional.of(l);
+            default:
+                if (latestTime > Timer.getFPGATimestamp() - 0.1) {
+                    return NotePicker.closestNote(notes, m_poseEstimator.getEstimatedPosition());
+                }
+                return Optional.empty();
         }
-        return Optional.empty();
     }
 
     public Optional<Translation2d> getTranslation2dAuto(int noteID) {
