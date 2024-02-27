@@ -217,9 +217,10 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         Translation2d translation = target.minus(robot);
         double range = translation.getNorm();
         Rotation2d bearing = translation.getAngle();
-        Rotation2d course = state.translation().getAngle();
+        Twist2d twist = state.twist();
+        Rotation2d course = new Rotation2d(twist.dx, twist.dy);
         Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(state.twist());
+        double speed = GeometryUtil.norm(twist);
         return speed * relativeBearing.getSin() / range;
     }
 
