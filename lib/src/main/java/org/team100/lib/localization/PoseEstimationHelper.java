@@ -33,11 +33,11 @@ public class PoseEstimationHelper {
                 return new Translation2d();
             }
             double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
-            if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
-                x =-x; 
-            }
-            double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
-            return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
+            double y = x * Math.tan(cameraObject.getZ());
+            Translation2d cameraRelativeTranslation = new Translation2d(x,y);
+            Rotation2d angleToNote = new Rotation2d(cameraInRobotCoordinates.getRotation().getZ()).plus(cameraRelativeTranslation.getAngle());
+            Translation2d robotRelativeTranslation2dNoOffsets = new Translation2d(angleToNote.getCos()*cameraRelativeTranslation.getNorm(),angleToNote.getSin()*cameraRelativeTranslation.getNorm());
+            return new Translation2d(robotRelativeTranslation2dNoOffsets.getX() + cameraInRobotCoordinates.getX(), robotRelativeTranslation2dNoOffsets.getY() + cameraInRobotCoordinates.getY());
     }
 
     public static Translation2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d) {

@@ -13,7 +13,7 @@ public class NotePicker {
      * This is the field relative position of every note on the field, going from
      * left buttom to right top
      */
-    private static final Translation2d[] autoNotes = {
+    public static final Translation2d[] autoNotes = {
             new Translation2d(2.91, 0.76),
             new Translation2d(2.91, 2.41),
             new Translation2d(2.91, 4.11),
