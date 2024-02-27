@@ -63,24 +63,10 @@ public class LEDIndicator {
 
     }
 
-    public void setStripRed(int index, State s){
-        // setStripSolid(leds.get(index), s);
-        for(int i = 0; i < 160; i++){
-            buffer.setLED(i, new Color(255, 0, 0));
-        }
+    
 
-        led.setData(buffer);
-
-    }
-
-    public void setStripGreen(int index, State s){
-        // setStripSolid(leds.get(index), s);
-        for(int i = 0; i < 160; i++){
-            buffer.setLED(i, new Color(0, 0, 255));
-        }
-
-        led.setData(buffer);
-
+    public void setStripSolid(int index, State s){
+        setStripSolid(leds.get(index), s);
     }
 
     public void setStripSolid(LEDStrip strip, State s){
@@ -95,6 +81,11 @@ public class LEDIndicator {
     public void setStripChase(LEDStrip strip){
         Color[] colors = {new Color(), new Color()};
         Patterns.chase(colors, strip, buffer);  
+
+    }
+
+    public void periodic(){
+        led.setData(buffer);
 
     }
 

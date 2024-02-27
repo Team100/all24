@@ -118,6 +118,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     public void driveFeeder(double value){
         ampDrive.setSpeed(-value);
+        // System.out.println("I AM BEING DRIVEN RIGHT NOW : " + value);
     }
 
 

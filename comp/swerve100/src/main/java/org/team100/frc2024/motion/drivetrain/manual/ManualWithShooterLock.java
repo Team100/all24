@@ -71,7 +71,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_omegaController = omegaController;
         m_scale = scale;
         isAligned = false;
-        m_name = Names.append(parent, this);
+        m_name = "MANUALLLLL";
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -148,6 +148,9 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
         t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
         t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
+        t.log(Level.TRACE, m_name, "target motion", targetMotion);
+        t.log(Level.TRACE, m_name, "goal X", goal.x());
+
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,

@@ -195,13 +195,16 @@ public class DrumShooter extends Shooter{
     @Override
     public void setAngleWithOverride(Double goal, double pivotUp, double pivotDown){
 
-        if(pivotUp >= 0){
-            pivotServo.setDutyCycle(pivotUp);
-        } else if(pivotDown >= 0){
-            pivotServo.setDutyCycle(pivotDown);
-        } else {
-            pivotServo.setPosition(goal);
-        }
+        // if(pivotUp >= 0){
+        //     pivotServo.setDutyCycle(pivotUp);
+        // } else if(pivotDown >= 0){
+        //     pivotServo.setDutyCycle(pivotDown);
+        // } else {
+        //     pivotServo.setPosition(goal);
+        // }
+
+        pivotServo.setPosition(goal);
+
 
     }
 

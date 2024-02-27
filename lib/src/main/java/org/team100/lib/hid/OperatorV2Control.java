@@ -87,7 +87,7 @@ public class OperatorV2Control implements OperatorControl {
     }
     @Override
     public boolean outtakeFromAmp(){
-        return true;
+        return m_controller.getRightStickButton();
     }
 
     @Override
