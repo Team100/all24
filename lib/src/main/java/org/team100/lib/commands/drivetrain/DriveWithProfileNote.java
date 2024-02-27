@@ -86,7 +86,6 @@ public class DriveWithProfileNote extends Command100 {
     @Override
     public void execute100(double dt) {
         Optional<Translation2d> goal = m_fieldRelativeGoal.get();
-        goal = Optional.of(new Translation2d());
         if (!goal.isPresent()) {
             if (previousGoal == null) {
                 return;
