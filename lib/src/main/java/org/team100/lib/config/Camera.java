@@ -36,17 +36,18 @@ public enum Camera {
     /**
      * Gamma shooter
      */
-    SHOOTER("10000000a7c673da",
+    SHOOTER("100000004e0a1fb9",
             new Transform3d(
                     new Translation3d(.09, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-20), 0))),
+                    new Rotation3d(0, Math.toRadians(-21), 0))),
+
     /**
      * Gamma amp-placer
      */
-    AMP("10000000a7c673db",
+    AMP("1000000031b9d05b",
             new Transform3d(
                     new Translation3d(-0.03, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-40), Math.PI))),
+                    new Rotation3d(0, Math.toRadians(-45), Math.PI))),
     /**
      * Gamma intake
      */

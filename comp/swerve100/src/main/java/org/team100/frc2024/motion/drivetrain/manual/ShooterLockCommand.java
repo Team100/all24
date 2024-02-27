@@ -24,16 +24,25 @@ public class ShooterLockCommand extends Command {
     m_driver = driver;
     m_twistSupplier = twistSupplier;
     m_drive = drive;
+
+    addRequirements(m_drive);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_driver.reset(m_drive.getPose());
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_driver.apply(m_drive.getState(), m_twistSupplier.get());
+    System.out.println( m_twistSupplier.get());
+    Twist2d twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
+
+    m_drive.driveInFieldCoords(twist, 0.02);
+                    
+
   }
 
   // Called once the command ends or is interrupted.

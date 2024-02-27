@@ -178,4 +178,9 @@ public class DriverControlProxy implements DriverControl {
     public boolean shooterLock(){
         return m_driverControl.shooterLock();
     }
+
+    @Override
+    public boolean outtakeFromAmp(){
+        return m_driverControl.shooterLock();
+    }
 }
