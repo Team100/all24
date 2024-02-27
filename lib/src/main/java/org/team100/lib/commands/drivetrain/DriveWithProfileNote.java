@@ -8,6 +8,8 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -84,6 +86,7 @@ public class DriveWithProfileNote extends Command100 {
     @Override
     public void execute100(double dt) {
         Optional<Translation2d> goal = m_fieldRelativeGoal.get();
+        goal = Optional.of(new Translation2d());
         if (!goal.isPresent()) {
             if (previousGoal == null) {
                 return;
@@ -97,20 +100,25 @@ public class DriveWithProfileNote extends Command100 {
         } else {
             count = 0;
         }
-        Rotation2d bearing;
-        bearing = new Rotation2d(
-                goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+        Rotation2d rotationGoal;
+        if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
+        rotationGoal = new Rotation2d(
+            goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+        }
+        else {
+            rotationGoal = m_swerve.getPose().getRotation();
+        }
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
-        bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, bearing.getRadians()));
+        rotationGoal = new Rotation2d(
+                Math100.getMinDistance(measurement, rotationGoal.getRadians()));
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new State100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
                 thetaSetpoint.v());
 
-        State100 thetaGoal = new State100(bearing.getRadians(), 0);
+        State100 thetaGoal = new State100(rotationGoal.getRadians(), 0);
         State100 xGoalRaw = new State100(goal.get().getX(), 0, 0);
         xSetpoint = xProfile.calculate(dt, xSetpoint, xGoalRaw);
         State100 yGoalRaw = new State100(goal.get().getY(), 0, 0);
