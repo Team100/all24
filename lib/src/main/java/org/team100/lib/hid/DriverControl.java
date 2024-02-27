@@ -129,4 +129,8 @@ public interface DriverControl {
     default boolean shooterLock(){
         return false;
     }
+
+    default boolean outtakeFromAmp(){
+        return false;
+    }
 }

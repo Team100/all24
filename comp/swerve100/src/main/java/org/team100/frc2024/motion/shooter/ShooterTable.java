@@ -26,11 +26,16 @@ public class ShooterTable {
     
     //MORE NUMBERSSDDD
     public void loadTable(){
-        m_table.put(1.0, 43.0);
-        m_table.put(2.0, 33.0);
-        m_table.put(3.0, 27.0);
-        m_table.put(4.0, 24.0);
-        m_table.put(4.5, 22.5);
+        m_table.put(1.455, 42.75); //43
+        m_table.put(2.455, 32.75); //33
+        m_table.put(3.455, 27.0); //27
+        m_table.put(4.0, 25.75); //24
+
+        
+        // m_table.put(4.455, 23.75); //24
+
+        m_table.put(4.455, 23.75); //24
+        m_table.put(4.955, 21.75); //22.5
 
 
     }

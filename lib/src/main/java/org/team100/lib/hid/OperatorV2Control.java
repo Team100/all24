@@ -57,12 +57,12 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public double getLeftAxis(){
-        return -m_controller.getLeftY();
+        return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
     }
 
     @Override
     public double getRightAxis(){
-        return -m_controller.getRightY();
+        return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
     }
 
     @Override
@@ -88,5 +88,20 @@ public class OperatorV2Control implements OperatorControl {
     @Override
     public boolean outtakeFromAmp(){
         return m_controller.getRightStickButton();
+    }
+
+    @Override
+    public double pivotUp(){
+        return deadband(m_controller.getLeftTriggerAxis(), 0.2, Double.MAX_VALUE);
+    }
+
+    @Override
+    public double pivotDown(){
+        return  deadband(m_controller.getRightTriggerAxis(), 0.2, Double.MAX_VALUE);
+    }
+
+    @Override
+    public boolean rezero(){
+        return m_controller.getStartButton();
     }
 }

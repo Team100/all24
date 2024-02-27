@@ -27,13 +27,13 @@ public class ShooterUtil {
         Translation2d shooterCenter = new Translation2d(FieldConstants.instance.getShooterCenterX(), 
                                                        FieldConstants.instance.getShooterCenterY());
 
-        double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
+        // double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
         
-         double offsetDistance = MathUtil.clamp( FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 * kScale, 
-                                                FieldConstants.instance.getShooterLeftSideY(), 
-                                                FieldConstants.instance.getShooterRightSideY());
+        //  double offsetDistance = MathUtil.clamp( FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 * kScale, 
+        //                                         FieldConstants.instance.getShooterLeftSideY(), 
+        //                                         FieldConstants.instance.getShooterRightSideY());
 
-        return new Translation2d(FieldConstants.instance.getShooterCenterX(), offsetDistance);
+        return new Translation2d(FieldConstants.instance.getShooterCenterX(), FieldConstants.instance.getShooterCenterY());
 
     }
 

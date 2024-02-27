@@ -172,6 +172,20 @@ public class OperatorControlProxy implements OperatorControl {
 
     
     public boolean outtakeFromAmp(){
-        return  m_operatorControl.outtakeFromAmp();
+        return m_operatorControl.outtakeFromAmp();
     }
+
+    public double pivotUp(){
+        return m_operatorControl.pivotUp();
+    }
+
+    public double pivotDown(){
+        return m_operatorControl.pivotDown();
+    }
+
+    public boolean rezero(){
+        return m_operatorControl.rezero();
+    }
+
+    
 }

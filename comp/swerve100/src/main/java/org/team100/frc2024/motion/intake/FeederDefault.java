@@ -52,9 +52,11 @@ public class FeederDefault extends Command {
         m_feeder.intake();
     } else if(RobotState100.getFeederState() == FeederState100.FEED) {
         m_feeder.feed();
-    } else {
-        m_feeder.stop();
+    } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
+        m_feeder.outtake();
 
+    }else {
+        m_feeder.stop();
     }
 
     // if(RobotState100.getIntakeState() == IntakeState100.INTAKE){

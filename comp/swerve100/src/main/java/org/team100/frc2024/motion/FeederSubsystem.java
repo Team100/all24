@@ -66,12 +66,17 @@ public class FeederSubsystem extends SubsystemBase {
 
 
   public void feed(){
-    feedRoller.setDutyCycle(1);
+    feedRoller.setDutyCycle(0.8);
     
   }
 
   public void intake(){
     feedRoller.setDutyCycle(0.1);
+    
+  }
+
+  public void outtake(){
+    feedRoller.setDutyCycle(-0.1);
     
   }
 

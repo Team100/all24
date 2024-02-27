@@ -72,7 +72,7 @@ public class SparkMaxEncoder implements Encoder100<Distance100> {
         // for some other reason
         // m_encoder.reset();
 
-        // m_encoder.setPosition(0);
+        m_encoder.setPosition(0);
         
     }
 

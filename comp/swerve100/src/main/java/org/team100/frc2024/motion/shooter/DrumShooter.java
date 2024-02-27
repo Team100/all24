@@ -125,7 +125,8 @@ public class DrumShooter extends Shooter{
                         pivotID, 
                         0.02, 
                         0,
-                        new SparkMaxEncoder(m_name, pivotMotor)
+                        new SparkMaxEncoder(m_name, pivotMotor),
+                        new double[]{0, 45}
 
                 ); //same
 
@@ -151,7 +152,9 @@ public class DrumShooter extends Shooter{
                         pivotID, 
                         0.02, 
                         0,
-                        new SparkMaxEncoder(m_name, pivotMotor)
+                        new SparkMaxEncoder(m_name, pivotMotor),
+                        new double[]{0, 45}
+
 
                 ); //same
 
@@ -178,8 +181,30 @@ public class DrumShooter extends Shooter{
     }
 
     @Override
+    public void rezero(){
+        pivotServo.rezero();
+    }
+
+    @Override
     public void setAngle(Double goal){
+
+        pivotServo.setPosition(getAngle());
+
+    }
+
+    @Override
+    public void setAngleWithOverride(Double goal, double pivotUp, double pivotDown){
+
+        // if(pivotUp >= 0){
+        //     pivotServo.setDutyCycle(pivotUp);
+        // } else if(pivotDown >= 0){
+        //     pivotServo.setDutyCycle(pivotDown);
+        // } else {
+        //     pivotServo.setPosition(goal);
+        // }
+
         pivotServo.setPosition(goal);
+
 
     }
 
@@ -240,8 +265,8 @@ public class DrumShooter extends Shooter{
     }
 
     public void feed(){
-        leftRoller.setDutyCycle(0.1);
-        rightRoller.setDutyCycle(0.1);
+        leftRoller.setDutyCycle(0.3);
+        rightRoller.setDutyCycle(0.3);
 
     }
 
