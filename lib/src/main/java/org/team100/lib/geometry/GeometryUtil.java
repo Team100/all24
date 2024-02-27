@@ -216,5 +216,4 @@ public class GeometryUtil {
         return new Rotation3d(q2);
 
     }
-
 }

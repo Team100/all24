@@ -5,9 +5,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
-import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
@@ -118,7 +118,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
-        Rotation2d bearing = bearing(currentTranslation, target.get());
+        Rotation2d bearing = TargetUtil.bearing(currentTranslation, target.get()).plus(GeometryUtil.kRotation180);
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -131,7 +131,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
-        double targetMotion = targetMotion(state, target.get());
+        double targetMotion = TargetUtil.targetMotion(state, target.get());
         t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
@@ -185,37 +185,6 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
         m_prevPose = state.pose();
         return twistWithLockM_S;
-    }
-
-    /**
-     * Absolute bearing to the target.
-     * 
-     * The bearing is only a valid shooting solution if both the robot and the
-     * target are at rest!
-     * 
-     * If the robot and/or target is moving, then the shooting solution needs to
-     * lead or lag the target.
-     */
-    static Rotation2d bearing(Translation2d robot, Translation2d target) {
-        return new Rotation2d(target.minus(robot).getAngle().getRadians() + Math.PI);
-    }
-
-    /**
-     * Apparent motion of the target, NWU rad/s.
-     * 
-     * The theta profile goal is to move at this rate, i.e. tracking the apparent
-     * movement.
-     */
-    static double targetMotion(SwerveState state, Translation2d target) {
-        Translation2d robot = state.pose().getTranslation();
-        Translation2d translation = target.minus(robot);
-        double range = translation.getNorm();
-        Rotation2d bearing = translation.getAngle();
-        Twist2d twist = state.twist();
-        Rotation2d course = new Rotation2d(twist.dx, twist.dy);
-        Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(twist);;
-        return speed * relativeBearing.getSin() / range;
     }
 
 }
