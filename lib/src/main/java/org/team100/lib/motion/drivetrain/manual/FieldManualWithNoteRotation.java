@@ -214,7 +214,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         Twist2d twist = state.twist();
         Rotation2d course = new Rotation2d(twist.dx, twist.dy);
         Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(twist);
+        double speed = GeometryUtil.norm(twist);;
         return speed * relativeBearing.getSin() / range;
     }
 

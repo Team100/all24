@@ -214,14 +214,10 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Translation2d translation = target.minus(robot);
         double range = translation.getNorm();
         Rotation2d bearing = translation.getAngle();
-        // Rotation2d course = state.translation().getAngle();
-        // Rotation2d relativeBearing = bearing.minus(course);
-
-        Twist2d t = state.twist();
-        Rotation2d course = new Rotation2d(t.dx, t.dy);
+        Twist2d twist = state.twist();
+        Rotation2d course = new Rotation2d(twist.dx, twist.dy);
         Rotation2d relativeBearing = bearing.minus(course);
-
-        double speed = GeometryUtil.norm(t);
+        double speed = GeometryUtil.norm(twist);
         return speed * relativeBearing.getSin() / range;
     }
 
