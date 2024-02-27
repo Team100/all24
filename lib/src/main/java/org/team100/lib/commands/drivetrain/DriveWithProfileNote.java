@@ -8,6 +8,8 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -84,6 +86,7 @@ public class DriveWithProfileNote extends Command100 {
     @Override
     public void execute100(double dt) {
         Optional<Translation2d> goal = m_fieldRelativeGoal.get();
+        goal = Optional.of(new Translation2d());
         if (!goal.isPresent()) {
             if (previousGoal == null) {
                 return;
@@ -98,8 +101,13 @@ public class DriveWithProfileNote extends Command100 {
             count = 0;
         }
         Rotation2d bearing;
+        if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
         bearing = new Rotation2d(
-                goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+            goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+        }
+        else {
+            bearing = m_swerve.getPose().getRotation();
+        }
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
