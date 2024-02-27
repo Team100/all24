@@ -11,7 +11,7 @@ public class CompSensors implements SensorInterface {
     // private final Timer m_timer = new Timer();
 
     public CompSensors(int port1, int port2, int port3) {
-        intakeSensor = new DigitalInput(port1);
+        intakeSensor = new DigitalInput(8);
         // superStructureSensor = new DigitalInput(port2);
         feederSensor = new DigitalInput(9);
     }

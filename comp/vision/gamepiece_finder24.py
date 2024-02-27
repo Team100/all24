@@ -147,8 +147,8 @@ class GamePieceFinder:
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
         serial = getserial()
         identity = Camera(serial)
-        if identity == Camera.GAME_PIECE:
-            img_bgr = img_bgr[0:self.height,:,:]
+        if identity == Camera.C:
+            img_bgr = img_bgr[65:583,:,:]
 
         img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)

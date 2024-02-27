@@ -85,7 +85,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     pivotID, 
                     0.02, 
                     -0.06,
-                    new AnalogEncoder100("ANALOG ENCODER PIVOT", 2, 0.51)
+                    new AnalogEncoder100("ANALOG ENCODER PIVOT", 10, 0.51)
                 );
                 ampDrive = new PWM(2);
 
