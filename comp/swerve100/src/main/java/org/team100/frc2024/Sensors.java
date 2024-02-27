@@ -19,7 +19,8 @@ public class Sensors {
 
     public Sensors(int port1, int port2, int port3){
 
-        // intakeSensor = new DigitalInput(port1);
+        //TODO get this real value
+        intakeSensor = new DigitalInput(5);
         // superStructureSensor = new DigitalInput(port2);
         feederSensor = new DigitalInput(9);
         m_timer.restart();
@@ -27,7 +28,7 @@ public class Sensors {
     }
 
     public boolean getIntakeSensor(){
-        return false;
+        return intakeSensor.get();
     }
      
     public boolean getSuperSensor(){
@@ -43,7 +44,6 @@ public class Sensors {
         //     return false;
         // }
         // return true;
-        System.out.println(feederSensor.get());
         return feederSensor.get();
 
         // return feederSensor.get();
