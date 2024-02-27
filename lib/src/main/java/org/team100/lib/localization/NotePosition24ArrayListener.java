@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.SimulatedCamera;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.util.NotePicker;
 import org.team100.lib.util.Util;
@@ -90,40 +91,9 @@ public class NotePosition24ArrayListener {
     public Optional<ArrayList<Translation2d>> getTranslation2dArray() {
         switch (Identity.instance) {
             case BLANK:
-                Optional<ArrayList<Translation2d>> optionalList = Optional.empty();
-                ArrayList<Translation2d> list = new ArrayList<>();
-                for (Translation2d note : NotePicker.autoNotes) {
-                    Pose2d pose = new Pose2d(note, new Rotation2d());
-                    Translation2d relative = pose.relativeTo(m_poseEstimator.getEstimatedPosition()).getTranslation();
-                    Transform3d cameraInRobotCoordinates = Camera.get("10000000e31d4a24").getOffset();
-                    double pitch;
-                    double x = relative.getX() - cameraInRobotCoordinates.getX();
-                    if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
-                        pitch = Math.atan2(cameraInRobotCoordinates.getZ(), -1.0 * x)
-                                - cameraInRobotCoordinates.getRotation().getY();
-                    } else {
-                        pitch = Math.atan2(cameraInRobotCoordinates.getZ(), x)
-                                - cameraInRobotCoordinates.getRotation().getY();
-                    }
-                    double y = relative.getY() - cameraInRobotCoordinates.getY();
-                    double yaw = MathUtil
-                            .angleModulus(Math.atan2(y, x) - cameraInRobotCoordinates.getRotation().getZ());
-                    Rotation3d rot = new Rotation3d(0, pitch, yaw);
-                    if (Math.abs(pitch) < Math.toRadians(31.5) && Math.abs(yaw) < Math.toRadians(40)) {
-                        Translation2d cameraRotationToRobotRelative = PoseEstimationHelper
-                                .cameraRotationToRobotRelative(
-                                        cameraInRobotCoordinates,
-                                        rot);
-                        Translation2d l = PoseEstimationHelper.convertToFieldRelative(
-                                m_poseEstimator.getEstimatedPosition(),
-                                cameraRotationToRobotRelative);
-                        if (Math.abs(l.minus(note).getX()) < 0.01 && Math.abs(l.minus(note).getY()) < 0.01) {
-                            list.add(l);
-                            optionalList = Optional.of(list);
-                        }
-                    }
-                }
-                return optionalList;
+                Transform3d cameraInRobotCoordinates = Camera.get("10000000e31d4a24").getOffset();
+                SimulatedCamera simCamera = new SimulatedCamera(cameraInRobotCoordinates);
+                return simCamera.findNotes(m_poseEstimator.getEstimatedPosition(), NotePicker.autoNotes);
             default:
                 if (latestTime > Timer.getFPGATimestamp() - 0.1) {
                     return notes;
