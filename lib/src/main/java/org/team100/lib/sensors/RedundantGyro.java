@@ -146,7 +146,7 @@ public class RedundantGyro implements RedundantGyroInterface {
     /**
      * NOTE NOTE NOTE this is NED = clockwise positive = backwards
      * 
-     * @returns rate in deg/sec
+     * @returns rate in rads/sec
      */
     @Override
     public float getRedundantGyroRateNED() {
@@ -171,7 +171,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         float result = inputs == 0 ? 0 : rateDeg_S / inputs;
 
-        t.log(Level.TRACE, m_name, "Rate NED (deg/s)", result);
+        t.log(Level.TRACE, m_name, "Rate NED (rad_s)", result);
 
         return result;
     }

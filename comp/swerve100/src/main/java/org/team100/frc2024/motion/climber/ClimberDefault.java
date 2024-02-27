@@ -37,8 +37,8 @@ public class ClimberDefault extends Command {
         // m_climber.setLeft(m_leftSupplier.get());
         // m_climber.setRight(m_rightSupplier.get());
     // } else {
-        m_climber.setLeft(m_leftSupplier.get());
-        m_climber.setRight(m_rightSupplier.get());
+        // m_climber.setLeft(m_leftSupplier.get());
+        // m_climber.setRight(m_rightSupplier.get());
     // }
     
 

@@ -195,7 +195,7 @@ public class RobotContainer {
         //
         // override the alliance logic.
 
-        m_alliance = Alliance.Blue;
+        m_alliance = Alliance.Red;
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -209,7 +209,7 @@ public class RobotContainer {
 
         switch (Identity.instance) {
             case COMP_BOT:
-                m_sensors = new CompSensors(2, 9); // Definitely real numbers
+                m_sensors = new CompSensors(8, 9); // Definitely real numbers
                 break;
             default:
                 // always returns false
@@ -430,7 +430,7 @@ public class RobotContainer {
 
         whileTrue(operatorControl::rezero, new ResetShooterZero(m_shooter));
 
-        // whileTrue(driverControl::test, new OuttakeNoteCommand());
+        whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
 
 
 
@@ -458,9 +458,11 @@ public class RobotContainer {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(1.7, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(4, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0); // .5
+        PIDController omega2Controller = new PIDController(0, 0, 0); // .5
+
 
         DriveManually driveManually = new DriveManually(driverControl::twist, m_drive);
 
@@ -542,7 +544,7 @@ public class RobotContainer {
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
-                omegaController,
+                omega2Controller,
                 0.25);
 
         whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));

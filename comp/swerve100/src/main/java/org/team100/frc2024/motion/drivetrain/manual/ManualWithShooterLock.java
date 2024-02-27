@@ -71,7 +71,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_omegaController = omegaController;
         m_scale = scale;
         isAligned = false;
-        m_name = Names.append(parent, this);
+        m_name = "MANUALLLLL";
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -148,6 +148,9 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
         t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
         t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
+        t.log(Level.TRACE, m_name, "target motion", targetMotion);
+        t.log(Level.TRACE, m_name, "goal X", goal.x());
+
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -211,9 +214,14 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Translation2d translation = target.minus(robot);
         double range = translation.getNorm();
         Rotation2d bearing = translation.getAngle();
-        Rotation2d course = state.translation().getAngle();
+        // Rotation2d course = state.translation().getAngle();
+        // Rotation2d relativeBearing = bearing.minus(course);
+
+        Twist2d t = state.twist();
+        Rotation2d course = new Rotation2d(t.dx, t.dy);
         Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(state.twist());
+
+        double speed = GeometryUtil.norm(t);
         return speed * relativeBearing.getSin() / range;
     }
 
