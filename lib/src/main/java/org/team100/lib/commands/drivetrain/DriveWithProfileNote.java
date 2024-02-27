@@ -97,9 +97,9 @@ public class DriveWithProfileNote extends Command100 {
         } else {
             count = 0;
         }
-        Rotation2d bearing;
-        bearing = new Rotation2d(
-                goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+        Rotation2d bearing = m_swerve.getPose().getRotation();
+        // Rotation2d bearing = new Rotation2d(
+        //         goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
