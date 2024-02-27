@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -196,7 +197,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
      * lead or lag the target.
      */
     static Rotation2d bearing(Translation2d robot, Translation2d target) {
-        return target.minus(robot).getAngle();
+        return new Rotation2d(target.minus(robot).getAngle().getRadians() + Math.PI);
     }
 
     /**
@@ -210,9 +211,10 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         Translation2d translation = target.minus(robot);
         double range = translation.getNorm();
         Rotation2d bearing = translation.getAngle();
-        Rotation2d course = state.translation().getAngle();
+        Twist2d twist = state.twist();
+        Rotation2d course = new Rotation2d(twist.dx, twist.dy);
         Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(state.twist());
+        double speed = GeometryUtil.norm(twist);
         return speed * relativeBearing.getSin() / range;
     }
 

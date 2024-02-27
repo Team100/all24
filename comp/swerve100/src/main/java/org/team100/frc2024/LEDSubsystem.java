@@ -26,10 +26,6 @@ public class LEDSubsystem extends SubsystemBase {
         m_indicator.setStripRed(0, State.GREEN);
     } else {
         m_indicator.setStripGreen(0, State.RED);
-
     }
-    // System.out.println("LEDSS R RUNNINNG");
-    // m_indicator.setStripSolid(0, State.RED);
-
   }
 }
