@@ -146,22 +146,27 @@ public class RedundantGyro implements RedundantGyroInterface {
     /**
      * NOTE NOTE NOTE this is NED = clockwise positive = backwards
      * 
-     * @returns rate in rads/sec
+     * @returns rate in RADIANS/sec
      */
     @Override
     public float getRedundantGyroRateNED() {
-        float rateDeg_S = 0;
+        // 2/27/24 note that the NavX is *supposed* to produce degrees per second
+        // but it appears to produce radians per second.  looking at the NavX code,
+        // i don't see how this is possible.  i logged a ticket with them to try
+        // to figure it out.
+        // https://www.kauailabs.com/support/navx-mxp/tickets.php?id=266
+        float rateRad_S = 0;
         int inputs = 0;
         if (m_gyro1.isConnected()) {
             connected1(true);
-            rateDeg_S += m_gyro1.getRate();
+            rateRad_S += m_gyro1.getRate();
             inputs += 1;
         } else {
             connected1(false);
         }
         if (m_gyro2.isConnected()) {
             connected2(true);
-            rateDeg_S += m_gyro2.getRate();
+            rateRad_S += m_gyro2.getRate();
             inputs += 1;
         } else {
             connected2(false);
@@ -169,7 +174,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         totalConnected(inputs);
 
-        float result = inputs == 0 ? 0 : rateDeg_S / inputs;
+        float result = inputs == 0 ? 0 : rateRad_S / inputs;
 
         t.log(Level.TRACE, m_name, "Rate NED (rad_s)", result);
 
