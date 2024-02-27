@@ -100,25 +100,25 @@ public class DriveWithProfileNote extends Command100 {
         } else {
             count = 0;
         }
-        Rotation2d rotationToNote;
+        Rotation2d rotationGoal;
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
-        rotationToNote = new Rotation2d(
+        rotationGoal = new Rotation2d(
             goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
         }
         else {
-            rotationToNote = m_swerve.getPose().getRotation();
+            rotationGoal = m_swerve.getPose().getRotation();
         }
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
-        rotationToNote = new Rotation2d(
-                Math100.getMinDistance(measurement, rotationToNote.getRadians()));
+        rotationGoal = new Rotation2d(
+                Math100.getMinDistance(measurement, rotationGoal.getRadians()));
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new State100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
                 thetaSetpoint.v());
 
-        State100 thetaGoal = new State100(rotationToNote.getRadians(), 0);
+        State100 thetaGoal = new State100(rotationGoal.getRadians(), 0);
         State100 xGoalRaw = new State100(goal.get().getX(), 0, 0);
         xSetpoint = xProfile.calculate(dt, xSetpoint, xGoalRaw);
         State100 yGoalRaw = new State100(goal.get().getY(), 0, 0);
