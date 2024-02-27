@@ -146,22 +146,28 @@ public class RedundantGyro implements RedundantGyroInterface {
     /**
      * NOTE NOTE NOTE this is NED = clockwise positive = backwards
      * 
-     * @returns rate in rads/sec
+     * @returns rate in degrees/sec
      */
     @Override
     public float getRedundantGyroRateNED() {
+        // 2/27/24 the NavX getRate() method has been broken since at least 2018
+        //
+        // https://github.com/kauailabs/navxmxp/issues/69
+        //
+        // the recommended workaround is to use getRawGyroZ() instead.
+
         float rateDeg_S = 0;
         int inputs = 0;
         if (m_gyro1.isConnected()) {
             connected1(true);
-            rateDeg_S += m_gyro1.getRate();
+            rateDeg_S += m_gyro1.getRawGyroZ();
             inputs += 1;
         } else {
             connected1(false);
         }
         if (m_gyro2.isConnected()) {
             connected2(true);
-            rateDeg_S += m_gyro2.getRate();
+            rateDeg_S += m_gyro2.getRawGyroZ();
             inputs += 1;
         } else {
             connected2(false);
