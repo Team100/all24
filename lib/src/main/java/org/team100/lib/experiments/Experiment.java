@@ -38,5 +38,9 @@ public enum Experiment {
      * Control heading when manually steering in snaps mode, to prevent
      * rotational drifting.
      */
-    StickyHeading
+    StickyHeading,
+    /**
+     * Drive to note turns toward the note
+     */
+    DriveToNoteWithRotation
 }
