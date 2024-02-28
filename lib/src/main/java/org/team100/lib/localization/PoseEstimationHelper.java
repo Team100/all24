@@ -27,7 +27,10 @@ public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
     private static final String m_name = Names.name(PoseEstimationHelper.class);
 
-    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
+    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d yawPitch) {
+            Translation2d roll = new Translation2d(yawPitch.getZ(),yawPitch.getY());
+            Rotation2d angle = new Rotation2d(cameraInRobotCoordinates.getRotation().getX()).plus(roll.getAngle());
+            Rotation3d cameraObject = new Rotation3d(0,angle.getSin()*roll.getNorm(),angle.getCos()*roll.getNorm());
             double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + cameraObject.getY());
             if (robotRelativeAngle == 0) {
                 return new Translation2d();
