@@ -12,17 +12,31 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 
+/**
+ * Creates a simulated camera with the given parameters, used for game piece detection testing
+ */
 public class SimulatedCamera {
     private final Transform3d m_cameraInRobotCoordinates;
+    private final Rotation3d m_focalLength;
 
-    public SimulatedCamera(Transform3d cameraInRobotCoordinates) {
+    /**
+     * @param cameraInRobotCoordinates Parameters of the camera relative to the robot
+     * @param focalLength Focal length of the camera, yaw is horizontal, pitch is vertical, should be in radians
+     */
+    public SimulatedCamera(Transform3d cameraInRobotCoordinates, Rotation3d focalLength) {
         m_cameraInRobotCoordinates = cameraInRobotCoordinates;
+        m_focalLength = focalLength;
     }
 
     //TODO make this work with any camera yaw
-    public Optional<ArrayList<Translation2d>> findNotes(Pose2d robotPose, Translation2d[] notes) {
-        Optional<ArrayList<Translation2d>> optionalList = Optional.empty();
-        ArrayList<Translation2d> list = new ArrayList<>();
+    /**
+     * Gets the rotation to the object in the frame
+     * @param robotPose Pose of the robot
+     * @param notes field relative translation of any objects
+     */
+    public Optional<ArrayList<Rotation3d>> getRotation(Pose2d robotPose, Translation2d[] notes) {
+        Optional<ArrayList<Rotation3d>> optionalList = Optional.empty();
+        ArrayList<Rotation3d> list = new ArrayList<>();
         for (Translation2d note : notes) {
             Pose2d pose = new Pose2d(note, new Rotation2d());
             Translation2d relative = pose.relativeTo(robotPose).getTranslation();
@@ -39,18 +53,9 @@ public class SimulatedCamera {
             double yaw = MathUtil
                     .angleModulus(Math.atan2(y, x) - m_cameraInRobotCoordinates.getRotation().getZ());
             Rotation3d rot = new Rotation3d(0, pitch, yaw);
-            if (Math.abs(pitch) < Math.toRadians(31.5) && Math.abs(yaw) < Math.toRadians(40)) {
-                Translation2d cameraRotationToRobotRelative = PoseEstimationHelper
-                        .cameraRotationToRobotRelative(
-                                m_cameraInRobotCoordinates,
-                                rot);
-                Translation2d l = PoseEstimationHelper.convertToFieldRelative(
-                        robotPose,
-                        cameraRotationToRobotRelative);
-                if (Math.abs(l.minus(note).getX()) < 0.01 && Math.abs(l.minus(note).getY()) < 0.01) {
-                    list.add(l);
-                    optionalList = Optional.of(list);
-                }
+            if (Math.abs(pitch) < m_focalLength.getY() && Math.abs(yaw) < m_focalLength.getZ()) {
+                list.add(rot);
+                optionalList = Optional.of(list);
             }
         }
         return optionalList;
