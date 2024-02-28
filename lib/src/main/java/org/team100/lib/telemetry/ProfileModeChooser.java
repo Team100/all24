@@ -1,6 +1,5 @@
 package org.team100.lib.telemetry;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

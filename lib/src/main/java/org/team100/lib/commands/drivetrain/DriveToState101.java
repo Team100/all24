@@ -1,7 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
@@ -74,9 +73,8 @@ public class DriveToState101 extends Command100 {
     public void initialize100() {
         System.out.println("DRIVE TO STATE");
 
-        Translation2d rot = m_swerve.getPose().getTranslation().minus(m_goal.getTranslation());
 
-        Transform2d transform = new Transform2d(m_swerve.getPose().getTranslation().minus(m_goal.getTranslation()), m_swerve.getPose().getTranslation().minus(m_goal.getTranslation()).getAngle());
+        Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()), m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()).getAngle());
 
         transform = transform.inverse();
 
@@ -85,7 +83,7 @@ public class DriveToState101 extends Command100 {
         Twist2d startVelocity = m_swerve.getVelocity();
 
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
-                new Rotation2d(-1, 1));
+                new Rotation2d(1, 1));
 
         if(startVelocity.dx == 0 && startVelocity.dy == 0){
             startWaypoint = startPose;
@@ -94,8 +92,9 @@ public class DriveToState101 extends Command100 {
 
         }        
 
+
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(),
-                new Rotation2d(-1, 1));
+                new Rotation2d(1, -1));
 
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
@@ -123,7 +122,7 @@ public class DriveToState101 extends Command100 {
             return;
         }
 
-        // TrajectoryVisualization.setViz(trajectory);
+        TrajectoryVisualization.setViz(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));

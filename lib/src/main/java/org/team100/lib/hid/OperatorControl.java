@@ -109,4 +109,20 @@ public interface OperatorControl {
     default boolean feedToAmp(){
         return false;
     }
+
+    default boolean outtakeFromAmp(){
+        return false;
+    }
+
+    default double pivotUp(){
+        return 0;
+    }
+
+    default double pivotDown(){
+        return 0;
+    }
+
+    default boolean rezero(){
+        return false;
+    }
 }

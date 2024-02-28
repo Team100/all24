@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public class DriverXboxControl implements DriverControl {
     private static final double kDeadband = 0.05;
-    private static final double kExpo = 0.75;
+    private static final double kExpo = 0.65;
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
     private final Telemetry t = Telemetry.get();
@@ -151,11 +151,16 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean test(){
-        return m_controller.getBButton();
+        return false;
     }
 
     @Override
     public int pov(){
         return m_controller.getPOV();
+    }
+
+    @Override
+    public boolean shooterLock(){
+        return m_controller.getBButton();
     }
 }

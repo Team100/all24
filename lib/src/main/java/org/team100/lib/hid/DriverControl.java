@@ -125,4 +125,12 @@ public interface DriverControl {
     default int pov() {
         return -1;
     }
+
+    default boolean shooterLock(){
+        return false;
+    }
+
+    default boolean outtakeFromAmp(){
+        return false;
+    }
 }

@@ -1,7 +1,6 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.frc2024.SensorInterface;
-import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.lib.config.Identity;
 
 /**

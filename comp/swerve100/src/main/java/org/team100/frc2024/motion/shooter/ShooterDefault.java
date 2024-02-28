@@ -4,7 +4,10 @@
 
 package org.team100.frc2024.motion.shooter;
 
+import java.util.function.Supplier;
+
 import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -15,11 +18,15 @@ public class ShooterDefault extends Command {
   double kThreshold = 8;
   Shooter m_shooter;
   SwerveDriveSubsystem m_drive;
+  Supplier<Double> m_pivotUpSupplier;
+  Supplier<Double> m_pivotDownSupplier;
 
-  public ShooterDefault(Shooter shooter, SwerveDriveSubsystem drive) {
+  public ShooterDefault(Shooter shooter, SwerveDriveSubsystem drive,  Supplier<Double> pivotUpSupplier, Supplier<Double> pivotDownSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_shooter = shooter;
     m_drive = drive;
+    m_pivotUpSupplier = pivotUpSupplier;
+    m_pivotDownSupplier = pivotDownSupplier;
     addRequirements(m_shooter);
   }
 
@@ -34,37 +41,13 @@ public class ShooterDefault extends Command {
 
     switch(RobotState100.getRobotState()){
         case SHOOTING:
-            // switch(RobotState100.getShooterState()){
-            //     case DEFAULTSHOOT:
-            //         m_shooter.pivotAndRamp(m_drive, kThreshold);
-            //         break;
-            //     case FEED:
-            //         m_shooter.feed();
-            //         break;
-            //     case READYTOSHOOT:
-            //         m_shooter.pivotAndRamp(m_drive, kThreshold); // pivots and ramps before anything
-            //         if(m_shooter.readyToShoot(m_drive)){ //if angle and rotation is good enough
-            //             m_shooter.feed(); //if velocity is good enough then shoot it
-            //         }
-            //         break;
-            //     case DOWN:
-            //         m_shooter.setAngle(0.0);
-            //         break;
-            //     default:
-            //         m_shooter.pivotAndRamp(m_drive, kThreshold);
-            //         break;
 
-            // }
-            // System.out.println("SHOOOOT");
-            // m_shooter.setAngle(22.0);
             switch(RobotState100.getShooterState()){
                 case DEFAULTSHOOT:
-                    // System.out.println("AHHHHHHHHH");
                     m_shooter.forward();
-                    m_shooter.setAngle(21.5);
+                    m_shooter.setAngleWithOverride(ShooterUtil.getAngle(m_drive.getPose().getX()), m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a   
                     break;
                 case STOP:
-                    // System.out.println("NOOOOOOOOOOOOOOOOOOO");
                     m_shooter.stop();
                     break;
                 default:

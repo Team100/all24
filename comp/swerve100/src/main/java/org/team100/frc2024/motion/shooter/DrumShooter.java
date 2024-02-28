@@ -1,32 +1,29 @@
 package org.team100.frc2024.motion.shooter;
 
-import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.motion.components.LimitedVelocityServo;
+import org.team100.lib.encoder.SparkMaxEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
-import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Direct-drive shooter with top and bottom drums.
@@ -52,7 +49,10 @@ public class DrumShooter extends Shooter{
     private final String m_name;
     private final VelocityServo<Distance100>  leftRoller;
     private final VelocityServo<Distance100>  rightRoller ;
-    private final GravityServo pivotMotor;
+    private final GravityServo pivotServo;
+
+    private final CANSparkMax pivotMotor;
+
 
     private final SpeedingVisualization m_viz;
 
@@ -106,8 +106,10 @@ public class DrumShooter extends Shooter{
 
                 rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
 
+                pivotMotor = new CANSparkMax(pivotID, MotorType.kBrushless);
 
-                pivotMotor = new GravityServo(
+                pivotServo = new GravityServo(
+                        pivotMotor,
                         40,
                         m_name + "/Pivot", 
                         pivotParams, 
@@ -115,7 +117,9 @@ public class DrumShooter extends Shooter{
                         new TrapezoidProfile100(450, 450, 0.02),
                         pivotID, 
                         0.02, 
-                        0
+                        0,
+                        new SparkMaxEncoder(m_name, pivotMotor),
+                        new double[]{0, 45}
 
                 ); //same
 
@@ -129,16 +133,23 @@ public class DrumShooter extends Shooter{
                         m_name + "/Bottom",
                         shooterParams);
 
-                pivotMotor = new GravityServo(
+                pivotMotor = new CANSparkMax(pivotID, MotorType.kBrushless);
+
+                pivotServo = new GravityServo(
+                        pivotMotor,
                         40,
                         m_name + "/Pivot", 
                         pivotParams, 
-                        new PIDController(1, 0, 0),
-                        new TrapezoidProfile100(pivotParams.maxVelM_S(), pivotParams.maxAccelM_S2(), 0.05),
+                        new PIDController(0.07, 0.0, 0.000), //same
+                        new TrapezoidProfile100(450, 450, 0.02),
                         pivotID, 
                         0.02, 
-                        -0.06
-                ); 
+                        0,
+                        new SparkMaxEncoder(m_name, pivotMotor),
+                        new double[]{0, 45}
+
+
+                ); //same
 
         }
         m_viz = new SpeedingVisualization(m_name, this);
@@ -146,33 +157,52 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void forward() {
-        leftRoller.setVelocity(20);
+        leftRoller.setVelocity(30);
         rightRoller.setVelocity(20);
     }
 
     @Override
     public void stop() {
-        // System.out.println("ZEEEEEROOOOOOOOOOOOOOO");
-
         leftRoller.setDutyCycle(0);
         rightRoller.setDutyCycle(0);
-        pivotMotor.setDutyCycle(0);
-        // m_feeder.stop(DrumShooter.class);
+        pivotServo.setDutyCycle(0);
     }
 
     @Override
     public void reset(){
-        pivotMotor.reset();
+        pivotServo.reset();
+    }
+
+    @Override
+    public void rezero(){
+        pivotServo.rezero();
     }
 
     @Override
     public void setAngle(Double goal){
-        pivotMotor.setPosition(goal);
+
+        pivotServo.setPosition(getAngle());
+
+    }
+
+    @Override
+    public void setAngleWithOverride(Double goal, double pivotUp, double pivotDown){
+
+        // if(pivotUp >= 0){
+        //     pivotServo.setDutyCycle(pivotUp);
+        // } else if(pivotDown >= 0){
+        //     pivotServo.setDutyCycle(pivotDown);
+        // } else {
+        //     pivotServo.setPosition(goal);
+        // }
+
+        pivotServo.setPosition(goal);
+
 
     }
 
     public double getAngle(){
-        return pivotMotor.getPosition();
+        return pivotServo.getPosition();
 
     }
 
@@ -180,7 +210,7 @@ public class DrumShooter extends Shooter{
     public void periodic() {
         leftRoller.periodic();
         rightRoller.periodic();
-        pivotMotor.periodic();
+        pivotServo.periodic();
         m_viz.periodic();
  
 
@@ -220,16 +250,16 @@ public class DrumShooter extends Shooter{
     }
 
     public double getPivotPosition(){
-        return pivotMotor.getRawPosition();
+        return pivotServo.getRawPosition();
     }
 
     public void setPivotPosition(double value){
-        pivotMotor.setPosition(value);
+        pivotServo.setPosition(value);
     }
 
     public void feed(){
-        leftRoller.setDutyCycle(0.1);
-        rightRoller.setDutyCycle(0.1);
+        leftRoller.setDutyCycle(0.3);
+        rightRoller.setDutyCycle(0.3);
 
     }
 

@@ -1,24 +1,14 @@
 package org.team100.frc2024.motion.climber;
 
-import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.motion.components.LimitedVelocityServo;
-import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.motion.simple.Positioning;
-import org.team100.lib.motion.simple.SimpleVisualization;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -120,11 +110,11 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public void setLeft(double value){
-        // s1.set(value);
+        s1.set(value);
     }
 
     public void setRight(double value){
-        // s2.set(value);
+        s2.set(value);
     }
     
     @Override

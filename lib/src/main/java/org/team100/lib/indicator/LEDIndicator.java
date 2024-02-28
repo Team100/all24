@@ -1,8 +1,6 @@
 package org.team100.lib.indicator;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Map;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -43,24 +41,29 @@ public class LEDIndicator {
 
     ArrayList<LEDStrip> leds = new ArrayList<>();
 
-    public LEDIndicator(int port, LEDStrip strip1, LEDStrip strip2) {
-        
-        leds.add(strip1);
-        leds.add(strip2);
+    public LEDIndicator(int port, LEDStrip... strips) {
 
-        for(LEDStrip s : leds){
-            totalLength += s.getLength();
+        for (LEDStrip strip : strips) {
+            leds.add(strip);
+            totalLength += strip.getLength();
         }
 
-        led = new AddressableLED(port);
-        led.setLength((int)totalLength);
+        led = new AddressableLED(0);
+        led.setLength(160);
+
+
+        buffer = new AddressableLEDBuffer(160);
+
+        led.setData(buffer);
         led.start();
 
 
-        buffer = new AddressableLEDBuffer((int)totalLength);
+    }
 
-        led.setData(buffer);
+    
 
+    public void setStripSolid(int index, State s){
+        setStripSolid(leds.get(index), s);
     }
 
     public void setStripSolid(LEDStrip strip, State s){
@@ -75,6 +78,11 @@ public class LEDIndicator {
     public void setStripChase(LEDStrip strip){
         Color[] colors = {new Color(), new Color()};
         Patterns.chase(colors, strip, buffer);  
+
+    }
+
+    public void periodic(){
+        led.setData(buffer);
 
     }
 

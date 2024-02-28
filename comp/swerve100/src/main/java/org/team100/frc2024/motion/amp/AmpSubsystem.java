@@ -1,25 +1,19 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.frc2024.motion.GravityServo;
-import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.ServoFactory;
+import org.team100.lib.encoder.AnalogEncoder100;
 import org.team100.lib.motion.simple.AngularVisualization;
 import org.team100.lib.motion.simple.Positioning;
-import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -36,6 +30,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
     private final AngularVisualization m_viz;
  
+    CANSparkMax m_motor;
 
 
     
@@ -49,23 +44,31 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
 
         switch (Identity.instance) {
             case COMP_BOT:
+
+                m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
                 //TODO tune kV
                 ampAngleServo = new GravityServo(
+                    m_motor, 
                     5,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
-                    new PIDController(0, 0, 0), 
+                    new PIDController(10, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
-                    -0.06
+                    -0.06, 
+                    new AnalogEncoder100("ANALOG ENCODER PIVOT", 2, 0.51),
+                    new double[]{0, 0}
                 );
 
-                ampDrive = new PWM(1);
+                ampDrive = new PWM(2);
                 break;
             case BLANK:
             default:
+                m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
+
                 ampAngleServo = new GravityServo(
+                    m_motor,
                     5,
                     m_name, 
                     m_params, 
@@ -73,9 +76,11 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
-                    -0.06
+                    -0.06,
+                    new AnalogEncoder100("ANALOG ENCODER PIVOT", 2, 0.51),
+                    new double[]{0, 0}
                 );
-                ampDrive = new PWM(1);
+                ampDrive = new PWM(2);
 
                 
         }
@@ -91,6 +96,10 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
      * @param value
      */
     public void setAmpPosition(double value) {
+        ampAngleServo.setPositionWithSteadyState(value);
+    }
+
+    public void setDutyCycle(double value) {
         ampAngleServo.set(value);
     }
 
@@ -98,13 +107,12 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         ampAngleServo.reset();
     }
 
-    public void feed() {
-        ampDrive.setSpeed(0.5);
+    public void driveFeeder(double value){
+        ampDrive.setSpeed(-value);
+        // System.out.println("I AM BEING DRIVEN RIGHT NOW : " + value);
     }
 
-    public void stopFeed() {
-        ampDrive.setSpeed(0);
-    }
+
 
     public void stop() {
         ampAngleServo.stop();
@@ -121,15 +129,11 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         return getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI;
     }
 
-    public void setDutyCycle(double value){
-        ampDrive.setSpeed(value);
-
-    }
-
     @Override
     public void periodic() {
         ampAngleServo.periodic();
         m_viz.periodic();
+
 
         
 

@@ -6,7 +6,7 @@ import org.team100.frc2024.motion.shooter.Shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class FeedCommand extends Command {
+public class OuttakeCommand extends Command {
     Intake m_intake;
     Shooter m_shooter;
     AmpSubsystem m_amp;
@@ -14,7 +14,7 @@ public class FeedCommand extends Command {
 
     double value = 5;
 
-    public FeedCommand(Intake intake, Shooter shooter, AmpSubsystem amp, FeederSubsystem feeder) {
+    public OuttakeCommand(Intake intake, Shooter shooter, AmpSubsystem amp, FeederSubsystem feeder) {
 
         m_intake = intake;
         m_shooter = shooter;
@@ -32,18 +32,10 @@ public class FeedCommand extends Command {
     @Override
     public void execute() {
 
-        System.out.println(Math.abs(m_shooter.getPivotPosition() - value));
-
-        if (Math.abs(m_shooter.getPivotPosition() - value) > 0.1) {
-            System.out.println("NOT IN POSITIONNN");
-            m_shooter.setPivotPosition(value);
-        } else {
-            m_shooter.setPivotPosition(value);
-            m_feeder.feed();
-            m_intake.intake();
-            m_shooter.feed();
-            m_amp.driveFeeder(-value);
-        }
+        m_feeder.starve();
+        m_intake.outtake();
+        m_shooter.feed();
+        m_amp.driveFeeder(-1);
 
     }
 
