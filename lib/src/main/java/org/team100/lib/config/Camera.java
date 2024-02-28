@@ -39,7 +39,7 @@ public enum Camera {
     SHOOTER("10000000a7c673da",
             new Transform3d(
                     new Translation3d(.09, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-25), 0))),
+                    new Rotation3d(0, Math.toRadians(-20), 0))),
     /**
      * Gamma amp-placer
      */
@@ -53,7 +53,7 @@ public enum Camera {
     GAME_PIECE("10000000a7c673dc",
             new Transform3d(
                     new Translation3d(-0.321, -0.025, .29),
-                    new Rotation3d(0, Math.toRadians(25), Math.PI))),
+                    new Rotation3d(0, Math.toRadians(27), 0))),
     
     G("10000000a7a892c0",
             new Transform3d(

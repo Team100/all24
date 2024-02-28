@@ -5,20 +5,21 @@ import edu.wpi.first.wpilibj.DigitalInput;
 
 public class CompSensors implements SensorInterface {
 
-    private final DigitalInput intakeSensor;
+    // private final DigitalInput intakeSensor;
     // private final DigitalInput superStructureSensor;
     private final DigitalInput feederSensor;
     // private final Timer m_timer = new Timer();
 
     public CompSensors(int port1, int port2, int port3) {
-        intakeSensor = new DigitalInput(port1);
+        // intakeSensor = new DigitalInput(port1);
         // superStructureSensor = new DigitalInput(port2);
         feederSensor = new DigitalInput(9);
     }
 
     @Override
     public boolean getIntakeSensor() {
-        return intakeSensor.get();
+        // return intakeSensor.get();
+        return false;
     }
 
     @Override

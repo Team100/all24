@@ -285,7 +285,7 @@ public class RobotContainer {
         // on xbox this is left bumper
         // on joystick this is button 4
         // on starting zone line lined up with note
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, Math.PI));
+        onTrue(driverControl::resetPose, new ResetPose(m_drive, 2, 2, Math.PI));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -342,7 +342,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 1.3, 1);
+        DriveMotionController drivePID = new DrivePIDFController(false, 0.0, 1.0);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -526,7 +526,7 @@ public class RobotContainer {
                 0.25);
 
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
+        whileTrue(driverControl::test, m_AutoMaker.tuning());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
@@ -541,7 +541,7 @@ public class RobotContainer {
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         // Registers the subsystems so that they run with the specified priority
-        SubsystemPriority.registerWithPriority();
+        // SubsystemPriority.registerWithPriority();
 
         m_auton = m_drive.runInit(m_drive::defense);
 

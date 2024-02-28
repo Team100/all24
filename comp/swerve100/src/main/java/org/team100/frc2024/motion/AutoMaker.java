@@ -231,6 +231,6 @@ public class AutoMaker {
     }
 
     public SequentialCommandGroup tuning() {
-        return new SequentialCommandGroup(tuningTrajectory3(), new WaitCommand(1), tuningTrajectory4());
+        return new SequentialCommandGroup(tuningTrajectory1(), new WaitCommand(1), tuningTrajectory2());
     }
 }
