@@ -1,11 +1,13 @@
 package org.team100.frc2024.motion;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
+import org.team100.lib.commands.drivetrain.DriveWithWaypoints;
 import org.team100.lib.commands.drivetrain.TrajectoryCommand;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -26,13 +28,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class AutoMaker {
     public SwerveDriveSubsystem m_swerve;
+    public FeederSubsystem m_feeder;
+    public Shooter m_shooter;
     public TrajectoryPlanner m_planner;
     public DriveMotionController m_controller;
     public List<TimingConstraint> m_constraints;
+
     private final double kMaxVelM_S = 4;
     private final double kMaxAccelM_S_S = 5;
     private final double kShooterScale;
@@ -41,7 +47,7 @@ public class AutoMaker {
     private final double kStageOpeningOffset = -1;
 
     public enum FieldPoint {
-        NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT, STAGEOPENING
+        NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT, STAGEOPENING, LEFTSTAGESHOT, TEST, RIGHTSTAGESHOT, DROPNOTE
     }
 
     private Translation2d getTranslation(FieldPoint point) {
@@ -70,6 +76,14 @@ public class AutoMaker {
                 return forAlliance(new Translation2d(4.25, 5), m_alliance);
             case STAGEOPENING:
                 return forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
+            case LEFTSTAGESHOT:
+                return forAlliance(new Translation2d(3.380401, 2.727194), m_alliance);
+            case TEST:
+                return forAlliance(new Translation2d(5.757135, 1.799320), m_alliance);
+            case DROPNOTE:
+                return forAlliance(new Translation2d(4.270352, 1.998448), m_alliance);
+            case RIGHTSTAGESHOT:
+                return forAlliance(new Translation2d(4.238593, 2.959588), m_alliance);
             default:
                 return new Translation2d();
         }
@@ -84,18 +98,22 @@ public class AutoMaker {
                 Translation2d offset = new Translation2d(kIntakeOffset * heading.getCos(), kIntakeOffset *
                         heading.getSin());
                 return new Pose2d(translation.plus(offset), heading);
-            case CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT:
+            case CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT, LEFTSTAGESHOT:
                 heading = ShooterUtil.getRobotRotationToSpeaker(translation, kShooterScale);
+                return new Pose2d(translation, heading);
+            case DROPNOTE:
+                heading = new Rotation2d(0);
                 return new Pose2d(translation, heading);
             default:
                 return new Pose2d(translation.plus(new Translation2d(-kIntakeOffset, 0)), heading);
         }
     }
 
-    public AutoMaker(SwerveDriveSubsystem swerve, TrajectoryPlanner planner, DriveMotionController controller,
-            SwerveKinodynamics limits, double shooterScale, Alliance alliance) {
+    public AutoMaker(SwerveDriveSubsystem swerve, TrajectoryPlanner planner, DriveMotionController controller, SwerveKinodynamics limits,
+            double shooterScale, Alliance alliance, Shooter shooter, FeederSubsystem feeder) {
         m_swerve = swerve;
         m_planner = planner;
+        m_shooter = shooter;
         m_controller = controller;
         m_constraints = List.of(
                 new CentripetalAccelerationConstraint(limits));
@@ -131,9 +149,50 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
+    public TrajectoryCommand100 aroundStage(FieldPoint noteA, FieldPoint otherPoint, FieldPoint noteB) {
+        Pose2d startPose = getPose(noteA);
+        Pose2d endPose = getPose(noteB);
+        Pose2d openingPose = getPose(otherPoint);
+        
+        // Rotation2d angleToGoal = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
+        // Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), angleToGoal.times(5));
+        // Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endPose.getRotation().plus(new Rotation2d(Math.PI)));
+        // List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
+        // List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
+        // Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        //         kMaxAccelM_S_S);
+        // return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
+
+        Translation2d rotationReference = openingPose.getTranslation();
+        Rotation2d startRotation = rotationReference.minus(startPose.getTranslation()).getAngle();
+        Rotation2d betweenRotation = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
+        Rotation2d endRotation = endPose.getTranslation().minus(rotationReference).getAngle();
+        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), startRotation);
+        Pose2d betweenWaypoint = new Pose2d(openingPose.getTranslation(), betweenRotation);
+        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
+        List<Pose2d> waypointsM = List.of(startWaypoint, betweenWaypoint, endWaypoint);
+        List<Rotation2d> headings = List.of(startPose.getRotation(), openingPose.getRotation(), endPose.getRotation());
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S, kMaxAccelM_S_S);
+        return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
+    }
+
+    
+
     public DriveToWithAutoStart startToNote(FieldPoint note) {
         Pose2d endPose = getPose(note);
         Rotation2d endRotation = endPose.getRotation().plus(new Rotation2d(Math.PI));
+        // Rotation2d endRotation = endPose.getRotation();
+
+        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
+        return new DriveToWithAutoStart(m_swerve, endWaypoint, endPose.getRotation(), m_planner, m_controller,
+                m_constraints);
+    }
+
+    public DriveToWithAutoStart startToNote2(FieldPoint note) {
+        Pose2d endPose = getPose(note);
+        Rotation2d endRotation = endPose.getRotation().plus(new Rotation2d(Math.PI));
+        // Rotation2d endRotation = endPose.getRotation();
+
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
         return new DriveToWithAutoStart(m_swerve, endWaypoint, endPose.getRotation(), m_planner, m_controller,
                 m_constraints);
@@ -173,14 +232,21 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
-    public TrajectoryCommand100 throughStageOpening(FieldPoint note, Boolean toNote) {
+    public TrajectoryCommand100 throughStageOpening(FieldPoint note, Boolean toNote, Boolean isRightShot) {
         Translation2d offset = new Translation2d(0, kStageOpeningOffset);
         if (m_alliance == Alliance.Red) {
             offset = offset.times(-1);
         }
+
+        
         Pose2d startPose = getPose(note);
         Pose2d openingPose = getPose(FieldPoint.STAGEOPENING);
         Pose2d endPose = getPose(FieldPoint.STAGESHOT);
+
+        if(isRightShot){
+            getPose(FieldPoint.RIGHTSTAGESHOT);
+        }
+
         switch (note) {
             case NOTE5:
                 offset = offset.times(-.125);
@@ -190,6 +256,9 @@ public class AutoMaker {
         }
         if (toNote) {
             startPose = getPose(FieldPoint.STAGESHOT);
+            if(isRightShot){
+                startPose = getPose(FieldPoint.RIGHTSTAGESHOT);
+            }
             endPose = getPose(note);
         }
         Translation2d rotationReference = openingPose.getTranslation().plus(offset);
@@ -205,21 +274,28 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
+   
+
     public DriveToWaypoint100 driveToStraight(FieldPoint point) {
         return new DriveToWaypoint100(getPose(point), m_swerve, m_planner, m_controller, m_constraints);
     }
 
+    
+
     public SequentialCommandGroup eightNoteAuto() {
-        return new SequentialCommandGroup(startToNote(FieldPoint.NOTE3),
+        return new SequentialCommandGroup(
+                startToNote(FieldPoint.NOTE3),
                 adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
                 adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8),
-                driveToStraight(FieldPoint.CLOSEWINGSHOT), driveToStraight(FieldPoint.NOTE7), throughStageOpening(FieldPoint.NOTE7, false),
-                throughStageOpening(FieldPoint.NOTE6, true), throughStageOpening(FieldPoint.NOTE6, false),
-                throughStageOpening(FieldPoint.NOTE5, true), throughStageOpening(FieldPoint.NOTE5, false));
+                driveToStraight(FieldPoint.CLOSEWINGSHOT), driveToStraight(FieldPoint.NOTE7), throughStageOpening(FieldPoint.NOTE7, false, false),
+                throughStageOpening(FieldPoint.NOTE6, true, false), throughStageOpening(FieldPoint.NOTE6, false, false),
+                throughStageOpening(FieldPoint.NOTE5, true, false), throughStageOpening(FieldPoint.NOTE5, false, false));
     }
 
     public SequentialCommandGroup fourNoteAuto() {
-        return new SequentialCommandGroup(startToNote(FieldPoint.NOTE1),
+        return new SequentialCommandGroup(
+                startToNote(FieldPoint.NOTE1),
+                // new StartEndCommand(m_shooter::forward, null),
                 adjacentWithShooterAngle(FieldPoint.NOTE1, FieldPoint.NOTE2),
                 adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE3));
     }
@@ -228,6 +304,14 @@ public class AutoMaker {
         return new SequentialCommandGroup(startToNote(FieldPoint.NOTE3),
                 adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
                 adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8), driveToStraight(FieldPoint.CLOSEWINGSHOT));
+    }
+
+    public SequentialCommandGroup leftAuto(){
+        // return new SequentialCommandGroup(startToNote(FieldPoint.NOTE4), driveToStraight(FieldPoint.LEFTSTAGESHOT));
+
+        return new SequentialCommandGroup(startToNote(FieldPoint.NOTE4), driveToStraight(FieldPoint.LEFTSTAGESHOT), aroundStage(FieldPoint.LEFTSTAGESHOT, FieldPoint.TEST, FieldPoint.NOTE5), throughStageOpening(FieldPoint.NOTE5, false, false));
+        // return null;
+
     }
 
     public SequentialCommandGroup tuning() {

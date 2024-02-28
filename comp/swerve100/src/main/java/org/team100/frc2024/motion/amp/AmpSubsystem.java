@@ -5,7 +5,7 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.encoder.AnalogEncoder100;
+import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.encoder.SparkMaxEncoder;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
@@ -47,8 +47,8 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
-                100,
-                100)
+                5,
+                10)
                 ;
 
         switch (Identity.instance) {
@@ -58,15 +58,15 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                 //TODO tune kV
                 ampAngleServo = new GravityServo(
                     m_motor, 
-                    5,
+                    40,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
-                    new PIDController(10, 0, 0), 
+                    new PIDController(3, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
                     -0.06, 
-                    new AnalogEncoder100("ANALOG ENCODER PIVOT", 2, 0.51),
+                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.51, false),
                     new double[]{0, 0}
                 );
 
@@ -81,12 +81,12 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     5,
                     m_name, 
                     m_params, 
-                    new PIDController(1, 0, 0), 
+                    new PIDController(3, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
                     -0.06,
-                    new AnalogEncoder100("ANALOG ENCODER PIVOT", 2, 0.51),
+                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
                     new double[]{0, 0}
                 );
                 ampDrive = new PWM(2);

@@ -6,7 +6,7 @@ package org.team100.frc2024.motion;
 
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
-import org.team100.lib.encoder.AnalogEncoder100;
+import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SparkMaxEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
@@ -64,13 +64,13 @@ public class GravityServo {
     m_softLimits = softLimits;
     m_period = period;
     m_motor = motor;
-    m_motor.setIdleMode(IdleMode.kCoast);
+    // m_motor.setIdleMode(IdleMode.kCoast);
     m_encoder = encoder;
     m_name = name;
     m_params = params;
     m_controller = controller;
     // m_controller.setIntegratorRange(-0.02, 0.02);
-    m_controller.setTolerance(0.02);
+    m_controller.setTolerance(0.001);
     m_profile = profile;
     m_gravityScale = gravityScale;
     kCurrentLimit = currentLimit;
@@ -118,9 +118,9 @@ public class GravityServo {
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.006; //rot/s to rpm conversion
+        double u_FF = m_setpoint.v() * 0.35; //rot/s to rpm conversion
 
-        double gravityTorque = 0.006 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
+        double gravityTorque = 0.006 * Math.cos((m_encoder.getPosition()));
 
         
         double staticFF = 0.01 * Math.signum(u_FF + u_FB);
@@ -130,6 +130,8 @@ public class GravityServo {
         }
 
         double u_TOTAL = gravityTorque + u_FF + u_FB + staticFF;
+        
+        u_TOTAL = gravityTorque + u_FF + u_FB;
 
         m_motor.set(u_TOTAL); 
 
@@ -175,6 +177,8 @@ public class GravityServo {
     }
 
     public void setPositionWithSteadyState(double goal) {
+        m_motor.setSmartCurrentLimit(kCurrentLimit);
+
         double measurement = m_encoder.getPosition();
 
         // use the modulus closest to the measurement.
@@ -185,7 +189,7 @@ public class GravityServo {
                 (m_setpoint.x()),
                 m_setpoint.v());
 
-        System.out.println("SETPOINT XXXXX" + m_setpoint.x());
+        // System.out.println("SETPOINT XXXXX" + m_setpoint.x());
 
 
         
@@ -195,16 +199,18 @@ public class GravityServo {
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        // double u_FF = m_setpoint.v() * 2; //rot/s to rpm conversion
+        double u_FF = m_setpoint.v() * 0.65; //rot/s to rpm conversion
 
         double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
-        double u_TOTAL = gravityTorque + u_FB;
+        double u_TOTAL = gravityTorque;
         
-        // if(diff < 0.1){
-        //     m_motor.set(0.05);
-        // } else {
-            m_motor.set(u_TOTAL); 
-        // }
+        if(diff < 0.1){
+            // System.out.println("I AM TRUEEEEEE");
+            m_motor.setSmartCurrentLimit(5);
+            m_motor.set(0.01);
+        } else {
+            m_motor.set(u_TOTAL + u_FF); 
+        }
 
 
         m_controller.setIntegratorRange(0, 0.1);
@@ -227,6 +233,7 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Get Raw Position", getRawPosition());
         t.log(Level.DEBUG, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
+        t.log(Level.DEBUG, m_name, "DUTY", m_motor.getAppliedOutput());
 
 
 
