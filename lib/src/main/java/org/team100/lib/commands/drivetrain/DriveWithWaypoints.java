@@ -4,14 +4,9 @@
 
 package org.team100.lib.commands.drivetrain;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
@@ -28,17 +23,12 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.DriveUtil;
 
-import com.choreo.lib.Choreo;
-import com.ctre.phoenix6.signals.Licensing_IsSeasonPassedValue;
-import com.ctre.phoenix6.signals.System_StateValue;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 
 public class DriveWithWaypoints extends Command100 {

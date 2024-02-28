@@ -1,11 +1,8 @@
 package org.team100.lib.hid;
 
-import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 
-import edu.wpi.first.util.concurrent.Event;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.event.EventLoop;
 
 public class OperatorV2Control implements OperatorControl {
     private static final double kDeadband = 0.1;

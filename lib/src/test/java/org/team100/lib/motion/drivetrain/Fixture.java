@@ -11,7 +11,6 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
 
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 /**
  * A real swerve subsystem populated with simulated motors and encoders,

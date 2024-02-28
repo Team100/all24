@@ -1,28 +1,19 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.frc2024.motion.GravityServo;
-import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.AnalogEncoder100;
-import org.team100.lib.encoder.SparkMaxEncoder;
-import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.AngularVisualization;
 import org.team100.lib.motion.simple.Positioning;
-import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**

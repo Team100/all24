@@ -1,7 +1,5 @@
 package org.team100.frc2024;
 
-import org.team100.frc2024.motion.intake.Intake;
-
 public class RobotState100 {
 
     public enum State100{

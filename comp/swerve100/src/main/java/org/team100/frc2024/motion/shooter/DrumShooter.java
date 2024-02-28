@@ -1,6 +1,5 @@
 package org.team100.frc2024.motion.shooter;
 
-import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.config.FeedforwardConstants;
@@ -8,29 +7,23 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.SparkMaxEncoder;
-import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
-import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Direct-drive shooter with top and bottom drums.

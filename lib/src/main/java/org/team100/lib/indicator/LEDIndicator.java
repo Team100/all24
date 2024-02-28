@@ -1,13 +1,10 @@
 package org.team100.lib.indicator;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Map;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /**
  * An LED strip used as a signal light.

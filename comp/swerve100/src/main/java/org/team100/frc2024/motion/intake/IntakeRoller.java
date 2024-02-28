@@ -3,7 +3,6 @@ package org.team100.frc2024.motion.intake;
 import org.team100.frc2024.RobotState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.SensorInterface;
-import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -12,13 +11,11 @@ import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 /**
  * Direct-drive roller intake
