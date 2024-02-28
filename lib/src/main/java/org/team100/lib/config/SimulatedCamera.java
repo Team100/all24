@@ -20,30 +20,30 @@ public class SimulatedCamera {
         m_cameraInRobotCoordinates = cameraInRobotCoordinates;
     }
 
+    //TODO make this work with any camera yaw
     public Optional<ArrayList<Translation2d>> findNotes(Pose2d robotPose, Translation2d[] notes) {
         Optional<ArrayList<Translation2d>> optionalList = Optional.empty();
         ArrayList<Translation2d> list = new ArrayList<>();
-        for (Translation2d note : NotePicker.autoNotes) {
+        for (Translation2d note : notes) {
             Pose2d pose = new Pose2d(note, new Rotation2d());
             Translation2d relative = pose.relativeTo(robotPose).getTranslation();
-            Transform3d cameraInRobotCoordinates = m_cameraInRobotCoordinates;
             double pitch;
-            double x = relative.getX() - cameraInRobotCoordinates.getX();
-            if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
-                pitch = Math.atan2(cameraInRobotCoordinates.getZ(), -1.0 * x)
-                        - cameraInRobotCoordinates.getRotation().getY();
+            double x = relative.getX() - m_cameraInRobotCoordinates.getX();
+            if (m_cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
+                pitch = Math.atan2(m_cameraInRobotCoordinates.getZ(), -1.0 * x)
+                        - m_cameraInRobotCoordinates.getRotation().getY();
             } else {
-                pitch = Math.atan2(cameraInRobotCoordinates.getZ(), x)
-                        - cameraInRobotCoordinates.getRotation().getY();
+                pitch = Math.atan2(m_cameraInRobotCoordinates.getZ(), x)
+                        - m_cameraInRobotCoordinates.getRotation().getY();
             }
-            double y = relative.getY() - cameraInRobotCoordinates.getY();
+            double y = relative.getY() - m_cameraInRobotCoordinates.getY();
             double yaw = MathUtil
-                    .angleModulus(Math.atan2(y, x) - cameraInRobotCoordinates.getRotation().getZ());
+                    .angleModulus(Math.atan2(y, x) - m_cameraInRobotCoordinates.getRotation().getZ());
             Rotation3d rot = new Rotation3d(0, pitch, yaw);
             if (Math.abs(pitch) < Math.toRadians(31.5) && Math.abs(yaw) < Math.toRadians(40)) {
                 Translation2d cameraRotationToRobotRelative = PoseEstimationHelper
                         .cameraRotationToRobotRelative(
-                                cameraInRobotCoordinates,
+                                m_cameraInRobotCoordinates,
                                 rot);
                 Translation2d l = PoseEstimationHelper.convertToFieldRelative(
                         robotPose,
