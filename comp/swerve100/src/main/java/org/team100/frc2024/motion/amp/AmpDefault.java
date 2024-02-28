@@ -7,6 +7,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class AmpDefault extends Command {
     AmpSubsystem m_amp;
 
+    public AmpDefault(AmpSubsystem amp){
+        m_amp = amp;
+    }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
@@ -65,6 +69,9 @@ public class AmpDefault extends Command {
                     m_amp.setDutyCycle(0);
                     m_amp.driveFeeder(0);
                 default:
+                    m_amp.setDutyCycle(0);
+                    m_amp.driveFeeder(0);
+    }
     }
 
 
