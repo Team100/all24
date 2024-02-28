@@ -5,7 +5,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.config.Identity;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
@@ -19,12 +18,9 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class DriveWithProfileNote extends Command100 {
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;

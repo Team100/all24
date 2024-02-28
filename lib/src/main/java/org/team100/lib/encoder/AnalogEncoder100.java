@@ -1,15 +1,10 @@
 package org.team100.lib.encoder;
 
-import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.wpilibj.AnalogEncoder;
-import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 

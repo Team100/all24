@@ -1,18 +1,11 @@
 package org.team100.lib.encoder;
 
-import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-
-import edu.wpi.first.wpilibj.AnalogEncoder;
-import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.

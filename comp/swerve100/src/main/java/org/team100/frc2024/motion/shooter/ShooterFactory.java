@@ -1,7 +1,5 @@
 package org.team100.frc2024.motion.shooter;
 
-import java.util.function.Supplier;
-
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.lib.config.Identity;
 

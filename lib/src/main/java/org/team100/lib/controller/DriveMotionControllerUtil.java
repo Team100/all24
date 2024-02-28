@@ -8,7 +8,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;

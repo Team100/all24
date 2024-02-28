@@ -20,6 +20,7 @@
         "editor.detectIndentation": false,
         "java.debug.settings.onBuildFailureProceed": true,
         "editor.parameterHints.cycle": false,
-        "java.signatureHelp.enabled": false
+        "java.signatureHelp.enabled": false,
+        "java.saveActions.organizeImports": true
     }
 }

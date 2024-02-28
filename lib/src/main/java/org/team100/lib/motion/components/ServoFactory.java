@@ -22,7 +22,6 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class ServoFactory {
 
