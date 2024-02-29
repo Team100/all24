@@ -88,7 +88,6 @@ public class PoseEstimationHelper {
                 Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
                         cameraInRobotCoordinates,
                         note);
-                        System.out.println(cameraRotationRobotRelative);
                 Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation());
             }

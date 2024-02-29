@@ -138,13 +138,6 @@ public class AutoMaker {
                         return translation2d.get();
                     }
                     return pose;
-                case STAGEADJACENT:
-                    pose = forAlliance(new Translation2d(5.87248, 1.9), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
                 case DROPSHOT:
                     pose = forAlliance(new Translation2d(.5, 1.8), m_alliance);
                     translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
