@@ -170,7 +170,7 @@ public class SwerveLocal {
     }
 
     /**
-     * The speed implied by the module states.
+     * The robot-relative speed implied by the module states.
      * performs inverse discretization and extra correction
      * 
      * @param gyroRateRad_S gyro rate
