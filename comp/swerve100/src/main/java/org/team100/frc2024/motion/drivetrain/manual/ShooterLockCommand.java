@@ -30,9 +30,9 @@ public class ShooterLockCommand extends Command {
         m_driver.reset(m_drive.getPose());
     }
 
+    
     @Override
     public void execute() {
-        System.out.println(m_twistSupplier.get());
         Twist2d twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
 
         m_drive.driveInFieldCoords(twist, 0.02);
