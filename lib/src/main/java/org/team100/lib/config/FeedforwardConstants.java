@@ -27,7 +27,7 @@ public class FeedforwardConstants {
     }
 
     public static FeedforwardConstants makeWCPSwerveDriveFalcon6() {
-        return new FeedforwardConstants(0.13, .07, .374, .37);
+        return new FeedforwardConstants(.13, .13, .374, .37);
         // return new FeedforwardConstants(0, 0, 0, 0);
 
     }

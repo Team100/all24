@@ -15,7 +15,8 @@ public class CompSensors implements SensorInterface {
 
     @Override
     public boolean getIntakeSensor() {
-        return intakeSensor.get();
+        // return intakeSensor.get();
+        return false;
     }
 
 

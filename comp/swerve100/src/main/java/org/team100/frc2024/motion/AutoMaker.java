@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
@@ -30,10 +31,11 @@ public class AutoMaker {
     private final double kShooterScale;
     private final Alliance m_alliance;
     private final double kIntakeOffset = .381;
-    private final double kStageOpeningOffset = -1;
 
     public enum FieldPoint {
-        NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT, STAGEOPENING
+        NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT,
+        CENTRALSTAGEOPENING,
+        STAGEADJACENT, FARSTAGEOPENING, DROPSHOT
     }
 
     private Translation2d getTranslation(FieldPoint point) {
@@ -60,8 +62,14 @@ public class AutoMaker {
                 return forAlliance(new Translation2d(4, 1.5), m_alliance);
             case STAGESHOT:
                 return forAlliance(new Translation2d(4.25, 5), m_alliance);
-            case STAGEOPENING:
+            case CENTRALSTAGEOPENING:
                 return forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
+            case FARSTAGEOPENING:
+                return forAlliance(new Translation2d(4.3, 3.3), m_alliance);
+            case STAGEADJACENT:
+                return forAlliance(new Translation2d(5.87248, 1.9), m_alliance);
+            case DROPSHOT:
+                return forAlliance(new Translation2d(.5, 1.8), m_alliance);
             default:
                 return new Translation2d();
         }
@@ -76,8 +84,10 @@ public class AutoMaker {
                 Translation2d offset = new Translation2d(kIntakeOffset * heading.getCos(), kIntakeOffset *
                         heading.getSin());
                 return new Pose2d(translation.plus(offset), heading);
-            case CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT:
+            case CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT, DROPSHOT:
                 heading = ShooterUtil.getRobotRotationToSpeaker(translation, kShooterScale);
+                return new Pose2d(translation, heading);
+            case CENTRALSTAGEOPENING, FARSTAGEOPENING, STAGEADJACENT:
                 return new Pose2d(translation, heading);
             default:
                 return new Pose2d(translation.plus(new Translation2d(-kIntakeOffset, 0)), heading);
@@ -165,36 +175,36 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
-    public TrajectoryCommand100 throughStageOpening(FieldPoint note, Boolean toNote) {
-        Translation2d offset = new Translation2d(0, kStageOpeningOffset);
-        if (m_alliance == Alliance.Red) {
-            offset = offset.times(-1);
-        }
-        Pose2d startPose = getPose(note);
-        Pose2d openingPose = getPose(FieldPoint.STAGEOPENING);
-        Pose2d endPose = getPose(FieldPoint.STAGESHOT);
-        switch (note) {
-            case NOTE5:
-                offset = offset.times(-.125);
-                openingPose = new Pose2d(openingPose.getTranslation().plus(new Translation2d(0.25, 0)), openingPose.getRotation());
-            default:
-                break;
-        }
-        if (toNote) {
-            startPose = getPose(FieldPoint.STAGESHOT);
-            endPose = getPose(note);
-        }
-        Translation2d rotationReference = openingPose.getTranslation().plus(offset);
-        Rotation2d startRotation = rotationReference.minus(startPose.getTranslation()).getAngle();
+    public TrajectoryCommand100 stageManeuver(FieldPoint start, FieldPoint between, FieldPoint end) {
+        Pose2d startPose = getPose(start);
+        Pose2d betweenPose = getPose(between);
+        Pose2d endPose = getPose(end);
+
+        Rotation2d startRotationToOpening = betweenPose.getTranslation().minus(startPose.getTranslation()).getAngle();
         Rotation2d betweenRotation = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
-        Rotation2d endRotation = endPose.getTranslation().minus(rotationReference).getAngle();
+        Rotation2d endRotationFromOpening = endPose.getTranslation().minus(betweenPose.getTranslation()).getAngle();
+        Rotation2d startRotation = startRotationToOpening.minus(betweenRotation).times(1.5).plus(betweenRotation);
+        Rotation2d endRotation = endRotationFromOpening.minus(betweenRotation).times(1.5).plus(betweenRotation);
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), startRotation);
-        Pose2d betweenWaypoint = new Pose2d(openingPose.getTranslation(), betweenRotation);
+        Pose2d betweenWaypoint = new Pose2d(betweenPose.getTranslation(), betweenRotation);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
         List<Pose2d> waypointsM = List.of(startWaypoint, betweenWaypoint, endWaypoint);
-        List<Rotation2d> headings = List.of(startPose.getRotation(), openingPose.getRotation(), endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S, kMaxAccelM_S_S);
+        List<Rotation2d> headings = List.of(startPose.getRotation(), betweenPose.getRotation(), endPose.getRotation());
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+                kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
+    }
+
+    public TrajectoryCommand100 throughCentralStageOpening(FieldPoint start, FieldPoint end) {
+        return stageManeuver(start, FieldPoint.CENTRALSTAGEOPENING, end);
+    }
+
+    public TrajectoryCommand100 throughFarStageOpening(FieldPoint start, FieldPoint end) {
+        return stageManeuver(start, FieldPoint.FARSTAGEOPENING, end);
+    }
+
+    public TrajectoryCommand100 aroundStage(FieldPoint start, FieldPoint end) {
+        return stageManeuver(start, FieldPoint.STAGEADJACENT, end);
     }
 
     public DriveToWaypoint100 driveToStraight(FieldPoint point) {
@@ -205,24 +215,36 @@ public class AutoMaker {
         return new SequentialCommandGroup(startToNote(FieldPoint.NOTE3),
                 adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
                 adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8),
-                driveToStraight(FieldPoint.CLOSEWINGSHOT), driveToStraight(FieldPoint.NOTE7), throughStageOpening(FieldPoint.NOTE7, false),
-                throughStageOpening(FieldPoint.NOTE6, true), throughStageOpening(FieldPoint.NOTE6, false),
-                throughStageOpening(FieldPoint.NOTE5, true), throughStageOpening(FieldPoint.NOTE5, false));
+                driveToStraight(FieldPoint.CLOSEWINGSHOT), driveToStraight(FieldPoint.NOTE7),
+                throughCentralStageOpening(FieldPoint.NOTE7, FieldPoint.STAGESHOT),
+                throughCentralStageOpening(FieldPoint.STAGESHOT, FieldPoint.NOTE6),
+                throughCentralStageOpening(FieldPoint.NOTE6, FieldPoint.STAGESHOT),
+                throughCentralStageOpening(FieldPoint.NOTE5, FieldPoint.STAGESHOT),
+                throughCentralStageOpening(FieldPoint.STAGESHOT, FieldPoint.NOTE5));
+    }
+
+    public SequentialCommandGroup complementAuto() {
+        return new SequentialCommandGroup(driveToStraight(FieldPoint.NOTE4), driveToStraight(FieldPoint.FARWINGSHOT),
+                aroundStage(FieldPoint.FARWINGSHOT, FieldPoint.NOTE5),
+                throughCentralStageOpening(FieldPoint.NOTE5, FieldPoint.STAGESHOT), throughFarStageOpening(FieldPoint.STAGESHOT, FieldPoint.DROPSHOT));
     }
 
     public SequentialCommandGroup fourNoteAuto() {
-        return new SequentialCommandGroup(startToNote(FieldPoint.NOTE1),
+        return new SequentialCommandGroup(
+                startToNote(FieldPoint.NOTE1),
                 adjacentWithShooterAngle(FieldPoint.NOTE1, FieldPoint.NOTE2),
-                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE3));
+                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE3)
+        );
     }
 
     public SequentialCommandGroup fiveNoteAuto() {
         return new SequentialCommandGroup(startToNote(FieldPoint.NOTE3),
                 adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
-                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8), driveToStraight(FieldPoint.CLOSEWINGSHOT));
+                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8),
+                driveToStraight(FieldPoint.CLOSEWINGSHOT));
     }
 
     public SequentialCommandGroup tuning() {
-        return new SequentialCommandGroup(tuningTrajectory3(), new WaitCommand(1), tuningTrajectory4());
+        return new SequentialCommandGroup(tuningTrajectory1(), new WaitCommand(1), tuningTrajectory2());
     }
 }
