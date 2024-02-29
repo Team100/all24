@@ -71,7 +71,6 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     public void initialize100() {
         Pose2d startPose = m_swerve.getPose();
         Rotation2d rotationToGoal = m_goalTranslation.minus(startPose.getTranslation()).getAngle();
-        System.out.println(rotationToGoal);
         Rotation2d startRotation = rotationToGoal.times(1.5);
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), startRotation);
         Rotation2d endHeading = ShooterUtil.getRobotRotationToSpeaker(m_goalTranslation, kShooterScale);

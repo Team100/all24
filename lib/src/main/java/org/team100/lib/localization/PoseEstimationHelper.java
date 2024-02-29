@@ -1,5 +1,8 @@
 package org.team100.lib.localization;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -27,21 +30,68 @@ public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
     private static final String m_name = Names.name(PoseEstimationHelper.class);
 
-    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
-            double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + cameraObject.getY());
-            if (robotRelativeAngle == 0) {
-                return new Translation2d();
-            }
-            double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
-            if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
-                x =-x; 
-            }
-            double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
-            return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
+    /**
+     * Converts camera rotation to an object to a robot relative translation,
+     * accounts for roll, pitch, and yaw offsets by using the unit circle. For roll,
+     * it takes the the angle between the pitch and yaw (roll) to the object and
+     * adds the offseted roll, then gets the Cos (x in unit circle) and multiples it
+     * by the norm, it does the same for yaw
+     */
+    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates,
+            Rotation3d yawPitch) {
+        Rotation2d angleNoRollOffset = new Rotation2d(yawPitch.getZ(), yawPitch.getY());
+        Rotation2d angleWRoll = new Rotation2d(cameraInRobotCoordinates.getRotation().getX()).plus(angleNoRollOffset);
+        double normInCamera = Math.hypot(yawPitch.getZ(), yawPitch.getY());
+        Rotation3d rotToObject = new Rotation3d(0, angleWRoll.getSin() * normInCamera,
+                angleWRoll.getCos() * normInCamera);
+        double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + rotToObject.getY());
+        if (robotRelativeAngle == 0) {
+            return new Translation2d();
+        }
+        double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
+        double y = x * Math.tan(rotToObject.getZ());
+        Rotation2d cameraRelativeTranslation = new Rotation2d(x, y);
+        double znorm = Math.hypot(x, y);
+        Rotation2d angleToObject = new Rotation2d(cameraInRobotCoordinates.getRotation().getZ())
+                .plus(cameraRelativeTranslation);
+        Translation2d robotRelativeTranslation2dNoOffsets = new Translation2d(
+                angleToObject.getCos() * znorm,
+                angleToObject.getSin() * znorm);
+        return robotRelativeTranslation2dNoOffsets.plus(cameraInRobotCoordinates.getTranslation().toTranslation2d());
     }
 
-    public static Translation2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d) {
-        return currentPose.transformBy(new Transform2d(RobotRelativeTranslation2d, new Rotation2d())).getTranslation();
+    /**
+     * Converts camera rotation to objects into field relative translations
+     */
+    public static ArrayList<Translation2d> cameraRotsToFieldRelative(Pose2d currentPose,
+            Transform3d cameraInRobotCoordinates, ArrayList<Rotation3d> rots) {
+        ArrayList<Translation2d> Tnotes = new ArrayList<>();
+        for (Rotation3d note : rots)
+            if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
+                Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
+                        cameraInRobotCoordinates,
+                        note);
+                Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .getTranslation());
+            }
+        return Tnotes;
+    }
+
+    /**
+     * Converts camera rotation to objects into field relative translations
+     */
+    public static ArrayList<Translation2d> cameraRotsToFieldRelativeArray(Pose2d currentPose,
+            Transform3d cameraInRobotCoordinates, Rotation3d[] rots) {
+        ArrayList<Translation2d> Tnotes = new ArrayList<>();
+        for (Rotation3d note : rots)
+            if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
+                Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
+                        cameraInRobotCoordinates,
+                        note);
+                Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .getTranslation());
+            }
+        return Tnotes;
     }
 
     /**
@@ -209,19 +259,22 @@ public class PoseEstimationHelper {
 
         t.log(Level.DEBUG, m_name, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
         t.log(Level.DEBUG, m_name, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("TAG TRANLSAION IN CAM COORDS :" + tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("CAMERA ROT IN FIELD COORDS: " + cameraRotationInFieldCoords.toRotation2d());
+        // System.out.println("TAG TRANLSAION IN CAM COORDS :" +
+        // tagTranslationInCameraCoords.toTranslation2d());
+        // System.out.println("CAMERA ROT IN FIELD COORDS: " +
+        // cameraRotationInFieldCoords.toRotation2d());
 
-        // System.out.println("TAG IN FIELD COORDS COOORDS" + tagInFieldCoords.toPose2d());
+        // System.out.println("TAG IN FIELD COORDS COOORDS" +
+        // tagInFieldCoords.toPose2d());
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
         t.log(Level.DEBUG, m_name, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
-    
 
-        // System.out.println("TAG ROTATION IN CAM COOORDS"+ tagRotationInCameraCoords.toRotation2d());        
+        // System.out.println("TAG ROTATION IN CAM COOORDS"+
+        // tagRotationInCameraCoords.toRotation2d());
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -230,8 +283,9 @@ public class PoseEstimationHelper {
         Pose3d cameraInFieldCoords = toFieldCoordinates(
                 tagInCameraCoords,
                 tagInFieldCoords);
-        
-        // System.out.println("CAM IN FIELD COORDS:::: " + cameraInFieldCoords.toPose2d());
+
+        // System.out.println("CAM IN FIELD COORDS:::: " +
+        // cameraInFieldCoords.toPose2d());
         t.log(Level.DEBUG, m_name, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
