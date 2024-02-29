@@ -28,6 +28,10 @@ public class ShooterUtil {
 
     }
 
+    public static Translation2d getSpeakerTranslation(){
+        return new Translation2d(0, FieldConstants.instance.getShooterCenterY());
+    }
+
 
 
     public static Translation2d getOffsetTranslation(Translation2d currTranslation, double kScale){
