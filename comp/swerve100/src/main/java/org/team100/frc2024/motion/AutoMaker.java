@@ -39,7 +39,7 @@ public class AutoMaker {
     public enum FieldPoint {
         NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT,
         CENTRALSTAGEOPENING,
-        STAGEADJACENT, FARSTAGEOPENING, DROPSHOT
+        FARSTAGEADJACENT, FARSTAGEOPENING, DROPSHOT, CLOSESTAGEADJACENT
     }
 
     private Translation2d getTranslation(FieldPoint point) {
@@ -174,7 +174,7 @@ public class AutoMaker {
             case NOTE8:
                 return forAlliance(new Translation2d(8.271, 7.4633), m_alliance);
             case CLOSEWINGSHOT:
-                return forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
+                return forAlliance(new Translation2d(3, 6.4), m_alliance);
             case FARWINGSHOT:
                 return forAlliance(new Translation2d(4, 1.5), m_alliance);
             case STAGESHOT:
@@ -183,8 +183,10 @@ public class AutoMaker {
                 return forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
             case FARSTAGEOPENING:
                 return forAlliance(new Translation2d(4.3, 3.3), m_alliance);
-            case STAGEADJACENT:
+            case FARSTAGEADJACENT:
                 return forAlliance(new Translation2d(5.87248, 1.9), m_alliance);
+            case CLOSESTAGEADJACENT:
+                return forAlliance(new Translation2d(5.87248, 6.45), m_alliance);
             case DROPSHOT:
                 return forAlliance(new Translation2d(.5, 1.8), m_alliance);
             default:
@@ -204,7 +206,7 @@ public class AutoMaker {
             case CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT, DROPSHOT:
                 heading = ShooterUtil.getRobotRotationToSpeaker(translation, kShooterScale);
                 return new Pose2d(translation, heading);
-            case CENTRALSTAGEOPENING, FARSTAGEOPENING, STAGEADJACENT:
+            case CENTRALSTAGEOPENING, FARSTAGEOPENING, FARSTAGEADJACENT:
                 return new Pose2d(translation, heading);
             default:
                 return new Pose2d(translation.plus(new Translation2d(-kIntakeOffset, 0)), heading);
@@ -321,8 +323,12 @@ public class AutoMaker {
         return stageManeuver(start, FieldPoint.FARSTAGEOPENING, end);
     }
 
-    public TrajectoryCommand100 aroundStage(FieldPoint start, FieldPoint end) {
-        return stageManeuver(start, FieldPoint.STAGEADJACENT, end);
+    public TrajectoryCommand100 aroundStageClose(FieldPoint start, FieldPoint end) {
+        return stageManeuver(start, FieldPoint.CLOSESTAGEADJACENT, end);
+    }
+
+    public TrajectoryCommand100 aroundStageFar(FieldPoint start, FieldPoint end) {
+        return stageManeuver(start, FieldPoint.FARSTAGEADJACENT, end);
     }
 
     public DriveToWaypoint100 driveToStraight(FieldPoint point) {
@@ -333,7 +339,7 @@ public class AutoMaker {
         return new SequentialCommandGroup(startToNote(FieldPoint.NOTE3),
                 adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
                 adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8),
-                driveToStraight(FieldPoint.CLOSEWINGSHOT), driveToStraight(FieldPoint.NOTE7),
+                driveToStraight(FieldPoint.CLOSEWINGSHOT), aroundStageClose(FieldPoint.CLOSEWINGSHOT, FieldPoint.NOTE7),
                 throughCentralStageOpening(FieldPoint.NOTE7, FieldPoint.STAGESHOT),
                 throughCentralStageOpening(FieldPoint.STAGESHOT, FieldPoint.NOTE6),
                 throughCentralStageOpening(FieldPoint.NOTE6, FieldPoint.STAGESHOT),
@@ -343,16 +349,16 @@ public class AutoMaker {
 
     public SequentialCommandGroup complementAuto() {
         return new SequentialCommandGroup(driveToStraight(FieldPoint.NOTE4), driveToStraight(FieldPoint.FARWINGSHOT),
-                aroundStage(FieldPoint.FARWINGSHOT, FieldPoint.NOTE5),
-                throughCentralStageOpening(FieldPoint.NOTE5, FieldPoint.STAGESHOT), throughFarStageOpening(FieldPoint.STAGESHOT, FieldPoint.DROPSHOT));
+                aroundStageClose(FieldPoint.FARWINGSHOT, FieldPoint.NOTE5),
+                throughCentralStageOpening(FieldPoint.NOTE5, FieldPoint.STAGESHOT),
+                throughFarStageOpening(FieldPoint.STAGESHOT, FieldPoint.DROPSHOT));
     }
 
     public SequentialCommandGroup fourNoteAuto() {
         return new SequentialCommandGroup(
                 startToNote(FieldPoint.NOTE1),
                 adjacentWithShooterAngle(FieldPoint.NOTE1, FieldPoint.NOTE2),
-                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE3)
-        );
+                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE3));
     }
 
     public SequentialCommandGroup fiveNoteAuto() {
