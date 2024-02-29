@@ -540,7 +540,7 @@ public class RobotContainer {
 
 
         whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, notePositionDetector);
         whileTrue(driverControl::test, m_AutoMaker.complementAuto());
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
@@ -558,7 +558,7 @@ public class RobotContainer {
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
         SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
                 operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
-        SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
+        // SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         //Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();

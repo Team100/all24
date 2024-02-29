@@ -42,5 +42,9 @@ public enum Experiment {
     /**
      * Drive to note turns toward the note
      */
-    DriveToNoteWithRotation
+    DriveToNoteWithRotation,
+    /**
+     * Use note detection in auto
+     */
+    AutoNoteDetection
 }

@@ -101,7 +101,7 @@ public class NotePosition24ArrayListener {
         return NotePicker.closestNote(getTranslation2dArray(), m_poseEstimator.getEstimatedPosition());
     }
 
-    public Optional<Translation2d> getTranslation2dAuto(int noteID) {
+    public Optional<Translation2d> getTranslation2dAuto(Translation2d noteID) {
         return NotePicker.autoNotePick(getTranslation2dArray(), noteID);
     }
 

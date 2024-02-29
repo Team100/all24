@@ -40,7 +40,7 @@ public class ShooterDefault extends Command {
   public void execute() {
 
     double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
-    System.out.println(distance);
+    // System.out.println(distance);
     switch(RobotState100.getRobotState()){
         case SHOOTING:
 

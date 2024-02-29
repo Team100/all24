@@ -35,7 +35,7 @@ public class PoseEstimationHelper {
      * accounts for roll, pitch, and yaw offsets by using the unit circle. For roll,
      * it takes the the angle between the pitch and yaw (roll) to the object and
      * adds the offseted roll, then gets the Cos (x in unit circle) and multiples it
-     * by the norm
+     * by the norm, it does the same for yaw
      */
     public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates,
             Rotation3d yawPitch) {
@@ -88,6 +88,7 @@ public class PoseEstimationHelper {
                 Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
                         cameraInRobotCoordinates,
                         note);
+                        System.out.println(cameraRotationRobotRelative);
                 Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation());
             }

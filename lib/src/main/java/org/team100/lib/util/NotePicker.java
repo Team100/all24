@@ -27,10 +27,36 @@ public class NotePicker {
             new Translation2d(13.66, 4.11),
     };
 
-    /**
+/**
      * @param notes  the field relative pose of detected notes
      * @param noteID the field id of the note you want to go for, left bottom to
      *               right top IDs are 1-11
+     * @return The field relative translation of the note you want to go for
+     */
+    public static Optional<Translation2d> autoNotePick(Optional<ArrayList<Translation2d>> notes,Translation2d noteID ) {
+        if (!notes.isPresent()) {
+            return Optional.empty();
+        }
+        ArrayList<Translation2d> Tnotes = notes.get();
+        double bestNote = 1000000000;
+        Optional<Translation2d> bestNoteTranslation = Optional.empty();
+        for (Translation2d note : Tnotes) {
+            Translation2d fieldNote = noteID;
+            Translation2d difference = note.minus(fieldNote);
+            if (Math.abs(difference.getX()) < 1 && Math.abs(difference.getY()) < 1) {
+                double average = Math.abs(difference.getX()) + Math.abs(difference.getY());
+                if (average < bestNote) {
+                    bestNote = average;
+                    bestNoteTranslation = Optional.of(note);
+                }
+            }
+        }
+        return bestNoteTranslation;
+    }
+
+    /**
+     * @param notes  the field relative pose of detected notes
+     * @param noteID the translation of note you want
      * @return The field relative translation of the note you want to go for
      */
     public static Optional<Translation2d> autoNotePick(Optional<ArrayList<Translation2d>> notes, int noteID) {
