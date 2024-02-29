@@ -7,6 +7,10 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
+
+import org.team100.frc2024.motion.AutoMaker;
+import org.team100.frc2024.motion.ChangeAmpState;
+
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.FeedCommand;
@@ -27,6 +31,7 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.shooter.ResetShooterZero;
+import org.team100.frc2024.motion.shooter.SetDefaultShoot;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.frc2024.motion.shooter.ShooterFactory;
@@ -393,21 +398,19 @@ public class RobotContainer {
                 new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
 
         whileTrue(operatorControl::ramp,
-                new StartEndCommand(() -> RobotState100.changeShooterState(ShooterState100.DEFAULTSHOOT),
-                        () -> RobotState100.changeShooterState(ShooterState100.STOP)));
+                new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
 
         whileTrue(operatorControl::feed, new StartEndCommand(() -> RobotState100.changeFeederState(FeederState100.FEED),
                 () -> RobotState100.changeFeederState(FeederState100.STOP)));
 
-        whileTrue(operatorControl::pivotToAmpPosition,
-                new StartEndCommand(() -> RobotState100.changeAmpState(AmpState100.UP),
-                        () -> RobotState100.changeAmpState(AmpState100.NONE)));
+        // whileTrue(operatorControl::pivotToAmpPosition,
+        //         new ChangeAmpState(AmpState100.UP, m_amp));
 
-        whileTrue(operatorControl::pivotToAmpPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.UP), () -> RobotState100.changeAmpState(AmpState100.NONE)));
+        whileTrue(operatorControl::pivotToAmpPosition, new ChangeAmpState(AmpState100.UP, m_amp));
 
         // whileTrue(operatorControl::pivotToDownPosition, new Test2());
 
-        whileTrue(operatorControl::pivotToDownPosition, new StartEndCommand( () -> RobotState100.changeAmpState(AmpState100.DOWN), () -> RobotState100.changeAmpState(AmpState100.NONE)));
+        whileTrue(operatorControl::pivotToDownPosition, new ChangeAmpState(AmpState100.DOWN, m_amp));
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
@@ -535,9 +538,15 @@ public class RobotContainer {
         
         // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
 
+
         whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
         whileTrue(driverControl::test, m_AutoMaker.complementAuto());
+
+        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
+        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_shooter, m_feeder);
+        // whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
+
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
