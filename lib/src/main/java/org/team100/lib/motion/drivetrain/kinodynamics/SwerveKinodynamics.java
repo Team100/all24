@@ -215,7 +215,7 @@ public class SwerveKinodynamics {
         m_steeringProfile = new TrapezoidProfile100(
                 m_MaxSteeringVelocityRad_S,
                 m_maxSteeringAccelerationRad_S2,
-                0.05);
+                0.02);
     }
 
     public Profile100 getSteeringProfile() {
