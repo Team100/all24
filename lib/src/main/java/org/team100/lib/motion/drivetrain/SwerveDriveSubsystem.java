@@ -116,7 +116,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
-     * The speed implied by the module states.
+     * The robot-relative speed implied by the module states.
      * 
      * @param dt for discretization
      */
@@ -187,6 +187,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * 
      * Feasibility is enforced by the setpoint generator (if enabled) and the
      * desaturator.
+     * 
+     * @param speeds in robot coordinates
+     * @param kDtSec time increment for the setpoint generator
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         // scale for driver skill; default is half speed.

@@ -46,5 +46,9 @@ public enum Experiment {
     /**
      * Use note detection in auto
      */
-    AutoNoteDetection
+    AutoNoteDetection,
+    /**
+     * Use full state feedback for trajectory following
+     */
+    FullStateTrajectoryFollower
 }
