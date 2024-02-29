@@ -339,7 +339,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 0.0, 1.0);
+        DriveMotionController drivePID = new DrivePIDFController(false, 1.7, 1.0);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -537,7 +537,7 @@ public class RobotContainer {
 
         whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.tuning());
+        whileTrue(driverControl::test, m_AutoMaker.complementAuto());
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
         // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
 
