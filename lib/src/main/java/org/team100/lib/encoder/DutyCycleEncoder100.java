@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
  */
-public class AnalogEncoder100 implements Encoder100<Distance100> {
+public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     // private final AnalogInput m_input;
@@ -25,6 +25,9 @@ public class AnalogEncoder100 implements Encoder100<Distance100> {
     /** Current velocity, updated in periodic() */
     private double m_rateRad_S;
 
+    private boolean m_reversed;
+
+
     /**
      * @param name        may not start with a slash
      * @param channel     roboRIO analog input channel
@@ -33,24 +36,31 @@ public class AnalogEncoder100 implements Encoder100<Distance100> {
      * @param gearRatio
      * @param drive       polarity
      */
-    public AnalogEncoder100(
+    public DutyCycleEncoder100(
             String name,
             int channel,
-            double inputOffset) {
+            double inputOffset,
+            boolean reversed) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
+        m_reversed = reversed; 
         m_name = Names.append(name, this);
         // m_input = new AnalogInput(channel);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
+        m_encoder.setDistancePerRotation(2 * Math.PI);
         
         // t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
     }
 
     @Override
     public double getPosition() {
-        return m_encoder.get();
+        if(m_reversed){
+            return -m_encoder.getDistance();
+        }
+        return m_encoder.getDistance();
+
     }
 
     /**

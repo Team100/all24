@@ -6,6 +6,7 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.encoder.SparkMaxEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -20,6 +21,8 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
@@ -57,6 +60,9 @@ public class DrumShooter extends Shooter{
     private final SpeedingVisualization m_viz;
 
     private final Telemetry t;
+
+    public final double kLeftRollerVelocity = 30;
+    public final double kRightRollerVelocity = 20;
 
 
     public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit) {
@@ -107,18 +113,18 @@ public class DrumShooter extends Shooter{
                 rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
 
                 pivotMotor = new CANSparkMax(pivotID, MotorType.kBrushless);
-
+                pivotMotor.setIdleMode(IdleMode.kCoast);
                 pivotServo = new GravityServo(
                         pivotMotor,
                         40,
                         m_name + "/Pivot", 
                         pivotParams, 
-                        new PIDController(0.07, 0.0, 0.000), //same
-                        new TrapezoidProfile100(450, 450, 0.02),
+                        new PIDController(2, 0.0, 0.000), //same
+                        new TrapezoidProfile100(8, 8, 0.001),
                         pivotID, 
                         0.02, 
                         0,
-                        new SparkMaxEncoder(m_name, pivotMotor),
+                        new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0.284, true),
                         new double[]{0, 45}
 
                 ); //same
@@ -145,7 +151,7 @@ public class DrumShooter extends Shooter{
                         pivotID, 
                         0.02, 
                         0,
-                        new SparkMaxEncoder(m_name, pivotMotor),
+                        new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0, true),
                         new double[]{0, 45}
 
 
@@ -157,8 +163,8 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void forward() {
-        leftRoller.setVelocity(30);
-        rightRoller.setVelocity(20);
+        leftRoller.setVelocity(kLeftRollerVelocity);
+        rightRoller.setVelocity(kRightRollerVelocity);
     }
 
     @Override
@@ -181,7 +187,7 @@ public class DrumShooter extends Shooter{
     @Override
     public void setAngle(Double goal){
 
-        pivotServo.setPosition(getAngle());
+        pivotServo.setPosition(goal);
 
     }
 
@@ -263,14 +269,22 @@ public class DrumShooter extends Shooter{
 
     }
 
-
+    
     public double getVelocity() {
-        switch (Identity.instance) {
-            case COMP_BOT:
-            case BETA_BOT:
-                return (leftRoller.getVelocity() + rightRoller.getVelocity()) / 2;
-            default:
-                return 15;
-        }
+        return 0;
     }
+
+
+    public boolean atVelocitySetpoint(){
+        if(leftRoller.getVelocity() >= kLeftRollerVelocity){
+            if(rightRoller.getVelocity() >= kRightRollerVelocity){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+   
 }
