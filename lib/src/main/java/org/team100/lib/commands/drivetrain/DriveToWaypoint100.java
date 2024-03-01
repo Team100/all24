@@ -32,8 +32,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class DriveToWaypoint100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 4;
+    private static final double kMaxVelM_S = 2;
+    private static final double kMaxAccelM_S_S = 2; //TODO THIS IS LOWW
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
@@ -44,6 +44,9 @@ public class DriveToWaypoint100 extends Command100 {
     private final List<TimingConstraint> m_constraints;
 
     private final Supplier<Rotation2d> m_endRotation;
+
+    // private final Trajectory100 m_trajectory;
+
 
     /**
      * @param goal
@@ -150,7 +153,7 @@ public class DriveToWaypoint100 extends Command100 {
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeedsNormally(output, dt);
     }
 
     @Override

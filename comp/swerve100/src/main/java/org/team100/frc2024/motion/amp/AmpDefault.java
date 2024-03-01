@@ -9,6 +9,8 @@ public class AmpDefault extends Command {
 
     public AmpDefault(AmpSubsystem amp){
         m_amp = amp;
+
+        addRequirements(m_amp);
     }
 
   // Called when the command is initially scheduled.
@@ -53,8 +55,8 @@ public class AmpDefault extends Command {
         //0.34
     switch(RobotState100.getAmpState()){
                 case UP:
-                    m_amp.setAmpPosition(0.7);
-                    // m_amp.setDutyCycle(1);
+                    // m_amp.setAmpPosition(0.7);
+                    m_amp.setAmpPosition(1.6);
 
                     m_amp.driveFeeder(0);
                     break;

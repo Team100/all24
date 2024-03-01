@@ -54,12 +54,16 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public double getLeftAxis(){
-        return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
+        // return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
+        return -m_controller.getLeftY();
+
     }
 
     @Override
     public double getRightAxis(){
-        return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
+        // return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
+        return -m_controller.getLeftY();
+
     }
 
     @Override

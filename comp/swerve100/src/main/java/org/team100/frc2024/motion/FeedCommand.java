@@ -12,7 +12,7 @@ public class FeedCommand extends Command {
     AmpSubsystem m_amp;
     FeederSubsystem m_feeder;
 
-    double value = 5;
+    double value = 0.207;
 
     public FeedCommand(Intake intake, Shooter shooter, AmpSubsystem amp, FeederSubsystem feeder) {
 
@@ -42,7 +42,7 @@ public class FeedCommand extends Command {
             m_feeder.feed();
             m_intake.intake();
             m_shooter.feed();
-            m_amp.driveFeeder(-value);
+            m_amp.driveFeeder(-1);
         }
 
     }

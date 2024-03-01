@@ -26,7 +26,7 @@ public class SimpleSubsystem extends SubsystemBase implements Positioning {
     }
 
     @Override
-    public double getPositionRad() {
+    public Double getPositionRad() {
         return m_actuator.getPosition();
     }
 

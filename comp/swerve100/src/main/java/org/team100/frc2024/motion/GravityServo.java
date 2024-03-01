@@ -69,10 +69,13 @@ public class GravityServo {
     public void reset() {
         // m_encoder.setPosition(0);
         m_controller.reset();
+        if(getPosition() == null){
+            return;
+        }
         m_setpoint = new State100(getPosition(), 0);
     }
 
-    public double getPosition() {
+    public Double getPosition() {
         return m_encoder.getPosition();
     }
 
@@ -80,12 +83,16 @@ public class GravityServo {
         m_encoder.reset();
     }
 
-    public double getRawPosition() {
+    public Double getRawPosition() {
         return m_encoder.getPosition();
     }
 
     public void setPosition(double goal) {
-        double measurement = m_encoder.getPosition();
+        Double measurement = m_encoder.getPosition();
+
+        if(measurement == null){
+            return;
+        }
 
         // use the modulus closest to the measurement.
         // note zero velocity in the goal.
@@ -168,30 +175,32 @@ public class GravityServo {
                 (m_setpoint.x()),
                 m_setpoint.v());
 
-        // System.out.println("SETPOINT XXXXX" + m_setpoint.x());
 
         double diff = m_goal.x() - m_setpoint.x();
+
+        System.out.println("DIFFF" + diff);
+
 
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.65; //rot/s to rpm conversion
+        double u_FF = m_setpoint.v() * 0.2; //rot/s to rpm conversion
 
         double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
-        double u_TOTAL = gravityTorque;
+        double u_TOTAL = gravityTorque + u_FF + u_FB;
         
-        if(diff < 0.1){
-            // System.out.println("I AM TRUEEEEEE");
-            m_motor.setSmartCurrentLimit(5);
-            m_motor.set(0.01);
+        if(diff <= 0.1){
+            System.out.println("I AM TRUEEEEEE");
+            m_motor.setSmartCurrentLimit(2);
+            m_motor.set(0.2);
         } else {
-            m_motor.set(u_TOTAL + u_FF); 
+            m_motor.set(u_TOTAL); 
         }
 
         // if(diff < 0.1){
         // m_motor.set(0.05);
         // } else {
-        m_motor.set(u_TOTAL);
+        // m_motor.set(u_TOTAL);
         // }
 
         m_controller.setIntegratorRange(0, 0.1);
@@ -212,6 +221,7 @@ public class GravityServo {
     }
 
     public void periodic() {
+
         t.log(Level.DEBUG, m_name, "Get Raw Position", getRawPosition());
         t.log(Level.DEBUG, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());

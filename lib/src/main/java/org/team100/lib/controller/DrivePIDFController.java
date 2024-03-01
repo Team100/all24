@@ -70,6 +70,10 @@ public class DrivePIDFController implements DriveMotionController {
         if (m_feedforwardOnly)
             return u_FF;
         ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement, mSetpoint.get(), m_kPCart, m_kPTheta);
+
+        ChassisSpeeds output = u_FF.plus(u_FB);
+
+        // if(output.equals(output))
         return u_FF.plus(u_FB);
     }
 

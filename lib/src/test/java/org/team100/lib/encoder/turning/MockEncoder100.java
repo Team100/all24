@@ -7,7 +7,7 @@ public class MockEncoder100<T extends Measure100> implements Encoder100<T> {
     public double angle = 0;
     public double rate = 0;
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return angle;
     }
 

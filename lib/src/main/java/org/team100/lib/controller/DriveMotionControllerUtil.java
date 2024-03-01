@@ -60,6 +60,8 @@ public class DriveMotionControllerUtil {
                 kPCart * errorTwist.dx,
                 kPCart * errorTwist.dy,
                 kPTheta * errorTwist.dtheta);
+
+        
         t.log(Level.TRACE, m_name, "u_FB", u_FB);
         return u_FB;
 

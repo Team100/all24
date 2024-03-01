@@ -226,7 +226,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
 
     /** Position in meters */
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return m_positionM;
     }
 

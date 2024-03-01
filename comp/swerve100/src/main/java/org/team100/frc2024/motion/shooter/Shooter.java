@@ -15,6 +15,7 @@ public abstract class Shooter extends SubsystemBase implements Speeding {
 
     public abstract double getAngle();
     public abstract boolean atVelocitySetpoint();
+    public abstract boolean atVelocitySetpoint(boolean bool);
 
     public abstract void setDutyCycle(double value);
     public abstract double getPivotPosition();

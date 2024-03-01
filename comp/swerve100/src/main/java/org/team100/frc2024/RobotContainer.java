@@ -16,6 +16,7 @@ import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.FeedCommand;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.OuttakeCommand;
+import org.team100.frc2024.motion.ShootSmart;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.OuttakeAmp;
@@ -344,7 +345,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 1.7, 1.7);
+        DriveMotionController drivePID = new DrivePIDFController(false, 0.9, 0.9);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
 
@@ -352,7 +353,7 @@ public class RobotContainer {
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
                         swerveKinodynamics, () -> !m_sensors.getIntakeSensor()));
-        // 254 FF follower
+        // 254 FF follower\
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
@@ -539,12 +540,13 @@ public class RobotContainer {
         // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-//         whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors);
+        whileTrue(driverControl::shooterLock, m_AutoMaker.fourNoteAuto());
 
-        whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.complementAuto());
+        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
+        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto());
+        // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_drive));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_shooter, m_feeder);

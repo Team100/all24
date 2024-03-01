@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /**
  * A 1-dof arm driven by two separate motors with opposite phases.
  */
-public class AmpSubsystem extends SubsystemBase implements Positioning {
+public class AmpSubsystem extends SubsystemBase{
     // ALERT! notice this very high current limit!!  ALERT! 
     private static final int kCurrentLimit = 80;
 
@@ -31,7 +31,6 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     private final GravityServo ampAngleServo;
     private final PWM ampDrive;
 
-    private final AngularVisualization m_viz;
  
     CANSparkMax m_motor;
 
@@ -55,12 +54,12 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     40,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
-                    new PIDController(3, 0, 0), 
+                    new PIDController(2, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
                     -0.06, 
-                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.51, false),
+                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
                     new double[]{0, 0}
                 );
 
@@ -80,14 +79,13 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
                     pivotID, 
                     0.02, 
                     -0.06,
-                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
+                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.51, false),
                     new double[]{0, 0}
                 );
                 ampDrive = new PWM(2);
 
                 
         }
-        m_viz = new AngularVisualization(m_name, this);
     }
 
     /**
@@ -121,8 +119,7 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
         ampAngleServo.stop();
     }
 
-    @Override
-    public double getPositionRad() {
+    public Double getPositionRad() {
         // return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) / 2;
         return ampAngleServo.getPosition();
     }
@@ -135,7 +132,6 @@ public class AmpSubsystem extends SubsystemBase implements Positioning {
     @Override
     public void periodic() {
         ampAngleServo.periodic();
-        m_viz.periodic();
 
 
         
