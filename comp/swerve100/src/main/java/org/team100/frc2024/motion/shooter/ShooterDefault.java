@@ -49,7 +49,7 @@ public class ShooterDefault extends Command {
                     m_shooter.forward();
                     // m_shooter.setAngleWithOverride(ShooterUtil.getAngle(m_drive.getPose().getX()), m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a   
                     m_shooter.setAngle(ShooterUtil.getAngle(distance)); //22.5a   
-                    System.out.println("DEFAULT SHOOOOT");
+                    // System.out.println("DEFAULT SHOOOOT");
                     break;
                 case STOP:
                     m_shooter.stop();

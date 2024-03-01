@@ -7,6 +7,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.DutyCycleEncoder100;
+import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SparkMaxEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -27,6 +28,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
 /**
  * Direct-drive shooter with top and bottom drums.
@@ -53,6 +55,8 @@ public class DrumShooter extends Shooter{
     private final VelocityServo<Distance100>  leftRoller;
     private final VelocityServo<Distance100>  rightRoller ;
     private final GravityServo pivotServo;
+    private final DutyCycleEncoder100 m_encoder;
+
 
     private final CANSparkMax pivotMotor;
 
@@ -61,13 +65,13 @@ public class DrumShooter extends Shooter{
 
     private final Telemetry t;
 
-    public final double kLeftRollerVelocity = 30;
-    public final double kRightRollerVelocity = 20;
+    public final double kLeftRollerVelocity = 15;
+    public final double kRightRollerVelocity = 15;
 
 
     public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit) {
         m_name = Names.name(this);
-        
+        m_encoder = new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0.284, true);
         int shooterCurrentLimit = 40;
         int pivotLimit = 40;
         int feederLimit = 40;
@@ -124,7 +128,7 @@ public class DrumShooter extends Shooter{
                         pivotID, 
                         0.02, 
                         0,
-                        new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0.284, true),
+                        m_encoder,
                         new double[]{0, 45}
 
                 ); //same
@@ -151,7 +155,7 @@ public class DrumShooter extends Shooter{
                         pivotID, 
                         0.02, 
                         0,
-                        new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0, true),
+                        m_encoder,
                         new double[]{0, 45}
 
 
@@ -218,6 +222,7 @@ public class DrumShooter extends Shooter{
         rightRoller.periodic();
         pivotServo.periodic();
         m_viz.periodic();
+        // System.out.println("FREEQ" + m_encoder.m_encoder.getFrequency());
  
 
         
@@ -269,20 +274,41 @@ public class DrumShooter extends Shooter{
 
     }
 
-    
+    @Override
     public double getVelocity() {
         return 0;
     }
 
-
+    @Override
     public boolean atVelocitySetpoint(){
-        if(leftRoller.getVelocity() >= kLeftRollerVelocity){
-            if(rightRoller.getVelocity() >= kRightRollerVelocity){
+        if( Math.abs(leftRoller.getVelocity() - kLeftRollerVelocity) < 10){
+            if( Math.abs(rightRoller.getVelocity() - kRightRollerVelocity) < 10){
                 return true;
             }
         }
 
         return false;
+    }
+
+    @Override
+    public boolean atVelocitySetpoint(boolean bool){
+
+        if(bool){
+            if( Math.abs(leftRoller.getVelocity() - 10) < 10){
+                if( Math.abs(rightRoller.getVelocity() - 10) < 10){
+                    return true;
+                }
+            }
+        } else{
+            if( Math.abs(leftRoller.getVelocity() - kLeftRollerVelocity) < 10){
+                if( Math.abs(rightRoller.getVelocity() - kRightRollerVelocity) < 10){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
     }
 
 

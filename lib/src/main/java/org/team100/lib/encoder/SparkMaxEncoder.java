@@ -35,7 +35,7 @@ public class SparkMaxEncoder implements Encoder100<Distance100> {
     }
 
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return m_encoder.getPosition();
     }
 

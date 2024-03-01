@@ -74,6 +74,7 @@ public class PoseEstimationHelper {
                 Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation());
             }
+
         return Tnotes;
     }
 

@@ -1,5 +1,7 @@
 package org.team100.frc2024.motion;
 
+import java.util.concurrent.TransferQueue;
+
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.geometry.GeometryUtil;
@@ -28,6 +30,7 @@ public class TrajectoryCommand100 extends Command100 {
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private Trajectory100 m_trajectory;
+    private double m_timeBuffer;
 
     public TrajectoryCommand100(
             SwerveDriveSubsystem robotDrive,
@@ -65,5 +68,9 @@ public class TrajectoryCommand100 extends Command100 {
     @Override
     public void end(boolean interrupted) {
         TrajectoryVisualization.clear();
+    }
+
+    public Trajectory100 getTrajectory() {
+        return m_trajectory;
     }
 }

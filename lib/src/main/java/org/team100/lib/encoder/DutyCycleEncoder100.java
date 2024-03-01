@@ -15,7 +15,7 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     // private final AnalogInput m_input;
-    private final DutyCycleEncoder m_encoder;
+    public final DutyCycleEncoder m_encoder;
 
     private Double prevAngle = null;
     private Double prevTime = null;
@@ -50,18 +50,25 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);
+        m_encoder.setConnectedFrequencyThreshold(1000);
         
         // t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
     }
 
     @Override
-    public double getPosition() {
+    public Double getPosition() {
+
+        // System.out.println("IS CONNECTED" + m_name + m_encoder.isConnected());
+        if(!m_encoder.isConnected()){
+            return null;
+        }
         if(m_reversed){
             return -m_encoder.getDistance();
         }
         return m_encoder.getDistance();
 
     }
+
 
     /**
      * Current rate in rad/s.

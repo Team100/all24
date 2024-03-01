@@ -159,7 +159,25 @@ public class Telemetry {
                 e -> consumer.accept(e.valueData.value.getDouble()));
     }
 
-    public void log(Level level, String root, String leaf, double val) {
+    public void log(Level level, String root, String leaf, Double val) {
+        if(val == null)
+            return;
+        if (!m_level.admit(level))
+            return;
+        String key = Telemetry.append(root, leaf);
+        if (kAlsoPrint)
+            Util.println(key + ": " + val);
+        pub(key, k -> {
+            DoubleTopic t = inst.getDoubleTopic(k);
+            t.publish();
+            t.setRetained(true);
+            return t.publish();
+        }, DoublePublisher.class).set(val);
+    }
+
+    public void log(Level level, String root, String leaf, float val) {
+        // if(val == null)
+        //     return;
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);

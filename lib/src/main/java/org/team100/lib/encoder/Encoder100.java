@@ -16,7 +16,7 @@ public interface Encoder100<T extends Measure100> {
      * Angle measure is counterclockwise-positive rad, and accumulates
      * turns; use MathUtil.AngleModulus if you want.
      */
-    double getPosition();
+    Double getPosition();
 
     /**
      * Angular or linear velocity depending on parameter.

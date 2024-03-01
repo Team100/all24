@@ -78,6 +78,12 @@ public class DrivePIDFController implements DriveMotionController {
         if (m_feedforwardOnly)
             return u_FF;
 
+//       ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement, mSetpoint.get(), m_kPCart, m_kPTheta);
+
+//         ChassisSpeeds output = u_FF.plus(u_FB);
+
+        // if(output.equals(output))
+
         ChassisSpeeds u_FB;
         if (Experiments.instance.enabled(Experiment.FullStateTrajectoryFollower)) {
             u_FB = DriveMotionControllerUtil.fullFeedback(
@@ -95,7 +101,8 @@ public class DrivePIDFController implements DriveMotionController {
                     m_kPCart,
                     m_kPTheta);
         }
-        return u_FF.plus(u_FB);
+
+      return u_FF.plus(u_FB);
     }
 
     double dt(double timestamp) {
