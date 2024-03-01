@@ -20,7 +20,7 @@ class DriveToWaypoint100Test extends Fixtured {
         DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics);
+                fixture.swerveKinodynamics, 0);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
@@ -34,7 +34,7 @@ class DriveToWaypoint100Test extends Fixtured {
         DriveMotionController controller = new DrivePursuitController(fixture.swerveKinodynamics);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics);
+                fixture.swerveKinodynamics, 0);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
@@ -48,7 +48,7 @@ class DriveToWaypoint100Test extends Fixtured {
         DriveMotionController controller = new DriveRamseteController();
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics);
+                fixture.swerveKinodynamics, 0);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
@@ -62,7 +62,7 @@ class DriveToWaypoint100Test extends Fixtured {
         DriveMotionController controller = new DrivePIDFController(true, 2.4, 2.4);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics);
+                fixture.swerveKinodynamics, 0);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);

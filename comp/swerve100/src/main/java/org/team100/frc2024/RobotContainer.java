@@ -347,7 +347,7 @@ public class RobotContainer {
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false, 0.9, 0.9);
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
+                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics, 1));
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
@@ -356,7 +356,7 @@ public class RobotContainer {
         // 254 FF follower\
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
+                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics, 1));
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
@@ -385,7 +385,7 @@ public class RobotContainer {
         // this one seems to have a pretty high tolerance?
         DriveMotionController driveRam = new DriveRamseteController();
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics, 1));
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
