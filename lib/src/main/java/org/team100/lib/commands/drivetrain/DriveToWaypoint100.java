@@ -45,6 +45,15 @@ public class DriveToWaypoint100 extends Command100 {
 
     private final Supplier<Rotation2d> m_endRotation;
 
+    private final double m_timeBuffer;
+
+    private Trajectory100 m_trajectory = new Trajectory100();
+
+    
+    private final Timer m_timer = new Timer();
+
+
+
     // private final Trajectory100 m_trajectory;
 
 
@@ -60,7 +69,9 @@ public class DriveToWaypoint100 extends Command100 {
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
-            SwerveKinodynamics limits) {
+            SwerveKinodynamics limits,
+            double timeBuffer) {
+        m_timeBuffer = timeBuffer;
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
@@ -74,13 +85,15 @@ public class DriveToWaypoint100 extends Command100 {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
-            DriveMotionController controller, List<TimingConstraint> constraints) {
+            DriveMotionController controller, List<TimingConstraint> constraints,
+            double timeBuffer) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
         m_endRotation = null;
+        m_timeBuffer = timeBuffer;
         addRequirements(m_swerve);
     }
 
@@ -90,13 +103,15 @@ public class DriveToWaypoint100 extends Command100 {
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            Supplier<Rotation2d> endRotation) {
+            Supplier<Rotation2d> endRotation,
+            double timeBuffer) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
         m_endRotation = endRotation;
+        m_timeBuffer = timeBuffer;
         addRequirements(m_swerve);
     }
 
@@ -106,6 +121,8 @@ public class DriveToWaypoint100 extends Command100 {
         final double startVelocity = 0;
         Pose2d end = m_goal;
         final double endVelocity = 0;
+        m_timer.reset();
+        m_timer.start();
 
         if (m_endRotation != null) {
             end = new Pose2d(end.getTranslation(), m_endRotation.get());
@@ -127,6 +144,7 @@ public class DriveToWaypoint100 extends Command100 {
                         endVelocity,
                         kMaxVelM_S,
                         kMaxAccelM_S_S);
+        m_trajectory = trajectory;
 
         TrajectoryVisualization.setViz(trajectory);
 
@@ -158,11 +176,13 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public boolean isFinished() {
-        return m_controller.isDone();
+        // return m_controller.isDone();
+        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer; 
     }
 
     @Override
     public void end(boolean interrupted) {
+        m_timer.stop();
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }
