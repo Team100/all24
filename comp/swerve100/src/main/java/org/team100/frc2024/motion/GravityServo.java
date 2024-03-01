@@ -189,13 +189,16 @@ public class GravityServo {
         double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
         double u_TOTAL = gravityTorque + u_FF + u_FB;
         
-        if(diff <= 0.1){
-            System.out.println("I AM TRUEEEEEE");
-            m_motor.setSmartCurrentLimit(2);
-            m_motor.set(0.2);
-        } else {
-            m_motor.set(u_TOTAL); 
-        }
+        // if(diff <= 0.1){
+        //     System.out.println("I AM TRUEEEEEE");
+        //     m_motor.setSmartCurrentLimit(2);
+        //     m_motor.set(0.2);
+        // } else {
+        //     m_motor.set(u_TOTAL); 
+        // }
+
+        m_motor.set(u_TOTAL); 
+
 
         // if(diff < 0.1){
         // m_motor.set(0.05);
@@ -222,10 +225,11 @@ public class GravityServo {
 
     public void periodic() {
 
-        t.log(Level.DEBUG, m_name, "Get Raw Position", getRawPosition());
+        // t.log(Level.DEBUG, m_name, "Get Raw Position", m_encoder.);
         t.log(Level.DEBUG, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
         t.log(Level.DEBUG, m_name, "DUTY", m_motor.getAppliedOutput());
+        // t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
 
     }
 
