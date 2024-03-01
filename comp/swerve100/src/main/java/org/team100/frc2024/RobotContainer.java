@@ -142,7 +142,7 @@ public class RobotContainer {
     // final Monitor m_monitor;
 
     // Identity-specific fields
-    final IndexerSubsystem m_indexer;
+    // final IndexerSubsystem m_indexer;
     final AmpSubsystem m_amp;
     private final ClimberSubsystem m_climber;
     final Shooter m_shooter;
@@ -260,7 +260,7 @@ public class RobotContainer {
 
         m_shooter = ShooterFactory.get(m_feeder);
 
-        m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
+        // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
@@ -426,9 +426,8 @@ public class RobotContainer {
 
         // whileTrue(operatorControl::ramp, new Ramp());
 
-        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
-        whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
+        // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
+        // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
         // (m_amp.inPosition())));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
@@ -544,7 +543,7 @@ public class RobotContainer {
 
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors, notePositionDetector);
         
-        
+
         whileTrue(driverControl::circle, m_AutoMaker.fourNoteAuto());
         whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
 
