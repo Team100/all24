@@ -31,11 +31,25 @@ public class TrajectoryCommand100 extends Command100 {
     private final DriveMotionController m_controller;
     private Trajectory100 m_trajectory;
     private double m_timeBuffer;
+    private Timer m_timer = new Timer();
 
     public TrajectoryCommand100(
             SwerveDriveSubsystem robotDrive,
             Trajectory100 trajectory,
             DriveMotionController controller) {
+        m_timeBuffer = 1;
+        m_robotDrive = robotDrive;
+        m_trajectory = trajectory;
+        m_controller = controller;
+        addRequirements(m_robotDrive);
+    }
+    
+    public TrajectoryCommand100(
+            SwerveDriveSubsystem robotDrive,
+            Trajectory100 trajectory,
+            DriveMotionController controller,
+            double timeBuffer) {
+        m_timeBuffer = timeBuffer;
         m_robotDrive = robotDrive;
         m_trajectory = trajectory;
         m_controller = controller;
@@ -47,6 +61,8 @@ public class TrajectoryCommand100 extends Command100 {
         TrajectoryVisualization.setViz(m_trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(m_trajectory));
         m_controller.setTrajectory(iter);
+        m_timer.reset();
+        m_timer.start();
     }
 
     @Override
@@ -57,16 +73,25 @@ public class TrajectoryCommand100 extends Command100 {
         Twist2d robotRelativeVelocity = GeometryUtil.toTwist2d(currentRobotRelativeSpeed);
         ChassisSpeeds output = m_controller.update(now, currentPose, robotRelativeVelocity);
         t.log(Level.TRACE, m_name, "chassis speeds", output);
+        
+        if(m_controller.isDone()){
+            return;
+        }
+
         m_robotDrive.setChassisSpeedsNormally(output, dt);
     }
 
     @Override
     public boolean isFinished() {
-        return m_controller.isDone();
+
+        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
+
+        // return m_controller.isDone();
     }
 
     @Override
     public void end(boolean interrupted) {
+        m_timer.stop();
         TrajectoryVisualization.clear();
     }
 
