@@ -110,6 +110,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -141,7 +142,7 @@ public class RobotContainer {
     // final Monitor m_monitor;
 
     // Identity-specific fields
-    final IndexerSubsystem m_indexer;
+    // final IndexerSubsystem m_indexer;
     final AmpSubsystem m_amp;
     private final ClimberSubsystem m_climber;
     final Shooter m_shooter;
@@ -187,7 +188,7 @@ public class RobotContainer {
         //
         // override the alliance logic.
 
-        m_alliance = Alliance.Red;
+        m_alliance = DriverStation.getAlliance().get();
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -259,7 +260,7 @@ public class RobotContainer {
 
         m_shooter = ShooterFactory.get(m_feeder);
 
-        m_indexer = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
+        // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
@@ -297,7 +298,7 @@ public class RobotContainer {
         whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
         m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
-        whileTrue(driverControl::circle, m_drawCircle);
+        // whileTrue(driverControl::circle, m_drawCircle);
 
         TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
 
@@ -347,7 +348,7 @@ public class RobotContainer {
         // 254 PID follower
         DriveMotionController drivePID = new DrivePIDFController(false, 0.9, 0.9);
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics));
+                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics, 1));
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
@@ -356,7 +357,7 @@ public class RobotContainer {
         // 254 FF follower\
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics));
+                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics, 1));
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
@@ -385,7 +386,7 @@ public class RobotContainer {
         // this one seems to have a pretty high tolerance?
         DriveMotionController driveRam = new DriveRamseteController();
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics));
+                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics, 1));
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
@@ -425,9 +426,8 @@ public class RobotContainer {
 
         // whileTrue(operatorControl::ramp, new Ramp());
 
-        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
-        whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
-        whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
+        // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
+        // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
         // (m_amp.inPosition())));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
@@ -542,7 +542,10 @@ public class RobotContainer {
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
 
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors, notePositionDetector);
-        whileTrue(driverControl::shooterLock, m_AutoMaker.fourNoteAuto());
+        
+
+        whileTrue(driverControl::circle, m_AutoMaker.fourNoteAuto());
+        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
@@ -574,7 +577,7 @@ public class RobotContainer {
         //Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();
 
-        m_auton = m_drive.runInit(m_drive::defense);
+        m_auton = m_AutoMaker.fourNoteAuto();
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);

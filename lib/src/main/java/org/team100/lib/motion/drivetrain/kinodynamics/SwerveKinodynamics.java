@@ -44,6 +44,7 @@ public class SwerveKinodynamics {
     private final double m_fronttrack;
     private final double m_backtrack;
     private final double m_wheelbase;
+    private final double m_frontoffset;
     private final double m_radius;
     private final double m_vcg;
     private final SwerveDriveKinematics m_kinematics;
@@ -82,6 +83,7 @@ public class SwerveKinodynamics {
             double maxSteeringAcceleration,
             double track,
             double wheelbase,
+            double frontoffset,
             double vcg) {
         if (track < 0.1)
             throw new IllegalArgumentException();
@@ -91,10 +93,11 @@ public class SwerveKinodynamics {
         m_fronttrack = track;
         m_backtrack = track;
         m_wheelbase = wheelbase;
+        m_frontoffset = frontoffset;
         m_vcg = vcg;
         // distance from center to wheel
         m_radius = Math.hypot(track / 2, m_wheelbase / 2);
-        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase);
+        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
         double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
@@ -140,6 +143,7 @@ public class SwerveKinodynamics {
             double fronttrack,
             double backtrack,
             double wheelbase,
+            double frontoffset,
             double vcg) {
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
@@ -149,10 +153,11 @@ public class SwerveKinodynamics {
         m_fronttrack = fronttrack;
         m_backtrack = backtrack;
         m_wheelbase = wheelbase;
+        m_frontoffset = frontoffset;
         m_vcg = vcg;
         // distance from center to wheel
         m_radius = Math.hypot((fronttrack+backtrack) / 4, m_wheelbase / 2);
-        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase);
+        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, m_frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
         double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
@@ -280,12 +285,19 @@ public class SwerveKinodynamics {
                 getMaxDriveAccelerationM_S2());
     }
 
-    private static SwerveDriveKinematics get(double fronttrack,double backtrack, double wheelbase) {
+    /**
+     * @param fronttrack
+     * @param backtrack
+     * @param wheelbase
+     * @param frontoffset distance from center of mass to front wheel
+     * @return
+     */
+    private static SwerveDriveKinematics get(double fronttrack,double backtrack, double wheelbase, double frontoffset) {
         return new SwerveDriveKinematics(
-                new Translation2d(wheelbase / 2, fronttrack / 2),
-                new Translation2d(wheelbase / 2, -fronttrack / 2),
-                new Translation2d(-wheelbase / 2, backtrack / 2),
-                new Translation2d(-wheelbase / 2, -backtrack / 2));
+                new Translation2d(frontoffset, fronttrack / 2),
+                new Translation2d(frontoffset, -fronttrack / 2),
+                new Translation2d(frontoffset-wheelbase, backtrack / 2),
+                new Translation2d(frontoffset-wheelbase, -backtrack / 2));
     }
 
     public void resetHeadings(Rotation2d... moduleHeadings) {

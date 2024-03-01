@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
@@ -44,6 +45,8 @@ public class AutoMaker {
     private final double kMaxAccelM_S_S = 2;
 
   private final NotePosition24ArrayListener m_notePosition24ArrayListener;
+    private final double kAutoNoteMaxVelM_S = 4;
+    private final double kAutoNoteMaxAccelM_S_S = 5;
 
   private final double kShooterScale;
     private final Alliance m_alliance;
@@ -352,7 +355,7 @@ public class AutoMaker {
     }
 
     public DriveToWaypoint100 driveToStraight(FieldPoint point) {
-        return new DriveToWaypoint100(getPose(point), m_swerve, m_planner, m_controller, m_constraints);
+        return new DriveToWaypoint100(getPose(point), m_swerve, m_planner, m_controller, m_constraints, 1);
     }
 
     public SequentialCommandGroup eightNoteAuto() {
@@ -388,12 +391,12 @@ public class AutoMaker {
 
                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
 
-                new ParallelDeadlineGroup( driveToStraight(FieldPoint.NOTE3),
+                new ParallelRaceGroup( driveToStraight(FieldPoint.NOTE3),
                         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
 
-                new ParallelCommandGroup(adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
+                new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
                         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-                new ParallelCommandGroup(adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1),
+                new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1),
                         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)));
 
         // return new SequentialCommandGroup(
@@ -408,9 +411,15 @@ public class AutoMaker {
     // }
 
     public SequentialCommandGroup fiveNoteAuto() {
-        return new SequentialCommandGroup(startToNote(FieldPoint.NOTE3),
-                adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
-                adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(FieldPoint.NOTE8),
+        return new SequentialCommandGroup(
+                new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
+                new ParallelRaceGroup( driveToStraight(FieldPoint.NOTE3),
+                        new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+                new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
+                        new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+                new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1),
+                        new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+                driveToStraight(FieldPoint.NOTE8),
                 driveToStraight(FieldPoint.CLOSEWINGSHOT));
     }
 

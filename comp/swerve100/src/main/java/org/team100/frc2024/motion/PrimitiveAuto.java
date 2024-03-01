@@ -34,7 +34,7 @@ public class PrimitiveAuto extends SequentialCommandGroup {
     
 
     addCommands(
-        new DriveToWaypoint100(goal, m_drive, planner, pidfController, limits, () -> ShooterUtil.getRobotRotationToSpeaker(goal.getTranslation(), 0.25))
+        // new DriveToWaypoint100(goal, m_drive, planner, pidfController, limits, () -> ShooterUtil.getRobotRotationToSpeaker(goal.getTranslation(), 0.25, 1))
         // new DriveToWaypoint3(goal, m_drive, maker, new HolonomicDriveController3())
         // new ParallelDeadlineGroup(new DriveBackwards(m_drive, 0.05), new IntakeWithSensor()),
         // new DriveSimple(m_drive, shooterLock),
