@@ -14,8 +14,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil {
-    private static final double kPathk = 2.4;
-    private static final double kPathKTheta = 2.4;
     private static final String m_name = Names.name(DriveMotionControllerUtil.class);
 
     private static final Telemetry t = Telemetry.get();
@@ -24,6 +22,9 @@ public class DriveMotionControllerUtil {
         //
     }
 
+    /**
+     * Returns robot-relative direction of motion.
+     */
     private static Rotation2d direction(Pose2d measurement, TimedPose setpoint) {
         // Field relative
         Optional<Rotation2d> course = setpoint.state().getCourse();
@@ -35,11 +36,15 @@ public class DriveMotionControllerUtil {
         return motion_direction;
     }
 
-    public static ChassisSpeeds feedforward(Pose2d current_state, TimedPose setpoint) {
+    /**
+     * Returns robot-relative speeds
+     */
+    public static ChassisSpeeds feedforward(Pose2d currentPose, TimedPose setpoint) {
         final double velocity_m = setpoint.velocityM_S();
         t.log(Level.TRACE, m_name, "setpoint velocity", velocity_m);
 
-        Rotation2d motion_direction = direction(current_state, setpoint);
+        // robot-relative motion direction
+        Rotation2d motion_direction = direction(currentPose, setpoint);
 
         double vx = motion_direction.getCos() * velocity_m;
         double vy = motion_direction.getSin() * velocity_m;
@@ -51,64 +56,106 @@ public class DriveMotionControllerUtil {
         return u_FF;
     }
 
-    public static ChassisSpeeds feedback(Pose2d current_state, TimedPose setpoint, double kPCart, double kPTheta) {
-        final Pose2d error = getError(current_state, setpoint);
-        t.log(Level.TRACE, m_name, "error", error);
-        Twist2d errorTwist = GeometryUtil.kPoseZero.log(error);
-        t.log(Level.TRACE, m_name, "errorTwist", errorTwist);
+    public static ChassisSpeeds feedback(
+            Pose2d currentPose,
+            TimedPose setpoint,
+            double kPCart,
+            double kPTheta) {
+        final Twist2d positionError = getErrorTwist(currentPose, setpoint);
+        t.log(Level.TRACE, m_name, "errorTwist", positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
-                kPCart * errorTwist.dx,
-                kPCart * errorTwist.dy,
-                kPTheta * errorTwist.dtheta);
-
-        
+                kPCart * positionError.dx,
+                kPCart * positionError.dy,
+                kPTheta * positionError.dtheta);
         t.log(Level.TRACE, m_name, "u_FB", u_FB);
         return u_FB;
-
-        
     }
 
-    public static ChassisSpeeds fullFeedback(Pose2d current_state, TimedPose setpoint, Twist2d currentVelocity, double kPCart, double kPTheta, double kPCartV, double kPThetaV) {
-        final double velocity_m = setpoint.velocityM_S();
-        Rotation2d motion_direction = direction(current_state, setpoint);
-
-        double vx = motion_direction.getCos() * velocity_m;
-        double vy = motion_direction.getSin() * velocity_m;
-        // heading rate is rad/m of movement, so multiply by m/s to get rad/s
-        double omega = velocity_m * setpoint.state().getHeadingRate();
-
-        Twist2d errorVelocityTwist = new Twist2d(
-            vx - currentVelocity.dx,
-            vy - currentVelocity.dy,
-            omega - currentVelocity.dtheta
-        );
-
-        final Pose2d error = getError(current_state, setpoint);
-        t.log(Level.TRACE, m_name, "error", error);
-        Twist2d errorTwist = GeometryUtil.kPoseZero.log(error);
-        t.log(Level.TRACE, m_name, "errorTwist", errorTwist);
-
-        ChassisSpeeds u_XFB = new ChassisSpeeds(
-                kPathk * errorTwist.dx,
-                kPathk * errorTwist.dy,
-                kPathKTheta * errorTwist.dtheta);
-
-        ChassisSpeeds u_VFB = new ChassisSpeeds(
-                kPCartV * errorVelocityTwist.dx,
-                kPCartV * errorVelocityTwist.dy,
-                kPTheta * errorVelocityTwist.dtheta
-        );
-
-        t.log(Level.TRACE, m_name, "u_XFB", u_XFB);
+    public static ChassisSpeeds velocityFeedback(
+            Pose2d currentPose,
+            TimedPose setpoint,
+            Twist2d currentRobotRelativeVelocity,
+            final double kPCartV,
+            final double kPThetaV) {
+        final Twist2d velocityError = getVelocityError(
+                currentPose,
+                setpoint,
+                currentRobotRelativeVelocity);
+        t.log(Level.TRACE, m_name, "velocityError", velocityError);
+        final ChassisSpeeds u_VFB = new ChassisSpeeds(
+                kPCartV * velocityError.dx,
+                kPCartV * velocityError.dy,
+                kPThetaV * velocityError.dtheta);
         t.log(Level.TRACE, m_name, "u_VFB", u_VFB);
+        return u_VFB;
+    }
+
+    /**
+     * 
+     * @param currentPose                  field relative
+     * @param setpoint                     field relative
+     * @param currentRobotRelativeVelocity *ROBOT RELATIVE*
+     * @param kPCartV
+     * @param kPThetaV
+     * @return
+     */
+    public static ChassisSpeeds fullFeedback(
+            Pose2d currentPose,
+            TimedPose setpoint,
+            final double kPCart,
+            final double kPTheta,
+            Twist2d currentRobotRelativeVelocity,
+            final double kPCartV,
+            final double kPThetaV) {
+
+        // POSITION
+        final ChassisSpeeds u_XFB = feedback(
+                currentPose,
+                setpoint,
+                kPCart,
+                kPTheta);
+
+        // VELOCITY
+        final ChassisSpeeds u_VFB = velocityFeedback(
+                currentPose,
+                setpoint,
+                currentRobotRelativeVelocity,
+                kPCartV,
+                kPThetaV);
 
         return u_XFB.plus(u_VFB);
-
-        
     }
 
-    static Pose2d getError(Pose2d current_state, TimedPose mSetpoint) {
-        return GeometryUtil.transformBy(GeometryUtil.inverse(current_state), mSetpoint.state().getPose());
+    static Twist2d getVelocityError(
+            Pose2d currentPose,
+            TimedPose setpoint,
+            Twist2d currentRobotRelativeVelocity) {
+        final double velocity_m = setpoint.velocityM_S();
+        Rotation2d robotRelativeMotionDirection = direction(currentPose, setpoint);
+        double vx = robotRelativeMotionDirection.getCos() * velocity_m;
+        double vy = robotRelativeMotionDirection.getSin() * velocity_m;
+        // heading rate is rad/m of movement, so multiply by m/s to get rad/s
+        double omega = velocity_m * setpoint.state().getHeadingRate();
+        return new Twist2d(
+                vx - currentRobotRelativeVelocity.dx,
+                vy - currentRobotRelativeVelocity.dy,
+                omega - currentRobotRelativeVelocity.dtheta);
+    }
+
+    /**
+     * Returns robot-relative position error
+     * 
+     * TODO: remove this method, use the twist version instead.
+     */
+    static Pose2d getError(Pose2d measurement, TimedPose setpoint) {
+        return GeometryUtil.transformBy(GeometryUtil.inverse(measurement), setpoint.state().getPose());
+    }
+
+    /**
+     * Returns robot-relative twist representing the position error
+     */
+    static Twist2d getErrorTwist(Pose2d measurement, TimedPose setpoint) {
+        return measurement.log(setpoint.state().getPose());
     }
 
 }

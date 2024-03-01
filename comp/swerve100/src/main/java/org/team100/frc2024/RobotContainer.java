@@ -540,6 +540,7 @@ public class RobotContainer {
         // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
+
         AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors);
         whileTrue(driverControl::shooterLock, m_AutoMaker.fourNoteAuto());
 
@@ -547,6 +548,11 @@ public class RobotContainer {
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
         whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_drive));
+
+        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
+//         whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
+
+       
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_shooter, m_feeder);

@@ -39,8 +39,8 @@ class GamePieceFinder:
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (4,200, 100)
-        self.object_higher = (12, 255, 255)
+        self.object_lower = (10,150, 100)
+        self.object_higher = (30, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
@@ -283,15 +283,13 @@ def main():
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
             "AwbEnable": False,
             "AeEnable": False,
-            "ExposureTime": 30000,
+            "ExposureTime": 40000,
             # "AnalogueGain": 1.0
         },
     )
 
     serial = getserial()
     identity = Camera(serial)
-    if identity == Camera.GAME_PIECE:
-        camera_config["transform"] = libcamera.Transform(hflip=-1, vflip=-1)
 
     print("\nREQUESTED CONFIG")
     print(camera_config)

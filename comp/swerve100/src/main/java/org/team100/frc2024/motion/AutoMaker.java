@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion;
 
-import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 
 import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
@@ -10,6 +10,9 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
+import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.CentripetalAccelerationConstraint;
@@ -33,12 +36,18 @@ public class AutoMaker {
     public DriveMotionController m_controller;
     public SensorInterface m_sensors;
     public List<TimingConstraint> m_constraints;
-    public Intake m_intake;
+
+  public Intake m_intake;
     public Shooter m_shooter;
     public FeederSubsystem m_feeder;
     private final double kMaxVelM_S = 2;
     private final double kMaxAccelM_S_S = 2;
-    private final double kShooterScale;
+
+  private final NotePosition24ArrayListener m_notePosition24ArrayListener;
+    private final double kMaxVelM_S = 4;
+    private final double kMaxAccelM_S_S = 5;
+
+  private final double kShooterScale;
     private final Alliance m_alliance;
     private final double kIntakeOffset = 0;
 
@@ -49,6 +58,112 @@ public class AutoMaker {
     }
 
     private Translation2d getTranslation(FieldPoint point) {
+        if (Experiments.instance.enabled(Experiment.AutoNoteDetection)) {
+            Translation2d pose;
+            Optional<Translation2d> translation2d;
+            switch (point) {
+                case NOTE1:
+                    pose = forAlliance(new Translation2d(2.8956, 7.0061), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE2:
+                    pose = forAlliance(new Translation2d(2.8956, 5.5583), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE3:
+                    pose = forAlliance(new Translation2d(2.8956, 4.1105), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE4:
+                    pose = forAlliance(new Translation2d(8.271, 0.7577), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE5:
+                    pose = forAlliance(new Translation2d(8.271, 2.4341), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE6:
+                    pose = forAlliance(new Translation2d(8.271, 4.1105), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE7:
+                    pose = forAlliance(new Translation2d(8.271, 5.7869), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case NOTE8:
+                    pose = forAlliance(new Translation2d(8.271, 7.4633), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case CLOSEWINGSHOT:
+                    pose =forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case FARWINGSHOT:
+                    pose = forAlliance(new Translation2d(4, 1.5), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case STAGESHOT:
+                    pose = forAlliance(new Translation2d(4.25, 5), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case CENTRALSTAGEOPENING:
+                    pose = forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case FARSTAGEOPENING:
+                    pose = forAlliance(new Translation2d(4.3, 3.3), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                case DROPSHOT:
+                    pose = forAlliance(new Translation2d(.5, 1.8), m_alliance);
+                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+                    if (translation2d.isPresent()) {
+                        return translation2d.get();
+                    }
+                    return pose;
+                default:
+                    return new Translation2d();
+            }
+        }
         switch (point) {
             case NOTE1:
                 return forAlliance(new Translation2d(2.8956, 7.0061), m_alliance);
@@ -113,7 +228,8 @@ public class AutoMaker {
 
     public AutoMaker(SwerveDriveSubsystem swerve, TrajectoryPlanner planner, DriveMotionController controller,
             SwerveKinodynamics limits, double shooterScale, Alliance alliance, FeederSubsystem feeder, Shooter shooter,
-            Intake intake, SensorInterface sensor) {
+            Intake intake, SensorInterface sensor, NotePosition24ArrayListener notePosition24ArrayListener) {
+        m_notePosition24ArrayListener = notePosition24ArrayListener;
         m_swerve = swerve;
         m_planner = planner;
         m_controller = controller;

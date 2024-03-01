@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Optional;
 
+
 import org.team100.lib.config.Camera;
+import org.team100.lib.config.Identity;
+import org.team100.lib.config.SimulatedCamera;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.util.NotePicker;
 import org.team100.lib.util.Util;
@@ -59,22 +62,9 @@ public class NotePosition24ArrayListener {
             } catch (RuntimeException ex) {
                 return;
             }
-            ArrayList<Translation2d> Tnotes = new ArrayList<>();
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
-            for (Rotation3d position : positions) {
-                if (position.getY() < cameraInRobotCoordinates.getRotation().getY()) {
-                    Translation2d cameraRotationToRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
-                            cameraInRobotCoordinates,
-                            position);
-                    Tnotes.add(PoseEstimationHelper.convertToFieldRelative(
-                            m_poseEstimator.getEstimatedPosition(),
-                            cameraRotationToRobotRelative));
-                }
-                // this is where you would do something useful with the payload
-                // System.out.println(fields[1] + " " + position.getY() + " " +
-                // position.getZ());
-            }
-            notes = Optional.of(Tnotes);
+            notes = Optional.of(PoseEstimationHelper.cameraRotsToFieldRelativeArray(m_poseEstimator.getEstimatedPosition(),
+            cameraInRobotCoordinates, positions));
         } else {
             Util.warn("note weird vision update key: " + name);
         }
@@ -84,27 +74,35 @@ public class NotePosition24ArrayListener {
      * @return The translation of all the notes, field relative
      */
     public Optional<ArrayList<Translation2d>> getTranslation2dArray() {
-        if (latestTime > Timer.getFPGATimestamp() - 0.1) {
-            return notes;
+        switch (Identity.instance) {
+            case BLANK:
+                Transform3d cameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
+                SimulatedCamera simCamera = new SimulatedCamera(cameraInRobotCoordinates,
+                        new Rotation3d(0, Math.toRadians(31.5), Math.toRadians(40)));
+                Optional<ArrayList<Rotation3d>> rot = simCamera.getRotation(m_poseEstimator.getEstimatedPosition(),
+                        NotePicker.autoNotes);
+                    if (!rot.isPresent()) {
+                        return Optional.empty();
+                    }
+                return Optional.of(PoseEstimationHelper.cameraRotsToFieldRelative(m_poseEstimator.getEstimatedPosition(),
+                        cameraInRobotCoordinates, rot.get()));
+            default:
+                if (latestTime > Timer.getFPGATimestamp() - 0.1) {
+                    return notes;
+                }
+                return Optional.empty();
         }
-        return Optional.empty();
     }
 
     /**
      * @return The translation of all the closest note, field relative
      */
     public Optional<Translation2d> getClosestTranslation2d() {
-        if (latestTime > Timer.getFPGATimestamp() - 0.1) {
-            return NotePicker.closestNote(notes, m_poseEstimator.getEstimatedPosition());
-        }
-        return Optional.empty();
+        return NotePicker.closestNote(getTranslation2dArray(), m_poseEstimator.getEstimatedPosition());
     }
 
-    public Optional<Translation2d> getTranslation2dAuto(int noteID) {
-        if (latestTime > Timer.getFPGATimestamp() - 0.1) {
-            return NotePicker.autoNotePick(notes, noteID);
-        }
-        return Optional.empty();
+    public Optional<Translation2d> getTranslation2dAuto(Translation2d noteID) {
+        return NotePicker.autoNotePick(getTranslation2dArray(), noteID);
     }
 
     public void enable() {
