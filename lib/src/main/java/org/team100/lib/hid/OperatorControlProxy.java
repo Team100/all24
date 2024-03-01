@@ -44,6 +44,9 @@ public class OperatorControlProxy implements OperatorControl {
         if (name.contains("F310")) {
             return new OperatorV2Control();
         }
+        if (name.contains("Xbox")) {
+            return new OperatorV2Control();
+        }
         if (name.startsWith("MSP430")) {
             // the old button board
             return new NoOperatorControl();

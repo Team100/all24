@@ -12,7 +12,7 @@ public class FeedCommand extends Command {
     AmpSubsystem m_amp;
     FeederSubsystem m_feeder;
 
-    double value = 0.207;
+    double value = 0.110273;
 
     public FeedCommand(Intake intake, Shooter shooter, AmpSubsystem amp, FeederSubsystem feeder) {
 

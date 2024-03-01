@@ -30,6 +30,8 @@ public class AmpSubsystem extends SubsystemBase{
     private final SysParam m_params;
     private final GravityServo ampAngleServo;
     private final PWM ampDrive;
+    private final DutyCycleEncoder100 m_encoder;
+
 
  
     CANSparkMax m_motor;
@@ -37,6 +39,7 @@ public class AmpSubsystem extends SubsystemBase{
 
     
     public AmpSubsystem(int pivotID) {
+        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51 , false);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 45,
@@ -51,7 +54,7 @@ public class AmpSubsystem extends SubsystemBase{
                 //TODO tune kV
                 ampAngleServo = new GravityServo(
                     m_motor, 
-                    40,
+                    20,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
                     new PIDController(2, 0, 0), 
@@ -59,7 +62,7 @@ public class AmpSubsystem extends SubsystemBase{
                     pivotID, 
                     0.02, 
                     -0.06, 
-                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
+                    m_encoder,
                     new double[]{0, 0}
                 );
 
@@ -69,19 +72,21 @@ public class AmpSubsystem extends SubsystemBase{
             default:
                 m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
 
-                ampAngleServo = new GravityServo(
-                    m_motor,
-                    5,
-                    m_name, 
-                    m_params, 
-                    new PIDController(3, 0, 0), 
-                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                    pivotID, 
-                    0.02, 
-                    -0.06,
-                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.51, false),
-                    new double[]{0, 0}
-                );
+                // ampAngleServo = new GravityServo(
+                //     m_motor,
+                //     5,
+                //     m_name, 
+                //     m_params, 
+                //     new PIDController(3, 0, 0), 
+                //     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                //     pivotID, 
+                //     0.02, 
+                //     -0.06,
+                //     new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
+                //     new double[]{0, 0}
+                // );
+
+                ampAngleServo = null;
                 ampDrive = new PWM(2);
 
                 
@@ -132,7 +137,7 @@ public class AmpSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         ampAngleServo.periodic();
-
+        System.out.println(m_encoder.m_encoder.get());
 
         
 
