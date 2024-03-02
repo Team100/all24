@@ -122,6 +122,11 @@ public abstract class JoystickControl implements DriverControl {
         return m_controller.getRawButton(7);
     }
 
+    @Override
+    public boolean driveToAmp() {
+        return m_controller.getRawButton(8);
+    }
+
     private boolean button(int button) {
         return m_controller.getRawButton(button);
     }

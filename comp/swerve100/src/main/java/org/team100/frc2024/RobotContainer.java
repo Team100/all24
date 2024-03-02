@@ -46,6 +46,7 @@ import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
+import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
@@ -187,8 +188,14 @@ public class RobotContainer {
         // *************************
         //
         // override the alliance logic.
-
-        m_alliance = DriverStation.getAlliance().get();
+        switch(Identity.instance) {
+            case BLANK: 
+            m_alliance = Alliance.Blue;
+            break;
+            default:
+            m_alliance = DriverStation.getAlliance().get();
+        break;
+        }
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -523,8 +530,8 @@ public class RobotContainer {
         // whileTrue(driverControl::test, Commands.startEnd(() ->
         // RobotState100.changeIntakeState(IntakeState100.INTAKE),
         // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-        // whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics,
-        // planner, drivePID));
+        whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
+        new HolonomicDriveController100(), swerveKinodynamics));
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
