@@ -42,6 +42,11 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean driveToNote() {
+        return m_controller.getYButton();
+    }
+
+    @Override
+    public boolean driveToAmp() {
         return m_controller.getLeftStickButton();
     }
 

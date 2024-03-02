@@ -90,6 +90,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public boolean driveToAmp() {
+        return m_driverControl.driveToAmp();
+    }    
+
+    @Override
     public Translation2d target() {
         return m_driverControl.target();
     }
