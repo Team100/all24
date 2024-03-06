@@ -74,9 +74,11 @@ public class TrajectoryCommand100 extends Command100 {
         ChassisSpeeds output = m_controller.update(now, currentPose, robotRelativeVelocity);
         t.log(Level.TRACE, m_name, "chassis speeds", output);
         
-        if(m_controller.isDone()){
-            return;
-        }
+        // if(m_controller.isDone() || m_timer.get() > m_trajectory.getLastPoint().state().getTimeS()){
+            
+        //      m_robotDrive.setChassisSpeedsNormally(new ChassisSpeeds(), dt);
+        //     return;
+        // }
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);
     }
@@ -84,9 +86,9 @@ public class TrajectoryCommand100 extends Command100 {
     @Override
     public boolean isFinished() {
 
-        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
+        // return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
 
-        // return m_controller.isDone();
+        return m_controller.isDone();
     }
 
     @Override

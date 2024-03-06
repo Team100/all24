@@ -42,9 +42,9 @@ public class AmpSubsystem extends SubsystemBase{
         m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51 , false);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
-                45,
+                55,
                 5,
-                10)
+                5 )
                 ;
 
         switch (Identity.instance) {
@@ -54,10 +54,10 @@ public class AmpSubsystem extends SubsystemBase{
                 //TODO tune kV
                 ampAngleServo = new GravityServo(
                     m_motor, 
-                    20,
+                    30,
                     "AMMMPPPPPPPPPP", 
                     m_params, 
-                    new PIDController(2, 0, 0), 
+                    new PIDController(0.6, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 
@@ -86,7 +86,19 @@ public class AmpSubsystem extends SubsystemBase{
                 //     new double[]{0, 0}
                 // );
 
-                ampAngleServo = null;
+                ampAngleServo = new GravityServo(
+                    m_motor, 
+                    30,
+                    "AMMMPPPPPPPPPP", 
+                    m_params, 
+                    new PIDController(0.6, 0, 0), 
+                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                    pivotID, 
+                    0.02, 
+                    -0.06, 
+                    m_encoder,
+                    new double[]{0, 0}
+                );
                 ampDrive = new PWM(2);
 
                 
@@ -137,7 +149,14 @@ public class AmpSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         ampAngleServo.periodic();
-        System.out.println(m_encoder.m_encoder.get());
+
+        // System.out.println("GET" + m_encoder.m_encoder.get());
+
+        // System.out.println("Absolute" + m_encoder.m_encoder.getAbsolutePosition());
+        // System.out.println("POSITION OFFSET" + m_encoder.m_encoder.getPositionOffset());
+        // System.out.println("DISTANCE PER" + m_encoder.m_encoder.getDistancePerRotation());
+
+        // System.out.println(m_encoder.m_encoder.get());
 
         
 

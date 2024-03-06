@@ -7,7 +7,7 @@ public class RobotState100 {
     }
 
     public enum ShooterState100{
-        FEED, NONE, DEFAULTSHOOT, READYTOSHOOT, DOWN, STOP
+        FEED, NONE, DEFAULTSHOOT, READYTOSHOOT, DOWN, STOP, TEST
     }
 
     public enum AmpState100{

@@ -71,8 +71,13 @@ public class PoseEstimationHelper {
                 Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
                         cameraInRobotCoordinates,
                         note);
-                Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
-                        .getTranslation());
+                Translation2d fieldRealtiveTranslation = currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .getTranslation();
+                        if (fieldRealtiveTranslation.getX() > 0 &&fieldRealtiveTranslation.getY() > 0) {
+                            if (fieldRealtiveTranslation.getX() < 8.21 &&fieldRealtiveTranslation.getY() < 16.54) {
+                                Tnotes.add(fieldRealtiveTranslation);
+                            }
+                        }
             }
 
         return Tnotes;
