@@ -72,21 +72,21 @@ public class AmpSubsystem extends SubsystemBase{
             default:
                 m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
 
-                // ampAngleServo = new GravityServo(
-                //     m_motor,
-                //     5,
-                //     m_name, 
-                //     m_params, 
-                //     new PIDController(3, 0, 0), 
-                //     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                //     pivotID, 
-                //     0.02, 
-                //     -0.06,
-                //     new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
-                //     new double[]{0, 0}
-                // );
+                ampAngleServo = new GravityServo(
+                    m_motor,
+                    5,
+                    m_name, 
+                    m_params, 
+                    new PIDController(3, 0, 0), 
+                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                    pivotID, 
+                    0.02, 
+                    -0.06,
+                    new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 10, 0.51, false),
+                    new double[]{0, 0}
+                );
 
-                ampAngleServo = null;
+                // ampAngleServ/o = null;
                 ampDrive = new PWM(2);
 
                 

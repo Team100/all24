@@ -71,8 +71,14 @@ public class PoseEstimationHelper {
                 Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
                         cameraInRobotCoordinates,
                         note);
-                Tnotes.add(currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
-                        .getTranslation());
+                Translation2d fieldRelativeNote = currentPose
+                        .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .getTranslation();
+                if (fieldRelativeNote.getX() >= 0 && fieldRelativeNote.getY() >= 0) {
+                    if (fieldRelativeNote.getX() <= 16.54 && fieldRelativeNote.getY() <= 8.21) {
+                        Tnotes.add(fieldRelativeNote);
+                    }
+                }
             }
 
         return Tnotes;
@@ -89,13 +95,14 @@ public class PoseEstimationHelper {
                 Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
                         cameraInRobotCoordinates,
                         note);
-                Translation2d fieldRelativeNote = currentPose.transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                Translation2d fieldRelativeNote = currentPose
+                        .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation();
-                        if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
-                            if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
-                Tnotes.add(fieldRelativeNote);
-                            }
-                        }
+                if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
+                    if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
+                        Tnotes.add(fieldRelativeNote);
+                    }
+                }
             }
         return Tnotes;
     }
