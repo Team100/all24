@@ -65,13 +65,14 @@ public class DrumShooter extends Shooter{
 
     private final Telemetry t;
 
-    public final double kLeftRollerVelocity = 15;
-    public final double kRightRollerVelocity = 15;
+    public final double kLeftRollerVelocity = 20;
+    public final double kRightRollerVelocity = 20;
 
 
     public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit) {
         m_name = Names.name(this);
-        m_encoder = new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0.284, true);
+        m_encoder = new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0.9536410238410256 , true);
+        // m_encoder.reset();
         int shooterCurrentLimit = 40;
         int pivotLimit = 40;
         int feederLimit = 40;
@@ -222,11 +223,19 @@ public class DrumShooter extends Shooter{
         rightRoller.periodic();
         pivotServo.periodic();
         m_viz.periodic();
+        // System.out.println("GET" + m_encoder.m_encoder.get());
+
+        // System.out.println("Absolute" + m_encoder.m_encoder.getAbsolutePosition());
+        // System.out.println("POSITION OFFSET" + m_encoder.m_encoder.getPositionOffset());
+        // System.out.println("DISTANCE PER" + m_encoder.m_encoder.getDistancePerRotation());
+
         // System.out.println("FREEQ" + m_encoder.m_encoder.getFrequency());
  
 
         
     }
+
+   
 
     public void pivotAndRamp(SwerveDriveSubsystem m_drive, double kThreshold){
         if (m_drive.getPose().getX() < kThreshold) {
@@ -294,14 +303,14 @@ public class DrumShooter extends Shooter{
     public boolean atVelocitySetpoint(boolean bool){
 
         if(bool){
-            if( Math.abs(leftRoller.getVelocity() - 10) < 10){
-                if( Math.abs(rightRoller.getVelocity() - 10) < 10){
+            if( Math.abs(leftRoller.getVelocity() - 10) < 0.5){
+                if( Math.abs(rightRoller.getVelocity() - 10) < 0.5){
                     return true;
                 }
             }
         } else{
-            if( Math.abs(leftRoller.getVelocity() - kLeftRollerVelocity) < 10){
-                if( Math.abs(rightRoller.getVelocity() - kRightRollerVelocity) < 10){
+            if( Math.abs(leftRoller.getVelocity() - kLeftRollerVelocity) < 0.5){
+                if( Math.abs(rightRoller.getVelocity() - kRightRollerVelocity) < 0.5){
                     return true;
                 }
             }
@@ -310,7 +319,4 @@ public class DrumShooter extends Shooter{
         return false;
 
     }
-
-
-   
 }

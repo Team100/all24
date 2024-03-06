@@ -43,6 +43,8 @@ public class Robot extends TimedRobot {
             throw new IllegalStateException("Robot Container Instantiation Failed", e);
         }
 
+        m_robotContainer.onInit();
+
         DataLogManager.start();
     }
 

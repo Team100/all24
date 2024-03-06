@@ -19,6 +19,7 @@ import org.team100.frc2024.motion.OuttakeCommand;
 import org.team100.frc2024.motion.ShootSmart;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
+import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.amp.OuttakeAmp;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
@@ -31,6 +32,7 @@ import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
+import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.ResetShooterZero;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
 import org.team100.frc2024.motion.shooter.Shooter;
@@ -151,6 +153,8 @@ public class RobotContainer {
     final LEDSubsystem m_ledSubsystem;
     final SensorInterface m_sensors;
     final FeederSubsystem m_feeder;
+    // final SwerveDriveSubsystem m_drive;
+
 
     final DriverControl driverControl;
     final OperatorControl operatorControl;
@@ -173,7 +177,7 @@ public class RobotContainer {
             // m_autonRoutine = m_autonSelector.routine();
             // digital inputs 4, 5
             // m_allianceSelector = new AllianceSelector();
-            // m_alliance = m_allianceSelector.alliance();
+            // m_alliance = Selector.alliance();
             m_autonSelector = null;
             m_autonRoutine = 0;
             m_allianceSelector = null;
@@ -188,20 +192,32 @@ public class RobotContainer {
         // *************************
         //
         // override the alliance logic.
-        switch(Identity.instance) {
-            case BLANK: 
-            m_alliance = Alliance.Blue;
-            break;
-            default:
-            m_alliance = DriverStation.getAlliance().get();
-        break;
-        }
+//        switch(Identity.instance) {
+//            case BLANK: 
+//            m_alliance = Alliance.Blue;
+//            break;
+//            default:
+//            m_alliance = DriverStation.getAlliance().get();
+//        break;
+//        }
+
+        // m_alliance = DriverStation.getAlliance().get();
+
+        // if(m_alliance == null){
+        m_alliance = Alliance.Blue 
+            ;
+        // }
+
+        // m_alliance = Alliance.Blue  ;
+        // m_alliance = Allsiance.Blue;
+
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
         } else {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.redLayout("2024-crescendo.json");
         }
+
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
         t.log(Level.INFO, m_name, "Alliance", m_alliance);
 
@@ -236,7 +252,7 @@ public class RobotContainer {
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 VecBuilder.fill(0.5, 0.5, 0.5),
-                VecBuilder.fill(0.1, 0.1, Double.MAX_VALUE));
+                VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); //0.1 0.1
 
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
@@ -263,9 +279,10 @@ public class RobotContainer {
         
         m_indicator = new LEDIndicator(0, strip1);
 
-        m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors);
 
-        m_shooter = ShooterFactory.get(m_feeder);
+        m_shooter = new DrumShooter(44, 45, 28, 39,  58);
+        
+        m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors, m_shooter);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);
@@ -423,7 +440,7 @@ public class RobotContainer {
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
-        whileTrue(operatorControl::rezero, new ResetShooterZero(m_shooter));
+        whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
 
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
 
@@ -530,8 +547,9 @@ public class RobotContainer {
         // whileTrue(driverControl::test, Commands.startEnd(() ->
         // RobotState100.changeIntakeState(IntakeState100.INTAKE),
         // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-        whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
-        new HolonomicDriveController100(), swerveKinodynamics));
+//        whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
+ //       new HolonomicDriveController100(), swerveKinodynamics));
+  //      whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics, planner, drivePID, m_alliance));
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
@@ -548,19 +566,19 @@ public class RobotContainer {
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
 
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors, notePositionDetector);
+        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors, notePositionDetector, m_amp, m_heading);
         
 
-        whileTrue(driverControl::circle, m_AutoMaker.fourNoteAuto());
+        // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
-
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto());
+        whileTrue(driverControl::test, m_AutoMaker.citrus());
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_drive));
 
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
 //         whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
+
 
        
 
@@ -584,7 +602,7 @@ public class RobotContainer {
         //Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();
 
-        m_auton = m_AutoMaker.fourNoteAuto();
+        m_auton = m_AutoMaker.wesuck(m_drive, notePositionDetector, swerveKinodynamics, m_sensors);
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
@@ -599,8 +617,14 @@ public class RobotContainer {
         m_amp.reset();
     }
 
-    public void onAuto() {
+    public void onInit() {
+        // m_drive.resetPose()
+        m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d(Math.PI)));
 
+    }
+
+    public void onAuto() {
+        // m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d())
     }
 
     private void  whileTrue(BooleanSupplier condition, Command command) {

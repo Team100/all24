@@ -21,6 +21,7 @@ import org.team100.lib.util.Math100;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithProfileNote extends Command100 {
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
@@ -37,6 +38,7 @@ public class DriveWithProfileNote extends Command100 {
     private State100 ySetpoint;
     private State100 thetaSetpoint;
     private final Telemetry t = Telemetry.get();
+    private Timer m_timer;
 
     /**
      * @param goal
@@ -69,6 +71,7 @@ public class DriveWithProfileNote extends Command100 {
         xProfile = new TrapezoidProfile100(driveContraints, 0.01);
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
+        m_timer = new Timer();
         addRequirements(m_swerve);
     }
 
@@ -77,6 +80,7 @@ public class DriveWithProfileNote extends Command100 {
         xSetpoint = m_swerve.getState().x();
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();
+        m_timer.restart();
     }
 
     @Override
@@ -96,13 +100,13 @@ public class DriveWithProfileNote extends Command100 {
             count = 0;
         }
         Rotation2d rotationGoal;
-        if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
+        // if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
         rotationGoal = new Rotation2d(
             goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
-        }
-        else {
-            rotationGoal = m_swerve.getPose().getRotation();
-        }
+        // }
+        // else {
+        //     rotationGoal = m_swerve.getPose().getRotation();
+        // }
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -131,14 +135,17 @@ public class DriveWithProfileNote extends Command100 {
 
     @Override
     public boolean isFinished() {
-        if (!m_fieldRelativeGoal.get().isPresent() && (count >= 50 || previousGoal == null)) {
-            return true;
-        }
-        return m_end.getAsBoolean();
+        // if (!m_fieldRelativeGoal.get().isPresent() && (count >= 50 || previousGoal == null)) {
+        //     return true;
+        // }
+        // return m_end.getAsBoolean();
+
+        return m_timer.get() >= 4;
     }
 
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
+        m_timer.stop();
     }
 }
