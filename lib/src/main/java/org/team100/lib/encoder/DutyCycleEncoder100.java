@@ -64,9 +64,9 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
             return null;
         }
         if(m_reversed){
-            return -m_encoder.getDistance();
+            return -(m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
         }
-        return m_encoder.getDistance();
+        return (m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
 
     }
 

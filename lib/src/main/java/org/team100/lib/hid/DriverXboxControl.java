@@ -42,7 +42,7 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean driveToNote() {
-        return m_controller.getLeftStickButton();
+        return m_controller.getYButton();
     }
 
     @Override
@@ -120,7 +120,8 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean steer90() {
-        return m_controller.getYButton();
+        // return m_controller.getYButton();
+        return false;
     }
 
     @Override

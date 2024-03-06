@@ -102,5 +102,6 @@ public class ShootSmart extends Command {
   @Override
   public boolean isFinished() {
     return finished;
+    // return false;
   }
 }
