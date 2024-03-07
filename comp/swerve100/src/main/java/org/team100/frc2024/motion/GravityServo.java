@@ -52,7 +52,7 @@ public class GravityServo {
         m_softLimits = softLimits;
         m_period = period;
         m_motor = motor;
-        m_motor.setIdleMode(IdleMode.kCoast);
+        m_motor.setIdleMode(IdleMode.kBrake);
         m_encoder = encoder;
         m_name = name;
         m_params = params;
@@ -178,15 +178,15 @@ public class GravityServo {
 
         double diff = m_goal.x() - m_setpoint.x();
 
-        System.out.println("DIFFF" + diff);
+        // System.out.println("DIFFF" + diff);
 
 
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.2; //rot/s to rpm conversion
+        double u_FF = m_setpoint.v() * 0.08; //rot/s to rpm conversion
 
-        double gravityTorque = 0.015 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
+        double gravityTorque = 0.015 * 3 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
         double u_TOTAL = gravityTorque + u_FF + u_FB;
         
         // if(diff <= 0.1){
@@ -209,7 +209,7 @@ public class GravityServo {
         m_controller.setIntegratorRange(0, 0.1);
 
         t.log(Level.DEBUG, m_name, "u_FB", u_FB);
-        // t.log(Level.DEBUG, m_name, "u_FF", u_FF);
+        t.log(Level.DEBUG, m_name, "u_FF", u_FF);
         t.log(Level.DEBUG, m_name, "GRAVITY", gravityTorque);
         t.log(Level.DEBUG, m_name, "u_TOTAL", u_TOTAL);
         t.log(Level.DEBUG, m_name, "Measurement", measurement);

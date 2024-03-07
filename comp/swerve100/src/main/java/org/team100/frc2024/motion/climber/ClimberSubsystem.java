@@ -52,7 +52,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 s1 = new CANSparkFlex(leftClimberID, MotorType.kBrushless);
                 s2 = new CANSparkFlex(rightClimberID, MotorType.kBrushless);
                 s2.setInverted(true);
-
+                s1.setInverted(false);
                 
                 s1.setSmartCurrentLimit(40);
                 s2.setSmartCurrentLimit(40);

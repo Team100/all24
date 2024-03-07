@@ -100,7 +100,7 @@ public class IntakeRoller extends Intake {
     @Override
     //All you have to do is set the state once and it handles the rest. No need for commands 
     public void intakeSmart() {
-        System.out.println("IM RUNNING");
+        // System.out.println("IM RUNNING");
         if(!m_sensors.getFeederSensor()){
             System.out.println("STOPING INAKE" + Timer.getFPGATimestamp());
             intakeRoller.setVelocity(0);

@@ -9,6 +9,8 @@ import java.util.function.Supplier;
 import org.team100.frc2024.RobotState100;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 
@@ -27,17 +29,23 @@ public class ShooterDefault extends Command {
     m_drive = drive;
     m_pivotUpSupplier = pivotUpSupplier;
     m_pivotDownSupplier = pivotDownSupplier;
+    SmartDashboard.putNumber("Shooter Angle", 0.2); //22.5a   
+
     addRequirements(m_shooter);
+
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
+    
 
     double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
     // System.out.println(distance);
@@ -48,8 +56,15 @@ public class ShooterDefault extends Command {
                 case DEFAULTSHOOT:
                     m_shooter.forward();
                     // m_shooter.setAngleWithOverride(ShooterUtil.getAngle(m_drive.getPose().getX()), m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a   
-                    m_shooter.setAngle(ShooterUtil.getAngle(distance)); //22.5a   
+                    // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2)); //22.5a   
+                    m_shooter.setAngle(0.95);
                     // System.out.println("DEFAULT SHOOOOT");
+                    break;
+                case TEST:
+                    // m_shooter.setAngle(Smart/Dashboard.getNumber("Shooter Angle", 0.2)); //22.5a   
+
+                    m_shooter.forward();
+                    m_shooter.setAngle(ShooterUtil.getAngle(distance));
                     break;
                 case STOP:
                     m_shooter.stop();
