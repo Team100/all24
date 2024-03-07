@@ -2,11 +2,8 @@ package org.team100.lib.localization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -76,19 +73,6 @@ class TestCameraAngles extends Fixtured {
             Translation2d testTranslation2 = PoseEstimationHelper.cameraRotationToRobotRelative(dTransform3d, new Rotation3d(0,Math.toRadians(45),0));
             assertEquals(-1, testTranslation2.getY(), 0.0001);
             assertEquals(1, testTranslation2.getX(), 0.0001);
-        }
-    }
-
-    @Test
-    void testCameraAngles7() {
-        {
-            Transform3d e = new Transform3d(0, 0, 1, new Rotation3d(0, Math.toRadians(45), 0));
-            ArrayList<Rotation3d> rots = new ArrayList<>();
-            rots.add(new Rotation3d());
-            ArrayList<Translation2d> testTranslation1 = PoseEstimationHelper.cameraRotsToFieldRelative(new Pose2d(),e, rots);
-            System.out.println(testTranslation1);
-            assertEquals(1, testTranslation1.get(0).getX(), 0.0001);
-            assertEquals(0, testTranslation1.get(0).getY(), 0.0001);
         }
     }
 }

@@ -104,8 +104,8 @@ public class SelfTestRunner extends Command {
             IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
             addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
 
-            // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
-            // addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
+            IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
+            addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
 
             AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
             addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
@@ -115,7 +115,7 @@ public class SelfTestRunner extends Command {
         }
 
         if (kTestVision) {
-                  // Oscillate is a good choice for vision since it uses acceleration-limited profiles
+            // Oscillate is a good choice for vision since it uses acceleration-limited profiles
             // and relatively slow speed.  This moves back and forth in x, using
             // module direct mode.
             Oscillate oscillate = new Oscillate(drivetrain);
