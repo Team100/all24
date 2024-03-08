@@ -39,7 +39,6 @@ public class StowAmpCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("STOW HAS FINISHED");
     finished = false;
   }
 
