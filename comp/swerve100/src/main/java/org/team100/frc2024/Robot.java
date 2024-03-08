@@ -3,6 +3,7 @@ package org.team100.frc2024;
 import java.io.IOException;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
@@ -17,7 +18,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
@@ -114,6 +115,13 @@ public class Robot extends TimedRobot {
     public void close() {
         super.close();
         m_robotContainer.close();
+    }
+
+    
+
+    @Override
+    public String getGlassName() {
+        return "Robot";
     }
 
     private void banner() {

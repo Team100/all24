@@ -168,4 +168,11 @@ public class DriveRamseteController implements DriveMotionController {
     public boolean isDone() {
         return m_iter != null && m_iter.isDone();
     }
+
+    @Override
+    public String getGlassName() {
+        return "DriveRamseteController";
+    }
+
+    
 }

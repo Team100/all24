@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -23,7 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The swerve drive in local, or robot, reference frame. This class knows
  * nothing about the outside world, it just accepts chassis speeds.
  */
-public class SwerveLocal {
+public class SwerveLocal implements Glassy {
     private static final SwerveModuleState[] states0 = new SwerveModuleState[] {
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
@@ -85,7 +86,6 @@ public class SwerveLocal {
             setChassisSpeedsNormally(speeds, gyroRateRad_S, kDtSec);
         }
     }
-
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         setChassisSpeedsNormally(speeds, 0, 0.02);
@@ -208,8 +208,6 @@ public class SwerveLocal {
         m_modules.periodic();
     }
 
-    ///////////////////////////////////////////////////////////
-
     public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState[] states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
@@ -217,6 +215,13 @@ public class SwerveLocal {
         setModuleStates(states);
         prevSetpoint = new SwerveSetpoint(speeds, states);
     }
+
+    @Override
+    public String getGlassName() {
+        return "SwerveLocal";
+    }
+
+    /////////////////////////////////////////////////////////
 
     private void setChassisSpeedsWithSetpointGenerator(
             ChassisSpeeds speeds,

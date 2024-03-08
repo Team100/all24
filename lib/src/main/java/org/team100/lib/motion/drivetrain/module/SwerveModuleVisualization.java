@@ -37,7 +37,7 @@ public class SwerveModuleVisualization {
     }
 
     public void periodic() {
-        if (TelemetryLevelChooser.get().getSelected() == Level.DEBUG) {
+        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG) ) {
             m_drive.setAngle(angle());
             m_drive.setLength(speed());
             m_steer.setAngle(angle());

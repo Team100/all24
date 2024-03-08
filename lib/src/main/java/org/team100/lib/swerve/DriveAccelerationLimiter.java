@@ -1,5 +1,6 @@
 package org.team100.lib.swerve;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -10,7 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 /**
  * Enforces drive motor torque constraints.
  */
-public class DriveAccelerationLimiter {
+public class DriveAccelerationLimiter implements Glassy {
     private static final Telemetry t = Telemetry.get();
 
     private static final int kMaxIterations = 10;
@@ -65,5 +66,12 @@ public class DriveAccelerationLimiter {
         t.log(Level.DEBUG, m_name, "s", min_s);
         return min_s;
     }
+
+    @Override
+    public String getGlassName() {
+        return "DriveAccelerationLimiter";
+    }
+
+    
     
 }

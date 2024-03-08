@@ -1,5 +1,6 @@
 package org.team100.lib.motion.arm;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
@@ -14,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /**
  * Arm mechanism with two joints.
  */
-public class ArmSubsystem extends SubsystemBase {
+public class ArmSubsystem extends SubsystemBase implements Glassy  {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
@@ -110,4 +111,11 @@ public class ArmSubsystem extends SubsystemBase {
         m_lowerArmEncoder.close();
         m_upperArmEncoder.close();
     }
+
+    @Override
+    public String getGlassName() {
+        return "Arm";
+    }
+
+    
 }

@@ -1,7 +1,6 @@
 package org.team100.lib.localization;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
@@ -9,7 +8,6 @@ import org.opencv.core.Mat;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -28,7 +26,7 @@ import edu.wpi.first.math.numbers.N3;
  */
 public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
-    private static final String m_name = Names.name(PoseEstimationHelper.class);
+    private static final String kName = PoseEstimationHelper.class.getSimpleName();
 
     /**
      * Converts camera rotation to an object to a robot relative translation,
@@ -121,14 +119,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, m_name, "rotation_source", "CAMERA");
+            t.log(Level.DEBUG, kName, "rotation_source", "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        t.log(Level.DEBUG, m_name, "rotation_source", "GYRO");
+        t.log(Level.DEBUG, kName, "rotation_source", "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -153,14 +151,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, m_name, "rotation_source", "CAMERA");
+            t.log(Level.DEBUG, kName, "rotation_source", "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        t.log(Level.DEBUG, m_name, "rotation_source", "GYRO");
+        t.log(Level.DEBUG, kName, "rotation_source", "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -268,8 +266,8 @@ public class PoseEstimationHelper {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        t.log(Level.DEBUG, m_name, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
-        t.log(Level.DEBUG, m_name, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
+        t.log(Level.DEBUG, kName, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
+        t.log(Level.DEBUG, kName, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
         // System.out.println("TAG TRANLSAION IN CAM COORDS :" +
         // tagTranslationInCameraCoords.toTranslation2d());
         // System.out.println("CAMERA ROT IN FIELD COORDS: " +
@@ -282,7 +280,7 @@ public class PoseEstimationHelper {
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        t.log(Level.DEBUG, m_name, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+        t.log(Level.DEBUG, kName, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
 
         // System.out.println("TAG ROTATION IN CAM COOORDS"+
         // tagRotationInCameraCoords.toRotation2d());
@@ -297,7 +295,7 @@ public class PoseEstimationHelper {
 
         // System.out.println("CAM IN FIELD COORDS:::: " +
         // cameraInFieldCoords.toPose2d());
-        t.log(Level.DEBUG, m_name, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+        t.log(Level.DEBUG, kName, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,

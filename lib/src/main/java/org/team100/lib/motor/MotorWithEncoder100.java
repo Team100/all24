@@ -8,5 +8,8 @@ import org.team100.lib.units.Measure100;
  * built-in encoders.
  */
 public interface MotorWithEncoder100<T extends Measure100> extends Motor100<T>, Encoder100<T> {
-
+    @Override
+    default String getGlassName() {
+        return "MotorWithEncoder100";
+    }
 }

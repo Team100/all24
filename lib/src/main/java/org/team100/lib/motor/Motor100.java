@@ -1,8 +1,9 @@
 package org.team100.lib.motor;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
-public interface Motor100<T extends Measure100> {
+public interface Motor100<T extends Measure100> extends Glassy {
 
     /**
      * Open-loop duty cycle control.
@@ -31,4 +32,9 @@ public interface Motor100<T extends Measure100> {
      * consistency.
      */
     void periodic();
+
+    @Override
+    default String getGlassName() {
+        return "Motor100";
+    }
 }

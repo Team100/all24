@@ -4,6 +4,7 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
@@ -26,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * and it's fragile. we want to eject as fast as possible
  * though, so try a high accel limit.
  */
-public class IndexerSubsystem extends SubsystemBase implements Speeding {
+public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 30;
 
@@ -113,4 +114,11 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding {
         m_servo.periodic();
         m_viz.periodic();
     }
+
+    @Override
+    public String getGlassName() {
+        return "Indexer";
+    }
+
+    
 }

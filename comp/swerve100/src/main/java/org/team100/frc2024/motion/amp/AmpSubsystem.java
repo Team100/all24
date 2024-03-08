@@ -3,12 +3,8 @@ package org.team100.frc2024.motion.amp;
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.DutyCycleEncoder100;
-import org.team100.lib.encoder.SparkMaxEncoder;
-import org.team100.lib.motion.components.PositionServoInterface;
-import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.motion.simple.AngularVisualization;
-import org.team100.lib.motion.simple.Positioning;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Names;
 
@@ -22,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /**
  * A 1-dof arm driven by two separate motors with opposite phases.
  */
-public class AmpSubsystem extends SubsystemBase{
+public class AmpSubsystem extends SubsystemBase implements Glassy {
     // ALERT! notice this very high current limit!!  ALERT! 
     private static final int kCurrentLimit = 80;
 
@@ -55,7 +51,7 @@ public class AmpSubsystem extends SubsystemBase{
                 ampAngleServo = new GravityServo(
                     m_motor, 
                     30,
-                    "AMMMPPPPPPPPPP", 
+                    m_name, 
                     m_params, 
                     new PIDController(0.6, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
@@ -89,7 +85,7 @@ public class AmpSubsystem extends SubsystemBase{
                 ampAngleServo = new GravityServo(
                     m_motor, 
                     30,
-                    "AMMMPPPPPPPPPP", 
+                    m_name, 
                     m_params, 
                     new PIDController(0.6, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
@@ -161,4 +157,12 @@ public class AmpSubsystem extends SubsystemBase{
         
 
     }
+
+    @Override
+    public String getGlassName() {
+        return "AMMMPPPPPPPPPP";
+    }
+
+
+    
 }

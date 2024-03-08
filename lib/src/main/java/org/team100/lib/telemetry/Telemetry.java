@@ -75,7 +75,7 @@ public class Telemetry {
             this.priority = priority;
         }
 
-        boolean admit(Level other) {
+        public boolean admit(Level other) {
             return this.priority >= other.priority;
         }
     }

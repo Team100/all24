@@ -297,6 +297,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal.close();
     }
 
+    @Override
+    public String getGlassName() {
+        return "SwerveDriveSubsystem";
+    }
+
     /////////////////////////////////////////////////////////////////
     //
     // Private

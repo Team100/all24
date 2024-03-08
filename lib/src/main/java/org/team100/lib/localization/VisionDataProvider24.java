@@ -9,6 +9,7 @@ import java.util.function.ObjDoubleConsumer;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -42,7 +43,7 @@ import edu.wpi.first.wpilibj.Timer;
  * This "24" version uses the "struct" method instead of the "msgpack" method,
  * which matches the TagFinder24 code on the camera.
  */
-public class VisionDataProvider24 {
+public class VisionDataProvider24 implements Glassy {
     /**
      * Standard deviation of pose estimate, as a fraction of target range.
      * This is a guess based on figure 5 in the Apriltag2 paper:
@@ -371,5 +372,12 @@ public class VisionDataProvider24 {
         double stddev = kRelativeError * distanceM;
         return VecBuilder.fill(stddev, stddev, Double.MAX_VALUE);
     }
+
+    @Override
+    public String getGlassName() {
+        return "VisionDataProvider24";
+    }
+
+    
 
 }

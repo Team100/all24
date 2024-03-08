@@ -51,4 +51,9 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver{
     public void reset(Pose2d p) {
         //
     }
+
+    @Override
+    public String getGlassName() {
+        return "ManualChassisSpeeds";
+    }
 }
