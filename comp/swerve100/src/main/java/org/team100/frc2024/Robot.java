@@ -15,6 +15,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -37,6 +38,9 @@ public class Robot extends TimedRobot implements Glassy {
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
         enableLiveWindowInTest(false);
+
+        // log what the scheduler is doing
+        SmartDashboard.putData(CommandScheduler.getInstance());
 
         try {
             m_robotContainer = new RobotContainer(this);
