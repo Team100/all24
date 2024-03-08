@@ -88,7 +88,6 @@ public class Robot extends TimedRobot implements Glassy {
     @Override
     public void teleopInit() {
         CommandScheduler.getInstance().cancelAll();
-        CommandScheduler.getInstance().clearComposedCommands();
         m_robotContainer.cancelAuton();
         m_robotContainer.onTeleop();
 
@@ -109,6 +108,7 @@ public class Robot extends TimedRobot implements Glassy {
     @Override
     public void testExit() {
         CommandScheduler.getInstance().cancelAll();
+        CommandScheduler.getInstance().clearComposedCommands();
     }
 
     @Override
