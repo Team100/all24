@@ -5,13 +5,13 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "730",
+      "height": "603",
       "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1065",
-      "xpos": "109",
-      "ypos": "101"
+      "width": "931",
+      "xpos": "187",
+      "ypos": "107"
     }
   },
   "Window": {
@@ -27,7 +27,7 @@
     },
     "###/SmartDashboard/ShowMode": {
       "Collapsed": "0",
-      "Pos": "60,100",
+      "Pos": "61,100",
       "Size": "200,48"
     },
     "###/SmartDashboard/Telemetry Level": {
@@ -37,27 +37,27 @@
     },
     "###/field": {
       "Collapsed": "0",
-      "Pos": "200,200",
+      "Pos": "302,211",
       "Size": "400,200"
     },
     "###Addressable LEDs": {
       "Collapsed": "0",
-      "Pos": "152,252",
+      "Pos": "305,30",
       "Size": "114,285"
     },
     "###DIO": {
       "Collapsed": "0",
-      "Pos": "301,25",
+      "Pos": "143,219",
       "Size": "129,68"
     },
     "###FMS": {
       "Collapsed": "0",
-      "Pos": "3,360",
+      "Pos": "4,330",
       "Size": "136,154"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "51,588",
+      "Pos": "51,461",
       "Size": "616,132"
     },
     "###Keyboard 0 Settings": {
@@ -87,7 +87,7 @@
     },
     "###PWM Outputs": {
       "Collapsed": "0",
-      "Pos": "305,101",
+      "Pos": "147,292",
       "Size": "89,96"
     },
     "###RoboRIO": {

@@ -17,9 +17,6 @@
           "open": true
         }
       },
-      "SmartDashboard": {
-        "open": true
-      },
       "Translation2d[]##v_vision": {
         "open": true
       },
@@ -131,14 +128,22 @@
       "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Simple Manual Mode": "String Chooser",
       "/SmartDashboard/StickyHeading": "String Chooser",
+      "/SmartDashboard/Swerve Viz Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/Triangulate": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
@@ -151,17 +156,113 @@
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": {
+      "/SmartDashboard/AutoNoteDetection": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": {
+      "/SmartDashboard/DriveToNoteWithRotation": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": {
+      "/SmartDashboard/Driver Skill Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/DrumShooter": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/FlushOften": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/FullStateTrajectoryFollower": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/HeedVision": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/IntakeRoller": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/OscillateDirect": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/OscillateTheta": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/StickyHeading": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Triangulate": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseInitialVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
         "window": {
           "visible": true
         }
@@ -205,5 +306,34 @@
     "mode": "Client (NT4)",
     "serverTeam": "localhost",
     "visible": false
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 178,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:vision/10000000e31d4a24[0]/pose/translation/x"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
   }
 }

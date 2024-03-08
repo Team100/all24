@@ -51,6 +51,11 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Driver Skill Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
