@@ -1,6 +1,7 @@
 package org.team100.lib.controller;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -14,7 +15,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 /**
  * Drivetrain control with three independent PID controllers.
  */
-public class HolonomicDriveController100 {
+public class HolonomicDriveController100 implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final PIDController m_xController;
     private final PIDController m_yController;
@@ -154,4 +155,11 @@ public class HolonomicDriveController100 {
         pid.setTolerance(0.01); // 0.5 degrees
         return pid;
     }
+
+    @Override
+    public String getGlassName() {
+        return "HolonomicDriveController100";
+    }
+
+    
 }

@@ -6,9 +6,14 @@ package org.team100.frc2024.motion.climber;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimberDefault extends Command {
+    private static final Telemetry t = Telemetry.get();
+
   /** Creates a new ClimberDefault. */
 
   Supplier<Double> m_leftSupplier;
@@ -27,11 +32,15 @@ public class ClimberDefault extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    t.log(Level.DEBUG, "ClimberDefault", "command state", "initialize");
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    t.log(Level.DEBUG, "ClimberDefault", "command state", "execute");
+
 
     // if(m_overideSupplier.get()){
         m_climber.setLeft(m_leftSupplier.get());
@@ -47,7 +56,9 @@ public class ClimberDefault extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+        t.log(Level.DEBUG, "ClimberDefault", "command state", "end");
+  }
 
   // Returns true when the command should end.
   @Override

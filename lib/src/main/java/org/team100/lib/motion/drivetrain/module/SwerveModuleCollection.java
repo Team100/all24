@@ -15,11 +15,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection {
-    private static final String kFrontLeft = "Front Left";
-    private static final String kFrontRight = "Front Right";
-    private static final String kRearLeft = "Rear Left";
-    private static final String kRearRight = "Rear Right";
-
+    private static final String kSwerveModules = "Swerve Modules";
+    private static final String kFrontLeft = kSwerveModules + "/Front Left";
+    private static final String kFrontRight = kSwerveModules + "/Front Right";
+    private static final String kRearLeft = kSwerveModules + "/Rear Left";
+    private static final String kRearRight = kSwerveModules + "/Rear Right";
+    // private static final String kFrontLeft =  "Front Left";
+    // private static final String kFrontRight =  "Front Right";
+    // private static final String kRearLeft =  "Rear Left";
+    // private static final String kRearRight =  "Rear Right";
+    
     private final SwerveModule100 m_frontLeft;
     private final SwerveModule100 m_frontRight;
     private final SwerveModule100 m_rearLeft;

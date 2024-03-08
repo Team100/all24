@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.ExperimentChooser;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -24,7 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * -- per-identity: enabled for specific RoboRIO serial numbers
  * -- override: using a Sendable Chooser in a dashboard, e.g. glass.
  */
-public class Experiments {
+public class Experiments implements Glassy {
     public static final Experiments instance = new Experiments(Identity.instance);
     private final Telemetry t = Telemetry.get();
     private final String m_name;
@@ -83,7 +84,14 @@ public class Experiments {
         return m_overrides.get(experiment).getSelected().getAsBoolean();
     }
 
+    
+
     ////////////////////////////////////////
+
+    @Override
+    public String getGlassName() {
+        return "Experiments";
+    }
 
     private String on(Experiment e) {
         return e.name() + " ON";

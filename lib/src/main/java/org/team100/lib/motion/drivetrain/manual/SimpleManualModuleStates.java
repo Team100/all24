@@ -45,4 +45,9 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
                 new SwerveModuleState(speedM_S, angle)
         };
     }
+
+    @Override
+    public String getGlassName() {
+        return "SimpleManualModuleStates";
+    }
 }

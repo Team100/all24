@@ -21,6 +21,7 @@ public class ThirdControlProxy implements ThirdControl {
 
     public ThirdControlProxy() {
         m_notifier = new Notifier(this::refresh);
+        m_notifier.setName("ThirdControlProxy Notifier");
         refresh();
         m_notifier.startPeriodic(kFreq);
     }

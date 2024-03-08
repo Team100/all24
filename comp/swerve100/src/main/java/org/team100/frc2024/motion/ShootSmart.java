@@ -8,13 +8,16 @@ import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.Shooter;
-import org.team100.lib.barcode.Sensor;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command {
+  private static final Telemetry t = Telemetry.get();
+
   /** Creates a new ShootSmart. */
 
   SensorInterface m_sensor;
@@ -43,6 +46,8 @@ public class ShootSmart extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+        t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
+
 
     double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
     m_timer.reset();
@@ -56,6 +61,7 @@ public class ShootSmart extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    t.log(Level.DEBUG, "ShootSmart", "command state", "execute");
 
     double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
 
@@ -89,6 +95,8 @@ public class ShootSmart extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
+
     atVelocity = false;
     finished = false;
     m_timer.stop();

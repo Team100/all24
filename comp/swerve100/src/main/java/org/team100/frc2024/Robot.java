@@ -3,6 +3,7 @@ package org.team100.frc2024;
 import java.io.IOException;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
@@ -14,10 +15,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
@@ -36,6 +38,9 @@ public class Robot extends TimedRobot {
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
         enableLiveWindowInTest(false);
+
+        // log what the scheduler is doing
+        SmartDashboard.putData(CommandScheduler.getInstance());
 
         try {
             m_robotContainer = new RobotContainer(this);
@@ -87,7 +92,6 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         CommandScheduler.getInstance().cancelAll();
-        CommandScheduler.getInstance().clearComposedCommands();
         m_robotContainer.cancelAuton();
         m_robotContainer.onTeleop();
 
@@ -108,12 +112,20 @@ public class Robot extends TimedRobot {
     @Override
     public void testExit() {
         CommandScheduler.getInstance().cancelAll();
+        CommandScheduler.getInstance().clearComposedCommands();
     }
 
     @Override
     public void close() {
         super.close();
         m_robotContainer.close();
+    }
+
+    
+
+    @Override
+    public String getGlassName() {
+        return "Robot";
     }
 
     private void banner() {

@@ -312,5 +312,12 @@ public class DrivePursuitController implements DriveMotionController {
         }
         return OptionalDouble.of(dt);
     }
+
+    @Override
+    public String getGlassName() {
+        return "DrivePursuitController";
+    }
+
+    
     
 }

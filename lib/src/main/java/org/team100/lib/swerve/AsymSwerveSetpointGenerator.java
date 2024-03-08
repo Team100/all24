@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Names;
@@ -27,7 +28,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * state that is kinematically infeasible (and can result in wheel slip or robot
  * heading drift as a result).
  */
-public class AsymSwerveSetpointGenerator {
+public class AsymSwerveSetpointGenerator implements Glassy {
     // turns greater than this will flip
     // this used to be pi/2, which resulted in "square corner" paths
     private static final double flipLimit = 3 * Math.PI / 4;
@@ -153,6 +154,13 @@ public class AsymSwerveSetpointGenerator {
                 overrideSteering,
                 kDtSec);
     }
+    
+    @Override
+    public String getGlassName() {
+        return "AsymSwerveSetpointGenerator";
+    }
+
+    ///////////////////////////////////////////////////////
 
     /**
      * If we want to go back the way we came, it might be faster to stop

@@ -1,0 +1,395 @@
+{
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
+    "retained": {
+      ".schema": {
+        "open": true
+      }
+    },
+    "transitory": {
+      ".schema": {
+        "open": true
+      },
+      "CameraPublisher": {
+        "Processed": {
+          "open": true
+        }
+      },
+      "SmartDashboard": {
+        "Swerve Module Front Left": {
+          "open": false
+        },
+        "Swerve Module Front Right": {
+          "open": false
+        },
+        "Swerve Viz": {
+          "Swerve Modules_Front Left_SwerveModule100": {
+            "Swerve Modules_Front Left_SwerveModule100": {
+              "drive": {
+                "open": true
+              },
+              "open": true,
+              "steer": {
+                "open": true
+              }
+            }
+          },
+          "open": true
+        }
+      },
+      "Translation2d[]##v_vision": {
+        "open": true
+      },
+      "Vision24": {
+        "Translation2d##v_/Vision24/foo": {
+          "open": true
+        },
+        "open": true
+      },
+      "experiments": {
+        "string[]##v_/experiments/enabled": {
+          "open": false
+        }
+      },
+      "position servo Front Left": {
+        "open": false
+      },
+      "position servo Front Right": {
+        "open": false
+      },
+      "position servo Rear Left": {
+        "open": false
+      },
+      "position servo Rear Right": {
+        "open": false
+      },
+      "robot": {
+        "open": false
+      },
+      "vision": {
+        "10000000e31d4a24": {
+          "open": true
+        },
+        "Blip24[]##v_vision/10000000e31d4a24": {
+          "Blip24##v_[0]": {
+            "Transform3d##v_pose": {
+              "Rotation3d##v_rotation": {
+                "Quaternion##v_q": {
+                  "open": true
+                },
+                "open": true
+              },
+              "Translation3d##v_translation": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "Blip24[]##v_vision/blips": {
+          "Blip24##v_[0]": {
+            "Pose2d##v_pose": {
+              "Rotation2d##v_rotation": {
+                "open": true
+              },
+              "Translation2d##v_translation": {
+                "open": true
+              },
+              "open": true
+            },
+            "Pose2d##v_translation": {
+              "Rotation2d##v_rotation": {
+                "open": true
+              },
+              "Translation2d##v_translation": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "Blip24##v_[1]": {
+            "Pose2d##v_translation": {
+              "Rotation2d##v_rotation": {
+                "open": true
+              },
+              "Translation2d##v_translation": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "Tag[]##v_vision/foo4": {
+          "Tag##v_[0]": {
+            "Translation2d##v_translation": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "Translation2d##v_vision/foo": {
+          "open": true
+        },
+        "Translation2d##v_vision/foo2": {
+          "open": true
+        },
+        "Translation2d[]##v_vision/foo": {
+          "Translation2d##v_[0]": {
+            "open": true
+          },
+          "Translation2d##v_[1]": {
+            "open": true
+          }
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/AutoNoteDetection": "String Chooser",
+      "/SmartDashboard/DriveToNoteWithRotation": "String Chooser",
+      "/SmartDashboard/Driver Skill Level": "String Chooser",
+      "/SmartDashboard/DrumShooter": "Mechanism2d",
+      "/SmartDashboard/FlushOften": "String Chooser",
+      "/SmartDashboard/Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Front Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/FullStateTrajectoryFollower": "String Chooser",
+      "/SmartDashboard/HeedVision": "String Chooser",
+      "/SmartDashboard/Intake": "Mechanism2d",
+      "/SmartDashboard/IntakeRoller": "Mechanism2d",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/Motion Profile": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
+      "/SmartDashboard/Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Rear Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Shooter": "Mechanism2d",
+      "/SmartDashboard/ShowMode": "String Chooser",
+      "/SmartDashboard/SideView": "Mechanism2d",
+      "/SmartDashboard/Simple Manual Mode": "String Chooser",
+      "/SmartDashboard/StickyHeading": "String Chooser",
+      "/SmartDashboard/Swerve Viz Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/Triangulate": "String Chooser",
+      "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
+      "/SmartDashboard/UseClosedLoopSteering": "String Chooser",
+      "/SmartDashboard/UseClosedLoopVelocity": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/annunciator": "Mechanism2d",
+      "/SmartDashboard/elevator": "Mechanism2d",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/AutoNoteDetection": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/DriveToNoteWithRotation": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Driver Skill Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/FlushOften": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/FullStateTrajectoryFollower": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/HeedVision": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Intake": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/OscillateDirect": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/OscillateTheta": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Shooter": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/StickyHeading": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SwerveModule100": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Triangulate": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseInitialVelocity": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/UseSetpointGenerator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      },
+      "open": true
+    },
+    "struct_demo@1": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      },
+      "open": true
+    },
+    "tag_finder24@1": {
+      "Publishers": {
+        "open": true
+      },
+      "open": true
+    }
+  },
+  "NetworkTables Settings": {
+    "dsClient": false,
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost",
+    "visible": false
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 178,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:vision/10000000e31d4a24[0]/pose/translation/x"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
+  }
+}

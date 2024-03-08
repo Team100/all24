@@ -6,7 +6,6 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,13 +13,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil {
-    private static final String m_name = Names.name(DriveMotionControllerUtil.class);
-
     private static final Telemetry t = Telemetry.get();
-
-    private DriveMotionControllerUtil() {
-        //
-    }
+    private static final String kName = DriveMotionControllerUtil.class.getSimpleName();
 
     /**
      * Returns robot-relative direction of motion.
@@ -32,7 +26,7 @@ public class DriveMotionControllerUtil {
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
         motion_direction = measurement.getRotation().unaryMinus().rotateBy(motion_direction);
-        t.log(Level.TRACE, m_name, "motion direction", motion_direction);
+        t.log(Level.TRACE, kName, "motion direction", motion_direction);
         return motion_direction;
     }
 
@@ -41,7 +35,7 @@ public class DriveMotionControllerUtil {
      */
     public static ChassisSpeeds feedforward(Pose2d currentPose, TimedPose setpoint) {
         final double velocity_m = setpoint.velocityM_S();
-        t.log(Level.TRACE, m_name, "setpoint velocity", velocity_m);
+        t.log(Level.TRACE, kName, "setpoint velocity", velocity_m);
 
         // robot-relative motion direction
         Rotation2d motion_direction = direction(currentPose, setpoint);
@@ -52,7 +46,7 @@ public class DriveMotionControllerUtil {
         double omega = velocity_m * setpoint.state().getHeadingRate();
 
         ChassisSpeeds u_FF = new ChassisSpeeds(vx, vy, omega);
-        t.log(Level.TRACE, m_name, "u_FF", u_FF);
+        t.log(Level.TRACE, kName, "u_FF", u_FF);
         return u_FF;
     }
 
@@ -62,12 +56,12 @@ public class DriveMotionControllerUtil {
             double kPCart,
             double kPTheta) {
         final Twist2d positionError = getErrorTwist(currentPose, setpoint);
-        t.log(Level.TRACE, m_name, "errorTwist", positionError);
+        t.log(Level.TRACE, kName, "errorTwist", positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,
                 kPTheta * positionError.dtheta);
-        t.log(Level.TRACE, m_name, "u_FB", u_FB);
+        t.log(Level.TRACE, kName, "u_FB", u_FB);
         return u_FB;
     }
 
@@ -81,12 +75,12 @@ public class DriveMotionControllerUtil {
                 currentPose,
                 setpoint,
                 currentRobotRelativeVelocity);
-        t.log(Level.TRACE, m_name, "velocityError", velocityError);
+        t.log(Level.TRACE, kName, "velocityError", velocityError);
         final ChassisSpeeds u_VFB = new ChassisSpeeds(
                 kPCartV * velocityError.dx,
                 kPCartV * velocityError.dy,
                 kPThetaV * velocityError.dtheta);
-        t.log(Level.TRACE, m_name, "u_VFB", u_VFB);
+        t.log(Level.TRACE, kName, "u_VFB", u_VFB);
         return u_VFB;
     }
 
@@ -156,6 +150,10 @@ public class DriveMotionControllerUtil {
      */
     static Twist2d getErrorTwist(Pose2d measurement, TimedPose setpoint) {
         return measurement.log(setpoint.state().getPose());
+    }
+
+    private DriveMotionControllerUtil() {
+        //
     }
 
 }

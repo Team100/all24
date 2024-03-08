@@ -22,6 +22,7 @@ public class OperatorControlProxy implements OperatorControl {
 
     public OperatorControlProxy() {
         m_notifier = new Notifier(this::refresh);
+        m_notifier.setName("OperatorControlProxy Notifier");
         refresh();
         m_notifier.startPeriodic(kFreq);
     }

@@ -1,7 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.telemetry.TelemetryLevelChooser;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.TelemetryLevelChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -37,7 +37,7 @@ public class SwerveModuleVisualization {
     }
 
     public void periodic() {
-        if (TelemetryLevelChooser.get().getSelected() == Level.DEBUG) {
+        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG) ) {
             m_drive.setAngle(angle());
             m_drive.setLength(speed());
             m_steer.setAngle(angle());

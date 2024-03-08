@@ -3,6 +3,7 @@ package org.team100.lib.telemetry;
 import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
@@ -17,7 +18,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * Exposes them to self testing.
  * Sets the annunciator if bounds are exceeded.
  */
-public class Monitor {
+public class Monitor implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final BooleanConsumer m_annunciator;
@@ -88,4 +89,11 @@ public class Monitor {
         }
         return current;
     }
+
+    @Override
+    public String getGlassName() {
+        return "Monitor";
+    }
+
+    
 }
