@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.selftest.AmpSelfTest;
-import org.team100.frc2024.selftest.IndexerSelfTest;
 import org.team100.frc2024.selftest.IntakeSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.Oscillate;
@@ -144,6 +143,7 @@ public class SelfTestRunner extends Command {
             if (waitCounter > kLimit) {
                 Util.warn("Cancelling self test due to enable");
                 cancel();
+                return;
             }
             Util.println("Hold down enable (operator start, '8' in sim) to proceed...");
             sleep1();
