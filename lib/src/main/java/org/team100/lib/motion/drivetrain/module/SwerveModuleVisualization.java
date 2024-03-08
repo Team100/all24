@@ -1,7 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.telemetry.TelemetryLevelChooser;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.TelemetryLevelChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;

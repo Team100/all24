@@ -15,7 +15,6 @@ import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -23,7 +22,6 @@ import edu.wpi.first.math.controller.PIDController;
  * For outboard closed-loop control.
  */
 public class AMCANSwerveModule100 extends SwerveModule100 {
-    private static final String m_name = Names.name(AMCANSwerveModule100.class);
 
     // AndyMark Swerve & Steer has 4 inch wheel
     private static final double kWheelDiameterM = 0.1016;
@@ -44,7 +42,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             Drive turningDrive,
             SwerveKinodynamics kinodynamics) {
-        name = m_name + "/" + name;
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         FeedforwardConstants driveFeedforwardConstants = new FeedforwardConstants(0.11, 0, 0.18, 0.01);
         VelocityServo<Distance100> driveServo = driveServo(

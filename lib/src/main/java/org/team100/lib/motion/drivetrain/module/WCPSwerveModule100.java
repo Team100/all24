@@ -19,7 +19,6 @@ import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -36,8 +35,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             m_ratio = ratio;
         }
     }
-
-    private static final String m_name = Names.name(WCPSwerveModule100.class);
 
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.1015;
@@ -68,7 +65,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             Drive drive,
             MotorPhase motorPhase) {
-        name = m_name + "/" + name;
         PIDConstants drivePidConstants = new PIDConstants(.2); //.2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
         FeedforwardConstants turningFeedforwardConstants = FeedforwardConstants.makeWCPSwerveTurningFalcon6();
