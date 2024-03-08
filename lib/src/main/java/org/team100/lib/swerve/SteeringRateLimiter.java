@@ -3,6 +3,7 @@ package org.team100.lib.swerve;
 import java.util.List;
 import java.util.Optional;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
@@ -19,7 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * out the maximum interpolant between start and goal states. Remembers the
  * minimum across all modules, since that is the active constraint.
  */
-public class SteeringRateLimiter {
+public class SteeringRateLimiter implements Glassy {
     private static final Telemetry t = Telemetry.get();
     private static final int kMaxIterations = 10;
     private final SwerveKinodynamics m_limits;
@@ -101,5 +102,12 @@ public class SteeringRateLimiter {
         t.log(Level.DEBUG, m_name, "s", min_s);
         return min_s;
     }
+
+    @Override
+    public String getGlassName() {
+        return "SteeringRateLimiter";
+    }
+
+    
 
 }

@@ -2,6 +2,7 @@ package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
@@ -26,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * 
  * TODO: add climber to selftest.
  */
-public class ClimberSubsystem extends SubsystemBase {
+public class ClimberSubsystem extends SubsystemBase implements Glassy {
     // TODO: tune the current limit
     private static final int kCurrentLimit = 2;
     private final String m_name;
@@ -140,4 +141,11 @@ public class ClimberSubsystem extends SubsystemBase {
         Telemetry.get().log(Level.DEBUG, m_name, "RPM 2", s2.getEncoder().getVelocity());
 
     }
+
+    @Override
+    public String getGlassName() {
+        return "Climber";
+    }
+
+    
 }

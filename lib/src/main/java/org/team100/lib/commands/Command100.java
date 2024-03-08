@@ -1,5 +1,6 @@
 package org.team100.lib.commands;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -7,15 +8,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Calculates dt.
+ * 
+ * The glass name leaf is always the implementing class name.
  */
-public abstract class Command100 extends Command {
+public abstract class Command100 extends Command implements Glassy {
 
     protected final String m_name;
 
     private double prevTime;
 
     protected Command100() {
-        m_name = Names.append(Names.name(Command100.class), this);
+        m_name = Names.append(Command100.class.getSimpleName(), this);
     }
 
     public void initialize100() {
@@ -38,4 +41,11 @@ public abstract class Command100 extends Command {
         prevTime = now;
         execute100(dt);
     }
+
+    @Override
+    public final String getGlassName() {
+        return this.getClass().getSimpleName();
+    }
+
+    
 }

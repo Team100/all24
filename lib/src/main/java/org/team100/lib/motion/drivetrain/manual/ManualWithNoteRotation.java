@@ -193,4 +193,11 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         return speeds;
     }
 
+    @Override
+    public String getGlassName() {
+        return "ManualWithNoteRotation";
+    }
+
+    
+
 }

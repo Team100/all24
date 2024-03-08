@@ -7,37 +7,28 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
-
-import org.team100.frc2024.motion.AutoMaker;
-import org.team100.frc2024.motion.ChangeAmpState;
-
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.motion.AutoMaker;
+import org.team100.frc2024.motion.ChangeAmpState;
 import org.team100.frc2024.motion.FeedCommand;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.OuttakeCommand;
-import org.team100.frc2024.motion.ShootSmart;
 import org.team100.frc2024.motion.amp.AmpDefault;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
-import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.amp.OuttakeAmp;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
-import org.team100.frc2024.motion.indexer.IndexCommand;
-import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.shooter.DrumShooter;
-import org.team100.frc2024.motion.shooter.ResetShooterZero;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
-import org.team100.frc2024.motion.shooter.ShooterFactory;
 import org.team100.lib.SubsystemPriority;
 import org.team100.lib.SubsystemPriority.Priority;
 import org.team100.lib.commands.drivetrain.CommandMaker;
@@ -45,10 +36,8 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
@@ -70,6 +59,7 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -110,16 +100,14 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class RobotContainer {
+public class RobotContainer implements Glassy {
     private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
@@ -680,5 +668,12 @@ public class RobotContainer {
         // m_indicator.close();
         m_modules.close();
     }
+
+    @Override
+    public String getGlassName() {
+        return "RobotContainer";
+    }
+
+    
 
 }

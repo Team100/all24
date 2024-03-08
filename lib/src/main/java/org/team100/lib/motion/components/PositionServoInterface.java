@@ -1,9 +1,10 @@
 package org.team100.lib.motion.components;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
-public interface PositionServoInterface<T extends Measure100> {
+public interface PositionServoInterface<T extends Measure100> extends Glassy {
 
     /**
      * It is essential to call this after a period of disuse, to prevent transients.
@@ -43,5 +44,12 @@ public interface PositionServoInterface<T extends Measure100> {
     State100 getSetpoint();
 
     void periodic();
+
+    @Override
+    default String getGlassName() {
+        return "PositionServo";
+    }
+
+    
 
 }

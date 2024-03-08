@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Constraints100;
@@ -37,7 +38,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  * In particular, the maximum spin rate is likely to seem quite high. Do not
  * lower it here.
  */ 
-public class SwerveKinodynamics {
+public class SwerveKinodynamics implements Glassy {
     private final Telemetry t = Telemetry.get();
 
     // geometry
@@ -481,5 +482,12 @@ public class SwerveKinodynamics {
                 ratio * maxV * Math.sin(xyAngle),
                 speeds.dtheta);
     }
+
+    @Override
+    public String getGlassName() {
+        return "SwerveKinodynamics";
+    }
+
+    
 
 }

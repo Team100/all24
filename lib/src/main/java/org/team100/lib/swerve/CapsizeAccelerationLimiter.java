@@ -1,5 +1,6 @@
 package org.team100.lib.swerve;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -8,7 +9,7 @@ import org.team100.lib.util.Names;
 /**
  * Enforces a fixed limit on delta v.
  */
-public class CapsizeAccelerationLimiter {
+public class CapsizeAccelerationLimiter implements Glassy {
     private static final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_limits;
     private final String m_name;
@@ -27,4 +28,11 @@ public class CapsizeAccelerationLimiter {
         t.log(Level.DEBUG, m_name, "s", s);
         return s;
     }
+
+    @Override
+    public String getGlassName() {
+        return "CapsizeAccelerationLimiter";
+    }
+
+    
 }

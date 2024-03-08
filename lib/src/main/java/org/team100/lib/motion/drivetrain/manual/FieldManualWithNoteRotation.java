@@ -187,4 +187,11 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         return twistWithLockM_S;
     }
 
+    @Override
+    public String getGlassName() {
+        return "FieldManualWithNoteRotation";
+    }
+
+    
+
 }

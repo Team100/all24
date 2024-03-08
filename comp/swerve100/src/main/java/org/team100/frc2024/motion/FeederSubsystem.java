@@ -4,6 +4,7 @@ import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.telemetry.Telemetry;
@@ -12,7 +13,7 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class FeederSubsystem extends SubsystemBase {
+public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final String m_name;
     private final Telemetry t;
     private final LimitedVelocityServo<Distance100> feedRoller;
@@ -76,4 +77,11 @@ public class FeederSubsystem extends SubsystemBase {
     public void periodic() {
         feedRoller.periodic();
     }
+
+    @Override
+    public String getGlassName() {
+        return "Feeder";
+    }
+
+    
 }

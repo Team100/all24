@@ -163,4 +163,10 @@ public class ManualWithHeading implements FieldRelativeDriver {
         twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
         return twistWithSnapM_S;
     }
+
+    @Override
+    public String getGlassName() {
+        return "ManualWithHeading";
+    }
+
 }

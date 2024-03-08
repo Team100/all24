@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle100;
@@ -14,7 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 /**
  * Feedforward and feedback control of a single module.
  */
-public class SwerveModule100 {
+public class SwerveModule100 implements Glassy {
     protected static final double dt = 0.02;
 
     private final String m_name;
@@ -86,6 +87,11 @@ public class SwerveModule100 {
 
     public String getName() {
         return m_name;
+    }
+
+    @Override
+    public String getGlassName() {
+        return "SwerveModule100";
     }
 
     /////////////////////////////////////////////////////////////
