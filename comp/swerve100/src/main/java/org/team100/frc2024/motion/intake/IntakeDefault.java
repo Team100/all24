@@ -1,10 +1,15 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class IntakeDefault extends Command {
+    private static final Telemetry t = Telemetry.get();
+
     Intake m_intake;
 
     public IntakeDefault(Intake intake) {
@@ -14,10 +19,12 @@ public class IntakeDefault extends Command {
 
     @Override
     public void initialize() {
+        t.log(Level.DEBUG, "IntakeDefault", "command state", "initialize");
     }
 
     @Override
     public void execute() {
+        t.log(Level.DEBUG, "IntakeDefault", "command state", "execute");
 
         // if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
         // // System.out.println("WE ARE INTAKING");
@@ -33,7 +40,9 @@ public class IntakeDefault extends Command {
 
         // }
 
-        switch (RobotState100.getIntakeState()) {
+        IntakeState100 intakeState = RobotState100.getIntakeState();
+        t.log(Level.DEBUG, "IntakeDefault", "state", intakeState);
+        switch (intakeState) {
             case INTAKE:
                 m_intake.intakeSmart();
                 break;
@@ -59,7 +68,7 @@ public class IntakeDefault extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        //
+        t.log(Level.DEBUG, "IntakeDefault", "command state", "end");
     }
 
     @Override
