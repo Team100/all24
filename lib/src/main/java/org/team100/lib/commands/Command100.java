@@ -1,6 +1,8 @@
 package org.team100.lib.commands;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * The glass name leaf is always the implementing class name.
  */
 public abstract class Command100 extends Command implements Glassy {
+    private static final Telemetry t = Telemetry.get();
 
     protected final String m_name;
 
@@ -30,12 +33,14 @@ public abstract class Command100 extends Command implements Glassy {
 
     @Override
     public final void initialize() {
+        t.log(Level.DEBUG, m_name, "command state", "initialize");
         prevTime = Timer.getFPGATimestamp();
         initialize100();
     }
 
     @Override
     public final void execute() {
+        t.log(Level.DEBUG, m_name, "command state", "execute");
         double now = Timer.getFPGATimestamp();
         double dt = now - prevTime;
         prevTime = now;

@@ -1,9 +1,13 @@
 package org.team100.frc2024;
 
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 // import edu.wpi.first.wpilibj.Timer;
 
 public class CompSensors implements SensorInterface {
+  private static final Telemetry t = Telemetry.get();
 
     private final DigitalInput intakeSensor;
     private final DigitalInput feederSensor;
@@ -27,6 +31,8 @@ public class CompSensors implements SensorInterface {
 
     @Override
     public boolean getFeederSensor() {
-        return feederSensor.get();
+        boolean sensorState = feederSensor.get();
+        t.log(Level.DEBUG, "CompSensors", "feeder", sensorState);
+        return sensorState;
     }
 }

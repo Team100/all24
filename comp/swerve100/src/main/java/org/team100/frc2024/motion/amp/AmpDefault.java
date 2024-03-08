@@ -1,10 +1,16 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.RobotState100.AmpState100;
+import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class AmpDefault extends Command {
+    private static final Telemetry t = Telemetry.get();
+
     AmpSubsystem m_amp;
 
     public AmpDefault(AmpSubsystem amp){
@@ -16,6 +22,7 @@ public class AmpDefault extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    t.log(Level.DEBUG, "AmpDefault", "command state", "initialize");
     m_amp.reset();
   }
 
@@ -24,6 +31,7 @@ public class AmpDefault extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    t.log(Level.DEBUG, "AmpDefault", "command state", "execute");
     // switch(RobotState100.getRobotState()){
     //     case AMPING:
     //         switch(RobotState100.getAmpState()){
@@ -53,7 +61,10 @@ public class AmpDefault extends Command {
 
 
         //0.34
-    switch(RobotState100.getAmpState()){
+    AmpState100 ampState = RobotState100.getAmpState();
+    t.log(Level.DEBUG, "AmpDefault", "amp state", ampState);
+
+    switch(ampState){
                 case UP:
                     m_amp.setAmpPosition(1.8);
                     // m_amp.setAmpPosition(2    );
@@ -76,7 +87,9 @@ public class AmpDefault extends Command {
                     m_amp.driveFeeder(0);
     }
 
-    switch(RobotState100.getIntakeState()){
+    IntakeState100 intakeState = RobotState100.getIntakeState();
+        t.log(Level.DEBUG, "AmpDefault", "intake state", intakeState);
+    switch(intakeState){
                 case INTAKE:
                     m_amp.driveFeeder(-1);
 
@@ -90,6 +103,7 @@ public class AmpDefault extends Command {
 
     @Override
     public void end(boolean interrupted) {
+       t.log(Level.DEBUG, "AmpDefault", "command state", "end");
     }
 
     @Override
