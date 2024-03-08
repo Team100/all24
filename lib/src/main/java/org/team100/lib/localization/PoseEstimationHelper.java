@@ -76,11 +76,7 @@ public class PoseEstimationHelper {
                         if (fieldRealtiveTranslation.getY() > 0 &&fieldRealtiveTranslation.getX() > 0) {
                             if (fieldRealtiveTranslation.getY() < 8.21 &&fieldRealtiveTranslation.getX() < 16.54) {
                                 Tnotes.add(fieldRealtiveTranslation);
-                            } else {
-                                System.out.println("Bruh");
                             }
-                        } else {
-                            System.out.println("Bruh");
                         }
             }
 
