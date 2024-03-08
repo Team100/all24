@@ -1,23 +1,8 @@
 {
   "HALProvider": {
-    "Addressable LEDs": {
-      "window": {
-        "visible": true
-      }
-    },
-    "DIO": {
-      "window": {
-        "visible": true
-      }
-    },
     "Other Devices": {
       "window": {
         "visible": false
-      }
-    },
-    "PWM Outputs": {
-      "window": {
-        "visible": true
       }
     }
   },
@@ -30,19 +15,45 @@
       "/SmartDashboard/Driver Skill Level": "String Chooser",
       "/SmartDashboard/DrumShooter": "Mechanism2d",
       "/SmartDashboard/FlushOften": "String Chooser",
+      "/SmartDashboard/Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Front Right_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/FullStateTrajectoryFollower": "String Chooser",
       "/SmartDashboard/HeedVision": "String Chooser",
       "/SmartDashboard/IndexerSubsystem": "Mechanism2d",
+      "/SmartDashboard/Intake": "Mechanism2d",
       "/SmartDashboard/IntakeRoller": "Mechanism2d",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/OscillateTheta": "String Chooser",
+      "/SmartDashboard/Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Rear Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Shooter": "Mechanism2d",
       "/SmartDashboard/ShowMode": "String Chooser",
       "/SmartDashboard/StickyHeading": "String Chooser",
+      "/SmartDashboard/Swerve Viz Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/Triangulate": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
@@ -56,23 +67,76 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Manual Drive Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Telemetry Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
         "left": 150,
         "right": 2961,
         "top": 79,
-        "width": 16.541748046875
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
       }
     }
   },
   "NetworkTables": {
-    "Transitory Values": {
-      "open": false
-    },
     "retained": {
+      "Command100": {
+        "Oscillate": {
+          "open": true
+        }
+      },
       "Experiments": {
         "string[]##v_/Experiments/enabled": {
+          "open": true
+        }
+      },
+      "Feeder": {
+        "Feed": {
+          "open": true
+        }
+      },
+      "Front Right": {
+        "Drive": {
+          "Encoder100": {
+            "open": true
+          },
+          "Motor100": {
+            "open": true
+          },
+          "VelocityServo": {
+            "open": true
+          },
+          "open": true
+        },
+        "Turning": {
+          "Encoder100": {
+            "open": true
+          },
+          "Motor100": {
+            "open": true
+          },
+          "PositionServo": {
+            "open": true
+          }
+        }
+      },
+      "Intake": {
+        "Center Wheels": {
+          "open": true
+        },
+        "Intake Roller": {
           "open": true
         }
       },
@@ -87,11 +151,6 @@
             },
             "open": true
           }
-        }
-      },
-      "RobotContainer": {
-        "ManualWithHeading": {
-          "open": true
         }
       },
       "SimulatedSwerveModule100": {
@@ -129,6 +188,16 @@
           "open": true
         }
       },
+      "Swerve Modules": {
+        "Front Left": {
+          "Turning": {
+            "PositionServo": {
+              "open": true
+            },
+            "open": true
+          }
+        }
+      },
       "SwerveDriveSubsystem": {
         "pose": {
           "translation": {
@@ -139,17 +208,38 @@
       "SwerveLocal": {
         "implied speed": {
           "open": true
-        },
-        "open": true
+        }
       },
       "field": {
         "double[]##v_/field/robot": {
           "open": true
         }
       }
+    },
+    "transitory": {
+      "SmartDashboard": {
+        "Shooter": {
+          "open": true,
+          "root": {
+            "Shooter": {
+              "open": true
+            },
+            "open": true
+          }
+        },
+        "Swerve Viz": {
+          "Swerve Modules_Front Left_SwerveModule100": {
+            "Swerve Modules_Front Left_SwerveModule100": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        }
+      }
     }
   },
-  "NetworkTables View": {
-    "visible": false
+  "NetworkTables Info": {
+    "visible": true
   }
 }

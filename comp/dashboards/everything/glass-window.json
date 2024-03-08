@@ -1,7 +1,7 @@
 {
   "Docking": {
     "Data": [
-      "DockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,16 Size=1403,725 CentralNode=1"
+      "DockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,16 Size=1666,740 CentralNode=1"
     ]
   },
   "MainWindow": {
@@ -12,13 +12,13 @@
       "style": "0",
       "userScale": "2",
       "width": "1403",
-      "xpos": "472",
-      "ypos": "230"
+      "xpos": "187",
+      "ypos": "201"
     }
   },
   "Table": {
     "0x542B5671,2": {
-      "Column 0  Width": "173",
+      "Column 0  Width": "265",
       "Column 1  Width": "203",
       "RefScale": "10"
     },
@@ -75,6 +75,11 @@
       "Pos": "12,177",
       "Size": "200,48"
     },
+    "###/SmartDashboard/Front Left_SwerveModule100": {
+      "Collapsed": "0",
+      "Pos": "1204,491",
+      "Size": "200,200"
+    },
     "###/SmartDashboard/FullStateTrajectoryFollower": {
       "Collapsed": "0",
       "Pos": "13,229",
@@ -84,6 +89,11 @@
       "Collapsed": "0",
       "Pos": "12,279",
       "Size": "200,48"
+    },
+    "###/SmartDashboard/Intake": {
+      "Collapsed": "0",
+      "Pos": "687,473",
+      "Size": "200,200"
     },
     "###/SmartDashboard/IntakeRoller": {
       "Collapsed": "0",
@@ -104,6 +114,11 @@
       "Collapsed": "0",
       "Pos": "14,428",
       "Size": "200,48"
+    },
+    "###/SmartDashboard/Shooter": {
+      "Collapsed": "0",
+      "Pos": "890,472",
+      "Size": "200,200"
     },
     "###/SmartDashboard/StickyHeading": {
       "Collapsed": "0",
@@ -165,6 +180,26 @@
       "Pos": "806,349",
       "Size": "109,115"
     },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_Sw": {
+      "Collapsed": "0",
+      "Pos": "1115,68",
+      "Size": "199,200"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_": {
+      "Collapsed": "0",
+      "Pos": "1315,66",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_Swer": {
+      "Collapsed": "0",
+      "Pos": "1115,269",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_Sw": {
+      "Collapsed": "0",
+      "Pos": "1316,269",
+      "Size": "200,200"
+    },
     "###/SmartDashboard/Telemetry Level": {
       "Collapsed": "0",
       "Pos": "15,527",
@@ -173,6 +208,11 @@
     "###/SmartDashboard/Triangulate": {
       "Collapsed": "0",
       "Pos": "16,578",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopVelocity": {
+      "Collapsed": "0",
+      "Pos": "60,60",
       "Size": "200,48"
     },
     "###/SmartDashboard/UseInitialVelocity": {
@@ -192,7 +232,7 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "238,28",
+      "Pos": "238,27",
       "Size": "438,471"
     },
     "###NetworkTables Info": {
@@ -248,7 +288,7 @@
     "DockSpaceViewport_11111111": {
       "Collapsed": "0",
       "Pos": "0,16",
-      "Size": "1403,725"
+      "Size": "1666,740"
     },
     "Example: Console": {
       "Collapsed": "0",

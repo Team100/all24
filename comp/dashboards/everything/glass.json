@@ -17,6 +17,28 @@
           "open": true
         }
       },
+      "SmartDashboard": {
+        "Swerve Module Front Left": {
+          "open": false
+        },
+        "Swerve Module Front Right": {
+          "open": false
+        },
+        "Swerve Viz": {
+          "Swerve Modules_Front Left_SwerveModule100": {
+            "Swerve Modules_Front Left_SwerveModule100": {
+              "drive": {
+                "open": true
+              },
+              "open": true,
+              "steer": {
+                "open": true
+              }
+            }
+          },
+          "open": true
+        }
+      },
       "Translation2d[]##v_vision": {
         "open": true
       },
@@ -25,6 +47,26 @@
           "open": true
         },
         "open": true
+      },
+      "experiments": {
+        "string[]##v_/experiments/enabled": {
+          "open": false
+        }
+      },
+      "position servo Front Left": {
+        "open": false
+      },
+      "position servo Front Right": {
+        "open": false
+      },
+      "position servo Rear Left": {
+        "open": false
+      },
+      "position servo Rear Right": {
+        "open": false
+      },
+      "robot": {
+        "open": false
       },
       "vision": {
         "10000000e31d4a24": {
@@ -117,13 +159,19 @@
       "/SmartDashboard/Driver Skill Level": "String Chooser",
       "/SmartDashboard/DrumShooter": "Mechanism2d",
       "/SmartDashboard/FlushOften": "String Chooser",
+      "/SmartDashboard/Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Front Right_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/FullStateTrajectoryFollower": "String Chooser",
       "/SmartDashboard/HeedVision": "String Chooser",
+      "/SmartDashboard/Intake": "Mechanism2d",
       "/SmartDashboard/IntakeRoller": "Mechanism2d",
       "/SmartDashboard/Manual Drive Mode": "String Chooser",
       "/SmartDashboard/Motion Profile": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/OscillateTheta": "String Chooser",
+      "/SmartDashboard/Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Rear Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Shooter": "Mechanism2d",
       "/SmartDashboard/ShowMode": "String Chooser",
       "/SmartDashboard/SideView": "Mechanism2d",
       "/SmartDashboard/Simple Manual Mode": "String Chooser",
@@ -138,12 +186,20 @@
       "/SmartDashboard/Swerve Viz SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Front Left": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Left_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Front Right": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Front Right_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Left": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Left_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Right": "Mechanism2d",
       "/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Rear Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SwerveModule100": "Mechanism2d",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/SmartDashboard/Triangulate": "String Chooser",
       "/SmartDashboard/UseClosedLoopDrive": "String Chooser",
@@ -171,11 +227,6 @@
           "visible": true
         }
       },
-      "/SmartDashboard/DrumShooter": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/FlushOften": {
         "window": {
           "visible": true
@@ -191,7 +242,7 @@
           "visible": true
         }
       },
-      "/SmartDashboard/IntakeRoller": {
+      "/SmartDashboard/Intake": {
         "window": {
           "visible": true
         }
@@ -211,27 +262,32 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Shooter": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/StickyHeading": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule100": {
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_SwerveModule100": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule100": {
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_SwerveModule100": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": {
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_SwerveModule100": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule100": {
+      "/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_SwerveModule100": {
         "window": {
           "visible": true
         }
