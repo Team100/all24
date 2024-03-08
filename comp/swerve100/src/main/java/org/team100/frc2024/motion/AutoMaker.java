@@ -135,45 +135,22 @@ public class AutoMaker {
                     return pose;
                 case CLOSEWINGSHOT:
                     pose =forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
                     return pose;
                 case FARWINGSHOT:
                     pose = forAlliance(new Translation2d(4, 1.5), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
                     return pose;
                 case STAGESHOT:
                     pose = forAlliance(new Translation2d(4.25, 5), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
                     return pose;
                 case CENTRALSTAGEOPENING:
                     pose = forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
                     return pose;
                 case FARSTAGEOPENING:
                     pose = forAlliance(new Translation2d(4.3, 3.3), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
                     return pose;
                 case DROPSHOT:
                     pose = forAlliance(new Translation2d(.5, 1.8), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
+                    return pose;
                 case DRIVETONOTEHANDOFF:
                     pose = forAlliance(new Translation2d(6.424240  , 6.098726), m_alliance);
                     return pose;
