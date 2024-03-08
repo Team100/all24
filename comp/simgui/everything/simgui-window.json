@@ -1,0 +1,119 @@
+{
+  "Docking": {
+    "Data": []
+  },
+  "MainWindow": {
+    "GLOBAL": {
+      "fps": "120",
+      "height": "730",
+      "maximized": "0",
+      "style": "0",
+      "userScale": "2",
+      "width": "1065",
+      "xpos": "109",
+      "ypos": "101"
+    }
+  },
+  "Window": {
+    "###/SmartDashboard/Driver Skill Level": {
+      "Collapsed": "0",
+      "Pos": "724,40",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Manual Drive Mode": {
+      "Collapsed": "0",
+      "Pos": "37,206",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/ShowMode": {
+      "Collapsed": "0",
+      "Pos": "60,100",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "83,22",
+      "Size": "200,48"
+    },
+    "###/field": {
+      "Collapsed": "0",
+      "Pos": "200,200",
+      "Size": "400,200"
+    },
+    "###Addressable LEDs": {
+      "Collapsed": "0",
+      "Pos": "152,252",
+      "Size": "114,285"
+    },
+    "###DIO": {
+      "Collapsed": "0",
+      "Pos": "301,25",
+      "Size": "129,68"
+    },
+    "###FMS": {
+      "Collapsed": "0",
+      "Pos": "3,360",
+      "Size": "136,154"
+    },
+    "###Joysticks": {
+      "Collapsed": "0",
+      "Pos": "51,588",
+      "Size": "616,132"
+    },
+    "###Keyboard 0 Settings": {
+      "Collapsed": "0",
+      "Pos": "471,21",
+      "Size": "261,558"
+    },
+    "###Keyboard 1 Settings": {
+      "Collapsed": "0",
+      "Pos": "743,21",
+      "Size": "236,560"
+    },
+    "###NetworkTables": {
+      "Collapsed": "0",
+      "Pos": "286,20",
+      "Size": "556,369"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "166,86",
+      "Size": "500,96"
+    },
+    "###Other Devices": {
+      "Collapsed": "0",
+      "Pos": "683,13",
+      "Size": "166,463"
+    },
+    "###PWM Outputs": {
+      "Collapsed": "0",
+      "Pos": "305,101",
+      "Size": "89,96"
+    },
+    "###RoboRIO": {
+      "Collapsed": "0",
+      "Pos": "312,242",
+      "Size": "97,128"
+    },
+    "###System Joysticks": {
+      "Collapsed": "0",
+      "Pos": "143,30",
+      "Size": "151,182"
+    },
+    "###Timing": {
+      "Collapsed": "0",
+      "Pos": "5,122",
+      "Size": "116,192"
+    },
+    "Debug##Default": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "400,400"
+    },
+    "Robot State": {
+      "Collapsed": "0",
+      "Pos": "5,20",
+      "Size": "74,98"
+    }
+  }
+}

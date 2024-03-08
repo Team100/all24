@@ -1,0 +1,150 @@
+{
+  "HALProvider": {
+    "Addressable LEDs": {
+      "window": {
+        "visible": true
+      }
+    },
+    "DIO": {
+      "window": {
+        "visible": true
+      }
+    },
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    },
+    "PWM Outputs": {
+      "window": {
+        "visible": true
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/AmpSubsystem": "Mechanism2d",
+      "/SmartDashboard/AutoNoteDetection": "String Chooser",
+      "/SmartDashboard/DriveToNoteWithRotation": "String Chooser",
+      "/SmartDashboard/Driver Skill Level": "String Chooser",
+      "/SmartDashboard/DrumShooter": "Mechanism2d",
+      "/SmartDashboard/FlushOften": "String Chooser",
+      "/SmartDashboard/FullStateTrajectoryFollower": "String Chooser",
+      "/SmartDashboard/HeedVision": "String Chooser",
+      "/SmartDashboard/IndexerSubsystem": "Mechanism2d",
+      "/SmartDashboard/IntakeRoller": "Mechanism2d",
+      "/SmartDashboard/Manual Drive Mode": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
+      "/SmartDashboard/ShowMode": "String Chooser",
+      "/SmartDashboard/StickyHeading": "String Chooser",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Front Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Left_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Swerve Viz/SimulatedSwerveModule100_Rear Right_SimulatedSwerveModule100": "Mechanism2d",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/Triangulate": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
+      "/SmartDashboard/annunciator": "Mechanism2d",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875
+      }
+    }
+  },
+  "NetworkTables": {
+    "Transitory Values": {
+      "open": false
+    },
+    "retained": {
+      "Experiments": {
+        "string[]##v_/Experiments/enabled": {
+          "open": true
+        }
+      },
+      "Rear Right": {
+        "Turning": {
+          "PositionServo": {
+            "Goal": {
+              "open": true
+            },
+            "Setpoint": {
+              "open": true
+            },
+            "open": true
+          }
+        }
+      },
+      "RobotContainer": {
+        "ManualWithHeading": {
+          "open": true
+        }
+      },
+      "SimulatedSwerveModule100": {
+        "Front Left": {
+          "Drive": {
+            "OutboardVelocityServo": {
+              "open": true
+            },
+            "SimulatedEncoder": {
+              "open": true
+            },
+            "SimulatedMotor": {
+              "open": true
+            },
+            "open": true
+          },
+          "Turning": {
+            "PositionServo": {
+              "Goal": {
+                "open": true
+              },
+              "Setpoint": {
+                "open": true
+              },
+              "open": true
+            },
+            "SimulatedEncoder": {
+              "open": true
+            },
+            "SimulatedMotor": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "SwerveDriveSubsystem": {
+        "pose": {
+          "translation": {
+            "open": true
+          }
+        }
+      },
+      "SwerveLocal": {
+        "implied speed": {
+          "open": true
+        },
+        "open": true
+      },
+      "field": {
+        "double[]##v_/field/robot": {
+          "open": true
+        }
+      }
+    }
+  },
+  "NetworkTables View": {
+    "visible": false
+  }
+}
