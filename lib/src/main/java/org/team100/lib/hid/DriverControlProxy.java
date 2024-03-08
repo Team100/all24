@@ -24,6 +24,7 @@ public class DriverControlProxy implements DriverControl {
 
     public DriverControlProxy() {
         m_notifier = new Notifier(this::refresh);
+        m_notifier.setName("DriverControlProxy Notifier");
         refresh();
 
         m_notifier.startPeriodic(kFreq);

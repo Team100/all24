@@ -45,6 +45,7 @@ public class RedundantGyro implements RedundantGyroInterface {
 
         // periodic notifier so we can see it without any command running
         periodicLogger = new Notifier(this::logStuff);
+        periodicLogger.setName("Gyro Periodic Logger Notifier");
         periodicLogger.startPeriodic(1);
     }
 

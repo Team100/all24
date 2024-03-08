@@ -117,6 +117,7 @@ public class Telemetry {
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
         m_levelUpdater = new Notifier(this::updateLevel);
+        m_levelUpdater.setName("Telemetry Level Updater Notifier");
         m_levelUpdater.startPeriodic(1);
         DataLogManager.start();
     }
