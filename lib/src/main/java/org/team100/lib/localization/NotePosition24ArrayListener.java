@@ -2,8 +2,8 @@ package org.team100.lib.localization;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
-
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.Timer;
 /** For testing the NotePosition struct array */
 public class NotePosition24ArrayListener {
     private StructBuffer<Rotation3d> m_buf = StructBuffer.create(Rotation3d.struct);
-    private Optional<ArrayList<Translation2d>> notes = Optional.empty();
+    private Optional<List<Translation2d>> notes = Optional.empty();
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private double latestTime = 0;
 
@@ -73,7 +73,7 @@ public class NotePosition24ArrayListener {
     /**
      * @return The translation of all the notes, field relative
      */
-    public Optional<ArrayList<Translation2d>> getTranslation2dArray() {
+    public Optional<List<Translation2d>> getTranslation2dArray() {
         switch (Identity.instance) {
             case BLANK:
                 Transform3d cameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
