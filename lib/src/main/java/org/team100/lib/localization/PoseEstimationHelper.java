@@ -1,16 +1,12 @@
 package org.team100.lib.localization;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.opencv.calib3d.Calib3d;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,7 +15,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N3;
 
 /**
  * Static methods used to interpret camera input.
@@ -61,8 +56,8 @@ public class PoseEstimationHelper {
     /**
      * Converts camera rotation to objects into field relative translations
      */
-    public static ArrayList<Translation2d> cameraRotsToFieldRelative(Pose2d currentPose,
-            Transform3d cameraInRobotCoordinates, ArrayList<Rotation3d> rots) {
+    public static List<Translation2d> cameraRotsToFieldRelative(Pose2d currentPose,
+            Transform3d cameraInRobotCoordinates, List<Rotation3d> rots) {
         ArrayList<Translation2d> Tnotes = new ArrayList<>();
         for (Rotation3d note : rots)
             if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
@@ -84,7 +79,7 @@ public class PoseEstimationHelper {
     /**
      * Converts camera rotation to objects into field relative translations
      */
-    public static ArrayList<Translation2d> cameraRotsToFieldRelativeArray(Pose2d currentPose,
+    public static List<Translation2d> cameraRotsToFieldRelativeArray(Pose2d currentPose,
             Transform3d cameraInRobotCoordinates, Rotation3d[] rots) {
         ArrayList<Translation2d> Tnotes = new ArrayList<>();
         for (Rotation3d note : rots)
@@ -108,38 +103,6 @@ public class PoseEstimationHelper {
      * 
      * First calculates the distance to the tag. If it's closer than the threshold,
      * use the camera-derived tag rotation. If it's far, use the gyro.
-     */
-    public static Pose3d getRobotPoseInFieldCoords(
-            Transform3d cameraInRobotCoords,
-            Pose3d tagInFieldCoords,
-            Blip blip,
-            Rotation3d robotRotationInFieldCoordsFromGyro,
-            double thresholdMeters) {
-
-        Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
-
-        if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, kName, "rotation_source", "CAMERA");
-            return getRobotPoseInFieldCoords(
-                    cameraInRobotCoords,
-                    tagInFieldCoords,
-                    blip);
-        }
-
-        t.log(Level.DEBUG, kName, "rotation_source", "GYRO");
-
-        return getRobotPoseInFieldCoords(
-                cameraInRobotCoords,
-                tagInFieldCoords,
-                blip,
-                robotRotationInFieldCoordsFromGyro);
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting transform is correct.
      */
     public static Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
@@ -178,21 +141,6 @@ public class PoseEstimationHelper {
     public static Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
-            Blip blip) {
-        Transform3d tagInCameraCoords = blipToTransform(blip);
-        Pose3d cameraInFieldCoords = toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
-        return applyCameraOffset(cameraInFieldCoords, cameraInRobotCoords);
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting transform is correct.
-     */
-    public static Pose3d getRobotPoseInFieldCoords(
-            Transform3d cameraInRobotCoords,
-            Pose3d tagInFieldCoords,
             Blip24 blip) {
 
         Transform3d tagInCameraCoords = blipToTransform(blip);
@@ -224,35 +172,6 @@ public class PoseEstimationHelper {
      *                                           gyro reading; it might be better to
      *                                           use the real gyro than the getPose
      *                                           method.
-     */
-    public static Pose3d getRobotPoseInFieldCoords(
-            Transform3d cameraInRobotCoords,
-            Pose3d tagInFieldCoords,
-            Blip blip,
-            Rotation3d robotRotationInFieldCoordsFromGyro) {
-        Rotation3d cameraRotationInFieldCoords = cameraRotationInFieldCoords(
-                cameraInRobotCoords,
-                robotRotationInFieldCoordsFromGyro);
-        Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
-        Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
-                tagInFieldCoords.getRotation(),
-                cameraRotationInFieldCoords);
-        Transform3d tagInCameraCoords = new Transform3d(
-                tagTranslationInCameraCoords,
-                tagRotationInCameraCoords);
-        Pose3d cameraInFieldCoords = toFieldCoordinates(
-                tagInCameraCoords,
-                tagInFieldCoords);
-        return applyCameraOffset(
-                cameraInFieldCoords,
-                cameraInRobotCoords);
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting pose is correct.
      */
     public static Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
@@ -322,19 +241,6 @@ public class PoseEstimationHelper {
      * translation and rotation as an NWU x-forward transform. Package-private for
      * testing.
      */
-    static Transform3d blipToTransform(Blip b) {
-        return new Transform3d(blipToTranslation(b), blipToRotation(b));
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting transform is correct.
-     * 
-     * @param b
-     * @return
-     */
     static Transform3d blipToTransform(Blip24 b) {
         return new Transform3d(blipToTranslation(b), blipToRotation(b));
     }
@@ -346,19 +252,6 @@ public class PoseEstimationHelper {
      * renormalized, but it's not very accurate, so we don't consume it.
      * Package-private for testing.
      */
-    static Translation3d blipToTranslation(Blip b) {
-        return new Translation3d(b.pose_t[2][0], -1.0 * b.pose_t[0][0], -1.0 * b.pose_t[1][0]);
-    }
-
-    /**
-     * ALERT: the new python code produces a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting translation orientation is correct
-     * 
-     * @param b
-     * @return
-     */
     static Translation3d blipToTranslation(Blip24 b) {
         return GeometryUtil.zForwardToXForward(b.getPose().getTranslation());
     }
@@ -367,52 +260,6 @@ public class PoseEstimationHelper {
      * Extract the rotation from the "z forward" blip and return the same rotation
      * expressed in our usual "x forward" NWU coordinates. Package-private for
      * testing.
-     */
-    static Rotation3d blipToRotation(Blip b) {
-        Mat rmat = new Mat(3, 3, CvType.CV_64F);
-        rmat.put(0, 0, b.pose_R[2][2]);
-        rmat.put(0, 1, -b.pose_R[2][0]);
-        rmat.put(0, 2, -b.pose_R[2][1]);
-
-        rmat.put(1, 0, -b.pose_R[0][2]);
-        rmat.put(1, 1, b.pose_R[0][0]);
-        rmat.put(1, 2, b.pose_R[0][1]);
-
-        rmat.put(2, 0, -b.pose_R[1][2]);
-        rmat.put(2, 1, b.pose_R[1][0]);
-        rmat.put(2, 2, b.pose_R[1][1]);
-
-        // convert it to axis-angle
-        Mat rvec = new Mat(3, 1, CvType.CV_64F);
-        Calib3d.Rodrigues(rmat, rvec);
-
-        // convert back to rotation matrix -- this should be orthogonal
-        Mat rmat2 = new Mat();
-        Calib3d.Rodrigues(rvec, rmat2);
-
-        Matrix<N3, N3> matrix = new Matrix<>(Nat.N3(), Nat.N3());
-        for (int row = 0; row < 3; ++row) {
-            for (int col = 0; col < 3; ++col) {
-                matrix.set(row, col, rmat2.get(row, col)[0]);
-            }
-        }
-
-        return new Rotation3d(matrix);
-    }
-
-    /**
-     * ALERT! the new python code uses a different estimator which may (probably)
-     * use a different convention for rotation -- the original AprilTag library uses
-     * Z-into-tag whereas I think the WPI convention is Z-out-of-tag.
-     * 
-     * it doesn't matter that much because we don't actually use the tag rotation
-     * for anything (we use the gyro instead), but it would be good for it to be
-     * correct.
-     * 
-     * TODO: verify the polarity of this rotation
-     * 
-     * @param b
-     * @return
      */
     static Rotation3d blipToRotation(Blip24 b) {
         return GeometryUtil.zForwardToXForward(b.getPose().getRotation());
