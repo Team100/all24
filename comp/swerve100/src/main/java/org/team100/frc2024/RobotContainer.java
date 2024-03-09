@@ -289,7 +289,8 @@ public class RobotContainer implements Glassy {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // this is @sanjan's version from some sort of vision testing in february
         // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
@@ -558,10 +559,11 @@ public class RobotContainer implements Glassy {
         
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
-        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+        whileTrue(driverControl::shooterLock, m_AutoMaker.tuning());
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.citrus());
+        whileTrue(driverControl::test, m_AutoMaker.tuning());
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_drive));
 
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
