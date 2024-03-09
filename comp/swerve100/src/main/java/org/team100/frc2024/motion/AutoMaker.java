@@ -300,6 +300,23 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
+    public TrajectoryCommand100 tuningTrajectory6() {
+        List<Pose2d> waypointsM = List.of(new Pose2d(0, 0, Rotation2d.fromDegrees(45)),
+                new Pose2d(1, 1, Rotation2d.fromDegrees(45)));
+
+        List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(0));
+
+        //  List<Pose2d> waypointsM = List.of(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        //         new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+
+        // List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(0));
+
+
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+                kMaxAccelM_S_S);
+        return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
+    }
+
     public TrajectoryCommand100 tuningTrajectory2() {
         List<Pose2d> waypointsM = List.of(new Pose2d(5, 2, new Rotation2d(Math.PI)),
                 new Pose2d(2, 2, new Rotation2d(Math.PI)));
@@ -440,8 +457,8 @@ public class AutoMaker {
                         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
             new ParallelDeadlineGroup(new WaitCommand(3), new RotateToShooter(m_swerve)),
             new ParallelDeadlineGroup(new WaitCommand(1), new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
-            driveStraight(FieldPoint.NOTE1, FieldPoint.DRIVETONOTEHANDOFF));
-            // new ParallelRaceGroup(new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor)), new IntakeSmart(sensor, m_intake));
+            driveStraight(FieldPoint.NOTE1, FieldPoint.DRIVETONOTEHANDOFF),
+            new ParallelRaceGroup(new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor)), new IntakeSmart(sensor, m_intake));
             
     }
 
@@ -474,7 +491,7 @@ public class AutoMaker {
 
     }
 
-    public SequentialCommandGroup tuning() {
-        return new SequentialCommandGroup(tuningTrajectory1(), new WaitCommand(1), tuningTrajectory2());
+    public Command tuning() {
+        return tuningTrajectory6();
     }
 }
