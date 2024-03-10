@@ -16,7 +16,8 @@ public class YawRateConstraint implements TimingConstraint {
     private final double m_maxOmegaRad_S;
 
     public YawRateConstraint(SwerveKinodynamics limits) {
-        m_maxOmegaRad_S = limits.getMaxAngleSpeedRad_S();
+        m_maxOmegaRad_S = limits.getMaxAngleSpeedRad_S() * 0.2;
+        // m_maxOmegaRad_S = 2;
     }
 
     @Override

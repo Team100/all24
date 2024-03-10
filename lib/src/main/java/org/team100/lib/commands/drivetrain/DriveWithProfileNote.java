@@ -4,6 +4,9 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.team100.frc2024.RobotState100;
+import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.intake.Intake;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
@@ -21,6 +24,7 @@ import org.team100.lib.util.Math100;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithProfileNote extends Command100 {
@@ -39,6 +43,8 @@ public class DriveWithProfileNote extends Command100 {
     private State100 thetaSetpoint;
     private final Telemetry t = Telemetry.get();
     private Timer m_timer;
+    private Intake m_intake;
+
 
     /**
      * @param goal
@@ -52,7 +58,8 @@ public class DriveWithProfileNote extends Command100 {
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits,
-            BooleanSupplier end) {
+            BooleanSupplier end,
+            Intake intake) {
         count = 0;
         previousGoal = null;
         m_swerve = drivetrain;
@@ -72,6 +79,7 @@ public class DriveWithProfileNote extends Command100 {
         yProfile = new TrapezoidProfile100(driveContraints, 0.01);
         thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
         m_timer = new Timer();
+        m_intake = intake;
         addRequirements(m_swerve);
     }
 
@@ -81,24 +89,33 @@ public class DriveWithProfileNote extends Command100 {
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();
         m_timer.restart();
+        // m_intake.intakeSmart();
+        RobotState100.changeIntakeState(IntakeState100.INTAKE);
+        
     }
 
     @Override
     public void execute100(double dt) {
         Optional<Translation2d> goal = m_fieldRelativeGoal.get();
-        if (!goal.isPresent()) {
-            if (previousGoal == null) {
-                return;
-            }
-            goal = previousGoal;
-            count++;
-            if (count == 50) {
-                return;
-            }
-            // return;
-        } else {
-            count = 0;
+        // if (!goal.isPresent()) {
+        //     if (previousGoal == null) {
+        //         return;
+        //     }
+        //     goal = previousGoal;
+        //     count++;
+        //     if (count == 50) {
+        //         return;
+        //     }
+        //     // return;
+        // } else {
+        //     count = 0;
+        // }
+
+        if(!goal.isPresent()){
+            m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
+            return;
         }
+
         Rotation2d rotationGoal;
         // if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
         rotationGoal = new Rotation2d(
@@ -140,7 +157,7 @@ public class DriveWithProfileNote extends Command100 {
         // }
         // return m_end.getAsBoolean();
 
-        return m_timer.get() >= 4;
+        return m_timer.get() >= 4 || m_end.getAsBoolean();
     }
 
     @Override

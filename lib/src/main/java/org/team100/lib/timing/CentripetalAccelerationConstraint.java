@@ -12,7 +12,7 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
     final double mMaxCentripetalAccel;
 
     public CentripetalAccelerationConstraint(SwerveKinodynamics limits) {
-        mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2();
+        mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2() * 0.2;
     }
 
     @Override

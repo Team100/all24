@@ -189,7 +189,7 @@ public class RobotContainer implements Glassy {
 //        break;
 //        }
 
-        // m_alliance = DriverStation.getAlliance().get();
+        // m_alliance = DriverStation.getAlliance().get();F
 
         // if(m_alliance == null){
         m_alliance = Alliance.Blue 
@@ -359,14 +359,14 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 0.9, 0.9);
+        DriveMotionController drivePID = new DrivePIDFController(false, 1, 1);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics, 1));
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
-                        swerveKinodynamics, () -> !m_sensors.getIntakeSensor()));
+                        swerveKinodynamics, () -> !m_sensors.getIntakeSensor(), m_intake));
         // 254 FF follower\
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
         whileTrue(driverControl::never,
@@ -560,10 +560,10 @@ public class RobotContainer implements Glassy {
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
-        whileTrue(driverControl::shooterLock, m_AutoMaker.tuning());
+        whileTrue(driverControl::shooterLock, m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.tuning());
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_drive));
 
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
@@ -592,7 +592,7 @@ public class RobotContainer implements Glassy {
         //Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();
 
-        m_auton = m_AutoMaker.wesuck(m_drive, notePositionDetector, swerveKinodynamics, m_sensors);
+        m_auton = m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors);
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
