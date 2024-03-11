@@ -1,15 +1,12 @@
 package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -33,84 +30,32 @@ public class DriveToWaypoint100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
-    private static final double kMaxAccelM_S_S = 2; //TODO THIS IS LOWW
+    private static final double kMaxAccelM_S_S = 2; // TODO THIS IS LOWW
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-    // private final SwerveKinodynamics m_limits;
     private final List<TimingConstraint> m_constraints;
 
-    private final Supplier<Rotation2d> m_endRotation;
-
     private final double m_timeBuffer;
+    private final Timer m_timer = new Timer();
 
     private Trajectory100 m_trajectory = new Trajectory100();
 
-    
-    private final Timer m_timer = new Timer();
-
-
-
-    // private final Trajectory100 m_trajectory;
-
-
-    /**
-     * @param goal
-     * @param drivetrain
-     * @param planner
-     * @param controller
-     * @param viz        ok to be null
-     */
     public DriveToWaypoint100(
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
-            SwerveKinodynamics limits,
-            double timeBuffer) {
-        m_timeBuffer = timeBuffer;
-        m_goal = goal;
-        m_swerve = drivetrain;
-        m_planner = planner;
-        m_controller = controller;
-        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
-        m_endRotation = null;
-        addRequirements(m_swerve);
-    }
-
-    public DriveToWaypoint100(
-            Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
-            DriveMotionController controller, List<TimingConstraint> constraints,
+            List<TimingConstraint> constraints,
             double timeBuffer) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
-        m_endRotation = null;
-        m_timeBuffer = timeBuffer;
-        addRequirements(m_swerve);
-    }
-
-    public DriveToWaypoint100(
-            Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
-            DriveMotionController controller,
-            SwerveKinodynamics limits,
-            Supplier<Rotation2d> endRotation,
-            double timeBuffer) {
-        m_goal = goal;
-        m_swerve = drivetrain;
-        m_planner = planner;
-        m_controller = controller;
-        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
-        m_endRotation = endRotation;
         m_timeBuffer = timeBuffer;
         addRequirements(m_swerve);
     }
@@ -123,10 +68,6 @@ public class DriveToWaypoint100 extends Command100 {
         final double endVelocity = 0;
         m_timer.reset();
         m_timer.start();
-
-        if (m_endRotation != null) {
-            end = new Pose2d(end.getTranslation(), m_endRotation.get());
-        }
 
         List<Pose2d> waypointsM = getWaypoints(start, end);
 
@@ -177,7 +118,7 @@ public class DriveToWaypoint100 extends Command100 {
     @Override
     public boolean isFinished() {
         // return m_controller.isDone();
-        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer; 
+        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
     }
 
     @Override

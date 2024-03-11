@@ -204,7 +204,8 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(currentState, setpoint, kPCart, kPTheta);
+        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(
+            currentState, setpoint, kPCart, kPTheta);
         // we're exactly on the setpoint so zero feedback
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0, speeds.vyMetersPerSecond, kDelta);
@@ -237,7 +238,8 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(currentState, setpoint, kPCart, kPTheta);
+        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(
+            currentState, setpoint, kPCart, kPTheta);
         // setpoint should be negative y
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
         assertEquals(-1, speeds.vyMetersPerSecond, kDelta);
@@ -270,7 +272,10 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(currentState, setpoint, kPCart, kPTheta);
+        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(
+            currentState, setpoint, kPCart, kPTheta);
+        // robot is on the setpoint in translation
+        // but needs negative rotation
         // setpoint should be negative theta
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0, speeds.vyMetersPerSecond, kDelta);
@@ -302,7 +307,8 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(currentState, setpoint, kPCart, kPTheta);
+        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(
+            currentState, setpoint, kPCart, kPTheta);
         // on target
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0, speeds.vyMetersPerSecond, kDelta);
@@ -334,7 +340,8 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(currentState, setpoint, kPCart, kPTheta);
+        ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(
+            currentState, setpoint, kPCart, kPTheta);
         // feedback is -y field relative so -x robot relative
         assertEquals(-1, speeds.vxMetersPerSecond, kDelta);
         assertEquals(0, speeds.vyMetersPerSecond, kDelta);
@@ -439,7 +446,9 @@ class DriveMotionControllerUtilTest {
         // motion is on setpoint
         Twist2d currentVelocity = new Twist2d(1, 0, 0);
         ChassisSpeeds speeds = DriveMotionControllerUtil.fullFeedback(
-                currentState, setpoint, kPCart, kPTheta, currentVelocity,
+                currentState, setpoint,
+                 kPCart, kPTheta,
+                 currentVelocity,
                 kPCartV, kPThetaV);
         // we're exactly on the setpoint so zero feedback
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
@@ -477,7 +486,9 @@ class DriveMotionControllerUtilTest {
         // motion is in the right direction but too slow
         Twist2d robotRelativeCurrentVelocity = new Twist2d(0, -0.5, 0);
         ChassisSpeeds speeds = DriveMotionControllerUtil.fullFeedback(
-                currentPose, setpoint, kPCart, kPTheta, robotRelativeCurrentVelocity,
+                currentPose, setpoint, 
+                kPCart, kPTheta,
+                 robotRelativeCurrentVelocity,
                 kPCartV, kPThetaV);
         // speed up
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
@@ -532,7 +543,9 @@ class DriveMotionControllerUtilTest {
         assertEquals(-0.495, velocityFeedback.vyMetersPerSecond, kDelta);
         assertEquals(0, velocityFeedback.omegaRadiansPerSecond, kDelta);
         ChassisSpeeds speeds = DriveMotionControllerUtil.fullFeedback(
-                currentPose, setpoint, kPCart, kPTheta, robotRelativeCurrentVelocity,
+                currentPose, setpoint,
+                 kPCart, kPTheta,
+                  robotRelativeCurrentVelocity,
                 kPCartV, kPThetaV);
         // this is just the sum
         assertEquals(-0.195, speeds.vxMetersPerSecond, kDelta);
