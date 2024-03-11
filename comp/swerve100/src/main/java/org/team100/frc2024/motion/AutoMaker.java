@@ -19,7 +19,7 @@ import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDFController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -428,8 +428,16 @@ public class AutoMaker {
 
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_swerve, trajectory, new DrivePIDFController(false, 2, 2));
+
+//       Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+//         return new TrajectoryCommand100(m_swerve, trajectory, new DrivePIDFController(false, 2, 2));
+
+      Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
+                kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+        return new TrajectoryCommand100(
+                m_swerve,
+                trajectory,
+                DriveMotionControllerFactory.goodPIDF());
     }
 
     public TrajectoryCommand100 driveStraightWithWaypoints(FieldPoint start, Translation2d waypoint, FieldPoint end, Rotation2d endingSplineDirection) {
@@ -444,11 +452,19 @@ public class AutoMaker {
 
 
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
-        Telemetry.get().log(Level.TRACE, "AUTOMAKER", "BEGGINING ROT", startWaypoint.getRotation());
-        System.out.println("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" + startPose.getRotation());
         List<Rotation2d> headings = List.of(startPose.getRotation(), new Rotation2d(Math.PI));
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, 2, 2);
-        return new TrajectoryCommand100(m_swerve, trajectory, new DrivePIDFController(false, 1.5, 1.5));
+        return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.goodPIDF());
+
+//         List<Pose2d> waypointsM = List.of(startWaypoint, midPoint, endWaypoint);
+//         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation(), endPose.getRotation());
+//         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
+//                 kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+//         // joel 20240311 changed ptheta from 2 to 1.3
+//         return new TrajectoryCommand100(
+//                 m_swerve,
+//                 trajectory,
+//                 DriveMotionControllerFactory.goodPIDF());
     }
 
     public TrajectoryCommand100 stageManeuver(FieldPoint start, FieldPoint between, FieldPoint end) {
