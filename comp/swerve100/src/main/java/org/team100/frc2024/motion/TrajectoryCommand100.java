@@ -96,16 +96,16 @@ public class TrajectoryCommand100 extends Command100 {
     public boolean isFinished() {
 
 
-        // if( Math.abs(m_goal.getX() - m_robotDrive.getPose().getX()) < 0.1){
-        //     if( Math.abs(m_goal.getY() - m_robotDrive.getPose().getY()) < 0.1){
-        //         if(Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()) < 0.1){
-        //             if(m_controller.isDone()){
+        if( Math.abs(m_goal.getX() - m_robotDrive.getPose().getX()) < 0.1){
+            if( Math.abs(m_goal.getY() - m_robotDrive.getPose().getY()) < 0.1){
+                if(Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()) < 0.1){
+                    if(m_controller.isDone()){
                         
-        //                 return true;
-        //             }
-        //         }
-        //     }
-        // }
+                        return true;
+                    }
+                }
+            }
+        }
 
         return false;
 
