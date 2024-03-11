@@ -117,13 +117,13 @@ public class DriveWithProfileNote extends Command100 {
         }
 
         Rotation2d rotationGoal;
-        // if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
+        if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
         rotationGoal = new Rotation2d(
             goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
-        // }
-        // else {
-        //     rotationGoal = m_swerve.getPose().getRotation();
-        // }
+        }
+        else {
+            rotationGoal = m_swerve.getPose().getRotation();
+        }
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
