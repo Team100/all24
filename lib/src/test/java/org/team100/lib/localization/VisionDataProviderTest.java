@@ -23,8 +23,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderTest implements Timeless {
     private static final double kDelta = 0.01;
@@ -87,15 +87,14 @@ class VisionDataProviderTest implements Timeless {
 
         Rotation3d cameraRotationInFieldCoords = new Rotation3d();
 
-        Blip blip = new Blip(5,
-                new double[][] { // pure tilt note we don't actually use this
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] { // one meter range (Z forward)
-                        { 0 },
-                        { 0 },
-                        { 1 } });
+        // one meter range (Z forward)
+        // pure tilt note we don't actually use this
+
+        Blip24 blip = new Blip24(7,
+                new Transform3d(
+                        new Translation3d(0, 0, 1),
+                        new Rotation3d(0, 0, 0)));
+
         Translation3d tagTranslationInCameraCoords = PoseEstimationHelper.blipToTranslation(blip);
         Rotation3d tagRotationInCameraCoords = PoseEstimationHelper.tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),

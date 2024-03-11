@@ -60,7 +60,7 @@ public class DriveMotionControllerUtil {
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,
-                1.3 * positionError.dtheta); //0.2
+                kPTheta * positionError.dtheta);
         t.log(Level.TRACE, kName, "u_FB", u_FB);
         return u_FB;
     }

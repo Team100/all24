@@ -63,14 +63,12 @@ public class DriveRamseteController implements DriveMotionController {
             return new ChassisSpeeds();
         }
 
-        Optional<TimedPose> setpoint = getSetpoint(timestamp);
-        if (!setpoint.isPresent()) {
+        Optional<TimedPose> optionalSetpoint = getSetpoint(timestamp);
+        if (!optionalSetpoint.isPresent()) {
             return new ChassisSpeeds();
         }
-        t.log(Level.TRACE, m_name, "setpoint", setpoint.get());
-
-        Pose2d mError = DriveMotionControllerUtil.getError(measurement, setpoint.get());
-        t.log(Level.TRACE, m_name, "error", mError);
+        TimedPose setpoint = optionalSetpoint.get();
+        t.log(Level.TRACE, m_name, "setpoint", setpoint);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
@@ -82,9 +80,9 @@ public class DriveRamseteController implements DriveMotionController {
         }
 
         // Convert goal into a desired course (in robot frame).
-        double goal_linear_velocity = setpoint.get().velocityM_S();
-        double goal_angular_velocity = goal_linear_velocity * setpoint.get().state().getCurvature();
-        Optional<Rotation2d> maybe_field_to_goal = setpoint.get().state().getCourse();
+        double goal_linear_velocity = setpoint.velocityM_S();
+        double goal_angular_velocity = goal_linear_velocity * setpoint.state().getCurvature();
+        Optional<Rotation2d> maybe_field_to_goal = setpoint.state().getCourse();
 
         // Deal with lack of course data by always being optimistic.
         if (maybe_field_to_course.isEmpty()) {
@@ -106,6 +104,9 @@ public class DriveRamseteController implements DriveMotionController {
         // course_to_goal = course_to_field * field_to_goal
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
+        Pose2d mError = DriveMotionControllerUtil.getError(measurement, setpoint);
+        t.log(Level.TRACE, m_name, "error", mError);
+
         // Rotate error to be aligned to current course.
         // Error is in robot (heading) frame. Need to rotate it to be in course frame.
         // course_to_error = robot_to_course.inverse() * robot_to_error
@@ -125,7 +126,7 @@ public class DriveRamseteController implements DriveMotionController {
         double adjusted_angular_velocity = goal_angular_velocity + k * angle_error_rads
                 + goal_linear_velocity * kBeta * sin_x_over_x * linear_error_course_relative.getY();
 
-        double heading_rate = goal_linear_velocity * setpoint.get().state().getHeadingRate()
+        double heading_rate = goal_linear_velocity * setpoint.state().getHeadingRate()
                 + kThetaKp * mError.getRotation().getRadians();
 
         // Create a course-relative Twist2d.
@@ -174,5 +175,4 @@ public class DriveRamseteController implements DriveMotionController {
         return "DriveRamseteController";
     }
 
-    
 }

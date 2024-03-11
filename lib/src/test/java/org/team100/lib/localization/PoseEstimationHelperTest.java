@@ -25,21 +25,18 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testGetRobotPoseInFieldCoordsUsingCameraRotation() {
+    void testGetRobotPoseInFieldCoordsUsingCameraRotation24() {
         Transform3d cameraInRobotCoords = new Transform3d(
                 new Translation3d(1, 1, 1),
                 new Rotation3d(0, 0, 0));
         Pose3d tagInFieldCoords = new Pose3d(2, 1, 1, new Rotation3d(0, 0, 0));
 
-        Blip blip = new Blip(5,
-                new double[][] { // identity
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] { // one meter range (Z forward)
-                        { 0 },
-                        { 0 },
-                        { 1 } });
+        // one meter range (Z forward)
+        // identity rotation
+        Blip24 blip = new Blip24(5,
+                new Transform3d(
+                        new Translation3d(0, 0, 1),
+                        new Rotation3d(0, 0, 0)));
 
         Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -55,21 +52,18 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testGetRobotPoseInFieldCoords5() {
+    void testGetRobotPoseInFieldCoords524() {
         Transform3d cameraInRobotCoords = new Transform3d(
                 new Translation3d(1, 1, 1),
                 new Rotation3d(0, 0, 0));
         Pose3d tagInFieldCoords = new Pose3d(2, 1, 1, new Rotation3d(0, 0, 0));
 
-        Blip blip = new Blip(5,
-                new double[][] { // identity
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] { // one meter range (Z forward)
-                        { 0 },
-                        { 0 },
-                        { 1 } });
+        // identity rotation
+        // one meter range (Z forward)
+        Blip24 blip = new Blip24(5,
+                new Transform3d(
+                        new Translation3d(0, 0, 1),
+                        new Rotation3d(0, 0, 0)));
 
         Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d();
 
@@ -103,17 +97,12 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testBlipToTransform() {
+    void testBlip24ToTransform() {
         { // identity
-            Blip blip = new Blip(5,
-                    new double[][] {
-                            { 1, 0, 0 },
-                            { 0, 1, 0 },
-                            { 0, 0, 1 } },
-                    new double[][] {
-                            { 0 },
-                            { 0 },
-                            { 0 } });
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(),
+                            new Rotation3d()));
             Transform3d transform3d = PoseEstimationHelper.blipToTransform(blip);
             assertEquals(0, transform3d.getX(), kDelta);
             assertEquals(0, transform3d.getY(), kDelta);
@@ -123,17 +112,10 @@ class PoseEstimationHelperTest {
             assertEquals(0, transform3d.getRotation().getZ(), kDelta);
         }
         {
-            double rot = Math.sqrt(2) / 2;
-            Blip blip = new Blip(5,
-                    new double[][] {
-                            { 1, 0, 0 },
-                            { 0, rot, -rot },
-                            { 0, rot, rot } },
-                    new double[][] {
-                            { -2 },
-                            { -1 },
-                            { 3 } });
-
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(-2, -1, 3),
+                            new Rotation3d(Math.PI / 4, 0, 0)));
             Transform3d transform3d = PoseEstimationHelper.blipToTransform(blip);
             assertEquals(3, transform3d.getX(), kDelta);
             assertEquals(2, transform3d.getY(), kDelta);
@@ -145,18 +127,13 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testBlipToTranslation() {
+    void testBlip24ToTranslation() {
         // Blip is "z-forward", one meter up, two meters left, three meters ahead
         // rotation doesn't matter
-        Blip blip = new Blip(5,
-                new double[][] {
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] {
-                        { -2 },
-                        { -1 },
-                        { 3 } });
+        Blip24 blip = new Blip24(5,
+                new Transform3d(
+                        new Translation3d(-2, -1, 3),
+                        new Rotation3d()));
 
         Translation3d nwuTranslation = PoseEstimationHelper.blipToTranslation(blip);
 
@@ -167,33 +144,26 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testBlipToRotation() {
+    void testBlip24ToRotation() {
         { // identity rotation
-            Blip blip = new Blip(5,
-                    new double[][] {
-                            { 1, 0, 0 },
-                            { 0, 1, 0 },
-                            { 0, 0, 1 } },
-                    new double[][] {
-                            { -2 },
-                            { -1 },
-                            { 3 } });
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(-2, -1, 3),
+                            new Rotation3d()));
+
             Rotation3d nwuRotation = PoseEstimationHelper.blipToRotation(blip);
             assertEquals(0, nwuRotation.getX(), kDelta);
             assertEquals(0, nwuRotation.getY(), kDelta);
             assertEquals(0, nwuRotation.getZ(), kDelta);
         }
         {
-            double rot = Math.sqrt(2) / 2;
-            Blip blip = new Blip(5,
-                    new double[][] { // tilt up in camera frame = +x rot
-                            { 1, 0, 0 },
-                            { 0, rot, -rot },
-                            { 0, rot, rot } },
-                    new double[][] { // one meter range (Z forward)
-                            { 0 },
-                            { Math.sqrt(2) / 2 },
-                            { Math.sqrt(2) / 2 } });
+            // one meter range (Z forward)
+            // tilt up in camera frame = +x rot
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
+                            new Rotation3d(Math.PI / 4, 0, 0)));
+
             Rotation3d nwuRotation = PoseEstimationHelper.blipToRotation(blip);
             // tilt up in NWU is -y
             assertEquals(0, nwuRotation.getX(), kDelta);
@@ -201,16 +171,13 @@ class PoseEstimationHelperTest {
             assertEquals(0, nwuRotation.getZ(), kDelta);
         }
         {
-            double rot = Math.sqrt(2) / 2;
-            Blip blip = new Blip(5,
-                    new double[][] { // pan right in camera frame = +y rot
-                            { rot, 0, rot },
-                            { 0, 1, 0 },
-                            { -rot, 0, rot } },
-                    new double[][] { // one meter range (Z forward)
-                            { 0 },
-                            { Math.sqrt(2) / 2 },
-                            { Math.sqrt(2) / 2 } });
+            // one meter range (Z forward)
+            // pan right in camera frame = +y rot
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
+                            new Rotation3d(0, Math.PI / 4, 0)));
+
             Rotation3d nwuRotation = PoseEstimationHelper.blipToRotation(blip);
             // pan right in NWU is -z
             assertEquals(0, nwuRotation.getX(), kDelta);
@@ -322,7 +289,7 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testTagRotationIncorrect() throws IOException {
+    void testTagRotationIncorrect24() throws IOException {
         // this illustrates the WRONG WRONG WRONG tag orientation.
 
         // say we're playing blue, on the blue side, looking at tag 7.
@@ -330,15 +297,11 @@ class PoseEstimationHelperTest {
         // note that the camera code returns the identity rotation when
         // it's looking straight at a tag, which implies "into the page"
         // orientation.
-        Blip blip = new Blip(7,
-                new double[][] {
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] {
-                        { 0 },
-                        { 0 },
-                        { 1 } });
+
+        Blip24 blip = new Blip24(7,
+                new Transform3d(
+                        new Translation3d(0, 0, 1),
+                        new Rotation3d(0, 0, 0)));
 
         Transform3d tagInCameraCoords = PoseEstimationHelper.blipToTransform(blip);
         assertEquals(1, tagInCameraCoords.getX(), kDelta);
@@ -371,7 +334,7 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testTagRotationCorrect() throws IOException {
+    void testTagRotationCorrect24() throws IOException {
         // this illustrates the CORRECT tag orientation.
 
         // say we're playing blue, on the blue side, looking at tag 7.
@@ -379,15 +342,11 @@ class PoseEstimationHelperTest {
         // note that the camera code returns the identity rotation when
         // it's looking straight at a tag, which implies "into the page"
         // orientation.
-        Blip blip = new Blip(7,
-                new double[][] {
-                        { 1, 0, 0 },
-                        { 0, 1, 0 },
-                        { 0, 0, 1 } },
-                new double[][] {
-                        { 0 },
-                        { 0 },
-                        { 1 } });
+
+        Blip24 blip = new Blip24(7,
+                new Transform3d(
+                        new Translation3d(0, 0, 1),
+                        new Rotation3d(0, 0, 0)));
 
         Transform3d tagInCameraCoords = PoseEstimationHelper.blipToTransform(blip);
         assertEquals(1, tagInCameraCoords.getX(), kDelta);

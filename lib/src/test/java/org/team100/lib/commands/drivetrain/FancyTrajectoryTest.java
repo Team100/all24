@@ -2,21 +2,26 @@ package org.team100.lib.commands.drivetrain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 class FancyTrajectoryTest extends Fixtured {
-
     @Test
     void testSimple() {
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
-        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
-        FancyTrajectory command = new FancyTrajectory(drive, planner, kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
+
+        FancyTrajectory command = new FancyTrajectory(drive, planner, constraints);
 
         command.initialize();
         command.execute();

@@ -99,21 +99,19 @@ public class DrivePursuitController implements DriveMotionController {
             return null;
         }
 
-        t.log(Level.TRACE, m_name,"current state", measurement);
+        t.log(Level.TRACE, m_name, "current state", measurement);
         if (isDone()) {
             Util.println("Done!");
             return new ChassisSpeeds();
         }
 
-        Optional<TimedPose> mSetpoint = getSetpoint(measurement);
-        if (!mSetpoint.isPresent()) {
+        Optional<TimedPose> optionalSetpoint = getSetpoint(measurement);
+        if (!optionalSetpoint.isPresent()) {
             Util.warn("No setpoint!");
             return new ChassisSpeeds();
         }
-        t.log(Level.TRACE, m_name,"setpoint", mSetpoint.get());
-
-        Pose2d mError = DriveMotionControllerUtil.getError(measurement, mSetpoint.get());
-        t.log(Level.TRACE, m_name,"error", mError);
+        TimedPose mSetpoint = optionalSetpoint.get();
+        t.log(Level.TRACE, m_name, "setpoint", mSetpoint);
 
         double lookahead_time = kPathLookaheadTime;
 
@@ -123,12 +121,11 @@ public class DrivePursuitController implements DriveMotionController {
             return new ChassisSpeeds();
         }
 
-
         TimedPose lookahead_state = preview.get().state();
-        t.log(Level.TRACE, m_name,"lookahead state", lookahead_state);
+        t.log(Level.TRACE, m_name, "lookahead state", lookahead_state);
 
-        double actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
-        double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.get().velocityM_S());
+        double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
+        double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
 
         // Find the Point on the Trajectory that is Lookahead Distance Away
         while (actual_lookahead_distance < adaptive_lookahead_distance &&
@@ -140,10 +137,8 @@ public class DrivePursuitController implements DriveMotionController {
                 return new ChassisSpeeds();
             }
             lookahead_state = preview2.get().state();
-            actual_lookahead_distance = mSetpoint.get().state().distance(lookahead_state.state());
+            actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         }
-
-        
 
         // If the Lookahead Point's Distance is less than the Lookahead Distance
         // transform it so it is the lookahead distance away
@@ -164,7 +159,7 @@ public class DrivePursuitController implements DriveMotionController {
         // Find the vector between robot's current position and the lookahead state
         Translation2d lookaheadTranslation = lookahead_state.state().getTranslation()
                 .minus(measurement.getTranslation());
-        t.log(Level.TRACE, m_name,"lookahead translation", lookaheadTranslation);
+        t.log(Level.TRACE, m_name, "lookahead translation", lookaheadTranslation);
 
         // Set the steering direction as the direction of the vector
         Rotation2d steeringDirection = lookaheadTranslation.getAngle();
@@ -173,7 +168,7 @@ public class DrivePursuitController implements DriveMotionController {
         steeringDirection = steeringDirection.rotateBy(GeometryUtil.inverse(measurement).getRotation());
 
         // Use the Velocity Feedforward of the Closest Point on the Trajectory
-        double normalizedSpeed = Math.abs(mSetpoint.get().velocityM_S()) / m_limits.getMaxDriveVelocityM_S();
+        double normalizedSpeed = Math.abs(mSetpoint.velocityM_S()) / m_limits.getMaxDriveVelocityM_S();
 
         if (normalizedSpeed > kMinSpeed) {
             // latch it off for this trajectory to avoid running off the end.
@@ -194,7 +189,10 @@ public class DrivePursuitController implements DriveMotionController {
                 steeringVector.getY() * m_limits.getMaxDriveVelocityM_S(),
                 0.0);
 
-        t.log(Level.TRACE, m_name,"pursuit speeds", chassisSpeeds);
+        t.log(Level.TRACE, m_name, "pursuit speeds", chassisSpeeds);
+
+        Pose2d mError = DriveMotionControllerUtil.getError(measurement, mSetpoint);
+        t.log(Level.TRACE, m_name, "error", mError);
 
         chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond
                 + kPositionkP * mError.getTranslation().getX();
@@ -223,7 +221,7 @@ public class DrivePursuitController implements DriveMotionController {
         if (!sample_point.isPresent()) {
             return Optional.empty();
         }
-        t.log(Level.TRACE, m_name,"sample point", sample_point.get());
+        t.log(Level.TRACE, m_name, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 
@@ -318,6 +316,4 @@ public class DrivePursuitController implements DriveMotionController {
         return "DrivePursuitController";
     }
 
-    
-    
 }

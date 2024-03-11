@@ -13,6 +13,7 @@ import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -57,6 +58,12 @@ public class Robot extends TimedRobot implements Glassy {
     public void robotPeriodic() {
         m_robotContainer.beforeCommandCycle();
         CommandScheduler.getInstance().run();
+        
+        t.log(Level.DEBUG, m_name, "DriverStation MatchTime", DriverStation.getMatchTime());
+        t.log(Level.DEBUG, m_name, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
+        t.log(Level.DEBUG, m_name, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
+        t.log(Level.DEBUG, m_name, "DriverStation FMSAttached", DriverStation.isFMSAttached());
+        
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");
             NetworkTableInstance.getDefault().flush();

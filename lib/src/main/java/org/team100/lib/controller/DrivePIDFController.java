@@ -42,7 +42,10 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
     private Trajectory100 m_trajectory = new Trajectory100();
     private Pose2d goalPose;
 
-    public DrivePIDFController(boolean feedforwardOnly, double kPCart, double kPTheta) {
+    public DrivePIDFController(
+            boolean feedforwardOnly,
+            double kPCart,
+            double kPTheta) {
         m_feedforwardOnly = feedforwardOnly;
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
@@ -70,7 +73,7 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
         t.log(Level.TRACE, m_name, "measurement", measurement);
 
         // if (isDone()) {
-        //     return new ChassisSpeeds();
+        // return new ChassisSpeeds();
         // }
 
         Optional<TimedPose> optionalSetpoint = getSetpoint(timeS);
@@ -83,14 +86,14 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
 
         error = DriveMotionControllerUtil.getError(measurement, setpoint);
 
-
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, setpoint);
         // if (m_feedforwardOnly)
-        //     return u_FF;
+        // return u_FF;
 
-//       ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement, mSetpoint.get(), m_kPCart, m_kPTheta);
+        // ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement,
+        // mSetpoint.get(), m_kPCart, m_kPTheta);
 
-//         ChassisSpeeds output = u_FF.plus(u_FB);
+        // ChassisSpeeds output = u_FF.plus(u_FB);
 
         // if(output.equals(output))
 
@@ -111,8 +114,8 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
                     m_kPCart,
                     m_kPTheta);
         }
-    
-      return u_FF.plus(u_FB);
+
+        return u_FF.plus(u_FB);
     }
 
     double dt(double timestamp) {
@@ -146,5 +149,4 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
         return "DrivePIDFController";
     }
 
-    
 }

@@ -1,6 +1,7 @@
 package org.team100.lib.util;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -27,17 +28,17 @@ public class NotePicker {
             new Translation2d(13.66, 4.11),
     };
 
-/**
+    /**
      * @param notes  the field relative pose of detected notes
      * @param noteID the field id of the note you want to go for, left bottom to
      *               right top IDs are 1-11
      * @return The field relative translation of the note you want to go for
      */
-    public static Optional<Translation2d> autoNotePick(Optional<ArrayList<Translation2d>> notes,Translation2d noteID ) {
+    public static Optional<Translation2d> autoNotePick(Optional<List<Translation2d>> notes, Translation2d noteID) {
         if (!notes.isPresent()) {
             return Optional.empty();
         }
-        ArrayList<Translation2d> Tnotes = notes.get();
+        List<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : Tnotes) {
@@ -85,11 +86,11 @@ public class NotePicker {
      * @param swervePose the pose of the swerve drivetrain
      * @return The field relative translation of the closest note
      */
-    public static Optional<Translation2d> closestNote(Optional<ArrayList<Translation2d>> notes, Pose2d swervePose) {
+    public static Optional<Translation2d> closestNote(Optional<List<Translation2d>> notes, Pose2d swervePose) {
         if (!notes.isPresent()) {
             return Optional.empty();
         }
-        ArrayList<Translation2d> Tnotes = notes.get();
+        List<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : Tnotes) {

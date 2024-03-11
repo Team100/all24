@@ -566,17 +566,13 @@ class PanTiltOffsetTest {
      * so tag in camera view should be R(0, PI/4, 0)t(sqrt(2)/2,0-sqrt(2)/2)
      */
     @Test
-    void testSemiRealisticExampleWithBlips() {
-        double rot = Math.sqrt(2) / 2;
-        Blip blip = new Blip(5,
-                new double[][] { // pure tilt
-                        { 1, 0, 0 },
-                        { 0, rot, -rot },
-                        { 0, rot, rot } },
-                new double[][] { // one meter range (Z forward)
-                        { 0 },
-                        { Math.sqrt(2) / 2 },
-                        { Math.sqrt(2) / 2 } });
+    void testSemiRealisticExampleWithBlip24s() {
+        // one meter range (Z forward)
+        // pure tilt
+        Blip24 blip = new Blip24(7,
+                new Transform3d(
+                        new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
+                        new Rotation3d(Math.PI / 4, 0, 0)));
 
         // Translation3d blipTranslation = VisionDataProvider.blipToTranslation(blip);
         Translation3d tagTranslationInCameraCoords = PoseEstimationHelper.blipToTranslation(blip);
@@ -645,29 +641,6 @@ class PanTiltOffsetTest {
         assertEquals(-3.0 * Math.PI / 4, robotInFieldCoords.getRotation().getZ(), kDelta);
     }
 
-    /**
-     * Blip from the network tables listener.
-     * This represents a tag with 45 deg tilted rotation and diagonal translation.
-     */
-    private Blip getBlip() {
-        double rot = Math.sqrt(2) / 2;
-        Blip blip = new Blip(5,
-                new double[][] { // pure tilt
-                        { 1, 0, 0 },
-                        { 0, rot, -rot },
-                        { 0, rot, rot } },
-                new double[][] { // one meter range (Z forward)
-                        { 0 },
-                        { Math.sqrt(2) / 2 },
-                        { Math.sqrt(2) / 2 } });
-        return blip;
-    }
-
-    // from the gyro
-    private Rotation3d getYawMeasurement() {
-        return new Rotation3d(0, 0, -3.0 * Math.PI / 4.0);
-    }
-
     // configuration: camera offset
     private Transform3d getCameraOffset(int cameraIdentity /* ignored */) {
         return new Transform3d(
@@ -688,7 +661,7 @@ class PanTiltOffsetTest {
      * so tag in camera view should be R(0, PI/4, 0)t(sqrt(2)/2,0-sqrt(2)/2)
      */
     @Test
-    void testSemiRealisticExampleWithBlipsUsingSingleFunction() {
+    void testSemiRealisticExampleWithBlip24sUsingSingleFunction() {
         // CONFIGURATION
 
         // in robot coords the camera rotation is both tilt and pan
@@ -700,10 +673,17 @@ class PanTiltOffsetTest {
         // INPUTS
 
         // from the network tables listener
-        Blip blip = getBlip();
+
+        // pure tilt
+        // one meter range (Z forward)
+
+        Blip24 blip = new Blip24(5,
+                new Transform3d(
+                        new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
+                        new Rotation3d(Math.PI / 4, 0, 0)));
 
         // from the gyro
-        Rotation3d robotRotationInFieldCoordsFromGyro = getYawMeasurement();
+        Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(0, 0, -3.0 * Math.PI / 4.0);
 
         // CALCULATIONS
 
@@ -722,7 +702,7 @@ class PanTiltOffsetTest {
     }
 
     @Test
-    void testSemiRealisticExampleWithBlipsUsingSingleFunctionUsingCameraRotation() {
+    void testSemiRealisticExampleWithBlip24sUsingSingleFunctionUsingCameraRotation() {
         {
             // see diagram at the top of the file.
             // tag pose is R(0)|t(1,1)
@@ -735,16 +715,12 @@ class PanTiltOffsetTest {
             // tag facing 0, at 1,1,0
             final Pose3d tagInFieldCoords = new Pose3d(1, 1, 0, new Rotation3d(0, 0, 0));
 
-            double rot = Math.sqrt(2) / 2;
-            Blip blip = new Blip(5,
-                    new double[][] { // pan right in camera frame = +y rot
-                            { rot, 0, rot },
-                            { 0, 1, 0 },
-                            { -rot, 0, rot } },
-                    new double[][] { // unit-square-diagonal range
-                            { 0 },
-                            { 0 },
-                            { Math.sqrt(2) } });
+            // unit-square-diagonal range
+            // pan right in camera frame = +y rot
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(0, 0, Math.sqrt(2)),
+                            new Rotation3d(0, Math.PI / 4, 0)));
 
             Pose3d robotInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
@@ -767,17 +743,12 @@ class PanTiltOffsetTest {
             // tag facing 0, at 1,0,1
             final Pose3d tagInFieldCoords = new Pose3d(1, 0, 1, new Rotation3d(0, 0, 0));
 
-            double rot = Math.sqrt(2) / 2;
-            Blip blip = new Blip(5,
-                    new double[][] { // tag tilts away, we're looking up at it in camera frame = -x rot
-                            { 1, 0, 0 },
-                            { 0, rot, rot },
-                            { 0, -rot, rot } },
-                    new double[][] { // unit-square-diagonal range
-                            { 0 },
-                            { 0 },
-                            { Math.sqrt(2) } });
-
+            // unit-square-diagonal range
+            // tag tilts away, we're looking up at it in camera frame = -x rot
+            Blip24 blip = new Blip24(5,
+                    new Transform3d(
+                            new Translation3d(0, 0, Math.sqrt(2)),
+                            new Rotation3d(-Math.PI / 4, 0, 0)));
             Pose3d robotInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
@@ -791,4 +762,5 @@ class PanTiltOffsetTest {
             assertEquals(0, robotInFieldCoords.getRotation().getZ(), kDelta);
         }
     }
+
 }
