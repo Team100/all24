@@ -5,11 +5,9 @@ import java.util.List;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
-import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -41,7 +39,7 @@ public class DriveToState101 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-    private final SwerveKinodynamics m_limits;
+    private final List<TimingConstraint> m_constraints;
 
     /**
      * @param goal        Pose2d
@@ -59,13 +57,13 @@ public class DriveToState101 extends Command100 {
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
-            SwerveKinodynamics limits) {
+            List<TimingConstraint> constraints) {
         m_goal = goal;
         m_endVelocity = endVelocity;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        m_limits = limits;
+        m_constraints = constraints;
         addRequirements(m_swerve);
     }
 
@@ -102,14 +100,12 @@ public class DriveToState101 extends Command100 {
                 m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(m_limits).allGood();
-
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
                         headings,
-                        constraints,
+                        m_constraints,
                         Math.hypot(startVelocity.dx, startVelocity.dy),
                         Math.hypot(m_endVelocity.dx, m_endVelocity.dy),
                         kMaxVelM_S,

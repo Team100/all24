@@ -36,7 +36,8 @@ public class DriveRamseteController implements DriveMotionController {
 
     private final String m_name;
 
-    public DriveRamseteController() {
+    /** Use the factory. */
+    DriveRamseteController() {
         m_name = Names.name(this);
     }
 

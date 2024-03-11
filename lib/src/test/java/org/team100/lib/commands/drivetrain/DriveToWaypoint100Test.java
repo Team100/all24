@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDFController;
-import org.team100.lib.controller.DrivePursuitController;
-import org.team100.lib.controller.DriveRamseteController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.timing.TimingConstraint;
@@ -18,11 +16,10 @@ import org.team100.lib.trajectory.TrajectoryPlanner;
 class DriveToWaypoint100Test extends Fixtured {
     private static final double kDelta = 0.001;
 
-
     @Test
     void testWithPID() {
         TrajectoryPlanner planner = new TrajectoryPlanner();
-        DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
+        DriveMotionController controller = DriveMotionControllerFactory.testPIDF();
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
 
@@ -43,7 +40,7 @@ class DriveToWaypoint100Test extends Fixtured {
     @Test
     void testWithPursuit() {
         TrajectoryPlanner planner = new TrajectoryPlanner();
-        DriveMotionController controller = new DrivePursuitController(fixture.swerveKinodynamics);
+        DriveMotionController controller = DriveMotionControllerFactory.purePursuit(fixture.swerveKinodynamics);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
 
         DriveToWaypoint100 command = new DriveToWaypoint100(
@@ -63,7 +60,7 @@ class DriveToWaypoint100Test extends Fixtured {
     @Test
     void testWithRamsete() {
         TrajectoryPlanner planner = new TrajectoryPlanner();
-        DriveMotionController controller = new DriveRamseteController();
+        DriveMotionController controller = DriveMotionControllerFactory.ramsete();
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
 
         DriveToWaypoint100 command = new DriveToWaypoint100(
@@ -83,7 +80,7 @@ class DriveToWaypoint100Test extends Fixtured {
     @Test
     void testWithFF() {
         TrajectoryPlanner planner = new TrajectoryPlanner();
-        DriveMotionController controller = new DrivePIDFController(true, 2.4, 2.4);
+        DriveMotionController controller = DriveMotionControllerFactory.testFFOnly();
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
 
         DriveToWaypoint100 command = new DriveToWaypoint100(
