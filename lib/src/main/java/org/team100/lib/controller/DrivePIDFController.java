@@ -2,7 +2,6 @@ package org.team100.lib.controller;
 
 import java.util.Optional;
 
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
@@ -22,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Follow a 254 trajectory using velocity feedforward with optional positional
  * feedback.
  */
-public class DrivePIDFController implements DriveMotionController, Glassy {
+public class DrivePIDFController implements DriveMotionController {
     // gains for velocity feedback
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
@@ -42,7 +41,8 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
     private Trajectory100 m_trajectory = new Trajectory100();
     private Pose2d goalPose;
 
-    public DrivePIDFController(
+    /** Use the factory. */
+    DrivePIDFController(
             boolean feedforwardOnly,
             double kPCart,
             double kPTheta) {

@@ -62,7 +62,8 @@ public class DrivePursuitController implements DriveMotionController {
     /** Min speed is used at the start of a trajectory only. */
     private boolean useMinSpeed;
 
-    public DrivePursuitController(SwerveKinodynamics limits) {
+    /** Use the factory. */
+    DrivePursuitController(SwerveKinodynamics limits) {
         m_limits = limits;
         m_name = Names.name(this);
     }

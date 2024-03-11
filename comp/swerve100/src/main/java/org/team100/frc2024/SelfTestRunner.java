@@ -16,7 +16,6 @@ import org.team100.lib.selftest.DriveManuallySelfTest;
 import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
-import org.team100.lib.selftest.SquareSelfTest;
 import org.team100.lib.selftest.VeeringSelfTest;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
@@ -70,7 +69,8 @@ public class SelfTestRunner extends Command {
 
         if (kTestDrivetrain) {
             // "treatment" is in situ.
-            addCase(new SquareSelfTest(drivetrain, m_listener), m_container.m_driveInALittleSquare);
+            // commented out to simplify the container for comp
+            // addCase(new SquareSelfTest(drivetrain, m_listener), m_container.m_driveInALittleSquare);
 
             // treatment is a specific manual input, supplied by the test case.
             DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDFController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
@@ -43,8 +43,7 @@ public class FancyTrajectory extends Command100 {
             TrajectoryPlanner planner,
             List<TimingConstraint> constraints) {
         m_robotDrive = robotDrive;
-        // joel 20240311 changed ptheta from 2.4 to 1.3
-        m_controller = new DrivePIDFController(false, 2.4, 1.3);
+        m_controller = DriveMotionControllerFactory.fancyPIDF();
         m_planner = planner;
         m_constraints = constraints;
         addRequirements(m_robotDrive);

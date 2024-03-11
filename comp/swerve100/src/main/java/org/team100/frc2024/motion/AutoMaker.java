@@ -13,7 +13,7 @@ import org.team100.frc2024.motion.shooter.RotateToShooter;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDFController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -407,11 +407,10 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
                 kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
-        // joel 20240311 changed ptheta from 2 to 1.3
         return new TrajectoryCommand100(
                 m_swerve,
                 trajectory,
-                new DrivePIDFController(false, 2, 1.3));
+                DriveMotionControllerFactory.goodPIDF());
     }
 
     public TrajectoryCommand100 driveStraightWithWaypoints(FieldPoint start, Translation2d waypoint, FieldPoint end,
@@ -434,7 +433,7 @@ public class AutoMaker {
         return new TrajectoryCommand100(
                 m_swerve,
                 trajectory,
-                new DrivePIDFController(false, 2, 1.3));
+                DriveMotionControllerFactory.goodPIDF());
     }
 
     public TrajectoryCommand100 stageManeuver(FieldPoint start, FieldPoint between, FieldPoint end) {
