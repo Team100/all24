@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,16 +21,12 @@ class TrajectoryTimeIteratorTest {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-    // for testing, use the aboslute maximum. This shouldn't be used in a real
-    // robot.
-    private static final double kYawRateScale = 1.0;
-    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testPreviewAndAdvance() {
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits, kYawRateScale, kCentripetalScale);
+        TrajectoryPlanner planner = new TrajectoryPlanner();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -48,8 +44,7 @@ class TrajectoryTimeIteratorTest {
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(limits, kCentripetalScale));
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(

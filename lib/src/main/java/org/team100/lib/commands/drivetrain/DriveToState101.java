@@ -8,8 +8,8 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -102,9 +102,7 @@ public class DriveToState101 extends Command100 {
                 m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
 
-        final double centripetalScale = 0.2;
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits, centripetalScale));
+        List<TimingConstraint> constraints = new TimingConstraintFactory(m_limits).allGood();
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(

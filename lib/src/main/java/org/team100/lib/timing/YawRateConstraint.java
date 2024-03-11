@@ -19,6 +19,7 @@ public class YawRateConstraint implements TimingConstraint {
     private final double m_maxOmegaRad_S;
 
     /**
+     * Use the factory.
      * 
      * @param limits absolute maxima
      * @param scale  apply to the maximum angular speed to get the actual
@@ -26,7 +27,7 @@ public class YawRateConstraint implements TimingConstraint {
      *               never useful for trajectories. A good number to try here might
      *               be 0.2.
      */
-    public YawRateConstraint(SwerveKinodynamics limits, double scale) {
+    YawRateConstraint(SwerveKinodynamics limits, double scale) {
         m_maxOmegaRad_S = limits.getMaxAngleSpeedRad_S() * scale;
     }
 

@@ -8,39 +8,23 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
-import org.team100.lib.timing.SwerveDriveDynamicsConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
-import org.team100.lib.timing.YawRateConstraint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
+/**
+ * joel 20240311: this class no longer applies default constraints (drive, yaw,
+ * centripetal) so if you want those, supply them.
+ */
 public class TrajectoryPlanner {
     private static final double kMaxDx = 0.0127; // m
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
 
-    private final SwerveKinodynamics m_limits;
-    private final double m_yawRateScale;
-    private final double m_centripetalScale;
-
-    /**
-     * 
-     * @param limits           absolute maxima
-     * @param yawRateScale     scale for yaw rate constraint. The absolute maximum
-     *                         yaw rate is very high, not useful for trajectories.
-     *                         Try 0.2 here. TODO: remove this parameter, supply the
-     *                         constraint instead.
-     * @param centripetalScale scale for centripetal constraint. Try 0.2 to slow
-     *                         down the robot in sharp corners. TODO: remove this
-     *                         parameter, supply the constraint instead.
-     */
-    public TrajectoryPlanner(SwerveKinodynamics limits, double yawRateScale, double centripetalScale) {
-        m_limits = limits;
-        m_yawRateScale = yawRateScale;
-        m_centripetalScale = centripetalScale;
+    public TrajectoryPlanner() {
+        //
     }
 
     public Trajectory100 generateTrajectory(
@@ -109,27 +93,13 @@ public class TrajectoryPlanner {
             trajectory = new Path100(flipped_points);
         }
 
-        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_limits);
-        final YawRateConstraint yaw_constraint = new YawRateConstraint(m_limits, m_yawRateScale);
-
-        final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
-                m_limits, m_centripetalScale);
-
-        List<TimingConstraint> all_constraints = new ArrayList<>();
-        all_constraints.add(drive_constraints);
-        all_constraints.add(yaw_constraint);
-        all_constraints.add(centripetal_accel_constraint);
-        if (constraints != null) {
-            all_constraints.addAll(constraints);
-        }
-
         // Generate the timed trajectory.
         PathDistanceSampler distance_view = new PathDistanceSampler(trajectory);
         return TimingUtil.timeParameterizeTrajectory(
                 reversed,
                 distance_view,
                 kMaxDx,
-                all_constraints,
+                constraints,
                 start_vel,
                 end_vel,
                 max_vel,

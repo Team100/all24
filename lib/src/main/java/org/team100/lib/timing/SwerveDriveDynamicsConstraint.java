@@ -23,7 +23,8 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     private static final double kDtSec = 0.02;
     private final SwerveKinodynamics m_limits;
 
-    public SwerveDriveDynamicsConstraint(SwerveKinodynamics limits) {
+    /** Use the factory. */
+    SwerveDriveDynamicsConstraint(SwerveKinodynamics limits) {
         m_limits = limits;
     }
 

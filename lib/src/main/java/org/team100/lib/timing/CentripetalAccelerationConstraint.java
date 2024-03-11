@@ -12,6 +12,7 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
     final double mMaxCentripetalAccel;
 
     /**
+     * Use the factory.
      * 
      * @param limits absolute maxima
      * @param scale  apply to the maximum capsize accel to get the actual
@@ -19,7 +20,7 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
      *               sharp curves, which makes odometry more accurate and reduces
      *               the effect of steering lag.
      */
-    public CentripetalAccelerationConstraint(SwerveKinodynamics limits, double scale) {
+    CentripetalAccelerationConstraint(SwerveKinodynamics limits, double scale) {
         mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2() * scale;
     }
 

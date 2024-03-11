@@ -31,12 +31,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class DriveMotionPlannerTest {
-
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
-    // for testing, use the aboslute maximum. This shouldn't be used in a real
-    // robot.
-    private static final double kYawRateScale = 1.0;
-    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testTrajectory() {
@@ -98,7 +93,7 @@ class DriveMotionPlannerTest {
     @Test
     void testAllTrajectories() {
         DrivePIDFController controller = new DrivePIDFController(false, 2.4, 2.4);
-        TrajectoryPlanner tPlanner = new TrajectoryPlanner(kSmoothKinematicLimits, kYawRateScale, kCentripetalScale);
+        TrajectoryPlanner tPlanner = new TrajectoryPlanner();
         TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
         generator.generateTrajectories();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();

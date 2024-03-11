@@ -75,7 +75,6 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
-// import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -87,6 +86,8 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -309,14 +310,12 @@ public class RobotContainer implements Glassy {
         m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
         // whileTrue(driverControl::circle, m_drawCircle);
 
-        // slow down the trajectory schedule to accommodate a reasonable yaw rate.
-        final double yawRateScale = 0.2;
-        // make tight curves corners slower.
-        final double centripetalScale = 0.2;
-        TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics, yawRateScale, centripetalScale);
+        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
+
+        TrajectoryPlanner planner = new TrajectoryPlanner();
 
         whileTrue(driverControl::driveWithFancyTrajec,
-                new FancyTrajectory(m_drive, planner, swerveKinodynamics, centripetalScale));
+                new FancyTrajectory(m_drive, planner, constraints));
 
         whileTrue(driverControl::never, new DriveInACircle(m_drive, controller, -1));
         whileTrue(driverControl::never, new Spin(m_drive, controller));
@@ -362,7 +361,13 @@ public class RobotContainer implements Glassy {
         // joel 20240311 changed ptheta from 1 to 1.3
         DriveMotionController drivePID = new DrivePIDFController(false, 1, 1.3);
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics, 1, centripetalScale));
+                new DriveToWaypoint100(
+                        goal,
+                        m_drive,
+                        planner,
+                        drivePID,
+                        constraints,
+                        1));
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
@@ -373,7 +378,13 @@ public class RobotContainer implements Glassy {
         // joel 20240311 changed ptheta from 2.4 to 1.3
         DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 1.3);
         whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics, 1, centripetalScale));
+                new DriveToWaypoint100(
+                        goal,
+                        m_drive,
+                        planner,
+                        driveFF,
+                        constraints,
+                        1));
 
         // 254 Pursuit follower
         DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
@@ -403,9 +414,12 @@ public class RobotContainer implements Glassy {
         DriveMotionController driveRam = new DriveRamseteController();
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
-                        goal, m_drive, planner,
-                        driveRam, swerveKinodynamics,
-                        1, centripetalScale));
+                        goal,
+                        m_drive,
+                        planner,
+                        driveRam,
+                        constraints,
+                        1));
 
         // little square
         m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
@@ -567,7 +581,6 @@ public class RobotContainer implements Glassy {
                 m_drive,
                 planner,
                 drivePID,
-                swerveKinodynamics,
                 0,
                 m_alliance,
                 m_feeder,
@@ -577,7 +590,7 @@ public class RobotContainer implements Glassy {
                 notePositionDetector,
                 m_amp,
                 m_heading,
-                centripetalScale);
+                constraints);
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,

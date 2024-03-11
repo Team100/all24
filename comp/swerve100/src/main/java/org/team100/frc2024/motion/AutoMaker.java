@@ -21,7 +21,6 @@ import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -43,7 +42,6 @@ public class AutoMaker {
     public SensorInterface m_sensors;
     public List<TimingConstraint> m_constraints;
     public AmpSubsystem m_amp;
-    public SwerveKinodynamics m_limits;
 
     public Intake m_intake;
     public Shooter m_shooter;
@@ -66,6 +64,35 @@ public class AutoMaker {
         CENTRALSTAGEOPENING,
         FARSTAGEADJACENT, FARSTAGEOPENING, DROPSHOT, CLOSESTAGEADJACENT, STARTSUBWOOFER, DRIVETONOTEHANDOFF, CITRUSMID,
         CITRUSEND, CITRUSBEGIN
+    }
+
+    public AutoMaker(
+            SwerveDriveSubsystem swerve,
+            TrajectoryPlanner planner,
+            DriveMotionController controller,
+            double shooterScale,
+            Alliance alliance,
+            FeederSubsystem feeder,
+            Shooter shooter,
+            Intake intake,
+            SensorInterface sensor,
+            NotePosition24ArrayListener notePosition24ArrayListener,
+            AmpSubsystem amp,
+            HeadingInterface heading,
+            List<TimingConstraint> constraints) {
+        m_notePosition24ArrayListener = notePosition24ArrayListener;
+        m_swerve = swerve;
+        m_planner = planner;
+        m_controller = controller;
+        m_constraints = constraints;
+        kShooterScale = shooterScale;
+        m_feeder = feeder;
+        m_shooter = shooter;
+        m_intake = intake;
+        m_sensors = sensor;
+        m_alliance = alliance;
+        m_amp = amp;
+        m_heading = heading;
     }
 
     private Translation2d getTranslation(FieldPoint point) {
@@ -225,55 +252,6 @@ public class AutoMaker {
             default:
                 return new Pose2d(translation.plus(new Translation2d(-kIntakeOffset, 0)), heading);
         }
-    }
-
-    /**
-     * 
-     * @param swerve
-     * @param planner
-     * @param controller
-     * @param limits
-     * @param shooterScale
-     * @param alliance
-     * @param feeder
-     * @param shooter
-     * @param intake
-     * @param sensor
-     * @param notePosition24ArrayListener
-     * @param amp
-     * @param heading
-     * @param centripetalScale TODO: remove this. pass the constraint instead.
-     */
-    public AutoMaker(
-            SwerveDriveSubsystem swerve,
-            TrajectoryPlanner planner,
-            DriveMotionController controller,
-            SwerveKinodynamics limits,
-            double shooterScale,
-            Alliance alliance,
-            FeederSubsystem feeder,
-            Shooter shooter,
-            Intake intake,
-            SensorInterface sensor,
-            NotePosition24ArrayListener notePosition24ArrayListener,
-            AmpSubsystem amp,
-            HeadingInterface heading,
-            double centripetalScale) {
-        m_notePosition24ArrayListener = notePosition24ArrayListener;
-        m_swerve = swerve;
-        m_planner = planner;
-        m_controller = controller;
-        m_constraints = List.of(
-                new CentripetalAccelerationConstraint(limits, centripetalScale));
-        kShooterScale = shooterScale;
-        m_feeder = feeder;
-        m_shooter = shooter;
-        m_intake = intake;
-        m_sensors = sensor;
-        m_alliance = alliance;
-        m_amp = amp;
-        m_heading = heading;
-        m_limits = limits;
     }
 
     public Translation2d forAlliance(Translation2d translation, Alliance alliance) {

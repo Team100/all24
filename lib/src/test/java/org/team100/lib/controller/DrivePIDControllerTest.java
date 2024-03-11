@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -30,10 +30,6 @@ class DrivePIDControllerTest {
     private static final double kMaxAccel = 1.0;
 
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
-    // for testing, use the aboslute maximum. This shouldn't be used in a real
-    // robot.
-    private static final double kYawRateScale = 1.0;
-    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testPIDControl() {
@@ -47,12 +43,12 @@ class DrivePIDControllerTest {
                 GeometryUtil.fromDegrees(180));
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
-        // these don't actually do anything.
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(kSmoothKinematicLimits, kCentripetalScale));
+
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
+
 
         // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits, kYawRateScale, kCentripetalScale);
+        TrajectoryPlanner planner = new TrajectoryPlanner();
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
