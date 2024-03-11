@@ -175,5 +175,4 @@ public class DriveRamseteController implements DriveMotionController {
         return "DriveRamseteController";
     }
 
-    
 }

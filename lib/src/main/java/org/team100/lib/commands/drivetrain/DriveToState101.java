@@ -73,8 +73,8 @@ public class DriveToState101 extends Command100 {
     public void initialize100() {
         System.out.println("DRIVE TO STATE");
 
-
-        Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()), m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()).getAngle());
+        Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()),
+                m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()).getAngle());
 
         transform = transform.inverse();
 
@@ -85,13 +85,12 @@ public class DriveToState101 extends Command100 {
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
                 new Rotation2d(1, 1));
 
-        if(startVelocity.dx == 0 && startVelocity.dy == 0){
+        if (startVelocity.dx == 0 && startVelocity.dy == 0) {
             startWaypoint = startPose;
         } else {
             startWaypoint = new Pose2d(startPose.getTranslation(), new Rotation2d(startVelocity.dx, startVelocity.dy));
 
-        }        
-
+        }
 
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(),
                 new Rotation2d(1, -1));
@@ -103,8 +102,9 @@ public class DriveToState101 extends Command100 {
                 m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
 
+        final double centripetalScale = 0.2;
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
+                new CentripetalAccelerationConstraint(m_limits, centripetalScale));
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
@@ -148,7 +148,7 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public boolean isFinished() {
-        
+
         return m_controller.isDone();
     }
 

@@ -90,8 +90,9 @@ public class DriveWithWaypoints extends Command100 {
     // List<Pose2d> waypointsM = getWaypoints(start, end);
     
 
+    final double centripetalScale = 0.2;
     List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
+                new CentripetalAccelerationConstraint(m_limits, centripetalScale));
 
     double max_vel = 5;
     double max_acc = 5;

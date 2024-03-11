@@ -32,6 +32,10 @@ class DrivePursuitControllerTest {
     private static final double kMaxAccelM_S_S = 2;
 
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
+    // for testing, use the aboslute maximum. This shouldn't be used in a real
+    // robot.
+    private static final double kYawRateScale = 1.0;
+    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testPursuit() {
@@ -47,13 +51,12 @@ class DrivePursuitControllerTest {
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(kSmoothKinematicLimits));
+                new CentripetalAccelerationConstraint(kSmoothKinematicLimits, kCentripetalScale));
 
         // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits, kYawRateScale, kCentripetalScale);
         double start_vel = 0;
         double end_vel = 0;
-        // there's a bug in here; it doesn't use the constraints, nor the voltage.
         Trajectory100 trajectory = planner.generateTrajectory(
                 false,
                 waypoints,
@@ -147,7 +150,7 @@ class DrivePursuitControllerTest {
     @Test
     void testPreviewDt() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(limits, kYawRateScale, kCentripetalScale);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -166,7 +169,7 @@ class DrivePursuitControllerTest {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(limits));
+                new CentripetalAccelerationConstraint(limits, kCentripetalScale));
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(
@@ -201,7 +204,7 @@ class DrivePursuitControllerTest {
     @Test
     void testNearPreviewDt() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(limits, kYawRateScale, kCentripetalScale);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -220,7 +223,7 @@ class DrivePursuitControllerTest {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(limits));
+                new CentripetalAccelerationConstraint(limits, kCentripetalScale));
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(

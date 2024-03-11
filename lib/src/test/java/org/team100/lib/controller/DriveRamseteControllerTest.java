@@ -29,6 +29,10 @@ class DriveRamseteControllerTest {
     private static final double kMaxAccel = 1.0;
 
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
+    // for testing, use the aboslute maximum. This shouldn't be used in a real
+    // robot.
+    private static final double kYawRateScale = 1.0;
+    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testRamsete() {
@@ -45,10 +49,10 @@ class DriveRamseteControllerTest {
         // less.
         // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(kSmoothKinematicLimits));
+                new CentripetalAccelerationConstraint(kSmoothKinematicLimits, kCentripetalScale));
 
         // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits, kYawRateScale, kCentripetalScale);
         double start_vel = 0;
         double end_vel = 0;
 

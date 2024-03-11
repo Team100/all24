@@ -10,13 +10,17 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 class FancyTrajectoryTest extends Fixtured {
+    // for testing, use the aboslute maximum. This shouldn't be used in a real
+    // robot.
+    private static final double kYawRateScale = 1.0;
+    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testSimple() {
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
-        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits);
-        FancyTrajectory command = new FancyTrajectory(drive, planner, kSmoothKinematicLimits);
+        TrajectoryPlanner planner = new TrajectoryPlanner(kSmoothKinematicLimits, kYawRateScale, kCentripetalScale);
+        FancyTrajectory command = new FancyTrajectory(drive, planner, kSmoothKinematicLimits, kCentripetalScale);
 
         command.initialize();
         command.execute();

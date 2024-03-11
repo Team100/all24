@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.frc2024.commands.drivetrain;
 
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -45,7 +45,6 @@ public class DriveWithProfileNote extends Command100 {
     private Timer m_timer;
     private Intake m_intake;
 
-
     /**
      * @param goal
      * @param drivetrain
@@ -91,37 +90,36 @@ public class DriveWithProfileNote extends Command100 {
         m_timer.restart();
         // m_intake.intakeSmart();
         RobotState100.changeIntakeState(IntakeState100.INTAKE);
-        
+
     }
 
     @Override
     public void execute100(double dt) {
         Optional<Translation2d> goal = m_fieldRelativeGoal.get();
         // if (!goal.isPresent()) {
-        //     if (previousGoal == null) {
-        //         return;
-        //     }
-        //     goal = previousGoal;
-        //     count++;
-        //     if (count == 50) {
-        //         return;
-        //     }
-        //     // return;
+        // if (previousGoal == null) {
+        // return;
+        // }
+        // goal = previousGoal;
+        // count++;
+        // if (count == 50) {
+        // return;
+        // }
+        // // return;
         // } else {
-        //     count = 0;
+        // count = 0;
         // }
 
-        if(!goal.isPresent()){
+        if (!goal.isPresent()) {
             m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
             return;
         }
 
         Rotation2d rotationGoal;
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
-        rotationGoal = new Rotation2d(
-            goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
-        }
-        else {
+            rotationGoal = new Rotation2d(
+                    goal.get().minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+        } else {
             rotationGoal = m_swerve.getPose().getRotation();
         }
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
@@ -152,8 +150,9 @@ public class DriveWithProfileNote extends Command100 {
 
     @Override
     public boolean isFinished() {
-        // if (!m_fieldRelativeGoal.get().isPresent() && (count >= 50 || previousGoal == null)) {
-        //     return true;
+        // if (!m_fieldRelativeGoal.get().isPresent() && (count >= 50 || previousGoal ==
+        // null)) {
+        // return true;
         // }
         // return m_end.getAsBoolean();
 

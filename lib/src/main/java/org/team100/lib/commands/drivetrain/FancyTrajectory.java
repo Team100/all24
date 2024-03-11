@@ -39,15 +39,19 @@ public class FancyTrajectory extends Command100 {
     private final DriveMotionController m_controller;
     private final TrajectoryPlanner m_planner;
     private final SwerveKinodynamics m_limits;
+    private final double m_centripetalScale;
 
     public FancyTrajectory(
             SwerveDriveSubsystem robotDrive,
             TrajectoryPlanner planner,
-            SwerveKinodynamics limits) {
+            SwerveKinodynamics limits,
+            double centripetalScale) {
         m_robotDrive = robotDrive;
-        m_controller = new DrivePIDFController(false, 2.4, 2.4);
+        // joel 20240311 changed ptheta from 2.4 to 1.3
+        m_controller = new DrivePIDFController(false, 2.4, 1.3);
         m_planner = planner;
         m_limits = limits;
+        m_centripetalScale = centripetalScale;
         addRequirements(m_robotDrive);
     }
 
@@ -62,7 +66,7 @@ public class FancyTrajectory extends Command100 {
                 GeometryUtil.fromDegrees(0));
         // these don't actually do anything.
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
+                new CentripetalAccelerationConstraint(m_limits, m_centripetalScale));
 
         double start_vel = 0;
         double end_vel = 0;

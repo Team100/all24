@@ -33,7 +33,7 @@ public class DriveToWaypoint100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
-    private static final double kMaxAccelM_S_S = 2; //TODO THIS IS LOWW
+    private static final double kMaxAccelM_S_S = 2; // TODO THIS IS LOWW
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
@@ -49,15 +49,13 @@ public class DriveToWaypoint100 extends Command100 {
 
     private Trajectory100 m_trajectory = new Trajectory100();
 
-    
     private final Timer m_timer = new Timer();
-
-
 
     // private final Trajectory100 m_trajectory;
 
-
     /**
+     * TODO: get rid of centripetal scale, pass the constraint instead.
+     * 
      * @param goal
      * @param drivetrain
      * @param planner
@@ -70,13 +68,14 @@ public class DriveToWaypoint100 extends Command100 {
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            double timeBuffer) {
+            double timeBuffer,
+            double centripetalScale) {
         m_timeBuffer = timeBuffer;
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
+        m_constraints = List.of(new CentripetalAccelerationConstraint(limits, centripetalScale));
         m_endRotation = null;
         addRequirements(m_swerve);
     }
@@ -104,12 +103,13 @@ public class DriveToWaypoint100 extends Command100 {
             DriveMotionController controller,
             SwerveKinodynamics limits,
             Supplier<Rotation2d> endRotation,
-            double timeBuffer) {
+            double timeBuffer,
+            double centripetalScale) {
         m_goal = goal;
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        m_constraints = List.of(new CentripetalAccelerationConstraint(limits));
+        m_constraints = List.of(new CentripetalAccelerationConstraint(limits, centripetalScale));
         m_endRotation = endRotation;
         m_timeBuffer = timeBuffer;
         addRequirements(m_swerve);
@@ -177,7 +177,7 @@ public class DriveToWaypoint100 extends Command100 {
     @Override
     public boolean isFinished() {
         // return m_controller.isDone();
-        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer; 
+        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
     }
 
     @Override

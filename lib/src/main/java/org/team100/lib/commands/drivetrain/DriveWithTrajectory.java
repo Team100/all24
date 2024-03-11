@@ -74,8 +74,9 @@ public class DriveWithTrajectory extends Command100 {
 
     // System.out.println("THIS IS THE ORIGINAL TRAJEC LIST" + trajectoryList.getPoseArray());
 
+    final double centripetalScale = 0.2;
     List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
+                new CentripetalAccelerationConstraint(m_limits, centripetalScale));
 
     double max_vel = 5;
     double max_acc = 5;

@@ -23,9 +23,24 @@ public class TrajectoryPlanner {
     private static final double kMaxDTheta = Math.toRadians(1.0);
 
     private final SwerveKinodynamics m_limits;
+    private final double m_yawRateScale;
+    private final double m_centripetalScale;
 
-    public TrajectoryPlanner(SwerveKinodynamics limits) {
+    /**
+     * 
+     * @param limits           absolute maxima
+     * @param yawRateScale     scale for yaw rate constraint. The absolute maximum
+     *                         yaw rate is very high, not useful for trajectories.
+     *                         Try 0.2 here. TODO: remove this parameter, supply the
+     *                         constraint instead.
+     * @param centripetalScale scale for centripetal constraint. Try 0.2 to slow
+     *                         down the robot in sharp corners. TODO: remove this
+     *                         parameter, supply the constraint instead.
+     */
+    public TrajectoryPlanner(SwerveKinodynamics limits, double yawRateScale, double centripetalScale) {
         m_limits = limits;
+        m_yawRateScale = yawRateScale;
+        m_centripetalScale = centripetalScale;
     }
 
     public Trajectory100 generateTrajectory(
@@ -51,8 +66,9 @@ public class TrajectoryPlanner {
             final List<TimingConstraint> constraints,
             double start_vel,
             double end_vel,
-            SwerveKinodynamics limits){
-        return generateTrajectory(reversed, waypoints, headings, constraints, start_vel, end_vel, limits.getMaxDriveVelocityM_S(), limits.getMaxDriveAccelerationM_S2());
+            SwerveKinodynamics limits) {
+        return generateTrajectory(reversed, waypoints, headings, constraints, start_vel, end_vel,
+                limits.getMaxDriveVelocityM_S(), limits.getMaxDriveAccelerationM_S2());
     }
 
     public Trajectory100 generateTrajectory(
@@ -78,7 +94,7 @@ public class TrajectoryPlanner {
 
         // Create a trajectory from splines.
         Path100 trajectory = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
-                waypoints_maybe_flipped, headings_maybe_flipped, 
+                waypoints_maybe_flipped, headings_maybe_flipped,
                 kMaxDx, kMaxDy, kMaxDTheta);
 
         if (reversed) {
@@ -94,10 +110,10 @@ public class TrajectoryPlanner {
         }
 
         final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_limits);
-        final YawRateConstraint yaw_constraint = new YawRateConstraint(m_limits);
+        final YawRateConstraint yaw_constraint = new YawRateConstraint(m_limits, m_yawRateScale);
 
         final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
-                m_limits);
+                m_limits, m_centripetalScale);
 
         List<TimingConstraint> all_constraints = new ArrayList<>();
         all_constraints.add(drive_constraints);

@@ -13,14 +13,18 @@ import org.team100.lib.trajectory.TrajectoryPlanner;
 
 class DriveToWaypoint100Test extends Fixtured {
     private static final double kDelta = 0.001;
+    // for testing, use the aboslute maximum. This shouldn't be used in a real
+    // robot.
+    private static final double kYawRateScale = 1.0;
+    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testWithPID() {
-        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics, kYawRateScale, kCentripetalScale);
         DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics, 0);
+                fixture.swerveKinodynamics, 0, kCentripetalScale);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
@@ -30,11 +34,11 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithPursuit() {
-        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics, kYawRateScale, kCentripetalScale);
         DriveMotionController controller = new DrivePursuitController(fixture.swerveKinodynamics);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics, 0);
+                fixture.swerveKinodynamics, 0, kCentripetalScale);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
@@ -44,11 +48,11 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithRamsete() {
-        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics, kYawRateScale, kCentripetalScale);
         DriveMotionController controller = new DriveRamseteController();
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics, 0);
+                fixture.swerveKinodynamics, 0, kCentripetalScale);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
@@ -58,11 +62,11 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithFF() {
-        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics);
+        TrajectoryPlanner planner = new TrajectoryPlanner(fixture.swerveKinodynamics, kYawRateScale, kCentripetalScale);
         DriveMotionController controller = new DrivePIDFController(true, 2.4, 2.4);
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero, fixture.drive, planner, controller,
-                fixture.swerveKinodynamics, 0);
+                fixture.swerveKinodynamics, 0, kCentripetalScale);
 
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);

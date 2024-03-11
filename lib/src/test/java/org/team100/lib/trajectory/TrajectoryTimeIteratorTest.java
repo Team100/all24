@@ -21,12 +21,16 @@ class TrajectoryTimeIteratorTest {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
+    // for testing, use the aboslute maximum. This shouldn't be used in a real
+    // robot.
+    private static final double kYawRateScale = 1.0;
+    private static final double kCentripetalScale = 1.0;
 
     @Test
     void testPreviewAndAdvance() {
 
-        SwerveKinodynamics limits =  SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        TrajectoryPlanner planner = new TrajectoryPlanner(limits, kYawRateScale, kCentripetalScale);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -45,7 +49,7 @@ class TrajectoryTimeIteratorTest {
                 end.getRotation());
 
         List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(limits));
+                new CentripetalAccelerationConstraint(limits, kCentripetalScale));
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(
