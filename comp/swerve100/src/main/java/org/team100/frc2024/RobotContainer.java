@@ -239,7 +239,7 @@ public class RobotContainer implements Glassy {
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                VecBuilder.fill(0.5, 0.5, 0.5),
+                VecBuilder.fill(0.1, 0.1, 0.1),
                 VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); //0.1 0.1
 
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(

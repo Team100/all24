@@ -100,8 +100,8 @@ public class TrajectoryCommand100 extends Command100 {
             if( Math.abs(m_goal.getY() - m_robotDrive.getPose().getY()) < 0.1){
                 if(Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()) < 0.1){
                     if(m_controller.isDone()){
-                        
-                        return true;
+                        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
+                        // return true;
                     }
                 }
             }

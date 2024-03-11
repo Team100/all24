@@ -248,6 +248,10 @@ public class VisionDataProvider24 implements Glassy {
             final Rotation2d gyroRotation) {
         for (Blip24 blip : blips) {
 
+            if(blip.getPose().getTranslation().getNorm() > 3)
+                return;
+            t.log(Level.DEBUG, m_name, cameraSerialNumber + "TAG NORMMMM", blip.getPose().getTranslation().getNorm());
+
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
