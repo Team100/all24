@@ -53,16 +53,16 @@ public class SwerveModuleCollection {
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 30, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 11, 0, 0.615074, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
+                                AnalogTurningEncoder.class, 11, 0, 0.620381, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 12, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 32, 1, 0.147709, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
+                                AnalogTurningEncoder.class, 32, 1, 0.162019, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearLeft, currentLimit, 31, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 21, 2, 0.886266, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
+                                AnalogTurningEncoder.class, 21, 2, 0.875648, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 22, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 33, 3, 0.303879, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE));
+                                AnalogTurningEncoder.class, 33, 3, 0.323889, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE));
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(

@@ -111,7 +111,7 @@ public class DrumShooter extends Shooter{
                     currentLimit,
                     1,
                     0.1,
-                    new PIDConstants(0.4, 0, 0), //0.4
+                    new PIDConstants(0.6, 0, 0), //0.4
                     new FeedforwardConstants(0.11,0,0,0.9)
                 );
 

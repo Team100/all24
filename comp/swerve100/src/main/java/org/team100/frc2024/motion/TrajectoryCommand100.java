@@ -116,7 +116,7 @@ public class TrajectoryCommand100 extends Command100 {
     @Override
     public void end(boolean interrupted) {
         t.log(Level.TRACE, m_name, "FINSIHED", true );
-
+        m_robotDrive.stop();
         System.out.println("I HAVE FINISHED");
         m_timer.stop();
         TrajectoryVisualization.clear();
