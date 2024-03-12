@@ -274,7 +274,7 @@ class DriveMotionControllerUtilTest {
         double kPTheta = 1.0;
         ChassisSpeeds speeds = DriveMotionControllerUtil.feedback(
             currentState, setpoint, kPCart, kPTheta);
-        // robot is on the setpoint in translation
+// robot is on the setpoint in translation
         // but needs negative rotation
         // setpoint should be negative theta
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);

@@ -31,7 +31,7 @@ public class TrajectoryCommand100 extends Command100 {
     private final DriveMotionController m_controller;
     private Trajectory100 m_trajectory;
     private double m_timeBuffer;
-    private Pose2d m_goal;
+private Pose2d m_goal;
 
     private Timer m_timer = new Timer();
 
@@ -65,7 +65,7 @@ public class TrajectoryCommand100 extends Command100 {
         m_controller.setTrajectory(iter);
         m_timer.reset();
         m_timer.start();
-        m_goal = m_trajectory.getLastPoint().state().state().getPose();
+m_goal = m_trajectory.getLastPoint().state().state().getPose();
 
     }
 
@@ -78,7 +78,7 @@ public class TrajectoryCommand100 extends Command100 {
         ChassisSpeeds output = m_controller.update(now, currentPose, robotRelativeVelocity);
 
         t.log(Level.TRACE, m_name, "chassis speeds", output);
-        t.log(Level.TRACE, m_name, "goal", m_goal);
+t.log(Level.TRACE, m_name, "goal", m_goal);
         t.log(Level.TRACE, m_name, "THETA ERROR", Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()));
         t.log(Level.TRACE, m_name, "FINSIHED", false);
 
@@ -110,12 +110,12 @@ public class TrajectoryCommand100 extends Command100 {
         return false;
 
         // return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
-        // return m_controller.isDone();
+// return m_controller.isDone();
     }
 
     @Override
     public void end(boolean interrupted) {
-        t.log(Level.TRACE, m_name, "FINSIHED", true );
+t.log(Level.TRACE, m_name, "FINSIHED", true );
         m_robotDrive.stop();
         System.out.println("I HAVE FINISHED");
         m_timer.stop();

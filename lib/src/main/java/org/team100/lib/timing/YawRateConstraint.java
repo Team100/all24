@@ -12,7 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * (scaled).
  * 
  * Slows the path velocity to accommodate the desired yaw rate.
- * 
+* 
  * Does not affect maximum acceleration.
  */
 public class YawRateConstraint implements TimingConstraint {

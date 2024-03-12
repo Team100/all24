@@ -5,8 +5,10 @@ import java.util.List;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -71,7 +73,7 @@ public class DriveToState101 extends Command100 {
     public void initialize100() {
         System.out.println("DRIVE TO STATE");
 
-        Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()),
+Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()),
                 m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()).getAngle());
 
         transform = transform.inverse();
@@ -88,7 +90,7 @@ public class DriveToState101 extends Command100 {
         } else {
             startWaypoint = new Pose2d(startPose.getTranslation(), new Rotation2d(startVelocity.dx, startVelocity.dy));
 
-        }
+        }        
 
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(),
                 new Rotation2d(1, -1));
@@ -100,7 +102,7 @@ public class DriveToState101 extends Command100 {
                 m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
 
-        Trajectory100 trajectory = m_planner
+                Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
                         waypointsM,
@@ -142,7 +144,7 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public boolean isFinished() {
-
+        
         return m_controller.isDone();
     }
 

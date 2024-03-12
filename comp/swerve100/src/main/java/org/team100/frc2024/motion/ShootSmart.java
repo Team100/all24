@@ -4,6 +4,8 @@
 
 package org.team100.frc2024.motion;
 
+import java.util.Optional;
+
 import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
@@ -12,6 +14,8 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -29,7 +33,7 @@ public class ShootSmart extends Command {
   boolean finished = false;
   SwerveDriveSubsystem m_drive;
   boolean m_isPreload;
-  double m_pivotOverride;
+double m_pivotOverride;
 
   public ShootSmart(SensorInterface sensor, Shooter shooter, Intake intake, FeederSubsystem feeder, SwerveDriveSubsystem drive, double pivotOverride) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -60,16 +64,19 @@ public class ShootSmart extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
+        Optional<Alliance> alliance = DriverStation.getAlliance(); 
+    if (!alliance.isPresent()) return;
 
-    double targetShooterAngle;
+        t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
 
-    double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
+double targetShooterAngle;
+
+    double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
     m_timer.reset();
     m_shooter.forward();
-    // if(m_pivotOverride == -1){
-        m_shooter.setAngle(ShooterUtil.getAngle(distance));
-    // } else {
+// if(m_pivotOverride == -1){
+    m_shooter.setAngle(ShooterUtil.getAngle(distance));
+// } else {
     //     m_shooter.setAngle(m_pivotOverride);
     // }
     m_intake.intake();
@@ -81,10 +88,12 @@ public class ShootSmart extends Command {
   @Override
   public void execute() {
     t.log(Level.DEBUG, "ShootSmart", "command state", "execute");
-
+    Optional<Alliance> alliance = DriverStation.getAlliance(); 
+    if (!alliance.isPresent()) return;
+    
     double angle;
     if(m_pivotOverride == -1){
-        double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation()); 
+        double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation(alliance.get())); 
        angle = ShooterUtil.getAngle(distance);
     } else {
         angle = m_pivotOverride;
@@ -107,7 +116,7 @@ public class ShootSmart extends Command {
         // if(Math.abs(m_shooter.getPivotgPosition() - ShooterUtil.getAngle(m_drive.getPose().getX())) < 1 ){
             atVelocity = true;
             m_timer.start();
-        //   }
+          //   }
         } 
     }
 

@@ -25,8 +25,8 @@ public class ShooterTable {
     }
     
     //MORE NUMBERSSDDD
-    public void loadTable(){        
-
+    public void loadTable(){
+  
         m_table.put(1.552869, 0.95);
 
         m_table.put(2.109692, 0.760000);
@@ -39,7 +39,7 @@ public class ShooterTable {
 
         m_table.put(4.01, 0.535);
 
-
+        
 
     }
 

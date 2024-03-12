@@ -78,7 +78,7 @@ public class TrajectoryPlanner {
 
         // Create a trajectory from splines.
         Path100 trajectory = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
-                waypoints_maybe_flipped, headings_maybe_flipped,
+                waypoints_maybe_flipped, headings_maybe_flipped, 
                 kMaxDx, kMaxDy, kMaxDTheta);
 
         if (reversed) {

@@ -28,59 +28,59 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithTrajectory extends Command100 {
-    /** Creates a new DriveWithTrajectory. */
-    private final SwerveDriveSubsystem m_swerve;
-    private final TrajectoryPlanner m_planner;
-    private final DriveMotionController m_controller;
-    private final SwerveKinodynamics m_limits;
-    private final String m_fileName;
-    private static final Telemetry t = Telemetry.get();
+  /** Creates a new DriveWithTrajectory. */
+  private final SwerveDriveSubsystem m_swerve;
+  private final TrajectoryPlanner m_planner;
+  private final DriveMotionController m_controller;
+  private final SwerveKinodynamics m_limits;
+  private final String m_fileName;
+  private static final Telemetry t = Telemetry.get();
 
-    public DriveWithTrajectory(SwerveDriveSubsystem drivetrain,
+  public DriveWithTrajectory(SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits,
             String fileName) {
-        // Use addRequirements() here to declare subsystem dependencies.
+    // Use addRequirements() here to declare subsystem dependencies.
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
         m_limits = limits;
         m_fileName = fileName;
         addRequirements(m_swerve);
-    }
+  }
 
-    // Called when the command is initially scheduled.
-    @Override
-    public void initialize100() {
-        // System.out.println("DRIVE WITH TRAJEC STARTING");
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize100() {
+    // System.out.println("DRIVE WITH TRAJEC STARTING");
 
-        TrajectoryList trajectoryList = JSONParser.getTrajectoryList(m_fileName);
-        // TrajectoryList trajectoryList = new TrajectoryList(null, null);
+    TrajectoryList trajectoryList = JSONParser.getTrajectoryList(m_fileName);
+    // TrajectoryList trajectoryList = new TrajectoryList(null, null);
 
-        trajectoryList.removeLastIndex();
-        List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
-        List<Rotation2d> headings = trajectoryList.getRotationArray();
+    trajectoryList.removeLastIndex();
+    List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
+    List<Rotation2d> headings = trajectoryList.getRotationArray();
 
-        // headings.remove(0);
-        // headings.add(new Rotation2d());
+    // headings.remove(0);
+    // headings.add(new Rotation2d());
 
-        // System.out.println("POSE AFTER LENGTH: " + poses.size());
-        // System.out.println("HEADINGS LENGTH: " + headings.size());
-        // System.out.println("POSE B4 LENGTH: " +
+    // System.out.println("POSE AFTER LENGTH: " + poses.size());
+    // System.out.println("HEADINGS LENGTH: " + headings.size());
+    // System.out.println("POSE B4 LENGTH: " +
         // trajectoryList.getPoseArray().size());
 
-        // System.out.println("THIS IS THE ORIGINAL TRAJEC LIST" +
+    // System.out.println("THIS IS THE ORIGINAL TRAJEC LIST" +
         // trajectoryList.getPoseArray());
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(m_limits).allGood();
+    List<TimingConstraint> constraints = new TimingConstraintFactory(m_limits).allGood();
 
-        double max_vel = 5;
-        double max_acc = 5;
-        double start_vel = 0;
-        double end_vel = 0;
+    double max_vel = 5;
+    double max_acc = 5;
+    double start_vel = 0;
+    double end_vel = 0;
 
-        Trajectory100 trajectory = m_planner
+    Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
                         poses,
@@ -91,45 +91,45 @@ public class DriveWithTrajectory extends Command100 {
                         5,
                         5);
 
-        TrajectoryVisualization.setViz(trajectory);
+    TrajectoryVisualization.setViz(trajectory);
 
-        TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
+    TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
 
-        m_controller.setTrajectory(iter);
+    m_controller.setTrajectory(iter);
 
-    }
+  }
 
-    // Called every time the scheduler runs while the command is scheduled.
-    @Override
-    public void execute100(double dt) {
-        double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
-        ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
-        Twist2d velocity = new Twist2d(
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute100(double dt) {
+     double now = Timer.getFPGATimestamp();
+     Pose2d currentPose = m_swerve.getPose();
+     ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
+     Twist2d velocity = new Twist2d(
                 currentSpeed.vxMetersPerSecond,
                 currentSpeed.vyMetersPerSecond,
                 currentSpeed.omegaRadiansPerSecond);
-        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+     ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+        
+     t.log(Level.DEBUG, m_name, "chassis speeds", output);
+     DriveUtil.checkSpeeds(output);
+     m_swerve.setChassisSpeeds(output, dt);
+  }
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
-        DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
-    }
+  @Override
+  public void end(boolean interrupted) {
+    // System.out.println("DRIVE WITH TRAJEC ENDING");
+    m_swerve.stop();
+    TrajectoryVisualization.clear();
+  }
 
-    @Override
-    public void end(boolean interrupted) {
-        // System.out.println("DRIVE WITH TRAJEC ENDING");
-        m_swerve.stop();
-        TrajectoryVisualization.clear();
-    }
+  @Override
+  public boolean isFinished() {
+   return m_controller.isDone();
+  }
 
-    @Override
-    public boolean isFinished() {
-        return m_controller.isDone();
-    }
-
-    private static List<Pose2d> getWaypoints(List<Pose2d> m) {
+  private static List<Pose2d> getWaypoints(List<Pose2d> m) {
         List<Pose2d> waypointsM = new ArrayList<>();
         // System.out.println("THIS IS M" + m);
         for (int i = 0; i < m.size() - 1; i += 1) {
@@ -142,13 +142,13 @@ public class DriveWithTrajectory extends Command100 {
             // System.out.println(new Pose2d(t0, theta));
             // waypointsM.add(new Pose2d(t0, theta));
             // } else {
-            Translation2d t0 = m.get(i).getTranslation();
-            Translation2d t1 = m.get(i + 1).getTranslation();
-            Rotation2d theta = t1.minus(t0).getAngle();
-            waypointsM.add(new Pose2d(t0, theta));
+                Translation2d t0 = m.get(i).getTranslation();
+                Translation2d t1 = m.get(i + 1).getTranslation();
+                Rotation2d theta = t1.minus(t0).getAngle();
+                waypointsM.add(new Pose2d(t0, theta));
             // }
-
-        }
+            
+}
 
         // Last Value
         Translation2d t0 = m.get(m.size() - 1).getTranslation();
@@ -158,6 +158,6 @@ public class DriveWithTrajectory extends Command100 {
         waypointsM.add(new Pose2d(t0, theta));
 
         return waypointsM;
-
+        
     }
 }

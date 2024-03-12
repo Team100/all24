@@ -65,7 +65,7 @@ public class NotePosition24ArrayListener {
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
             notes = Optional
                     .of(PoseEstimationHelper.cameraRotsToFieldRelativeArray(m_poseEstimator.getEstimatedPosition(),
-                            cameraInRobotCoordinates, positions));
+            cameraInRobotCoordinates, positions));
         } else {
             Util.warn("note weird vision update key: " + name);
         }
@@ -82,12 +82,12 @@ public class NotePosition24ArrayListener {
                         new Rotation3d(0, Math.toRadians(31.5), Math.toRadians(40)));
                 Optional<ArrayList<Rotation3d>> rot = simCamera.getRotation(m_poseEstimator.getEstimatedPosition(),
                         NotePicker.autoNotes);
-                if (!rot.isPresent()) {
-                    return Optional.empty();
-                }
+                    if (!rot.isPresent()) {
+                        return Optional.empty();
+                    }
                 return Optional
                         .of(PoseEstimationHelper.cameraRotsToFieldRelative(m_poseEstimator.getEstimatedPosition(),
-                                cameraInRobotCoordinates, rot.get()));
+                        cameraInRobotCoordinates, rot.get()));
             default:
                 if (latestTime > Timer.getFPGATimestamp() - 0.1) {
                     return notes;
