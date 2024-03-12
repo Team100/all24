@@ -51,7 +51,7 @@ public class VisionDataProvider24 implements Glassy {
      * The error is much worse at very long range but I don't think that
      * matters for us.
      */
-    private static final double kRelativeError = 0.05;
+    private static final double kRelativeError = 0.1;
     /**
      * Time between events in reality and their appearance here; the average
      * end-to-end latency of the camera, detection code, network tables, and rio
@@ -247,6 +247,10 @@ public class VisionDataProvider24 implements Glassy {
             final double frameTime,
             final Rotation2d gyroRotation) {
         for (Blip24 blip : blips) {
+
+            if(blip.getPose().getTranslation().getNorm() > 3)
+                return;
+            t.log(Level.DEBUG, m_name, cameraSerialNumber + "TAG NORMMMM", blip.getPose().getTranslation().getNorm());
 
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);

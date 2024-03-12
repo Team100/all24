@@ -8,6 +8,7 @@ import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
+import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.ChangeAmpState;
 import org.team100.frc2024.motion.FeedCommand;
@@ -20,7 +21,6 @@ import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
@@ -36,9 +36,9 @@ import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
+import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Oscillate;
@@ -48,13 +48,12 @@ import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
+import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDFController;
-import org.team100.lib.controller.DrivePursuitController;
-import org.team100.lib.controller.DriveRamseteController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
@@ -76,7 +75,6 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
-// import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -86,8 +84,12 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.Annunciator;
+import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -100,6 +102,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -126,11 +129,6 @@ public class RobotContainer implements Glassy {
     private final DrawSquare m_drawCircle;
 
     private final SelfTestRunner m_selfTest;
-    final DriveInALittleSquare m_driveInALittleSquare;
-
-    // joel 2/22/24 removing for SVR, put back after that.
-    // final MorseCodeBeep m_beep;
-    // final Monitor m_monitor;
 
     // Identity-specific fields
     // final IndexerSubsystem m_indexer;
@@ -142,7 +140,6 @@ public class RobotContainer implements Glassy {
     final SensorInterface m_sensors;
     final FeederSubsystem m_feeder;
     // final SwerveDriveSubsystem m_drive;
-
 
     final DriverControl driverControl;
     final OperatorControl operatorControl;
@@ -180,25 +177,23 @@ public class RobotContainer implements Glassy {
         // *************************
         //
         // override the alliance logic.
-//        switch(Identity.instance) {
-//            case BLANK: 
-//            m_alliance = Alliance.Blue;
-//            break;
-//            default:
-//            m_alliance = DriverStation.getAlliance().get();
-//        break;
-//        }
-
+        // switch(Identity.instance) {
+        // case BLANK:
+        // m_alliance = Alliance.Blue;
+        // break;
+        // default:
         // m_alliance = DriverStation.getAlliance().get();
-
-        // if(m_alliance == null){
-        m_alliance = Alliance.Blue 
-            ;
+        // break;
         // }
 
-        // m_alliance = Alliance.Blue  ;
-        // m_alliance = Allsiance.Blue;
+        // m_alliance = DriverStation.getAlliance().get();F
 
+        // if(m_alliance == null){
+        m_alliance = Alliance.Blue;
+        // }
+
+        // m_alliance = Alliance.Blue ;
+        // m_alliance = Allsiance.Blue;
 
         if (m_alliance == Alliance.Blue) {
             m_layout = AprilTagFieldLayoutWithCorrectOrientation.blueLayout("2024-crescendo.json");
@@ -218,28 +213,16 @@ public class RobotContainer implements Glassy {
                 m_sensors = new MockSensors();
         }
 
-        // joel 2/22/24 removing for SVR, put it back after that.
-        // 20 words per minute is 60 ms.
-        // m_beep = new MorseCodeBeep(0.06);
-        // m_beep = new Beep();
-        // BooleanSupplier test = () -> driverControl.annunicatorTest() ||
-        // m_beep.getOutput();
-        // m_monitor = new Monitor(new Annunciator(6), test);
-        // The monitor runs less frequently than the control loop.
-        // robot.addPeriodic(m_monitor::periodic, 0.2);
-
         m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        // TODO the max value is a hack for the pose estimator to ignore gyro updates.
-        // Without it the gyro offset keeps updating in the wrong places. Find the real
-        // problem
+        // ignores the rotation derived from vision.
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                VecBuilder.fill(0.5, 0.5, 0.5),
+                VecBuilder.fill(0.1, 0.1, 0.1),
                 VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); //0.1 0.1
 
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
@@ -264,12 +247,11 @@ public class RobotContainer implements Glassy {
         m_intake = IntakeFactory.get(m_sensors);
 
         LEDStrip strip1 = new LEDStrip(160, 0);
-        
+
         m_indicator = new LEDIndicator(0, strip1);
 
+        m_shooter = new DrumShooter(44, 45, 28, 39, 58);
 
-        m_shooter = new DrumShooter(44, 45, 28, 39,  58);
-        
         m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors, m_shooter);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
@@ -289,7 +271,9 @@ public class RobotContainer implements Glassy {
         whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
         whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive,
+        // GeometryUtil.kRotationZero));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // this is @sanjan's version from some sort of vision testing in february
         // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
@@ -312,41 +296,12 @@ public class RobotContainer implements Glassy {
         m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
         // whileTrue(driverControl::circle, m_drawCircle);
 
-        TrajectoryPlanner planner = new TrajectoryPlanner(swerveKinodynamics);
+        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
+
+        TrajectoryPlanner planner = new TrajectoryPlanner();
 
         whileTrue(driverControl::driveWithFancyTrajec,
-                new FancyTrajectory(m_drive, planner, swerveKinodynamics));
-
-        whileTrue(driverControl::never, new DriveInACircle(m_drive, controller, -1));
-        whileTrue(driverControl::never, new Spin(m_drive, controller));
-        whileTrue(driverControl::never, new Oscillate(m_drive));
-
-        // make a one-meter line
-        whileTrue(driverControl::never,
-                new TrajectoryListCommand(m_drive, controller,
-                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
-
-        // make a one-meter square
-        whileTrue(driverControl::never,
-                new TrajectoryListCommand(m_drive, controller,
-                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
-
-        // whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller,
-        // null));
-
-        // one-meter square with reset at the corners
-        whileTrue(driverControl::never,
-                new PermissiveTrajectoryListCommand(m_drive, controller,
-                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
-
-        // one-meter square with position and velocity feedback control
-        whileTrue(driverControl::never,
-                new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
-
-        // trying the new ChoreoLib
-        ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
-        whileTrue(driverControl::never, CommandMaker.choreo(choreoTrajectory, m_drive));
+                new FancyTrajectory(m_drive, planner, constraints));
 
         // playing with trajectory followers
         TrajectoryConfig config = new TrajectoryConfig(5, 5);
@@ -358,27 +313,13 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = new DrivePIDFController(false, 0.9, 0.9);
-        whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, drivePID, swerveKinodynamics, 1));
+        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF();
+
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
-                        swerveKinodynamics, () -> !m_sensors.getIntakeSensor()));
-        // 254 FF follower\
-        DriveMotionController driveFF = new DrivePIDFController(true, 2.4, 2.4);
-        whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveFF, swerveKinodynamics, 1));
-
-        // 254 Pursuit follower
-        DriveMotionController drivePP = new DrivePursuitController(swerveKinodynamics);
-        // whileTrue(driverControl::test,
-        // new DriveToWaypoint100(goal, m_drive, planner, drivePP, swerveKinodynamics));
-
-        // whileTrue(driverControl::test,
-        // new DriveToState100(goal, new Twist2d(2, 0, 0), m_drive, planner, drivePP,
-        // swerveKinodynamics));
+                        swerveKinodynamics, () -> !m_sensors.getIntakeSensor(), m_intake));
 
         // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
         // drivePID, swerveKinodynamics));
@@ -394,15 +335,7 @@ public class RobotContainer implements Glassy {
 
         // whileTrue(driverControl::test, run);
 
-        // 254 Ramsete follower
-        // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = new DriveRamseteController();
-        whileTrue(driverControl::never,
-                new DriveToWaypoint100(goal, m_drive, planner, driveRam, swerveKinodynamics, 1));
 
-        // little square
-        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
-        whileTrue(driverControl::never, m_driveInALittleSquare);
 
         whileTrue(operatorControl::intake,
                 new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
@@ -418,7 +351,7 @@ public class RobotContainer implements Glassy {
                 () -> RobotState100.changeFeederState(FeederState100.STOP)));
 
         // whileTrue(operatorControl::pivotToAmpPosition,
-        //         new ChangeAmpState(AmpState100.UP, m_amp));
+        // new ChangeAmpState(AmpState100.UP, m_amp));
 
         whileTrue(operatorControl::pivotToAmpPosition, new ChangeAmpState(AmpState100.UP, m_amp));
 
@@ -431,8 +364,6 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
 
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
-
-
 
         // TODO: spin up the shooter whenever the robot is in range.
 
@@ -461,7 +392,6 @@ public class RobotContainer implements Glassy {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0); // .5
         PIDController omega2Controller = new PIDController(0, 0, 0); // .5
-
 
         DriveManually driveManually = new DriveManually(driverControl::twist, m_drive);
 
@@ -535,9 +465,11 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::test, Commands.startEnd(() ->
         // RobotState100.changeIntakeState(IntakeState100.INTAKE),
         // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-//        whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
- //       new HolonomicDriveController100(), swerveKinodynamics));
-  //      whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics, planner, drivePID, m_alliance));
+        // whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new
+        // Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
+        // new HolonomicDriveController100(), swerveKinodynamics));
+        // whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics,
+        // planner, drivePID, m_alliance));
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
@@ -547,31 +479,54 @@ public class RobotContainer implements Glassy {
                 omega2Controller,
                 0.25);
 
-        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
+        // driverControl::twist, m_drive));
 
-        
-        // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
+        // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,
+        // driverControl::twist, m_drive));
 
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
+        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
+        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
+        // planner, drivePID, swerveKinodynamics));
 
-        AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_feeder, m_shooter, m_intake, m_sensors, notePositionDetector, m_amp, m_heading);
-        
+        AutoMaker m_AutoMaker = new AutoMaker(
+                m_drive,
+                planner,
+                drivePID,
+                0,
+                m_alliance,
+                m_feeder,
+                m_shooter,
+                m_intake,
+                m_sensors,
+                notePositionDetector,
+                m_amp,
+                m_heading,
+                constraints);
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
-        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,  driverControl::twist, m_drive));
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
-        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.citrus());
-        // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_drive));
+        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
+        // driverControl::twist, m_drive));
+        whileTrue(driverControl::shooterLock,
+                m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
+        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
+        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
+        // planner, drivePID, swerveKinodynamics));
+        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
+        // swerveKinodynamics, 0, m_alliance);
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
+        // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
+        // m_intake, m_feeder, m_drive));
 
-        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance);
-//         whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
+        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
+        // swerveKinodynamics, 0, m_alliance);
+        // whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
 
-
-       
-
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
-        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID, swerveKinodynamics, 0, m_alliance, m_shooter, m_feeder);
+        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
+        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
+        // planner, drivePID, swerveKinodynamics));
+        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
+        // swerveKinodynamics, 0, m_alliance, m_shooter, m_feeder);
         // whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
 
         // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
@@ -580,17 +535,19 @@ public class RobotContainer implements Glassy {
         m_drive.setDefaultCommand(driveManually);
 
         SubsystemPriority.addSubsystem(m_drive, driveManually, Priority.ONE);
-        SubsystemPriority.addSubsystem(m_shooter, new ShooterDefault(m_shooter, m_drive, operatorControl::pivotUp, operatorControl::pivotDown), Priority.TWO);
+        SubsystemPriority.addSubsystem(m_shooter,
+                new ShooterDefault(m_shooter, m_drive, operatorControl::pivotUp, operatorControl::pivotDown),
+                Priority.TWO);
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
         SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
                 operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
-        //Registers the subsystems so that they run with the specified priority
+        // Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();
 
-        m_auton = m_AutoMaker.wesuck(m_drive, notePositionDetector, swerveKinodynamics, m_sensors);
+        m_auton = m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors);
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
@@ -612,10 +569,11 @@ public class RobotContainer implements Glassy {
     }
 
     public void onAuto() {
-        // m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d())
+        // m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new
+        // Rotation2d())
     }
 
-    private void  whileTrue(BooleanSupplier condition, Command command) {
+    private void whileTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).whileTrue(command);
     }
 
@@ -674,6 +632,155 @@ public class RobotContainer implements Glassy {
         return "RobotContainer";
     }
 
-    
+    /**
+     * Stuff to come back to someday.
+     * 
+     * The reason to put it here rather than commenting it out is so that it doesn't
+     * rot.
+     */
+    private void parkingLot(TimedRobot robot) {
 
+        // joel 2/22/24 removing for SVR, put back after that.
+        // these should be fields
+        final MorseCodeBeep m_beep;
+        final Monitor m_monitor;
+
+        // joel 2/22/24 removing for SVR, put it back after that.
+        // 20 words per minute is 60 ms.
+        m_beep = new MorseCodeBeep(0.06);
+        // TODO: try a simple beep instead?
+        // m_beep = new Beep();
+        BooleanSupplier test = () -> driverControl.annunicatorTest() ||
+                m_beep.getOutput();
+        m_monitor = new Monitor(new Annunciator(6), test);
+        // The monitor runs less frequently than the control loop.
+        robot.addPeriodic(m_monitor::periodic, 0.2);
+
+        HolonomicDriveController3 controller = new HolonomicDriveController3();
+
+
+        ///////////////////////
+
+                // little square
+                // this should be a field.
+                    final DriveInALittleSquare m_driveInALittleSquare;
+
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
+        whileTrue(driverControl::never, m_driveInALittleSquare);
+
+
+        ///////////////////////
+        // trying the new ChoreoLib
+        ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
+        whileTrue(driverControl::never, CommandMaker.choreo(choreoTrajectory, m_drive));
+
+        ///////////////////////
+
+        whileTrue(driverControl::never, new DriveInACircle(m_drive, controller, -1));
+        whileTrue(driverControl::never, new Spin(m_drive, controller));
+        whileTrue(driverControl::never, new Oscillate(m_drive));
+
+        ////////////////////////
+
+                // field center, roughly, facing to the left.
+        Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
+        TrajectoryPlanner planner = new TrajectoryPlanner();
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
+
+
+
+                // 254 PID follower
+        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF();
+        whileTrue(driverControl::never,
+                new DriveToWaypoint100(
+                        goal,
+                        m_drive,
+                        planner,
+                        drivePID,
+                        constraints,
+                        1));
+
+
+        ////////////////////////
+
+        // 254 FF follower
+        
+
+        DriveMotionController driveFF = DriveMotionControllerFactory.ffOnly();
+
+        whileTrue(driverControl::never,
+                new DriveToWaypoint100(
+                        goal,
+                        m_drive,
+                        planner,
+                        driveFF,
+                        constraints,
+                        1));
+
+        ///////////////////////
+
+        // 254 Pursuit follower
+        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(swerveKinodynamics);
+
+        whileTrue(driverControl::test,
+                new DriveToWaypoint100(
+                        goal,
+                        m_drive,
+                        planner,
+                        drivePP,
+                        constraints,
+                        1));
+
+        whileTrue(driverControl::test,
+                new DriveToState101(
+                        goal,
+                        new Twist2d(2, 0, 0),
+                        m_drive,
+                        planner,
+                        drivePP,
+                        constraints));
+
+        ///////////////////////
+
+        // 254 Ramsete follower
+        // this one seems to have a pretty high tolerance?
+        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete();
+        whileTrue(driverControl::never,
+                new DriveToWaypoint100(
+                        goal,
+                        m_drive,
+                        planner,
+                        driveRam,
+                        constraints,
+                        1));
+
+        //////////////////////
+
+        // calibration
+
+        // make a one-meter line
+        whileTrue(driverControl::never,
+                new TrajectoryListCommand(m_drive, controller,
+                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
+
+        // make a one-meter square
+        whileTrue(driverControl::never,
+                new TrajectoryListCommand(m_drive, controller,
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+
+        whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller,
+                null));
+
+        // one-meter square with reset at the corners
+        whileTrue(driverControl::never,
+                new PermissiveTrajectoryListCommand(m_drive, controller,
+                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
+
+        // one-meter square with position and velocity feedback control
+        whileTrue(driverControl::never,
+                new FullStateTrajectoryListCommand(m_drive,
+                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+
+    }
 }

@@ -2,12 +2,12 @@ package org.team100.lib.controller;
 
 import java.util.Optional;
 
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
+import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Names;
@@ -21,12 +21,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Follow a 254 trajectory using velocity feedforward with optional positional
  * feedback.
  */
-public class DrivePIDFController implements DriveMotionController, Glassy {
+public class DrivePIDFController implements DriveMotionController {
     // gains for velocity feedback
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
 
-    private static final double kTolerance = 0.15;
+    private static final double kTolerance = 0.05;
+    private static final double kThetaTolerance = 0.05;
+
     public static final Telemetry t = Telemetry.get();
     private final boolean m_feedforwardOnly;
     private final String m_name;
@@ -36,8 +38,14 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
     private Pose2d error = new Pose2d();
     private double m_kPCart;
     private double m_kPTheta;
+    private Trajectory100 m_trajectory = new Trajectory100();
+    private Pose2d goalPose;
 
-    public DrivePIDFController(boolean feedforwardOnly, double kPCart, double kPTheta) {
+    /** Use the factory. */
+    DrivePIDFController(
+            boolean feedforwardOnly,
+            double kPCart,
+            double kPTheta) {
         m_feedforwardOnly = feedforwardOnly;
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
@@ -46,6 +54,9 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator iter) {
+        m_trajectory = iter.trajectory();
+        goalPose = m_trajectory.getLastPoint().state().state().getPose();
+
         m_iter = iter;
         m_prevTimeS = Double.POSITIVE_INFINITY;
     }
@@ -60,9 +71,10 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
             return new ChassisSpeeds();
 
         t.log(Level.TRACE, m_name, "measurement", measurement);
-        if (isDone()) {
-            return new ChassisSpeeds();
-        }
+
+        // if (isDone()) {
+        // return new ChassisSpeeds();
+        // }
 
         Optional<TimedPose> optionalSetpoint = getSetpoint(timeS);
         if (!optionalSetpoint.isPresent()) {
@@ -73,15 +85,15 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
         t.log(Level.TRACE, m_name, "setpoint", setpoint);
 
         error = DriveMotionControllerUtil.getError(measurement, setpoint);
-        t.log(Level.TRACE, m_name, "error", error);
 
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, setpoint);
-        if (m_feedforwardOnly)
-            return u_FF;
+        // if (m_feedforwardOnly)
+        // return u_FF;
 
-//       ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement, mSetpoint.get(), m_kPCart, m_kPTheta);
+        // ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement,
+        // mSetpoint.get(), m_kPCart, m_kPTheta);
 
-//         ChassisSpeeds output = u_FF.plus(u_FB);
+        // ChassisSpeeds output = u_FF.plus(u_FB);
 
         // if(output.equals(output))
 
@@ -103,7 +115,7 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
                     m_kPTheta);
         }
 
-      return u_FF.plus(u_FB);
+        return u_FF.plus(u_FB);
     }
 
     double dt(double timestamp) {
@@ -119,6 +131,8 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
 
         Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
         if (!sample_point.isPresent()) {
+            t.log(Level.TRACE, m_name, "IS MT", true);
+
             return Optional.empty();
         }
         t.log(Level.TRACE, m_name, "sample point", sample_point.get());
@@ -127,7 +141,7 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
 
     @Override
     public boolean isDone() {
-        return m_iter != null && m_iter.isDone() && error.getTranslation().getNorm() < kTolerance;
+        return m_iter != null && m_iter.isDone();
     }
 
     @Override
@@ -135,5 +149,4 @@ public class DrivePIDFController implements DriveMotionController, Glassy {
         return "DrivePIDFController";
     }
 
-    
 }
