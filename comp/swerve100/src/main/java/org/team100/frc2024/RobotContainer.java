@@ -21,7 +21,6 @@ import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
@@ -33,22 +32,16 @@ import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.lib.SubsystemPriority;
 import org.team100.lib.SubsystemPriority.Priority;
 import org.team100.lib.commands.drivetrain.DriveManually;
-import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
-import org.team100.lib.commands.drivetrain.Spin;
-import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.DrivePIDFController;
-import org.team100.lib.controller.DrivePursuitController;
-import org.team100.lib.controller.DriveRamseteController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
@@ -94,7 +87,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -515,7 +507,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         logTime("fourNoteAuto 2 start");
         // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
         // lot.
-        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors));
         logTime("fourNoteAuto 2 end");
 
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
