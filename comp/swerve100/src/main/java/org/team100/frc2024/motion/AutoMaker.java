@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.team100.frc2024.CompSensors;
 import org.team100.frc2024.SensorInterface;
+import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
@@ -14,7 +15,6 @@ import org.team100.frc2024.motion.shooter.RotateToShooter;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveWithProfile2;
-import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
@@ -515,7 +515,7 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
                 throughFarStageOpening(alliance, FieldPoint.STAGESHOT, FieldPoint.DROPSHOT));
     }
 
-    public SequentialCommandGroup fourNoteAuto(NotePosition24ArrayListener noteDetecor,SwerveKinodynamics limits,SensorInterface sensor) {
+    public SequentialCommandGroup fourNoteAuto(Alliance alliance, NotePosition24ArrayListener noteDetecor,SwerveKinodynamics limits,SensorInterface sensor) {
         // return new SequentialCommandGroup(
         //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
         //         new ParallelCommandGroup(driveToStraight(FieldPoint.NOTE3),
@@ -561,16 +561,16 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
 
         return new SequentialCommandGroup(
             // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
-            driveToStageBase(FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
+            driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
             
-            test(FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2),
+            test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2),
             
-            test(FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1),  
+            test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1),  
             // new ChangeIntakeState(m_intake),
-            driveStraightWithWaypoints(FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()),
+            driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()),
             // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
             // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
-            driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(new Translation2d(3.4, 6.1), kShooterScale)))
+            driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1), kShooterScale)))
             // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
         );
                 
@@ -618,7 +618,7 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
     public SequentialCommandGroup citrus(Alliance alliance){
         return new SequentialCommandGroup(
             new StowAmpCommand(m_amp),
-            new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+            new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
             driveStraight(alliance, FieldPoint.CITRUSBEGIN, FieldPoint.CITRUSMID),
             driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)
 

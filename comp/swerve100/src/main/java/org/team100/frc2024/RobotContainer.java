@@ -8,6 +8,7 @@ import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
+import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.ChangeAmpState;
 import org.team100.frc2024.motion.FeedCommand;
@@ -38,7 +39,6 @@ import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.commands.drivetrain.DriveWithProfileNote;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Oscillate;
@@ -52,6 +52,7 @@ import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.DrivePursuitController;
 import org.team100.lib.controller.DriveRamseteController;
@@ -88,6 +89,8 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -510,13 +513,13 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
         whileTrue(driverControl::shooterLock,
-                m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
+                m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors));
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
         // planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
         // swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors));
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
         // m_intake, m_feeder, m_drive));
 
@@ -549,7 +552,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();
 
-        m_auton = m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors);
+        m_auton = m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors);
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
