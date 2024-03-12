@@ -491,7 +491,9 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
 
-        Alliance m_alliance = DriverStation.getAlliance().get();
+        // TODO: make alliance dynamic.
+        // Alliance m_alliance = DriverStation.getAlliance().get();
+        Alliance m_alliance = Alliance.Blue;
 
         AutoMaker m_AutoMaker = new AutoMaker(
                 m_drive,
