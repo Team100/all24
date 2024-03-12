@@ -32,17 +32,10 @@ import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.lib.SubsystemPriority;
 import org.team100.lib.SubsystemPriority.Priority;
-import org.team100.lib.commands.drivetrain.CommandMaker;
-import org.team100.lib.commands.drivetrain.DrawSquare;
-import org.team100.lib.commands.drivetrain.DriveInACircle;
-import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
-import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
-import org.team100.lib.commands.drivetrain.Oscillate;
-import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
@@ -92,12 +85,8 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
-import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.util.Names;
-
-import com.choreo.lib.Choreo;
-import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -106,11 +95,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+/**
+ * Try to keep this container clean; if there's something you want to keep but
+ * don't need right now, cut and paste it into {@link RobotContainerParkingLot}.
+ */
 public class RobotContainer implements Glassy {
     private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
@@ -127,11 +121,9 @@ public class RobotContainer implements Glassy {
     private final SwerveModuleCollection m_modules;
 
     private final Command m_auton;
-    private final DrawSquare m_drawCircle;
 
     private final SelfTestRunner m_selfTest;
-    
-    // Identity-specific fields
+
     // final IndexerSubsystem m_indexer;
     final AmpSubsystem m_amp;
     private final ClimberSubsystem m_climber;
@@ -140,7 +132,6 @@ public class RobotContainer implements Glassy {
     final LEDSubsystem m_ledSubsystem;
     final SensorInterface m_sensors;
     final FeederSubsystem m_feeder;
-    // final SwerveDriveSubsystem m_drive;
 
     final DriverControl driverControl;
     final OperatorControl operatorControl;
@@ -150,6 +141,7 @@ public class RobotContainer implements Glassy {
     private final String m_name;
 
     public RobotContainer(TimedRobot robot) throws IOException {
+        logTime("start");
         m_name = Names.name(this);
 
         driverControl = new DriverControlProxy();
@@ -228,7 +220,7 @@ public class RobotContainer implements Glassy {
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 VecBuilder.fill(0.1, 0.1, 0.1),
-                VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); //0.1 0.1
+                VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); // 0.1 0.1
 
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
@@ -297,9 +289,6 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         whileTrue(driverControl::rotate0, new Rotate(m_drive, m_heading, swerveKinodynamics, 0));
 
-        m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
-        // whileTrue(driverControl::circle, m_drawCircle);
-
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         TrajectoryPlanner planner = new TrajectoryPlanner();
@@ -318,7 +307,6 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // 254 PID follower
         DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF();
-
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
@@ -339,8 +327,6 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // whileTrue(driverControl::test, run);
 
-        
-        
         whileTrue(operatorControl::intake,
                 new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
                         () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
@@ -510,7 +496,10 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
                 m_amp,
                 m_heading,
                 constraints);
-        
+
+        logTime("fourNoteAuto 1 start");
+        // on a roborio 1 this takes 0.8 sec (!)
+
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
@@ -521,7 +510,14 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
         // swerveKinodynamics, 0, m_alliance);
-        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors));
+        logTime("fourNoteAuto 1 done");
+
+        logTime("fourNoteAuto 2 start");
+        // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
+        // lot.
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(notePositionDetector, swerveKinodynamics, m_sensors));
+        logTime("fourNoteAuto 2 end");
+
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
         // m_intake, m_feeder, m_drive));
 
@@ -639,6 +635,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         return "RobotContainer";
     }
 
-    
-
+        private void logTime(String msg) {
+        System.out.printf("%20s %10d us\n", msg, RobotController.getFPGATime());
+    }
 }
