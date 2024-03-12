@@ -68,7 +68,6 @@ public class ShootSmart extends Command {
     m_timer.reset();
     m_shooter.forward();
     // if(m_pivotOverride == -1){
-        
         m_shooter.setAngle(ShooterUtil.getAngle(distance));
     // } else {
     //     m_shooter.setAngle(m_pivotOverride);
@@ -83,14 +82,21 @@ public class ShootSmart extends Command {
   public void execute() {
     t.log(Level.DEBUG, "ShootSmart", "command state", "execute");
 
-    double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
+    double angle;
+    if(m_pivotOverride == -1){
+        double distance = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation()); 
+       angle = ShooterUtil.getAngle(distance);
+    } else {
+        angle = m_pivotOverride;
+    }
+    // double angle = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
 
     
-    // if(m_pivotOverride == -1){
-        m_shooter.setAngle(ShooterUtil.getAngle(distance));
-    // } else {
-    //     m_shooter.setAngle(m_pivotOverride);
-    // }
+    if(m_pivotOverride == -1){
+        m_shooter.setAngle(angle);
+    } else {
+        m_shooter.setAngle(angle);
+    }
 
     if(!m_sensor.getFeederSensor()){
 
@@ -98,10 +104,10 @@ public class ShootSmart extends Command {
       m_feeder.stop();
 
       if(m_shooter.atVelocitySetpoint(false)){
-        if(Math.abs(m_shooter.getPivotPosition() - ShooterUtil.getAngle(m_drive.getPose().getX())) < 1 ){
+        // if(Math.abs(m_shooter.getPivotgPosition() - ShooterUtil.getAngle(m_drive.getPose().getX())) < 1 ){
             atVelocity = true;
             m_timer.start();
-          }
+        //   }
         } 
     }
 
