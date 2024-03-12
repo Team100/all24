@@ -25,23 +25,7 @@ public class ShooterTable {
     }
     
     //MORE NUMBERSSDDD
-    public void loadTable(){
-        // m_table.put(1.4, 0.9);
-        // m_table.put(2.0, 0.714);
-        // m_table.put(3.0, 0.55);
-        // m_table.put(4.03, 0.47);
-        // m_table.put(4.52, 0.42);
-
-        // m_table.put(1.206277, 0.9 );
-        // m_table.put(2.016800, 0.75);
-        // m_table.put(2.810767, 0.6 );
-        // m_table.put(3.998360, 0.51 );
-
-        // m_table.put(2.607582, 0.7);
-
-        // m_table.put(3.277676, 0.6);
-
-        // m_table.put(4.0, 0.48);
+    public void loadTable(){        
 
         m_table.put(1.552869, 0.95);
 
@@ -51,7 +35,11 @@ public class ShooterTable {
 
         m_table.put(3.095720, 0.600000);
 
-        
+        m_table.put(3.819086, 0.55);
+
+        m_table.put(4.01, 0.535);
+
+
 
     }
 

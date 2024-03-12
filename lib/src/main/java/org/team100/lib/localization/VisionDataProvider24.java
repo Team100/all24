@@ -248,7 +248,7 @@ public class VisionDataProvider24 implements Glassy {
             final Rotation2d gyroRotation) {
         for (Blip24 blip : blips) {
 
-            if(blip.getPose().getTranslation().getNorm() > 3)
+            if(blip.getPose().getTranslation().getNorm() > 4)
                 return;
             t.log(Level.DEBUG, m_name, cameraSerialNumber + "TAG NORMMMM", blip.getPose().getTranslation().getNorm());
 

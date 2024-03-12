@@ -493,6 +493,7 @@ public class RobotContainer implements Glassy {
                 m_drive,
                 planner,
                 drivePID,
+                swerveKinodynamics,
                 0,
                 m_alliance,
                 m_feeder,
