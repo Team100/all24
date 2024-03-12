@@ -58,12 +58,12 @@ public class Robot extends TimedRobot implements Glassy {
     public void robotPeriodic() {
         m_robotContainer.beforeCommandCycle();
         CommandScheduler.getInstance().run();
-        
+
         t.log(Level.DEBUG, m_name, "DriverStation MatchTime", DriverStation.getMatchTime());
         t.log(Level.DEBUG, m_name, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
         t.log(Level.DEBUG, m_name, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
         t.log(Level.DEBUG, m_name, "DriverStation FMSAttached", DriverStation.isFMSAttached());
-        
+
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");
             NetworkTableInstance.getDefault().flush();
@@ -75,12 +75,13 @@ public class Robot extends TimedRobot implements Glassy {
         m_robotContainer.ledStart();
     }
 
-    public void setLogName(String logName){
+    public void setLogName(String logName) {
         m_logName = logName;
     }
 
     @Override
     public void disabledPeriodic() {
+        t.log(Level.DEBUG, m_name, "mode", "disabled");
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
         t.log(Level.DEBUG, m_name, "key list size", keyListSize);
         if (keyListSize == 0) {
@@ -128,11 +129,29 @@ public class Robot extends TimedRobot implements Glassy {
         m_robotContainer.close();
     }
 
-    
-
     @Override
     public String getGlassName() {
         return "Robot";
+    }
+
+    @Override
+    public void autonomousPeriodic() {
+        t.log(Level.DEBUG, m_name, "mode", "autonomous");
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        t.log(Level.DEBUG, m_name, "mode", "simulation");
+    }
+
+    @Override
+    public void teleopPeriodic() {
+        t.log(Level.DEBUG, m_name, "mode", "teleop");
+    }
+
+    @Override
+    public void testPeriodic() {
+        t.log(Level.DEBUG, m_name, "mode", "test");
     }
 
     private void banner() {
@@ -150,6 +169,5 @@ public class Robot extends TimedRobot implements Glassy {
         b.append(kReset);
         Util.println(b.toString());
 
-        
     }
 }
