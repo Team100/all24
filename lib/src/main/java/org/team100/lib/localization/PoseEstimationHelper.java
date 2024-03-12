@@ -67,11 +67,11 @@ public class PoseEstimationHelper {
                 Translation2d fieldRealtiveTranslation = currentPose
                         .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation();
-                if (fieldRealtiveTranslation.getY() > 0 && fieldRealtiveTranslation.getX() > 0) {
-                    if (fieldRealtiveTranslation.getY() < 8.21 && fieldRealtiveTranslation.getX() < 16.54) {
-                        Tnotes.add(fieldRealtiveTranslation);
-                    }
-                }
+                        if (fieldRealtiveTranslation.getY() > 0 && fieldRealtiveTranslation.getX() > 0) {
+                            if (fieldRealtiveTranslation.getY() < 8.21 && fieldRealtiveTranslation.getX() < 16.54) {
+                                Tnotes.add(fieldRealtiveTranslation);
+                            }
+                        }
             }
 
         return Tnotes;
@@ -91,11 +91,11 @@ public class PoseEstimationHelper {
                 Translation2d fieldRelativeNote = currentPose
                         .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation();
-                if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
-                    if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
-                        Tnotes.add(fieldRelativeNote);
-                    }
-                }
+                        if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
+                            if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
+                Tnotes.add(fieldRelativeNote);
+                            }
+                        }
             }
         return Tnotes;
     }

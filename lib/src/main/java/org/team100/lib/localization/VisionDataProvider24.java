@@ -35,6 +35,7 @@ import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -87,7 +88,6 @@ public class VisionDataProvider24 implements Glassy {
     private final SwerveDrivePoseEstimator100 poseEstimator;
     private final AprilTagFieldLayoutWithCorrectOrientation layout;
     private final String m_name;
-    private final Alliance m_alliance;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -97,21 +97,19 @@ public class VisionDataProvider24 implements Glassy {
 
     /**
      * @param layout
-     * @param poseEstimator can be null for testing.
+     * @param poseEstimator    can be null for testing.
      * @param rotationSupplier rotation for the given time in seconds
      * @throws IOException
      */
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
             SwerveDrivePoseEstimator100 poseEstimator,
-            DoubleFunction<Optional<Rotation2d>> rotationSupplier,
-            Alliance alliance) throws IOException {
+            DoubleFunction<Optional<Rotation2d>> rotationSupplier) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
         this.layout = layout;
         this.poseEstimator = poseEstimator;
         this.rotationSupplier = rotationSupplier;
-        m_alliance = alliance;
         m_name = Names.name(this);
     }
 
@@ -156,13 +154,18 @@ public class VisionDataProvider24 implements Glassy {
             // the ID of the camera
             String cameraSerialNumber = fields[1];
 
+            Optional<Alliance> alliance = DriverStation.getAlliance();
+            if (!alliance.isPresent())
+                return;
+
             // TODO: add a real firing solution consumer.
             estimateRobotPose(
                     poseEstimator::addVisionMeasurement,
                     f -> {
                     },
                     cameraSerialNumber,
-                    blips);
+                    blips,
+                    alliance.get());
         } else {
             // this event is not for us
             // Util.println("weird vision update key: " + name);
@@ -179,7 +182,8 @@ public class VisionDataProvider24 implements Glassy {
             final ObjDoubleConsumer<Pose2d> estimateConsumer,
             Consumer<Translation2d> firingSolutionConsumer,
             String cameraSerialNumber,
-            final Blip24[] blips) {
+            final Blip24[] blips,
+            Alliance alliance) {
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
         // Estimated instant represented by the blips
@@ -199,13 +203,26 @@ public class VisionDataProvider24 implements Glassy {
                 blips,
                 cameraInRobotCoordinates,
                 frameTime,
-                gyroRotation);
+                gyroRotation,
+                alliance);
 
         if (Experiments.instance.enabled(Experiment.Triangulate)) {
-            triangulate(estimateConsumer, cameraSerialNumber, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
+            triangulate(
+                    estimateConsumer,
+                    cameraSerialNumber,
+                    blips,
+                    cameraInRobotCoordinates,
+                    frameTime,
+                    gyroRotation,
+                    alliance);
         }
 
-        firingSolution(firingSolutionConsumer, cameraSerialNumber, blips, cameraInRobotCoordinates);
+        firingSolution(
+                firingSolutionConsumer,
+                cameraSerialNumber,
+                blips,
+                cameraInRobotCoordinates,
+                alliance);
 
     }
 
@@ -220,12 +237,12 @@ public class VisionDataProvider24 implements Glassy {
     private void firingSolution(
             Consumer<Translation2d> firingSolutionConsumer,
             final String cameraSerialNumber,
-
             final Blip24[] blips,
-            final Transform3d cameraInRobotCoordinates) {
+            final Transform3d cameraInRobotCoordinates,
+            Alliance alliance) {
         for (Blip24 blip : blips) {
-            if ((blip.getId() == 7 && m_alliance == Alliance.Blue) ||
-                    (blip.getId() == 5 && m_alliance == Alliance.Red)) {
+            if ((blip.getId() == 7 && alliance == Alliance.Blue) ||
+                    (blip.getId() == 5 && alliance == Alliance.Red)) {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
@@ -245,18 +262,15 @@ public class VisionDataProvider24 implements Glassy {
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
             final double frameTime,
-            final Rotation2d gyroRotation) {
+            final Rotation2d gyroRotation,
+            Alliance alliance) {
         for (Blip24 blip : blips) {
-
-            if(blip.getPose().getTranslation().getNorm() > 4)
-                return;
-            t.log(Level.DEBUG, m_name, cameraSerialNumber + "TAG NORMMMM", blip.getPose().getTranslation().getNorm());
 
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
-            Optional<Pose3d> tagInFieldCoordsOptional = layout.getTagPose(blip.getId());
+            Optional<Pose3d> tagInFieldCoordsOptional = layout.getTagPose(alliance, blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())
                 continue;
 
@@ -309,7 +323,8 @@ public class VisionDataProvider24 implements Glassy {
             Blip24[] blips,
             Transform3d cameraInRobotCoordinates,
             double frameTime,
-            Rotation2d gyroRotation) {
+            Rotation2d gyroRotation,
+            Alliance alliance) {
         // if multiple tags are in view, triangulate to get another (perhaps more
         // accurate) estimate
         for (int i = 0; i < blips.length - 1; i++) {
@@ -317,8 +332,8 @@ public class VisionDataProvider24 implements Glassy {
             for (int j = i + 1; j < blips.length; ++j) {
                 Blip24 b1 = blips[j];
 
-                Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(b0.getId());
-                Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(b1.getId());
+                Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(alliance, b0.getId());
+                Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(alliance, b1.getId());
 
                 if (!tagInFieldCordsOptional0.isPresent())
                     continue;
@@ -381,7 +396,5 @@ public class VisionDataProvider24 implements Glassy {
     public String getGlassName() {
         return "VisionDataProvider24";
     }
-
-    
 
 }

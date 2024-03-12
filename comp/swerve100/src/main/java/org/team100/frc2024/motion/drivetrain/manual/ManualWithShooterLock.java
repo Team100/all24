@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.drivetrain.manual;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
@@ -22,6 +23,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * Manual cartesian control, with rotational control based on a target position.
@@ -58,7 +61,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private boolean isAligned;
 
     public ManualWithShooterLock(
-            String parent, 
+            String parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             PIDController thetaController,
@@ -93,17 +96,20 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
      */
     @Override
     public Twist2d apply(SwerveState state, Twist2d input) {
+        Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
+        if (!optionalAlliance.isPresent())
+            return new Twist2d();
+
         // clip the input to the unit circle
         Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
 
         Translation2d currentTranslation = state.pose().getTranslation();
-        Translation2d target = ShooterUtil.getOffsetTranslation(state, m_scale);
+        Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get(), state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
 
         t.log(Level.TRACE, m_name, "bearing", bearing);
-
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -149,7 +155,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
         t.log(Level.TRACE, m_name, "target motion", targetMotion);
         t.log(Level.TRACE, m_name, "goal X", goal.x());
-
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -200,25 +205,22 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return target.minus(robot).getAngle();
     }
 
-
-    public void checkBearing(Rotation2d bearing, Rotation2d currentRotation){
-        if(Math.abs(bearing.minus(currentRotation).getDegrees()) < 20){
+    public void checkBearing(Rotation2d bearing, Rotation2d currentRotation) {
+        if (Math.abs(bearing.minus(currentRotation).getDegrees()) < 20) {
             isAligned = true;
         } else {
             isAligned = false;
         }
     }
 
-    public boolean isAligned(){
+    public boolean isAligned() {
         return isAligned;
     }
 
-    
+    static void aimWhileMoving(Rotation2d bearing, SwerveState state) {
 
-    static void aimWhileMoving(Rotation2d bearing, SwerveState state){
-
-            //its the shooter util code but robot moving vec is y velocity and angle in rads is bearing
-
+        // its the shooter util code but robot moving vec is y velocity and angle in
+        // rads is bearing
 
     }
 
@@ -227,5 +229,4 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return "ManualWithShooterLock";
     }
 
-    
 }

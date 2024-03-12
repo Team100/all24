@@ -58,7 +58,7 @@ public class FancyTrajectory extends Command100 {
         List<Rotation2d> headings = List.of(
                 GeometryUtil.fromDegrees(0),
                 GeometryUtil.fromDegrees(0));
-
+        
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.

@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class PoseEstimationHelperTest {
     private static final double kDelta = 0.01;
@@ -358,10 +359,9 @@ class PoseEstimationHelperTest {
 
         // first try the "corrected" layout, which is "into the page" tag orientation.
         // this is CORRECT
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
-                .blueLayout("2024-crescendo.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
-        Pose3d tagInFieldCoords = layout.getTagPose(7).get();
+        Pose3d tagInFieldCoords = layout.getTagPose(Alliance.Blue, 7).get();
 
         Pose3d cameraInFieldCoords = PoseEstimationHelper.toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
 

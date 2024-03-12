@@ -71,7 +71,7 @@ class DriveMotionPlannerTest {
         Pose2d pose = timed_trajectory.getPoint(0).state().state().getPose();
         Twist2d velocity = new Twist2d();
 
-        // this overshoots 0.02 in y and about 1 degree in heading
+// this overshoots 0.02 in y and about 1 degree in heading
         // TODO: figure out why that is
         double time = 0.0;
         double mDt = 0.005;
@@ -82,7 +82,7 @@ class DriveMotionPlannerTest {
             velocity = GeometryUtil.toTwist2d(speeds);
             pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
             time += mDt;
-            System.out.println(pose);
+System.out.println(pose);
         }
         Assertions.assertEquals(196, pose.getTranslation().getX(), 0.2);
         Assertions.assertEquals(13, pose.getTranslation().getY(), 0.1);

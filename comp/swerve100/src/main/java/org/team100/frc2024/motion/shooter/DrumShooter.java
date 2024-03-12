@@ -29,6 +29,7 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * Direct-drive shooter with top and bottom drums.
@@ -247,8 +248,8 @@ public class DrumShooter extends Shooter{
         }
     }
 
-    public boolean readyToShoot(SwerveDriveSubsystem m_drive){
-        if (ShooterUtil.getRobotRotationToSpeaker(m_drive.getPose().getTranslation(), 0.25).getDegrees() < 1){
+    public boolean readyToShoot(Alliance alliance, SwerveDriveSubsystem m_drive){
+        if (ShooterUtil.getRobotRotationToSpeaker(alliance, m_drive.getPose().getTranslation(), 0.25).getDegrees() < 1){
             if(getAngle() - ShooterUtil.getAngle(m_drive.getPose().getX()) < 0.1){
                 return true;
             }

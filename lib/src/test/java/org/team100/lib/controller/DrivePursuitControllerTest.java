@@ -46,7 +46,7 @@ class DrivePursuitControllerTest {
                 GeometryUtil.fromDegrees(180));
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
-
+        
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
 
 
@@ -55,7 +55,7 @@ class DrivePursuitControllerTest {
         TrajectoryPlanner planner = new TrajectoryPlanner();
         double start_vel = 0;
         double end_vel = 0;
-        Trajectory100 trajectory = planner.generateTrajectory(
+                Trajectory100 trajectory = planner.generateTrajectory(
                 false,
                 waypoints,
                 headings,

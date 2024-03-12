@@ -8,64 +8,75 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class ShooterUtil {
     public static ShooterTable instance = new ShooterTable();
 
-    public static Translation2d getOffsetTranslation(SwerveState state, double kScale){
+    public static Translation2d getOffsetTranslation(Alliance alliance, SwerveState state, double kScale) {
         Translation2d currentTranslation = state.pose().getTranslation();
 
-        Translation2d shooterCenter = new Translation2d(FieldConstants.instance.getShooterCenterX(), 
-                                                       FieldConstants.instance.getShooterCenterY());
+        FieldConstants fieldConstants = FieldConstants.get(alliance);
+
+        Translation2d shooterCenter = new Translation2d(
+                fieldConstants.getShooterCenterX(),
+                fieldConstants.getShooterCenterY());
 
         // double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
-        
-        //  double offsetDistance = MathUtil.clamp( FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 * kScale, 
-        //                                         FieldConstants.instance.getShooterLeftSideY(), 
-        //                                         FieldConstants.instance.getShooterRightSideY());
 
-        return new Translation2d(FieldConstants.instance.getShooterCenterX(), FieldConstants.instance.getShooterCenterY());
+        // double offsetDistance = MathUtil.clamp(
+        // FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 *
+        // kScale,
+        // FieldConstants.instance.getShooterLeftSideY(),
+        // FieldConstants.instance.getShooterRightSideY());
+
+        return new Translation2d(
+            fieldConstants.getShooterCenterX(),
+            fieldConstants.getShooterCenterY());
 
     }
 
-    public static Translation2d getSpeakerTranslation(){
-        return new Translation2d(0, FieldConstants.instance.getShooterCenterY());
+    public static Translation2d getSpeakerTranslation(Alliance alliance) {
+        FieldConstants fieldConstants = FieldConstants.get(alliance);
+
+        return new Translation2d(0, fieldConstants.getShooterCenterY());
     }
 
+    public static Translation2d getOffsetTranslation(Alliance alliance, Translation2d currTranslation, double kScale) {
+        FieldConstants fieldConstants = FieldConstants.get(alliance);
 
-
-    public static Translation2d getOffsetTranslation(Translation2d currTranslation, double kScale){
         Translation2d currentTranslation = currTranslation;
 
-        Translation2d shooterCenter = new Translation2d(FieldConstants.instance.getShooterCenterX(), 
-                                                       FieldConstants.instance.getShooterCenterY());
+        Translation2d shooterCenter = new Translation2d(fieldConstants.getShooterCenterX(),
+                fieldConstants.getShooterCenterY());
 
         double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
 
-        double offsetDistance = MathUtil.clamp( FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 * kScale, 
-                                                FieldConstants.instance.getShooterLeftSideY(), 
-                                                FieldConstants.instance.getShooterRightSideY());
+        double offsetDistance = MathUtil.clamp(
+                fieldConstants.getShooterCenterY() + distanceHorizontal * -1 * kScale,
+                fieldConstants.getShooterLeftSideY(),
+                fieldConstants.getShooterRightSideY());
 
-        return new Translation2d(FieldConstants.instance.getShooterCenterX(), offsetDistance);
+        return new Translation2d(fieldConstants.getShooterCenterX(), offsetDistance);
 
     }
 
-    public static Rotation2d getRobotRotationToSpeaker(Translation2d translation, double kScale){
+    public static Rotation2d getRobotRotationToSpeaker(Alliance alliance, Translation2d translation, double kScale) {
         Translation2d currentTranslation = translation;
-        Translation2d target = getOffsetTranslation(translation, kScale);
+        Translation2d target = getOffsetTranslation(alliance, translation, kScale);
 
         return target.minus(currentTranslation).getAngle();
 
     }
 
-    public static double getAngle(double distance){
+    public static double getAngle(double distance) {
         return instance.getAngle(distance);
     }
-    
-    //Distance in Meters
-    //Velocity also needs to be in M/s
 
-    public static double getShooterAngleWhileMovingTest(double distance, double velocity, SwerveState state){
+    // Distance in Meters
+    // Velocity also needs to be in M/s
+
+    public static double getShooterAngleWhileMovingTest(double distance, double velocity, SwerveState state) {
 
         double angleWithoutMoving = getAngle(distance);
 
@@ -87,7 +98,7 @@ public class ShooterUtil {
 
     }
 
-    public static double getShooterAngleWhileMoving(double distance, double velocity, SwerveState state){
+    public static double getShooterAngleWhileMoving(double distance, double velocity, SwerveState state) {
 
         double angleWithoutMoving = getAngle(distance);
 
@@ -95,12 +106,13 @@ public class ShooterUtil {
 
         Vector2d stationaryRobotVector = new Vector2d(velocity, angleInRads);
 
-        Vector2d robotMovingVector = new Vector2d(state.x().v(), 0); 
+        Vector2d robotMovingVector = new Vector2d(state.x().v(), 0);
 
         Vector2d resultingVector = Vector2d.sub(stationaryRobotVector, robotMovingVector);
-        
-        // System.out.println("RESULTANT VECTOR: " + resultingVector.getTheta().getDegrees());
-        // System.out.println("OG VECTOR: " + angleWithoutMoving); 
+
+        // System.out.println("RESULTANT VECTOR: " +
+        // resultingVector.getTheta().getDegrees());
+        // System.out.println("OG VECTOR: " + angleWithoutMoving);
 
         return resultingVector.getTheta().getDegrees();
 

@@ -41,7 +41,7 @@ class DriveToWaypoint100Test extends Fixtured {
     void testWithPursuit() {
         TrajectoryPlanner planner = new TrajectoryPlanner();
         DriveMotionController controller = DriveMotionControllerFactory.purePursuit(fixture.swerveKinodynamics);
-        List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
+List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
 
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero,

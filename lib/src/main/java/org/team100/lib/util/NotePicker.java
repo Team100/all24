@@ -28,7 +28,7 @@ public class NotePicker {
             new Translation2d(13.66, 4.11),
     };
 
-    /**
+/**
      * @param notes  the field relative pose of detected notes
      * @param noteID the field id of the note you want to go for, left bottom to
      *               right top IDs are 1-11

@@ -38,7 +38,7 @@ public class DrivePIDFController implements DriveMotionController {
     private Pose2d error = new Pose2d();
     private double m_kPCart;
     private double m_kPTheta;
-    private Trajectory100 m_trajectory = new Trajectory100();
+private Trajectory100 m_trajectory = new Trajectory100();
     private Pose2d goalPose;
 
     /** Use the factory. */
@@ -54,7 +54,7 @@ public class DrivePIDFController implements DriveMotionController {
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator iter) {
-        m_trajectory = iter.trajectory();
+m_trajectory = iter.trajectory();
         goalPose = m_trajectory.getLastPoint().state().state().getPose();
 
         m_iter = iter;
@@ -71,9 +71,9 @@ public class DrivePIDFController implements DriveMotionController {
             return new ChassisSpeeds();
 
         t.log(Level.TRACE, m_name, "measurement", measurement);
-
+        
         // if (isDone()) {
-        // return new ChassisSpeeds();
+            // return new ChassisSpeeds();
         // }
 
         Optional<TimedPose> optionalSetpoint = getSetpoint(timeS);
@@ -85,15 +85,15 @@ public class DrivePIDFController implements DriveMotionController {
         t.log(Level.TRACE, m_name, "setpoint", setpoint);
 
         error = DriveMotionControllerUtil.getError(measurement, setpoint);
-
+        
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, setpoint);
         // if (m_feedforwardOnly)
-        // return u_FF;
+            // return u_FF;
 
-        // ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement,
+// ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement,
         // mSetpoint.get(), m_kPCart, m_kPTheta);
 
-        // ChassisSpeeds output = u_FF.plus(u_FB);
+// ChassisSpeeds output = u_FF.plus(u_FB);
 
         // if(output.equals(output))
 
@@ -115,7 +115,7 @@ public class DrivePIDFController implements DriveMotionController {
                     m_kPTheta);
         }
 
-        return u_FF.plus(u_FB);
+      return u_FF.plus(u_FB);
     }
 
     double dt(double timestamp) {
@@ -131,7 +131,7 @@ public class DrivePIDFController implements DriveMotionController {
 
         Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
         if (!sample_point.isPresent()) {
-            t.log(Level.TRACE, m_name, "IS MT", true);
+t.log(Level.TRACE, m_name, "IS MT", true);
 
             return Optional.empty();
         }
@@ -149,4 +149,4 @@ public class DrivePIDFController implements DriveMotionController {
         return "DrivePIDFController";
     }
 
-}
+    }

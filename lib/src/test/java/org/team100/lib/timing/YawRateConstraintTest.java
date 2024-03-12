@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 class YawRateConstraintTest {
     private static final double kDelta = 0.001;
-    // for testing, use the aboslute maximum. This shouldn't be used in a real
+// for testing, use the aboslute maximum. This shouldn't be used in a real
     // robot.
     private static final double kYawRateScale = 1.0;
 
