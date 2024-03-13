@@ -35,7 +35,7 @@ public class ShootSmart extends Command {
   boolean m_isPreload;
 double m_pivotOverride;
 
-  public ShootSmart(SensorInterface sensor, Shooter shooter, Intake intake, FeederSubsystem feeder, SwerveDriveSubsystem drive, double pivotOverride) {
+  public ShootSmart(SensorInterface sensor, Shooter shooter, Intake intake, FeederSubsystem feeder, SwerveDriveSubsystem drive, double pivotOverride, boolean isPreload) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_intake = intake;
     m_sensor = sensor;
@@ -44,11 +44,12 @@ double m_pivotOverride;
     m_timer = new Timer();
     m_drive = drive;
     m_pivotOverride = pivotOverride;
+    m_isPreload = isPreload;
 
     addRequirements(m_intake, m_feeder, m_shooter);
   }
 
-  public ShootSmart(SensorInterface sensor, Shooter shooter, Intake intake, FeederSubsystem feeder, SwerveDriveSubsystem drive) {
+  public ShootSmart(SensorInterface sensor, Shooter shooter, Intake intake, FeederSubsystem feeder, SwerveDriveSubsystem drive, boolean isPreload) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_intake = intake;
     m_sensor = sensor;
@@ -57,6 +58,7 @@ double m_pivotOverride;
     m_timer = new Timer();
     m_drive = drive;
     m_pivotOverride = -1;
+    m_isPreload = isPreload;
 
     addRequirements(m_intake, m_feeder, m_shooter);
   }
@@ -112,7 +114,7 @@ double targetShooterAngle;
       m_intake.stop();
       m_feeder.stop();
 
-      if(m_shooter.atVelocitySetpoint(false)){
+      if(m_shooter.atVelocitySetpoint(m_isPreload)){
         // if(Math.abs(m_shooter.getPivotgPosition() - ShooterUtil.getAngle(m_drive.getPose().getX())) < 1 ){
             atVelocity = true;
             m_timer.start();
@@ -125,7 +127,7 @@ double targetShooterAngle;
       m_feeder.feed();
       m_intake.intake();
 
-      if(m_timer.get() > 1){
+      if(m_timer.get() > 0.2){
         finished = true;
       }
     }

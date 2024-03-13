@@ -191,7 +191,6 @@ public class RobotContainer implements Glassy {
         m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
         t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
-        // t.log(Level.INFO, m_name, "Alliance", m_alliance);
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -298,7 +297,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF();
+        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF();
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
@@ -471,7 +470,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // TODO: make alliance dynamic.
         // Alliance m_alliance = DriverStation.getAlliance().get();
-        Alliance m_alliance = Alliance.Blue;
+        Alliance m_alliance = Alliance.Red;
 
         AutoMaker m_AutoMaker = new AutoMaker(
                 m_drive,
@@ -495,8 +494,12 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
+        // whileTrue(driverControl::shooterLock,
+        //         m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors));
+
         whileTrue(driverControl::shooterLock,
-                m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors));
+                m_AutoMaker.citrus(Alliance.Red));
+
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
         // planner, drivePID, swerveKinodynamics));
@@ -507,7 +510,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         logTime("fourNoteAuto 2 start");
         // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
         // lot.
-        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors));
+        whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Red));
         logTime("fourNoteAuto 2 end");
 
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
