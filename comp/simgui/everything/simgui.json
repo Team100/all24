@@ -1,5 +1,10 @@
 {
   "HALProvider": {
+    "Addressable LEDs": {
+      "window": {
+        "visible": true
+      }
+    },
     "Other Devices": {
       "window": {
         "visible": false
@@ -62,7 +67,17 @@
       "/field": "Field2d"
     },
     "windows": {
+      "/FMSInfo": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Driver Skill Level": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Front Left_SwerveModule100": {
         "window": {
           "visible": true
         }
@@ -93,6 +108,9 @@
   "NetworkTables": {
     "retained": {
       "Command100": {
+        "DriveManually": {
+          "open": false
+        },
         "Oscillate": {
           "open": true
         }
@@ -199,7 +217,9 @@
         }
       },
       "SwerveDriveSubsystem": {
+        "open": true,
         "pose": {
+          "open": true,
           "translation": {
             "open": true
           }
@@ -213,11 +233,20 @@
       "field": {
         "double[]##v_/field/robot": {
           "open": true
-        }
+        },
+        "open": true
       }
     },
     "transitory": {
       "SmartDashboard": {
+        "Scheduler": {
+          "int[]##v_/SmartDashboard/Scheduler/Ids": {
+            "open": false
+          },
+          "string[]##v_/SmartDashboard/Scheduler/Names": {
+            "open": false
+          }
+        },
         "Shooter": {
           "open": true,
           "root": {
@@ -238,8 +267,5 @@
         }
       }
     }
-  },
-  "NetworkTables Info": {
-    "visible": true
   }
 }

@@ -1,33 +1,25 @@
 package org.team100.frc2024.motion;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
-import org.team100.frc2024.CompSensors;
 import org.team100.frc2024.SensorInterface;
-import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.ChangeIntakeState;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.RampShooter;
-import org.team100.frc2024.motion.shooter.RotateToShooter;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
-import org.team100.lib.commands.drivetrain.DriveWithProfile2;
-import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -37,11 +29,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class AutoMaker {
     public SwerveDriveSubsystem m_swerve;
@@ -52,30 +41,29 @@ public class AutoMaker {
     public AmpSubsystem m_amp;
     public SwerveKinodynamics m_limits;
 
-
-  public Intake m_intake;
+    public Intake m_intake;
     public Shooter m_shooter;
     public FeederSubsystem m_feeder;
     private final double kMaxVelM_S = 2;
     private final double kMaxAccelM_S_S = 2;
 
-  private final NotePosition24ArrayListener m_notePosition24ArrayListener;
+    private final NotePosition24ArrayListener m_notePosition24ArrayListener;
     private final double kAutoNoteMaxVelM_S = 2;
     private final double kAutoNoteMaxAccelM_S_S = 2;
 
     HeadingInterface m_heading;
 
-  private final double kShooterScale;
-    private final Alliance m_alliance;
+    private final double kShooterScale;
     private final double kIntakeOffset = 0;
 
     public enum FieldPoint {
         NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT,
         CENTRALSTAGEOPENING,
-        FARSTAGEADJACENT, FARSTAGEOPENING, DROPSHOT, CLOSESTAGEADJACENT, STARTSUBWOOFER, DRIVETONOTEHANDOFF, CITRUSMID, CITRUSEND, CITRUSBEGIN, COMPLEMENTBEGIN, COMPLEMENTSHOOT
+        FARSTAGEADJACENT, FARSTAGEOPENING, DROPSHOT, CLOSESTAGEADJACENT, STARTSUBWOOFER, DRIVETONOTEHANDOFF, CITRUSMID,
+        CITRUSEND, CITRUSBEGIN, COMPLEMENTBEGIN, COMPLEMENTSHOOT
     }
 
-    private Translation2d getTranslation(FieldPoint point) {
+    private Translation2d getTranslation(Alliance m_alliance, FieldPoint point) {
         if (Experiments.instance.enabled(Experiment.AutoNoteDetection)) {
             Translation2d pose;
             Optional<Translation2d> translation2d;
@@ -137,7 +125,7 @@ public class AutoMaker {
                     }
                     return pose;
                 case CLOSEWINGSHOT:
-                    pose =forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
+                    pose = forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
                     return pose;
                 case FARWINGSHOT:
                     pose = forAlliance(new Translation2d(4, 1.5), m_alliance);
@@ -155,7 +143,7 @@ public class AutoMaker {
                     pose = forAlliance(new Translation2d(.5, 1.8), m_alliance);
                     return pose;
                 case DRIVETONOTEHANDOFF:
-                    pose = forAlliance(new Translation2d(6.2,7.8), m_alliance);
+                    pose = forAlliance(new Translation2d(6.2, 7.8), m_alliance);
                     return pose;
                 default:
                     return new Translation2d();
@@ -163,11 +151,11 @@ public class AutoMaker {
         }
         switch (point) {
             case NOTE1:
-                return forAlliance(new Translation2d(2.8956, 7.0061), m_alliance); //7.0061
+                return forAlliance(new Translation2d(2.8956, 7.0061), m_alliance); // 7.0061
             case NOTE2:
                 return forAlliance(new Translation2d(2.8956, 5.5583), m_alliance);
             case NOTE3:
-                return forAlliance(new Translation2d(2.8956, 4.1105), m_alliance); //2.6956, 4.2105
+                return forAlliance(new Translation2d(2.8956, 4.1105), m_alliance); // 2.6956, 4.2105
             case NOTE4:
                 return forAlliance(new Translation2d(8.271, 0.7577), m_alliance);
             case NOTE5:
@@ -177,7 +165,7 @@ public class AutoMaker {
             case NOTE7:
                 return forAlliance(new Translation2d(8.271, 5.7869), m_alliance);
             case NOTE8:
-                return forAlliance(new Translation2d(8.4, 8.3633), m_alliance); //WAS 7.4 //8.4 fudge
+                return forAlliance(new Translation2d(8.4, 8.3633), m_alliance); // WAS 7.4 //8.4 fudge
             case CLOSEWINGSHOT:
                 return forAlliance(new Translation2d(3, 6.4), m_alliance);
             case FARWINGSHOT:
@@ -197,24 +185,24 @@ public class AutoMaker {
             case STARTSUBWOOFER:
                 return forAlliance(new Translation2d(1.38, 5.566847), m_alliance);
             case DRIVETONOTEHANDOFF:
-                    return forAlliance(new Translation2d(4.9, 7.5  ), m_alliance);
+                return forAlliance(new Translation2d(4.9, 7.5), m_alliance);
             case CITRUSMID:
-                    return forAlliance(new Translation2d(3.269011, 1.306543), m_alliance);
+                return forAlliance(new Translation2d(3.269011, 1.306543), m_alliance);
             case CITRUSEND:
-                    return forAlliance(new Translation2d(6.964483, 1.476407), m_alliance);
+                return forAlliance(new Translation2d(6.964483, 1.476407), m_alliance);
             case CITRUSBEGIN:
-                    return forAlliance( new Translation2d(0.865358, 4.215958), m_alliance);
+                return forAlliance(new Translation2d(0.865358, 4.215958), m_alliance);
             case COMPLEMENTBEGIN:
-                    return new Translation2d(0.663879, 3.917024);
+                return new Translation2d(0.663879, 3.917024);
             case COMPLEMENTSHOOT:
-                    return (new Translation2d(3.683978, 5.089443));
-            default:    
+                return (new Translation2d(3.683978, 5.089443));
+            default:
                 return new Translation2d();
         }
     }
 
     private Pose2d getPose(Alliance alliance, FieldPoint point) {
-        Translation2d translation = getTranslation(point);
+        Translation2d translation = getTranslation(alliance, point);
         Rotation2d heading = new Rotation2d(Math.PI);
         switch (point) {
             case NOTE1, NOTE2:
@@ -248,8 +236,9 @@ public class AutoMaker {
     }
 
     public AutoMaker(SwerveDriveSubsystem swerve, TrajectoryPlanner planner, DriveMotionController controller,
-            SwerveKinodynamics limits, double shooterScale, Alliance alliance, FeederSubsystem feeder, Shooter shooter,
-            Intake intake, SensorInterface sensor, NotePosition24ArrayListener notePosition24ArrayListener, AmpSubsystem amp, HeadingInterface heading, List<TimingConstraint> constraints) {
+            SwerveKinodynamics limits, double shooterScale, FeederSubsystem feeder, Shooter shooter,
+            Intake intake, SensorInterface sensor, NotePosition24ArrayListener notePosition24ArrayListener,
+            AmpSubsystem amp, HeadingInterface heading, List<TimingConstraint> constraints) {
         m_notePosition24ArrayListener = notePosition24ArrayListener;
         m_swerve = swerve;
         m_planner = planner;
@@ -260,7 +249,6 @@ public class AutoMaker {
         m_shooter = shooter;
         m_intake = intake;
         m_sensors = sensor;
-        m_alliance = alliance;
         m_amp = amp;
         m_heading = heading;
         m_limits = limits;
@@ -298,19 +286,18 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
-public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translation2d waypoint, Translation2d waypoint2, FieldPoint noteB, double maxVel, double maxAcc) {
+    public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translation2d waypoint,
+            Translation2d waypoint2, FieldPoint noteB, double maxVel, double maxAcc) {
         Pose2d startPose = getPose(alliance, noteA);
         Pose2d endPose = getPose(alliance, noteB);
         Translation2d translationToGoal = endPose.getTranslation().minus(startPose.getTranslation());
 
         Translation2d translationGoalToWaypoint = endPose.getTranslation().minus(waypoint);
-        
 
         Rotation2d angleFromWaypoint = translationGoalToWaypoint.getAngle();
 
         Rotation2d angleToGoal = translationToGoal.getAngle();
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), Rotation2d.fromDegrees(170));
-
 
         Pose2d betweenWaypoint = new Pose2d(waypoint, waypoint2.minus(waypoint).getAngle());
 
@@ -321,15 +308,15 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endPose.getRotation().plus(new Rotation2d(Math.PI)));
 
         List<Pose2d> waypointsM = List.of(startWaypoint, betweenWaypoint, midWaypoint, endWaypoint);
-        Rotation2d betweenHeading = new Rotation2d(ShooterUtil.getRobotRotationToSpeaker(alliance, waypoint, 0).getRadians());
+        Rotation2d betweenHeading = new Rotation2d(
+                ShooterUtil.getRobotRotationToSpeaker(alliance, waypoint, 0).getRadians());
         System.out.println("ENNNNNNNNNNNNNNDDDDDDDDDDDDDD" + endPose.getRotation());
-        List<Rotation2d> headings = List.of(startPose.getRotation(), betweenHeading, betweenHeading, endPose.getRotation());
+        List<Rotation2d> headings = List.of(startPose.getRotation(), betweenHeading, betweenHeading,
+                endPose.getRotation());
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
                 maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
-
-    
 
     public DriveToWithAutoStart startToNote(Alliance alliance, FieldPoint note) {
         Pose2d endPose = getPose(alliance, note);
@@ -354,11 +341,12 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
 
         List<Rotation2d> headings = List.of(Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(150));
 
-        //  List<Pose2d> waypointsM = List.of(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-        //         new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+        // List<Pose2d> waypointsM = List.of(new Pose2d(0, 0,
+        // Rotation2d.fromDegrees(0)),
+        // new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 
-        // List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(0));
-
+        // List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new
+        // Rotation2d(0));
 
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
                 kMaxAccelM_S_S);
@@ -394,15 +382,16 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
         Rotation2d angleToGoal = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
-        
-        Pose2d waypoint = new Pose2d( forAlliance(new Translation2d(1.92, 4.84), m_alliance), angleToGoal);
-        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), waypoint.getTranslation().minus(startPose.getTranslation()).getAngle());
-        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
+        Pose2d waypoint = new Pose2d(forAlliance(new Translation2d(1.92, 4.84), alliance), angleToGoal);
+        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
+                waypoint.getTranslation().minus(startPose.getTranslation()).getAngle());
+        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
         List<Pose2d> waypointsM = List.of(startWaypoint, waypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation(), endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
+                kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
@@ -410,15 +399,16 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
         Rotation2d angleToGoal = endPose.getTranslation().minus(new Translation2d(4.91, 3.84)).getAngle();
-        
-        Pose2d waypoint = new Pose2d( (new Translation2d(4.91, 3.84)), angleToGoal);
-        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), waypoint.getTranslation().minus(startPose.getTranslation()).getAngle());
-        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
+        Pose2d waypoint = new Pose2d((new Translation2d(4.91, 3.84)), angleToGoal);
+        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
+                waypoint.getTranslation().minus(startPose.getTranslation()).getAngle());
+        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
         List<Pose2d> waypointsM = List.of(startWaypoint, waypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation(), endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
+                kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
 
@@ -439,24 +429,24 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
         Pose2d startPose = start;
         Pose2d endPose = end;
         Translation2d correctTranslation = forAlliance(end.getTranslation(), alliance);
-        endPose = new Pose2d( forAlliance(end.getTranslation(), alliance), ShooterUtil.getRobotRotationToSpeaker(alliance, correctTranslation, kShooterScale));
-
-        
+        endPose = new Pose2d(forAlliance(end.getTranslation(), alliance),
+                ShooterUtil.getRobotRotationToSpeaker(alliance, correctTranslation, kShooterScale));
 
         Rotation2d angleToGoal = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
-        
+
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), angleToGoal);
 
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
-
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
 
-//       Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
-//         return new TrajectoryCommand100(m_swerve, trajec tory, new DrivePIDFController(false, 2, 2));
+        // Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM,
+        // headings, m_constraints, kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+        // return new TrajectoryCommand100(m_swerve, trajec tory, new
+        // DrivePIDFController(false, 2, 2));
 
-      Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
                 4, 4);
         return new TrajectoryCommand100(
                 m_swerve,
@@ -464,31 +454,35 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
                 DriveMotionControllerFactory.straightPIDF());
     }
 
-    public TrajectoryCommand100 driveStraightWithWaypoints(Alliance alliance, FieldPoint start, Translation2d waypoint, FieldPoint end, Rotation2d endingSplineDirection) {
+    public TrajectoryCommand100 driveStraightWithWaypoints(Alliance alliance, FieldPoint start, Translation2d waypoint,
+            FieldPoint end, Rotation2d endingSplineDirection) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
         Rotation2d angleToGoal = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
-        
-        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), endPose.getTranslation().minus(startPose.getTranslation()).getAngle());
+
+        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
+                endPose.getTranslation().minus(startPose.getTranslation()).getAngle());
         Pose2d midPoint = new Pose2d(waypoint, endingSplineDirection);
 
-        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(),  endPose.getTranslation().minus(startPose.getTranslation()).getAngle());
-
+        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(),
+                endPose.getTranslation().minus(startPose.getTranslation()).getAngle());
 
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), new Rotation2d(Math.PI));
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, 4, 4);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.straightPIDF());
 
-//         List<Pose2d> waypointsM = List.of(startWaypoint, midPoint, endWaypoint);
-//         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation(), endPose.getRotation());
-//         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-//                 kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
-//         // joel 20240311 changed ptheta from 2 to 1.3
-//         return new TrajectoryCommand100(
-//                 m_swerve,
-//                 trajectory,
-//                 DriveMotionControllerFactory.goodPIDF());
+        // List<Pose2d> waypointsM = List.of(startWaypoint, midPoint, endWaypoint);
+        // List<Rotation2d> headings = List.of(startPose.getRotation(),
+        // endPose.getRotation(), endPose.getRotation());
+        // Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM,
+        // headings, m_constraints,
+        // kAutoNoteMaxVelM_S, kAutoNoteMaxAccelM_S_S);
+        // // joel 20240311 changed ptheta from 2 to 1.3
+        // return new TrajectoryCommand100(
+        // m_swerve,
+        // trajectory,
+        // DriveMotionControllerFactory.goodPIDF());
     }
 
     public TrajectoryCommand100 stageManeuver(Alliance alliance, FieldPoint start, FieldPoint between, FieldPoint end) {
@@ -534,8 +528,10 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
     public SequentialCommandGroup eightNoteAuto(Alliance alliance) {
         return new SequentialCommandGroup(startToNote(alliance, FieldPoint.NOTE3),
                 adjacentWithShooterAngle(alliance, FieldPoint.NOTE3, FieldPoint.NOTE2),
-                adjacentWithShooterAngle(alliance, FieldPoint.NOTE2, FieldPoint.NOTE1), driveToStraight(alliance, FieldPoint.NOTE8),
-                driveToStraight(alliance, FieldPoint.CLOSEWINGSHOT), aroundStageClose(alliance, FieldPoint.CLOSEWINGSHOT, FieldPoint.NOTE7),
+                adjacentWithShooterAngle(alliance, FieldPoint.NOTE2, FieldPoint.NOTE1),
+                driveToStraight(alliance, FieldPoint.NOTE8),
+                driveToStraight(alliance, FieldPoint.CLOSEWINGSHOT),
+                aroundStageClose(alliance, FieldPoint.CLOSEWINGSHOT, FieldPoint.NOTE7),
                 throughCentralStageOpening(alliance, FieldPoint.NOTE7, FieldPoint.STAGESHOT),
                 throughCentralStageOpening(alliance, FieldPoint.STAGESHOT, FieldPoint.NOTE6),
                 throughCentralStageOpening(alliance, FieldPoint.NOTE6, FieldPoint.STAGESHOT),
@@ -544,122 +540,165 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
     }
 
     public SequentialCommandGroup complementAuto(Alliance alliance) {
-        return new SequentialCommandGroup(driveToStraight(alliance, FieldPoint.NOTE4), driveToStraight(alliance, FieldPoint.FARWINGSHOT),
+        return new SequentialCommandGroup(driveToStraight(alliance, FieldPoint.NOTE4),
+                driveToStraight(alliance, FieldPoint.FARWINGSHOT),
                 aroundStageFar(alliance, FieldPoint.FARWINGSHOT, FieldPoint.NOTE5),
                 throughCentralStageOpening(alliance, FieldPoint.NOTE5, FieldPoint.STAGESHOT),
                 throughFarStageOpening(alliance, FieldPoint.STAGESHOT, FieldPoint.DROPSHOT));
     }
 
-    public SequentialCommandGroup fourNoteAuto(Alliance alliance, NotePosition24ArrayListener noteDetecor,SwerveKinodynamics limits,SensorInterface sensor) {
+    public SequentialCommandGroup fourNoteAuto(Alliance alliance, NotePosition24ArrayListener noteDetecor,
+            SwerveKinodynamics limits, SensorInterface sensor) {
         // return new SequentialCommandGroup(
-        //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
-        //         new ParallelCommandGroup(driveToStraight(FieldPoint.NOTE3),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-        //         new ParallelCommandGroup(adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-        //         new ParallelCommandGroup(adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)));
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
+        // new ParallelCommandGroup(driveToStraight(FieldPoint.NOTE3),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+        // new ParallelCommandGroup(adjacentWithShooterAngle(FieldPoint.NOTE3,
+        // FieldPoint.NOTE2),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+        // new ParallelCommandGroup(adjacentWithShooterAngle(FieldPoint.NOTE2,
+        // FieldPoint.NOTE1),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)));
 
         // return new SequentialCommandGroup(
-                //         new StowAmpCommand(m_amp),
-                //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true)
-    
-                //         // new ParallelRaceGroup( driveStraight(FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
-                //         //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+        // new StowAmpCommand(m_amp),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true)
 
-                //         // new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
-                //         //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-                //         // new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1),
-                //         //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)));
+        // // new ParallelRaceGroup( driveStraight(FieldPoint.STARTSUBWOOFER,
+        // FieldPoint.NOTE3),
+        // // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve,
+        // false)),
+
+        // // new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE3,
+        // FieldPoint.NOTE2),
+        // // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve,
+        // false)),
+        // // new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE2,
+        // FieldPoint.NOTE1),
+        // // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve,
+        // false)));
         // );
 
         // return new SequentialCommandGroup(
-        //         // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
-        //         driveStraight(FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
-        //         adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
-        //         adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1));
+        // // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
+        // driveStraight(FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
+        // adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
+        // adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1));
 
         return new SequentialCommandGroup(
-            new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, true),
-            new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3), new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)), 
-            
-            new ParallelRaceGroup(test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2, 3, 2),  new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
-            
-            new ParallelRaceGroup(test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1, 3, 2),  new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
-            // new ChangeIntakeState(m_intake),
-            new ParallelRaceGroup(driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()), new ChangeIntakeState(m_intake, m_sensors)),
-            // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
-            // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
-            new ParallelRaceGroup(driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1), kShooterScale)), alliance), new RampShooter(m_shooter)),
-            new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)
-        );
+                new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, true),
+                new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
+
+                new ParallelRaceGroup(
+                        test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), alliance),
+                                forAlliance(new Translation2d(2.3, 5.5583), alliance), FieldPoint.NOTE2, 3, 2),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
+
+                new ParallelRaceGroup(
+                        test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), alliance),
+                                forAlliance(new Translation2d(2.307, 6.67), alliance), FieldPoint.NOTE1, 3, 2),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
+                // new ChangeIntakeState(m_intake),
+                new ParallelRaceGroup(driveStraightWithWaypoints(alliance, FieldPoint.NOTE1,
+                        forAlliance(new Translation2d(3.9, 7.5), alliance), FieldPoint.NOTE8, new Rotation2d()),
+                        new ChangeIntakeState(m_intake, m_sensors)),
+                // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
+                // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new
+                // HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
+                new ParallelRaceGroup(
+                        driveStraight(new Pose2d(getTranslation(alliance, FieldPoint.NOTE8), new Rotation2d(Math.PI)),
+                                new Pose2d(3.4, 6.1,
+                                        ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1),
+                                                kShooterScale)),
+                                alliance),
+                        new RampShooter(m_shooter)),
+                new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false));
 
         // return new SequentialCommandGroup(
-        //     // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
-        //     driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
-            
-        //     test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2, 3, 3),
-            
-        //     test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1, 3, 3),  
-        //     // new ChangeIntakeState(m_intake),
-        //     driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()),
-        //     // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
-        //     // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
-        //     driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1), kShooterScale)), alliance)
-        //     // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
+        // // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
+        // driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
+
+        // test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583),
+        // m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance),
+        // FieldPoint.NOTE2, 3, 3),
+
+        // test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47),
+        // m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance),
+        // FieldPoint.NOTE1, 3, 3),
+        // // new ChangeIntakeState(m_intake),
+        // driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new
+        // Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()),
+        // // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
+        // // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new
+        // HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
+        // driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new
+        // Rotation2d(Math.PI)), new Pose2d(3.4, 6.1,
+        // ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1),
+        // kShooterScale)), alliance)
+        // // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
         // );
-                
 
     }
 
-    // public Command getTimeoutCommand(Command trajectoryCommand,  ){
-        
+    // public Command getTimeoutCommand(Command trajectoryCommand, ){
+
     // }
 
-    public SequentialCommandGroup wesuck(Alliance alliance, SwerveDriveSubsystem drive, NotePosition24ArrayListener noteDetecor,SwerveKinodynamics limits,SensorInterface sensor){
+    public SequentialCommandGroup wesuck(Alliance alliance, SwerveDriveSubsystem drive,
+            NotePosition24ArrayListener noteDetecor, SwerveKinodynamics limits, SensorInterface sensor) {
         // return new SequentialCommandGroup(
-        //     new ResetPoseAuto(drive),
-        //     new StowAmpCommand(m_amp),
-        //     new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, 1),
-        //     new ParallelRaceGroup( driveStraight(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE2),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1)),
-        //     new ParallelRaceGroup(adjacentWithShooterAngle(alliance, FieldPoint.NOTE2, FieldPoint.NOTE1),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1)),
-        //     new ParallelDeadlineGroup(new WaitCommand(3), new RotateToShooter(m_swerve)),
-        //     new ParallelDeadlineGroup(new WaitCommand(1), new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, 1)),
-        //     driveStraight(alliance, FieldPoint.NOTE1, FieldPoint.DRIVETONOTEHANDOFF),
-        //     new ParallelRaceGroup(new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)), new IntakeSmart(sensor, m_intake));
-        return null;    
+        // new ResetPoseAuto(drive),
+        // new StowAmpCommand(m_amp),
+        // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, 1),
+        // new ParallelRaceGroup( driveStraight(alliance, FieldPoint.STARTSUBWOOFER,
+        // FieldPoint.NOTE2),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1)),
+        // new ParallelRaceGroup(adjacentWithShooterAngle(alliance, FieldPoint.NOTE2,
+        // FieldPoint.NOTE1),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1)),
+        // new ParallelDeadlineGroup(new WaitCommand(3), new RotateToShooter(m_swerve)),
+        // new ParallelDeadlineGroup(new WaitCommand(1), new ShootSmart(sensor,
+        // m_shooter, m_intake, m_feeder, m_swerve, 1)),
+        // driveStraight(alliance, FieldPoint.NOTE1, FieldPoint.DRIVETONOTEHANDOFF),
+        // new ParallelRaceGroup(new
+        // DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new
+        // HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)),
+        // new IntakeSmart(sensor, m_intake));
+        return null;
     }
 
     public TrajectoryCommand100 fiveNoteAuto(Alliance alliance) {
         // return new SequentialCommandGroup(
-        //         new StowAmpCommand(m_amp),
-        //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
-        //         new ParallelRaceGroup(driveStraight(FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-        //         new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-        //         new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1),
-        //                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
-        //         driveToStraight(FieldPoint.NOTE8),
-        //         driveToStraight(FieldPoint.CLOSEWINGSHOT));
+        // new StowAmpCommand(m_amp),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, true),
+        // new ParallelRaceGroup(driveStraight(FieldPoint.STARTSUBWOOFER,
+        // FieldPoint.NOTE3),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+        // new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE3,
+        // FieldPoint.NOTE2),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+        // new ParallelRaceGroup(adjacentWithShooterAngle(FieldPoint.NOTE2,
+        // FieldPoint.NOTE1),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)),
+        // driveToStraight(FieldPoint.NOTE8),
+        // driveToStraight(FieldPoint.CLOSEWINGSHOT));
 
         return driveStraight(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3);
 
-            
     }
 
-    public SequentialCommandGroup citrus(Alliance alliance){
+    public SequentialCommandGroup citrus(Alliance alliance) {
         return new SequentialCommandGroup(
-            // new StowAmpCommand(m_amp),
-            // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
-            // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.COMPLEMENTSHOOT),
-            driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4),
-            driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT),
-            throughStage(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6)
+                // new StowAmpCommand(m_amp),
+                // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
+                // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
+                // FieldPoint.COMPLEMENTSHOOT),
+                driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4),
+                driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT),
+                throughStage(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6)
 
-            // driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)
+        // driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)
 
         );
         // return null;
