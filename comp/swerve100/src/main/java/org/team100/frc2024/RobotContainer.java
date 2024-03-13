@@ -297,7 +297,7 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower
-        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF();
+        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF();
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,

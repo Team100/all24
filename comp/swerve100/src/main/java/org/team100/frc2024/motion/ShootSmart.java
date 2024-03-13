@@ -125,7 +125,7 @@ double targetShooterAngle;
       m_feeder.feed();
       m_intake.intake();
 
-      if(m_timer.get() > 1){
+      if(m_timer.get() > 0.5){
         finished = true;
       }
     }
