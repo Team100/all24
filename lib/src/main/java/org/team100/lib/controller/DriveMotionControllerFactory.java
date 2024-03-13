@@ -14,7 +14,7 @@ public class DriveMotionControllerFactory {
     }
 
     public static DriveMotionController straightPIDF() {
-        return new DrivePIDFController(false, 4, 2.5);
+        return new DrivePIDFController(false, 4, 4);
     }
 
     public static DriveMotionController goodPIDF() {

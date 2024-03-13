@@ -304,8 +304,8 @@ public class DrumShooter extends Shooter{
     public boolean atVelocitySetpoint(boolean bool){
 
         if(bool){
-            if( Math.abs(leftRoller.getVelocity() - 10) < 0.5){
-                if( Math.abs(rightRoller.getVelocity() - 10) < 0.5){
+            if( leftRoller.getVelocity() > (kLeftRollerVelocity/2)){
+                if(rightRoller.getVelocity() > (kRightRollerVelocity/2)){
                     return true;
                 }
             }
