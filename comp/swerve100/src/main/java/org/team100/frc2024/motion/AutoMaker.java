@@ -10,6 +10,7 @@ import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
+import org.team100.frc2024.motion.intake.ChangeIntakeState;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.RotateToShooter;
 import org.team100.frc2024.motion.shooter.Shooter;
@@ -175,7 +176,7 @@ public class AutoMaker {
             case NOTE7:
                 return forAlliance(new Translation2d(8.271, 5.7869), m_alliance);
             case NOTE8:
-                return forAlliance(new Translation2d(8.271, 8.3633), m_alliance); //WAS 7.4
+                return forAlliance(new Translation2d(7.7, 8.3633), m_alliance); //WAS 7.4
             case CLOSEWINGSHOT:
                 return forAlliance(new Translation2d(3, 6.4), m_alliance);
             case FARWINGSHOT:
@@ -544,35 +545,35 @@ public TrajectoryCommand100 test(Alliance alliance, FieldPoint noteA, Translatio
         //         adjacentWithShooterAngle(FieldPoint.NOTE3, FieldPoint.NOTE2),
         //         adjacentWithShooterAngle(FieldPoint.NOTE2, FieldPoint.NOTE1));
 
-        // return new SequentialCommandGroup(
-        //     new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
-        //     new ParallelRaceGroup(driveToStageBase(FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3), new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)), 
-            
-        //     new ParallelRaceGroup(test(FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2),  new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)),
-            
-        //     new ParallelRaceGroup(test(FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1),  new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)),
-        //     // new ChangeIntakeState(m_intake),
-        //     new ParallelRaceGroup(driveStraightWithWaypoints(FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()), new ChangeIntakeState(m_intake, m_sensors)),
-        //     // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
-        //     // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
-        //     driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(new Translation2d(3.4, 6.1), kShooterScale))),
-        //     new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
-        // );
-
         return new SequentialCommandGroup(
-            // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
-            driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
+            new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
+            new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3), new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)), 
             
-            test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2),
+            new ParallelRaceGroup(test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2),  new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)),
             
-            test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1),  
+            new ParallelRaceGroup(test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1),  new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)),
             // new ChangeIntakeState(m_intake),
-            driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()),
+            new ParallelRaceGroup(driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()), new ChangeIntakeState(m_intake, m_sensors)),
             // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
             // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
-            driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1), kShooterScale)))
-            // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
+            driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1), kShooterScale))),
+            new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
         );
+
+        // return new SequentialCommandGroup(
+        //     // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1),
+        //     driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
+            
+        //     test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), m_alliance), forAlliance(new Translation2d(2.3, 5.5583), m_alliance), FieldPoint.NOTE2),
+            
+        //     test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), m_alliance), forAlliance(new Translation2d(2.307, 6.67), m_alliance), FieldPoint.NOTE1),  
+        //     // new ChangeIntakeState(m_intake),
+        //     driveStraightWithWaypoints(alliance, FieldPoint.NOTE1, forAlliance(new Translation2d(3.9, 7.5), m_alliance), FieldPoint.NOTE8, new Rotation2d()),
+        //     // driveStraight(FieldPoint.NOTE1, FieldPoint.NOTE1),
+        //     // new DriveWithProfileNote(noteDetecor::getClosestTranslation2d,m_swerve,new HolonomicDriveController100(),limits, sensor::getFeederSensor, m_intake)
+        //     driveStraight( new Pose2d(getTranslation(FieldPoint.NOTE8), new Rotation2d(Math.PI)), new Pose2d(3.4, 6.1, ShooterUtil.getRobotRotationToSpeaker(alliance, new Translation2d(3.4, 6.1), kShooterScale)))
+        //     // new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1)
+        // );
                 
 
     }
