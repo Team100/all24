@@ -31,13 +31,13 @@ import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
 import org.team100.lib.SubsystemPriority;
 import org.team100.lib.SubsystemPriority.Priority;
+import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
-import org.team100.lib.config.AllianceSelector;
 import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
@@ -63,7 +63,6 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
-// import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
@@ -87,7 +86,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -101,10 +99,9 @@ public class RobotContainer implements Glassy {
     private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
+    // TODO: make a glass widget for this
     private final AutonSelector m_autonSelector;
     private final int m_autonRoutine;
-    private final AllianceSelector m_allianceSelector;
-    // private Alliance m_alliance;
 
     final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -133,7 +130,6 @@ public class RobotContainer implements Glassy {
     private final String m_name;
 
     public RobotContainer(TimedRobot robot) throws IOException {
-        logTime("start");
         m_name = Names.name(this);
 
         driverControl = new DriverControlProxy();
@@ -145,48 +141,12 @@ public class RobotContainer implements Glassy {
             // digital inputs 0, 1, 2, 3.
             // m_autonSelector = new AutonSelector();
             // m_autonRoutine = m_autonSelector.routine();
-            // digital inputs 4, 5
-            // m_allianceSelector = new AllianceSelector();
-            // m_alliance = Selector.alliance();
             m_autonSelector = null;
             m_autonRoutine = 0;
-            m_allianceSelector = null;
-            // m_alliance = Alliance.Blue;
         } else {
             m_autonSelector = null;
             m_autonRoutine = 0;
-            m_allianceSelector = null;
-            // m_alliance = Alliance.Blue;
         }
-
-        // *************************
-        //
-        // override the alliance logic.
-//        switch(Identity.instance) {
-//            case BLANK: 
-//            m_alliance = Alliance.Blue;
-//            break;
-//            default:
-//            m_alliance = DriverStation.getAlliance().get();
-//        break;
-//        }
-
-        // m_alliance = DriverStation.getAlliance().get();
-
-        // if(m_alliance == null){
-        // m_alliance = Alliance.Blue 
-            // ;
-        // }
-
-        // m_alliance = Alliance.Blue  ;
-        // m_alliance = Allsiance.Blue;
-
-
-        // if (m_alliance == Alliance.Blue) {
-        //     m_layout = m_blueLayout;
-        // } else {
-        //     m_layout = m_redLayout;
-        // }
 
         m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
@@ -234,11 +194,11 @@ public class RobotContainer implements Glassy {
         m_intake = IntakeFactory.get(m_sensors);
 
         LEDStrip strip1 = new LEDStrip(160, 0);
-        
+
         m_indicator = new LEDIndicator(0, strip1);
 
-m_shooter = new DrumShooter(44, 45, 28, 39, 58);
-        
+        m_shooter = new DrumShooter(44, 45, 28, 39, 58);
+
         m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors, m_shooter);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
@@ -260,7 +220,7 @@ m_shooter = new DrumShooter(44, 45, 28, 39, 58);
 
         // onTrue(driverControl::resetRotation0, new SetRotation(m_drive,
         // GeometryUtil.kRotationZero));
-onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // this is @sanjan's version from some sort of vision testing in february
         // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
@@ -446,10 +406,10 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // whileTrue(driverControl::test, Commands.startEnd(() ->
         // RobotState100.changeIntakeState(IntakeState100.INTAKE),
         // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-// whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new
+        // whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new
         // Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
- // new HolonomicDriveController100(), swerveKinodynamics));
-  // whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics,
+        // new HolonomicDriveController100(), swerveKinodynamics));
+        // whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics,
         // planner, drivePID, m_alliance));
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
@@ -462,15 +422,13 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
-        
+
         // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
 
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963, 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive, planner, drivePID, swerveKinodynamics));
-
-        // TODO: make alliance dynamic.
-        // Alliance m_alliance = DriverStation.getAlliance().get();
-        Alliance m_alliance = Alliance.Red;
+        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
+        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
+        // planner, drivePID, swerveKinodynamics));
 
         AutoMaker m_AutoMaker = new AutoMaker(
                 m_drive,
@@ -478,7 +436,6 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
                 drivePID,
                 swerveKinodynamics,
                 0,
-                m_alliance,
                 m_feeder,
                 m_shooter,
                 m_intake,
@@ -488,37 +445,35 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
                 m_heading,
                 constraints);
 
-        logTime("fourNoteAuto 1 start");
         // on a roborio 1 this takes 0.8 sec (!)
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
         // whileTrue(driverControl::shooterLock,
-        //         m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors));
+        // m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector,
+        // swerveKinodynamics, m_sensors));
 
         whileTrue(driverControl::shooterLock,
-                m_AutoMaker.citrus(Alliance.Red));
+                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
         // planner, drivePID, swerveKinodynamics));
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
         // swerveKinodynamics, 0, m_alliance);
-        logTime("fourNoteAuto 1 done");
 
-        logTime("fourNoteAuto 2 start");
         // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
         // lot.
-        whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Red));
-        logTime("fourNoteAuto 2 end");
+        whileTrue(driverControl::test,
+                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
 
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
         // m_intake, m_feeder, m_drive));
 
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
         // swerveKinodynamics, 0, m_alliance);
-// whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
+        // whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
@@ -545,7 +500,13 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // Registers the subsystems so that they run with the specified priority
         // SubsystemPriority.registerWithPriority();
 
-        m_auton = m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector, swerveKinodynamics, m_sensors);
+        // m_auton = m_AutoMaker.fourNoteAuto(m_alliance, notePositionDetector,
+        // swerveKinodynamics, m_sensors);
+
+        // joel mar 13: the alliance command chooses which of these autos to run
+        m_auton = new AllianceCommand(
+                m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors),
+                m_AutoMaker.fourNoteAuto(Alliance.Blue, notePositionDetector, swerveKinodynamics, m_sensors));
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
@@ -619,8 +580,6 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
     public void close() {
         if (m_autonSelector != null)
             m_autonSelector.close();
-        if (m_allianceSelector != null)
-            m_allianceSelector.close();
         // m_indicator.close();
         m_modules.close();
     }
@@ -628,9 +587,5 @@ onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
     @Override
     public String getGlassName() {
         return "RobotContainer";
-    }
-
-        private void logTime(String msg) {
-        System.out.printf("%20s %10d us\n", msg, RobotController.getFPGATime());
     }
 }

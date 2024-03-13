@@ -9,7 +9,7 @@
       "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1101",
+      "width": "1245",
       "xpos": "346",
       "ypos": "98"
     }
@@ -26,7 +26,7 @@
     "###/FMSInfo": {
       "Collapsed": "0",
       "Pos": "261,422",
-      "Size": "140,140"
+      "Size": "145,140"
     },
     "###/SmartDashboard/Driver Skill Level": {
       "Collapsed": "0",
@@ -78,10 +78,15 @@
       "Pos": "290,100",
       "Size": "114,285"
     },
+    "###DIO": {
+      "Collapsed": "0",
+      "Pos": "728,121",
+      "Size": "129,68"
+    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "9,409",
-      "Size": "140,154"
+      "Size": "136,154"
     },
     "###Joysticks": {
       "Collapsed": "0",
