@@ -34,21 +34,21 @@ public class LEDSubsystem extends SubsystemBase {
             Optional<Alliance> alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
                 if (alliance.get() == Alliance.Red) {
-                    m_indicator.setStripFlashing(0, State.RED, 160000);
+                    m_indicator.setStripSolid(0, State.RED);
                 } else {
-                    m_indicator.setStripFlashing(0, State.BLUE, 160000);
+                    m_indicator.setStripSolid(0, State.BLUE);
                 }
             } else {
                 m_indicator.setStripFlashing(0, State.ORANGE, 80000);
             }
         } else {
             if (atVelocitySetpoint) {
-                m_indicator.setStripFlashing(0, State.PURPLE, 80000);
+                m_indicator.setStripSolid(0, State.PURPLE);
             } else {
                 if (indexerIsEmpty) {
                     m_indicator.setStripSolid(0, State.RED);
                 } else {
-                    m_indicator.setStripFlashing(0, State.GREEN, 80000);
+                    m_indicator.setStripSolid(0, State.GREEN);
                 }
             }
         }
