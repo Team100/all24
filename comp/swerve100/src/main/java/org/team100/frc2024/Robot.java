@@ -2,6 +2,7 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 
+import org.team100.frc2024.config.AutonChooser;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
@@ -89,6 +90,9 @@ public class Robot extends TimedRobot implements Glassy {
         } else {
             m_robotContainer.green();
         }
+        // this forces the static initializer to run, so that the widget appears.
+        // TODO: make the LEDs blink somehow indicating the active auton.
+        t.log(Level.INFO, m_name, "active auton routine", AutonChooser.routine().name());
     }
 
     @Override
