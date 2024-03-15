@@ -9,13 +9,13 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 /**
@@ -24,6 +24,15 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
  * This is not finished, don't use it without finishing it.
  */
 public class NeoVortexDriveMotor implements Motor100<Distance100> {
+    /**
+     * Motor resistance https://www.revrobotics.com/rev-21-1652/
+     */
+    private static final double kROhms = 0.057;
+    /**
+     * Motor torque constant https://www.revrobotics.com/rev-21-1652/
+     */
+    private static final double kTNm_amp = 0.017;
+
     private final RelativeEncoder m_encoder;
 
     private final double staticFrictionFFVolts;
@@ -59,6 +68,17 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
     /** Current velocity measurement, obtained in periodic(). */
     private double m_encoderVelocity;
 
+    /**
+     * 
+     * @param name
+     * @param canId
+     * @param motorPhase
+     * @param currentLimit
+     * @param gearRatio
+     * @param wheelDiameter
+     * @param lowLevelFeedforwardConstants using VOLTS VOLTS VOLTS
+     * @param lowLevelVelocityConstants
+     */
     public NeoVortexDriveMotor(
             String name,
             int canId,
@@ -71,7 +91,7 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
-        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV(); 
+        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
         staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
         dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
         m_motor.setInverted(!motorPhase);
@@ -97,29 +117,6 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         t.register(Level.TRACE, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
         t.register(Level.TRACE, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
         t.register(Level.TRACE, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
-    }
-
-    private void setP(double p) {
-        m_pidController.setP(p);
-    }
-
-    private void setI(double i) {
-        m_pidController.setI(i);
-    }
-
-    private void setD(double d) {
-        m_pidController.setD(d);
-    }
-
-    private void setIZone(double iz) {
-        m_pidController.setIZone(iz);
-    }
-
-    private void require(REVLibError responseCode) {
-        // TODO: make this throw
-        if (responseCode != REVLibError.kOk)
-            Util.warn("NeoDriveMotor received response code " + responseCode.name());
-        // throw new IllegalStateException();
     }
 
     @Override
@@ -150,17 +147,49 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         double wheelRev_S2 = accelM_S2 / (m_wheelDiameter * Math.PI);
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
-        double velocityFF = velocityFF(motorRev_S);
-        double frictionFF = frictionFF(m_encoderVelocity / 60, motorRev_S);
-        double accelFF = accelFF(motorRev_S2);
-        double kFF = frictionFF + velocityFF + accelFF;
+        double velocityFFVolts = velocityFFVolts(motorRev_S);
+        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRev_S);
+        double accelFFVolts = accelFFVolts(motorRev_S2);
+        double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
         m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFF);
-        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFF);
-        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+    }
+
+    @Override
+    public void setVelocity(double outputM_S, double accelM_S2, double torqueNm) {
+        double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
+        double motorRev_S = wheelRev_S * m_gearRatio;
+        double motorRev_M = motorRev_S * 60;
+
+        double wheelRev_S2 = accelM_S2 / (m_wheelDiameter * Math.PI);
+        double motorRev_S2 = wheelRev_S2 * m_gearRatio;
+
+        double velocityFFVolts = velocityFFVolts(motorRev_S);
+        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRev_S);
+        double accelFFVolts = accelFFVolts(motorRev_S2);
+
+        double torqueFFAmps = torqueNm / kTNm_amp;
+        double torqueFFVolts = torqueFFAmps * kROhms;
+
+        double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
+
+        m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
+
+        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+    }
+
+    @Override
+    public double getTorque() {
+        return m_motor.getOutputCurrent() * kTNm_amp;
     }
 
     @Override
@@ -206,9 +235,9 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
     /////////////////////////////////////////////////////////////////
 
     /**
-     * Frictional feedforward in duty cycle units [-1, 1]
+     * Frictional feedforward in VOLTS
      */
-    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFFVolts(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < 0.5) {
             return staticFrictionFFVolts * direction;
@@ -217,16 +246,40 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
     }
 
     /**
-     * Velocity feedforward in duty cycle units [-1, 1]
+     * Velocity feedforward in VOLTS
      */
-    private double velocityFF(double motorRev_S) {
+    private double velocityFFVolts(double motorRev_S) {
         return velocityFFVoltS_Rev * motorRev_S;
     }
 
     /**
-     * Acceleration feedforward in duty cycle units [-1, 1]
+     * Acceleration feedforward VOLTS
      */
-    private double accelFF(double accelM_S_S) {
+    private double accelFFVolts(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S;
     }
+
+    private void setP(double p) {
+        m_pidController.setP(p);
+    }
+
+    private void setI(double i) {
+        m_pidController.setI(i);
+    }
+
+    private void setD(double d) {
+        m_pidController.setD(d);
+    }
+
+    private void setIZone(double iz) {
+        m_pidController.setIZone(iz);
+    }
+
+    private void require(REVLibError responseCode) {
+        // TODO: make this throw
+        if (responseCode != REVLibError.kOk)
+            Util.warn("NeoDriveMotor received response code " + responseCode.name());
+        // throw new IllegalStateException();
+    }
+
 }

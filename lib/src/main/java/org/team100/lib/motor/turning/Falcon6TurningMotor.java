@@ -9,6 +9,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -28,6 +29,17 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * See {@link FalconDriveMotor} for configuration details.
  */
 public class Falcon6TurningMotor implements Motor100<Angle100> {
+    /**
+     * Motor resistance, Kraken.  Falcon is 0.03.
+     * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
+     */
+    private static final double kROhms = 0.025;
+    /**
+     * Motor torque constant, Kraken.  Falcon is 0.018.
+     * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
+     */
+    private static final double kTNm_amp = 0.019;
+
     private static final double kCurrentLimit = 40;
 
     /**
@@ -143,6 +155,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = velocityFFVolts(motorRev_S);
         double accelFFVolts = accelFFVolts(accelRad_S_S);
+
+
         double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
         VelocityVoltage v = new VelocityVoltage(motorRev_S);
@@ -151,10 +165,50 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         m_motor.setControl(v);
 
         t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
-        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFFVolts);
+        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+    }
+
+        /**
+     * Supports accel feedforward.
+     */
+    public void setVelocity(double outputRad_S, double accelRad_S_S, double torqueNm) {
+        double outputRev_S = outputRad_S / (2 * Math.PI);
+        double wheelRev_S2 = accelRad_S_S / (2 * Math.PI);
+        double motorRev_S = outputRev_S * m_gearRatio;
+        double motorRev_S2 = wheelRev_S2 * m_gearRatio;
+
+        double currentMotorRev_S = m_velocityRev_S;
+        double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = velocityFFVolts(motorRev_S);
+        double accelFFVolts = accelFFVolts(accelRad_S_S);
+
+        double torqueFFAmps = torqueNm / kTNm_amp;
+        double torqueFFVolts = torqueFFAmps * kROhms;
+
+        double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
+
+        VelocityVoltage v = new VelocityVoltage(motorRev_S);
+        v.FeedForward = kFFVolts;
+        v.Acceleration = motorRev_S2;
+        m_motor.setControl(v);
+
+        t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
+        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+    }
+
+    @Override
+    public double getTorque() {
+        StatusSignal<Double> statorCurrentAmpsStatus = m_motor.getTorqueCurrent();
+        // TODO: latency compensation
+        double statorCurrentAmps = statorCurrentAmpsStatus.getValueAsDouble();
+        return statorCurrentAmps * kTNm_amp;
     }
 
     @Override

@@ -17,6 +17,11 @@ public class NullPositionServo<T extends Measure100> implements PositionServoInt
     }
 
     @Override
+    public void setPosition(double goal, double feedForwardTorqueNm) {
+        //
+    }
+
+    @Override
     public void setVelocity(double velocity) {
         // 
     }

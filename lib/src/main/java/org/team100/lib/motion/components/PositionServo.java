@@ -68,8 +68,8 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         m_setpoint = new State100(getPosition(), getVelocity());
         prevTime = Timer.getFPGATimestamp();
 
-        // ALERT!  @joel 2/19/24: I think encoder reset changes the internal offset
-        // which is never what we want.  but this might be wrong
+        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want. but this might be wrong
         // for some other reason
         // m_encoder.reset();
     }
@@ -112,6 +112,50 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
         t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
         t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
+    }
+
+    /**
+     * @param goal                For distance, use meters, For angle, use radians.
+     * @param feedForwardTorqueNm used for gravity and drive/steer decoupling, this
+     *                            is a passthrough to the motor.
+     */
+    @Override
+    public void setPosition(double goal, double feedForwardTorqueNm) {
+        double measurement = m_instance.modulus(m_encoder.getPosition());
+
+        // use the modulus closest to the measurement.
+        // note zero velocity in the goal.
+        m_goal = new State100(m_instance.modulus(goal - measurement) + measurement, 0.0);
+
+        m_setpoint = new State100(
+                m_instance.modulus(m_setpoint.x() - measurement) + measurement,
+                m_setpoint.v());
+
+        m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
+
+        double u_FB = m_controller.calculate(measurement, m_setpoint.x());
+        double u_FF = m_setpoint.v();
+        // note u_FF is rad/s, so a big number, u_FB should also be a big number.
+
+        double u_TOTAL = u_FB + u_FF;
+        u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
+
+        // pass the feedforward through unmodified
+        m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
+        t.log(Level.DEBUG, m_name, "Desired velocity setpoint", u_TOTAL);
+
+        m_controller.setIntegratorRange(0, 0.1);
+
+        t.log(Level.TRACE, m_name, "u_FB", u_FB);
+        t.log(Level.TRACE, m_name, "u_FF", u_FF);
+        t.log(Level.TRACE, m_name, "u_TOTAL", u_TOTAL);
+        t.log(Level.DEBUG, m_name, "Measurement", measurement);
+        t.log(Level.DEBUG, m_name, "Goal", m_goal);
+        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
+        t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
+        t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
+        t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
+        t.log(Level.TRACE, m_name, "Feedforward Torque", feedForwardTorqueNm);
     }
 
     /** Direct velocity control for testing */
@@ -184,7 +228,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         m_motor.periodic();
     }
 
-        ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
 
     /**
      * there will be some jitter in dt, which will result in a small amount of

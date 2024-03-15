@@ -50,5 +50,10 @@ public enum Experiment {
     /**
      * Use full state feedback for trajectory following
      */
-    FullStateTrajectoryFollower
+    FullStateTrajectoryFollower,
+    /**
+     * Compensate for drive/steer coupling
+     * https://docs.google.com/document/d/1Zm6VpteqNMmT0VaTDhN5U6-jF3VS11uCoykzZUIGQdU/edit
+     */
+    DriveSteerCouplingCompensation
 }

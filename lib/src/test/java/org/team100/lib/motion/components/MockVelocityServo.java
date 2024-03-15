@@ -28,6 +28,12 @@ public class MockVelocityServo<T extends Measure100> implements VelocityServo<T>
     }
 
     @Override
+    public double getTorque() {
+        // TODO: this is surely wrong
+        return 0;
+    }
+
+    @Override
     public void stop() {
         //
     }

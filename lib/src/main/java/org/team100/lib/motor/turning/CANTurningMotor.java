@@ -155,9 +155,23 @@ public class CANTurningMotor implements Motor100<Angle100> {
         double velocityFF = velocityFF(motorRev_S);
         double frictionFF = frictionFF(motorRev_S);
         double accelFF = accelFF(accelRad_S2);
+        
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
+    }
+
+    /**
+     * ignores torque feedforward
+     */
+    @Override
+    public void setVelocity(double velocity, double accel, double torque) {
+        setVelocity(torque, accel);
+    }
+
+    @Override
+    public double getTorque() {
+        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
     }
 
     @Override

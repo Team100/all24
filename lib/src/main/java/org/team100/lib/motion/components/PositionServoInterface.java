@@ -19,6 +19,12 @@ public interface PositionServoInterface<T extends Measure100> extends Glassy {
      */
     void setPosition(double goal);
 
+    /**
+     * @param goal
+     * @param feedForwardTorque used for drive/steer decoupling and gravity
+     */
+    void setPosition(double goal, double feedForwardTorqueNm);
+
     /** Direct velocity control for testing */
     void setVelocity(double velocity);
 
