@@ -17,6 +17,10 @@ public class DriveMotionControllerFactory {
         return new DrivePIDFController(false, 4, 4);
     }
 
+    public static DriveMotionController complementPIDF() {
+        return new DrivePIDFController(false, 6, 6);
+    }
+
     public static DriveMotionController goodPIDF() {
         return new DrivePIDFController(false, 1, 1.3);
     }

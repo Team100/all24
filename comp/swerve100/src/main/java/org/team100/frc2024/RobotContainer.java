@@ -454,14 +454,14 @@ public class RobotContainer implements Glassy {
         // on a roborio 1 this takes 0.8 sec (!)
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
-        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
-        driverControl::twist, m_drive));
+        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
+        // driverControl::twist, m_drive));
         // whileTrue(driverControl::shooterLock,
         // m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector,
         // swerveKinodynamics, m_sensors));
 
-        // whileTrue(driverControl::shooterLock,
-        //         new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
+        whileTrue(driverControl::shooterLock,
+                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,

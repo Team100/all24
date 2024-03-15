@@ -39,6 +39,12 @@ public class ShooterTable {
 
         m_table.put(4.01, 0.535);
 
+        m_table.put(4.5, 0.5);
+
+        m_table.put(5.0, 0.48);
+
+
+
         
 
     }

@@ -37,7 +37,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     // WCP 4 inch wheel
-    private static final double kWheelDiameterM = 0.1015;
+    private static final double kWheelDiameterM = 0.0975; //0.1015
     // flipped belt ratios
     private static final double kDriveReductionFast = 5.50;
     private static final double kDriveReductionMedium = 6.55;
@@ -145,7 +145,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningGearRatio,
                 drive);
         PIDController turningPositionController = new PIDController(
-                1.9, // kP
+                30, // kP
                 0.06, // kI
                 0, // kD
                 dt);
