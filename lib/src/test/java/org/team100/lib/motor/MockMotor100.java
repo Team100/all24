@@ -16,9 +16,26 @@ public class MockMotor100<T extends Measure100> implements Motor100<T> {
         this.output = 0;
     }
 
+    /**
+     * @param accel ignored
+     */
     @Override
     public void setVelocity(double velocity, double accel) {
         this.velocity = velocity;
+    }
+
+    /**
+     * @param accel  ignored
+     * @param torque ignored
+     */
+    @Override
+    public void setVelocity(double velocity, double accel, double torque) {
+        this.velocity = velocity;
+    }
+
+    @Override
+    public double getTorque() {
+        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
     }
 
     @Override
@@ -30,5 +47,4 @@ public class MockMotor100<T extends Measure100> implements Motor100<T> {
     public void periodic() {
         //
     }
-
 }

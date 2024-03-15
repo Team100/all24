@@ -104,7 +104,9 @@ public class DriverXboxControl implements DriverControl {
     public boolean resetPose() {
         // @joel 2/19/24 removed this for slow mode instead
         // return m_controller.getLeftBumper();
-        return m_controller.getRightStickButton();
+        // @joel 3/15/24 removed this entirely
+        // return m_controller.getRightStickButton();
+        return false;
     } 
 
     @Override

@@ -41,14 +41,35 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     /**
      * Ignores accel, because the simulated motor responds instantly to the velocity
      * command, i.e. the accel is effectively infinite.
+     * 
+     * @param velocity sets the state exactly
+     * @param accel    ignored
      */
     @Override
     public void setVelocity(double velocity, double accel) {
         if (Double.isNaN(velocity))
             throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
-        // ignore accel
         t.log(Level.TRACE, m_name, "velocity", m_velocity);
+    }
+
+    /**
+     * @param velocity sets the state exactly
+     * @param accel    ignored
+     * @param torque   ignored
+     */
+    @Override
+    public void setVelocity(double velocity, double accel, double torque) {
+        m_velocity = velocity;
+        t.log(Level.TRACE, m_name, "velocity", m_velocity);
+    }
+
+    /**
+     * this is definitely wrong, always returns zero. beware.
+     */
+    @Override
+    public double getTorque() {
+        return 0;
     }
 
     public double getVelocity() {

@@ -71,6 +71,11 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     }
 
     @Override
+    public double getTorque() {
+        return m_motor.getTorque();
+    }
+
+    @Override
     public void stop() {
         m_motor.stop();
     }
