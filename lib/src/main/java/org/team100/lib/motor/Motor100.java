@@ -20,6 +20,20 @@ public interface Motor100<T extends Measure100> extends Glassy {
      */
     void setVelocity(double velocity, double accel);
 
+    /**
+     * Includes feedforward in Nm.
+     * TODO: make feedforward use the Measure units (Nm or N).
+     * @param velocity
+     * @param accel
+     * @param torque feedforward torque in Nm.
+     */
+    void setVelocity(double velocity, double accel, double torque);
+
+    /**
+     * @return Current applied torque.  Used for drive/steer decoupling.
+     */
+    double getTorque();
+
     void stop();
 
     /**

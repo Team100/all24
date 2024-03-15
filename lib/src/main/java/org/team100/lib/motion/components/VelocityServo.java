@@ -23,6 +23,11 @@ public interface VelocityServo<T extends Measure100> extends Glassy {
      */
     double getVelocity();
 
+    /**
+     * @return Current applied torque.  Used for drive/steer decoupling.
+     */
+    double getTorque();
+
     void stop();
 
     double getDistance();

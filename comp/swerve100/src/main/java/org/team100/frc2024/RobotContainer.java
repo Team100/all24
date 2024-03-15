@@ -2,13 +2,16 @@ package org.team100.frc2024;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
+import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
+import org.team100.frc2024.config.AutonChooser;
 import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.ChangeAmpState;
 import org.team100.frc2024.motion.FeedCommand;
@@ -36,7 +39,6 @@ import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
-import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.AutonSelector;
@@ -89,6 +91,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -215,25 +218,27 @@ public class RobotContainer implements Glassy {
         // DRIVETRAIN COMMANDS
         //
 
-        whileTrue(driverControl::defense, m_drive.runInit(m_drive::defense));
-        whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
-        whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
+        // joel 3/15/24 removed these, i don't think we use them.
+        // whileTrue(driverControl::defense, m_drive.runInit(m_drive::defense));
+        // whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
+        // whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive,
-        // GeometryUtil.kRotationZero));
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+        // RESET ZERO
+        // on xbox this is "back"
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
-        // this is @sanjan's version from some sort of vision testing in february
-        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
-        // 2.44346));
-
+        // RESET 180
         // on xbox this is "start"
-        onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+        onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
 
+        // joel 3/15/24 removed ResetPose
+        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // on xbox this is left bumper
         // on joystick this is button 4
         // on starting zone line lined up with note
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, 0));
+        // joel mar 15 turned this off, i think it's the cause of the "spontaneous gyro
+        // reset" the drivers experience
+        // onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, 0));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
@@ -508,6 +513,25 @@ public class RobotContainer implements Glassy {
         m_auton = new AllianceCommand(
                 m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors),
                 m_AutoMaker.fourNoteAuto(Alliance.Blue, notePositionDetector, swerveKinodynamics, m_sensors));
+
+        // this illustrates how to use AutonCommand together with AllianceCommand
+        Command choosableAuton = new AutonCommand(
+                Map.of(
+                        AutonChooser.Routine.FOUR_NOTE, new AllianceCommand(
+                                m_AutoMaker.fourNoteAuto(
+                                        Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors),
+                                m_AutoMaker.fourNoteAuto(
+                                        Alliance.Blue, notePositionDetector, swerveKinodynamics, m_sensors)),
+                        AutonChooser.Routine.FIVE_NOTE, new AllianceCommand(
+                                new PrintCommand("five note red goes here"),
+                                new PrintCommand("five note blue goes here")),
+                        AutonChooser.Routine.COMPLEMENTARY, new AllianceCommand(
+                                new PrintCommand("complementary red goes here"),
+                                new PrintCommand("complementary blue goes here")),
+                        AutonChooser.Routine.NOTHING, new AllianceCommand(
+                                new PrintCommand("nothing red goes here"),
+                                new PrintCommand("nothing blue goes here"))),
+                AutonChooser::routine);
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);

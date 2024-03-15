@@ -10,13 +10,13 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 /**
@@ -25,6 +25,15 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
  * This is not finished, don't use it without finishing it.
  */
 public class NeoVortexTurningMotor implements Motor100<Angle100> {
+    /**
+     * Motor resistance https://www.revrobotics.com/rev-21-1652/
+     */
+    private static final double kROhms = 0.057;
+    /**
+     * Motor torque constant https://www.revrobotics.com/rev-21-1652/
+     */
+    private static final double kTNm_amp = 0.017;
+
     private final RelativeEncoder m_encoder;
 
     private final double staticFrictionFFVolts;
@@ -84,7 +93,7 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
 
-        if(motorPhase == MotorPhase.FORWARD){
+        if (motorPhase == MotorPhase.FORWARD) {
             m_motor.setInverted(false);
         } else {
             m_motor.setInverted(true);
@@ -96,12 +105,12 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         require(m_pidController.setPositionPIDWrappingEnabled(true));
-        
+
         setP(lowLevelVelocityConstants.getP());
         setI(lowLevelVelocityConstants.getI());
         setD(lowLevelVelocityConstants.getD());
         setIZone(lowLevelVelocityConstants.getIZone());
-        
+
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
 
@@ -113,29 +122,6 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
         t.register(Level.TRACE, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
         t.register(Level.TRACE, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
         t.register(Level.TRACE, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
-    }
-
-    private void setP(double p) {
-        m_pidController.setP(p);
-    }
-
-    private void setI(double i) {
-        m_pidController.setI(i);
-    }
-
-    private void setD(double d) {
-        m_pidController.setD(d);
-    }
-
-    private void setIZone(double iz) {
-        m_pidController.setIZone(iz);
-    }
-
-    private void require(REVLibError responseCode) {
-        // TODO: make this throw
-        if (responseCode != REVLibError.kOk)
-            Util.warn("NeoTurningMotor received response code " + responseCode.name());
-        // throw new IllegalStateException();
     }
 
     @Override
@@ -161,17 +147,50 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
         double motorRevs_M = motorRevs_S * 60;
         double motorRad_S2 = m_gearRatio * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
-        double velocityFF = velocityFF(motorRevs_S);
-        double frictionFF = frictionFF(m_encoderVelocity / 60, motorRevs_S);
-        double accelFF = accelFF(motorRevs_S2);
-        double kFF = frictionFF + velocityFF + accelFF;
+
+        double velocityFFVolts = velocityFFVolts(motorRevs_S);
+        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRevs_S);
+        double accelFFVolts = accelFFVolts(motorRevs_S2);
+
+        double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
 
-        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFF);
-        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFF);
-        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFF);
+        t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRevs_S);
+    }
+
+    @Override
+    public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
+        double motorRad_S = m_gearRatio * outputRad_S;
+        double motorRevs_S = motorRad_S / (2 * Math.PI);
+        double motorRevs_M = motorRevs_S * 60;
+        double motorRad_S2 = m_gearRatio * accelRad_S2;
+        double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
+
+        double velocityFFVolts = velocityFFVolts(motorRevs_S);
+        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRevs_S);
+        double accelFFVolts = accelFFVolts(motorRevs_S2);
+
+        double torqueFFAmps = torqueNm / kTNm_amp;
+        double torqueFFVolts = torqueFFAmps * kROhms;
+
+        double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
+
+        m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
+
+        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRevs_S);
+    }
+
+    @Override
+    public double getTorque() {
+        return m_motor.getOutputCurrent() * kTNm_amp;
     }
 
     public void resetPosition() {
@@ -208,9 +227,9 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
     /////////////////////////////////////////////////////////////////
 
     /**
-     * Frictional feedforward in duty cycle units [-1, 1]
+     * Frictional feedforward in Volts
      */
-    private double frictionFF(double currentMotorRev_S, double desiredMotorRev_S) {
+    private double frictionFFVolts(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
         if (currentMotorRev_S < 0.5) {
             return staticFrictionFFVolts * direction;
@@ -219,16 +238,39 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
     }
 
     /**
-     * Velocity feedforward in duty cycle units [-1, 1]
+     * Velocity feedforward in Volts
      */
-    private double velocityFF(double motorRev_S) {
+    private double velocityFFVolts(double motorRev_S) {
         return velocityFFVoltS_Rev * motorRev_S;
     }
 
     /**
-     * Acceleration feedforward in duty cycle units [-1, 1]
+     * Acceleration feedforward in Volts
      */
-    private double accelFF(double accelM_S_S) {
+    private double accelFFVolts(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S;
+    }
+
+    private void setP(double p) {
+        m_pidController.setP(p);
+    }
+
+    private void setI(double i) {
+        m_pidController.setI(i);
+    }
+
+    private void setD(double d) {
+        m_pidController.setD(d);
+    }
+
+    private void setIZone(double iz) {
+        m_pidController.setIZone(iz);
+    }
+
+    private void require(REVLibError responseCode) {
+        // TODO: make this throw
+        if (responseCode != REVLibError.kOk)
+            Util.warn("NeoTurningMotor received response code " + responseCode.name());
+        // throw new IllegalStateException();
     }
 }
