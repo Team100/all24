@@ -35,7 +35,6 @@ import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
-import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.AutonSelector;
@@ -214,25 +213,26 @@ public class RobotContainer implements Glassy {
         // DRIVETRAIN COMMANDS
         //
 
-        whileTrue(driverControl::defense, m_drive.runInit(m_drive::defense));
-        whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
-        whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
+        // joel 3/15/24 removed these, i don't think we use them.
+        // whileTrue(driverControl::defense, m_drive.runInit(m_drive::defense));
+        // whileTrue(driverControl::steer0, m_drive.runInit(m_drive::steer0));
+        // whileTrue(driverControl::steer90, m_drive.runInit(m_drive::steer90));
 
-        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive,
-        // GeometryUtil.kRotationZero));
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
-
-        // this is @sanjan's version from some sort of vision testing in february
-        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 1.77, 1.07,
-        // 2.44346));
-
+        // RESET ZERO
+        // on xbox this is "back"
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        
+        // RESET 180
         // on xbox this is "start"
-        onTrue(driverControl::resetRotation180, new SetRotation(m_drive, Rotation2d.fromDegrees(180)));
+        onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
 
+        // joel 3/15/24 removed ResetPose
+        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
         // on xbox this is left bumper
         // on joystick this is button 4
         // on starting zone line lined up with note
-        onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, 0));
+        // joel mar 15 turned this off, i think it's the cause of the "spontaneous gyro reset" the drivers experience
+        // onTrue(driverControl::resetPose, new ResetPose(m_drive, .5, 7, 0));
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 
