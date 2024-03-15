@@ -70,15 +70,16 @@ public class SwerveKinodynamicsFactory {
                     return new SwerveKinodynamics(5, 5, 7, 13, 20 * Math.PI, 0.4826, 0.4826, .2413, 0.3);
                 }
                 return new SwerveKinodynamics(
-                        4.2, // max vel m/s
-                        17, // max accel m/s/s
-                        40, // max decel m/s/s
-                        16, // max module steering rate rad/s
-                        40, // max module steering accel rad/s/s
-                        0.4826, // track m
-                        0.4826, // wheelbase m
-                        .2413,
-                        0.15); // vcg m
+                        5, // max vel m/s
+                        20, // max accel m/s/s
+                        50, // max decel m/s/s
+                        20, // max module steering rate rad/s
+                        60, // max module steering accel rad/s/s
+                        0.491, // front wheelbase m
+                        0.44, // back wheelbase m
+                        0.491, // wheelbase m
+                        0.29,
+                        0.1); // vcg m (guess)
             default:
                 Util.warn("Using default kinodynamics");
                 return new SwerveKinodynamics(5, 5, 5, 13, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
