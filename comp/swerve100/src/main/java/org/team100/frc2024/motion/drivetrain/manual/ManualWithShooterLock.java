@@ -7,6 +7,7 @@ import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.TargetUtil;
+import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
@@ -108,6 +109,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get(), state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
+        Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state); //make this integreate with shooter blah blah blah h mhh bh h                                                                                                                    
 
         t.log(Level.TRACE, m_name, "bearing", bearing);
 
@@ -217,10 +219,22 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return isAligned;
     }
 
-    static void aimWhileMoving(Rotation2d bearing, SwerveState state) {
+    static Rotation2d aimWhileMoving(Rotation2d bearing, double shooterVelocity, SwerveState state) {
 
         // its the shooter util code but robot moving vec is y velocity and angle in
         // rads is bearing
+
+        // double angleWithoutMoving = bearing.getRadians();
+
+        Rotation2d angleInRads = bearing;
+        
+        Vector2d stationaryRobotVector = new Vector2d(shooterVelocity, angleInRads);
+
+        Vector2d robotMovingVector = new Vector2d(state.y().v(), 0);
+
+        Vector2d resultingVector = Vector2d.sub(stationaryRobotVector, robotMovingVector);
+
+        return resultingVector.getTheta();
 
     }
 

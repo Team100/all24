@@ -24,6 +24,7 @@ import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
+import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
@@ -460,7 +461,7 @@ public class RobotContainer implements Glassy {
         // swerveKinodynamics, m_sensors));
 
         whileTrue(driverControl::shooterLock,
-                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
+                new AllianceCommand(m_AutoMaker.citrusv2(Alliance.Red), m_AutoMaker.citrusv2(Alliance.Blue)));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
@@ -471,7 +472,7 @@ public class RobotContainer implements Glassy {
         // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
         // lot.
         whileTrue(driverControl::test,
-                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
+                new AllianceCommand(m_AutoMaker.citrusv2(Alliance.Red), m_AutoMaker.citrusv2(Alliance.Blue)));
 
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
         // m_intake, m_feeder, m_drive));

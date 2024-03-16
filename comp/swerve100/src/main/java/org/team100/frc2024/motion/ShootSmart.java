@@ -100,7 +100,6 @@ double targetShooterAngle;
     } else {
         angle = m_pivotOverride;
     }
-    // double angle = m_drive.getPose().getTranslation().getDistance(ShooterUtil.getSpeakerTranslation());
 
     
     if(m_pivotOverride == -1){
@@ -109,16 +108,21 @@ double targetShooterAngle;
         m_shooter.setAngle(angle);
     }
 
+    t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT", Math.abs(m_shooter.getPivotPosition() - angle));
+
+    // t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT", Math.abs(m_shooter.getPivotPosition() - angle));
+
     if(!m_sensor.getFeederSensor()){
 
       m_intake.stop();
       m_feeder.stop();
 
       if(m_shooter.atVelocitySetpoint(m_isPreload)){
-        // if(Math.abs(m_shooter.getPivotgPosition() - ShooterUtil.getAngle(m_drive.getPose().getX())) < 1 ){
+        if(Math.abs(m_shooter.getPivotPosition() - angle) < 0.01 ){
+            System.out.println("TROOOOOOOOO");
             atVelocity = true;
             m_timer.start();
-          //   }
+            }
         } 
     }
 

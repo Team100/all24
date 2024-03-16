@@ -274,6 +274,10 @@ public class VisionDataProvider24 implements Glassy {
             if (!tagInFieldCoordsOptional.isPresent())
                 continue;
 
+            if(blip.getPose().getTranslation().getNorm() > 4.5){
+                return;
+            }
+
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
                     0, 0, gyroRotation.getRadians());
