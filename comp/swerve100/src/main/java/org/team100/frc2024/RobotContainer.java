@@ -24,7 +24,6 @@ import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
@@ -182,6 +181,7 @@ public class RobotContainer implements Glassy {
                 poseEstimator,
                 poseEstimator::getSampledRotation);
         visionDataProvider.enable();
+
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
         notePositionDetector.enable();
 
@@ -203,7 +203,11 @@ public class RobotContainer implements Glassy {
 
         m_shooter = new DrumShooter(44, 45, 28, 39, 58);
 
-        m_ledSubsystem = new LEDSubsystem(m_indicator, m_sensors, m_shooter);
+        m_ledSubsystem = new LEDSubsystem(
+                m_indicator,
+                m_sensors,
+                m_shooter,
+                visionDataProvider);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
         m_amp = new AmpSubsystem(19);

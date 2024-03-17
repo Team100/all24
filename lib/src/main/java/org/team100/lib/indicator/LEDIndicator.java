@@ -53,9 +53,16 @@ public class LEDIndicator {
         }
     }
 
+    /**
+     * Fast flashing, 15hz.
+     */
+    private static final int kFlashDurationMicrosec = 30000;
+
     private final AddressableLED led;
     private final AddressableLEDBuffer buffer;
+    private final AddressableLEDBuffer blackBuffer;
     private final List<LEDStrip> leds = new ArrayList<>();
+    private boolean flashing = false;
 
     public LEDIndicator(int port, LEDStrip... strips) {
         Collections.addAll(leds, strips);
@@ -63,25 +70,29 @@ public class LEDIndicator {
         led = new AddressableLED(port);
         led.setLength(length);
         buffer = new AddressableLEDBuffer(length);
+        blackBuffer = new AddressableLEDBuffer(length);
         led.setData(buffer);
         led.start();
     }
 
     public void setStripSolid(int index, State s) {
-        setStripSolid(leds.get(index), s);
+        Patterns.solid(leds.get(index), buffer, s.color);
     }
 
-    /** This should be called periodically if you want flashing to work. */
-    public void setStripFlashing(int index, State s, int durationMicrosec) {
-        if ((RobotController.getFPGATime() / durationMicrosec) % 2 == 0) {
-            setStripSolid(index, State.BLACK);
-        } else {
-            setStripSolid(index, s);
-        }
+    public void setFlashing(boolean flashing) {
+        this.flashing = flashing;
     }
 
     public void periodic() {
-        led.setData(buffer);
+        if (flashing) {
+            if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
+                led.setData(buffer);
+            } else {
+                led.setData(blackBuffer);
+            }
+        } else {
+            led.setData(buffer);
+        }
     }
 
     /////////////////////////////////
@@ -94,12 +105,5 @@ public class LEDIndicator {
     void setStripChase(LEDStrip strip) {
         Color[] colors = { new Color(), new Color() };
         Patterns.chase(colors, strip, buffer);
-    }
-
-    //////////////////////////////////
-    //
-
-    private void setStripSolid(LEDStrip strip, State s) {
-        Patterns.solid(strip, buffer, s.color);
     }
 }

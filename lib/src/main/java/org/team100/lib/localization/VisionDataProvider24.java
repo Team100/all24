@@ -34,8 +34,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -95,6 +96,8 @@ public class VisionDataProvider24 implements Glassy {
     // reuse the buffer since it takes some time to make
     private StructBuffer<Blip24> m_buf = StructBuffer.create(Blip24.struct);
 
+    private long latestTimeUs = 0;
+
     /**
      * @param layout
      * @param poseEstimator    can be null for testing.
@@ -119,6 +122,15 @@ public class VisionDataProvider24 implements Glassy {
                 new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::accept);
+    }
+
+    /**
+     * The age of the last pose estimate, in microseconds.
+     * The caller could use this to, say, indicate tag visibility.
+     */
+    public long getPoseAgeUs() {
+        long nowUs = RobotController.getFPGATime();
+        return nowUs - latestTimeUs;
     }
 
     /**
@@ -274,7 +286,7 @@ public class VisionDataProvider24 implements Glassy {
             if (!tagInFieldCoordsOptional.isPresent())
                 continue;
 
-            if(blip.getPose().getTranslation().getNorm() > 4.5){
+            if (blip.getPose().getTranslation().getNorm() > 4.5) {
                 return;
             }
 
@@ -306,6 +318,7 @@ public class VisionDataProvider24 implements Glassy {
                     if (Experiments.instance.enabled(Experiment.HeedVision)) {
                         if (poseEstimator != null)
                             poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
+                        latestTimeUs = RobotController.getFPGATime();
                         estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                     }
                 } else {
@@ -376,6 +389,7 @@ public class VisionDataProvider24 implements Glassy {
                         if (Experiments.instance.enabled(Experiment.HeedVision)) {
                             if (poseEstimator != null)
                                 poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
+                            latestTimeUs = RobotController.getFPGATime();
                             estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                         }
                     } else {
