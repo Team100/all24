@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.drive.Drive;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motor.MotorPhase;

@@ -58,7 +58,8 @@ public class ServoFactory {
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI,
+                param.gearRatio());
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
                 motor,
@@ -91,7 +92,8 @@ public class ServoFactory {
         Falcon6DriveEncoder encoder = new Falcon6DriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI,
+                param.gearRatio());
 
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
@@ -240,7 +242,8 @@ public class ServoFactory {
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI,
+                param.gearRatio());
         return new PositionServo<>(
                 name,
                 motor,
@@ -278,7 +281,8 @@ public class ServoFactory {
         Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI,
+                param.gearRatio());
         return new PositionServo<>(
                 name,
                 motor,

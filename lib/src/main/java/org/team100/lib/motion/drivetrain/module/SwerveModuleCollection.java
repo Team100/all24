@@ -2,8 +2,8 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
+import org.team100.lib.encoder.drive.Drive;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;

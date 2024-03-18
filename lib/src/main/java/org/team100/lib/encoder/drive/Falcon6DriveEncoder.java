@@ -18,7 +18,7 @@ public class Falcon6DriveEncoder implements Encoder100<Distance100> {
     private final String m_name;
     private final Falcon6DriveMotor m_motor;
     private final double m_distancePerTurn;
-
+    private final double m_gearRatio;
     /** updated in periodic() */
     private double m_positionM;
     /** updated in periodic() */
@@ -31,12 +31,14 @@ public class Falcon6DriveEncoder implements Encoder100<Distance100> {
     public Falcon6DriveEncoder(
             String name,
             Falcon6DriveMotor motor,
-            double distancePerTurn) {
+            double distancePerTurn,
+            double gearRatio) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
+        m_gearRatio = gearRatio;
     }
 
     /** Position in meters. */
@@ -73,11 +75,11 @@ public class Falcon6DriveEncoder implements Encoder100<Distance100> {
     //////////////////////////////////
 
     private void updatePosition() {
-        m_positionM = m_motor.getPosition();
+        m_positionM = m_motor.getPosition() / m_gearRatio;
     }
 
     private void updateVelocity() {
-        m_velocityM_S = m_motor.getRate() ;
+        m_velocityM_S = m_motor.getRate() / m_gearRatio;
     }
 
 }

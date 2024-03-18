@@ -62,7 +62,7 @@ public class Monitor implements Glassy {
         double voltage = RobotController.getBatteryVoltage();
         if (voltage < 11 || voltage > 14) {
             m_shouldAlert = true;
-        }
+        }   
         return voltage;
     }
 

@@ -18,6 +18,7 @@ public class NeoVortexDriveEncoder implements Encoder100<Distance100> {
     private final String m_name;
     private final NeoVortexDriveMotor m_motor;
     private final double m_distancePerTurn;
+    private final double m_gearRatio;
 
     /** updated in periodic() */
     private double m_positionM;
@@ -31,12 +32,14 @@ public class NeoVortexDriveEncoder implements Encoder100<Distance100> {
     public NeoVortexDriveEncoder(
             String name,
             NeoVortexDriveMotor motor,
-            double distancePerTurn) {
+            double distancePerTurn,
+            double gearRatio) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
+        m_gearRatio = gearRatio;
     }
 
     /** Position in meters. */
@@ -74,12 +77,12 @@ public class NeoVortexDriveEncoder implements Encoder100<Distance100> {
 
     private void updatePosition() {
         // raw position is in rotations
-        m_positionM = m_motor.getPositionRot() * m_distancePerTurn;
+        m_positionM = m_motor.getPositionRot() / m_gearRatio * m_distancePerTurn;
     }
 
     private void updateVelocity() {
         // raw velocity is in RPM
-        m_velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
+        m_velocityM_S = m_motor.getRateRPM() / m_gearRatio * m_distancePerTurn / 60;
     }
 
 }

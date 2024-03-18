@@ -23,6 +23,7 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     private double m_positionM;
     /** updated in periodic() */
     private double m_velocityM_S;
+    private final double m_gearRatio;
 
     /**
      * @param name            do not use a leading slash.
@@ -31,11 +32,13 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     public NeoDriveEncoder(
             String name,
             NeoDriveMotor motor,
+            double gearRatio,
             double distancePerTurn) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
         m_motor = motor;
+        m_gearRatio = gearRatio;
         m_distancePerTurn = distancePerTurn;
     }
 
@@ -74,12 +77,12 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
 
     private void updatePosition() {
         // raw position is in rotations
-        m_positionM = m_motor.getPositionRot() * m_distancePerTurn;
+        m_positionM = m_motor.getPositionRot() / m_gearRatio * m_distancePerTurn;
     }
 
     private void updateVelocity() {
         // raw velocity is in RPM
-        m_velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
+        m_velocityM_S = m_motor.getRateRPM() / m_gearRatio * m_distancePerTurn / 60;
     }
 
 }
