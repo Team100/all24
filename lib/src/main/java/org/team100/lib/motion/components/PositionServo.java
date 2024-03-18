@@ -165,6 +165,12 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         t.log(Level.DEBUG, m_name, "Desired velocity setpoint", velocity);
     }
 
+    /** Direct dutyCycle for testing */
+    public void setDutyCycle(double velocity) {
+        m_motor.setDutyCycle(velocity);
+        t.log(Level.DEBUG, m_name, "Desired velocity setpoint", velocity);
+    }
+
     /**
      * @return Current position measurement. For distance this is meters, for angle
      *         this is radians.

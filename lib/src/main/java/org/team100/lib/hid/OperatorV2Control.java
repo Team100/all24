@@ -67,7 +67,7 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public boolean getClimberOveride(){
+    public boolean climbGo(){
         // return m_controller.getLeftBumper();
         return false;
     }
