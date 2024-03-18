@@ -1,7 +1,6 @@
 package org.team100.lib.encoder.turning;
 
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.encoder.drive.Drive;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;

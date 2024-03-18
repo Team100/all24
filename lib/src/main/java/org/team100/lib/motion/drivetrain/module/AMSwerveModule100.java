@@ -2,8 +2,8 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.encoder.drive.Drive;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
+import org.team100.lib.encoder.turning.Drive;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;

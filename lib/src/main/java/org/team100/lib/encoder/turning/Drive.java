@@ -1,4 +1,4 @@
-package org.team100.lib.encoder.drive;
+package org.team100.lib.encoder.turning;
 
 /** Describes how the encoder angle is linked to the steering angle. */
 public enum Drive {
