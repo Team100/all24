@@ -504,7 +504,7 @@ public class RobotContainer implements Glassy {
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
         SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
-                operatorControl::getRightAxis, operatorControl::climbGo), Priority.FIVE);
+                operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         // Registers the subsystems so that they run with the specified priority

@@ -10,7 +10,6 @@ import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
@@ -96,7 +95,6 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
         dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
         m_motor.setInverted(!motorPhase);
-        m_motor.setIdleMode(IdleMode.kBrake);
         require(m_motor.setSmartCurrentLimit(currentLimit));
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
         m_encoder = m_motor.getEncoder();

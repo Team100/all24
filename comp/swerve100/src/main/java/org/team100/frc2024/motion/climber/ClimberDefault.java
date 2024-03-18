@@ -18,15 +18,15 @@ public class ClimberDefault extends Command {
 
   Supplier<Double> m_leftSupplier;
   Supplier<Double> m_rightSupplier;
-  Supplier<Boolean> m_climbGo;
+  Supplier<Boolean> m_overideSupplier;
 
   ClimberSubsystem m_climber;
-  public ClimberDefault(ClimberSubsystem climber, Supplier<Double> leftSupplier, Supplier<Double> rightSupplier, Supplier<Boolean> climbGo) {
+  public ClimberDefault(ClimberSubsystem climber, Supplier<Double> leftSupplier, Supplier<Double> rightSupplier, Supplier<Boolean> overideSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_leftSupplier = leftSupplier;
     m_rightSupplier = rightSupplier;
     m_climber = climber;
-    m_climbGo = climbGo;
+    m_overideSupplier = overideSupplier;
     addRequirements(m_climber);
   }
 
@@ -42,14 +42,9 @@ public class ClimberDefault extends Command {
     t.log(Level.DEBUG, "ClimberDefault", "command state", "execute");
 
 
-    if(!m_climbGo.get()){
-        // m_climber.setLeft(m_leftSupplier.get());
-        // m_climber.setRight(m_rightSupplier.get());
-        m_climber.rest();
-    } else {
-        m_climber.setClimbGO();
-    }
-
+    // if(m_overideSupplier.get()){
+        m_climber.setLeft(m_leftSupplier.get());
+        m_climber.setRight(m_rightSupplier.get());
     // } else {
         // m_climber.setLeft(m_leftSupplier.get());
         // m_climber.setRight(m_rightSupplier.get());

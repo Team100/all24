@@ -100,7 +100,7 @@ public interface OperatorControl extends Glassy {
         return 0;
     }
 
-    default boolean climbGo(){
+    default boolean getClimberOveride(){
         return false;
     }
 

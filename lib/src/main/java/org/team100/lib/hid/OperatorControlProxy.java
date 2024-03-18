@@ -166,8 +166,8 @@ public class OperatorControlProxy implements OperatorControl {
         return  m_operatorControl.getRightAxis();
     }
 
-    public boolean climbGo(){
-        return  m_operatorControl.climbGo();
+    public boolean getClimberOveride(){
+        return  m_operatorControl.getClimberOveride();
     }
 
     public boolean feedToAmp(){

@@ -11,7 +11,6 @@ import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
@@ -93,7 +92,7 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
-        m_motor.setIdleMode(IdleMode.kBrake);
+
         if (motorPhase == MotorPhase.FORWARD) {
             m_motor.setInverted(false);
         } else {
