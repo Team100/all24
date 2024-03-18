@@ -64,9 +64,9 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     private final String m_name;
 
     /** Current position measurement, obtained in periodic(). */
-    private double m_encoderPosition;
+    private double m_encoderPositionRev;
     /** Current velocity measurement, obtained in periodic(). */
-    private double m_encoderVelocity;
+    private double m_encoderVelocityRev_M;
 
     /**
      * 
@@ -148,7 +148,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
         double velocityFFVolts = velocityFFVolts(motorRev_S);
-        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRev_S);
+        double frictionFFVolts = frictionFFVolts(m_encoderVelocityRev_M / 60, motorRev_S);
         double accelFFVolts = accelFFVolts(motorRev_S2);
         double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
@@ -170,7 +170,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
         double velocityFFVolts = velocityFFVolts(motorRev_S);
-        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRev_S);
+        double frictionFFVolts = frictionFFVolts(m_encoderVelocityRev_M / 60, motorRev_S);
         double accelFFVolts = accelFFVolts(motorRev_S2);
 
         double torqueFFAmps = torqueNm / kTNm_amp;
@@ -201,14 +201,14 @@ public class NeoDriveMotor implements Motor100<Distance100> {
      * @return integrated sensor position in rotations.
      */
     public double getPositionRot() {
-        return m_encoderPosition;
+        return m_encoderPositionRev;
     }
 
     /**
      * @return integrated sensor velocity in RPM
      */
     public double getRateRPM() {
-        return m_encoderVelocity;
+        return m_encoderVelocityRev_M;
     }
 
     /**
@@ -216,17 +216,17 @@ public class NeoDriveMotor implements Motor100<Distance100> {
      */
     public void resetPosition() {
         m_encoder.setPosition(0);
-        m_encoderPosition = 0;
+        m_encoderPositionRev = 0;
     }
 
     /**
      * Update measurements.
      */
     public void periodic() {
-        m_encoderPosition = m_encoder.getPosition();
-        m_encoderVelocity = m_encoder.getVelocity();
-        t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPosition);
-        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+        m_encoderPositionRev = m_encoder.getPosition();
+        m_encoderVelocityRev_M = m_encoder.getVelocity();
+        t.log(Level.DEBUG, m_name, "position (rev)", m_encoderPositionRev);
+        t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoderVelocityRev_M / 60);
         t.log(Level.DEBUG, m_name, "current (A)", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "duty cycle", m_motor.getAppliedOutput());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getMotorTemperature());
