@@ -9,68 +9,30 @@ It uses 20% scaled tags 33.02 mm
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=import-error
-import dataclasses
-import time
 
-from enum import Enum
 
 import cv2
+import sys
 import libcamera
 import numpy as np
-import ntcore
 
 import robotpy_apriltag
 
 from cscore import CameraServer
 from picamera2 import Picamera2
 from wpimath.geometry import Transform3d
-from wpiutil import wpistruct
-
-
-@wpistruct.make_wpistruct
-@dataclasses.dataclass
-class Blip24:
-    id: int
-    pose: Transform3d
-
-
-class Camera(Enum):
-    """Keep this synchronized with java team100.config.Camera."""
-
-    A = "10000000caeaae82"  # "BETA FRONT"
-    B = "1000000013c9c96c"  # "BETA BACK"
-    C = "10000000a7c673d9"  # "GAMMA INTAKE"
-
-    SHOOTER = "100000004e0a1fb9"  # "DELTA SHOOTER"
-    AMP = "1000000031b9d05b"  # "DELTA AMP-PLACER"
-    GAME_PIECE = "10000000a7c673dc"  # "DELTA INTAKE"
-
-    G = "10000000a7a892c0"  # ""
-    UNKNOWN = None
-
-    @classmethod
-    def _missing_(cls, value):
-        return Camera.UNKNOWN
 
 
 class TagFinder:
-    def __init__(self, serial, width, height, model):
-        self.frame_time = time.time()
-        # the cpu serial number
-        self.serial = serial
+    def __init__(self, width, height, model):
         self.width = width
         self.height = height
         self.model = model
 
-        # for the driver view
-        scale = 0.25
-        self.view_width = int(width * scale)
-        self.view_height = int(height * scale)
-
-        self.initialize_nt()
-
         self.at_detector = robotpy_apriltag.AprilTagDetector()
         self.at_detector.addFamily("tag36h11")
+
+        # i think we should just focus on k1 and k2, and assume zero tangential, and ignore the higher order k factors.
 
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
@@ -86,12 +48,6 @@ class TagFinder:
                         -1.14073111e00,
                         6.16356154e-01,
                         5.86094708e-02,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
                     ]
                 ]
             )
@@ -118,12 +74,6 @@ class TagFinder:
                         -5.75883422e-02,
                         3.81831051e01,
                         -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
                     ]
                 ]
             )
@@ -137,43 +87,13 @@ class TagFinder:
                 )
             )
         else:
-            print("UNKNOWN CAMERA")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    666,  # fx
-                    666,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            print("UNKNOWN CAMERA MODEL")
+            sys.exit()
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def analyze(self, request):
         buffer = request.make_buffer("lores")
-        metadata = request.get_metadata()
 
         y_len = self.width * self.height
 
@@ -183,67 +103,19 @@ class TagFinder:
         # this  makes a view, very fast (150 ns)
         img = img.reshape((self.height, self.width))
 
-        # TODO: crop regions that never have targets
-        # this also makes a view, very fast (150 ns)
-        # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
-        # for now use the full frame
-        # TODO: probably remove this
-        serial = getserial()
-        identity = Camera(serial)
-        if identity == Camera.SHOOTER:
-            img = img[62:554, : self.width]
-        else:        
-            img = img[: self.height, : self.width]
-
         # for calibration we don't undistort
+        # turn this on to check the calibration!
         # img = cv2.undistort(img, self.mtx, self.dist)
 
         result = self.at_detector.detect(img)
 
-        blips = []
         for result_item in result:
             if result_item.getHamming() > 0:
                 continue
             pose = self.estimator.estimate(result_item)
-            blips.append(Blip24(result_item.getId(), pose))
-            # TODO: turn this off for prod
             self.draw_result(img, result_item, pose)
 
-        # compute time since last frame
-        current_time = time.time()
-        total_et = current_time - self.frame_time
-        self.frame_time = current_time
-
-        fps = 1 / total_et
-
-        self.vision_nt_struct.set(blips)
-        self.vision_fps.set(fps)
-
-        # sensor timestamp is the boottime when the first byte was received from the sensor
-        sensor_timestamp = metadata["SensorTimestamp"]
-        # include all the work above in the latency
-        system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
-        time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
-        self.vision_latency.set(time_delta_ms)
-
-        # must flush!  otherwise 100ms update rate.
-        self.inst.flush()
-
-        # now do the drawing (after the NT payload is written)
-        # none of this is particularly fast or important for prod,
-        # TODO: consider disabling it after dev is done
-        self.draw_text(img, f"fps {fps:.1f}", (5, 65))
-        # self.draw_text(img, f"latency(ms) {time_delta_ms:.0f}", (5, 105))
-
-        # shrink the driver view to avoid overloading the radio
-        # TODO: turn this back on for prod!!
-        # driver_img = cv2.resize(img, (self.view_width, self.view_height))
-        # self.output_stream.putFrame(driver_img)
-
-        # for now put big images
-        # TODO: turn this off for prod!!
-        img_output = cv2.resize(img, (416,308)) 
-        self.output_stream.putFrame(img_output)
+        self.output_stream.putFrame(img)
 
     def draw_result(self, image, result_item, pose: Transform3d):
         color = (255, 255, 255)
@@ -257,16 +129,12 @@ class TagFinder:
 
         (c_x, c_y) = (int(result_item.getCenter().x), int(result_item.getCenter().y))
         cv2.circle(image, (c_x, c_y), 10, (255, 255, 255), -1)
-
-        tag_id = result_item.getId()
-        self.draw_text(image, f"id {tag_id}", (c_x, c_y))
-
-        # type the translation into the image, in WPI coords (x-forward)
+        self.draw_text(image, f"cx {c_x} cy {c_y}", (c_x, c_y))
         if pose is not None:
             t = pose.translation()
             self.draw_text(
                 image,
-                f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
+                f"t: {t.x:4.1f},{t.y:4.1f},{t.z:4.1f}",
                 (c_x - 50, c_y + 40),
             )
 
@@ -275,41 +143,8 @@ class TagFinder:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    def initialize_nt(self):
-        """Start NetworkTables with Rio as server, set up publisher."""
-        self.inst = ntcore.NetworkTableInstance.getDefault()
-        self.inst.startClient4("tag_finder24")
-
-        # roboRio address. windows machines can impersonate this for simulation.
-        self.inst.setServer("10.1.0.2")
-
-        topic_name = "vision/" + self.serial
-        self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
-        self.vision_latency = self.inst.getDoubleTopic(
-            topic_name + "/latency"
-        ).publish()
-
-        # work around https://github.com/robotpy/mostrobotpy/issues/60
-        self.inst.getStructTopic("bugfix", Blip24).publish().set(
-            Blip24(0, Transform3d())
-        )
-
-        # blip array topic
-        self.vision_nt_struct = self.inst.getStructArrayTopic(
-            topic_name + "/blips", Blip24
-        ).publish()
-
-
-def getserial():
-    with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
-        for line in cpuinfo:
-            if line[0:6] == "Serial":
-                return line[10:26]
-    return ""
-
 
 def main():
-
     camera = Picamera2()
 
     model = camera.camera_properties["Model"]
@@ -332,11 +167,8 @@ def main():
         width = 832
         height = 616
     else:
-        print("UNKNOWN CAMERA: " + model)
-        fullwidth = 100
-        fullheight = 100
-        width = 100
-        height = 100
+        print("UNKNOWN CAMERA MODEL: " + model)
+        sys.exit()
 
     camera_config = camera.create_still_configuration(
         # 2 buffers => low latency (32-48 ms), low fps (15-20)
@@ -365,11 +197,6 @@ def main():
         },
     )
 
-    serial = getserial()
-    identity = Camera(serial)
-    # if identity == Camera.FRONT:
-    #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
-
     print("\nREQUESTED CONFIG")
     print(camera_config)
     camera.align_configuration(camera_config)
@@ -378,8 +205,7 @@ def main():
     camera.configure(camera_config)
     print("\nCONTROLS")
     print(camera.camera_controls)
-    print(serial)
-    output = TagFinder(serial, width, height, model)
+    output = TagFinder(width, height, model)
 
     camera.start()
     try:
