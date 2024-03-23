@@ -290,7 +290,8 @@ def main():
             # fast shutter means more gain
             # "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-            "ExposureTime": 3000,
+            # 3/23/24, reduced to 2ms, even less blur.
+            "ExposureTime": 2000,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
