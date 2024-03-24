@@ -114,6 +114,46 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
     }
 
+     /**
+     * @param goal For distance, use meters, For angle, use radians.
+     */
+    @Override
+    public void setPositionDirect(double goal) {
+        double measurement = m_instance.modulus(m_encoder.getPosition());
+
+        // use the modulus closest to the measurement.
+        // note zero velocity in the goal.
+        m_goal = new State100(m_instance.modulus(goal - measurement) + measurement, 0.0);
+
+        m_setpoint = new State100(
+                m_instance.modulus(m_setpoint.x() - measurement) + measurement,
+                m_setpoint.v());
+
+        m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
+
+        double u_FB = m_controller.calculate(measurement, m_setpoint.x());
+        double u_FF = m_setpoint.v();
+        // note u_FF is rad/s, so a big number, u_FB should also be a big number.
+
+        double u_TOTAL = (u_FB + u_FF)/m_maxVel;
+        u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
+
+        m_motor.setDutyCycle(u_TOTAL);
+        t.log(Level.DEBUG, m_name, "Desired velocity setpoint", u_TOTAL);
+
+        m_controller.setIntegratorRange(0, 0.1);
+
+        t.log(Level.TRACE, m_name, "u_FB", u_FB);
+        t.log(Level.TRACE, m_name, "u_FF", u_FF);
+        t.log(Level.TRACE, m_name, "u_TOTAL", u_TOTAL);
+        t.log(Level.DEBUG, m_name, "Measurement", measurement);
+        t.log(Level.DEBUG, m_name, "Goal", m_goal);
+        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
+        t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
+        t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
+        t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
+    }
+
     /**
      * @param goal                For distance, use meters, For angle, use radians.
      * @param feedForwardTorqueNm used for gravity and drive/steer decoupling, this
@@ -177,6 +217,13 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
     @Override
     public double getVelocity() {
         return m_encoder.getRate();
+    }
+
+    /**
+     * 0-1 direct duty cycle to motor
+     */
+    public void set(double value) {
+        m_motor.setDutyCycle(value);
     }
 
     @Override
