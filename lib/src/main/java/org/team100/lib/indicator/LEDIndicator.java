@@ -1,7 +1,6 @@
 package org.team100.lib.indicator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -31,7 +30,8 @@ public class LEDIndicator {
         GREEN(Color.kLime),
         PURPLE(Color.kFuchsia),
         YELLOW(Color.kYellow),
-        ORANGE(Color.kOrange);
+        ORANGE(Color.kOrange),
+        WHITE(Color.kWhite);
 
         /**
          * This "color" is what we tell the LED strip to make it display the actual
@@ -61,12 +61,28 @@ public class LEDIndicator {
     private final AddressableLED led;
     private final AddressableLEDBuffer buffer;
     private final AddressableLEDBuffer blackBuffer;
-    private final List<LEDStrip> leds = new ArrayList<>();
-    private boolean flashing = false;
+    private final List<LEDStrip> backleds = new ArrayList<>();
+    private final List<LEDStrip> frontleds = new ArrayList<>();
+    private State frontState;
+    private State backState;
+    private boolean backflashing = false;
+    private boolean frontflashing = false;
+    private final int m_numsplitstrips;
 
-    public LEDIndicator(int port, LEDStrip... strips) {
-        Collections.addAll(leds, strips);
-        int length = leds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
+    public LEDIndicator(int port) {
+        m_numsplitstrips = 10;
+        // TODO get real strips that are front and back
+        List<LEDStrip> allLeds = new ArrayList<>();
+        for (int i = 0; i < m_numsplitstrips; i++) {
+            allLeds.add(new LEDStrip(16, i * 16));
+        }
+        for (int i = 0; i < m_numsplitstrips / 2; i++) {
+            frontleds.add(new LEDStrip(16, i * 2 * 16));
+        }
+        for (int i = 0; i < m_numsplitstrips / 2; i++) {
+            backleds.add(new LEDStrip(16, (i * 2 + 1) * 16));
+        }
+        int length = allLeds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
         led = new AddressableLED(port);
         led.setLength(length);
         buffer = new AddressableLEDBuffer(length);
@@ -75,24 +91,54 @@ public class LEDIndicator {
         led.start();
     }
 
-    public void setStripSolid(int index, State s) {
-        Patterns.solid(leds.get(index), buffer, s.color);
+    public void setFrontSolid(State s) {
+        frontState = s;
+        for (int i = 0; i < m_numsplitstrips; i++) {
+            Patterns.solid(frontleds.get(i), buffer, frontState.color);
+        }
+        setFrontFlashing(frontflashing);
     }
 
-    public void setFlashing(boolean flashing) {
-        this.flashing = flashing;
+    public void setBackSolid(State s) {
+        backState = s;
+        for (int i = 0; i < m_numsplitstrips; i++) {
+            Patterns.solid(backleds.get(i), buffer, backState.color);
+        }
+        setBackFlashing(backflashing);
+    }
+
+    public void setFrontFlashing(boolean flashing) {
+        if (flashing) {
+            for (int i = 0; i < m_numsplitstrips / 2; i++) {
+                Patterns.solid(frontleds.get(i), blackBuffer, Color.kBlack);
+            }
+        } else {
+            for (int i = 0; i < m_numsplitstrips / 2; i++) {
+                Patterns.solid(frontleds.get(i), blackBuffer, frontState.color);
+            }
+        }
+        frontflashing = flashing;
+    }
+
+    public void setBackFlashing(boolean flashing) {
+        if (flashing) {
+            for (int i = 0; i < m_numsplitstrips / 2; i++) {
+                Patterns.solid(backleds.get(i), blackBuffer, Color.kBlack);
+            }
+        } else {
+            for (int i = 0; i < m_numsplitstrips / 2; i++) {
+                Patterns.solid(backleds.get(i), blackBuffer, backState.color);
+            }
+        }
+        backflashing = flashing;
     }
 
     public void periodic() {
-        if (flashing) {
             if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
                 led.setData(buffer);
             } else {
                 led.setData(blackBuffer);
             }
-        } else {
-            led.setData(buffer);
-        }
     }
 
     /////////////////////////////////

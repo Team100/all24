@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.indicator.LEDIndicator;
+import org.team100.lib.indicator.LEDStrip;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.VisionDataProvider24;
 
@@ -45,29 +46,30 @@ public class LEDSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        m_indicator.setBackSolid(State.WHITE);
         if (!DriverStation.isDSAttached() || DriverStation.isDisabled()) {
             Optional<Alliance> alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
                 if (alliance.get() == Alliance.Red) {
-                    m_indicator.setStripSolid(0, State.RED);
+                    m_indicator.setFrontSolid(State.RED);
                 } else {
-                    m_indicator.setStripSolid(0, State.BLUE);
+                    m_indicator.setFrontSolid(State.BLUE);
                 }
             } else {
-                m_indicator.setStripSolid(0, State.ORANGE);
+                m_indicator.setFrontSolid(State.ORANGE);
             }
         } else {
             boolean atVelocitySetpoint = m_shooter.atVelocitySetpoint(false);
             SmartDashboard.putBoolean("VELOCITY", atVelocitySetpoint);
             if (atVelocitySetpoint) {
-                m_indicator.setStripSolid(0, State.PURPLE);
+                m_indicator.setFrontSolid(State.PURPLE);
             } else {
                 boolean indexerIsEmpty = m_sensors.getFeederSensor();
                 SmartDashboard.putBoolean("FEEDER", indexerIsEmpty);
                 if (indexerIsEmpty) {
-                    m_indicator.setStripSolid(0, State.RED);
+                    m_indicator.setFrontSolid(State.RED);
                 } else {
-                    m_indicator.setStripSolid(0, State.GREEN);
+                    m_indicator.setFrontSolid(State.GREEN);
                 }
             }
         }
@@ -75,7 +77,7 @@ public class LEDSubsystem extends SubsystemBase {
         long poseAgeUs = m_vision.getPoseAgeUs();
 
         // flash if the pose is too old
-        m_indicator.setFlashing(poseAgeUs > kPersistenceUs);
+        m_indicator.setFrontFlashing(poseAgeUs > kPersistenceUs);
 
         m_indicator.periodic();
     }

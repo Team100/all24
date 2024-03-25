@@ -14,6 +14,7 @@ public interface PositionServoInterface<T extends Measure100> extends Glassy {
      */
     void reset();
 
+    void setPositionDirect(double goal);
     /**
      * @param goal For distance, use meters, For angle, use radians.
      */

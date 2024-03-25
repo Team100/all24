@@ -10,6 +10,7 @@ import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
@@ -106,7 +107,7 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         m_pidController.setIZone(lowLevelVelocityConstants.getIZone());
         require(m_pidController.setFF(0));
         require(m_pidController.setOutputRange(-1, 1));
-
+        m_motor.setIdleMode(IdleMode.kBrake);
         m_gearRatio = gearRatio;
         m_wheelDiameter = wheelDiameter;
 
