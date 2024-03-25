@@ -60,115 +60,79 @@ public class LEDIndicator {
 
     private final AddressableLED led;
     private final AddressableLEDBuffer buffer;
-    private final AddressableLEDBuffer blackBuffer;
-    private final List<LEDStrip> backleds = new ArrayList<>();
-    private final List<LEDStrip> frontleds = new ArrayList<>();
-    private State frontState;
-    private State backState;
-    private boolean backflashing = false;
-    private boolean frontflashing = false;
-    private final int m_numsplitstrips;
+    private final List<LEDStrip> m_frontStrips;
+    private final List<LEDStrip> m_backStrips;
 
-    // @sanjan 3/25
-    // public LEDIndicator(int port, ArrayList<LEDStrip> strips) {
-    //
-    //    // Collections.addAll(leds, strips);
-    //    int length = leds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
+    private State m_front;
+    private State m_back;
+    private boolean m_flashing;
 
     public LEDIndicator(int port) {
-        m_numsplitstrips = 10;
-        // TODO get real strips that are front and back
-        List<LEDStrip> allLeds = new ArrayList<>();
-        for (int i = 0; i < m_numsplitstrips; i++) {
-            allLeds.add(new LEDStrip(16, i * 16));
-        }
-        for (int i = 0; i < m_numsplitstrips / 2; i++) {
-            frontleds.add(new LEDStrip(16, i * 2 * 16));
-        }
-        for (int i = 0; i < m_numsplitstrips / 2; i++) {
-            backleds.add(new LEDStrip(16, (i * 2 + 1) * 16));
-        }
-        int length = allLeds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
+        // TODO: change the ranges to match the actual LEDs
+        m_frontStrips = new ArrayList<>();
+        m_backStrips = new ArrayList<>();
+        
+        m_backStrips.add(new LEDStrip(0, 16));
+        m_frontStrips.add(new LEDStrip(16, 32));
+        m_backStrips.add(new LEDStrip(32, 48));
+        m_frontStrips.add(new LEDStrip(48, 64));
+        m_backStrips.add(new LEDStrip(64, 80));
+        m_frontStrips.add(new LEDStrip(80, 96));
+        m_backStrips.add(new LEDStrip(96, 112));
+        m_frontStrips.add(new LEDStrip(112, 128));
+        m_backStrips.add(new LEDStrip(128, 144));
+        m_frontStrips.add(new LEDStrip(144, 160));
+
+        int length = Math.max(
+                m_frontStrips.stream().map(LEDStrip::end).reduce(0, Integer::max),
+                m_backStrips.stream().map(LEDStrip::end).reduce(0, Integer::max));
         led = new AddressableLED(port);
         led.setLength(length);
         buffer = new AddressableLEDBuffer(length);
-        blackBuffer = new AddressableLEDBuffer(length);
         led.setData(buffer);
         led.start();
+        m_flashing = false;
     }
 
-    public void setFrontSolid(State s) {
-        frontState = s;
-        for (int i = 0; i < m_numsplitstrips; i++) {
-            Patterns.solid(frontleds.get(i), buffer, frontState.color);
-        }
-        setFrontFlashing(frontflashing);
+    public void setFront(State s) {
+        m_front = s;
     }
 
-    // @sanjan 3/25
-    // public void setGroupSolid(LEDGroup group, State s) {
-    //    for(LEDStrip strip : leds){
-    //        if(strip.getGroup() == group){
-    //            Patterns.solid(strip, buffer, s.color);
-    //
-    //        }
-    //    }
-    // }
+    public void setBack(State s) {
+        m_back = s;
+    }
 
     public void setFlashing(boolean flashing) {
-        this.flashing = flashing;
-
-    public void setBackSolid(State s) {
-        backState = s;
-        for (int i = 0; i < m_numsplitstrips; i++) {
-            Patterns.solid(backleds.get(i), buffer, backState.color);
-        }
-        setBackFlashing(backflashing);
+        m_flashing = flashing;
     }
 
-    public void setFrontFlashing(boolean flashing) {
-        if (flashing) {
-            for (int i = 0; i < m_numsplitstrips / 2; i++) {
-                Patterns.solid(frontleds.get(i), blackBuffer, Color.kBlack);
-            }
-        } else {
-            for (int i = 0; i < m_numsplitstrips / 2; i++) {
-                Patterns.solid(frontleds.get(i), blackBuffer, frontState.color);
-            }
-        }
-        frontflashing = flashing;
-    }
-
-    public void setBackFlashing(boolean flashing) {
-        if (flashing) {
-            for (int i = 0; i < m_numsplitstrips / 2; i++) {
-                Patterns.solid(backleds.get(i), blackBuffer, Color.kBlack);
-            }
-        } else {
-            for (int i = 0; i < m_numsplitstrips / 2; i++) {
-                Patterns.solid(backleds.get(i), blackBuffer, backState.color);
-            }
-        }
-        backflashing = flashing;
-    }
-
+    /**
+     * Periodic does all the real work in this class.
+     */
     public void periodic() {
+        // back always shows the same
+        for (LEDStrip strip : m_backStrips) {
+            strip.solid(buffer, m_back.color);
+        }
+
+        // front depends on flashing state
+        if (m_flashing) {
             if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
-                led.setData(buffer);
+                for (LEDStrip strip : m_frontStrips) {
+                    strip.solid(buffer, Color.kBlack);
+                }
             } else {
-                led.setData(blackBuffer);
+                for (LEDStrip strip : m_frontStrips) {
+                    strip.solid(buffer, m_front.color);
+                }
             }
-    }
+        } else {
+            for (LEDStrip strip : m_frontStrips) {
+                strip.solid(buffer, m_front.color);
+            }
+        }
 
-    /////////////////////////////////
-    // work in progress
-
-    void setStripRainbow(LEDStrip strip) {
-        Patterns.rainbow(strip, buffer);
-    }
-
-    void setStripChase(LEDStrip strip) {
-        Color[] colors = { new Color(), new Color() };
-        Patterns.chase(colors, strip, buffer);
+        // update the output with the buffer we constructed.
+        led.setData(buffer);
     }
 }

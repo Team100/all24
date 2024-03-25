@@ -1,7 +1,5 @@
 package org.team100.frc2024.motion.amp;
 
-import java.net.CacheRequest;
-
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
@@ -14,7 +12,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -97,7 +94,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                     m_encoder,
                     new double[]{0, 0}
                 );
-                ampDrive = new CANSparkMax(2, MotorType.kBrushless);
+                ampDrive = new CANSparkMax(33, MotorType.kBrushless);
 
                 
         }
