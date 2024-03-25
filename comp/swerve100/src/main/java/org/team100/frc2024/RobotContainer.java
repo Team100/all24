@@ -1,6 +1,7 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -200,9 +201,12 @@ public class RobotContainer implements Glassy {
 
         m_intake = IntakeFactory.get(m_sensors);
 
-        LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);
 
-        m_indicator = new LEDIndicator(0, StripFactory.get());
+        // @sanjan 3/25
+        // LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);
+        // m_indicator = new LEDIndicator(0, StripFactory.get());
+
+        m_indicator = new LEDIndicator(0);
 
         m_shooter = new DrumShooter(3, 13, 7, 58);
 

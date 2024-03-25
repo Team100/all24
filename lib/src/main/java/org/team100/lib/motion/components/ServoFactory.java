@@ -216,7 +216,7 @@ public class ServoFactory {
      * 
      * @param lowLevelFeedforwardConstants in VOLTS VOLTS VOLTS
      */
-    public static PositionServoInterface<Distance100> neoVortexDistanceServo(
+    public static PositionServo<Distance100> neoVortexDistanceServo(
             String name,
             int canId,
             boolean motorPhase,
