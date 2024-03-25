@@ -8,6 +8,7 @@ import time
 from enum import Enum
 
 import cv2
+import sys
 import libcamera
 import numpy as np
 import ntcore
@@ -64,103 +65,44 @@ class TagFinder:
 
         self.at_detector = robotpy_apriltag.AprilTagDetector()
         self.at_detector.addFamily("tag36h11")
-
+        
+        # from testing on 3/22/24, k1 and k2 only
+        
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
-            self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        -1.18341279e00,
-                        7.13453990e-01,
-                        7.90204163e-04,
-                        -7.38879856e-04,
-                        -2.94529084e-03,
-                        -1.14073111e00,
-                        6.16356154e-01,
-                        5.86094708e-02,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    497,  # fx
-                    498,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            fx = 498
+            fy = 498
+            cx = 584
+            cy = 316
+            k1 = 0.01
+            k2 = -0.0365
         elif self.model == "imx219":
             print("V2 CAMERA (NOT WIDE ANGLE)")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    658,  # fx
-                    660,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            fx = 660
+            fy = 660
+            cx = 426
+            cy = 303
+            k1 = -0.003
+            k2 = 0.04
         else:
-            print("UNKNOWN CAMERA")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
+            print("UNKNOWN CAMERA MODEL")
+            sys.exit()
+
+        tag_size = 0.1651  # tagsize 6.5 inches
+        p1 = 0
+        p2 = 0
+
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+        self.dist = np.array([[k1, k2, p1, p2]])
+        self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
+            robotpy_apriltag.AprilTagPoseEstimator.Config(
+                tag_size,
+                fx,
+                fy,
+                cx,
+                cy,
             )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    666,  # fx
-                    666,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+        )
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
@@ -348,7 +290,8 @@ def main():
             # fast shutter means more gain
             # "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-            "ExposureTime": 3000,
+            # 3/23/24, reduced to 2ms, even less blur.
+            "ExposureTime": 2000,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
