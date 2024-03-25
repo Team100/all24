@@ -19,8 +19,9 @@ public class CompSensors implements SensorInterface {
 
     @Override
     public boolean getIntakeSensor() {
-        // return intakeSensor.get();
-        return false;
+        boolean sensorState = intakeSensor.get();
+        t.log(Level.DEBUG, "CompSensors", "intake", sensorState);
+        return sensorState;
     }
 
 

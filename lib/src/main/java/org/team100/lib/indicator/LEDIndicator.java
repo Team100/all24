@@ -79,6 +79,15 @@ public class LEDIndicator {
         Patterns.solid(leds.get(index), buffer, s.color);
     }
 
+    public void setGroupSolid(LEDGroup group, State s) {
+        for(LEDStrip strip : leds){
+            if(strip.getGroup() == group){
+                Patterns.solid(strip, buffer, s.color);
+
+            }
+        }
+    }
+
     public void setFlashing(boolean flashing) {
         this.flashing = flashing;
     }

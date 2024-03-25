@@ -52,8 +52,9 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
                 s1 = new CANSparkFlex(leftClimberID, MotorType.kBrushless);
                 s2 = new CANSparkFlex(rightClimberID, MotorType.kBrushless);
-                s2.setInverted(true);
-                s1.setInverted(false);
+
+                s2.setInverted(false);
+                s1.setInverted(true);
                 
                 s1.setSmartCurrentLimit(40);
                 s2.setSmartCurrentLimit(40);
@@ -67,55 +68,26 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         // m_viz = new SimpleVisualization(m_name, this);
     }
 
-    public void setLeftWithSoftLimits(double value){
-        if(s1.getEncoder().getPosition() > 300){
-            if(value >= 0){
-                s1.set(0);
-                return;
-            }
-        }
 
-        if(s1.getEncoder().getPosition() < 5){
-            if(value <= 0){
-                s1.set(0);
-                return;
-            }
-        }
-
-        // s1.set(value);
-
-        Telemetry.get().log(Level.DEBUG, m_name, "LEFT VALUE", value);
+    public void zeroClimbers(){
+        s1.getEncoder().setPosition(0);
+        s2.getEncoder().setPosition(0);
 
     }
-
-    public void setRightWithSoftLimits(double value){
-        if(s2.getEncoder().getPosition() > 300){
-            if(value >= 0){
-                s2.set(0);
-                return;
-            }
-        }
-
-
-        if(s2.getEncoder().getPosition() < 5){
-            if(value <= 0){
-                s2.set(0);
-                return;
-            }
-        }
-
-        // s2.set(value);
-
-        Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
-
-    }
-
     public void setLeft(double value){
         s1.set(value);
     }
 
     public void setRight(double value){
         s2.set(value);
+    }
+
+    public double getRightPosition(){
+        return s2.getEncoder().getPosition();
+    }
+
+    public double getLeftPosition(){
+        return s1.getEncoder().getPosition();
     }
     
     @Override
@@ -134,7 +106,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
         Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 1", s1.getAppliedOutput());
 
-        Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 2", s1.getAppliedOutput());
+        Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 2", s2.getAppliedOutput());
 
         Telemetry.get().log(Level.DEBUG, m_name, "RPM 1", s1.getEncoder().getVelocity());
 

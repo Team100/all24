@@ -40,7 +40,7 @@ public class IntakeRoller extends Intake {
     private static final double kCenteringVelocityM_S = 3;
 
     private final String m_name;
-    private final LimitedVelocityServo<Distance100> intakeRoller;
+    private final PWM intakeRoller;
     // private final LimitedVelocityServo<Distance100> centeringWheels;
     private final PWM centeringWheels;
     private final LimitedVelocityServo<Distance100> superRollers;
@@ -63,16 +63,9 @@ public class IntakeRoller extends Intake {
         switch (Identity.instance) {
             case COMP_BOT:
             //TODO tune kV
-                intakeRoller = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Intake Roller",
-                        intakeCAN,
-                        false,
-                        kCurrentLimit,
-                        rollerParameter,
-                        new FeedforwardConstants(0.122,0,0.1,0.065),
-                        new PIDConstants(0.0001, 0, 0));
+                intakeRoller = new PWM(1);
 
-                centeringWheels = new PWM(1);
+                centeringWheels = new PWM(2);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Super Roller",
                         superCAN,
@@ -84,10 +77,7 @@ public class IntakeRoller extends Intake {
                 break;
             case BLANK:
             default:
-                intakeRoller = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Intake Roller",
-                        rollerParameter);
-
+                intakeRoller = new PWM(0);
                 centeringWheels = new PWM(1);
 
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
@@ -103,23 +93,24 @@ public class IntakeRoller extends Intake {
         // System.out.println("IM RUNNING");
         if(!m_sensors.getFeederSensor()){
             System.out.println("STOPING INAKE" + Timer.getFPGATimestamp());
-            intakeRoller.setVelocity(0);
+            intakeRoller.setSpeed(0);
             centeringWheels.setSpeed(0);
             superRollers.setVelocity(0);
             RobotState100.changeIntakeState(IntakeState100.STOP);
         } else {
-            intakeRoller.setVelocity(kIntakeVelocityM_S);
-            centeringWheels.setSpeed(0.8);
-            superRollers.setVelocity(kIntakeVelocityM_S);
+            intakeRoller.setSpeed(-1);
+            centeringWheels.setSpeed(1);
+            superRollers.setDutyCycle(1);
         }
         
+
 
     }
 
     @Override
     public void intake(){
         centeringWheels.setSpeed(0.8);
-        intakeRoller.setDutyCycle(0.8);
+        intakeRoller.setSpeed(0.8);
         superRollers.setDutyCycle(0.8);
 
     }
@@ -132,7 +123,7 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void outtake() {
-        intakeRoller.setDutyCycle(-0.8);
+        intakeRoller.setSpeed(0.8);
         centeringWheels.setSpeed(-0.8);
         superRollers.setVelocity(-0.8);
     }
@@ -140,7 +131,7 @@ public class IntakeRoller extends Intake {
     @Override
     public void stop() {
         // System.out.println("STOPPPP");
-        intakeRoller.setDutyCycle(0);
+        intakeRoller.setSpeed(0);
         centeringWheels.setSpeed(0);
         superRollers.setDutyCycle(0);
 
@@ -148,16 +139,20 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void periodic() {
-        intakeRoller.periodic();
+        // intakeRoller.periodic();
         superRollers.periodic();
         m_viz.periodic();
+
+       boolean intake= m_sensors.getIntakeSensor();
+       boolean feed= m_sensors.getFeederSensor();
 
         // System.out.println(m_sensors.getFeederSensor());
     }
 
     @Override
     public double getVelocity() {
-        return intakeRoller.getVelocity();
+        // return intakeRoller.getVelocity();
+        return 0;
     }
 
     

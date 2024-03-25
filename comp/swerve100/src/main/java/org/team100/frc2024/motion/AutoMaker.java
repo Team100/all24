@@ -317,7 +317,7 @@ public class AutoMaker {
         List<Pose2d> waypointsM = List.of(startWaypoint, betweenWaypoint, midWaypoint, endWaypoint);
         Rotation2d betweenHeading = new Rotation2d(
                 ShooterUtil.getRobotRotationToSpeaker(alliance, waypoint, 0).getRadians());
-        System.out.println("ENNNNNNNNNNNNNNDDDDDDDDDDDDDD" + endPose.getRotation());
+        // System.out.println("ENNNNNNNNNNNNNNDDDDDDDDDDDDDD" + endPose.getRotation());
         List<Rotation2d> headings = List.of(startPose.getRotation(), betweenHeading, betweenHeading,
                 endPose.getRotation());
         Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,

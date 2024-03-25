@@ -70,9 +70,9 @@ public class DrumShooter extends Shooter{
     public final double kRightRollerVelocity = 20;
 
 
-    public DrumShooter(int leftID, int rightID, int pivotID, int feederID, int currentLimit) {
+    public DrumShooter(int leftID, int rightID, int pivotID, int currentLimit) {
         m_name = Names.name(this);
-        m_encoder = new DutyCycleEncoder100("SHOOTER PIVOT", 5, 0.9536410238410256 , true);
+        m_encoder = new DutyCycleEncoder100("SHOOTER PIVOT", 0, 0.5087535877188397 , false);
         // m_encoder.reset();
         int shooterCurrentLimit = 40;
         int pivotLimit = 40;
@@ -81,8 +81,8 @@ public class DrumShooter extends Shooter{
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
         SysParam pivotParams = SysParam.neoPositionServoSystem(
             165,
-            50,
-            50)
+            300,
+            300)
             ;        
         SysParam feederParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
 
@@ -112,20 +112,20 @@ public class DrumShooter extends Shooter{
                     currentLimit,
                     1,
                     0.1,
-                    new PIDConstants(0.6, 0, 0), //0.4
+                    new PIDConstants(0.4, 0, 0), //0.4
                     new FeedforwardConstants(0.11,0,0,0.9)
                 );
 
                 rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
 
-                pivotMotor = new CANSparkMax(pivotID, MotorType.kBrushless);
+                pivotMotor = new CANSparkMax(27, MotorType.kBrushless);
                 pivotMotor.setIdleMode(IdleMode.kCoast);
                 pivotServo = new GravityServo(
                         pivotMotor,
                         40,
                         m_name + "/Pivot", 
                         pivotParams, 
-                        new PIDController(2, 0.0, 0.000), //same
+                        new PIDController(4.5, 0.0, 0.000), //same
                         new TrapezoidProfile100(8, 8, 0.001),
                         pivotID, 
                         0.02, 
@@ -149,7 +149,7 @@ public class DrumShooter extends Shooter{
 
                 pivotServo = new GravityServo(
                         pivotMotor,
-                        40,
+                        10,
                         m_name + "/Pivot", 
                         pivotParams, 
                         new PIDController(0.07, 0.0, 0.000), //same
@@ -169,8 +169,11 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void forward() {
-        leftRoller.setVelocity(kLeftRollerVelocity);
-        rightRoller.setVelocity(kRightRollerVelocity);
+        // leftRoller.setVelocity(kLeftRollerVelocity);
+        // rightRoller.setVelocity(kRightRollerVelocity);
+
+        leftRoller.setVelocity(2);
+        rightRoller.setVelocity(2);
     }
 
     @Override
@@ -187,13 +190,15 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void rezero(){
-        pivotServo.rezero();
+        // pivotServo.rezero();
     }
 
     @Override
     public void setAngle(Double goal){
 
         pivotServo.setPosition(goal);
+        // System.out.println("SETTTING");
+        // pivotServo.setDutyCycle(0.1);
 
     }
 
@@ -204,11 +209,11 @@ public class DrumShooter extends Shooter{
         //     pivotServo.setDutyCycle(pivotUp);
         // } else if(pivotDown >= 0){
         //     pivotServo.setDutyCycle(pivotDown);
-        // } else {
+        // } else {         
         //     pivotServo.setPosition(goal);
         // }
 
-        pivotServo.setPosition(goal);
+        // pivotServo.setPosition(goal);
 
 
     }
@@ -223,10 +228,16 @@ public class DrumShooter extends Shooter{
         leftRoller.periodic();
         rightRoller.periodic();
         pivotServo.periodic();
-        m_viz.periodic();
-        // System.out.println("GET" + m_encoder.m_encoder.get());
 
-        // System.out.println("Absolute" + m_encoder.m_encoder.getAbsolutePosition());
+        
+        m_viz.periodic();
+
+        // pivotServo.setDutyCycle(0.1);
+
+
+        // System.out.println("GET" + m_encoder.m_encoder.get());
+        // System.out.println("AHHHHH");
+        // System.out.println("Absolute" + pivotServo.getPosition());
         // System.out.println("POSITION OFFSET" + m_encoder.m_encoder.getPositionOffset());
         // System.out.println("DISTANCE PER" + m_encoder.m_encoder.getDistancePerRotation());
 

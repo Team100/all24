@@ -12,7 +12,7 @@ public class ShooterFactory {
             case COMP_BOT:
             case BETA_BOT:
             default:
-                return new DrumShooter(44, 45, 28, 39,  58); //Definitely real numbers
+                return new DrumShooter(44, 45, 27,  58); //Definitely real numbers
         }
     }
 

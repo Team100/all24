@@ -48,7 +48,7 @@ public class SwerveModuleCollection {
             double currentLimit,
             SwerveKinodynamics kinodynamics) {
         switch (Identity.instance) {
-            case COMP_BOT:
+            case BETA_BOT:
                 Util.println("************** WCP MODULES using AI 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
@@ -100,35 +100,35 @@ public class SwerveModuleCollection {
                         SimulatedSwerveModule100.get(kFrontRight, kinodynamics),
                         SimulatedSwerveModule100.get(kRearLeft, kinodynamics),
                         SimulatedSwerveModule100.get(kRearRight, kinodynamics));
-            case BETA_BOT:
+            case COMP_BOT:
                 Util.println("************** WCP MODULES using DIO 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 3, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kFrontLeft, currentLimit, 4, WCPSwerveModule100.DriveRatio.MEDIUM,
                                 DutyCycleTurningEncoder.class,
                                 54,
-                                4,
+                                9,
                                 0.058735,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 22, WCPSwerveModule100.DriveRatio.MEDIUM,
                                 DutyCycleTurningEncoder.class,
                                 52,
-                                3,
+                                8,
                                 0.773486,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 13, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kRearLeft, currentLimit, 56, WCPSwerveModule100.DriveRatio.MEDIUM,
                                 DutyCycleTurningEncoder.class,
                                 51,
-                                7,
+                                6,
                                 0.334580,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 11, WCPSwerveModule100.DriveRatio.MEDIUM,
                                 DutyCycleTurningEncoder.class,
                                 21,
-                                6,
+                                7,
                                 0.714328,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE));
             default:

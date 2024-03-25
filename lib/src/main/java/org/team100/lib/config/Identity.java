@@ -26,8 +26,8 @@ public enum Identity {
     BETA_BOT("0315db43"),
     SQUAREBOT("031e31e3"),
     SWERVE_TWO("0317f285"),
-    COMP_BOT("032363AC"),
-    SWERVE_ONE("03238232"),
+    COMP_BOT("03238232"), 
+    SWERVE_ONE("032363AC"), 
     BLANK(""), // e.g. test default or simulation
     UNKNOWN(null);
 

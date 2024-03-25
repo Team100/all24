@@ -59,17 +59,17 @@ public class ShooterDefault extends Command {
 
             switch(RobotState100.getShooterState()){
                 case DEFAULTSHOOT:
-                    m_shooter.forward();
+                    // m_shooter.forward();
                     // m_shooter.setAngleWithOverride(ShooterUtil.getAngle(m_drive.getPose().getX()), m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a   
                     // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2)); //22.5a   
-                    m_shooter.setAngle(0.535);
+                    m_shooter.setAngle(0.4);
                     // System.out.println("DEFAULT SHOOOOT");
                     break;
                 case TEST:
                     // m_shooter.setAngle(Smart/Dashboard.getNumber("Shooter Angle", 0.2)); //22.5a   
 
                     m_shooter.forward();
-                    m_shooter.setAngle(ShooterUtil.getAngle(distance));
+                    // m_shooter.setAngle(ShooterUtil.getAngle(distance));
                     break;
                 case STOP:
                     m_shooter.stop();
