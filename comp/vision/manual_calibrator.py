@@ -4,7 +4,10 @@ MANUAL CALIBRATOR
 This simply finds tags in the viewport and displays their centers in pixels and meters.
 
 It uses 20% scaled tags 33.02 mm
+
+Force f_x and f_y to be the same
 """
+
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
@@ -15,6 +18,7 @@ import cv2
 import sys
 import libcamera
 import numpy as np
+import math
 
 import robotpy_apriltag
 
@@ -32,63 +36,47 @@ class TagFinder:
         self.at_detector = robotpy_apriltag.AprilTagDetector()
         self.at_detector.addFamily("tag36h11")
 
-        # i think we should just focus on k1 and k2, and assume zero tangential, and ignore the higher order k factors.
-
         if self.model == "imx708_wide":
+            # from testing on 3/23/24, k1 and k2 only
+            # see https://docs.google.com/spreadsheets/d/1hroyVK2Vg2H-gPxu4nAX5R5qa46zbWO7TYqaq_pViE8
             print("V3 WIDE CAMERA")
-            self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        -1.18341279e00,
-                        7.13453990e-01,
-                        7.90204163e-04,
-                        -7.38879856e-04,
-                        -2.94529084e-03,
-                        -1.14073111e00,
-                        6.16356154e-01,
-                        5.86094708e-02,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    497,  # fx
-                    498,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            fx = 498
+            fy = 498
+            cx = 584
+            cy = 316
+            k1 = 0.01
+            k2 = -0.0365
         elif self.model == "imx219":
+            # from testing on 3/22/24, k1 and k2 only 
+            # this is a particular camera, their c_x and c_y probably vary so
+            # TODO: test each one, keep track via pi serial number.
+            # see https://docs.google.com/spreadsheets/d/1hroyVK2Vg2H-gPxu4nAX5R5qa46zbWO7TYqaq_pViE8
             print("V2 CAMERA (NOT WIDE ANGLE)")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    658,  # fx
-                    660,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            fx = 660
+            fy = 660
+            cx = 426
+            cy = 303
+            k1 = -0.003
+            k2 = 0.04
         else:
             print("UNKNOWN CAMERA MODEL")
             sys.exit()
+
+        tag_size = 0.03302  # tagsize for mini tags
+        p1 = 0
+        p2 = 0
+
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+        self.dist = np.array([[k1, k2, p1, p2]])
+        self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
+            robotpy_apriltag.AprilTagPoseEstimator.Config(
+                tag_size,
+                fx,
+                fy,
+                cx,
+                cy,
+            )
+        )
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
@@ -105,7 +93,7 @@ class TagFinder:
 
         # for calibration we don't undistort
         # turn this on to check the calibration!
-        # img = cv2.undistort(img, self.mtx, self.dist)
+        img = cv2.undistort(img, self.mtx, self.dist)
 
         result = self.at_detector.detect(img)
 
@@ -129,19 +117,24 @@ class TagFinder:
 
         (c_x, c_y) = (int(result_item.getCenter().x), int(result_item.getCenter().y))
         cv2.circle(image, (c_x, c_y), 10, (255, 255, 255), -1)
-        self.draw_text(image, f"cx {c_x} cy {c_y}", (c_x, c_y))
+        self.draw_text(image, f"cx {c_x} cy {c_y}", (20,40)) #(c_x, c_y))
+        fx = self.mtx[0,0]
+        cx = self.mtx[0,2]
+        oppo = c_x - cx
+        angle = math.degrees(math.atan2(oppo, fx))
+        self.draw_text(image, f"deg {angle:6.2f}", (20, 80)) # (c_x, c_y + 40))
         if pose is not None:
             t = pose.translation()
             self.draw_text(
                 image,
-                f"t: {t.x:4.1f},{t.y:4.1f},{t.z:4.1f}",
-                (c_x - 50, c_y + 40),
+                f"t {t.x:5.2f},{t.y:5.2f},{t.z:5.2f}",
+                (20, 120), # (c_x, c_y + 80),
             )
 
     # these are white with black outline
     def draw_text(self, image, msg, loc):
-        cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
-        cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
+        cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 6)
+        cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
 
 def main():
