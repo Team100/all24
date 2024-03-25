@@ -104,7 +104,7 @@ public class LEDIndicator {
         for (int i = 0; i < m_numsplitstrips; i++) {
             Patterns.solid(backleds.get(i), buffer, backState.color);
         }
-        setFrontFlashing(backflashing);
+        setBackFlashing(backflashing);
     }
 
     public void setFrontFlashing(boolean flashing) {
