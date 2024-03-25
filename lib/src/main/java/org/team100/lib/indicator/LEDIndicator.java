@@ -31,7 +31,8 @@ public class LEDIndicator {
         GREEN(Color.kLime),
         PURPLE(Color.kFuchsia),
         YELLOW(Color.kYellow),
-        ORANGE(Color.kOrange);
+        ORANGE(Color.kOrange),
+        WHITE(Color.kWhite);
 
         /**
          * This "color" is what we tell the LED strip to make it display the actual
@@ -62,21 +63,41 @@ public class LEDIndicator {
     private final AddressableLEDBuffer buffer;
     private final AddressableLEDBuffer blackBuffer;
     private final List<LEDStrip> leds = new ArrayList<>();
-    private boolean flashing = false;
+    private boolean flashing;
+    private final int m_numstrips;
+    private final int m_numLEDs;
 
-    public LEDIndicator(int port, LEDStrip... strips) {
+    public LEDIndicator(int port, int numLEDs, LEDStrip... strips) {
+        int numstrips = 0;
+        m_numLEDs = numLEDs;
+        for (LEDStrip strip : strips) {
+            numstrips++;
+        }
+        m_numstrips = numstrips;
         Collections.addAll(leds, strips);
         int length = leds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
         led = new AddressableLED(port);
         led.setLength(length);
         buffer = new AddressableLEDBuffer(length);
         blackBuffer = new AddressableLEDBuffer(length);
+        // for (int i = 0; i < m_numstrips; i++) {
+        //     Patterns.solid(leds.get(i * m_numLEDs + 1), blackBuffer, Color.kWhite);
+        // }
         led.setData(buffer);
         led.start();
     }
 
-    public void setStripSolid(int index, State s) {
-        Patterns.solid(leds.get(index), buffer, s.color);
+    public void setStripSolid(LEDStrip.strip state, State s) {
+        if (state.equals(LEDStrip.strip.BACKLIGHT)) {
+            for (int i = 0; i < m_numstrips; i++) {
+                Patterns.solid(leds.get(i * m_numLEDs + 1), buffer, s.color);
+                Patterns.solid(leds.get(i * m_numLEDs + 1), blackBuffer, s.color);
+            }
+        } else {
+            for (int i = 0; i < m_numstrips; i++) {
+                Patterns.solid(leds.get(i * m_numLEDs), buffer, s.color);
+            }
+        }
     }
 
     public void setFlashing(boolean flashing) {

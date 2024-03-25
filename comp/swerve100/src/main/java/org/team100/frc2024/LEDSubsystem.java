@@ -4,8 +4,11 @@ import java.util.Optional;
 
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.indicator.LEDIndicator;
+import org.team100.lib.indicator.LEDStrip;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.VisionDataProvider24;
+
+import com.ctre.phoenix.led.CANdle.LEDStripType;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -45,29 +48,30 @@ public class LEDSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        m_indicator.setStripSolid(LEDStrip.strip.BACKLIGHT, State.WHITE);
         if (!DriverStation.isDSAttached() || DriverStation.isDisabled()) {
             Optional<Alliance> alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
                 if (alliance.get() == Alliance.Red) {
-                    m_indicator.setStripSolid(0, State.RED);
+                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.RED);
                 } else {
-                    m_indicator.setStripSolid(0, State.BLUE);
+                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.BLUE);
                 }
             } else {
-                m_indicator.setStripSolid(0, State.ORANGE);
+                m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.ORANGE);
             }
         } else {
             boolean atVelocitySetpoint = m_shooter.atVelocitySetpoint(false);
             SmartDashboard.putBoolean("VELOCITY", atVelocitySetpoint);
             if (atVelocitySetpoint) {
-                m_indicator.setStripSolid(0, State.PURPLE);
+                m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.PURPLE);
             } else {
                 boolean indexerIsEmpty = m_sensors.getFeederSensor();
                 SmartDashboard.putBoolean("FEEDER", indexerIsEmpty);
                 if (indexerIsEmpty) {
-                    m_indicator.setStripSolid(0, State.RED);
+                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.RED);
                 } else {
-                    m_indicator.setStripSolid(0, State.GREEN);
+                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.GREEN);
                 }
             }
         }
