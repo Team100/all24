@@ -1,5 +1,7 @@
 package org.team100.frc2024.motion.amp;
 
+import java.net.CacheRequest;
+
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
@@ -25,7 +27,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     private final String m_name;
     private final SysParam m_params;
     private final GravityServo ampAngleServo;
-    private final PWM ampDrive;
+    private final CANSparkMax ampDrive;
     private final DutyCycleEncoder100 m_encoder;
 
 
@@ -35,7 +37,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
 
     
     public AmpSubsystem(int pivotID) {
-        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51 , false);
+        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.146400, true);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 55,
@@ -62,7 +64,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                     new double[]{0, 0}
                 );
 
-                ampDrive = new PWM(2);
+                ampDrive = new CANSparkMax(33, MotorType.kBrushless);
                 break;
             case BLANK:
             default:
@@ -95,7 +97,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                     m_encoder,
                     new double[]{0, 0}
                 );
-                ampDrive = new PWM(2);
+                ampDrive = new CANSparkMax(2, MotorType.kBrushless);
 
                 
         }
@@ -122,7 +124,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void driveFeeder(double value){
-        ampDrive.setSpeed(-value);
+        ampDrive.set(value);
         // System.out.println("I AM BEING DRIVEN RIGHT NOW : " + value);
     }
 

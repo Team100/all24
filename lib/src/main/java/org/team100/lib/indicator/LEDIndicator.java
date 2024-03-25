@@ -69,6 +69,12 @@ public class LEDIndicator {
     private boolean frontflashing = false;
     private final int m_numsplitstrips;
 
+    // @sanjan 3/25
+    // public LEDIndicator(int port, ArrayList<LEDStrip> strips) {
+    //
+    //    // Collections.addAll(leds, strips);
+    //    int length = leds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
+
     public LEDIndicator(int port) {
         m_numsplitstrips = 10;
         // TODO get real strips that are front and back
@@ -98,6 +104,19 @@ public class LEDIndicator {
         }
         setFrontFlashing(frontflashing);
     }
+
+    // @sanjan 3/25
+    // public void setGroupSolid(LEDGroup group, State s) {
+    //    for(LEDStrip strip : leds){
+    //        if(strip.getGroup() == group){
+    //            Patterns.solid(strip, buffer, s.color);
+    //
+    //        }
+    //    }
+    // }
+
+    public void setFlashing(boolean flashing) {
+        this.flashing = flashing;
 
     public void setBackSolid(State s) {
         backState = s;

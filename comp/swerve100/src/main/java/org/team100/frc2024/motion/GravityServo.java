@@ -52,7 +52,7 @@ public class GravityServo {
         m_softLimits = softLimits;
         m_period = period;
         m_motor = motor;
-        m_motor.setIdleMode(IdleMode.kBrake);
+        m_motor.setIdleMode(IdleMode.kCoast);
         m_encoder = encoder;
         m_name = name;
         m_params = params;
@@ -105,7 +105,7 @@ public class GravityServo {
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.35; //rot/s to rpm conversion
+        double u_FF = m_setpoint.v() * 0.5; //rot/s to rpm conversion
 
         double gravityTorque = 0.006 * Math.cos((m_encoder.getPosition()));
 
@@ -197,7 +197,7 @@ public class GravityServo {
         //     m_motor.set(u_TOTAL); 
         // }
 
-        m_motor.set(u_TOTAL); 
+        m_motor.set(gravityTorque); 
 
 
         // if(diff < 0.1){
@@ -226,11 +226,14 @@ public class GravityServo {
     public void periodic() {
 
         // t.log(Level.DEBUG, m_name, "Get Raw Position", m_encoder.);
-        t.log(Level.DEBUG, m_name, "AMPS", m_motor.getOutputCurrent());
-        t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
-        t.log(Level.DEBUG, m_name, "DUTY", m_motor.getAppliedOutput());
+        t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
+        t.log(Level.TRACE, m_name, "ENCODEr", m_encoder.getPosition());
+        t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
         // t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
 
+        // System.out.println(m_encoder.getPosition());
+
+        m_encoder.periodic();
     }
 
     public void set(double value) {

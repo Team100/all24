@@ -23,6 +23,7 @@ import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.OuttakeAmp;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
+import org.team100.frc2024.motion.climber.ClimberPosition;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.intake.FeederDefault;
@@ -55,8 +56,10 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
+import org.team100.lib.indicator.LEDGroup;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDStrip;
+import org.team100.lib.indicator.StripFactory;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider24;
@@ -158,7 +161,7 @@ public class RobotContainer implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
-                m_sensors = new CompSensors(8, 9); // Definitely real numbers
+                m_sensors = new CompSensors(1, 2); // Definitely real numbers
                 break;
             default:
                 // always returns false
@@ -198,9 +201,14 @@ public class RobotContainer implements Glassy {
 
         m_intake = IntakeFactory.get(m_sensors);
 
+
+        // @sanjan 3/25
+        // LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);
+        // m_indicator = new LEDIndicator(0, StripFactory.get());
+
         m_indicator = new LEDIndicator(0);
 
-        m_shooter = new DrumShooter(44, 45, 28, 39, 58);
+        m_shooter = new DrumShooter(3, 13, 7, 58);
 
         m_ledSubsystem = new LEDSubsystem(
                 m_indicator,
@@ -209,7 +217,7 @@ public class RobotContainer implements Glassy {
                 visionDataProvider);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
-        m_amp = new AmpSubsystem(19);
+        m_amp = new AmpSubsystem(2);
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         m_climber = new ClimberSubsystem(60, 61);
@@ -294,8 +302,11 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::outtake,
                 new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
 
+        // whileTrue(operatorControl::ramp,
+        //         new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
+
         whileTrue(operatorControl::ramp,
-                new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
+                new ClimberPosition(m_climber));
 
         whileTrue(operatorControl::feed, new StartEndCommand(() -> RobotState100.changeFeederState(FeederState100.FEED),
                 () -> RobotState100.changeFeederState(FeederState100.STOP)));
@@ -465,6 +476,8 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::shooterLock,
                 new AllianceCommand(m_AutoMaker.citrusv2(Alliance.Red), m_AutoMaker.citrusv2(Alliance.Blue)));
+
+
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,

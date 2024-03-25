@@ -52,12 +52,23 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         switch (Identity.instance) {
             case COMP_BOT:
             //TODO tune kV
-s1 = ServoFactory.neoVortexDistanceServo(m_name + "Left Climber", leftClimberID, true, kCurrentLimit,
-                        m_params, controller,
-                        FeedforwardConstants.makeNeoVortex(), new PIDConstants(1));
-                s2 = ServoFactory.neoVortexDistanceServo(m_name + "Right Climber", rightClimberID, false, kCurrentLimit,
-                        m_params, controller,
-                        FeedforwardConstants.makeNeoVortex(), new PIDConstants(1));
+
+                s1 = new CANSparkFlex(leftClimberID, MotorType.kBrushless);
+                s2 = new CANSparkFlex(rightClimberID, MotorType.kBrushless);
+
+                s2.setInverted(false);
+                s1.setInverted(true);
+                
+                s1.setSmartCurrentLimit(40);
+                s2.setSmartCurrentLimit(40);
+
+                // @vasili 3/25
+                // s1 = ServoFactory.neoVortexDistanceServo(m_name + "Left Climber", leftClimberID, true, kCurrentLimit,
+                //        m_params, controller,
+                //        FeedforwardConstants.makeNeoVortex(), new PIDConstants(1));
+                // s2 = ServoFactory.neoVortexDistanceServo(m_name + "Right Climber", rightClimberID, false, kCurrentLimit,
+                //        m_params, controller,
+                //        FeedforwardConstants.makeNeoVortex(), new PIDConstants(1));
                 break;
             case BLANK:
             default:
@@ -110,16 +121,51 @@ s1 = ServoFactory.neoVortexDistanceServo(m_name + "Left Climber", leftClimberID,
 
         // s2.set(value);
 
-        Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
+
+    public void zeroClimbers(){
+        s1.getEncoder().setPosition(0);
+        s2.getEncoder().setPosition(0);
 
     }
-
     public void setLeft(double value){
         s1.set(value);
     }
 
     public void setRight(double value){
         s2.set(value);
+    }
+
+
+    public double getRightPosition(){
+        return s2.getEncoder().getPosition();
+    }
+
+    public double getLeftPosition(){
+        return s1.getEncoder().getPosition();
+    }
+    
+    @Override
+    public void periodic() {
+        
+        // s1.set(-1);
+        // s2.set(-1);
+
+        Telemetry.get().log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", s1.getEncoder().getPosition());
+        Telemetry.get().log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", s2.getEncoder().getPosition());
+
+        
+        Telemetry.get().log(Level.DEBUG, m_name, "current (A) CLIMVER 1", s1.getOutputCurrent());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "current (A) CLIMBER 2", s2.getOutputCurrent());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 1", s1.getAppliedOutput());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "DUTY CYCLE 2", s2.getAppliedOutput());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "RPM 1", s1.getEncoder().getVelocity());
+
+        Telemetry.get().log(Level.DEBUG, m_name, "RPM 2", s2.getEncoder().getVelocity());
+
     }
 
     @Override

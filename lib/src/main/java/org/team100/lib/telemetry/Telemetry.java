@@ -110,7 +110,7 @@ public class Telemetry {
         // set this to SILENT unless you want the logs for analysis
 
         Util.warn("Setting default telemetry to DEBUG.  Fix this for comp.");
-        m_levelChooser.setDefaultOption(Level.DEBUG.name(), Level.DEBUG);
+        m_levelChooser.setDefaultOption(Level.TRACE.name(), Level.TRACE);
         // m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
 
 

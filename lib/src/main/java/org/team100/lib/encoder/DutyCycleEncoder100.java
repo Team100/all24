@@ -67,7 +67,6 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
             return -(m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
         }
         return (m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
-
     }
 
     
@@ -111,6 +110,7 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
         t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
         // t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
+
     }
 
     //////////////////////////////////////////////
