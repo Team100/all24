@@ -7,7 +7,7 @@ public class LEDStrip {
     private final LEDGroup m_group;
 
 
-    public LEDStrip(LEDGroup group, int length, int offset) {
+    public LEDStrip(LEDGroup group, int offset, int length) {
         m_length = length;
         m_offset = offset;
         m_group = group;

@@ -64,8 +64,9 @@ public class LEDIndicator {
     private final List<LEDStrip> leds = new ArrayList<>();
     private boolean flashing = false;
 
-    public LEDIndicator(int port, LEDStrip... strips) {
-        Collections.addAll(leds, strips);
+    public LEDIndicator(int port, ArrayList<LEDStrip> strips) {
+
+        // Collections.addAll(leds, strips);
         int length = leds.stream().map(LEDStrip::getLength).reduce(0, Integer::sum);
         led = new AddressableLED(port);
         led.setLength(length);

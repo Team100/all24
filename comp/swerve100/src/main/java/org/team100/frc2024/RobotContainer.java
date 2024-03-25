@@ -55,8 +55,10 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
+import org.team100.lib.indicator.LEDGroup;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDStrip;
+import org.team100.lib.indicator.StripFactory;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider24;
@@ -198,9 +200,9 @@ public class RobotContainer implements Glassy {
 
         m_intake = IntakeFactory.get(m_sensors);
 
-        LEDStrip strip1 = new LEDStrip(160, 0);
+        LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);
 
-        m_indicator = new LEDIndicator(0, strip1);
+        m_indicator = new LEDIndicator(0, StripFactory.get());
 
         m_shooter = new DrumShooter(3, 13, 7, 58);
 
