@@ -4,14 +4,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
 
 public class Patterns {
-    /**
-     * Fill buffer corresponding to the specified strip with the specified color
-     */
-    public static void solid(LEDStrip strip, AddressableLEDBuffer buffer, Color color) {
-        for (var i = strip.getOffset(); i < strip.getLength(); i++) {
-            buffer.setLED(i, color);
-        }
-    }
+
 
     /**
      * work-in-progress
@@ -19,7 +12,7 @@ public class Patterns {
     static void rainbow(LEDStrip strip, AddressableLEDBuffer buffer) {
         int m_rainbowFirstPixelHue = 0;
         // For every pixel
-        for (var i = strip.getOffset(); i < strip.getLength(); i++) {
+        for (var i = strip.start(); i < strip.end(); i++) {
             // Calculate the hue - hue is easier for rainbows because the color
             // shape is a circle so only one value needs to precess
             final var hue = (m_rainbowFirstPixelHue + (i * 180 / buffer.getLength())) % 180;

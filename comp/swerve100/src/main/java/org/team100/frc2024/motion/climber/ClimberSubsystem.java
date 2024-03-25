@@ -1,16 +1,14 @@
 package org.team100.frc2024.motion.climber;
 
-import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,8 +33,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 2;
     private final String m_name;
     private final SysParam m_params;
-    private final PositionServo<Distance100> s1;
-    private final PositionServo<Distance100> s2;
+    private final CANSparkFlex s1;
+    private final CANSparkFlex s2;
     PIDController controller;
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
@@ -72,25 +70,23 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 break;
             case BLANK:
             default:
-            s1 = ServoFactory.neoVortexDistanceServo(m_name + "Left Climber", leftClimberID, true, kCurrentLimit,
-            m_params, controller,
-            FeedforwardConstants.makeNeoVortex(), new PIDConstants(1));
-    s2 = ServoFactory.neoVortexDistanceServo(m_name + "Right Climber", rightClimberID, false, kCurrentLimit,
-            m_params, controller,
-            FeedforwardConstants.makeNeoVortex(), new PIDConstants(1));
+            s1 = new CANSparkFlex(60, MotorType.kBrushless);
+            s2 = new CANSparkFlex(61, MotorType.kBrushless);
+            s2.setInverted(true);
+
         }
         // m_viz = new SimpleVisualization(m_name, this);
     }
 
     public void setLeftWithSoftLimits(double value){
-        if(s1.getPosition() > 300){
+        if(s1.getEncoder().getPosition() > 300){
             if(value >= 0){
                 s1.set(0);
                 return;
             }
         }
 
-        if(s1.getPosition() < 5){
+        if(s1.getEncoder().getPosition() < 5){
             if(value <= 0){
                 s1.set(0);
                 return;
@@ -104,7 +100,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void setRightWithSoftLimits(double value){
-        if(s2.getPosition() > 300){
+        if(s2.getEncoder().getPosition() > 300){
             if(value >= 0){
                 s2.set(0);
                 return;
@@ -112,7 +108,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         }
 
 
-        if(s2.getPosition() < 5){
+        if(s2.getEncoder().getPosition() < 5){
             if(value <= 0){
                 s2.set(0);
                 return;
@@ -120,6 +116,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         }
 
         // s2.set(value);
+        Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
+
+
+    }
 
 
     public void zeroClimbers(){
@@ -172,15 +172,4 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     public String getGlassName() {
         return "Climber";
     }
-    public void setClimbGO() {
-        //TODO get real up pose
-        s1.setPositionDirect(2);
-        s2.setPositionDirect(2);
-    }
-
-    public void rest() {
-        s1.setPositionDirect(0);
-        s2.setPositionDirect(0);
-    }
-    
 }

@@ -77,8 +77,8 @@ public class IntakeRoller extends Intake {
                 break;
             case BLANK:
             default:
-                intakeRoller = new PWM(0);
-                centeringWheels = new PWM(1);
+                intakeRoller = new PWM(1);
+                centeringWheels = new PWM(2);
 
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Center Wheels",

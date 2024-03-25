@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.indicator.LEDIndicator;
-import org.team100.lib.indicator.LEDStrip;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.VisionDataProvider24;
 
@@ -46,39 +45,48 @@ public class LEDSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        m_indicator.setBackSolid(State.WHITE);
+        m_indicator.setBack(State.WHITE);
+
         if (!DriverStation.isDSAttached() || DriverStation.isDisabled()) {
+
+            // when disabled, show alliance (or orange if not connected), steady.
+
             Optional<Alliance> alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
                 if (alliance.get() == Alliance.Red) {
-                    m_indicator.setFrontSolid(State.RED);
+                    m_indicator.setFront(State.RED);
                 } else {
-                    m_indicator.setFrontSolid(State.BLUE);
+                    m_indicator.setFront(State.BLUE);
                 }
             } else {
-                m_indicator.setFrontSolid(State.ORANGE);
+                m_indicator.setFront(State.ORANGE);
             }
+            m_indicator.setFlashing(false);
         } else {
+
+            // when enabled, show shooter velocity and feeder state, with
+            // flashing to show vision state
+
             boolean atVelocitySetpoint = m_shooter.atVelocitySetpoint(false);
             SmartDashboard.putBoolean("VELOCITY", atVelocitySetpoint);
             if (atVelocitySetpoint) {
-                m_indicator.setFrontSolid(State.PURPLE);
+                m_indicator.setFront(State.PURPLE);
             } else {
                 boolean indexerIsEmpty = m_sensors.getFeederSensor();
                 SmartDashboard.putBoolean("FEEDER", indexerIsEmpty);
                 if (indexerIsEmpty) {
-                    m_indicator.setFrontSolid(State.RED);
+                    m_indicator.setFront(State.RED);
                 } else {
-                    m_indicator.setFrontSolid(State.GREEN);
+                    m_indicator.setFront(State.GREEN);
                 }
             }
+
+            // flash if the pose is too old
+            long poseAgeUs = m_vision.getPoseAgeUs();
+            m_indicator.setFlashing(poseAgeUs > kPersistenceUs);
         }
 
-        long poseAgeUs = m_vision.getPoseAgeUs();
-
-        // flash if the pose is too old
-        m_indicator.setFrontFlashing(poseAgeUs > kPersistenceUs);
-
+        // actually change the indicator
         m_indicator.periodic();
     }
 }
