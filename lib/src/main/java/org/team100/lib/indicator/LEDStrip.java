@@ -4,12 +4,6 @@ package org.team100.lib.indicator;
 public class LEDStrip {
     private final int m_length;
     private final int m_offset;
-
-    public enum strip{
-        BACKLIGHT,
-        INDICATOR
-    }
-
     public LEDStrip(int length, int offset) {
         m_length = length;
         m_offset = offset;

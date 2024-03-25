@@ -197,13 +197,8 @@ public class RobotContainer implements Glassy {
         m_feeder = new FeederSubsystem(39);
 
         m_intake = IntakeFactory.get(m_sensors);
-        //TODO get real strips that are front and back
-        List<LEDStrip> strips = new ArrayList<>();
-        for (int i = 0; i< 10;i++) {
-            strips.add(new LEDStrip(16, i*16));
-        }
 
-        m_indicator = new LEDIndicator(0, 2, strips.get(0),strips.get(1), strips.get(2), strips.get(3), strips.get(4), strips.get(5), strips.get(6), strips.get(7), strips.get(8), strips.get(9));
+        m_indicator = new LEDIndicator(0);
 
         m_shooter = new DrumShooter(44, 45, 28, 39, 58);
 

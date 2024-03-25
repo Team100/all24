@@ -8,8 +8,6 @@ import org.team100.lib.indicator.LEDStrip;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.VisionDataProvider24;
 
-import com.ctre.phoenix.led.CANdle.LEDStripType;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -48,30 +46,30 @@ public class LEDSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        m_indicator.setStripSolid(LEDStrip.strip.BACKLIGHT, State.WHITE);
+        m_indicator.setBackSolid(State.WHITE);
         if (!DriverStation.isDSAttached() || DriverStation.isDisabled()) {
             Optional<Alliance> alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
                 if (alliance.get() == Alliance.Red) {
-                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.RED);
+                    m_indicator.setFrontSolid(State.RED);
                 } else {
-                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.BLUE);
+                    m_indicator.setFrontSolid(State.BLUE);
                 }
             } else {
-                m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.ORANGE);
+                m_indicator.setFrontSolid(State.ORANGE);
             }
         } else {
             boolean atVelocitySetpoint = m_shooter.atVelocitySetpoint(false);
             SmartDashboard.putBoolean("VELOCITY", atVelocitySetpoint);
             if (atVelocitySetpoint) {
-                m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.PURPLE);
+                m_indicator.setFrontSolid(State.PURPLE);
             } else {
                 boolean indexerIsEmpty = m_sensors.getFeederSensor();
                 SmartDashboard.putBoolean("FEEDER", indexerIsEmpty);
                 if (indexerIsEmpty) {
-                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.RED);
+                    m_indicator.setFrontSolid(State.RED);
                 } else {
-                    m_indicator.setStripSolid(LEDStrip.strip.INDICATOR, State.GREEN);
+                    m_indicator.setFrontSolid(State.GREEN);
                 }
             }
         }
@@ -79,7 +77,7 @@ public class LEDSubsystem extends SubsystemBase {
         long poseAgeUs = m_vision.getPoseAgeUs();
 
         // flash if the pose is too old
-        m_indicator.setFlashing(poseAgeUs > kPersistenceUs);
+        m_indicator.setFrontFlashing(poseAgeUs > kPersistenceUs);
 
         m_indicator.periodic();
     }
