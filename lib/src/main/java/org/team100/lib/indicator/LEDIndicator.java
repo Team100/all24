@@ -72,16 +72,16 @@ public class LEDIndicator {
         m_frontStrips = new ArrayList<>();
         m_backStrips = new ArrayList<>();
         
-        m_frontStrips.add(new LEDStrip(0, 22));
-        m_backStrips.add(new LEDStrip(22, 22+29));
-        m_frontStrips.add(new LEDStrip(22+29,22+29+27));
-        m_backStrips.add(new LEDStrip(22+29+27, 22+29+27+27));
-        m_frontStrips.add(new LEDStrip( 22+29+27+27,  22+29+27+27+26));
-        m_backStrips.add(new LEDStrip(22+29+27+27+26, 22+29+27+27+26+31));
-        m_frontStrips.add(new LEDStrip(22+29+27+27+26+31, 22+29+27+27+26+31+29));
-        m_backStrips.add(new LEDStrip(22+29+27+27+26+31+29, 22+29+27+27+26+31+29+28));
-        m_frontStrips.add(new LEDStrip(22+29+27+27+26+31+29+28, 22+29+27+27+26+31+29+28+28));
-        m_backStrips.add(new LEDStrip(22+29+27+27+26+31+29+28+28, 22+29+27+27+26+31+29+28+28+26));
+        m_frontStrips.add(new LEDStrip(0, 7));
+        m_backStrips.add(new LEDStrip(7, 17));
+        m_frontStrips.add(new LEDStrip(17,26));
+        m_backStrips.add(new LEDStrip(26, 35));
+        m_frontStrips.add(new LEDStrip(35, 44));
+        m_backStrips.add(new LEDStrip(44, 54));
+        m_frontStrips.add(new LEDStrip(54, 64));
+        m_backStrips.add(new LEDStrip(64, 73));
+        m_frontStrips.add(new LEDStrip(73, 83));
+        m_backStrips.add(new LEDStrip(83, 92));
 
         int length = Math.max(
                 m_frontStrips.stream().map(LEDStrip::end).reduce(0, Integer::max),
