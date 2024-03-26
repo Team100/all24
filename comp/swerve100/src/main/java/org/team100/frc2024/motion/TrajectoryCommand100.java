@@ -1,7 +1,5 @@
 package org.team100.frc2024.motion;
 
-import java.util.concurrent.TransferQueue;
-
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.geometry.GeometryUtil;
@@ -31,7 +29,7 @@ public class TrajectoryCommand100 extends Command100 {
     private final DriveMotionController m_controller;
     private Trajectory100 m_trajectory;
     private double m_timeBuffer;
-private Pose2d m_goal;
+    private Pose2d m_goal;
 
     private Timer m_timer = new Timer();
 
@@ -45,7 +43,7 @@ private Pose2d m_goal;
         m_controller = controller;
         addRequirements(m_robotDrive);
     }
-    
+
     public TrajectoryCommand100(
             SwerveDriveSubsystem robotDrive,
             Trajectory100 trajectory,
@@ -65,7 +63,7 @@ private Pose2d m_goal;
         m_controller.setTrajectory(iter);
         m_timer.reset();
         m_timer.start();
-m_goal = m_trajectory.getLastPoint().state().state().getPose();
+        m_goal = m_trajectory.getLastPoint().state().state().getPose();
 
     }
 
@@ -78,15 +76,16 @@ m_goal = m_trajectory.getLastPoint().state().state().getPose();
         ChassisSpeeds output = m_controller.update(now, currentPose, robotRelativeVelocity);
 
         t.log(Level.TRACE, m_name, "chassis speeds", output);
-t.log(Level.TRACE, m_name, "goal", m_goal);
-        t.log(Level.TRACE, m_name, "THETA ERROR", Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()));
+        t.log(Level.TRACE, m_name, "goal", m_goal);
+        t.log(Level.TRACE, m_name, "THETA ERROR",
+                Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()));
         t.log(Level.TRACE, m_name, "FINSIHED", false);
 
-        
-        // if(m_controller.isDone() || m_timer.get() > m_trajectory.getLastPoint().state().getTimeS()){
-            
-        //      m_robotDrive.setChassisSpeedsNormally(new ChassisSpeeds(), dt);
-        //     return;
+        // if(m_controller.isDone() || m_timer.get() >
+        // m_trajectory.getLastPoint().state().getTimeS()){
+
+        // m_robotDrive.setChassisSpeedsNormally(new ChassisSpeeds(), dt);
+        // return;
         // }
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);
@@ -95,32 +94,33 @@ t.log(Level.TRACE, m_name, "goal", m_goal);
     @Override
     public boolean isFinished() {
 
-
         // if( Math.abs(m_goal.getX() - m_robotDrive.getPose().getX()) < 0.1){
-        //     if( Math.abs(m_goal.getY() - m_robotDrive.getPose().getY()) < 0.1){
-        //         if(Math.abs(m_goal.getRotation().getRadians() - m_robotDrive.getPose().getRotation().getRadians()) < 0.1){
-        //             if(m_controller.isDone()){
-        //                 return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
-        //                 // return true;
-        //             }
-        //         }
-        //     }
+        // if( Math.abs(m_goal.getY() - m_robotDrive.getPose().getY()) < 0.1){
+        // if(Math.abs(m_goal.getRotation().getRadians() -
+        // m_robotDrive.getPose().getRotation().getRadians()) < 0.1){
+        // if(m_controller.isDone()){
+        // return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() +
+        // m_timeBuffer;
+        // // return true;
+        // }
+        // }
+        // }
         // }
 
-
-        if(m_controller.isDone()){
+        if (m_controller.isDone()) {
             return true;
         }
 
         return false;
 
-        // return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
-// return m_controller.isDone();
+        // return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() +
+        // m_timeBuffer;
+        // return m_controller.isDone();
     }
 
     @Override
     public void end(boolean interrupted) {
-t.log(Level.TRACE, m_name, "FINSIHED", true );
+        t.log(Level.TRACE, m_name, "FINSIHED", true);
         m_robotDrive.stop();
         System.out.println("I HAVE FINISHED");
         m_timer.stop();
