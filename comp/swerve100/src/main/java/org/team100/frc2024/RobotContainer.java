@@ -320,7 +320,7 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::pivotToDownPosition, new ChangeAmpState(AmpState100.DOWN, m_amp));
 
-        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
+        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder, m_sensors));
 
         whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
 
