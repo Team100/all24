@@ -7,55 +7,42 @@ import org.team100.frc2024.motion.shooter.Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class FeedCommand extends Command {
-    Intake m_intake;
-    Shooter m_shooter;
-    AmpSubsystem m_amp;
-    FeederSubsystem m_feeder;
+    private static final double kPosition = 0.110273;
 
-    double value = 0.110273;
+    private final Intake m_intake;
+    private final Shooter m_shooter;
+    private final AmpSubsystem m_amp;
+    private final FeederSubsystem m_feeder;
 
-    public FeedCommand(Intake intake, Shooter shooter, AmpSubsystem amp, FeederSubsystem feeder) {
-
+    public FeedCommand(
+            Intake intake,
+            Shooter shooter,
+            AmpSubsystem amp,
+            FeederSubsystem feeder) {
         m_intake = intake;
         m_shooter = shooter;
         m_amp = amp;
         m_feeder = feeder;
-
         addRequirements(m_amp, m_intake, m_shooter, m_feeder);
     }
 
     @Override
-    public void initialize() {
-        //
-    }
-
-    @Override
     public void execute() {
-
-        System.out.println(Math.abs(m_shooter.getPivotPosition() - value));
-
-        if (Math.abs(m_shooter.getPivotPosition() - value) > 0.1) {
-            System.out.println("NOT IN POSITIONNN");
-            m_shooter.setPivotPosition(value);
+        if (Math.abs(m_shooter.getPivotPosition() - kPosition) > 0.1) {
+            m_shooter.setPivotPosition(kPosition);
         } else {
-            m_shooter.setPivotPosition(value);
+            m_shooter.setPivotPosition(kPosition);
             m_feeder.feed();
             m_intake.intake();
             m_shooter.feed();
             m_amp.driveFeeder(-1);
         }
-
     }
 
     @Override
     public void end(boolean interrupted) {
         m_shooter.stop();
         m_amp.driveFeeder(0);
-
     }
 
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
 }

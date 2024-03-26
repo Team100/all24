@@ -31,7 +31,6 @@ public class AmpDefault extends Command {
         // case AMPING:
         // switch(RobotState100.getAmpState()){
         // case UP:
-        // System.out.println("AMP IS GOIIING UPPPPPPPPPP");
         // m_amp.setAmpPosition(0.1);
         // m_amp.stopFeed();
         // break;
@@ -45,7 +44,6 @@ public class AmpDefault extends Command {
 
         // default:
         // }
-        // // System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
 
         // default:
         // m_amp.setAmpPosition(0);

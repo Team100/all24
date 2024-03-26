@@ -82,7 +82,6 @@ class DriveMotionPlannerTest {
             velocity = GeometryUtil.toTwist2d(speeds);
             pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
             time += mDt;
-System.out.println(pose);
         }
         Assertions.assertEquals(196, pose.getTranslation().getX(), 0.2);
         Assertions.assertEquals(13, pose.getTranslation().getY(), 0.1);

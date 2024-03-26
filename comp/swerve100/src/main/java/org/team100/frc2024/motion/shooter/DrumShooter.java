@@ -180,7 +180,6 @@ public class DrumShooter extends Shooter {
     public void setAngle(Double goal) {
 
         pivotServo.setPosition(goal);
-        // System.out.println("SETTTING");
         // pivotServo.setDutyCycle(0.1);
 
     }
@@ -215,14 +214,6 @@ public class DrumShooter extends Shooter {
 
         // pivotServo.setDutyCycle(0.1);
 
-        // System.out.println("GET" + m_encoder.m_encoder.get());
-        // System.out.println("AHHHHH");
-        // System.out.println("Absolute" + pivotServo.getPosition());
-        // System.out.println("POSITION OFFSET" +
-        // m_encoder.m_encoder.getPositionOffset());
-        // System.out.println("DISTANCE PER" +
-        // m_encoder.m_encoder.getDistancePerRotation());
-        // System.out.println("FREEQ" + m_encoder.m_encoder.getFrequency());
     }
 
     public void pivotAndRamp(SwerveDriveSubsystem m_drive, double kThreshold) {

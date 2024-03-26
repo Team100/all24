@@ -127,7 +127,6 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition() / m_params.gearRatio())));
         t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition() / m_params.gearRatio());
-
     }
 
     public void setDutyCycle(double value) {
@@ -146,9 +145,7 @@ public class GravityServo {
                 return;
             }
         }
-
         m_motor.set(value);
-
     }
 
     public void setPositionWithSteadyState(double goal) {
@@ -166,8 +163,6 @@ public class GravityServo {
 
         double diff = m_goal.x() - m_setpoint.x();
 
-        // System.out.println("DIFFF" + diff);
-
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
@@ -177,7 +172,6 @@ public class GravityServo {
         double u_TOTAL = gravityTorque + u_FF + u_FB;
 
         // if(diff <= 0.1){
-        // System.out.println("I AM TRUEEEEEE");
         // m_motor.setSmartCurrentLimit(2);
         // m_motor.set(0.2);
         // } else {
@@ -206,19 +200,13 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition() / m_params.gearRatio())));
         t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition() / m_params.gearRatio());
-
     }
 
     public void periodic() {
-
         // t.log(Level.DEBUG, m_name, "Get Raw Position", m_encoder.);
         t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.TRACE, m_name, "ENCODEr", m_encoder.getPosition());
         t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
-        // t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
-
-        // System.out.println(m_encoder.getPosition());
-
         m_encoder.periodic();
     }
 

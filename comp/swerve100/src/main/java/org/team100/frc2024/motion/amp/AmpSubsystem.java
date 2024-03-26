@@ -112,7 +112,6 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
 
     public void driveFeeder(double value) {
         ampDrive.set(value);
-        // System.out.println("I AM BEING DRIVEN RIGHT NOW : " + value);
     }
 
     public void stop() {
@@ -133,17 +132,6 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     @Override
     public void periodic() {
         ampAngleServo.periodic();
-
-        // System.out.println("GET" + m_encoder.m_encoder.get());
-
-        // System.out.println("Absolute" + m_encoder.m_encoder.getAbsolutePosition());
-        // System.out.println("POSITION OFFSET" +
-        // m_encoder.m_encoder.getPositionOffset());
-        // System.out.println("DISTANCE PER" +
-        // m_encoder.m_encoder.getDistancePerRotation());
-
-        // System.out.println(m_encoder.m_encoder.get());
-
     }
 
     @Override
