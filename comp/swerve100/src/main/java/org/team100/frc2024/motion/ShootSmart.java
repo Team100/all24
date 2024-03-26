@@ -125,7 +125,6 @@ public class ShootSmart extends Command {
 
             if (m_shooter.atVelocitySetpoint(m_isPreload)) {
                 if (Math.abs(m_shooter.getPivotPosition() - angle) < 0.01) {
-                    System.out.println("TROOOOOOOOO");
                     atVelocity = true;
                     m_timer.start();
                 }
@@ -133,7 +132,6 @@ public class ShootSmart extends Command {
         }
 
         if (atVelocity) {
-
             m_feeder.feed();
             m_intake.intake();
 
@@ -141,7 +139,6 @@ public class ShootSmart extends Command {
                 finished = true;
             }
         }
-
     }
 
     @Override
@@ -160,6 +157,5 @@ public class ShootSmart extends Command {
     @Override
     public boolean isFinished() {
         return finished;
-        // return false;
     }
 }

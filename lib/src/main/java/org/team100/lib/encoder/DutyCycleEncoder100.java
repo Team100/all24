@@ -47,7 +47,6 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         m_reversed = reversed; 
         m_name = Names.append(name, this);
         // m_input = new AnalogInput(channel);
-        System.out.println("I HAVE BEEN SET " + name);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);
@@ -59,7 +58,6 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     @Override
     public Double getPosition() {
 
-        // System.out.println("IS CONNECTED" + m_name + m_encoder.isConnected());
         if(!m_encoder.isConnected()){
             return null;
         }

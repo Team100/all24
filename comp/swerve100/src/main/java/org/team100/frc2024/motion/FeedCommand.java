@@ -10,32 +10,29 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class FeedCommand extends Command {
-    Intake m_intake;
-    Shooter m_shooter;
-    AmpSubsystem m_amp;
-    FeederSubsystem m_feeder;
-    SensorInterface m_sensors;
-    
-    boolean noteInAmp = false;
+    private static final double shooterAngle = 0.110273;
+  
+    private final Intake m_intake;
+    private final Shooter m_shooter;
+    private final AmpSubsystem m_amp;
+    private final FeederSubsystem m_feeder;
+    private final SensorInterface m_sensors;
 
+    boolean noteInAmp = false;
     boolean shooterIsInPosition = false;
     boolean finished = false;
 
-    double shooterAngle = 0.110273;
     Timer m_timer = new Timer();
 
-
     public FeedCommand(Intake intake, Shooter shooter, AmpSubsystem amp, FeederSubsystem feeder, SensorInterface sensors) {
-
         m_intake = intake;
         m_shooter = shooter;
         m_amp = amp;
         m_feeder = feeder;
         m_sensors = sensors;
-
         addRequirements(m_amp, m_intake, m_shooter, m_feeder);
     }
-
+  
     @Override
     public void initialize() {
         shooterIsInPosition = false;
@@ -55,7 +52,6 @@ public class FeedCommand extends Command {
         }
         
         if(shooterIsInPosition){
-
             if(m_sensors.getAmpSensor() == false){
                 noteInAmp = true;
             } else {
@@ -64,7 +60,6 @@ public class FeedCommand extends Command {
                 m_shooter.feed();
                 m_amp.driveFeeder(-1);
             }
-
         }
 
         if(noteInAmp){
@@ -74,11 +69,8 @@ public class FeedCommand extends Command {
         if(m_timer.get() >= 0.1){
             finished = true;
         }
-            
-        
-
     }
-
+  
     @Override
     public void end(boolean interrupted) {
         m_shooter.stop();
@@ -86,8 +78,6 @@ public class FeedCommand extends Command {
         shooterIsInPosition = false;
         finished = false;
         m_timer.stop();
-
-
     }
 
     @Override

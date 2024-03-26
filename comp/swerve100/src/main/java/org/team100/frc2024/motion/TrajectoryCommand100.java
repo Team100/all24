@@ -24,11 +24,10 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class TrajectoryCommand100 extends Command100 {
     private final Telemetry t = Telemetry.get();
-
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
-    private Trajectory100 m_trajectory;
-    private double m_timeBuffer;
+    private final Trajectory100 m_trajectory;
+    private final double m_timeBuffer;
     private Pose2d m_goal;
 
     private Timer m_timer = new Timer();
@@ -122,7 +121,6 @@ public class TrajectoryCommand100 extends Command100 {
     public void end(boolean interrupted) {
         t.log(Level.TRACE, m_name, "FINSIHED", true);
         m_robotDrive.stop();
-        System.out.println("I HAVE FINISHED");
         m_timer.stop();
         TrajectoryVisualization.clear();
     }

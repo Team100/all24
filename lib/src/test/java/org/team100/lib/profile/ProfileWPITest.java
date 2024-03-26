@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.State100;
-import org.team100.lib.util.Util;
 
 class ProfileWPITest {
     private static final double kDelta = 0.001;
@@ -20,11 +19,11 @@ class ProfileWPITest {
 
         double tt = 0;
         // the first sample is near the starting state
-        Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
 
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
         assertEquals(0, sample.x(), kDelta);
         assertEquals(0.04, sample.v(), kDelta);
 
@@ -32,7 +31,7 @@ class ProfileWPITest {
         for (double t = 0; t < 0.68; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
         }
         // halfway there, going fast
         assertEquals(0.5, sample.x(), 0.01);
@@ -42,7 +41,7 @@ class ProfileWPITest {
         for (double t = 0; t < 0.86; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
         }
         assertEquals(1.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);

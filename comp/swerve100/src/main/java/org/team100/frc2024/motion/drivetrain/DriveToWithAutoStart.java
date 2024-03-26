@@ -68,14 +68,12 @@ public class DriveToWithAutoStart extends Command100 {
 
     @Override
     public void initialize100() {
-        System.out.println("DRIVE TO WAYPOINT");
         Pose2d startPose = m_swerve.getPose();
         Translation2d startTranslation = new Translation2d();
         Translation2d endTranslation = m_goalWaypoint.getTranslation();
         Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
                 angleToGoal);
-
 
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
@@ -129,8 +127,6 @@ public class DriveToWithAutoStart extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("DRIVE TO FINISHED");
-
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }
