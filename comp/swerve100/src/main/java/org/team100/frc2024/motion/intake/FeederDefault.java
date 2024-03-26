@@ -35,7 +35,6 @@ public class FeederDefault extends Command {
         // m_feeder.stop();
     // }
 
-    // System.out.println("FEEDER DEFAULT IS RUNNING");
 
     if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
         m_feeder.intake();

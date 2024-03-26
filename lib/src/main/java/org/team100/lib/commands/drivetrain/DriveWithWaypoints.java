@@ -69,8 +69,6 @@ public class DriveWithWaypoints extends Command100 {
 
         newWaypointM = getWaypointsList(newWaypointM);
 
-        // System.out.println("NEW WAYPOINT LENGHT" + newWaypointM.size());
-        // System.out.println("HEADINGS LENGHT" + headings.size());
 
         // List<Pose2d> waypointsM = getWaypoints(start, end);
 
@@ -81,7 +79,6 @@ public class DriveWithWaypoints extends Command100 {
         double start_vel = 0;
         double end_vel = 0;
 
-        // System.out.println(newWaypointM);
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(

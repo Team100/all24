@@ -69,7 +69,6 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public void initialize100() {
-        System.out.println("DRIVE TO STATE");
 
         Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()),
                 m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()).getAngle());
@@ -147,7 +146,6 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("FINNIISHEDD");
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

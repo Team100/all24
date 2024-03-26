@@ -138,7 +138,7 @@ public class RobotContainer implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
-                m_sensors = new CompSensors(1, 2); // Definitely real numbers
+                m_sensors = new CompSensors(1, 2, 3); // Definitely real numbers
                 break;
             default:
                 // always returns false
@@ -297,7 +297,7 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::pivotToDownPosition, new ChangeAmpState(AmpState100.DOWN, m_amp));
 
-        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
+        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder, m_sensors));
 
         whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
 

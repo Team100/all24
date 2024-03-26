@@ -31,7 +31,6 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
             default:
                 feedRoller = new PWM(3);
         }
-
     }
 
     public void starve() {
@@ -45,19 +44,14 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
     public void intake() {
         // feedRoller.setSpeed(0.5);
-
     }
 
     public void outtake() {
         // feedRoller.setSpeed(-0.1);
-
     }
 
     public void stop() {
-        // System.out.println("STOPING FEED" + Timer.getFPGATimestamp());
-
         // feedRoller.setsSpeed(0);
-
     }
 
     @Override
@@ -72,6 +66,4 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     public String getGlassName() {
         return "Feeder";
     }
-
-    
 }

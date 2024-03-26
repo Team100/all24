@@ -11,10 +11,13 @@ public class CompSensors implements SensorInterface {
 
     private final DigitalInput intakeSensor;
     private final DigitalInput feederSensor;
+    private final DigitalInput ampSensor;
 
-    public CompSensors(int port1, int port2) {
+
+    public CompSensors(int port1, int port2, int port3) {
         intakeSensor = new DigitalInput(port1);
         feederSensor = new DigitalInput(port2);
+        ampSensor = new DigitalInput(port3);
     }
 
     @Override
@@ -26,8 +29,10 @@ public class CompSensors implements SensorInterface {
 
 
     @Override
-    public boolean getSuperSensor() {
-        return false;
+    public boolean getAmpSensor() {
+        boolean sensorState = ampSensor.get();
+        t.log(Level.DEBUG, "CompSensors", "amp", sensorState);
+        return sensorState;
     }
 
     @Override

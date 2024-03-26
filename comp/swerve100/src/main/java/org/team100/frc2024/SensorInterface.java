@@ -4,7 +4,7 @@ public interface SensorInterface {
 
     boolean getIntakeSensor();
 
-    boolean getSuperSensor();
+    boolean getAmpSensor();
 
     boolean getFeederSensor();
 

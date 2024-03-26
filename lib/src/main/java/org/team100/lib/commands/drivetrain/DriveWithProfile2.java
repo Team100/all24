@@ -67,8 +67,6 @@ public class DriveWithProfile2 extends Command100 {
 
     @Override
     public void initialize100() {
-        // System.out.println("START X " + m_swerve.getState().x().v());
-        System.out.println("DRIVE WITH PROFILE");
         xSetpoint = m_swerve.getState().x();
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();

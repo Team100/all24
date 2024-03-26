@@ -67,11 +67,11 @@ public class PoseEstimationHelper {
                 Translation2d fieldRealtiveTranslation = currentPose
                         .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation();
-                        if (fieldRealtiveTranslation.getY() > 0 && fieldRealtiveTranslation.getX() > 0) {
-                            if (fieldRealtiveTranslation.getY() < 8.21 && fieldRealtiveTranslation.getX() < 16.54) {
-                                Tnotes.add(fieldRealtiveTranslation);
-                            }
-                        }
+                if (fieldRealtiveTranslation.getY() > 0 && fieldRealtiveTranslation.getX() > 0) {
+                    if (fieldRealtiveTranslation.getY() < 8.21 && fieldRealtiveTranslation.getX() < 16.54) {
+                        Tnotes.add(fieldRealtiveTranslation);
+                    }
+                }
             }
 
         return Tnotes;
@@ -91,11 +91,11 @@ public class PoseEstimationHelper {
                 Translation2d fieldRelativeNote = currentPose
                         .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation();
-                        if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
-                            if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
-                Tnotes.add(fieldRelativeNote);
-                            }
-                        }
+                if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
+                    if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
+                        Tnotes.add(fieldRelativeNote);
+                    }
+                }
             }
         return Tnotes;
     }
@@ -189,22 +189,12 @@ public class PoseEstimationHelper {
 
         t.log(Level.DEBUG, kName, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
         t.log(Level.DEBUG, kName, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("TAG TRANLSAION IN CAM COORDS :" +
-        // tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("CAMERA ROT IN FIELD COORDS: " +
-        // cameraRotationInFieldCoords.toRotation2d());
-
-        // System.out.println("TAG IN FIELD COORDS COOORDS" +
-        // tagInFieldCoords.toPose2d());
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
         t.log(Level.DEBUG, kName, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
-
-        // System.out.println("TAG ROTATION IN CAM COOORDS"+
-        // tagRotationInCameraCoords.toRotation2d());
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -214,8 +204,6 @@ public class PoseEstimationHelper {
                 tagInCameraCoords,
                 tagInFieldCoords);
 
-        // System.out.println("CAM IN FIELD COORDS:::: " +
-        // cameraInFieldCoords.toPose2d());
         t.log(Level.DEBUG, kName, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(

@@ -15,7 +15,6 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
-import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -76,8 +75,7 @@ class DriveRamseteControllerTest {
         // based on the trajectory itself.
 
         {
-            if (dump)
-                Util.println("============initialize============");
+         
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new Twist2d());
@@ -85,8 +83,7 @@ class DriveRamseteControllerTest {
         }
 
         {
-            if (dump)
-                Util.println("============4 sec============");
+          
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new Twist2d());
             // remember, facing +90, moving -90, so this should be like -1
@@ -109,8 +106,7 @@ class DriveRamseteControllerTest {
             assertEquals(0, heading_error.getRadians(), 0.05);
         }
         {
-            if (dump)
-                Util.println("============8 sec============");
+      
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new Twist2d());
             verify(-0.96, -0.05, 0.18, output);
