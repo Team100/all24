@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * A 1-dof arm driven by two separate motors with opposite phases.
  */
 public class AmpSubsystem extends SubsystemBase implements Glassy {
-    // ALERT! notice this very high current limit!!  ALERT! 
+    // ALERT! notice this very high current limit!! ALERT!
     private static final int kCurrentLimit = 80;
 
     private final String m_name;
@@ -27,39 +27,32 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     private final CANSparkMax ampDrive;
     private final DutyCycleEncoder100 m_encoder;
 
-
- 
     CANSparkMax m_motor;
 
-
-    
     public AmpSubsystem(int pivotID) {
         m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.146400, true);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 55,
                 5,
-                5 )
-                ;
+                5);
 
         switch (Identity.instance) {
             case COMP_BOT:
 
                 m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
-                //TODO tune kV
+                // TODO tune kV
                 ampAngleServo = new GravityServo(
-                    m_motor, 
-                    30,
-                    m_name, 
-                    m_params, 
-                    new PIDController(0.6, 0, 0), 
-                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                    pivotID, 
-                    0.02, 
-                    -0.06, 
-                    m_encoder,
-                    new double[]{0, 0}
-                );
+                        m_motor,
+                        30,
+                        m_name,
+                        m_params,
+                        new PIDController(0.6, 0, 0),
+                        new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                        0.02,
+                        -0.06,
+                        m_encoder,
+                        new double[] { 0, 0 });
 
                 ampDrive = new CANSparkMax(33, MotorType.kBrushless);
                 break;
@@ -68,35 +61,32 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                 m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
 
                 // ampAngleServo = new GravityServo(
-                //     m_motor,
-                //     5,
-                //     m_name, 
-                //     m_params, 
-                //     new PIDController(3, 0, 0), 
-                //     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                //     pivotID, 
-                //     0.02, 
-                //     -0.06,
-                //     new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
-                //     new double[]{0, 0}
+                // m_motor,
+                // 5,
+                // m_name,
+                // m_params,
+                // new PIDController(3, 0, 0),
+                // new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                // pivotID,
+                // 0.02,
+                // -0.06,
+                // new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
+                // new double[]{0, 0}
                 // );
 
                 ampAngleServo = new GravityServo(
-                    m_motor, 
-                    30,
-                    m_name, 
-                    m_params, 
-                    new PIDController(0.6, 0, 0), 
-                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                    pivotID, 
-                    0.02, 
-                    -0.06, 
-                    m_encoder,
-                    new double[]{0, 0}
-                );
+                        m_motor,
+                        30,
+                        m_name,
+                        m_params,
+                        new PIDController(0.6, 0, 0),
+                        new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                        0.02,
+                        -0.06,
+                        m_encoder,
+                        new double[] { 0, 0 });
                 ampDrive = new CANSparkMax(33, MotorType.kBrushless);
 
-                
         }
     }
 
@@ -120,19 +110,18 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
         ampAngleServo.reset();
     }
 
-    public void driveFeeder(double value){
+    public void driveFeeder(double value) {
         ampDrive.set(value);
         // System.out.println("I AM BEING DRIVEN RIGHT NOW : " + value);
     }
-
-
 
     public void stop() {
         ampAngleServo.stop();
     }
 
     public Double getPositionRad() {
-        // return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) / 2;
+        // return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) /
+        // 2;
         return ampAngleServo.getPosition();
     }
 
@@ -148,12 +137,12 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
         // System.out.println("GET" + m_encoder.m_encoder.get());
 
         // System.out.println("Absolute" + m_encoder.m_encoder.getAbsolutePosition());
-        // System.out.println("POSITION OFFSET" + m_encoder.m_encoder.getPositionOffset());
-        // System.out.println("DISTANCE PER" + m_encoder.m_encoder.getDistancePerRotation());
+        // System.out.println("POSITION OFFSET" +
+        // m_encoder.m_encoder.getPositionOffset());
+        // System.out.println("DISTANCE PER" +
+        // m_encoder.m_encoder.getDistancePerRotation());
 
         // System.out.println(m_encoder.m_encoder.get());
-
-        
 
     }
 
@@ -162,6 +151,4 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
         return "AMMMPPPPPPPPPP";
     }
 
-
-    
 }
