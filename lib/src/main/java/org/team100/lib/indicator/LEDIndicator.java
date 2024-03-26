@@ -72,16 +72,16 @@ public class LEDIndicator {
         m_frontStrips = new ArrayList<>();
         m_backStrips = new ArrayList<>();
         
-        m_backStrips.add(new LEDStrip(0, 16));
-        m_frontStrips.add(new LEDStrip(16, 32));
-        m_backStrips.add(new LEDStrip(32, 48));
-        m_frontStrips.add(new LEDStrip(48, 64));
-        m_backStrips.add(new LEDStrip(64, 80));
-        m_frontStrips.add(new LEDStrip(80, 96));
-        m_backStrips.add(new LEDStrip(96, 112));
-        m_frontStrips.add(new LEDStrip(112, 128));
-        m_backStrips.add(new LEDStrip(128, 144));
-        m_frontStrips.add(new LEDStrip(144, 160));
+        m_frontStrips.add(new LEDStrip(0, 22));
+        m_backStrips.add(new LEDStrip(22, 22+29));
+        m_frontStrips.add(new LEDStrip(22+29,22+29+27));
+        m_backStrips.add(new LEDStrip(22+29+27, 22+29+27+27));
+        m_frontStrips.add(new LEDStrip( 22+29+27+27,  22+29+27+27+26));
+        m_backStrips.add(new LEDStrip(22+29+27+27+26, 22+29+27+27+26+31));
+        m_frontStrips.add(new LEDStrip(22+29+27+27+26+31, 22+29+27+27+26+31+29));
+        m_backStrips.add(new LEDStrip(22+29+27+27+26+31+29, 22+29+27+27+26+31+29+28));
+        m_frontStrips.add(new LEDStrip(22+29+27+27+26+31+29+28, 22+29+27+27+26+31+29+28+28));
+        m_backStrips.add(new LEDStrip(22+29+27+27+26+31+29+28+28, 22+29+27+27+26+31+29+28+28+26));
 
         int length = Math.max(
                 m_frontStrips.stream().map(LEDStrip::end).reduce(0, Integer::max),
