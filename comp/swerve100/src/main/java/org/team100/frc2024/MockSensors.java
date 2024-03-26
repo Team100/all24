@@ -8,7 +8,7 @@ public class MockSensors implements SensorInterface{
     }
 
     @Override
-    public boolean getSuperSensor() {
+    public boolean getAmpSensor() {
         return false;
     }
 
