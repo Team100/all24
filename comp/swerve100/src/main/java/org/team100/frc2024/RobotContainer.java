@@ -161,7 +161,7 @@ public class RobotContainer implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
-                m_sensors = new CompSensors(1, 2); // Definitely real numbers
+                m_sensors = new CompSensors(1, 2, 3); // Definitely real numbers
                 break;
             default:
                 // always returns false
