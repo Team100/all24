@@ -3,7 +3,6 @@ package org.team100.frc2024.motion;
 import java.util.List;
 import java.util.Optional;
 
-import org.opencv.core.Mat;
 import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.drivetrain.DriveToWithAutoStart;
@@ -158,7 +157,7 @@ public class AutoMaker {
             case NOTE3:
                 return forAlliance(new Translation2d(2.8956, 4.1105), m_alliance); // 2.6956, 4.2105
             case NOTE4:
-                return forAlliance(new Translation2d(8.271, 0.4077), m_alliance); //WAS 0.75
+                return forAlliance(new Translation2d(8.271, 0.4077), m_alliance); // WAS 0.75
             case NOTE5:
                 return forAlliance(new Translation2d(8.271, 2.4341), m_alliance);
             case NOTE6:
@@ -196,7 +195,7 @@ public class AutoMaker {
             case COMPLEMENTBEGIN:
                 return new Translation2d(0.663879, 3.917024);
             case COMPLEMENTSHOOT:
-                return (new Translation2d(3.47, 5.06)); //3.183978, 4.8
+                return (new Translation2d(3.47, 5.06)); // 3.183978, 4.8
             case COMPLEMENTSHOOT2:
                 return new Translation2d(3.94, 2.94);
             default:
@@ -436,7 +435,8 @@ public class AutoMaker {
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
 
-    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end, int maxAcc, int maxVel) {
+    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end, int maxAcc,
+            int maxVel) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
         Rotation2d angleToGoal = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
@@ -444,19 +444,22 @@ public class AutoMaker {
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel, maxAcc);
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
+                maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.straightPIDF());
     }
 
-    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end, double splineStartDirection, double endingSplineDirection, int maxVel, int maxAcc) {
+    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end,
+            double splineStartDirection, double endingSplineDirection, int maxVel, int maxAcc) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
         Rotation2d angleToGoal = endPose.getTranslation().minus(startPose.getTranslation()).getAngle();
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), new Rotation2d(splineStartDirection));
-        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(),  new Rotation2d(endingSplineDirection));
+        Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), new Rotation2d(endingSplineDirection));
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
         List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel, maxAcc);
+        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
+                maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
 
@@ -731,29 +734,38 @@ public class AutoMaker {
                 // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
                 // FieldPoint.COMPLEMENTSHOOT),
                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
-                new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI/4, 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
-                new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT, Math.toRadians(180), Math.toRadians(245), 4, 3), new RampShooter(m_shooter, m_swerve)),
+                new ParallelRaceGroup(
+                        driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI / 4, 0, 4, 3),
+                        new ChangeIntakeState(m_intake, m_sensors)),
+                new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT,
+                        Math.toRadians(180), Math.toRadians(245), 4, 3), new RampShooter(m_shooter, m_swerve)),
                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
-                new ParallelRaceGroup(throughStage(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6), new ChangeIntakeState(m_intake, m_sensors)),
-                // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6, 4, 2), new ChangeIntakeState(m_intake, m_sensors)),
-                new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE6, FieldPoint.COMPLEMENTSHOOT2, Math.PI, Math.toRadians(-135), 4, 3), new RampShooter(m_shooter, m_swerve)),
+                new ParallelRaceGroup(throughStage(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6),
+                        new ChangeIntakeState(m_intake, m_sensors)),
+                // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTSHOOT,
+                // FieldPoint.NOTE6, 4, 2), new ChangeIntakeState(m_intake, m_sensors)),
+                new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE6, FieldPoint.COMPLEMENTSHOOT2, Math.PI,
+                        Math.toRadians(-135), 4, 3), new RampShooter(m_shooter, m_swerve)),
                 new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)
 
         // driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)
 
         );
 
-        //  return new SequentialCommandGroup(
-        //         // new StowAmpCommand(m_amp),
-        //         // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
-        //         // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
-        //         // FieldPoint.COMPLEMENTSHOOT),
-        //         driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI/4, 0),
-        //         driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT, Math.toRadians(180), Math.toRadians(245)),
-                
-        //         driveStraight(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6),
-        //         driveStraight(alliance, FieldPoint.NOTE6, FieldPoint.COMPLEMENTSHOOT2, Math.PI, Math.toRadians(-135)),
-        //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)
+        // return new SequentialCommandGroup(
+        // // new StowAmpCommand(m_amp),
+        // // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
+        // // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
+        // // FieldPoint.COMPLEMENTSHOOT),
+        // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4,
+        // Math.PI/4, 0),
+        // driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT,
+        // Math.toRadians(180), Math.toRadians(245)),
+
+        // driveStraight(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6),
+        // driveStraight(alliance, FieldPoint.NOTE6, FieldPoint.COMPLEMENTSHOOT2,
+        // Math.PI, Math.toRadians(-135)),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)
 
         // // driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)
 
@@ -764,30 +776,39 @@ public class AutoMaker {
 
     public SequentialCommandGroup citrusv2(Alliance alliance) {
         // return new SequentialCommandGroup(
-        //         // new StowAmpCommand(m_amp),
-        //         // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
-        //         // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
-        //         // FieldPoint.COMPLEMENTSHOOT),
-        //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
-        //         new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI/4, 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
-        //         new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT, Math.toRadians(180), Math.toRadians(245), 4, 3), new RampShooter(m_shooter, m_swerve)),
-        //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
-        //         new ParallelRaceGroup(throughStage(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6), new ChangeIntakeState(m_intake, m_sensors)),
-        //         // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE6, 4, 2), new ChangeIntakeState(m_intake, m_sensors)),
-        //         new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE6, FieldPoint.COMPLEMENTSHOOT2, Math.PI, Math.toRadians(-135), 4, 3), new RampShooter(m_shooter, m_swerve)),
-        //         new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)
+        // // new StowAmpCommand(m_amp),
+        // // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
+        // // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
+        // // FieldPoint.COMPLEMENTSHOOT),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+        // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
+        // FieldPoint.NOTE4, Math.PI/4, 0, 4, 3), new ChangeIntakeState(m_intake,
+        // m_sensors)),
+        // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE4,
+        // FieldPoint.COMPLEMENTSHOOT, Math.toRadians(180), Math.toRadians(245), 4, 3),
+        // new RampShooter(m_shooter, m_swerve)),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+        // new ParallelRaceGroup(throughStage(alliance, FieldPoint.COMPLEMENTSHOOT,
+        // FieldPoint.NOTE6), new ChangeIntakeState(m_intake, m_sensors)),
+        // // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTSHOOT,
+        // FieldPoint.NOTE6, 4, 2), new ChangeIntakeState(m_intake, m_sensors)),
+        // new ParallelRaceGroup(driveStraight(alliance, FieldPoint.NOTE6,
+        // FieldPoint.COMPLEMENTSHOOT2, Math.PI, Math.toRadians(-135), 4, 3), new
+        // RampShooter(m_shooter, m_swerve)),
+        // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false)
 
         // // driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)
 
         // );
 
-         return new SequentialCommandGroup(
+        return new SequentialCommandGroup(
                 // new StowAmpCommand(m_amp),
                 // new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, 1),
                 // driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN,
                 // FieldPoint.COMPLEMENTSHOOT),
-                driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI/4, 0, 4, 3),
-                driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT, Math.toRadians(180), Math.toRadians(245), 4, 2),
+                driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI / 4, 0, 4, 3),
+                driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.COMPLEMENTSHOOT, Math.toRadians(180),
+                        Math.toRadians(245), 4, 2),
                 aroundStage(alliance, FieldPoint.COMPLEMENTSHOOT, FieldPoint.NOTE5)
 
         // driveStraight(alliance, FieldPoint.CITRUSMID, FieldPoint.CITRUSEND)

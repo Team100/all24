@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.drivetrain;
 
 import org.team100.frc2024.FieldConstants;
+import org.team100.frc2024.FieldConstantsFactory;
 import org.team100.frc2024.motion.shooter.ShooterTable;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -16,7 +17,7 @@ public class ShooterUtil {
     public static Translation2d getOffsetTranslation(Alliance alliance, SwerveState state, double kScale) {
         Translation2d currentTranslation = state.pose().getTranslation();
 
-        FieldConstants fieldConstants = FieldConstants.get(alliance);
+        FieldConstants fieldConstants = FieldConstantsFactory.get(alliance);
 
         Translation2d shooterCenter = new Translation2d(
                 fieldConstants.getShooterCenterX(),
@@ -37,13 +38,13 @@ public class ShooterUtil {
     }
 
     public static Translation2d getSpeakerTranslation(Alliance alliance) {
-        FieldConstants fieldConstants = FieldConstants.get(alliance);
+        FieldConstants fieldConstants = FieldConstantsFactory.get(alliance);
 
         return new Translation2d(0, fieldConstants.getShooterCenterY());
     }
 
     public static Translation2d getOffsetTranslation(Alliance alliance, Translation2d currTranslation, double kScale) {
-        FieldConstants fieldConstants = FieldConstants.get(alliance);
+        FieldConstants fieldConstants = FieldConstantsFactory.get(alliance);
 
         Translation2d currentTranslation = currTranslation;
 

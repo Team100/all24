@@ -26,14 +26,10 @@ import edu.wpi.first.wpilibj2.command.Command;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends Subsystem100 {
-    // multiply field-relative speeds for medium and slow modes.
-    private static final double kMedium = 0.5;
-    private static final double kSlow = 0.15;
-
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
-    public final SwerveLocal m_swerveLocal;
+    private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
 
