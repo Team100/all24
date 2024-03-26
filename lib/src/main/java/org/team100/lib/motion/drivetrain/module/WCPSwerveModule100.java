@@ -25,9 +25,12 @@ import edu.wpi.first.math.controller.PIDController;
 public class WCPSwerveModule100 extends SwerveModule100 {
     /**
      * Flipped belt ratios.
+     * 
+     * See https://docs.wcproducts.com/wcp-swervex/misc/other-configurations/ratio-options
      */
     public enum DriveRatio {
-        FAST(5.5), MEDIUM(6.55);
+        FAST(5.5),
+        MEDIUM(6.55);
 
         private double m_ratio;
 
@@ -38,9 +41,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.0975; //0.1015
-    // flipped belt ratios
-    private static final double kDriveReductionFast = 5.50;
-    private static final double kDriveReductionMedium = 6.55;
 
     /**
      * @param name                  like "front left" or whatever

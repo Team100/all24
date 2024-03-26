@@ -71,11 +71,6 @@ public class Robot extends TimedRobot implements Glassy {
         }
     }
 
-    @Override
-    public void disabledInit() {
-        m_robotContainer.ledStart();
-    }
-
     public void setLogName(String logName) {
         m_logName = logName;
     }
@@ -85,13 +80,8 @@ public class Robot extends TimedRobot implements Glassy {
         t.log(Level.DEBUG, m_name, "mode", "disabled");
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
         t.log(Level.DEBUG, m_name, "key list size", keyListSize);
-        if (keyListSize == 0) {
-            m_robotContainer.red();
-        } else {
-            m_robotContainer.green();
-        }
+
         // this forces the static initializer to run, so that the widget appears.
-        // TODO: make the LEDs blink somehow indicating the active auton.
         t.log(Level.INFO, m_name, "active auton routine", AutonChooser.routine().name());
     }
 

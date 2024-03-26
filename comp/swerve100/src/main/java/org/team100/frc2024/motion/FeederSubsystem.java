@@ -1,16 +1,9 @@
 package org.team100.frc2024.motion;
 
-import java.util.logging.Level;
-
-import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
-import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LimitedVelocityServo;
-import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.PWM;
@@ -18,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final String m_name;
-    private final Telemetry t;
+    private final Telemetry t = Telemetry.get();
     private final PWM feedRoller;
     private final double kFeederVelocityM_S = 30;
 
@@ -27,7 +20,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
         m_name = Names.name(this);
         SysParam feederParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
-        t = Telemetry.get();
+
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -72,7 +65,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
         // feedRoller.periodic();
         feedRoller.setSpeed(0.5);
 
-        Telemetry.get().log(org.team100.lib.telemetry.Telemetry.Level.DEBUG, "FEEDER", "GET SPEED" , feedRoller.getSpeed());
+        t.log(org.team100.lib.telemetry.Telemetry.Level.DEBUG, "FEEDER", "GET SPEED" , feedRoller.getSpeed());
     }
 
     @Override

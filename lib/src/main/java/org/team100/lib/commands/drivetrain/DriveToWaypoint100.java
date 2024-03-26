@@ -1,15 +1,12 @@
 package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -40,14 +37,14 @@ public class DriveToWaypoint100 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-        private final List<TimingConstraint> m_constraints;
+    private final List<TimingConstraint> m_constraints;
 
-        private final double m_timeBuffer;
-private final Timer m_timer = new Timer();
+    private final double m_timeBuffer;
+    private final Timer m_timer = new Timer();
 
     private Trajectory100 m_trajectory = new Trajectory100();
 
-        public DriveToWaypoint100(
+    public DriveToWaypoint100(
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
@@ -59,7 +56,7 @@ private final Timer m_timer = new Timer();
         m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
-                m_timeBuffer = timeBuffer;
+        m_timeBuffer = timeBuffer;
         addRequirements(m_swerve);
     }
 
@@ -121,7 +118,7 @@ private final Timer m_timer = new Timer();
     @Override
     public boolean isFinished() {
         // return m_controller.isDone();
-        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer; 
+        return m_timer.get() > m_trajectory.getLastPoint().state().getTimeS() + m_timeBuffer;
     }
 
     @Override

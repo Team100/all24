@@ -1,7 +1,6 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -42,7 +41,6 @@ import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
-import org.team100.lib.config.AutonSelector;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
@@ -56,10 +54,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
-import org.team100.lib.indicator.LEDGroup;
 import org.team100.lib.indicator.LEDIndicator;
-import org.team100.lib.indicator.LEDStrip;
-import org.team100.lib.indicator.StripFactory;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider24;
@@ -79,7 +74,6 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -106,11 +100,7 @@ public class RobotContainer implements Glassy {
     private static final double kDriveCurrentLimit = 60;
     private final Telemetry t = Telemetry.get();
 
-    // TODO: make a glass widget for this
-    private final AutonSelector m_autonSelector;
-    private final int m_autonRoutine;
-
-    final HeadingInterface m_heading;
+    private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     final SwerveDriveSubsystem m_drive;
@@ -123,14 +113,14 @@ public class RobotContainer implements Glassy {
     // final IndexerSubsystem m_indexer;
     final AmpSubsystem m_amp;
     private final ClimberSubsystem m_climber;
-    final Shooter m_shooter;
+    private final Shooter m_shooter;
     final Intake m_intake;
-    final LEDSubsystem m_ledSubsystem;
-    final SensorInterface m_sensors;
-    final FeederSubsystem m_feeder;
+    private final LEDSubsystem m_ledSubsystem;
+    private final SensorInterface m_sensors;
+    private final FeederSubsystem m_feeder;
 
-    final DriverControl driverControl;
-    final OperatorControl operatorControl;
+    private final DriverControl driverControl;
+    private final OperatorControl operatorControl;
     // Commands
     private final PivotAmp m_pivotAmp;
 
@@ -143,21 +133,8 @@ public class RobotContainer implements Glassy {
         operatorControl = new OperatorControlProxy();
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
-        // these devices only currently exist on the comp bot
-        if (Identity.instance == Identity.COMP_BOT) {
-            // digital inputs 0, 1, 2, 3.
-            // m_autonSelector = new AutonSelector();
-            // m_autonRoutine = m_autonSelector.routine();
-            m_autonSelector = null;
-            m_autonRoutine = 0;
-        } else {
-            m_autonSelector = null;
-            m_autonRoutine = 0;
-        }
-
         m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
-        t.log(Level.INFO, m_name, "Routine", m_autonRoutine);
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -597,31 +574,8 @@ public class RobotContainer implements Glassy {
         m_auton.cancel();
     }
 
-    public double getRoutine() {
-        return m_autonSelector.routine();
-    }
-
-    public void ledStart() {
-        // m_indicator.set(State.ORANGE);
-    }
-
-    public void ledStop() {
-        // m_indicator.close();
-    }
-
-    public void red() {
-        // m_indicator.set(State.RED);
-    }
-
-    public void green() {
-        // m_indicator.set(State.GREEN);
-    }
-
     // this keeps the tests from conflicting via the use of simulated HAL ports.
     public void close() {
-        if (m_autonSelector != null)
-            m_autonSelector.close();
-        // m_indicator.close();
         m_modules.close();
     }
 

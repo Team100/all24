@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 /**
  * Represents all the cameras. Some may be mounted on one robot, some on
  * another. Keep this up to date when you move cameras around.
+ * //TODO for delta you need correct serial numbers, put them here
  */
 public enum Camera {
     /**
@@ -34,27 +35,38 @@ public enum Camera {
                     new Translation3d(0, 0, 0.75),
                     new Rotation3d(0, Math.toRadians(30), Math.PI))),
     /**
-     * Gamma shooter
+     * Delta shooter
      */
+    //TODO get real y offset
     SHOOTER("10000000e31d4a24", 
             new Transform3d(
-                    new Translation3d(.055, -.2748, 0.5),
-                    new Rotation3d(Math.toRadians(-10), Math.toRadians(-28), Math.toRadians(0)))),
+                    new Translation3d(-0.2778506, 0.03,  0.6254242),
+                    new Rotation3d(0, Math.toRadians(-25), Math.toRadians(0)))),
 
     /**
-     * Gamma amp-placer
+     * Delta amp-placer
      */
-    AMP("100000004e0a1fb9",
+    RIGHTAMP("100000004e0a1fb9",
+    //TODO get real y offset
             new Transform3d(
-                    new Translation3d(-0.03, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-45), Math.PI))),
+                    new Translation3d(-0.2778506, -0.0818896, 0.6254242),
+                    new Rotation3d(0, Math.toRadians(-20), -Math.PI/3))),
+
     /**
-     * Gamma intake
+     * Delta amp-placer
+     */
+    LEFTAMP("100000004e0a1fb9",
+    //TODO get real y offset
+            new Transform3d(
+                    new Translation3d(-0.2778506, 0.0818896, 0.6254242),
+                    new Rotation3d(0, Math.toRadians(-20), Math.PI/3))),
+    /**
+     * Delta intake
      */
     GAME_PIECE("1000000031b9d05b",
             new Transform3d(
-                    new Translation3d(-0.341, 0.01, .47),
-                    new Rotation3d(0, Math.toRadians(26), Math.PI))),
+                    new Translation3d(-0.3, 0, 0.61),
+                    new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
     
     G("10000000a7a892c0",
             new Transform3d(

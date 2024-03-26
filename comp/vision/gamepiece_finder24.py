@@ -16,12 +16,13 @@ import math
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
-
+    # TODO get correct serial numbers for Delta
     A = "10000000caeaae82"  # "BETA FRONT"
     B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
     SHOOTER = "10000000a7c673da"  # "DELTA SHOOTER"
-    AMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
+    RIGHTAMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
+    LEFTAMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
     GAME_PIECE = "10000000e31d4a24"  # "DELTA INTAKE"
     G = "10000000a7a892c0"  # ""
     UNKNOWN = None
