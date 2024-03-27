@@ -39,6 +39,7 @@ import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
+import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.Rotate;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.Identity;
@@ -213,7 +214,7 @@ public class RobotContainer implements Glassy {
 
         // RESET ZERO
         // on xbox this is "back"
-        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // RESET 180
         // on xbox this is "start"
@@ -442,7 +443,6 @@ public class RobotContainer implements Glassy {
                 m_heading,
                 constraints);
 
-        // on a roborio 1 this takes 0.8 sec (!)
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
@@ -452,9 +452,10 @@ public class RobotContainer implements Glassy {
         // swerveKinodynamics, m_sensors));
 
         whileTrue(driverControl::shooterLock,
-                new AllianceCommand(m_AutoMaker.citrusv2(Alliance.Red), m_AutoMaker.citrusv2(Alliance.Blue)));
+                new AllianceCommand(m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors), m_AutoMaker.fourNoteAuto(Alliance.Blue, swerveKinodynamics, m_sensors)));
 
-
+        // whileTrue(driverControl::shooterLock,
+        //         new AllianceCommand(m_AutoMaker.tuningTrajectory6(), m_AutoMaker.tuningTrajectory6()));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
@@ -504,17 +505,17 @@ public class RobotContainer implements Glassy {
 
         // joel mar 13: the alliance command chooses which of these autos to run
         m_auton = new AllianceCommand(
-                m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors),
-                m_AutoMaker.fourNoteAuto(Alliance.Blue, notePositionDetector, swerveKinodynamics, m_sensors));
+                m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors),
+                m_AutoMaker.fourNoteAuto(Alliance.Blue, swerveKinodynamics, m_sensors));
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(
                 Map.of(
                         AutonChooser.Routine.FOUR_NOTE, new AllianceCommand(
                                 m_AutoMaker.fourNoteAuto(
-                                        Alliance.Red, notePositionDetector, swerveKinodynamics, m_sensors),
+                                        Alliance.Red, swerveKinodynamics, m_sensors),
                                 m_AutoMaker.fourNoteAuto(
-                                        Alliance.Blue, notePositionDetector, swerveKinodynamics, m_sensors)),
+                                        Alliance.Blue, swerveKinodynamics, m_sensors)),
                         AutonChooser.Routine.FIVE_NOTE, new AllianceCommand(
                                 new PrintCommand("five note red goes here"),
                                 new PrintCommand("five note blue goes here")),

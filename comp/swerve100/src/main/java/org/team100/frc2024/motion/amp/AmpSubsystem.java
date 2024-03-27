@@ -34,8 +34,8 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 55,
-                5,
-                5);
+                60,
+                60);
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -47,9 +47,8 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                     30,
                     m_name, 
                     m_params, 
-                    new PIDController(0.7, 0, 0), 
-                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                    pivotID, 
+                    new PIDController(0.8, 0, 0), 
+                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05), 
                     0.02, 
                     -0.06, 
                     m_encoder,
@@ -82,7 +81,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                         30,
                         m_name,
                         m_params,
-                        new PIDController(0.6, 0, 0),
+                        new PIDController(0.7, 0, 0),
                         new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                         0.02,
                         -0.06,

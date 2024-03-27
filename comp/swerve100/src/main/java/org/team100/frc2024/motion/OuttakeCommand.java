@@ -34,8 +34,8 @@ public class OuttakeCommand extends Command {
 
         m_feeder.starve();
         m_intake.outtake();
-        m_shooter.feed();
-        m_amp.driveFeeder(-1);
+        m_shooter.outtake();
+        m_amp.driveFeeder(1);
 
     }
 

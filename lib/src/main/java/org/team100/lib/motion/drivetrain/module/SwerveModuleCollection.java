@@ -104,28 +104,28 @@ public class SwerveModuleCollection {
                 Util.println("************** WCP MODULES using DIO 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 4, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kFrontLeft, currentLimit, 4, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
                                 54,
                                 9,
                                 0.058735,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kFrontRight, currentLimit, 22, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kFrontRight, currentLimit, 22, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
                                 52,
                                 8,
                                 0.773486,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 56, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kRearLeft, currentLimit, 56, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
                                 51,
                                 6,
                                 0.334580,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearRight, currentLimit, 11, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kRearRight, currentLimit, 11, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
                                 21,
                                 7,
