@@ -40,7 +40,7 @@ public enum Camera {
     //TODO get real y offset
     SHOOTER("10000000a7a892c0", 
             new Transform3d(
-                    new Translation3d(-0.2778506, 0.03,  0.6254242),
+                    new Translation3d(-0.1265, 0.0682,  0.61),
                     new Rotation3d(0, Math.toRadians(-25), Math.toRadians(0)))),
 
     /**
@@ -49,7 +49,7 @@ public enum Camera {
     RIGHTAMP("10000000caeaae82",
     //TODO get real y offset
             new Transform3d(
-                    new Translation3d(-0.2778506, -0.0818896, 0.6254242),
+                    new Translation3d(-0.1265, -0.1063625, 0.61),
                     new Rotation3d(0, Math.toRadians(-20), -Math.PI/3))),
 
     /**
@@ -58,14 +58,14 @@ public enum Camera {
     LEFTAMP("100000004e0a1fb9",
     //TODO get real y offset
             new Transform3d(
-                    new Translation3d(-0.2778506, 0.0818896, 0.6254242),
+                    new Translation3d(-0.1265,  0.1532, 0.61),
                     new Rotation3d(0, Math.toRadians(-20), Math.PI/3))),
     /**
      * Delta intake
      */
     GAME_PIECE("1000000013c9c96c",
             new Transform3d(
-                    new Translation3d(-0.3, 0, 0.61),
+                    new Translation3d(-0.1265, 0.03, 0.61),
                     new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
     
     // G("10000000a7a892c0",
