@@ -3,6 +3,7 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
@@ -24,7 +25,9 @@ import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberPosition;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
+import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
+import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
@@ -67,6 +70,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
+import org.team100.lib.motion.drivetrain.manual.ManualWithAmpLock;
 import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
@@ -87,6 +91,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -136,7 +141,6 @@ public class RobotContainer implements Glassy {
 
         m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
-
         switch (Identity.instance) {
             case COMP_BOT:
                 m_sensors = new CompSensors(2, 1, 4); // Definitely real numbers
@@ -178,7 +182,6 @@ public class RobotContainer implements Glassy {
         m_feeder = new FeederSubsystem(39);
 
         m_intake = IntakeFactory.get(m_sensors);
-
 
         // @sanjan 3/25
         // LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);
@@ -284,7 +287,7 @@ public class RobotContainer implements Glassy {
                 new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
 
         // whileTrue(operatorControl::ramp,
-        //         new ClimberPosition(m_climber));
+        // new ClimberPosition(m_climber));
 
         whileTrue(operatorControl::feed, new StartEndCommand(() -> RobotState100.changeFeederState(FeederState100.FEED),
                 () -> RobotState100.changeFeederState(FeederState100.STOP)));
@@ -418,6 +421,13 @@ public class RobotContainer implements Glassy {
                 omega2Controller,
                 0.25);
 
+                ManualWithAmpLock ampLock = new ManualWithAmpLock(
+                    m_name,
+                    swerveKinodynamics,
+                    m_heading,
+                    thetaController,
+                    omega2Controller);
+
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
 
@@ -443,19 +453,23 @@ public class RobotContainer implements Glassy {
                 m_heading,
                 constraints);
 
-
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
-        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
-        // driverControl::twist, m_drive));
+        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
+        driverControl::twist, m_drive));
         // whileTrue(driverControl::shooterLock,
         // m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector,
         // swerveKinodynamics, m_sensors));
 
-        whileTrue(driverControl::shooterLock,
-                new AllianceCommand(m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors), m_AutoMaker.fourNoteAuto(Alliance.Blue, swerveKinodynamics, m_sensors)));
+        // whileTrue(driverControl::shooterLock,
+        //         new ManualWithShooterLock(m_name, swerveKinodynamics, m_heading, thetaController, omegaController,
+        //                 kDriveCurrentLimit));
+
+        whileTrue(driverControl::ampLock,
+                        new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
-        //         new AllianceCommand(m_AutoMaker.tuningTrajectory6(), m_AutoMaker.tuningTrajectory6()));
+        // new AllianceCommand(m_AutoMaker.tuningTrajectory6(),
+        // m_AutoMaker.tuningTrajectory6()));
 
         // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
         // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,

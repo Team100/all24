@@ -1,5 +1,7 @@
 package org.team100.frc2024;
 
+import edu.wpi.first.math.geometry.Translation2d;
+
 public class FieldConstantsBlue extends FieldConstants {
     @Override
     public double getShooterLeftSideY() {
@@ -13,6 +15,14 @@ public class FieldConstantsBlue extends FieldConstants {
 
     public double getShooterCenterY() {
         return 5.596386;
+    }
+
+    public double getAmpPose() {
+        return 5.596386;
+    }
+
+    public Translation2d getAmpTranslation2d() {
+        return new Translation2d(8.14,1.832);
     }
 
     public double getShooterCenterX() {

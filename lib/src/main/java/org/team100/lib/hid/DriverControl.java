@@ -138,6 +138,10 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
+    default boolean ampLock() {
+        return false;
+    }
+
     default boolean outtakeFromAmp(){
         return false;
     }
