@@ -30,7 +30,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     CANSparkMax m_motor;
 
     public AmpSubsystem(int pivotID) {
-        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.146400, true);
+        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.645439, true);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
                 55,
@@ -43,16 +43,19 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                 m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
                 // TODO tune kV
                 ampAngleServo = new GravityServo(
-                        m_motor,
-                        30,
-                        m_name,
-                        m_params,
-                        new PIDController(0.6, 0, 0),
-                        new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                        0.02,
-                        -0.06,
-                        m_encoder,
-                        new double[] { 0, 0 });
+                    m_motor, 
+                    30,
+                    m_name, 
+                    m_params, 
+                    new PIDController(0.7, 0, 0), 
+                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                    pivotID, 
+                    0.02, 
+                    -0.06, 
+                    m_encoder,
+                    new double[]{0, 0}
+                );
+
 
                 ampDrive = new CANSparkMax(33, MotorType.kBrushless);
                 break;
