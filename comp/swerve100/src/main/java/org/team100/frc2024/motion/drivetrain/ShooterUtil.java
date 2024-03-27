@@ -42,6 +42,11 @@ public class ShooterUtil {
         return new Translation2d(0, fieldConstants.getShooterCenterY());
     }
 
+    public static Translation2d getAmpTranslation(Alliance alliance) {
+        FieldConstants fieldConstants = FieldConstantsFactory.get(alliance);
+        return fieldConstants.getAmpTranslation2d();
+    }
+
     public static Translation2d getOffsetTranslation(
             Alliance alliance,
             Translation2d currTranslation,
