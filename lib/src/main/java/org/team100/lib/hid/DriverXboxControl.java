@@ -110,6 +110,11 @@ public class DriverXboxControl implements DriverControl {
     } 
 
     @Override
+    public boolean ampLock() {
+        return m_controller.getYButton();
+    }
+
+    @Override
     public Rotation2d desiredRotation() {
         double desiredAngleDegrees = m_controller.getPOV();
 
@@ -171,4 +176,6 @@ public class DriverXboxControl implements DriverControl {
     public boolean shooterLock(){
         return m_controller.getBButton();
     }
+
+    
 }
