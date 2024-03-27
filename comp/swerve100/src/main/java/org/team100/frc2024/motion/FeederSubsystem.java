@@ -35,35 +35,35 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void starve() {
-        // feedRoller.setSpeed(-1);
+        feedRoller.setSpeed(-1);
     }
 
     public void feed() {
-        // feedRoller.setSpeed(0.8);
+        feedRoller.setSpeed(0.8);
 
     }
 
     public void intake() {
-        // feedRoller.setSpeed(0.5);
+        feedRoller.setSpeed(0.5);
 
     }
 
     public void outtake() {
-        // feedRoller.setSpeed(-0.1);
+        feedRoller.setSpeed(-0.1);
 
     }
 
     public void stop() {
         // System.out.println("STOPING FEED" + Timer.getFPGATimestamp());
 
-        // feedRoller.setsSpeed(0);
+        feedRoller.setSpeed(0);
 
     }
 
     @Override
     public void periodic() {
         // feedRoller.periodic();
-        feedRoller.setSpeed(0.5);
+        // feedRoller.setSpeed(0.5);
 
         t.log(org.team100.lib.telemetry.Telemetry.Level.DEBUG, "FEEDER", "GET SPEED" , feedRoller.getSpeed());
     }

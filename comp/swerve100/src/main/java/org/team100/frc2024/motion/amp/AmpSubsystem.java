@@ -34,12 +34,12 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
 
     
     public AmpSubsystem(int pivotID) {
-        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.146400, true);
+        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.645439, true);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
-                55,
-                5,
-                5 )
+                60,
+                180,
+                50)
                 ;
 
         switch (Identity.instance) {
@@ -52,7 +52,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                     30,
                     m_name, 
                     m_params, 
-                    new PIDController(0.6, 0, 0), 
+                    new PIDController(0.7, 0, 0), 
                     new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                     pivotID, 
                     0.02, 

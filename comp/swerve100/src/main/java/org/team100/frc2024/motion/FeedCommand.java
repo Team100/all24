@@ -51,29 +51,32 @@ public class FeedCommand extends Command {
         if (Math.abs(m_shooter.getPivotPosition() - shooterAngle) > 0.1) {
             m_shooter.setPivotPosition(shooterAngle);
         } else {
-            shooterIsInPosition = true;
-        }
-        
-        if(shooterIsInPosition){
-
-            if(m_sensors.getAmpSensor() == false){
-                noteInAmp = true;
-            } else {
-                m_feeder.feed();
+            m_feeder.feed();
                 m_intake.intake();
                 m_shooter.feed();
                 m_amp.driveFeeder(-1);
-            }
-
         }
+        
+        // if(shooterIsInPosition){
 
-        if(noteInAmp){
-            m_timer.start();
-        }
+        //     if(m_sensors.getAmpSensor() == false){
+        //         noteInAmp = true;
+        //     } else {
+        //         m_feeder.feed();
+        //         m_intake.intake();
+        //         m_shooter.feed();
+        //         m_amp.driveFeeder(-1);
+        //     }
 
-        if(m_timer.get() >= 0.1){
-            finished = true;
-        }
+        // }
+
+        // if(noteInAmp){
+        //     m_timer.start();
+        // }
+
+        // if(m_timer.get() >= 0.1){
+        //     finished = true;
+        // }
             
         
 

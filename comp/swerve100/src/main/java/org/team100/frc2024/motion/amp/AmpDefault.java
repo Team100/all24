@@ -60,7 +60,7 @@ public class AmpDefault extends Command {
 
         switch (ampState) {
             case UP:
-                m_amp.setAmpPosition(1.8);
+                m_amp.setAmpPosition(0.75);
                 // m_amp.setAmpPosition(2 );
                 // m_amp.setDutyCycle(0.1);
                 m_amp.driveFeeder(0);

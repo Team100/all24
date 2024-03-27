@@ -165,11 +165,11 @@ public class DrumShooter extends Shooter{
 
     @Override
     public void forward() {
-        // leftRoller.setVelocity(kLeftRollerVelocity);
-        // rightRoller.setVelocity(kRightRollerVelocity);
+        leftRoller.setVelocity(kLeftRollerVelocity);
+        rightRoller.setVelocity(kRightRollerVelocity);
 
-        leftRoller.setVelocity(2);
-        rightRoller.setVelocity(2);
+        // leftRoller.setVelocity(5);
+        // rightRoller.setVelocity(2);
     }
 
     @Override
