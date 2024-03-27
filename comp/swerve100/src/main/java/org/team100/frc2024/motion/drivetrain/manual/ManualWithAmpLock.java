@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.team100.frc2024.FieldConstants;
 import org.team100.frc2024.FieldConstantsFactory;
+import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.TargetUtil;
@@ -103,10 +104,9 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
         if (!optionalAlliance.isPresent())
             return new Twist2d();
-        FieldConstants fieldConstants = FieldConstantsFactory.get(optionalAlliance.get());
 
         Translation2d currentTranslation = state.pose().getTranslation();
-        Translation2d target = fieldConstants.getAmpTranslation2d();
+        Translation2d target = ShooterUtil.getAmpTranslation(optionalAlliance.get());
         Rotation2d bearing = TargetUtil.bearing(currentTranslation, target);
 
         // take the short path
