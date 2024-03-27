@@ -41,7 +41,6 @@ public class ShooterDefault extends Command {
 
         double distance = m_drive.getPose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
-        // System.out.println(distance);
         switch (RobotState100.getRobotState()) {
             case SHOOTING:
 
@@ -52,7 +51,6 @@ public class ShooterDefault extends Command {
                         // m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a
                         // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2)); //22.5a
                         m_shooter.setAngle(0.4);
-                        // System.out.println("DEFAULT SHOOOOT");
                         break;
                     case TEST:
                         // m_shooter.setAngle(Smart/Dashboard.getNumber("Shooter Angle", 0.2)); //22.5a
@@ -72,7 +70,6 @@ public class ShooterDefault extends Command {
 
             case AMPING:
                 // m_shooter.stop();
-                // System.out.println("AMPIIING");
                 break;
             case NONE:
                 // m_shooter.stop();

@@ -27,15 +27,12 @@ public class IntakeDefault extends Command {
         t.log(Level.DEBUG, "IntakeDefault", "command state", "execute");
 
         // if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
-        // // System.out.println("WE ARE INTAKING");
         // m_intake.intake();
 
         // } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
-        // // System.out.println("WE ARE OUTTAKING");
         // m_intake.outtake();
 
         // }else if(RobotState100.getIntakeState() == IntakeState100.NONE){
-        // // System.out.println("WE ARE NONNNEE");
         // m_intake.stop();
 
         // }

@@ -321,16 +321,9 @@ public class VisionDataProvider24 implements Glassy {
                         latestTimeUs = RobotController.getFPGATime();
                         estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                     }
-                } else {
-                    // System.out.println("IGNORE " + currentRobotinFieldCoords);
-                    // System.out.println("previous " + lastRobotInFieldCoords);
-                    // System.out.println("blip " + blip);
-                    // System.out.println("distance " + distanceM);
                 }
             }
-
             lastRobotInFieldCoords = currentRobotinFieldCoords;
-
         }
     }
 
@@ -392,11 +385,6 @@ public class VisionDataProvider24 implements Glassy {
                             latestTimeUs = RobotController.getFPGATime();
                             estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
                         }
-                    } else {
-                        // System.out.println("triangulation too far");
-                        // System.out.println("IGNORE " + currentRobotinFieldCoords);
-                        // System.out.println("previous " + lastRobotInFieldCoords);
-                        // System.out.println("distance " + distanceM);
                     }
                 }
                 lastRobotInFieldCoords = currentRobotinFieldCoords;

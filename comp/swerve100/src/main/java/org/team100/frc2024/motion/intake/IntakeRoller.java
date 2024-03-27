@@ -15,7 +15,6 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Direct-drive roller intake
@@ -36,33 +35,32 @@ public class IntakeRoller extends Intake {
      */
     private static final double kIntakeVelocityM_S = 3;
     private static final double kUpperIntakeM_S = 0.5;
-
     private static final double kCenteringVelocityM_S = 3;
 
+    private final Telemetry t = Telemetry.get();
     private final String m_name;
+    private final SensorInterface m_sensors;
+
     private final PWM intakeRoller;
     // private final LimitedVelocityServo<Distance100> centeringWheels;
     private final PWM centeringWheels;
     private final LimitedVelocityServo<Distance100> superRollers;
 
     private final SpeedingVisualization m_viz;
-    private final SensorInterface m_sensors;
-    private final Telemetry t;
 
-    public IntakeRoller(SensorInterface sensors, int intakeCAN, int centerCAN, int superCAN) {
-
+    public IntakeRoller(
+            SensorInterface sensors,
+            int intakeCAN,
+            int centerCAN,
+            int superCAN) {
         m_name = Names.name(this);
-
         m_sensors = sensors;
-
-        t = Telemetry.get();
 
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
 
-               
         switch (Identity.instance) {
             case COMP_BOT:
-            //TODO tune kV
+                // TODO tune kV
                 intakeRoller = new PWM(1);
 
                 centeringWheels = new PWM(2);
@@ -72,7 +70,7 @@ public class IntakeRoller extends Intake {
                         true,
                         kCurrentLimit,
                         rollerParameter,
-                        new FeedforwardConstants(0.122,0,0.1,0.065),
+                        new FeedforwardConstants(0.122, 0, 0.1, 0.065),
                         new PIDConstants(0.0001, 0, 0));
                 break;
             case BLANK:
@@ -88,11 +86,10 @@ public class IntakeRoller extends Intake {
     }
 
     @Override
-    //All you have to do is set the state once and it handles the rest. No need for commands 
+    // All you have to do is set the state once and it handles the rest. No need for
+    // commands
     public void intakeSmart() {
-        // System.out.println("IM RUNNING");
-        if(!m_sensors.getFeederSensor()){
-            System.out.println("STOPING INAKE" + Timer.getFPGATimestamp());
+        if (!m_sensors.getFeederSensor()) {
             intakeRoller.setSpeed(0);
             centeringWheels.setSpeed(0);
             superRollers.setVelocity(0);
@@ -102,23 +99,19 @@ public class IntakeRoller extends Intake {
             centeringWheels.setSpeed(1);
             superRollers.setDutyCycle(1);
         }
-        
-
 
     }
 
     @Override
-    public void intake(){
+    public void intake() {
         centeringWheels.setSpeed(0.8);
         intakeRoller.setSpeed(0.8);
         superRollers.setDutyCycle(0.8);
-
     }
 
-     @Override
-    public void runUpper(){
+    @Override
+    public void runUpper() {
         superRollers.setDutyCycle(0.8);
-
     }
 
     @Override
@@ -130,11 +123,9 @@ public class IntakeRoller extends Intake {
 
     @Override
     public void stop() {
-        // System.out.println("STOPPPP");
         intakeRoller.setSpeed(0);
         centeringWheels.setSpeed(0);
         superRollers.setDutyCycle(0);
-
     }
 
     @Override
@@ -143,10 +134,8 @@ public class IntakeRoller extends Intake {
         superRollers.periodic();
         m_viz.periodic();
 
-       boolean intake= m_sensors.getIntakeSensor();
-       boolean feed= m_sensors.getFeederSensor();
-
-        // System.out.println(m_sensors.getFeederSensor());
+        boolean intake = m_sensors.getIntakeSensor();
+        boolean feed = m_sensors.getFeederSensor();
     }
 
     @Override
@@ -155,5 +144,4 @@ public class IntakeRoller extends Intake {
         return 0;
     }
 
-    
 }

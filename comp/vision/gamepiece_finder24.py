@@ -17,13 +17,13 @@ import math
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
     # TODO get correct serial numbers for Delta
-    A = "10000000caeaae82"  # "BETA FRONT"
-    B = "1000000013c9c96c"  # "BETA BACK"
+    # A = "10000000caeaae82"  # "BETA FRONT"
+    # B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
-    SHOOTER = "10000000a7c673da"  # "DELTA SHOOTER"
-    RIGHTAMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
-    LEFTAMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
-    GAME_PIECE = "10000000e31d4a24"  # "DELTA INTAKE"
+    SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
+    RIGHTAMP = "10000000caeaae82"  # "DELTA AMP-PLACER"
+    LEFTAMP = "100000004e0a1fb9"  # "DELTA AMP-PLACER"
+    GAME_PIECE = "1000000013c9c96c"  # "DELTA INTAKE"
     G = "10000000a7a892c0"  # ""
     UNKNOWN = None
 
@@ -108,7 +108,7 @@ class GamePieceFinder:
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
         serial = getserial()
         identity = Camera(serial)
-        if identity == Camera.C:
+        if identity == Camera.GAME_PIECE:
             img_bgr = img_bgr[65:583,:,:]
 
         img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)

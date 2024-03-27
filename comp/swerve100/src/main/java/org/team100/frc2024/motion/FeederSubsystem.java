@@ -31,7 +31,6 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
             default:
                 feedRoller = new PWM(3);
         }
-
     }
 
     public void starve() {
@@ -58,7 +57,10 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
         feedRoller.setSpeed(0);
 
+        // feedRoller.setSpeed(0.5);
     }
+
+
 
     @Override
     public void periodic() {
@@ -72,6 +74,4 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     public String getGlassName() {
         return "Feeder";
     }
-
-    
 }

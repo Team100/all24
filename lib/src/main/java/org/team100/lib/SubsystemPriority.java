@@ -29,15 +29,12 @@ public class SubsystemPriority {
 
     public static void registerWithPriority(){
 
-        System.out.println("BEFORE");
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        System.out.println("AFTER");
         List<SubsystemBase> sortedList =  new ArrayList<>();
 
         for(Priority priority : Priority.values()){
             if(subsystemMap.get(priority) != null){
                 sortedList.add(subsystemMap.get(priority));
-                System.out.println(subsystemMap.get(priority).getName());
                 subsystemMap.get(priority).setDefaultCommand(defaultCommandMap.get(subsystemMap.get(priority)));
                 CommandScheduler.getInstance().registerSubsystem(subsystemMap.get(priority));
             }

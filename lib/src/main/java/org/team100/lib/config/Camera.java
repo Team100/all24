@@ -15,11 +15,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 public enum Camera {
     /**
      * BETA front
-     */
-    A("10000000caeaae82",
-            new Transform3d(
-                    new Translation3d(.1625, 0.0889, 0.762),
-                    new Rotation3d(0, Math.toRadians(-18), 0))),
+    //  */
+    // A("10000000caeaae82",
+    //         new Transform3d(
+    //                 new Translation3d(.1625, 0.0889, 0.762),
+    //                 new Rotation3d(0, Math.toRadians(-18), 0))),
     /**
      * BETA back
      */
@@ -38,7 +38,7 @@ public enum Camera {
      * Delta shooter
      */
     //TODO get real y offset
-    SHOOTER("10000000e31d4a24", 
+    SHOOTER("10000000a7a892c0", 
             new Transform3d(
                     new Translation3d(-0.2778506, 0.03,  0.6254242),
                     new Rotation3d(0, Math.toRadians(-25), Math.toRadians(0)))),
@@ -46,7 +46,7 @@ public enum Camera {
     /**
      * Delta amp-placer
      */
-    RIGHTAMP("100000004e0a1fb9",
+    RIGHTAMP("10000000caeaae82",
     //TODO get real y offset
             new Transform3d(
                     new Translation3d(-0.2778506, -0.0818896, 0.6254242),
@@ -63,15 +63,15 @@ public enum Camera {
     /**
      * Delta intake
      */
-    GAME_PIECE("1000000031b9d05b",
+    GAME_PIECE("1000000013c9c96c",
             new Transform3d(
                     new Translation3d(-0.3, 0, 0.61),
                     new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
     
-    G("10000000a7a892c0",
-            new Transform3d(
-                    new Translation3d(0, 0, 1),
-                    new Rotation3d(0, Math.toRadians(30), 0))),           
+    // G("10000000a7a892c0",
+    //         new Transform3d(
+    //                 new Translation3d(0, 0, 1),
+    //                 new Rotation3d(0, Math.toRadians(30), 0))),           
 
     TEST1("test1",
             new Transform3d(
