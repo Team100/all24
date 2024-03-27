@@ -13,35 +13,15 @@ import edu.wpi.first.math.geometry.Translation3d;
  * //TODO for delta you need correct serial numbers, put them here
  */
 public enum Camera {
-    /**
-     * BETA front
-    //  */
-    // A("10000000caeaae82",
-    //         new Transform3d(
-    //                 new Translation3d(.1625, 0.0889, 0.762),
-    //                 new Rotation3d(0, Math.toRadians(-18), 0))),
-    /**
-     * BETA back
-     */
-    B("1000000013c9c96c",
-            new Transform3d(
-                    new Translation3d(0.1825, -0.06985, 0.76),
-                    new Rotation3d(0, Math.toRadians(-24), Math.PI))),
-    /**
-     * 
-     */
-    C("10000000a7c673d9",
-            new Transform3d(
-                    new Translation3d(0, 0, 0.75),
-                    new Rotation3d(0, Math.toRadians(30), Math.PI))),
+
     /**
      * Delta shooter
      */
     //TODO get real y offset
     SHOOTER("10000000a7a892c0", 
             new Transform3d(
-                    new Translation3d(-0.2778506, 0.03,  0.6254242),
-                    new Rotation3d(0, Math.toRadians(-25), Math.toRadians(0)))),
+                    new Translation3d(-0.1265, 0.0682,  0.612),
+                    new Rotation3d(0, Math.toRadians(-25), Math.toRadians(-2)))),
 
     /**
      * Delta amp-placer

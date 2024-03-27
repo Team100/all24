@@ -59,7 +59,7 @@ public class DrumShooter extends Shooter {
     private final SpeedingVisualization m_viz;
 
     public final double kLeftRollerVelocity = 20;
-    public final double kRightRollerVelocity = 20;
+    public final double kRightRollerVelocity = 15;
 
     public DrumShooter(int leftID, int rightID, int pivotID, int currentLimit) {
         m_name = Names.name(this);
@@ -87,7 +87,7 @@ public class DrumShooter extends Shooter {
                         currentLimit,
                         1,
                         0.1,
-                        new PIDConstants(0.4, 0, 0), // 0.4
+                        new PIDConstants(0.3, 0, 0), // 0.4
                         new FeedforwardConstants(0.11, 0, 0, 0.9));
 
                 leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftMotor);
@@ -99,7 +99,7 @@ public class DrumShooter extends Shooter {
                         currentLimit,
                         1,
                         0.1,
-                        new PIDConstants(0.4, 0, 0), // 0.4
+                        new PIDConstants(0.3, 0, 0), // 0.4
                         new FeedforwardConstants(0.11, 0, 0, 0.9));
 
                 rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
@@ -259,6 +259,12 @@ public class DrumShooter extends Shooter {
     public void feed() {
         leftRoller.setDutyCycle(0.3);
         rightRoller.setDutyCycle(0.3);
+    }
+
+    @Override
+    public void outtake() {
+        leftRoller.setDutyCycle(-0.3);
+        rightRoller.setDutyCycle(-0.3);
     }
 
     @Override

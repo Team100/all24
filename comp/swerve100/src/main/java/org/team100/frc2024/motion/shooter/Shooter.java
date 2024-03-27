@@ -22,6 +22,8 @@ public abstract class Shooter extends SubsystemBase implements Speeding, Glassy 
     public abstract void setDutyCycle(double value);
     public abstract double getPivotPosition();
     public abstract void setPivotPosition(double value);
+    public abstract void outtake();
+
     public abstract void reset();
     public abstract void rezero();
 
