@@ -111,7 +111,7 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean ampLock() {
-        return m_controller.getYButton();
+        return m_controller.getAButton();
     }
 
     @Override
@@ -143,10 +143,10 @@ public class DriverXboxControl implements DriverControl {
         return false;
     }
 
-    @Override
-    public boolean circle() {
-        return m_controller.getAButton();
-    }
+    // @Override
+    // public boolean circle() {
+    //     return m_controller.getAButton();
+    // }
 
     public boolean choreo(){
         return m_controller.getRawButton(2);
