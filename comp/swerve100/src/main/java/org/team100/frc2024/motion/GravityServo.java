@@ -166,9 +166,11 @@ public class GravityServo {
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.08; // rot/s to rpm conversion
+        double u_FF = m_setpoint.v() * 0.06; //rot/s to rpm conversion
+
 
         double gravityTorque = 0.015 * 3 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
+        gravityTorque = gravityTorque * 0.9;
         double u_TOTAL = gravityTorque + u_FF + u_FB;
 
         // if(diff <= 0.1){
@@ -178,7 +180,9 @@ public class GravityServo {
         // m_motor.set(u_TOTAL);
         // }
 
-        m_motor.set(gravityTorque);
+        m_motor.set(gravityTorque + u_FF + u_FB); 
+
+
 
         // if(diff < 0.1){
         // m_motor.set(0.05);
