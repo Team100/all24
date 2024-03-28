@@ -31,7 +31,7 @@ public class LEDIndicator {
         PURPLE(Color.kFuchsia),
         YELLOW(Color.kYellow),
         ORANGE(Color.kOrange),
-        WHITE(Color.kWhite);
+        WHITE(Color.kBlack);
 
         /**
          * This "color" is what we tell the LED strip to make it display the actual
