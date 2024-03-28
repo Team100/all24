@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class FeedCommand extends Command {
-    private static final double shooterAngle = 0.110273;
+    private static final double shooterAngle = 0.14;
   
     private final Intake m_intake;
     private final Shooter m_shooter;
@@ -49,9 +49,9 @@ public class FeedCommand extends Command {
             m_shooter.setPivotPosition(shooterAngle);
         } else {
             m_feeder.feed();
-                m_intake.intake();
-                m_shooter.feed();
-                m_amp.driveFeeder(-1);
+            m_intake.intake();
+            m_shooter.feed();
+            m_amp.driveFeeder(-1);
         }
         
         // if(shooterIsInPosition){

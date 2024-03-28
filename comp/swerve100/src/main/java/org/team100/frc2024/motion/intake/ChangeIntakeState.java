@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class ChangeIntakeState extends Command {
     private final Intake m_intake;
     private final SensorInterface m_sensors;
+    private boolean finished = false;
 
     public ChangeIntakeState(Intake intake, SensorInterface sensors) {
         m_intake = intake;
@@ -16,16 +17,29 @@ public class ChangeIntakeState extends Command {
 
     @Override
     public void initialize() {
+        finished = false;
         m_intake.intakeSmart();
     }
 
     @Override
+    public void execute() {
+        if(m_sensors.getFeederSensor()){
+            m_intake.intake();
+        } else {
+            finished = true;
+        }
+    }
+
+
+    @Override
     public void end(boolean interrupted) {
+        finished = false;
+
         m_intake.stop();
     }
 
     @Override
     public boolean isFinished() {
-        return !m_sensors.getFeederSensor();
+        return finished;
     }
 }

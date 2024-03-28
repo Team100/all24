@@ -145,7 +145,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningGearRatio,
                 drive);
         PIDController turningPositionController = new PIDController(
-                30, // kP
+                20, // kP
                 0.06, // kI
                 0, // kD
                 dt);
