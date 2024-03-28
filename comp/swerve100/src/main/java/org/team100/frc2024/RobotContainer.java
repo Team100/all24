@@ -299,7 +299,7 @@ public class RobotContainer implements Glassy {
 
         // whileTrue(operatorControl::pivotToDownPosition, new Test2());
 
-        whileTrue(operatorControl::pivotToDownPosition, new ChangeAmpState(AmpState100.DOWN, m_amp));
+        whileTrue(operatorControl::pivotToDownPosition, new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder, m_sensors));
 
@@ -478,7 +478,10 @@ public class RobotContainer implements Glassy {
         // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
         // lot.
         whileTrue(driverControl::shooterLock,
-                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
+                new ShooterLockCommand(shooterLock, driverControl::twist, m_drive));
+
+        whileTrue(driverControl::test,
+                new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
         //         new ClimberPosition(m_climber));
@@ -519,17 +522,17 @@ public class RobotContainer implements Glassy {
 
         // joel mar 13: the alliance command chooses which of these autos to run
         m_auton = new AllianceCommand(
-                m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors),
-                m_AutoMaker.fourNoteAuto(Alliance.Blue, swerveKinodynamics, m_sensors));
+                m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
+                m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(
                 Map.of(
                         AutonChooser.Routine.FOUR_NOTE, new AllianceCommand(
                                 m_AutoMaker.fourNoteAuto(
-                                        Alliance.Red, swerveKinodynamics, m_sensors),
+                                        Alliance.Red, m_sensors),
                                 m_AutoMaker.fourNoteAuto(
-                                        Alliance.Blue, swerveKinodynamics, m_sensors)),
+                                        Alliance.Blue, m_sensors)),
                         AutonChooser.Routine.FIVE_NOTE, new AllianceCommand(
                                 new PrintCommand("five note red goes here"),
                                 new PrintCommand("five note blue goes here")),
