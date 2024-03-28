@@ -160,7 +160,7 @@ public class AutoMaker {
             case NOTE3:
                 return forAlliance(new Translation2d(2.8956, 4.1105), m_alliance); // 2.6956, 4.2105
             case NOTE4:
-                return forAlliance(new Translation2d(8.271, 0.75"?                                                            '   hg'), m_alliance); // WAS 0.75
+                return forAlliance(new Translation2d(8.271, 0.75), m_alliance); // WAS 0.75
             case NOTE5:
                 return forAlliance(new Translation2d(8.271, 2.4341), m_alliance);
             case NOTE6:
