@@ -257,8 +257,8 @@ public class DrumShooter extends Shooter {
     }
 
     public void feed() {
-        leftRoller.setDutyCycle(0.3);
-        rightRoller.setDutyCycle(0.3);
+        leftRoller.setDutyCycle(0.1);
+        rightRoller.setDutyCycle(0.1);
     }
 
     @Override

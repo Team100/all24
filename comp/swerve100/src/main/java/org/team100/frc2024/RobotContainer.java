@@ -454,11 +454,9 @@ public class RobotContainer implements Glassy {
                 constraints);
 
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
-        whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
-        driverControl::twist, m_drive));
-        // whileTrue(driverControl::shooterLock,
-        // m_AutoMaker.fourNoteAuto(Alliance.Red, notePositionDetector,
-        // swerveKinodynamics, m_sensors));
+        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
+        // driverControl::twist, m_drive));
+        // whileTrue(driverControl::shooterLock,m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors));
 
         // whileTrue(driverControl::shooterLock,
         //         new ManualWithShooterLock(m_name, swerveKinodynamics, m_heading, thetaController, omegaController,
@@ -479,9 +477,11 @@ public class RobotContainer implements Glassy {
 
         // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
         // lot.
-        whileTrue(driverControl::test,
-                new AllianceCommand(m_AutoMaker.citrusv2(Alliance.Red), m_AutoMaker.citrusv2(Alliance.Blue)));
+        whileTrue(driverControl::shooterLock,
+                new AllianceCommand(m_AutoMaker.citrus(Alliance.Red), m_AutoMaker.citrus(Alliance.Blue)));
 
+        // whileTrue(driverControl::shooterLock,
+        //         new ClimberPosition(m_climber));
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
         // m_intake, m_feeder, m_drive));
 
@@ -508,7 +508,7 @@ public class RobotContainer implements Glassy {
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
         SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
-                operatorControl::getRightAxis, operatorControl::getClimberOveride), Priority.FIVE);
+                operatorControl::getRightAxis, operatorControl::getClimberOveride, operatorControl::pov), Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         // Registers the subsystems so that they run with the specified priority

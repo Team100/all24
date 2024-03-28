@@ -105,8 +105,14 @@ public class IntakeRoller extends Intake {
     @Override
     public void intake() {
         centeringWheels.setSpeed(0.8);
-        intakeRoller.setSpeed(0.8);
+        intakeRoller.setSpeed(-1);
         superRollers.setDutyCycle(0.8);
+    }
+
+    
+    public void runLowerIntake() {
+        centeringWheels.setSpeed(0.8);
+        intakeRoller.setSpeed(-1);
     }
 
     @Override

@@ -1,8 +1,9 @@
-package org.team100.frc2024.motion;
+package org.team100.frc2024.commands;
 
 import java.util.Optional;
 
 import org.team100.frc2024.SensorInterface;
+import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.Shooter;
@@ -15,7 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ShootSmart extends Command {
+public class ShootPreload extends Command {
     private static final Telemetry t = Telemetry.get();
 
     private final Intake m_intake;
@@ -30,7 +31,7 @@ public class ShootSmart extends Command {
     private boolean atVelocity = false;
     private boolean finished = false;
 
-    public ShootSmart(
+    public ShootPreload(
             SensorInterface sensor,
             Shooter shooter, Intake intake,
             FeederSubsystem feeder,
@@ -48,7 +49,7 @@ public class ShootSmart extends Command {
         addRequirements(m_intake, m_feeder, m_shooter);
     }
 
-    public ShootSmart(
+    public ShootPreload(
             SensorInterface sensor,
             Shooter shooter,
             Intake intake,
@@ -83,22 +84,16 @@ public class ShootSmart extends Command {
         m_shooter.forward();
         // if(m_pivotOverride == -1){
         m_shooter.setAngle(ShooterUtil.getAngle(distance));
-        // } else {
-        // m_shooter.setAngle(m_pivotOverride);
-        // }
         
-        // if(!m_isPreload){
-            m_intake.intake();
-            m_feeder.feed();
-        // }
 
         m_timer.reset();
     }
 
     @Override
     public void execute() {
-        m_intake.runLowerIntake();
-        t.log(Level.DEBUG, "ShootSmart", "command state", "execute");
+        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
+
+        t.log(Level.DEBUG, "ShootSmart", "END", 0);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
@@ -150,7 +145,9 @@ public class ShootSmart extends Command {
     @Override
     public void end(boolean interrupted) {
         t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        System.out.println("SHOOTO SMAART HAS FINNIISHEDD");
+        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
+        t.log(Level.DEBUG, "ShootSmart", "END", 1);
+
         atVelocity = false;
         finished = false;
         m_timer.stop();
@@ -162,6 +159,6 @@ public class ShootSmart extends Command {
 
     @Override
     public boolean isFinished() {
-        return false;
+        return finished;
     }
 }

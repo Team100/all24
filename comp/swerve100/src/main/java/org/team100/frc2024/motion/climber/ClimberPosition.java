@@ -10,7 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimberPosition extends Command {
     private final ClimberSubsystem m_climber;
-    private final PIDController controller = new PIDController(0.1, 0, 0);
+    private final PIDController leftController = new PIDController(0.1, 0, 0);
+    private final PIDController rightController = new PIDController(0.1, 0, 0);
 
     private TrapezoidProfile100 rightProfile;
     private TrapezoidProfile100 leftProfile;
@@ -39,30 +40,35 @@ public class ClimberPosition extends Command {
         double rightPose = m_climber.getRightPosition();
         double leftPose = m_climber.getLeftPosition();
 
-        State100 goal = new State100(100, 0);
+        double rightVal = rightController.calculate(rightPose, 30);
+        double leftVal = leftController.calculate(leftPose, 30);
 
-        right_setpoint = rightProfile.calculate(0.02, right_setpoint, goal);
+        // State100 goal = new State100(30, 0);
 
-        double right_fB = controller.calculate(rightPose, right_setpoint.x());
-        double rightFF = right_setpoint.v();
+        // right_setpoint = rightProfile.calculate(0.02, right_setpoint, goal);
 
-        left_setpoint = leftProfile.calculate(0.02, left_setpoint, goal);
+        // double right_fB = controller.calculate(rightPose, right_setpoint.x());
+        // double rightFF = right_setpoint.v();
 
-        double left_fB = controller.calculate(leftPose, left_setpoint.x());
-        double left_FF = left_setpoint.v();
+        // left_setpoint = leftProfile.calculate(0.02, left_setpoint, goal);
 
-        rightFF = rightFF * 0.8;
+        // double left_fB = controller.calculate(leftPose, left_setpoint.x());
+        // double left_FF = left_setpoint.v();
 
-        left_FF = left_FF * 0.8;
+        // rightFF = rightFF * 0.8;
 
-        m_climber.setRight(right_fB + rightFF);
-        m_climber.setLeft(left_fB + left_FF);
+        // left_FF = left_FF * 0.8;
+
+        // m_climber.setRight(rightVal);
+        // m_climber.setLeft(leftVal);
+
+        // m_climber.setLeft(left_fB + left_FF);
 
         // m_climber.setRight(-0.5);
 
         Telemetry.get().log(Level.DEBUG, "CLIMBERRR", "Right Pose", rightPose);
-        Telemetry.get().log(Level.DEBUG, "CLIMBERRR", "Right Setpoint", right_setpoint);
-        Telemetry.get().log(Level.DEBUG, "CLIMBERRR", "Goal", goal);
+        // Telemetry.get().log(Level.DEBUG, "CLIMBERRR", "Right Setpoint", right_setpoint);
+        // Telemetry.get().log(Level.DEBUG, "CLIMBERRR", "Goal", goal);
 
     }
 

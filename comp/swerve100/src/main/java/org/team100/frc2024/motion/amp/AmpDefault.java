@@ -73,7 +73,7 @@ public class AmpDefault extends Command {
                 break;
             case NONE:
             default:
-                m_amp.setAmpPosition(0.064230);
+                m_amp.setAmpPosition(0);
                 m_amp.driveFeeder(0);
         }
 

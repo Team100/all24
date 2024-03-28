@@ -49,9 +49,9 @@ public class ShooterDefault extends Command {
                         m_shooter.forward();
                         // m_shooter.setAngleWithOverride(ShooterUtil.getAngle(m_drive.getPose().getX()),
                         // m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a
-                        m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2)); //22.5a
+                        // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2)); //22.5a
                         // m_shooter.setAngle(0.4);
-                        // m_shooter.setAngle(ShooterUtil.getAngle(distance));
+                        m_shooter.setAngle(ShooterUtil.getAngle(distance));
 
                         break;
                     case TEST:

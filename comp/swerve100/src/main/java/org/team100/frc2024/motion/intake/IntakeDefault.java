@@ -55,7 +55,8 @@ public class IntakeDefault extends Command {
 
         switch (RobotState100.getFeederState()) {
             case FEED:
-                m_intake.runUpper();
+                // m_intake.runUpper();
+                m_intake.intake();
                 break;
             default:
 
