@@ -45,9 +45,7 @@ public class RotateCommand extends Command {
             Util.warn("no alliance present!");
             return true;
         }
-        return Math.abs(ShooterUtil.getRobotRotationToSpeaker(
-                alliance.get(),
-                m_drive.getPose().getTranslation(), 0).getRadians()
+        return Math.abs(Math.PI/2
                 - m_drive.getPose().getRotation().getRadians()) < 0.05;
     }
 }

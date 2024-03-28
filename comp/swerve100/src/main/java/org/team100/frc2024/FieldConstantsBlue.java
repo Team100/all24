@@ -22,7 +22,7 @@ public class FieldConstantsBlue extends FieldConstants {
     }
 
     public Translation2d getAmpTranslation2d() {
-        return new Translation2d(8.14,1.832);
+        return new Translation2d(1.855751,8.341236);
     }
 
     public double getShooterCenterX() {
