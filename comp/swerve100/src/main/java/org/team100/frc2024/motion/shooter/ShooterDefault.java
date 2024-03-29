@@ -61,6 +61,9 @@ public class ShooterDefault extends Command {
                         break;
                     case STOP:
                         m_shooter.stop();
+                        // m_shooter.setDutyCycle(0.05);
+                        
+
                         break;
                     case LOB:
                         m_shooter.forward();

@@ -286,7 +286,7 @@ public class VisionDataProvider24 implements Glassy {
             if (!tagInFieldCoordsOptional.isPresent())
                 continue;
 
-            if (blip.getPose().getTranslation().getNorm() > 4.5) {
+            if (blip.getPose().getTranslation().getNorm() > 5) {
                 return;
             }
 

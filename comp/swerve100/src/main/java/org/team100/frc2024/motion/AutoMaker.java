@@ -717,11 +717,18 @@ public class AutoMaker {
 
     public Command sibling(Alliance alliance) {
 
-        return new SequentialCommandGroup(
-            new ParallelRaceGroup(driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.PI / 4, 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
-            driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.NOTE8, 4, 4)
-
-        );
+        if(alliance == Alliance.Blue){
+            return new SequentialCommandGroup(
+                new ParallelDeadlineGroup(driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, -Math.toRadians(70), 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
+                driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.NOTE8, 4, 4)
+            );
+        } else{
+            return new SequentialCommandGroup(
+                new ParallelDeadlineGroup(driveStraight(alliance, FieldPoint.COMPLEMENTBEGIN, FieldPoint.NOTE4, Math.toRadians(70), 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
+                driveStraight(alliance, FieldPoint.NOTE4, FieldPoint.NOTE8, 4, 4)
+            );
+        }
+        
        
     }
 

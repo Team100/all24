@@ -141,6 +141,8 @@ public class Robot extends TimedRobot implements Glassy {
     @Override
     public void teleopPeriodic() {
         t.log(Level.DEBUG, m_name, "mode", "teleop");
+        t.log(Level.DEBUG, "Robot", "voltage", RobotController.getBatteryVoltage());
+
     }
 
     @Override

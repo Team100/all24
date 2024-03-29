@@ -46,7 +46,7 @@ public class DriveMotionControllerUtil {
         double omega = velocity_m * setpoint.state().getHeadingRate();
 
         ChassisSpeeds u_FF = new ChassisSpeeds(vx, vy, omega);
-        t.log(Level.TRACE, kName, "u_FF", u_FF);
+        t.log(Level.DEBUG, kName, "u_FF", u_FF);
         return u_FF;
     }
 
@@ -56,12 +56,12 @@ public class DriveMotionControllerUtil {
             double kPCart,
             double kPTheta) {
         final Twist2d positionError = getErrorTwist(currentPose, setpoint);
-        t.log(Level.TRACE, kName, "errorTwist", positionError);
+        t.log(Level.DEBUG, kName, "errorTwist", positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,
                 kPTheta * positionError.dtheta);
-        t.log(Level.TRACE, kName, "u_FB", u_FB);
+        t.log(Level.DEBUG, kName, "u_FB", u_FB);
         return u_FB;
     }
 

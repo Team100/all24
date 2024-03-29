@@ -90,8 +90,8 @@ public class HolonomicDriveController100 implements Glassy {
         t.log(Level.TRACE, m_name, "u_FB/theta", thetaFB);
         t.log(Level.TRACE, m_name, "measurement", currentPose);
 
-        t.log(Level.TRACE, m_name, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.TRACE, m_name, "setpoint/y", m_yController.getSetpoint());
+        t.log(Level.DEBUG, m_name, "setpoint/x", m_xController.getSetpoint());
+        t.log(Level.DEBUG, m_name, "setpoint/y", m_yController.getSetpoint());
         t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaController.getSetpoint());
         t.log(Level.TRACE, m_name, "error/x", m_xController.getPositionError());
         t.log(Level.TRACE, m_name, "error/y", m_yController.getPositionError());

@@ -14,6 +14,8 @@ public class AutonChooser {
         FOUR_NOTE,
         FIVE_NOTE,
         COMPLEMENTARY,
+        COMPLEMENTARY2,
+        SIBLING,
         NOTHING;
     }
 
