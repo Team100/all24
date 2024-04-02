@@ -320,6 +320,8 @@ public class PoseEstimator100<T extends WheelPositions<T>> {
      * loop.
      *
      * @param currentTimeSeconds Time at which this method was called, in seconds.
+     *                           Must be monotonic because the pose estimator
+     *                           expects in-order input.
      * @param gyroAngle          The current gyro angle.
      * @param wheelPositions     The current encoder readings.
      * @return The estimated pose of the robot in meters.

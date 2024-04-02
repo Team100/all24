@@ -139,6 +139,7 @@ public class SwerveDrivePoseEstimator100 extends PoseEstimator100<SwerveDriveWhe
      * loop.
      *
      * @param currentTimeSeconds Time at which this method was called, in seconds.
+     *                           must be monotonic since the odometry expects that.
      * @param gyroAngle          The current gyroscope angle.
      * @param modulePositions    The current distance measurements and rotations of
      *                           the swerve modules.
