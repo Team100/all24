@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveKinematicsConstraint;
 import edu.wpi.first.math.trajectory.constraint.MecanumDriveKinematicsConstraint;
-import edu.wpi.first.math.trajectory.constraint.SwerveDriveKinematicsConstraint;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;

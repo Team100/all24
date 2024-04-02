@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 import org.ejml.simple.SimpleMatrix;
 
-import edu.wpi.first.math.MathSharedStore;
-import edu.wpi.first.math.MathUsageId;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -18,6 +16,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * individual module states (speed and angle).
  */
 public class SwerveDriveKinematics100 {
+    private static final double kEpsilon = 1e-6;
+
     private final SimpleMatrix m_inverseKinematics;
     private final SimpleMatrix m_forwardKinematics;
 
@@ -45,152 +45,62 @@ public class SwerveDriveKinematics100 {
         m_moduleHeadings = new Rotation2d[m_numModules];
         Arrays.fill(m_moduleHeadings, new Rotation2d());
         m_inverseKinematics = new SimpleMatrix(m_numModules * 2, 3);
-
         for (int i = 0; i < m_numModules; i++) {
             m_inverseKinematics.setRow(i * 2 + 0, 0, /* Start Data */ 1, 0, -m_modules[i].getY());
             m_inverseKinematics.setRow(i * 2 + 1, 0, /* Start Data */ 0, 1, +m_modules[i].getX());
         }
         m_forwardKinematics = m_inverseKinematics.pseudoInverse();
-
-        MathSharedStore.reportUsage(MathUsageId.kKinematics_SwerveDrive, 1);
     }
 
-    /**
-     * Reset the internal swerve module headings.
-     *
-     * @param moduleHeadings The swerve module headings. The order of the module
-     *                       headings should be same as passed into the constructor
-     *                       of this class.
-     */
+    /** Reset the internal swerve module headings. */
     public void resetHeadings(Rotation2d... moduleHeadings) {
         checkLength(moduleHeadings);
         m_moduleHeadings = Arrays.copyOf(moduleHeadings, m_numModules);
     }
 
-    /**
-     * Performs inverse kinematics to return the module states from a desired
-     * chassis velocity. This method is often used to convert joystick values into
-     * module speeds and angles.
-     *
-     * In the case that the desired chassis speeds are zero (i.e. the robot will be
-     * stationary), the previously calculated module angle will be maintained.
-     *
-     * @param chassisSpeeds The desired chassis speed.
-     * 
-     * @return An array containing the module states. Use caution because these
-     *         module states are not normalized. Sometimes, a user input may cause
-     *         one of the module speeds to go above the attainable max velocity. Use
-     *         desaturateWheelSpeeds() to rectify this issue.
-     */
+    /** Inverse kinematics: chassis speeds -> module states. */
     public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
-        SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
-
-        if (chassisSpeeds.vxMetersPerSecond == 0.0
-                && chassisSpeeds.vyMetersPerSecond == 0.0
-                && chassisSpeeds.omegaRadiansPerSecond == 0.0) {
-            for (int i = 0; i < m_numModules; i++) {
-                moduleStates[i] = new SwerveModuleState(0.0, m_moduleHeadings[i]);
-            }
-            return moduleStates;
+        if (fullStop(chassisSpeeds)) {
+            return constantModuleHeadings(); // avoid steering when stopped
         }
-
-        SimpleMatrix chassisSpeedsVector = new SimpleMatrix(3, 1);
-        chassisSpeedsVector.setColumn(
-                0,
-                0,
-                chassisSpeeds.vxMetersPerSecond,
-                chassisSpeeds.vyMetersPerSecond,
-                chassisSpeeds.omegaRadiansPerSecond);
-
+        SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
         SimpleMatrix moduleStatesMatrix = m_inverseKinematics.mult(chassisSpeedsVector);
-
-        for (int i = 0; i < m_numModules; i++) {
-            double x = moduleStatesMatrix.get(i * 2, 0);
-            double y = moduleStatesMatrix.get(i * 2 + 1, 0);
-
-            double speed = Math.hypot(x, y);
-            Rotation2d angle = new Rotation2d(x, y);
-
-            moduleStates[i] = new SwerveModuleState(speed, angle);
-            m_moduleHeadings[i] = angle;
-        }
-
+        SwerveModuleState[] moduleStates = statesFromMatrix(moduleStatesMatrix);
+        updateHeadings(moduleStates);
         return moduleStates;
     }
 
-    /**
-     * Performs forward kinematics to return the resulting chassis state from the
-     * given module states.
-     *
-     * @param moduleStates The state of the modules (as a SwerveModuleState type) as
-     *                     measured from respective encoders and gyros. The order of
-     *                     the swerve module states should be same as passed into
-     *                     the constructor of this class.
-     * @return The resulting chassis speed.
-     */
-    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
-        checkLength(moduleStates);
-        SimpleMatrix moduleStatesMatrix = new SimpleMatrix(m_numModules * 2, 1);
+    /** Forward kinematics: module states -> chassis speeds. */
+    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... states) {
+        checkLength(states);
+        SimpleMatrix statesVector = states2Vector(states);
+        SimpleMatrix chassisSpeedsVector = m_forwardKinematics.mult(statesVector);
+        return vector2ChassisSpeeds(chassisSpeedsVector);
+    }
 
-        for (int i = 0; i < m_numModules; i++) {
-            SwerveModuleState module = moduleStates[i];
-            moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.getCos());
-            moduleStatesMatrix.set(i * 2 + 1, module.speedMetersPerSecond * module.angle.getSin());
-        }
-
-        SimpleMatrix chassisSpeedsVector = m_forwardKinematics.mult(moduleStatesMatrix);
-        return new ChassisSpeeds(
-                chassisSpeedsVector.get(0, 0),
-                chassisSpeedsVector.get(1, 0),
-                chassisSpeedsVector.get(2, 0));
+    /** Forward kinematics: module deltas -> twist. */
+    public Twist2d toTwist2d(SwerveModulePosition... deltas) {
+        checkLength(deltas);
+        SimpleMatrix deltaVector = deltas2Vector(deltas);
+        SimpleMatrix twistVector = m_forwardKinematics.mult(deltaVector);
+        return vector2Twist(twistVector);
     }
 
     /**
-     * Performs forward kinematics to return the chassis twist implied by the
-     * module states.
+     * Scale wheel speeds to limit maximum.
      *
-     * @param moduleDeltas The latest change in position of the modules as measured
-     *                     from respective encoders and gyros.
-     * @return The resulting Twist2d.
+     * @param states      Array of module states, will be mutated!
+     * @param maxSpeedM_s The absolute max speed that a module can reach.
      */
-    public Twist2d toTwist2d(SwerveModulePosition... moduleDeltas) {
-        checkLength(moduleDeltas);
-
-        SimpleMatrix moduleDeltaMatrix = new SimpleMatrix(m_numModules * 2, 1);
-
-        for (int i = 0; i < m_numModules; i++) {
-            SwerveModulePosition module = moduleDeltas[i];
-            moduleDeltaMatrix.set(i * 2, 0, module.distanceMeters * module.angle.getCos());
-            moduleDeltaMatrix.set(i * 2 + 1, module.distanceMeters * module.angle.getSin());
-        }
-
-        SimpleMatrix chassisDeltaVector = m_forwardKinematics.mult(moduleDeltaMatrix);
-        return new Twist2d(
-                chassisDeltaVector.get(0, 0),
-                chassisDeltaVector.get(1, 0),
-                chassisDeltaVector.get(2, 0));
-    }
-
-    /**
-     * Renormalizes the wheel speeds if any individual speed is above the specified
-     * maximum.
-     *
-     * @param moduleStates                      Reference to array of module states.
-     *                                          The array will be mutated with the
-     *                                          normalized speeds!
-     * @param attainableMaxSpeedMetersPerSecond The absolute max speed that a module
-     *                                          can reach.
-     */
-    public static void desaturateWheelSpeeds(
-            SwerveModuleState[] moduleStates, double attainableMaxSpeedMetersPerSecond) {
+    public static void desaturateWheelSpeeds(SwerveModuleState[] states, double maxSpeedM_s) {
         double realMaxSpeed = 0;
-        for (SwerveModuleState moduleState : moduleStates) {
+        for (SwerveModuleState moduleState : states) {
             realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
         }
-        if (realMaxSpeed > attainableMaxSpeedMetersPerSecond) {
-            for (SwerveModuleState moduleState : moduleStates) {
+        if (realMaxSpeed > maxSpeedM_s) {
+            for (SwerveModuleState moduleState : states) {
                 moduleState.speedMetersPerSecond = moduleState.speedMetersPerSecond / realMaxSpeed
-                        * attainableMaxSpeedMetersPerSecond;
+                        * maxSpeedM_s;
             }
         }
     }
@@ -198,11 +108,91 @@ public class SwerveDriveKinematics100 {
     ///////////////////////////////////////
 
     private void checkLength(Object[] objs) {
-        if (objs.length != m_numModules) {
-            throw new IllegalArgumentException(
-                    "Number of modules is not consistent with number of wheel locations provided in "
-                            + "constructor");
+        int ct = objs.length;
+        if (ct != m_numModules) {
+            throw new IllegalArgumentException("Wrong module count: " + ct);
         }
     }
 
+    /** states -> [v cos; v sin; ... v cos; v sin] */
+    private SimpleMatrix states2Vector(SwerveModuleState... moduleStates) {
+        SimpleMatrix moduleStatesMatrix = new SimpleMatrix(m_numModules * 2, 1);
+        for (int i = 0; i < m_numModules; i++) {
+            SwerveModuleState module = moduleStates[i];
+            moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.getCos());
+            moduleStatesMatrix.set(i * 2 + 1, 0, module.speedMetersPerSecond * module.angle.getSin());
+        }
+        return moduleStatesMatrix;
+    }
+
+    /** deltas -> [d cos; d sin; ... d cos; d sin] */
+    private SimpleMatrix deltas2Vector(SwerveModulePosition... moduleDeltas) {
+        SimpleMatrix moduleDeltaMatrix = new SimpleMatrix(m_numModules * 2, 1);
+        for (int i = 0; i < m_numModules; i++) {
+            SwerveModulePosition module = moduleDeltas[i];
+            moduleDeltaMatrix.set(i * 2, 0, module.distanceMeters * module.angle.getCos());
+            moduleDeltaMatrix.set(i * 2 + 1, 0, module.distanceMeters * module.angle.getSin());
+        }
+        return moduleDeltaMatrix;
+    }
+
+    /** ChassisSpeeds -> [x; y; theta] */
+    private SimpleMatrix chassisSpeeds2Vector(ChassisSpeeds chassisSpeeds) {
+        SimpleMatrix chassisSpeedsVector = new SimpleMatrix(3, 1);
+        chassisSpeedsVector.setColumn(
+                0,
+                0,
+                chassisSpeeds.vxMetersPerSecond,
+                chassisSpeeds.vyMetersPerSecond,
+                chassisSpeeds.omegaRadiansPerSecond);
+        return chassisSpeedsVector;
+    }
+
+    /** [x; y; theta] -> ChassisSpeeds */
+    private static ChassisSpeeds vector2ChassisSpeeds(SimpleMatrix v) {
+        return new ChassisSpeeds(v.get(0, 0), v.get(1, 0), v.get(2, 0));
+    }
+
+    /** [x; y; theta] -> Twist2d */
+    private static Twist2d vector2Twist(SimpleMatrix v) {
+        return new Twist2d(v.get(0, 0), v.get(1, 0), v.get(2, 0));
+    }
+
+    /**
+     * True if speeds are (nearly) stopped. Deadband upstream for this to work.
+     */
+    private boolean fullStop(ChassisSpeeds chassisSpeeds) {
+        return Math.abs(chassisSpeeds.vxMetersPerSecond) < kEpsilon
+                && Math.abs(chassisSpeeds.vyMetersPerSecond) < kEpsilon
+                && Math.abs(chassisSpeeds.omegaRadiansPerSecond) < kEpsilon;
+    }
+
+    /** Zero velocity, same heading as before. */
+    private SwerveModuleState[] constantModuleHeadings() {
+        SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
+        for (int i = 0; i < m_numModules; i++) {
+            moduleStates[i] = new SwerveModuleState(0.0, m_moduleHeadings[i]);
+        }
+        return moduleStates;
+    }
+
+    /**     */
+    private SwerveModuleState[] statesFromMatrix(SimpleMatrix moduleStatesMatrix) {
+        SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
+        for (int i = 0; i < m_numModules; i++) {
+            double x = moduleStatesMatrix.get(i * 2, 0);
+            double y = moduleStatesMatrix.get(i * 2 + 1, 0);
+            double speed = Math.hypot(x, y);
+            Rotation2d angle = new Rotation2d(x, y);
+            moduleStates[i] = new SwerveModuleState(speed, angle);
+        }
+        return moduleStates;
+    }
+
+    /** Keep a copy of headings in case we need them for full-stop. */
+    private void updateHeadings(SwerveModuleState[] moduleStates) {
+        for (int i = 0; i < m_numModules; i++) {
+            m_moduleHeadings[i] = moduleStates[i].angle;
+        }
+    }
 }

@@ -368,14 +368,6 @@ public class SwerveKinodynamics implements Glassy {
                 angle.unaryMinus());
     }
 
-    // public SwerveDrivePoseEstimator newPoseEstimator(
-    //         Rotation2d gyroAngle,
-    //         SwerveModulePosition[] modulePositions,
-    //         Pose2d initialPoseMeters) {
-    //     return new SwerveDrivePoseEstimator(
-    //             m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
-    // }
-
     public SwerveDrivePoseEstimator100 newPoseEstimator(
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,

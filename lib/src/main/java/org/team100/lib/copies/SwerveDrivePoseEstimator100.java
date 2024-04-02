@@ -338,10 +338,9 @@ public class SwerveDrivePoseEstimator100 {
     ///////////////////////////////////////
 
     private void checkLength(SwerveDriveWheelPositions modulePositions) {
-        if (modulePositions.positions.length != m_numModules) {
-            throw new IllegalArgumentException(
-                    "Number of modules is not consistent with number of wheel locations provided in "
-                            + "constructor");
+        int ct = modulePositions.positions.length; 
+        if (ct != m_numModules) {
+            throw new IllegalArgumentException("Wrong module count: " + ct);
         }
     }
 }

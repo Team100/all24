@@ -71,11 +71,6 @@ public class SwerveDriveOdometry100 {
      * @param pose            The position on the field that your robot is at.
      */
     public void resetPosition(
-            Rotation2d gyroAngle, SwerveModulePosition[] modulePositions, Pose2d pose) {
-        resetPosition(gyroAngle, new SwerveDriveWheelPositions(modulePositions), pose);
-    }
-
-    public void resetPosition(
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions modulePositions,
             Pose2d pose) {
@@ -129,10 +124,9 @@ public class SwerveDriveOdometry100 {
     ///////////////////////////////////////
 
     private void checkLength(SwerveDriveWheelPositions modulePositions) {
-        if (modulePositions.positions.length != m_numModules) {
-            throw new IllegalArgumentException(
-                    "Number of modules is not consistent with number of wheel locations provided in "
-                            + "constructor");
+        int ct = modulePositions.positions.length;
+        if (ct != m_numModules) {
+            throw new IllegalArgumentException("Wrong module count: " + ct);
         }
     }
 }
