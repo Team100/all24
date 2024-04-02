@@ -194,7 +194,7 @@ public final class TrajectoryGenerator100 {
    * @param config The configuration for the trajectory.
    * @return The generated trajectory.
    */
-  public static Trajectory generateTrajectory(List<Pose2d> waypoints, TrajectoryConfig config) {
+  public static Trajectory generateTrajectory(List<Pose2d> waypoints, TrajectoryConfig100 config) {
     final var flip = new Transform2d(new Translation2d(), Rotation2d.fromDegrees(180.0));
 
     List<Pose2d> newWaypoints = new ArrayList<>();

@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -22,40 +21,33 @@ import edu.wpi.first.units.Velocity;
 
 /**
  * Helper class that converts a chassis velocity (dx, dy, and dtheta components)
- * into individual
- * module states (speed and angle).
+ * into individual module states (speed and angle).
  *
- * <p>
  * The inverse kinematics (converting from a desired chassis velocity to
- * individual module
- * states) uses the relative locations of the modules with respect to the center
- * of rotation. The
- * center of rotation for inverse kinematics is also variable. This means that
+ * individual module states) uses the relative locations of the modules with
+ * respect to the center of rotation.
+ * 
+ * The center of rotation for inverse kinematics is also variable. This means
+ * that
  * you can set your
  * center of rotation in a corner of the robot to perform special evasion
  * maneuvers.
+ * 
+ * TODO: remove this
  *
- * <p>
  * Forward kinematics (converting an array of module states into the overall
- * chassis motion) is
- * performs the exact opposite of what inverse kinematics does. Since this is an
- * overdetermined
- * system (more equations than variables), we use a least-squares approximation.
+ * chassis motion) is performs the exact opposite of what inverse kinematics
+ * does. Since this is an overdetermined system (more equations than variables),
+ * we use a least-squares approximation.
  *
- * <p>
  * The inverse kinematics: [moduleStates] = [moduleLocations] * [chassisSpeeds]
- * We take the
- * Moore-Penrose pseudoinverse of [moduleLocations] and then multiply by
- * [moduleStates] to get our
- * chassis speeds.
+ * We take the Moore-Penrose pseudoinverse of [moduleLocations] and then
+ * multiply by [moduleStates] to get our chassis speeds.
  *
- * <p>
  * Forward kinematics is also used for odometry -- determining the position of
- * the robot on the
- * field using encoders and a gyro.
+ * the robot on the field using encoders and a gyro.
  */
-public class SwerveDriveKinematics100
-        implements Kinematics<SwerveDriveKinematics100.SwerveDriveWheelStates, SwerveDriveWheelPositions> {
+public class SwerveDriveKinematics100 {
     /** Wrapper class for swerve module states. */
     public static class SwerveDriveWheelStates {
         /** Swerve module states. */
@@ -79,8 +71,15 @@ public class SwerveDriveKinematics100
 
     private final int m_numModules;
     private final Translation2d[] m_modules;
+    /**
+     * Module Headings.
+     * 
+     * Used when velocity is zero, to keep the steering the same.
+     * 
+     * Updated in resetHeadings() and toSwerveModuleStates().
+     */
     private Rotation2d[] m_moduleHeadings;
-    private Translation2d m_prevCoR = new Translation2d();
+
 
     /**
      * Constructs a swerve drive kinematics object. This takes in a variable number
@@ -134,42 +133,25 @@ public class SwerveDriveKinematics100
 
     /**
      * Performs inverse kinematics to return the module states from a desired
-     * chassis velocity. This
-     * method is often used to convert joystick values into module speeds and
-     * angles.
+     * chassis velocity. This method is often used to convert joystick values into
+     * module speeds and angles.
      *
-     * <p>
      * This function also supports variable centers of rotation. During normal
-     * operations, the
-     * center of rotation is usually the same as the physical center of the robot;
-     * therefore, the
-     * argument is defaulted to that use case. However, if you wish to change the
-     * center of rotation
-     * for evasive maneuvers, vision alignment, or for any other use case, you can
-     * do so.
+     * operations, the center of rotation is usually the same as the physical center
+     * of the robot; therefore, the
+     * argument is defaulted to that use case.
      *
-     * <p>
      * In the case that the desired chassis speeds are zero (i.e. the robot will be
-     * stationary),
-     * the previously calculated module angle will be maintained.
+     * stationary), the previously calculated module angle will be maintained.
      *
-     * @param chassisSpeeds          The desired chassis speed.
-     * @param centerOfRotationMeters The center of rotation. For example, if you set
-     *                               the center of
-     *                               rotation at one corner of the robot and provide
-     *                               a chassis speed that only has a dtheta
-     *                               component, the robot will rotate around that
-     *                               corner.
+     * @param chassisSpeeds The desired chassis speed.
+     * 
      * @return An array containing the module states. Use caution because these
-     *         module states are not
-     *         normalized. Sometimes, a user input may cause one of the module
-     *         speeds to go above the
-     *         attainable max velocity. Use the
-     *         {@link #desaturateWheelSpeeds(SwerveModuleState[], double)
-     *         DesaturateWheelSpeeds} function to rectify this issue.
+     *         module states are not normalized. Sometimes, a user input may cause
+     *         one of the module speeds to go above the attainable max velocity. Use
+     *         desaturateWheelSpeeds() to rectify this issue.
      */
-    public SwerveModuleState[] toSwerveModuleStates(
-            ChassisSpeeds chassisSpeeds, Translation2d centerOfRotationMeters) {
+    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
         var moduleStates = new SwerveModuleState[m_numModules];
 
         if (chassisSpeeds.vxMetersPerSecond == 0.0
@@ -178,26 +160,7 @@ public class SwerveDriveKinematics100
             for (int i = 0; i < m_numModules; i++) {
                 moduleStates[i] = new SwerveModuleState(0.0, m_moduleHeadings[i]);
             }
-
             return moduleStates;
-        }
-
-        if (!centerOfRotationMeters.equals(m_prevCoR)) {
-            for (int i = 0; i < m_numModules; i++) {
-                m_inverseKinematics.setRow(
-                        i * 2 + 0,
-                        0, /* Start Data */
-                        1,
-                        0,
-                        -m_modules[i].getY() + centerOfRotationMeters.getY());
-                m_inverseKinematics.setRow(
-                        i * 2 + 1,
-                        0, /* Start Data */
-                        0,
-                        1,
-                        +m_modules[i].getX() - centerOfRotationMeters.getX());
-            }
-            m_prevCoR = centerOfRotationMeters;
         }
 
         var chassisSpeedsVector = new SimpleMatrix(3, 1);
@@ -225,18 +188,13 @@ public class SwerveDriveKinematics100
     }
 
     /**
-     * Performs inverse kinematics. See
-     * {@link #toSwerveModuleStates(ChassisSpeeds, Translation2d)}
-     * toSwerveModuleStates for more information.
+     * Performs inverse kinematics to return the wheel speeds from a desired chassis
+     * velocity. This method is often used to convert joystick values into wheel
+     * speeds.
      *
      * @param chassisSpeeds The desired chassis speed.
-     * @return An array containing the module states.
+     * @return The wheel speeds.
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
-        return toSwerveModuleStates(chassisSpeeds, new Translation2d());
-    }
-
-    @Override
     public SwerveDriveWheelStates toWheelSpeeds(ChassisSpeeds chassisSpeeds) {
         return new SwerveDriveWheelStates(toSwerveModuleStates(chassisSpeeds));
     }
@@ -276,7 +234,15 @@ public class SwerveDriveKinematics100
                 chassisSpeedsVector.get(2, 0));
     }
 
-    @Override
+    /**
+     * Performs forward kinematics to return the resulting chassis speed from the
+     * wheel speeds. This method is often used for odometry -- determining the
+     * robot's position on the field using data from the real-world speed of each
+     * wheel on the robot.
+     *
+     * @param wheelSpeeds The speeds of the wheels.
+     * @return The chassis speed.
+     */
     public ChassisSpeeds toChassisSpeeds(SwerveDriveWheelStates wheelStates) {
         return toChassisSpeeds(wheelStates.states);
     }
@@ -312,10 +278,22 @@ public class SwerveDriveKinematics100
 
         var chassisDeltaVector = m_forwardKinematics.mult(moduleDeltaMatrix);
         return new Twist2d(
-                chassisDeltaVector.get(0, 0), chassisDeltaVector.get(1, 0), chassisDeltaVector.get(2, 0));
+                chassisDeltaVector.get(0, 0),
+                chassisDeltaVector.get(1, 0),
+                chassisDeltaVector.get(2, 0));
     }
 
-    @Override
+    /**
+     * Performs forward kinematics to return the resulting Twist2d from the given
+     * change in wheel positions. This method is often used for odometry --
+     * determining the robot's position on the field using changes in the distance
+     * driven by each wheel on the robot.
+     *
+     * @param start The starting distances driven by the wheels.
+     * @param end   The ending distances driven by the wheels.
+     * @return The resulting Twist2d in the robot's movement.
+     */
+
     public Twist2d toTwist2d(SwerveDriveWheelPositions start, SwerveDriveWheelPositions end) {
         if (start.positions.length != end.positions.length) {
             throw new IllegalArgumentException("Inconsistent number of modules!");
