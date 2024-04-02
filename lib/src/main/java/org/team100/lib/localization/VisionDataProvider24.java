@@ -191,8 +191,8 @@ public class VisionDataProvider24 implements Glassy {
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
         // Estimated instant represented by the blips
-        final double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
-        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTime);
+        final double frameTimeSec = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTimeSec);
 
         if (optionalGyroRotation.isEmpty()) {
             Util.warn("No gyro rotation available!");
@@ -206,7 +206,7 @@ public class VisionDataProvider24 implements Glassy {
                 cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
-                frameTime,
+                frameTimeSec,
                 gyroRotation,
                 alliance);
 
@@ -216,7 +216,7 @@ public class VisionDataProvider24 implements Glassy {
                     cameraSerialNumber,
                     blips,
                     cameraInRobotCoordinates,
-                    frameTime,
+                    frameTimeSec,
                     gyroRotation,
                     alliance);
         }
@@ -265,7 +265,7 @@ public class VisionDataProvider24 implements Glassy {
             final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
-            final double frameTime,
+            final double frameTimeSec,
             final Rotation2d gyroRotation,
             Alliance alliance) {
         for (Blip24 blip : blips) {
@@ -311,7 +311,7 @@ public class VisionDataProvider24 implements Glassy {
                         if (poseEstimator != null)
                             poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
                         latestTimeUs = RobotController.getFPGATime();
-                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                        estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
                     }
                 }
             }
@@ -324,7 +324,7 @@ public class VisionDataProvider24 implements Glassy {
             final String cameraSerialNumber,
             Blip24[] blips,
             Transform3d cameraInRobotCoordinates,
-            double frameTime,
+            double frameTimeSec,
             Rotation2d gyroRotation,
             Alliance alliance) {
         // if multiple tags are in view, triangulate to get another (perhaps more
@@ -375,7 +375,7 @@ public class VisionDataProvider24 implements Glassy {
                             if (poseEstimator != null)
                                 poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
                             latestTimeUs = RobotController.getFPGATime();
-                            estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                            estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
                         }
                     }
                 }

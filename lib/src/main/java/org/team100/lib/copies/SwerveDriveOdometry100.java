@@ -1,7 +1,10 @@
 package org.team100.lib.copies;
 
+import org.team100.lib.util.DriveUtil;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
@@ -55,21 +58,6 @@ public class SwerveDriveOdometry100 {
         m_previousWheelPositions = new SwerveDriveWheelPositions(modulePositions).copy();
     }
 
-    // /**
-    // * Constructs a SwerveDriveOdometry object with the default pose at the
-    // origin.
-    // *
-    // * @param kinematics The swerve drive kinematics for your drivetrain.
-    // * @param gyroAngle The angle reported by the gyroscope.
-    // * @param modulePositions The wheel positions reported by each module.
-    // */
-    // public SwerveDriveOdometry100(
-    // SwerveDriveKinematics100 kinematics,
-    // Rotation2d gyroAngle,
-    // SwerveModulePosition[] modulePositions) {
-    // this(kinematics, gyroAngle, modulePositions, new Pose2d());
-    // }
-
     /**
      * Resets the robot's position on the field.
      *
@@ -91,12 +79,7 @@ public class SwerveDriveOdometry100 {
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions modulePositions,
             Pose2d pose) {
-        if (modulePositions.positions.length != m_numModules) {
-            throw new IllegalArgumentException(
-                    "Number of modules is not consistent with number of wheel locations provided in "
-                            + "constructor");
-        }
-
+        checkLength(modulePositions);
         m_poseMeters = pose;
         m_previousAngle = m_poseMeters.getRotation();
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
@@ -108,86 +91,48 @@ public class SwerveDriveOdometry100 {
     }
 
     /**
-     * Returns the position of the robot on the field.
-     * 
-     * TODO: remove this since it depends on calling update() first.
-     *
-     * @return The pose of the robot (x and y are in meters).
+     * Used only by the pose estimator.
      */
-    public Pose2d getPoseMeters() {
+    Pose2d getPoseMeters() {
         return m_poseMeters;
     }
 
     /**
-     * Updates the robot's position on the field using forward kinematics and
-     * integration of the pose
-     * over time. This method automatically calculates the current time to calculate
-     * period
-     * (difference between two timestamps). The period is used to calculate the
-     * change in distance
-     * from a velocity. This also takes in an angle parameter which is used instead
-     * of the angular
-     * rate that is calculated from forward kinematics.
+     * Updates the robot's position on the field using forward kinematics.
      *
-     * @param gyroAngle       The angle reported by the gyroscope.
-     * @param modulePositions The current position of all swerve modules. Please
-     *                        provide the positions
-     *                        in the same order in which you instantiated your
-     *                        SwerveDriveKinematics.
+     * @param currentTimeSeconds
+     * @param gyroAngle          from gyro.
+     * @param modulePositions    The current position of all swerve modules.
      * @return The new pose of the robot.
      */
-    public Pose2d update(Rotation2d gyroAngle, SwerveModulePosition[] modulePositions) {
-        return update(gyroAngle, new SwerveDriveWheelPositions(modulePositions));
-    }
-
-    public Pose2d update(double currentTimeSeconds, Rotation2d gyroAngle, SwerveModulePosition[] modulePositions) {
-        return update(currentTimeSeconds, gyroAngle, new SwerveDriveWheelPositions(modulePositions));
-    }
-
-    public Pose2d update(Rotation2d gyroAngle, SwerveDriveWheelPositions modulePositions) {
-        if (modulePositions.positions.length != m_numModules) {
-            throw new IllegalArgumentException(
-                    "Number of modules is not consistent with number of wheel locations provided in "
-                            + "constructor");
-        }
-
-        var angle = gyroAngle.plus(m_gyroOffset);
-
-        var twist = m_kinematics.toTwist2d(m_previousWheelPositions, modulePositions);
-        twist.dtheta = angle.minus(m_previousAngle).getRadians();
-
-        var newPose = m_poseMeters.exp(twist);
-
-        m_previousWheelPositions = modulePositions.copy();
-        m_previousAngle = angle;
-        m_poseMeters = new Pose2d(newPose.getTranslation(), angle);
-
-        return m_poseMeters;
-
-    }
-
     public Pose2d update(
             double currentTimeSeconds,
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions modulePositions) {
-        if (modulePositions.positions.length != m_numModules) {
-            throw new IllegalArgumentException(
-                    "Number of modules is not consistent with number of wheel locations provided in "
-                            + "constructor");
-        }
+        checkLength(modulePositions);
 
-        var angle = gyroAngle.plus(m_gyroOffset);
+        Rotation2d angle = gyroAngle.plus(m_gyroOffset);
 
-        var twist = m_kinematics.toTwist2d(m_previousWheelPositions, modulePositions);
+        Twist2d twist = m_kinematics.toTwist2d(
+                DriveUtil.modulePositions(m_previousWheelPositions, modulePositions));
         twist.dtheta = angle.minus(m_previousAngle).getRadians();
 
-        var newPose = m_poseMeters.exp(twist);
+        Pose2d newPose = m_poseMeters.exp(twist);
 
         m_previousWheelPositions = modulePositions.copy();
         m_previousAngle = angle;
         m_poseMeters = new Pose2d(newPose.getTranslation(), angle);
 
         return m_poseMeters;
+    }
 
+    ///////////////////////////////////////
+
+    private void checkLength(SwerveDriveWheelPositions modulePositions) {
+        if (modulePositions.positions.length != m_numModules) {
+            throw new IllegalArgumentException(
+                    "Number of modules is not consistent with number of wheel locations provided in "
+                            + "constructor");
+        }
     }
 }
