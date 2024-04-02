@@ -1,11 +1,9 @@
 package org.team100.lib.copies;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -33,39 +31,6 @@ public class SwerveDrivePoseEstimator100 extends PoseEstimator100<SwerveDriveWhe
     private final int m_numModules;
 
     /**
-     * Constructs a SwerveDrivePoseEstimator with default standard deviations for
-     * the model and vision
-     * measurements.
-     *
-     * <p>
-     * The default standard deviations of the model states are 0.1 meters for x, 0.1
-     * meters for y,
-     * and 0.1 radians for heading. The default standard deviations of the vision
-     * measurements are 0.9
-     * meters for x, 0.9 meters for y, and 0.9 radians for heading.
-     *
-     * @param kinematics        A correctly-configured kinematics object for your
-     *                          drivetrain.
-     * @param gyroAngle         The current gyro angle.
-     * @param modulePositions   The current distance measurements and rotations of
-     *                          the swerve modules.
-     * @param initialPoseMeters The starting pose estimate.
-     */
-    public SwerveDrivePoseEstimator100(
-            SwerveDriveKinematics kinematics,
-            Rotation2d gyroAngle,
-            SwerveModulePosition[] modulePositions,
-            Pose2d initialPoseMeters) {
-        this(
-                kinematics,
-                gyroAngle,
-                modulePositions,
-                initialPoseMeters,
-                VecBuilder.fill(0.1, 0.1, 0.1),
-                VecBuilder.fill(0.9, 0.9, 0.9));
-    }
-
-    /**
      * Constructs a SwerveDrivePoseEstimator.
      *
      * @param kinematics               A correctly-configured kinematics object for
@@ -86,7 +51,7 @@ public class SwerveDrivePoseEstimator100 extends PoseEstimator100<SwerveDriveWhe
      *                                 the vision pose measurement less.
      */
     public SwerveDrivePoseEstimator100(
-            SwerveDriveKinematics kinematics,
+            SwerveDriveKinematics100 kinematics,
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,

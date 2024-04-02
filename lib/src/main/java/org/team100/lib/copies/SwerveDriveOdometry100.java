@@ -4,7 +4,6 @@ import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
@@ -28,7 +27,7 @@ public class SwerveDriveOdometry100 extends Odometry100<SwerveDriveWheelPosition
    * @param initialPose The starting position of the robot on the field.
    */
   public SwerveDriveOdometry100(
-      SwerveDriveKinematics kinematics,
+      SwerveDriveKinematics100 kinematics,
       Rotation2d gyroAngle,
       SwerveModulePosition[] modulePositions,
       Pose2d initialPose) {
@@ -47,7 +46,7 @@ public class SwerveDriveOdometry100 extends Odometry100<SwerveDriveWheelPosition
    * @param modulePositions The wheel positions reported by each module.
    */
   public SwerveDriveOdometry100(
-      SwerveDriveKinematics kinematics,
+      SwerveDriveKinematics100 kinematics,
       Rotation2d gyroAngle,
       SwerveModulePosition[] modulePositions) {
     this(kinematics, gyroAngle, modulePositions, new Pose2d());

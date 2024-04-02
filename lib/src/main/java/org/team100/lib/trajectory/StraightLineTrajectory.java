@@ -2,6 +2,8 @@ package org.team100.lib.trajectory;
 
 import java.util.List;
 
+import org.team100.lib.copies.TrajectoryConfig100;
+import org.team100.lib.copies.TrajectoryGenerator100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -13,16 +15,14 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
 
 /** Make straight lines, rest-to-rest. */
 public class StraightLineTrajectory {
 
-    private final TrajectoryConfig m_config;
+    private final TrajectoryConfig100 m_config;
 
-    public StraightLineTrajectory(TrajectoryConfig config) {
+    public StraightLineTrajectory(TrajectoryConfig100 config) {
         m_config = config;
     }
 
@@ -60,7 +60,7 @@ public class StraightLineTrajectory {
         m_config.setEndVelocity(0);
 
         try {
-            return TrajectoryGenerator.generateTrajectory(
+            return TrajectoryGenerator100.generateTrajectory(
                     initial,
                     List.of(),
                     last,

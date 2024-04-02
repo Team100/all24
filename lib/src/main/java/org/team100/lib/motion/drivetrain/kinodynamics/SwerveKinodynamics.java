@@ -1,6 +1,8 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import org.team100.lib.copies.SwerveDriveKinematics100;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.copies.TrajectoryConfig100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
@@ -12,18 +14,15 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -48,7 +47,7 @@ public class SwerveKinodynamics implements Glassy {
     private final double m_frontoffset;
     private final double m_radius;
     private final double m_vcg;
-    private final SwerveDriveKinematics m_kinematics;
+    private final SwerveDriveKinematics100 m_kinematics;
     private final double m_MaxCapsizeAccelM_S2;
 
     // configured inputs
@@ -293,8 +292,8 @@ public class SwerveKinodynamics implements Glassy {
      * @param frontoffset distance from center of mass to front wheel
      * @return
      */
-    private static SwerveDriveKinematics get(double fronttrack,double backtrack, double wheelbase, double frontoffset) {
-        return new SwerveDriveKinematics(
+    private static SwerveDriveKinematics100 get(double fronttrack,double backtrack, double wheelbase, double frontoffset) {
+        return new SwerveDriveKinematics100(
                 new Translation2d(frontoffset, fronttrack / 2),
                 new Translation2d(frontoffset, -fronttrack / 2),
                 new Translation2d(frontoffset-wheelbase, backtrack / 2),
@@ -369,13 +368,13 @@ public class SwerveKinodynamics implements Glassy {
                 angle.unaryMinus());
     }
 
-    public SwerveDrivePoseEstimator newPoseEstimator(
-            Rotation2d gyroAngle,
-            SwerveModulePosition[] modulePositions,
-            Pose2d initialPoseMeters) {
-        return new SwerveDrivePoseEstimator(
-                m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
-    }
+    // public SwerveDrivePoseEstimator newPoseEstimator(
+    //         Rotation2d gyroAngle,
+    //         SwerveModulePosition[] modulePositions,
+    //         Pose2d initialPoseMeters) {
+    //     return new SwerveDrivePoseEstimator(
+    //             m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
+    // }
 
     public SwerveDrivePoseEstimator100 newPoseEstimator(
             Rotation2d gyroAngle,
@@ -392,9 +391,9 @@ public class SwerveKinodynamics implements Glassy {
                 visionMeasurementStdDevs);
     }
 
-    public TrajectoryConfig newTrajectoryConfig(
+    public TrajectoryConfig100 newTrajectoryConfig(
             double maxVelocityMetersPerSecond, double maxAccelerationMetersPerSecondSq) {
-        TrajectoryConfig result = new TrajectoryConfig(
+        TrajectoryConfig100 result = new TrajectoryConfig100(
                 maxVelocityMetersPerSecond, maxAccelerationMetersPerSecondSq);
         result.setKinematics(m_kinematics);
         return result;

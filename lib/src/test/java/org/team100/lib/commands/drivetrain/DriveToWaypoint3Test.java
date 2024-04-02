@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.copies.TrajectoryConfig100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
@@ -22,7 +23,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class DriveToWaypoint3Test extends Fixtured {
@@ -58,7 +58,7 @@ class DriveToWaypoint3Test extends Fixtured {
     void testAprilTag() throws IOException {
         SwerveDriveSubsystem drivetrain = fixture.drive;
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
-        TrajectoryConfig config = SwerveKinodynamicsFactory.get().newTrajectoryConfig(4, 2);
+        TrajectoryConfig100 config = SwerveKinodynamicsFactory.get().newTrajectoryConfig(4, 2);
 
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
         Transform2d transform = new Transform2d(
