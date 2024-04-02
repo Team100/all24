@@ -3,7 +3,6 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
@@ -23,7 +22,6 @@ import org.team100.frc2024.motion.amp.AmpSubsystem;
 import org.team100.frc2024.motion.amp.OuttakeAmp;
 import org.team100.frc2024.motion.amp.PivotAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
-import org.team100.frc2024.motion.climber.ClimberPosition;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithAmpLock;
@@ -54,6 +52,8 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -91,7 +91,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -154,13 +153,21 @@ public class RobotContainer implements Glassy {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
+        // these are the old numbers.
+        double stateStdDev = 0.1;
+        double visionStdDev = 0.5;
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            stateStdDev = 0.001; // guess: try adjusting this.
+            visionStdDev = 0.1; // measured
+        }
+
         // ignores the rotation derived from vision.
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                VecBuilder.fill(0.1, 0.1, 0.1),
-                VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); // 0.1 0.1
+                VecBuilder.fill(stateStdDev, stateStdDev, 0.1),
+                VecBuilder.fill(visionStdDev, visionStdDev, Double.MAX_VALUE)); // 0.1 0.1
 
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
@@ -421,12 +428,12 @@ public class RobotContainer implements Glassy {
                 omega2Controller,
                 0.25);
 
-                ManualWithAmpLock ampLock = new ManualWithAmpLock(
-                    m_name,
-                    swerveKinodynamics,
-                    m_heading,
-                    thetaController,
-                    omega2Controller);
+        ManualWithAmpLock ampLock = new ManualWithAmpLock(
+                m_name,
+                swerveKinodynamics,
+                m_heading,
+                thetaController,
+                omega2Controller);
 
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
@@ -456,14 +463,16 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
-        // whileTrue(driverControl::shooterLock,m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors));
+        // whileTrue(driverControl::shooterLock,m_AutoMaker.fourNoteAuto(Alliance.Red,
+        // swerveKinodynamics, m_sensors));
 
         // whileTrue(driverControl::shooterLock,
-        //         new ManualWithShooterLock(m_name, swerveKinodynamics, m_heading, thetaController, omegaController,
-        //                 kDriveCurrentLimit));
+        // new ManualWithShooterLock(m_name, swerveKinodynamics, m_heading,
+        // thetaController, omegaController,
+        // kDriveCurrentLimit));
 
         whileTrue(driverControl::ampLock,
-                        new AmpLockCommand(ampLock, driverControl::twist, m_drive));
+                new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
         // new AllianceCommand(m_AutoMaker.tuningTrajectory6(),
@@ -484,7 +493,7 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
-        //         new ClimberPosition(m_climber));
+        // new ClimberPosition(m_climber));
         // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
         // m_intake, m_feeder, m_drive));
 
@@ -511,7 +520,8 @@ public class RobotContainer implements Glassy {
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
         SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
-                operatorControl::getRightAxis, operatorControl::getClimberOveride, operatorControl::pov), Priority.FIVE);
+                operatorControl::getRightAxis, operatorControl::getClimberOveride, operatorControl::pov),
+                Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
         // Registers the subsystems so that they run with the specified priority

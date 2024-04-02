@@ -150,4 +150,29 @@ class SwerveDrivePoseEstimator100Test {
         verify(0.249, poseEstimator.getEstimatedPosition());
     }
 
+    @Test
+    void reasonable() {
+        // stdev that actually make sense
+        // actual odometry error is very low
+        // measured camera error is something under 10 cm
+        // these yield much slower convergence, maybe too slow?  try and see.
+        SwerveDrivePoseEstimator100 poseEstimator = fixture.swerveKinodynamics.newPoseEstimator(
+                GeometryUtil.kRotationZero,
+                positionZero,
+                GeometryUtil.kPoseZero,
+                VecBuilder.fill(0.001, 0.001, 0.01), // 5 mm (guess), 0.5 degree (gyro spec)
+                VecBuilder.fill(0.1, 0.1, Double.MAX_VALUE)); // 10 cm (measured)
+        verify(0, poseEstimator.getEstimatedPosition());
+        verify(0, poseEstimator.updateWithTime(0, GeometryUtil.kRotationZero, positionZero));
+
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.02);
+        verify(0.010, poseEstimator.getEstimatedPosition());
+
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.04);
+        verify(0.020, poseEstimator.getEstimatedPosition());
+
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.06);
+        verify(0.029, poseEstimator.getEstimatedPosition());
+    }
+
 }

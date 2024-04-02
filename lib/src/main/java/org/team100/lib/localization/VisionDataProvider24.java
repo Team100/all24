@@ -47,14 +47,6 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class VisionDataProvider24 implements Glassy {
     /**
-     * Standard deviation of pose estimate, as a fraction of target range.
-     * This is a guess based on figure 5 in the Apriltag2 paper:
-     * https://april.eecs.umich.edu/media/media/pdfs/wang2016iros.pdf
-     * The error is much worse at very long range but I don't think that
-     * matters for us.
-     */
-    private static final double kRelativeError = 0.1;
-    /**
      * Time between events in reality and their appearance here; the average
      * end-to-end latency of the camera, detection code, network tables, and rio
      * looping.
@@ -394,6 +386,22 @@ public class VisionDataProvider24 implements Glassy {
 
     /** This is an educated guess. */
     static Matrix<N3, N1> visionMeasurementStdDevs(double distanceM) {
+        /*
+         * Standard deviation of pose estimate, as a fraction of target range.
+         * This is a guess based on figure 5 in the Apriltag2 paper:
+         * https://april.eecs.umich.edu/media/media/pdfs/wang2016iros.pdf
+         * The error is much worse at very long range but I don't think that
+         * matters for us.
+         */
+        double kRelativeError = 0.1;
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            /*
+             * actual stdev seem like between 0.03 at 1m or 0.15 at 5m so
+             * actual k might be 0.03, this needs to be accompanied by the
+             * much lower state stddev in RobotContainer.
+             */
+            kRelativeError = 0.03;
+        }
         double stddev = kRelativeError * distanceM;
         return VecBuilder.fill(stddev, stddev, Double.MAX_VALUE);
     }
