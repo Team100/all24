@@ -129,6 +129,8 @@ public class SwerveDriveKinematics100 {
 
     /**
      * FORWARD: module states -> chassis speeds
+     * 
+     * NOTE: do not use the returned omega, use the gyro instead.
      */
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... states) {
         checkLength(states);
@@ -141,6 +143,8 @@ public class SwerveDriveKinematics100 {
 
     /**
      * FORWARD: module deltas -> twist.
+     * 
+     * NOTE: do not use the returned dtheta, use the gyro instead. 
      */
     public Twist2d toTwist2d(SwerveModulePosition... deltas) {
         checkLength(deltas);
