@@ -109,7 +109,7 @@ public class SwerveDriveOdometry100 {
         Rotation2d angle = gyroAngle.plus(m_gyroOffset);
 
         Twist2d twist = m_kinematics.toTwist2d(
-                DriveUtil.modulePositions(m_previousWheelPositions, modulePositions));
+                DriveUtil.modulePositionDelta(m_previousWheelPositions, modulePositions));
         twist.dtheta = angle.minus(m_previousAngle).getRadians();
 
         Pose2d newPose = m_poseMeters.exp(twist);
