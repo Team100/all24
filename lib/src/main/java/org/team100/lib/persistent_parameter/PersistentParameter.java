@@ -72,7 +72,7 @@ public class PersistentParameter implements Parameter {
      * This is synchronized to guarantee the offset arithmetic is correct.
      */
     @Override
-    public synchronized double getAsDouble() {
+    public synchronized double get() {
         double knobVal = m_conf.knob().getAsDouble();
         if (m_conf.reset().getAsBoolean()) {
             m_knob_offset = knobVal;

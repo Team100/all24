@@ -23,7 +23,7 @@ public class ConstantParameter implements Parameter {
     }
 
     @Override
-    public synchronized double getAsDouble() {
+    public synchronized double get() {
         // reiterate the value every time we use it.
         m_entry.setDouble(m_value);
         return m_value;
