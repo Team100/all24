@@ -253,12 +253,12 @@ public class RobotContainer implements Glassy {
                 new FancyTrajectory(m_drive, planner, constraints));
 
         // playing with trajectory followers
-        TrajectoryConfig100 config = new TrajectoryConfig100(5, 5);
-        StraightLineTrajectory maker = new StraightLineTrajectory(config);
+        // TrajectoryConfig100 config = new TrajectoryConfig100(5, 5);
+        // StraightLineTrajectory maker = new StraightLineTrajectory(config);
 
         // field center, roughly, facing to the left.
-        Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
-        Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
+        // Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
+        // Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower

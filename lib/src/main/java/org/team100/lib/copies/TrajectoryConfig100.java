@@ -21,6 +21,7 @@ import edu.wpi.first.units.Velocity;
  * (start velocity, end velocity, constraints, reversed) have been defaulted to reasonable values
  * (0, 0, {}, false). These values can be changed via the setXXX methods.
  */
+@Deprecated
 public class TrajectoryConfig100 {
   private final double m_maxVelocity;
   private final double m_maxAcceleration;

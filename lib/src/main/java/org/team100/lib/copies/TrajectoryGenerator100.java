@@ -25,6 +25,7 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer;
  * 
  * TODO (soon!): remove this class, use just one way to do trajectories.
  */
+@Deprecated
 public final class TrajectoryGenerator100 {
     private static final Trajectory kDoNothingTrajectory = new Trajectory(List.of(new Trajectory.State()));
 

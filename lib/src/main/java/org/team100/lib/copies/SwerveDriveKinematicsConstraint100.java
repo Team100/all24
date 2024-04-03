@@ -13,6 +13,7 @@ import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
  * 
  * TODO: remove this class, do trajectories in just one way (not this way).
  */
+@Deprecated
 public class SwerveDriveKinematicsConstraint100 implements TrajectoryConstraint {
     private final double m_maxSpeedMetersPerSecond;
     private final SwerveDriveKinematics100 m_kinematics;
