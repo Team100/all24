@@ -10,6 +10,8 @@ import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
  * A class that enforces constraints on the swerve drive kinematics. This can be
  * used to ensure that the trajectory is constructed so that the commanded
  * velocities for all 4 wheels of the drivetrain stay below a certain limit.
+ * 
+ * TODO: remove this class, do trajectories in just one way (not this way).
  */
 public class SwerveDriveKinematicsConstraint100 implements TrajectoryConstraint {
     private final double m_maxSpeedMetersPerSecond;
