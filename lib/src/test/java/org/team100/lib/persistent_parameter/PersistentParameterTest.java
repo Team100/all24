@@ -59,7 +59,7 @@ class PersistentParameterTest {
         Setter setter = new Setter();
 
         // supply a default of 1.0 here:
-        DoubleSupplier p = new PersistentParameter(
+        Parameter p = new PersistentParameter(
                 "foo",
                 1.0,
                 new PersistentParameter.HIDConfig(setter, () -> false));
@@ -90,7 +90,7 @@ class PersistentParameterTest {
         Setter setter = new Setter();
 
         // supply a default of 1.0 here:
-        DoubleSupplier p = new ConstantParameter("bar", 1.0);
+        Parameter p = new ConstantParameter("bar", 1.0);
 
         // use only the specified value.
         assertEquals(1.0, p.getAsDouble(), kDelta);
