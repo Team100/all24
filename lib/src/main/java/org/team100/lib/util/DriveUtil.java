@@ -101,9 +101,6 @@ public class DriveUtil {
     }
 
     /**
-     * NOTE: takes the end angle as the angle, which is wrong
-     * TODO: fix this https://github.com/Team100/all24/issues/352
-     * 
      * Path between start and end is assumed to be a circular arc so the
      * angle of the delta is the angle of the chord between the endpoints,
      * i.e. the average angle.
