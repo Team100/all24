@@ -153,13 +153,10 @@ public class RobotContainer implements Glassy {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        // these are the old numbers.
+        // these are the old numbers, just used as defaults. see VisionDataProvider24
+        // for updated stddevs.
         double stateStdDev = 0.1;
         double visionStdDev = 0.5;
-        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
-            stateStdDev = 0.001; // guess: try adjusting this.
-            visionStdDev = 0.1; // measured
-        }
 
         // ignores the rotation derived from vision.
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(

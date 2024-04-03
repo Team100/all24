@@ -253,7 +253,9 @@ public class VisionDataProvider24 implements Glassy {
                 if (Experiments.instance.enabled(Experiment.HeedVision)) {
                     double distance = translation2d.getNorm();
                     if (poseEstimator != null)
-                        poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distance));
+                        poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distance));
                     firingSolutionConsumer.accept(translation2d);
                 }
             }
@@ -309,7 +311,9 @@ public class VisionDataProvider24 implements Glassy {
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     if (Experiments.instance.enabled(Experiment.HeedVision)) {
                         if (poseEstimator != null)
-                            poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
+                            poseEstimator.setStdDevs(
+                                    stateStdDevs(),
+                                    visionMeasurementStdDevs(distanceM));
                         latestTimeUs = RobotController.getFPGATime();
                         estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
                     }
@@ -373,7 +377,9 @@ public class VisionDataProvider24 implements Glassy {
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         if (Experiments.instance.enabled(Experiment.HeedVision)) {
                             if (poseEstimator != null)
-                                poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
+                                poseEstimator.setStdDevs(
+                                        stateStdDevs(),
+                                        visionMeasurementStdDevs(distanceM));
                             latestTimeUs = RobotController.getFPGATime();
                             estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
                         }
@@ -382,6 +388,14 @@ public class VisionDataProvider24 implements Glassy {
                 lastRobotInFieldCoords = currentRobotinFieldCoords;
             }
         }
+    }
+
+    static Matrix<N3, N1> stateStdDevs() {
+        double stateStdDev = 0.1;
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            stateStdDev = 0.001; // guess: try adjusting this.
+        }
+        return VecBuilder.fill(stateStdDev, stateStdDev, 0.1);
     }
 
     /** This is an educated guess. */

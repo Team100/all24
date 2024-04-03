@@ -66,24 +66,31 @@ public class SwerveDrivePoseEstimator100 {
         m_numModules = modulePositions.length;
         m_kinematics = kinematics;
         m_odometry = new SwerveDriveOdometry100(kinematics, gyroAngle, modulePositions, initialPoseMeters);
-        for (int i = 0; i < 3; ++i) {
-            m_q.set(i, 0, stateStdDevs.get(i, 0) * stateStdDevs.get(i, 0));
-        }
-        setVisionMeasurementStdDevs(visionMeasurementStdDevs);
+        setStdDevs(stateStdDevs, visionMeasurementStdDevs);
     }
 
     /**
      * Sets the pose estimator's trust of global measurements. This might be used to
      * change trust in vision measurements after the autonomous period, or to change
      * trust as distance to a vision target increases.
+     * 
+     * TODO: get rid of this as a public method, adjust the stdevs on every update.
      *
+     * @param stateStdDevs             standard deviations of the state. Increase
+     *                                 these numbers to trust the state less, i.e.
+     *                                 allow it to change faster on update.
      * @param visionMeasurementStdDevs Standard deviations of the vision
      *                                 measurements. Increase these numbers to trust
      *                                 global measurements from vision less. This
      *                                 matrix is in the form [x, y, theta]ᵀ, with
      *                                 units in meters and radians.
      */
-    public final void setVisionMeasurementStdDevs(Matrix<N3, N1> visionMeasurementStdDevs) {
+    public final void setStdDevs(
+            Matrix<N3, N1> stateStdDevs,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+        for (int i = 0; i < 3; ++i) {
+            m_q.set(i, 0, stateStdDevs.get(i, 0) * stateStdDevs.get(i, 0));
+        }
         double[] r = new double[3];
         for (int i = 0; i < 3; ++i) {
             r[i] = visionMeasurementStdDevs.get(i, 0) * visionMeasurementStdDevs.get(i, 0);
@@ -221,8 +228,9 @@ public class SwerveDrivePoseEstimator100 {
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters,
             double timestampSeconds,
+            Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
-        setVisionMeasurementStdDevs(visionMeasurementStdDevs);
+        setStdDevs(stateStdDevs, visionMeasurementStdDevs);
         addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
     }
 
@@ -308,7 +316,7 @@ public class SwerveDrivePoseEstimator100 {
 
                 // Create a twist to represent the change based on the interpolated sensor
                 // inputs.
-                Twist2d twist = m_kinematics.toTwist2d(DriveUtil.modulePositions(wheelPositions, wheelLerp));
+                Twist2d twist = m_kinematics.toTwist2d(DriveUtil.modulePositionDelta(wheelPositions, wheelLerp));
                 twist.dtheta = gyroLerp.minus(gyroAngle).getRadians();
 
                 return new InterpolationRecord(poseMeters.exp(twist), gyroLerp, wheelLerp);
@@ -338,7 +346,7 @@ public class SwerveDrivePoseEstimator100 {
     ///////////////////////////////////////
 
     private void checkLength(SwerveDriveWheelPositions modulePositions) {
-        int ct = modulePositions.positions.length; 
+        int ct = modulePositions.positions.length;
         if (ct != m_numModules) {
             throw new IllegalArgumentException("Wrong module count: " + ct);
         }

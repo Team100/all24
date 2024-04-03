@@ -513,6 +513,7 @@ class SwerveDrivePoseEstimator100Test {
         estimator.addVisionMeasurement(
                 new Pose2d(new Translation2d(10, 10), new Rotation2d(0.1)),
                 1,
+                VecBuilder.fill(0.1, 0.1, 0.1),
                 VecBuilder.fill(0.1, 0.1, 0.1));
 
         assertEquals(odometryPose.getX(), estimator.getEstimatedPosition().getX(), "Incorrect Final X");
