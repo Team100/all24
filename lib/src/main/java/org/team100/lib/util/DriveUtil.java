@@ -103,7 +103,12 @@ public class DriveUtil {
     /**
      * Path between start and end is assumed to be a circular arc so the
      * angle of the delta is the angle of the chord between the endpoints,
-     * i.e. the average angle.
+     * i.e. the average angle. This might not be a good assumption if the positional
+     * control is at a lower level, so that the motion is not uniform during the
+     * control period.
+     * 
+     * Note the arc is assumed to be the same length as the chord, though, i.e. the
+     * angles are assumed to be close to each other.
      */
     public static SwerveModulePosition[] modulePositionDelta(
             SwerveDriveWheelPositions start,
