@@ -245,11 +245,6 @@ public class SwerveLocal implements Glassy {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S());
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
-
-        // log what we did, note this is not using discretization but it probably should
-        ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
-        t.log(Level.TRACE, m_name, "implied speed", speeds);
-        t.log(Level.TRACE, m_name, "moving", isMoving(speeds));
     }
 
     private static boolean isMoving(ChassisSpeeds speeds) {

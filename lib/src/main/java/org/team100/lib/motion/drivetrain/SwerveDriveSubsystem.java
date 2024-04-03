@@ -17,8 +17,10 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -225,7 +227,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     public void resetPose(Pose2d robotPose) {
-        m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+        m_poseEstimator.resetPosition(m_heading.getHeadingNWU(),
+                new SwerveDriveWheelPositions(m_swerveLocal.positions()), robotPose);
         m_pose = robotPose;
         // TODO: should we really assume we're motionless when we call this??
         m_velocity = new Twist2d();
@@ -311,8 +314,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * of odometry are self-consistent.
      */
     private void updatePosition() {
-        m_poseEstimator.update(m_heading.getHeadingNWU(), m_swerveLocal.positions());
-        m_pose = m_poseEstimator.getEstimatedPosition();
+        m_pose = m_poseEstimator.updateWithTime(Timer.getFPGATimestamp(), m_heading.getHeadingNWU(),
+                new SwerveDriveWheelPositions(m_swerveLocal.positions()));
     }
 
     private void updateVelocity(double dt) {

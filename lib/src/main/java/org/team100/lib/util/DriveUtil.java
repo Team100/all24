@@ -3,6 +3,8 @@ package org.team100.lib.util;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public class DriveUtil {
@@ -55,7 +57,8 @@ public class DriveUtil {
      */
     public static Twist2d clampTwist(Twist2d input, double maxMagnitude) {
         double hyp = Math.hypot(input.dx, input.dy);
-        if (hyp < 1e-12) return input;
+        if (hyp < 1e-12)
+            return input;
         double clamped = Math.min(hyp, maxMagnitude);
         double ratio = clamped / hyp;
         return new Twist2d(ratio * input.dx, ratio * input.dy, input.dtheta);
@@ -86,12 +89,40 @@ public class DriveUtil {
 
     public static void checkTwist(Twist2d twist) {
         try {
-            if (Double.isNaN(twist.dx)) throw new IllegalStateException("dx is Nan");
-            if (Double.isNaN(twist.dy)) throw new IllegalStateException("dy is Nan");
-            if (Double.isNaN(twist.dtheta)) throw new IllegalStateException("dtheta is Nan");
+            if (Double.isNaN(twist.dx))
+                throw new IllegalStateException("dx is Nan");
+            if (Double.isNaN(twist.dy))
+                throw new IllegalStateException("dy is Nan");
+            if (Double.isNaN(twist.dtheta))
+                throw new IllegalStateException("dtheta is Nan");
         } catch (IllegalStateException e) {
             throw e;
         }
+    }
+
+    /**
+     * NOTE: takes the end angle as the angle, which is wrong
+     * TODO: fix this https://github.com/Team100/all24/issues/352
+     * 
+     * Path between start and end is assumed to be a circular arc so the
+     * angle of the delta is the angle of the chord between the endpoints,
+     * i.e. the average angle.
+     */
+    public static SwerveModulePosition[] modulePositionDelta(
+            SwerveDriveWheelPositions start,
+            SwerveDriveWheelPositions end) {
+        if (start.positions.length != end.positions.length) {
+            throw new IllegalArgumentException("Inconsistent number of modules!");
+        }
+        SwerveModulePosition[] newPositions = new SwerveModulePosition[start.positions.length];
+        for (int i = 0; i < start.positions.length; i++) {
+            SwerveModulePosition startModule = start.positions[i];
+            SwerveModulePosition endModule = end.positions[i];
+            newPositions[i] = new SwerveModulePosition(
+                    endModule.distanceMeters - startModule.distanceMeters,
+                    endModule.angle.interpolate(startModule.angle, 0.5));
+        }
+        return newPositions;
     }
 
     private DriveUtil() {

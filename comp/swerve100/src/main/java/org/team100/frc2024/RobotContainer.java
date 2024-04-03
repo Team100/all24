@@ -51,6 +51,7 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.copies.TrajectoryConfig100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -89,7 +90,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -153,13 +153,10 @@ public class RobotContainer implements Glassy {
 
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
-        // these are the old numbers.
+        // these are the old numbers, just used as defaults. see VisionDataProvider24
+        // for updated stddevs.
         double stateStdDev = 0.1;
         double visionStdDev = 0.5;
-        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
-            stateStdDev = 0.001; // guess: try adjusting this.
-            visionStdDev = 0.1; // measured
-        }
 
         // ignores the rotation derived from vision.
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
@@ -253,12 +250,12 @@ public class RobotContainer implements Glassy {
                 new FancyTrajectory(m_drive, planner, constraints));
 
         // playing with trajectory followers
-        TrajectoryConfig config = new TrajectoryConfig(5, 5);
-        StraightLineTrajectory maker = new StraightLineTrajectory(config);
+        // TrajectoryConfig100 config = new TrajectoryConfig100(5, 5);
+        // StraightLineTrajectory maker = new StraightLineTrajectory(config);
 
         // field center, roughly, facing to the left.
-        Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
-        Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
+        // Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
+        // Command follower = new DriveToWaypoint3(goal, m_drive, maker, controller);
         // whileTrue(driverControl::test, follower);
 
         // 254 PID follower

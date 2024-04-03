@@ -191,8 +191,8 @@ public class VisionDataProvider24 implements Glassy {
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
         // Estimated instant represented by the blips
-        final double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
-        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTime);
+        final double frameTimeSec = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTimeSec);
 
         if (optionalGyroRotation.isEmpty()) {
             Util.warn("No gyro rotation available!");
@@ -206,7 +206,7 @@ public class VisionDataProvider24 implements Glassy {
                 cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
-                frameTime,
+                frameTimeSec,
                 gyroRotation,
                 alliance);
 
@@ -216,7 +216,7 @@ public class VisionDataProvider24 implements Glassy {
                     cameraSerialNumber,
                     blips,
                     cameraInRobotCoordinates,
-                    frameTime,
+                    frameTimeSec,
                     gyroRotation,
                     alliance);
         }
@@ -253,7 +253,9 @@ public class VisionDataProvider24 implements Glassy {
                 if (Experiments.instance.enabled(Experiment.HeedVision)) {
                     double distance = translation2d.getNorm();
                     if (poseEstimator != null)
-                        poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distance));
+                        poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distance));
                     firingSolutionConsumer.accept(translation2d);
                 }
             }
@@ -265,7 +267,7 @@ public class VisionDataProvider24 implements Glassy {
             final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
-            final double frameTime,
+            final double frameTimeSec,
             final Rotation2d gyroRotation,
             Alliance alliance) {
         for (Blip24 blip : blips) {
@@ -309,9 +311,11 @@ public class VisionDataProvider24 implements Glassy {
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     if (Experiments.instance.enabled(Experiment.HeedVision)) {
                         if (poseEstimator != null)
-                            poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
+                            poseEstimator.setStdDevs(
+                                    stateStdDevs(),
+                                    visionMeasurementStdDevs(distanceM));
                         latestTimeUs = RobotController.getFPGATime();
-                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                        estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
                     }
                 }
             }
@@ -324,7 +328,7 @@ public class VisionDataProvider24 implements Glassy {
             final String cameraSerialNumber,
             Blip24[] blips,
             Transform3d cameraInRobotCoordinates,
-            double frameTime,
+            double frameTimeSec,
             Rotation2d gyroRotation,
             Alliance alliance) {
         // if multiple tags are in view, triangulate to get another (perhaps more
@@ -373,15 +377,25 @@ public class VisionDataProvider24 implements Glassy {
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         if (Experiments.instance.enabled(Experiment.HeedVision)) {
                             if (poseEstimator != null)
-                                poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
+                                poseEstimator.setStdDevs(
+                                        stateStdDevs(),
+                                        visionMeasurementStdDevs(distanceM));
                             latestTimeUs = RobotController.getFPGATime();
-                            estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                            estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
                         }
                     }
                 }
                 lastRobotInFieldCoords = currentRobotinFieldCoords;
             }
         }
+    }
+
+    static Matrix<N3, N1> stateStdDevs() {
+        double stateStdDev = 0.1;
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            stateStdDev = 0.001; // guess: try adjusting this.
+        }
+        return VecBuilder.fill(stateStdDev, stateStdDev, 0.1);
     }
 
     /** This is an educated guess. */

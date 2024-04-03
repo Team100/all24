@@ -1,6 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.copies.TrajectoryConfig100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryVisualization;
@@ -10,7 +11,6 @@ import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
@@ -26,7 +26,7 @@ public class CommandMaker {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
-            TrajectoryConfig config) {
+            TrajectoryConfig100 config) {
         StraightLineTrajectory maker = new StraightLineTrajectory(config);
         return new DriveToWaypoint3(goal, drivetrain, maker, controller);
     }
