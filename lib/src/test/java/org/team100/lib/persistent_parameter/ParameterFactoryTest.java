@@ -19,10 +19,10 @@ class ParameterFactoryTest {
         ParameterFactory factory = new ParameterFactory(knobs);
         Parameter parameter = factory.mutable("foo", 0.0);
         val = 0.0;
-        assertEquals(0.0, parameter.getAsDouble(), kDelta);
+        assertEquals(0.0, parameter.get(), kDelta);
         // changing the knob value affects the parameter.
         val = 1.0;
-        assertEquals(1.0, parameter.getAsDouble(), kDelta);
+        assertEquals(1.0, parameter.get(), kDelta);
     }
 
     @Test
@@ -32,9 +32,9 @@ class ParameterFactoryTest {
                 new PersistentParameter.HIDConfig(() -> val, () -> false));
         ParameterFactory factory = new ParameterFactory(knobs);
         Parameter parameter = factory.constant("foo", 0.0);
-        assertEquals(0.0, parameter.getAsDouble(), kDelta);
+        assertEquals(0.0, parameter.get(), kDelta);
         // changing the knob value does not affect the parameter.
         val = 1.0;
-        assertEquals(0.0, parameter.getAsDouble(), kDelta);
+        assertEquals(0.0, parameter.get(), kDelta);
     }
 }

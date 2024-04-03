@@ -65,15 +65,15 @@ class PersistentParameterTest {
                 new PersistentParameter.HIDConfig(setter, () -> false));
 
         // but the data file has 2.0, which takes precedence.
-        assertEquals(2.0, p.getAsDouble(), kDelta);
+        assertEquals(2.0, p.get(), kDelta);
 
         // write a different value and verify it
         setter.val = 1.0;
-        assertEquals(3.0, p.getAsDouble(), kDelta);
+        assertEquals(3.0, p.get(), kDelta);
 
         // set it back to what it was.
         setter.val = 0.0;
-        assertEquals(2.0, p.getAsDouble(), kDelta);
+        assertEquals(2.0, p.get(), kDelta);
 
         // and write the file again in case the value above was written.
         inst.flush();
@@ -93,10 +93,10 @@ class PersistentParameterTest {
         Parameter p = new ConstantParameter("bar", 1.0);
 
         // use only the specified value.
-        assertEquals(1.0, p.getAsDouble(), kDelta);
+        assertEquals(1.0, p.get(), kDelta);
 
         // this should do nothing
         setter.val = 1.0;
-        assertEquals(1.0, p.getAsDouble(), kDelta);
+        assertEquals(1.0, p.get(), kDelta);
     }
 }
