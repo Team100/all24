@@ -314,7 +314,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * of odometry are self-consistent.
      */
     private void updatePosition() {
-        m_pose = m_poseEstimator.updateWithTime(Timer.getFPGATimestamp(), m_heading.getHeadingNWU(),
+        m_pose = m_poseEstimator.updateWithTime(
+                Timer.getFPGATimestamp(),
+                m_heading.getHeadingNWU(),
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()));
     }
 

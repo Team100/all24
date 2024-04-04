@@ -2,6 +2,7 @@ package org.team100.lib.copies;
 
 import java.util.NavigableMap;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import edu.wpi.first.math.MathUtil;
@@ -142,14 +143,11 @@ public final class TimeInterpolatableBuffer100<T> {
         }
     }
 
-    /**
-     * Grant access to the internal sample buffer. Used in Pose Estimation to replay
-     * odometry inputs
-     * stored within this buffer.
-     *
-     * @return The internal sample buffer.
-     */
-    public NavigableMap<Double, T> getInternalBuffer() {
-        return m_pastSnapshots;
+    public SortedMap<Double, T> tailMap(double t) {
+        return m_pastSnapshots.tailMap(t);
+    }
+
+    public double lastKey() {
+        return m_pastSnapshots.lastKey();
     }
 }

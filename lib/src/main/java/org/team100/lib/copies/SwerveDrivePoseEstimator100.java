@@ -170,7 +170,7 @@ public class SwerveDrivePoseEstimator100 {
         // Step 0: If this measurement is old enough to be outside the pose buffer's
         // timespan, skip.
         try {
-            if (m_poseBuffer.getInternalBuffer().lastKey() - kBufferDuration > timestampSeconds) {
+            if (m_poseBuffer.lastKey() - kBufferDuration > timestampSeconds) {
                 return;
             }
         } catch (NoSuchElementException ex) {
@@ -216,9 +216,11 @@ public class SwerveDrivePoseEstimator100 {
 
         // Step 7: Replay odometry inputs between sample time and latest recorded sample
         // to update the pose buffer and correct odometry.
-        for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.getInternalBuffer().tailMap(timestampSeconds)
-                .entrySet()) {
-            updateWithTime(entry.getKey(), entry.getValue().gyroAngle, entry.getValue().wheelPositions);
+        for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampSeconds).entrySet()) {
+            double entryTimestampS = entry.getKey();
+            Rotation2d entryGyroAngle = entry.getValue().gyroAngle;
+            SwerveDriveWheelPositions wheelPositions = entry.getValue().wheelPositions;
+            updateWithTime(entryTimestampS, entryGyroAngle, wheelPositions);
         }
     }
 
@@ -316,7 +318,8 @@ public class SwerveDrivePoseEstimator100 {
 
                 // Create a twist to represent the change based on the interpolated sensor
                 // inputs.
-                Twist2d twist = m_kinematics.toTwist2d(DriveUtil.modulePositionDelta(wheelPositions, wheelLerp));
+                Twist2d twist = m_kinematics.toTwist2d(
+                        DriveUtil.modulePositionDelta(wheelPositions, wheelLerp));
                 twist.dtheta = gyroLerp.minus(gyroAngle).getRadians();
 
                 return new InterpolationRecord(poseMeters.exp(twist), gyroLerp, wheelLerp);

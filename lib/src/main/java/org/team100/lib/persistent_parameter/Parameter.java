@@ -4,4 +4,6 @@ public interface Parameter {
     double get();
 
     void set(double val);
+
+    void reset();
 }

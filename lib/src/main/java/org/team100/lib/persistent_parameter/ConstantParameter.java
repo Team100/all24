@@ -33,4 +33,9 @@ public class ConstantParameter implements Parameter {
     public void set(double ignored) {
         // constant cannot be changed.
     }
+
+    @Override
+    public void reset() {
+        // do nothing
+    }
 }

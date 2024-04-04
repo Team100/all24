@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Preferences;
 /**
  * A parameter useful for tuning.
  * 
- * Can be influenced six ways:
+ * Can be influenced seven ways:
  * 
  * 1. load the persistent value from Preference storage
  * 2. default in code at startup if no persistent value
@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Preferences;
  * 4. update via HID axes, e.g. the custom arduino knobs Joel made.
  * 5. reset to the default via a HID button
  * 6. set in code
+ * 7. reset to default in code (for tests)
  * 
  * Updates are sent to preference storage and the network.
  * 
@@ -86,8 +87,14 @@ public class PersistentParameter implements Parameter {
         return newVal;
     }
 
+    @Override
     public synchronized void set(double val) {
         m_knob_offset = m_conf.knob().getAsDouble();
         Preferences.setDouble(m_key, val);
+    }
+
+    @Override
+    public synchronized void reset() {
+        set(m_defaultValue);
     }
 }
