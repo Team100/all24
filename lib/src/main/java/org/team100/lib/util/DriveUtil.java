@@ -122,6 +122,8 @@ public class DriveUtil {
             SwerveModulePosition endModule = end.positions[i];
             newPositions[i] = new SwerveModulePosition(
                     endModule.distanceMeters - startModule.distanceMeters,
+                    // this change breaks the odometry test on line 66, the 90 degree turn case.
+                    // endModule.angle);
                     endModule.angle.interpolate(startModule.angle, 0.5));
         }
         return newPositions;

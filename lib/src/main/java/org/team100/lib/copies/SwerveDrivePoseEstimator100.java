@@ -113,6 +113,8 @@ public class SwerveDrivePoseEstimator100 {
      *
      * The gyroscope angle does not need to be reset here on the user's robot code.
      * The library automatically takes care of offsetting the gyro angle.
+     * 
+     * This is called, for example, to align with the field.
      *
      * @param gyroAngle      The angle reported by the gyroscope.
      * @param wheelPositions The current encoder readings.
@@ -128,7 +130,7 @@ public class SwerveDrivePoseEstimator100 {
     }
 
     public Rotation2d getGyroOffset() {
-        return m_odometry.getGyroOffset();
+        return m_odometry.m_gyroOffset;
     }
 
     /**
@@ -138,7 +140,7 @@ public class SwerveDrivePoseEstimator100 {
      * update and reading doesn't matter.
      */
     public Pose2d getEstimatedPosition() {
-        return m_odometry.getPoseMeters();
+        return m_odometry.m_poseMeters;
     }
 
     /**
@@ -200,6 +202,9 @@ public class SwerveDrivePoseEstimator100 {
         Pose2d newPose = sample.poseMeters.exp(scaledTwist);
 
         // Step 5: Reset Odometry to state at sample with vision adjustment.
+        // it's super weird that this resets the odometry briefly as part of fixing the history.
+        // because we do these two things with two different threads.
+        // TODO: blarg
         m_odometry.resetPosition(
                 sample.gyroAngle,
                 sample.wheelPositions,
@@ -318,6 +323,7 @@ public class SwerveDrivePoseEstimator100 {
 
                 // Create a twist to represent the change based on the interpolated sensor
                 // inputs.
+                // TODO: this should take tires into account since it modifies the pose estimate.
                 Twist2d twist = m_kinematics.toTwist2d(
                         DriveUtil.modulePositionDelta(wheelPositions, wheelLerp));
                 twist.dtheta = gyroLerp.minus(gyroAngle).getRadians();

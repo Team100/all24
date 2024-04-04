@@ -10,34 +10,35 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * Collapses WPI SwerveDriveOdometry and Odometry.
+ * 
+ * TODO: get rid of this class.  this state is weird given that all these are in the pose buffer.
+ * 
+ * alternatively make it like a utility of some kind, not something that sticks around.
  */
 public class SwerveDriveOdometry100 {
-    private final int m_numModules;
+    final int m_numModules;
 
-    private final SwerveDriveKinematics100 m_kinematics;
+    final SwerveDriveKinematics100 m_kinematics;
 
     /**
      * "current" pose, maintained in update() and resetPosition().
      */
-    private Pose2d m_poseMeters;
-
-    private Pose2d m_previousPoseMeters;
-    private double m_previousTimeSeconds;
+    Pose2d m_poseMeters;
 
     /**
      * maintained in resetPosition().
      */
-    private Rotation2d m_gyroOffset;
+    Rotation2d m_gyroOffset;
 
     /**
      * maintained in update() as gyro angle plus offset.
      */
-    private Rotation2d m_previousAngle;
+    Rotation2d m_previousAngle;
 
     /**
      * maintained in update() and resetPosition()
      */
-    private SwerveDriveWheelPositions m_previousWheelPositions;
+    SwerveDriveWheelPositions m_previousWheelPositions;
 
     /**
      * @param kinematics      The swerve drive kinematics for your drivetrain.
@@ -70,7 +71,7 @@ public class SwerveDriveOdometry100 {
      * @param modulePositions The wheel positions reported by each module.,
      * @param pose            The position on the field that your robot is at.
      */
-    public void resetPosition(
+    void resetPosition(
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions modulePositions,
             Pose2d pose) {
@@ -81,17 +82,6 @@ public class SwerveDriveOdometry100 {
         m_previousWheelPositions = modulePositions.copy();
     }
 
-    public Rotation2d getGyroOffset() {
-        return m_gyroOffset;
-    }
-
-    /**
-     * Used only by the pose estimator.
-     */
-    Pose2d getPoseMeters() {
-        return m_poseMeters;
-    }
-
     /**
      * Updates the robot's position on the field using forward kinematics.
      *
@@ -100,7 +90,7 @@ public class SwerveDriveOdometry100 {
      * @param modulePositions    The current position of all swerve modules.
      * @return The new pose of the robot.
      */
-    public Pose2d update(
+    Pose2d update(
             double currentTimeSeconds,
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions modulePositions) {
@@ -108,8 +98,11 @@ public class SwerveDriveOdometry100 {
 
         Rotation2d angle = gyroAngle.plus(m_gyroOffset);
 
-        Twist2d twist = m_kinematics.toTwist2d(
-                DriveUtil.modulePositionDelta(m_previousWheelPositions, modulePositions));
+        // TODO: this should take tires into account!
+        SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
+                m_previousWheelPositions,
+                modulePositions);
+        Twist2d twist = m_kinematics.toTwist2d(modulePositionDelta);
         twist.dtheta = angle.minus(m_previousAngle).getRadians();
 
         Pose2d newPose = m_poseMeters.exp(twist);

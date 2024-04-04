@@ -147,6 +147,7 @@ public final class TimeInterpolatableBuffer100<T> {
         return m_pastSnapshots.tailMap(t);
     }
 
+    /** the most recent timstampSeconds. */
     public double lastKey() {
         return m_pastSnapshots.lastKey();
     }

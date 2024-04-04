@@ -173,6 +173,8 @@ public class SwerveLocal implements Glassy {
      * The robot-relative speed implied by the module states.
      * performs inverse discretization and extra correction
      * 
+     * TODO: this seems like it should be in odometry.
+     * 
      * @param gyroRateRad_S gyro rate
      * @param dt            for discretization
      */

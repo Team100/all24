@@ -14,6 +14,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
+/**
+ * None of the tests here involve the Tire model.
+ */
 class SwerveDriveDynamicsConstraintTest {
     private static final double kDelta = 0.001;
     // the free speed of a module, which is also the free speed
@@ -104,7 +107,5 @@ class SwerveDriveDynamicsConstraintTest {
         assertEquals(-0.108, implied.vyMetersPerSecond, kDelta);
         assertEquals(5, implied.omegaRadiansPerSecond, kDelta);
     }
-
-  
 
 }

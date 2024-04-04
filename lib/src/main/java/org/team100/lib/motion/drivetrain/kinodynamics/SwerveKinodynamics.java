@@ -36,7 +36,7 @@ import edu.wpi.first.math.numbers.N3;
  * 
  * In particular, the maximum spin rate is likely to seem quite high. Do not
  * lower it here.
- */ 
+ */
 public class SwerveKinodynamics implements Glassy {
     private final Telemetry t = Telemetry.get();
 
@@ -156,7 +156,7 @@ public class SwerveKinodynamics implements Glassy {
         m_frontoffset = frontoffset;
         m_vcg = vcg;
         // distance from center to wheel
-        m_radius = Math.hypot((fronttrack+backtrack) / 4, m_wheelbase / 2);
+        m_radius = Math.hypot((fronttrack + backtrack) / 4, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, m_frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
         double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
@@ -292,12 +292,13 @@ public class SwerveKinodynamics implements Glassy {
      * @param frontoffset distance from center of mass to front wheel
      * @return
      */
-    private static SwerveDriveKinematics100 get(double fronttrack,double backtrack, double wheelbase, double frontoffset) {
+    private static SwerveDriveKinematics100 get(double fronttrack, double backtrack, double wheelbase,
+            double frontoffset) {
         return new SwerveDriveKinematics100(
                 new Translation2d(frontoffset, fronttrack / 2),
                 new Translation2d(frontoffset, -fronttrack / 2),
-                new Translation2d(frontoffset-wheelbase, backtrack / 2),
-                new Translation2d(frontoffset-wheelbase, -backtrack / 2));
+                new Translation2d(frontoffset - wheelbase, backtrack / 2),
+                new Translation2d(frontoffset - wheelbase, -backtrack / 2));
     }
 
     public void resetHeadings(Rotation2d... moduleHeadings) {
@@ -337,9 +338,13 @@ public class SwerveKinodynamics implements Glassy {
 
     /**
      * Forward kinematics, module states => chassis speeds.
+     * 
      * Does not do inverse discretization.
+     * 
+     * Does not take Tires into account.
      */
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
+        // does not take tires into account
         return m_kinematics.toChassisSpeeds(moduleStates);
     }
 
@@ -348,6 +353,8 @@ public class SwerveKinodynamics implements Glassy {
      * instead of velocities, it is not needed.
      * 
      * It performs inverse discretization and an extra correction.
+     * 
+     * Does not take Tires into account.
      */
     public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
             SwerveModuleState... moduleStates) {
@@ -478,7 +485,5 @@ public class SwerveKinodynamics implements Glassy {
     public String getGlassName() {
         return "SwerveKinodynamics";
     }
-
-    
 
 }

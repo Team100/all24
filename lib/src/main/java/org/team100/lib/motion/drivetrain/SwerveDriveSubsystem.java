@@ -38,7 +38,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private ChassisSpeeds m_prevSpeeds;
     // maintained in periodic.
     private Pose2d m_pose;
+    // TODO: do not use Twist for this
     private Twist2d m_velocity;
+    // TODO: do not use Twist for this
     private Twist2d m_accel;
     private SwerveState m_state;
 
@@ -320,6 +322,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()));
     }
 
+    // TODO: use odometry to get the speeds
     private void updateVelocity(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
@@ -328,6 +331,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     }
 
+    // TODO: use odometry to get the speeds
     private void updateAcceleration(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         if (m_prevSpeeds == null) {
