@@ -3,6 +3,7 @@ package org.team100.lib.copies;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.SortedMap;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import edu.wpi.first.math.MathUtil;
@@ -10,77 +11,51 @@ import edu.wpi.first.math.interpolation.Interpolatable;
 import edu.wpi.first.math.interpolation.Interpolator;
 
 /**
- * The TimeInterpolatableBuffer provides an easy way to estimate past
- * measurements. One application
- * might be in conjunction with the DifferentialDrivePoseEstimator, where
- * knowledge of the robot
- * pose at the time when vision or other global measurement were recorded is
- * necessary, or for
- * recording the past angles of mechanisms as measured by encoders.
- *
- * @param <T> The type stored in this buffer.
+ * Uses an Interpolator to provide interpolated sampling with a history limit.
  */
 public final class TimeInterpolatableBuffer100<T> {
     private final double m_historySize;
     private final Interpolator<T> m_interpolatingFunc;
-    // @joel 2/19/24: using ConcurrentSkipListMap here to avoid concurrent modification exception; used to be TreeMap.
+    // @joel 2/19/24: using ConcurrentSkipListMap here to avoid concurrent
+    // modification exception; used to be TreeMap.
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
 
-    private TimeInterpolatableBuffer100(Interpolator<T> interpolateFunction, double historySizeSeconds) {
-        this.m_historySize = historySizeSeconds;
-        this.m_interpolatingFunc = interpolateFunction;
+    private TimeInterpolatableBuffer100(
+            Interpolator<T> interpolateFunction,
+            double historySizeSeconds) {
+        m_historySize = historySizeSeconds;
+        m_interpolatingFunc = interpolateFunction;
     }
 
-    /**
-     * Create a new TimeInterpolatableBuffer.
-     *
-     * @param interpolateFunction The function used to interpolate between values.
-     * @param historySizeSeconds  The history size of the buffer.
-     * @param <T>                 The type of data to store in the buffer.
-     * @return The new TimeInterpolatableBuffer.
-     */
     public static <T> TimeInterpolatableBuffer100<T> createBuffer(
-            Interpolator<T> interpolateFunction, double historySizeSeconds) {
-        return new TimeInterpolatableBuffer100<>(interpolateFunction, historySizeSeconds);
+            Interpolator<T> interpolateFunction,
+            double historySizeSeconds) {
+        return new TimeInterpolatableBuffer100<>(
+                interpolateFunction,
+                historySizeSeconds);
     }
 
-    /**
-     * Create a new TimeInterpolatableBuffer that stores a given subclass of
-     * {@link Interpolatable}.
-     *
-     * @param historySizeSeconds The history size of the buffer.
-     * @param <T>                The type of {@link Interpolatable} to store in the
-     *                           buffer.
-     * @return The new TimeInterpolatableBuffer.
-     */
     public static <T extends Interpolatable<T>> TimeInterpolatableBuffer100<T> createBuffer(
             double historySizeSeconds) {
-        return new TimeInterpolatableBuffer100<>(Interpolatable::interpolate, historySizeSeconds);
+        return new TimeInterpolatableBuffer100<>(
+                Interpolatable::interpolate,
+                historySizeSeconds);
     }
 
-    /**
-     * Create a new TimeInterpolatableBuffer to store Double values.
-     *
-     * @param historySizeSeconds The history size of the buffer.
-     * @return The new TimeInterpolatableBuffer.
-     */
-    public static TimeInterpolatableBuffer100<Double> createDoubleBuffer(double historySizeSeconds) {
-        return new TimeInterpolatableBuffer100<>(MathUtil::interpolate, historySizeSeconds);
+    public static TimeInterpolatableBuffer100<Double> createDoubleBuffer(
+            double historySizeSeconds) {
+        return new TimeInterpolatableBuffer100<>(
+                MathUtil::interpolate,
+                historySizeSeconds);
     }
 
-    /**
-     * Add a sample to the buffer.
-     *
-     * @param timeSeconds The timestamp of the sample.
-     * @param sample      The sample object.
-     */
     public void addSample(double timeSeconds, T sample) {
         cleanUp(timeSeconds);
         m_pastSnapshots.put(timeSeconds, sample);
     }
 
     /**
-     * Removes samples older than our current history size.
+     * Removes samples older than the history limit.
      *
      * @param time The current timestamp.
      */
@@ -95,7 +70,7 @@ public final class TimeInterpolatableBuffer100<T> {
         }
     }
 
-    /** Clear all old samples. */
+    /** Clears history entirely. */
     public void clear() {
         m_pastSnapshots.clear();
     }
@@ -103,9 +78,6 @@ public final class TimeInterpolatableBuffer100<T> {
     /**
      * Sample the buffer at the given time. If the buffer is empty, an empty
      * Optional is returned.
-     *
-     * @param timeSeconds The time at which to sample.
-     * @return The interpolated value at that timestamp or an empty Optional.
      */
     public Optional<T> getSample(double timeSeconds) {
         if (m_pastSnapshots.isEmpty()) {
@@ -131,10 +103,8 @@ public final class TimeInterpolatableBuffer100<T> {
             return Optional.of(topBound.getValue());
         } else {
             // Otherwise, interpolate. Because T is between [0, 1], we want the ratio of
-            // (the difference
-            // between the current time and bottom bound) and (the difference between top
-            // and bottom
-            // bounds).
+            // (the difference between the current time and bottom bound) and (the
+            // difference between top and bottom bounds).
             return Optional.of(
                     m_interpolatingFunc.interpolate(
                             bottomBound.getValue(),
@@ -143,12 +113,29 @@ public final class TimeInterpolatableBuffer100<T> {
         }
     }
 
-    public SortedMap<Double, T> tailMap(double t) {
-        return m_pastSnapshots.tailMap(t);
+    public SortedMap<Double, T> tailMap(double t, boolean inclusive) {
+        return m_pastSnapshots.tailMap(t, inclusive);
     }
 
-    /** the most recent timstampSeconds. */
+    /** The most recent timestampSeconds. */
     public double lastKey() {
+        // consider caching this at write time
         return m_pastSnapshots.lastKey();
     }
+
+    /** The more recent entry. */
+    public Entry<Double, T> lastEntry() {
+        // consider caching this at write time
+        return m_pastSnapshots.lastEntry();
+    }
+
+    public Entry<Double, T> lowerEntry(Double t) {
+        return m_pastSnapshots.lowerEntry(t);
+    }
+
+    public Entry<Double, T> ceilingEntry(Double arg0) {
+        return m_pastSnapshots.ceilingEntry(arg0);
+    }
+    
+
 }

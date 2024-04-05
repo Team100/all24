@@ -29,8 +29,11 @@ class SwerveDriveOdometry100Test {
     private final SwerveDriveKinematics100 m_kinematics = new SwerveDriveKinematics100(m_fl, m_fr, m_bl, m_br);
 
     private final SwerveDrivePoseEstimator100 m_poseEstimator = new SwerveDrivePoseEstimator100(
-            m_kinematics, new Rotation2d(), new SwerveModulePosition[] { zero, zero, zero, zero },
-            new Pose2d(), VecBuilder.fill(0.1, 0.1, 0.1),
+            m_kinematics,
+            new Rotation2d(),
+            new SwerveModulePosition[] { zero, zero, zero, zero },
+            new Pose2d(), 0, // time is zero here for testing
+            VecBuilder.fill(0.1, 0.1, 0.1),
             VecBuilder.fill(0.1, 0.1, 0.1));
 
     @Test
@@ -53,7 +56,7 @@ class SwerveDriveOdometry100Test {
                         new SwerveModulePosition()
                 }));
         var pose = m_poseEstimator.update(
-                0.0, new Rotation2d(), new SwerveDriveWheelPositions(wheelDeltas));
+                1.0, new Rotation2d(), new SwerveDriveWheelPositions(wheelDeltas));
 
         assertAll(
                 () -> assertEquals(5.0 / 10.0, pose.getX(), 0.01),
@@ -80,7 +83,7 @@ class SwerveDriveOdometry100Test {
 
         m_poseEstimator.update(0.0, new Rotation2d(),
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { zero, zero, zero, zero }));
-        final var pose = m_poseEstimator.update(0.0, Rotation2d.fromDegrees(90.0),
+        final var pose = m_poseEstimator.update(1.0, Rotation2d.fromDegrees(90.0),
                 new SwerveDriveWheelPositions(wheelDeltas));
 
         // this was chagned because of the change in DriveUtil line 113.
@@ -104,7 +107,7 @@ class SwerveDriveOdometry100Test {
         m_poseEstimator.update(0.0, gyro,
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { delta, delta, delta, delta }));
         delta = new SwerveModulePosition(1.0, Rotation2d.fromDegrees(0));
-        var pose = m_poseEstimator.update(0.0, gyro,
+        var pose = m_poseEstimator.update(1.0, gyro,
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { delta, delta, delta, delta }));
 
         assertAll(

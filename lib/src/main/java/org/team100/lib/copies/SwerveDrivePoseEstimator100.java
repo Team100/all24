@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map.Entry;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.localization.PoseEstimator100;
@@ -36,15 +37,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-
     private final int m_numModules;
     private final SwerveDriveKinematics100 m_kinematics;
-
-    private final Matrix<N3, N1> m_q = new Matrix<>(Nat.N3(), Nat.N1());
-    private final Matrix<N3, N3> m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
-
-    private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer = TimeInterpolatableBuffer100
-            .createBuffer(kBufferDuration);
+    private final Matrix<N3, N1> m_q;
+    private final Matrix<N3, N3> m_visionK;
+    private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
 
     /**
      * "current" pose, maintained in update() and resetPosition().
@@ -85,18 +82,31 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
+            double timestampSeconds,
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         m_name = Names.name(this);
 
         m_numModules = modulePositions.length;
         m_kinematics = kinematics;
+        m_q = new Matrix<>(Nat.N3(), Nat.N1());
+        m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
+        m_poseBuffer = TimeInterpolatableBuffer100.createBuffer(kBufferDuration);
 
         m_poseMeters = initialPoseMeters;
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
         m_previousWheelPositions = new SwerveDriveWheelPositions(modulePositions).copy();
 
         setStdDevs(stateStdDevs, visionMeasurementStdDevs);
+
+        // plant the starting point in the buffer
+        // System.out.println("add sample at time " + timestampSeconds);
+        m_poseBuffer.addSample(
+                timestampSeconds,
+                new InterpolationRecord(
+                        initialPoseMeters,
+                        gyroAngle,
+                        m_previousWheelPositions.copy()));
     }
 
     @Override
@@ -130,7 +140,14 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * update and reading doesn't matter.
      */
     public Pose2d getEstimatedPosition() {
-        return m_poseMeters;
+        // return m_poseMeters;
+        return m_poseBuffer.lastEntry().getValue().poseMeters;
+    }
+
+    public void dump() {
+        for (Entry<Double, InterpolationRecord> e : m_poseBuffer.tailMap(0, true).entrySet()) {
+            System.out.printf("%f %f\n", e.getKey(), e.getValue().poseMeters.getX());
+        }
     }
 
     @Override
@@ -190,6 +207,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         // Step 6: Record the current pose to allow multiple measurements from the same
         // timestamp
+
+        // System.out.println("add sample at time " + timestampSeconds);
         m_poseBuffer.addSample(
                 timestampSeconds,
                 new InterpolationRecord(
@@ -199,10 +218,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         // Step 7: Replay odometry inputs between sample time and latest recorded sample
         // to update the pose buffer and correct odometry.
-        for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampSeconds).entrySet()) {
+        // note exclusive tailmap, don't need to reprocess the entry we just put there.
+        for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampSeconds, false).entrySet()) {
             double entryTimestampS = entry.getKey();
             Rotation2d entryGyroAngle = entry.getValue().gyroAngle;
             SwerveDriveWheelPositions wheelPositions = entry.getValue().wheelPositions;
+            // System.out.println("update entry for time " + entryTimestampS);
             update(entryTimestampS, entryGyroAngle, wheelPositions);
         }
     }
@@ -210,9 +231,15 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     public void resetPosition(
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions modulePositions,
-            Pose2d pose) {
+            Pose2d pose,
+            double timestampSeconds) {
         resetOdometry(gyroAngle, modulePositions, pose);
         m_poseBuffer.clear();
+        // keep the current pose in the buffer
+        // System.out.println("add sample at time " + timestampSeconds);
+        m_poseBuffer.addSample(
+                timestampSeconds,
+                new InterpolationRecord(pose, gyroAngle, modulePositions.copy()));
     }
 
     void resetOdometry(
@@ -220,6 +247,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             SwerveDriveWheelPositions modulePositions,
             Pose2d pose) {
         checkLength(modulePositions);
+        // TODO: remove this
         m_poseMeters = pose;
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
         m_previousWheelPositions = modulePositions.copy();
@@ -255,6 +283,25 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             SwerveDriveWheelPositions wheelPositions) {
         checkLength(wheelPositions);
 
+        // the last entry should be the same as m_poseMeters
+        // Entry<Double, InterpolationRecord> lastEntry = m_poseBuffer.lastEntry();
+        // if we're replaying the past, we want the entry right before this one.
+        Entry<Double, InterpolationRecord> lowerEntry = m_poseBuffer.lowerEntry(currentTimeSeconds);
+       
+        if (lowerEntry == null) {
+            // we're at the beginning, or there haven't been any updates in a long
+            // time so the cleaner has removed them all.
+            // there's nothing to apply the wheel position delta to, so just
+            // return something?
+            return m_poseBuffer.ceilingEntry(currentTimeSeconds).getValue().poseMeters;
+        }
+        // these should be the same
+        if (Math.abs(lowerEntry.getValue().poseMeters.getX() - m_poseMeters.getX()) > 0.0000001)
+            throw new IllegalArgumentException(
+                    "blarg " + lowerEntry.getValue().poseMeters.getX() + " " + m_poseMeters.getX());
+        // System.out.printf("%f %f\n", m_poseMeters.getX(),
+        // lastEntry.getValue().poseMeters.getX());
+
         // TODO: this should take tires into account!
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 m_previousWheelPositions,
@@ -269,9 +316,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         Pose2d newPose1 = m_poseMeters.exp(twist);
 
         m_previousWheelPositions = wheelPositions.copy();
+        // System.out.println("new pose " + newPose1.getX());
         m_poseMeters = new Pose2d(newPose1.getTranslation(), angle);
 
         Pose2d newPose = m_poseMeters;
+        // System.out.println("add sample at time " + currentTimeSeconds);
 
         m_poseBuffer.addSample(
                 currentTimeSeconds,
