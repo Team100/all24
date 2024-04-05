@@ -50,4 +50,20 @@ public class Vector2d {
         return new Vector2d(m_x, m_y);
     }
 
+    public double norm() {
+        return Math.hypot(m_x, m_y);
+    }
+
+    public Vector2d plus(Vector2d other) {
+        return new Vector2d(m_x + other.m_x, m_y + other.m_y);
+    }
+
+    public Vector2d minus(Vector2d other) {
+        return new Vector2d(m_x - other.m_x, m_y - other.m_y);
+    }
+
+    public Vector2d times(double a) {
+        return new Vector2d(a * m_x, a * m_y);
+    }
+
 }

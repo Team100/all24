@@ -101,12 +101,14 @@ public class DriveUtil {
     }
 
     /**
-     * NOTE: takes the end angle as the angle, which is wrong
-     * TODO: fix this https://github.com/Team100/all24/issues/352
-     * 
      * Path between start and end is assumed to be a circular arc so the
      * angle of the delta is the angle of the chord between the endpoints,
-     * i.e. the average angle.
+     * i.e. the average angle. This might not be a good assumption if the positional
+     * control is at a lower level, so that the motion is not uniform during the
+     * control period.
+     * 
+     * Note the arc is assumed to be the same length as the chord, though, i.e. the
+     * angles are assumed to be close to each other.
      */
     public static SwerveModulePosition[] modulePositionDelta(
             SwerveDriveWheelPositions start,
@@ -120,6 +122,8 @@ public class DriveUtil {
             SwerveModulePosition endModule = end.positions[i];
             newPositions[i] = new SwerveModulePosition(
                     endModule.distanceMeters - startModule.distanceMeters,
+                    // this change breaks the odometry test on line 66, the 90 degree turn case.
+                    // endModule.angle);
                     endModule.angle.interpolate(startModule.angle, 0.5));
         }
         return newPositions;

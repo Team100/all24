@@ -113,6 +113,8 @@ public class SwerveDriveKinematics100 {
 
     /**
      * INVERSE: chassis speeds -> module states
+     * 
+     * Does not take Tires into account.
      */
     public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
         if (fullStop(chassisSpeeds)) {
@@ -131,7 +133,14 @@ public class SwerveDriveKinematics100 {
      * FORWARD: module states -> chassis speeds
      * 
      * NOTE: do not use the returned omega, use the gyro instead.
+     * 
+     * does not take tires into account
+     * 
+     * TODO: remove this, use exclusively the twist version
+     * 
+     * @deprecated
      */
+    @Deprecated
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... states) {
         checkLength(states);
         // [v cos; v sin; ...] (2n x 1)
@@ -145,6 +154,9 @@ public class SwerveDriveKinematics100 {
      * FORWARD: module deltas -> twist.
      * 
      * NOTE: do not use the returned dtheta, use the gyro instead. 
+     * 
+     * Does not take Tires into account, so you should really call this
+     * with corner deltas not wheel deltas.
      */
     public Twist2d toTwist2d(SwerveModulePosition... deltas) {
         checkLength(deltas);

@@ -63,6 +63,7 @@ public class SwerveDriveKinematicsConstraint100 implements TrajectoryConstraint 
         SwerveDriveKinematics.desaturateWheelSpeeds(wheelSpeeds, m_maxSpeedMetersPerSecond);
 
         // Convert normalized wheel speeds back to chassis speeds
+        // this does not take tires into account.
         ChassisSpeeds normSpeeds = m_kinematics.toChassisSpeeds(wheelSpeeds);
 
         // Return the new linear chassis speed.

@@ -12,6 +12,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
+/**
+ * None of the tests here involve the Tire model.
+ */
 class SwerveKinodynamicsTest {
     private static final double kDelta = 0.001;
 
