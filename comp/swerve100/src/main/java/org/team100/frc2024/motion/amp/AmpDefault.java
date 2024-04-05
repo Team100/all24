@@ -66,6 +66,7 @@ public class AmpDefault extends Command {
             case DOWN:
                 // m_amp.setDutyCycle(-0.3);
                 m_amp.setAmpPosition(0.064230);
+                m_amp.setDutyCycle(0);
                 m_amp.driveFeeder(0);
                 break;
             case OUTTAKE:

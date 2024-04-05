@@ -30,6 +30,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
 public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
+    
     /**
      * Motor resistance, Kraken. Falcon is 0.03.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf

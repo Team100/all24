@@ -57,11 +57,12 @@ public class ShooterDefault extends Command {
                     case TEST:
                         // m_shooter.setAngle(Smart/Dashboard.getNumber("Shooter Angle", 0.2)); //22.5a
                         m_shooter.forward();
-                        m_shooter.setAngle(0.9);
+                        m_shooter.setAngle(0.445);
                         break;
                     case STOP:
                         m_shooter.stop();
                         // m_shooter.setDutyCycle(0.05);
+                        // m_shooter.setPivotPosition(distance);
                         
 
                         break;

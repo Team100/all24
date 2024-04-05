@@ -33,8 +33,8 @@ public class SwerveKinodynamicsFactory {
                 // TODO: measure the comp bot.
                 return new SwerveKinodynamics(
                         5, // max vel m/s
-                        3.5, // max accel m/s/s
-                        50, // max decel m/s/s
+                        3, // max accel m/s/s
+                        10, // max decel m/s/s
                         20, // max module steering rate rad/s
                         60, // max module steering accel rad/s/s
                         0.491, // front wheelbase m

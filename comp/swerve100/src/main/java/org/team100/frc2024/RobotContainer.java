@@ -33,6 +33,7 @@ import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
+import org.team100.frc2024.motion.intake.RunIntake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
 import org.team100.frc2024.motion.shooter.Shooter;
@@ -276,9 +277,12 @@ public class RobotContainer implements Glassy {
 
         // whileTrue(driverControl::test, run);
 
+        // whileTrue(operatorControl::intake,
+        //         new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        //                 () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+
         whileTrue(operatorControl::intake,
-                new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-                        () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+                new RunIntake(m_intake));
 
         whileTrue(operatorControl::outtake,
                 new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
@@ -330,7 +334,7 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(4, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(2.5, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0); // .5
         PIDController omega2Controller = new PIDController(0, 0, 0); // .5
@@ -453,7 +457,7 @@ public class RobotContainer implements Glassy {
                 m_heading,
                 constraints);
 
-        whileTrue(driverControl::test, m_AutoMaker.sibling(Alliance.Blue));
+        whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
         // whileTrue(driverControl::shooterLock,m_AutoMaker.fourNoteAuto(Alliance.Red, swerveKinodynamics, m_sensors));

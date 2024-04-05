@@ -53,7 +53,7 @@ public class VisionDataProvider24 implements Glassy {
      * The error is much worse at very long range but I don't think that
      * matters for us.
      */
-    private static final double kRelativeError = 0.1;
+    private static final double kRelativeError = 0.3;
     /**
      * Time between events in reality and their appearance here; the average
      * end-to-end latency of the camera, detection code, network tables, and rio

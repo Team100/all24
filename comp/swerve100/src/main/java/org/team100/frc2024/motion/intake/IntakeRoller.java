@@ -16,6 +16,7 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Direct-drive roller intake
@@ -29,7 +30,7 @@ import edu.wpi.first.wpilibj.PWM;
  */
 public class IntakeRoller extends Intake {
     // TODO: tune the current limit
-    private static final int kCurrentLimit = 40;
+    private static final int kCurrentLimit = 20;
 
     /**
      * Surface velocity of whatever is turning in the intake.
@@ -47,6 +48,7 @@ public class IntakeRoller extends Intake {
     private final PWM centeringWheels;
     private final LimitedVelocityServo<Distance100> superRollers;
     private int count = 0;
+    private int currentCount = 0;
 
     private final SpeedingVisualization m_viz;
 
@@ -94,9 +96,22 @@ public class IntakeRoller extends Intake {
         if (!m_sensors.getFeederSensor()) {
             count++;
         } else {
-            intakeRoller.setSpeed(-1);
-            centeringWheels.setSpeed(0.2);
-            superRollers.setDutyCycle(1);
+            if(currentCount >= 0){
+                intakeRoller.setSpeed(-1);
+            }
+
+            if(currentCount >= 1){
+                intakeRoller.setSpeed(-1);
+                centeringWheels.setSpeed(0.2);
+
+            }
+
+            if(currentCount >= 2){
+                intakeRoller.setSpeed(-1);
+                centeringWheels.setSpeed(0.2);
+                superRollers.setDutyCycle(1);
+            }
+            
         }
 
         if(count >= 4){
@@ -108,6 +123,8 @@ public class IntakeRoller extends Intake {
 
         }
 
+        currentCount++;
+
     }
 
     @Override
@@ -115,6 +132,11 @@ public class IntakeRoller extends Intake {
         centeringWheels.setSpeed(0.8);
         intakeRoller.setSpeed(-1);
         superRollers.setDutyCycle(0.8);
+    }
+
+    @Override
+    public void resetCurrentCount() {
+        currentCount = 0;
     }
 
     
