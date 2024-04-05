@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.team100.lib.localization.PoseEstimator100;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.Matrix;
@@ -26,18 +27,17 @@ import edu.wpi.first.math.numbers.N3;
  *
  * call addVisionMeasurement} asynchronously.
  */
-public class SwerveDrivePoseEstimator100 {
+public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
+    private static final double kBufferDuration = 1.5;
+
     private final int m_numModules;
     private final SwerveDriveKinematics100 m_kinematics;
+
     private final Matrix<N3, N1> m_q = new Matrix<>(Nat.N3(), Nat.N1());
     private final Matrix<N3, N3> m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
 
-    private static final double kBufferDuration = 1.5;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer = TimeInterpolatableBuffer100
             .createBuffer(kBufferDuration);
-
-
-
 
     /**
      * "current" pose, maintained in update() and resetPosition().
@@ -58,7 +58,6 @@ public class SwerveDrivePoseEstimator100 {
      * maintained in update() and resetPosition()
      */
     SwerveDriveWheelPositions m_previousWheelPositions;
-
 
     /**
      *
@@ -88,34 +87,20 @@ public class SwerveDrivePoseEstimator100 {
             Matrix<N3, N1> visionMeasurementStdDevs) {
         m_numModules = modulePositions.length;
         m_kinematics = kinematics;
-        // m_odometry = new SwerveDriveOdometry100(gyroAngle, modulePositions, initialPoseMeters);
+        // m_odometry = new SwerveDriveOdometry100(gyroAngle, modulePositions,
+        // initialPoseMeters);
 
         m_poseMeters = initialPoseMeters;
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
         m_previousAngle = m_poseMeters.getRotation();
         m_previousWheelPositions = new SwerveDriveWheelPositions(modulePositions).copy();
 
-
         setStdDevs(stateStdDevs, visionMeasurementStdDevs);
     }
 
-    /**
-     * Sets the pose estimator's trust of global measurements. This might be used to
-     * change trust in vision measurements after the autonomous period, or to change
-     * trust as distance to a vision target increases.
-     * 
-     * TODO: get rid of this as a public method, adjust the stdevs on every update.
-     *
-     * @param stateStdDevs             standard deviations of the state. Increase
-     *                                 these numbers to trust the state less, i.e.
-     *                                 allow it to change faster on update.
-     * @param visionMeasurementStdDevs Standard deviations of the vision
-     *                                 measurements. Increase these numbers to trust
-     *                                 global measurements from vision less. This
-     *                                 matrix is in the form [x, y, theta]ᵀ, with
-     *                                 units in meters and radians.
-     */
-    public final void setStdDevs(
+
+    @Override
+    public void setStdDevs(
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         for (int i = 0; i < 3; ++i) {
@@ -152,10 +137,7 @@ public class SwerveDrivePoseEstimator100 {
         return m_poseMeters;
     }
 
-    /**
-     * This is for vision calculations, so that we use the high-accuracy gyro
-     * measurement for the correct time in the past.
-     */
+@Override
     public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
         Optional<InterpolationRecord> sample = m_poseBuffer.getSample(timestampSeconds);
         if (sample.isEmpty())
@@ -164,17 +146,8 @@ public class SwerveDrivePoseEstimator100 {
         return Optional.of(sample.get().poseMeters.getRotation());
     }
 
-    /**
-     * Adds a vision measurement to the Kalman Filter. This will correct the
-     * odometry pose estimate while still accounting for measurement noise.
-     *
-     * This method can be called as infrequently as you want, as long as you are
-     * calling update() periodically.
-     *
-     * @param visionRobotPoseMeters pose as measured by the camera.
-     * @param timestampSeconds      The timestamp of the vision measurement in
-     *                              seconds, same epoch as updateWithTime().
-     */
+
+    @Override
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters,
             double timestampSeconds) {
@@ -288,27 +261,23 @@ public class SwerveDrivePoseEstimator100 {
             SwerveDriveWheelPositions wheelPositions) {
 
         checkLength(wheelPositions);
-        
+
         Rotation2d angle = gyroAngle.plus(m_gyroOffset);
-        
+
         // TODO: this should take tires into account!
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 m_previousWheelPositions,
                 wheelPositions);
         Twist2d twist = m_kinematics.toTwist2d(modulePositionDelta);
         twist.dtheta = angle.minus(m_previousAngle).getRadians();
-        
+
         Pose2d newPose1 = m_poseMeters.exp(twist);
-        
+
         m_previousWheelPositions = wheelPositions.copy();
         m_previousAngle = angle;
         m_poseMeters = new Pose2d(newPose1.getTranslation(), angle);
 
-
-        
         Pose2d newPose = m_poseMeters;
-
-
 
         m_poseBuffer.addSample(
                 currentTimeSeconds,

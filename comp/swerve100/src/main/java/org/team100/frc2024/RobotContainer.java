@@ -62,6 +62,7 @@ import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
+import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -166,10 +167,14 @@ public class RobotContainer implements Glassy {
                 VecBuilder.fill(stateStdDev, stateStdDev, 0.1),
                 VecBuilder.fill(visionStdDev, visionStdDev, Double.MAX_VALUE)); // 0.1 0.1
 
+        // TODO: make this do something
+        FireControl fireControl = new FireControl() {
+        };
+
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 m_layout,
                 poseEstimator,
-                poseEstimator::getSampledRotation);
+                fireControl);
         visionDataProvider.enable();
 
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
