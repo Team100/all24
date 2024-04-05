@@ -92,7 +92,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateAcceleration(dt);
         updateState();
 
-        t.log(Level.TRACE, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
         t.log(Level.DEBUG, m_name, "pose", m_pose);
         t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
 

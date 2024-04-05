@@ -5,8 +5,12 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.localization.PoseEstimator100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -27,8 +31,11 @@ import edu.wpi.first.math.numbers.N3;
  *
  * call addVisionMeasurement} asynchronously.
  */
-public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
+public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private static final double kBufferDuration = 1.5;
+
+    private final Telemetry t = Telemetry.get();
+    private final String m_name;
 
     private final int m_numModules;
     private final SwerveDriveKinematics100 m_kinematics;
@@ -85,10 +92,10 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
             Pose2d initialPoseMeters,
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
+        m_name = Names.name(this);
+
         m_numModules = modulePositions.length;
         m_kinematics = kinematics;
-        // m_odometry = new SwerveDriveOdometry100(gyroAngle, modulePositions,
-        // initialPoseMeters);
 
         m_poseMeters = initialPoseMeters;
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
@@ -97,7 +104,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
 
         setStdDevs(stateStdDevs, visionMeasurementStdDevs);
     }
-
 
     @Override
     public void setStdDevs(
@@ -123,10 +129,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
         }
     }
 
-    public Rotation2d getGyroOffset() {
-        return m_gyroOffset;
-    }
-
     /**
      * Gets the estimated robot pose.
      * 
@@ -137,7 +139,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
         return m_poseMeters;
     }
 
-@Override
+    @Override
     public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
         Optional<InterpolationRecord> sample = m_poseBuffer.getSample(timestampSeconds);
         if (sample.isEmpty())
@@ -145,7 +147,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
         // return Optional.of(sample.get().gyroAngle);
         return Optional.of(sample.get().poseMeters.getRotation());
     }
-
 
     @Override
     public void addVisionMeasurement(
@@ -282,6 +283,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
         m_poseBuffer.addSample(
                 currentTimeSeconds,
                 new InterpolationRecord(newPose, gyroAngle, wheelPositions.copy()));
+
+        t.log(Level.TRACE, m_name, "GYRO OFFSET", m_gyroOffset);
+
         return newPose;
     }
 
@@ -371,6 +375,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100 {
         public int hashCode() {
             return Objects.hash(gyroAngle, wheelPositions, poseMeters);
         }
+    }
+
+    @Override
+    public String getGlassName() {
+        return "SwerveDrivePoseEstimator100";
     }
 
     ///////////////////////////////////////
