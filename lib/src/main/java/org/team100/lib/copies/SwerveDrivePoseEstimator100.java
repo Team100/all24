@@ -29,13 +29,36 @@ import edu.wpi.first.math.numbers.N3;
 public class SwerveDrivePoseEstimator100 {
     private final int m_numModules;
     private final SwerveDriveKinematics100 m_kinematics;
-    private final SwerveDriveOdometry100 m_odometry;
     private final Matrix<N3, N1> m_q = new Matrix<>(Nat.N3(), Nat.N1());
     private final Matrix<N3, N3> m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
 
     private static final double kBufferDuration = 1.5;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer = TimeInterpolatableBuffer100
             .createBuffer(kBufferDuration);
+
+
+
+
+    /**
+     * "current" pose, maintained in update() and resetPosition().
+     */
+    Pose2d m_poseMeters;
+
+    /**
+     * maintained in resetPosition().
+     */
+    Rotation2d m_gyroOffset;
+
+    /**
+     * maintained in update() as gyro angle plus offset.
+     */
+    Rotation2d m_previousAngle;
+
+    /**
+     * maintained in update() and resetPosition()
+     */
+    SwerveDriveWheelPositions m_previousWheelPositions;
+
 
     /**
      *
@@ -65,7 +88,14 @@ public class SwerveDrivePoseEstimator100 {
             Matrix<N3, N1> visionMeasurementStdDevs) {
         m_numModules = modulePositions.length;
         m_kinematics = kinematics;
-        m_odometry = new SwerveDriveOdometry100(kinematics, gyroAngle, modulePositions, initialPoseMeters);
+        // m_odometry = new SwerveDriveOdometry100(gyroAngle, modulePositions, initialPoseMeters);
+
+        m_poseMeters = initialPoseMeters;
+        m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
+        m_previousAngle = m_poseMeters.getRotation();
+        m_previousWheelPositions = new SwerveDriveWheelPositions(modulePositions).copy();
+
+
         setStdDevs(stateStdDevs, visionMeasurementStdDevs);
     }
 
@@ -108,29 +138,8 @@ public class SwerveDrivePoseEstimator100 {
         }
     }
 
-    /**
-     * Resets the robot's position on the field.
-     *
-     * The gyroscope angle does not need to be reset here on the user's robot code.
-     * The library automatically takes care of offsetting the gyro angle.
-     * 
-     * This is called, for example, to align with the field.
-     *
-     * @param gyroAngle      The angle reported by the gyroscope.
-     * @param wheelPositions The current encoder readings.
-     * @param poseMeters     The position on the field that your robot is at.
-     */
-    public void resetPosition(
-            Rotation2d gyroAngle,
-            SwerveDriveWheelPositions wheelPositions,
-            Pose2d poseMeters) {
-        // Reset state estimate and error covariance
-        m_odometry.resetPosition(gyroAngle, wheelPositions, poseMeters);
-        m_poseBuffer.clear();
-    }
-
     public Rotation2d getGyroOffset() {
-        return m_odometry.m_gyroOffset;
+        return m_gyroOffset;
     }
 
     /**
@@ -140,7 +149,7 @@ public class SwerveDrivePoseEstimator100 {
      * update and reading doesn't matter.
      */
     public Pose2d getEstimatedPosition() {
-        return m_odometry.m_poseMeters;
+        return m_poseMeters;
     }
 
     /**
@@ -202,10 +211,11 @@ public class SwerveDrivePoseEstimator100 {
         Pose2d newPose = sample.poseMeters.exp(scaledTwist);
 
         // Step 5: Reset Odometry to state at sample with vision adjustment.
-        // it's super weird that this resets the odometry briefly as part of fixing the history.
+        // it's super weird that this resets the odometry briefly as part of fixing the
+        // history.
         // because we do these two things with two different threads.
         // TODO: blarg
-        m_odometry.resetPosition(
+        resetOdometry(
                 sample.gyroAngle,
                 sample.wheelPositions,
                 newPose);
@@ -225,8 +235,27 @@ public class SwerveDrivePoseEstimator100 {
             double entryTimestampS = entry.getKey();
             Rotation2d entryGyroAngle = entry.getValue().gyroAngle;
             SwerveDriveWheelPositions wheelPositions = entry.getValue().wheelPositions;
-            updateWithTime(entryTimestampS, entryGyroAngle, wheelPositions);
+            update(entryTimestampS, entryGyroAngle, wheelPositions);
         }
+    }
+
+    public void resetPosition(
+            Rotation2d gyroAngle,
+            SwerveDriveWheelPositions modulePositions,
+            Pose2d pose) {
+        resetOdometry(gyroAngle, modulePositions, pose);
+        m_poseBuffer.clear();
+    }
+
+    void resetOdometry(
+            Rotation2d gyroAngle,
+            SwerveDriveWheelPositions modulePositions,
+            Pose2d pose) {
+        checkLength(modulePositions);
+        m_poseMeters = pose;
+        m_previousAngle = m_poseMeters.getRotation();
+        m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
+        m_previousWheelPositions = modulePositions.copy();
     }
 
     /**
@@ -253,12 +282,34 @@ public class SwerveDrivePoseEstimator100 {
      *                           the swerve modules.
      * @return The estimated pose of the robot in meters.
      */
-    public Pose2d updateWithTime(
+    public Pose2d update(
             double currentTimeSeconds,
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions wheelPositions) {
+
         checkLength(wheelPositions);
-        Pose2d newPose = m_odometry.update(currentTimeSeconds, gyroAngle, wheelPositions);
+        
+        Rotation2d angle = gyroAngle.plus(m_gyroOffset);
+        
+        // TODO: this should take tires into account!
+        SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
+                m_previousWheelPositions,
+                wheelPositions);
+        Twist2d twist = m_kinematics.toTwist2d(modulePositionDelta);
+        twist.dtheta = angle.minus(m_previousAngle).getRadians();
+        
+        Pose2d newPose1 = m_poseMeters.exp(twist);
+        
+        m_previousWheelPositions = wheelPositions.copy();
+        m_previousAngle = angle;
+        m_poseMeters = new Pose2d(newPose1.getTranslation(), angle);
+
+
+        
+        Pose2d newPose = m_poseMeters;
+
+
+
         m_poseBuffer.addSample(
                 currentTimeSeconds,
                 new InterpolationRecord(newPose, gyroAngle, wheelPositions.copy()));
@@ -323,7 +374,8 @@ public class SwerveDrivePoseEstimator100 {
 
                 // Create a twist to represent the change based on the interpolated sensor
                 // inputs.
-                // TODO: this should take tires into account since it modifies the pose estimate.
+                // TODO: this should take tires into account since it modifies the pose
+                // estimate.
                 Twist2d twist = m_kinematics.toTwist2d(
                         DriveUtil.modulePositionDelta(wheelPositions, wheelLerp));
                 twist.dtheta = gyroLerp.minus(gyroAngle).getRadians();

@@ -3,6 +3,7 @@ package org.team100.lib.copies;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,8 +28,10 @@ class SwerveDriveOdometry100Test {
 
     private final SwerveDriveKinematics100 m_kinematics = new SwerveDriveKinematics100(m_fl, m_fr, m_bl, m_br);
 
-    private final SwerveDriveOdometry100 m_odometry = new SwerveDriveOdometry100(
-            m_kinematics, new Rotation2d(), new SwerveModulePosition[] { zero, zero, zero, zero }, new Pose2d());
+    private final SwerveDrivePoseEstimator100 m_poseEstimator = new SwerveDrivePoseEstimator100(
+            m_kinematics, new Rotation2d(), new SwerveModulePosition[] { zero, zero, zero, zero },
+            new Pose2d(), VecBuilder.fill(0.1, 0.1, 0.1),
+            VecBuilder.fill(0.1, 0.1, 0.1));
 
     @Test
     void testTwoIterations() {
@@ -40,7 +43,7 @@ class SwerveDriveOdometry100Test {
                 new SwerveModulePosition(0.5, Rotation2d.fromDegrees(0))
         };
 
-        m_odometry.update(
+        m_poseEstimator.update(
                 0.0,
                 new Rotation2d(),
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] {
@@ -49,7 +52,7 @@ class SwerveDriveOdometry100Test {
                         new SwerveModulePosition(),
                         new SwerveModulePosition()
                 }));
-        var pose = m_odometry.update(
+        var pose = m_poseEstimator.update(
                 0.0, new Rotation2d(), new SwerveDriveWheelPositions(wheelDeltas));
 
         assertAll(
@@ -75,9 +78,9 @@ class SwerveDriveOdometry100Test {
         };
         final var zero = new SwerveModulePosition();
 
-        m_odometry.update(0.0, new Rotation2d(),
+        m_poseEstimator.update(0.0, new Rotation2d(),
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { zero, zero, zero, zero }));
-        final var pose = m_odometry.update(0.0, Rotation2d.fromDegrees(90.0),
+        final var pose = m_poseEstimator.update(0.0, Rotation2d.fromDegrees(90.0),
                 new SwerveDriveWheelPositions(wheelDeltas));
 
         // this was chagned because of the change in DriveUtil line 113.
@@ -93,15 +96,15 @@ class SwerveDriveOdometry100Test {
     void testGyroAngleReset() {
         var gyro = Rotation2d.fromDegrees(90.0);
         var fieldAngle = Rotation2d.fromDegrees(0.0);
-        m_odometry.resetPosition(
+        m_poseEstimator.resetOdometry(
                 gyro,
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { zero, zero, zero, zero }),
                 new Pose2d(new Translation2d(), fieldAngle));
         var delta = new SwerveModulePosition();
-        m_odometry.update(0.0, gyro,
+        m_poseEstimator.update(0.0, gyro,
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { delta, delta, delta, delta }));
         delta = new SwerveModulePosition(1.0, Rotation2d.fromDegrees(0));
-        var pose = m_odometry.update(0.0, gyro,
+        var pose = m_poseEstimator.update(0.0, gyro,
                 new SwerveDriveWheelPositions(new SwerveModulePosition[] { delta, delta, delta, delta }));
 
         assertAll(
