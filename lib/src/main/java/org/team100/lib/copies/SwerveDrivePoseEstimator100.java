@@ -49,22 +49,17 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     /**
      * "current" pose, maintained in update() and resetPosition().
      */
-    Pose2d m_poseMeters;
+    private Pose2d m_poseMeters;
 
     /**
      * maintained in resetPosition().
      */
-    Rotation2d m_gyroOffset;
-
-    /**
-     * maintained in update() as gyro angle plus offset.
-     */
-    Rotation2d m_previousAngle;
+    private Rotation2d m_gyroOffset;
 
     /**
      * maintained in update() and resetPosition()
      */
-    SwerveDriveWheelPositions m_previousWheelPositions;
+    private SwerveDriveWheelPositions m_previousWheelPositions;
 
     /**
      *
@@ -99,7 +94,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         m_poseMeters = initialPoseMeters;
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
-        m_previousAngle = m_poseMeters.getRotation();
         m_previousWheelPositions = new SwerveDriveWheelPositions(modulePositions).copy();
 
         setStdDevs(stateStdDevs, visionMeasurementStdDevs);
@@ -227,7 +221,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Pose2d pose) {
         checkLength(modulePositions);
         m_poseMeters = pose;
-        m_previousAngle = m_poseMeters.getRotation();
         m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
         m_previousWheelPositions = modulePositions.copy();
     }
@@ -260,22 +253,22 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             double currentTimeSeconds,
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions wheelPositions) {
-
         checkLength(wheelPositions);
-
-        Rotation2d angle = gyroAngle.plus(m_gyroOffset);
 
         // TODO: this should take tires into account!
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 m_previousWheelPositions,
                 wheelPositions);
         Twist2d twist = m_kinematics.toTwist2d(modulePositionDelta);
-        twist.dtheta = angle.minus(m_previousAngle).getRadians();
+
+        // replace the twist dtheta with one derived from the current pose
+        // pose angle based on the gyro (which is more accurate)
+        Rotation2d angle = gyroAngle.plus(m_gyroOffset);
+        twist.dtheta = angle.minus(m_poseMeters.getRotation()).getRadians();
 
         Pose2d newPose1 = m_poseMeters.exp(twist);
 
         m_previousWheelPositions = wheelPositions.copy();
-        m_previousAngle = angle;
         m_poseMeters = new Pose2d(newPose1.getTranslation(), angle);
 
         Pose2d newPose = m_poseMeters;
