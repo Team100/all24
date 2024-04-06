@@ -38,6 +38,93 @@ class SwerveDrivePoseEstimator100Test {
         assertEquals(0, estimate.getRotation().getRadians(), kDelta);
     }
 
+        @Test
+    void outOfOrder() {
+        // out of order odometry?
+        SwerveDrivePoseEstimator100 poseEstimator = fixture.swerveKinodynamics.newPoseEstimator(
+                GeometryUtil.kRotationZero,
+                positionZero,
+                GeometryUtil.kPoseZero,
+                0, // zero initial time
+                VecBuilder.fill(0.1, 0.1, 0.1),
+                VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE));
+
+        System.out.println("============= 0");
+        poseEstimator.dump();
+
+        // initial pose = 0
+        verify(0, poseEstimator.getEstimatedPosition());
+
+        System.out.println("============= 1");
+        poseEstimator.dump();
+
+        // pose stays zero when updated at time zero
+        // if we try to update zero, there's nothing to compare it to,
+        // so we should just ignore this update.
+        verify(0, poseEstimator.update(0.0, GeometryUtil.kRotationZero,
+                new SwerveDriveWheelPositions(positionZero)));
+
+        System.out.println("============= 2");
+        poseEstimator.dump();
+
+        // now vision says we're one meter away, so pose goes towards that
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.01);
+        verify(0.167, poseEstimator.getEstimatedPosition());
+
+        System.out.println("============= 3");
+        poseEstimator.dump();
+
+        // if we had added this vision measurement here, it would have pulled the
+        // estimate further
+        // poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.015);
+        // verify(0.305, poseEstimator.getEstimatedPosition());
+
+        // wheels haven't moved, so the "odometry opinion" should be zero
+        // but it's not, it's applied relative to the vision update, so there's no
+        // change.
+        verify(0.167, poseEstimator.update(0.02, GeometryUtil.kRotationZero,
+                new SwerveDriveWheelPositions(positionZero)));
+
+        System.out.println("============= 4");
+        poseEstimator.dump();
+
+        // wheels have moved 0.1m in +x, at t=0.04.
+        // the "odometry opinion" should be 0.1 since the last odometry estimate was
+        // 0, but instead odometry is applied relative to the latest estimate, which
+        // was based on vision. so the actual odometry stddev is like *zero*.
+
+        verify(0.267, poseEstimator.update(0.04, GeometryUtil.kRotationZero,
+                new SwerveDriveWheelPositions(position01)));
+
+        System.out.println("============= 5");
+        poseEstimator.dump();
+
+        // here's the delayed update from above, which moves the estimate to 0.305 and
+        // then the odometry is applied on top of that, yielding 0.405.
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.015);
+
+        System.out.println("============= 6");
+        poseEstimator.dump();
+
+        verify(0.405, poseEstimator.getEstimatedPosition());
+
+        // wheels are in the same position as the previous iteration
+        verify(0.405, poseEstimator.update(0.06, GeometryUtil.kRotationZero,
+                new SwerveDriveWheelPositions(position01)));
+
+        // a little earlier than the previous estimate does nothing.
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.014);
+        verify(0.405, poseEstimator.getEstimatedPosition());
+
+        // a little later than the previous estimate works normally.
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.016);
+        verify(0.521, poseEstimator.getEstimatedPosition());
+
+        // wheels not moving -> no change
+        verify(0.521, poseEstimator.update(0.08, GeometryUtil.kRotationZero,
+                new SwerveDriveWheelPositions(position01)));
+    }
+
     @Test
     void minorWeirdness() {
         // weirdness with out-of-order vision updates
@@ -312,6 +399,7 @@ class SwerveDrivePoseEstimator100Test {
 
         for (int offset_direction_degs = 0; offset_direction_degs < 360; offset_direction_degs += 45) {
             for (int offset_heading_degs = 0; offset_heading_degs < 360; offset_heading_degs += 45) {
+                System.out.printf("dir %d head %d\n", offset_direction_degs, offset_heading_degs);
                 var pose_offset = Rotation2d.fromDegrees(offset_direction_degs);
                 var heading_offset = Rotation2d.fromDegrees(offset_heading_degs);
 
@@ -424,6 +512,7 @@ class SwerveDrivePoseEstimator100Test {
             errorSum += error;
 
             t += dt;
+            System.out.printf("%f %f\n", t, estimator.getEstimatedPosition().getX());
         }
 
         assertEquals(

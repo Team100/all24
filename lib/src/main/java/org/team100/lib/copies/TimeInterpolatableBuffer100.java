@@ -49,6 +49,10 @@ public final class TimeInterpolatableBuffer100<T> {
                 historySizeSeconds);
     }
 
+    /**
+     * Add a sample and clean up the stale ones; the cleaner never fully empties the
+     * buffer.
+     */
     public void addSample(double timeSeconds, T sample) {
         cleanUp(timeSeconds);
         m_pastSnapshots.put(timeSeconds, sample);
@@ -136,6 +140,5 @@ public final class TimeInterpolatableBuffer100<T> {
     public Entry<Double, T> ceilingEntry(Double arg0) {
         return m_pastSnapshots.ceilingEntry(arg0);
     }
-    
 
 }
