@@ -11,6 +11,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -44,7 +45,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     /**
      * maintained in resetPosition().
      */
-    private Rotation2d m_gyroOffset;
+    Rotation2d m_gyroOffset;
 
     /**
      *
@@ -131,7 +132,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     public void dump() {
         for (Entry<Double, InterpolationRecord> e : m_poseBuffer.tailMap(0, true).entrySet()) {
-            System.out.printf("%f %f\n", e.getKey(), e.getValue().m_poseMeters.getX());
+            Util.printf("%f %f\n", e.getKey(), e.getValue().m_poseMeters.getX());
         }
     }
 
@@ -144,9 +145,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     }
 
     @Override
-    public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters,
-            double timestampSeconds) {
+    public void addVisionMeasurement(  Pose2d visionRobotPoseMeters, double timestampSeconds) {
         // Step 0: If this measurement is old enough to be outside the pose buffer's
         // timespan, skip.
         try {
@@ -179,9 +178,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         Pose2d newPose = sample.m_poseMeters.exp(scaledTwist);
 
-        // Step 5: Reset Odometry to state at sample with vision adjustment.
+        // Step 5: Adjust the gyro offset so that the adjusted pose is consistent with the unadjusted gyro angle 
         // this should have no effect if you disregard vision angle input
-        
+
         m_gyroOffset = newPose.getRotation().minus(sample.m_gyroAngle);
         t.log(Level.TRACE, m_name, "GYRO OFFSET", m_gyroOffset);
 
