@@ -27,6 +27,10 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * //TODO just make this class use DriveWithProfile2, this should be more of a high level class
+ * Creates a profile to the translation of a note and follows it
+ */
 public class DriveWithProfileNote extends Command100 {
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
