@@ -1,8 +1,11 @@
 package org.team100.lib.util;
 
+import org.team100.lib.copies.SwerveDriveKinematics100;
 import org.team100.lib.geometry.Vector2d;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -25,7 +28,7 @@ public class SlipperyTireUtil {
     /**
      * @param corners current period extrapolated corner deltas
      * @param deltas  current period wheel deltas
-     * @param dtS      current period time delta
+     * @param dtS     current period time delta
      * @return adjusted corner deltas, suitable for forward kinematics
      */
     public SwerveModulePosition[] adjust(
@@ -51,7 +54,7 @@ public class SlipperyTireUtil {
     /**
      * @param corners current period entry corner speeds
      * @param states  current period exit wheel speeds
-     * @param dtS length of the current period
+     * @param dtS     length of the current period
      * @return adjusted corner speeds, suitable for forward kinematics
      */
     public SwerveModuleState[] adjust(
@@ -72,5 +75,14 @@ public class SlipperyTireUtil {
                     new Rotation2d(actual.getX(), actual.getY()));
         }
         return result;
+    }
+
+    public static Vector2d[] cornerDeltas(
+            SwerveDriveKinematics100 kinematics,
+            Pose2d pose0,
+            Pose2d pose1) {
+        Twist2d twist = pose0.log(pose1);
+        SwerveModulePosition[] p = kinematics.toSwerveModulePosition(twist);
+        return kinematics.pos2vec(p);
     }
 }

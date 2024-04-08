@@ -270,11 +270,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         InterpolationRecord value = lowerEntry.getValue();
         Pose2d previousPose = value.m_poseMeters;
 
-        // m_previousWheelPositions = value.wheelPositions;
 
         // TODO: this should take tires into account!
+        
+
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
-                // m_previousWheelPositions,
                 value.m_wheelPositions,
                 wheelPositions);
 

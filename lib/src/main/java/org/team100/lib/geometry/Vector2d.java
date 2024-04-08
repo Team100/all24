@@ -15,8 +15,8 @@ public class Vector2d {
     }
 
     public Vector2d(double hypo, Rotation2d theta) {
-        m_x = hypo * Math.sin(theta.getRadians());
-        m_y = hypo * Math.cos(theta.getRadians());
+        m_x = hypo * Math.cos(theta.getRadians());
+        m_y = hypo * Math.sin(theta.getRadians());
         m_theta = theta;
     }
 
