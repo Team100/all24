@@ -7,6 +7,7 @@ from cscore import CameraServer
 from ntcore import NetworkTableInstance
 import ntcore as nt
 
+from wpimath.geometry import Translation2d
 from picamera2 import Picamera2
 import sys
 import libcamera
@@ -38,6 +39,7 @@ class MouseVision:
         self.height = height
         self.model = model
         self.prev_gray = bwimg
+        self.fps = 0
         self.lk_params = dict(
             winSize=(15, 15),
             maxLevel=2,
@@ -48,7 +50,7 @@ class MouseVision:
             maxCorners=20, qualityLevel=0.3, minDistance=10, blockSize=7
         )
 
-        self.trajectory_len = 20
+        self.trajectory_len = 2
         self.detect_interval = 1
         self.trajectories = []
         self.frame_idx = 0
@@ -106,19 +108,28 @@ class MouseVision:
         # roboRio address. windows machines can impersonate this for simulation.
         self.inst.setServer("10.1.0.2")
 
-        topic_name = "noteVision/" + self.serial
+        topic_name = "mouseVision/" + self.serial
         self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
 
+        self.vision_nt_struct = self.inst.getStructTopic(
+            topic_name + "/Translation2d", Translation2d
+        ).publish()
+
     def analyze(self, request):
         img_yuv = request.make_array("lores")
-        # truncate, ignore chrominance. this makes a view, very fast (300 ns)
         frame = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
+        # frame = cv2.resize(frame, (552,408))
         # this  makes a view, very fast (150 ns)
         # start time to calculate FPS
         start = time.time()
+        metadata = request.get_metadata()
+        sensor_timestamp = metadata["SensorTimestamp"]
+        system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+        time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
+        self.vision_latency.set(time_delta_ms)
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         img = frame.copy()
         # Calculate optical flow for a sparse feature set using thje iterative Lucas-Kanade Method
@@ -169,7 +180,21 @@ class MouseVision:
                 (0, 255, 0),
                 2,
             )
-
+            dy = 0
+            dx = 0
+            average = 0
+            for trjactory in new_trajectories:
+                x = (trjactory[1][0] - trjactory[0][0]) * self.fps
+                dx += x
+                y = (trjactory[1][1] - trjactory[0][1]) * self.fps
+                dy += y
+                average += 1
+            if len(new_trajectories) > 0:
+                averageX = dx / average
+                averageY = dy / average
+                # Puts it up in robot cords
+                self.vision_nt_struct.set(Translation2d(averageY,averageX))
+                print("DX: " + str(averageX) + " DY: " + str(averageY))
         # Update interval - When to update and detect new features
         if self.frame_idx % self.detect_interval == 0:
             mask = np.zeros_like(frame_gray)
@@ -192,11 +217,17 @@ class MouseVision:
         # End time
         end = time.time()
         # calculate the FPS for current frame detection
-        fps = 1 / (end - start)
-
+        self.fps = 1 / (end - start)
+        self.vision_fps.set(self.fps)
         # Show Results
         cv2.putText(
-            img, f"{fps:.2f} FPS", (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
+            img,
+            f"{self.fps:.2f} FPS",
+            (20, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
         )
         self.output_stream.putFrame(img)
 
@@ -239,8 +270,8 @@ def main():
         fullwidth = 1456  # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
-        width = 1456
-        height = 1088
+        width = 273
+        height = 204
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100
@@ -264,17 +295,21 @@ def main():
             # these manual controls are useful sometimes but turn them off for now
             # because auto mode seems fine
             # fast shutter means more gain
-            # "AnalogueGain": 8.0,
+            "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # 3/23/24, reduced to 2ms, even less blur.
-            "ExposureTime": 2000,
-            "AnalogueGain": 8,
+            "ExposureTime": 1000,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-            # "ScalerCrop":(0,0,width/2,height/2),
+            "ScalerCrop": (
+                int((fullwidth - width) / 2),
+                int((fullheight - height) / 2),
+                width,
+                height,
+            ),
         },
     )
 
