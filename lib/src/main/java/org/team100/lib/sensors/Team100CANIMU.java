@@ -1,4 +1,4 @@
-package frc.robot;
+package org.team100.lib.sensors;
 
 import edu.wpi.first.hal.CANData;
 import edu.wpi.first.util.sendable.Sendable;
