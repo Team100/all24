@@ -1,5 +1,6 @@
 package org.team100.lib.indicator;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +21,27 @@ import edu.wpi.first.wpilibj.util.Color;
  * red-green-blue, so the colors need some fixing up.
  */
 public class LEDIndicator {
+
+    private static final int kStripLength = 256;
+    private static final double brightnessScaler = 50.0/255.0;
+    private State currentColor;
+    
+
     /**
      * Maps indicator colors to WS2811 colors.
      */
     public enum State {
+
+//         BLACK(new Color((int)(0*brightnessScaler), (int)(0*brightnessScaler), (int)(0*brightnessScaler))),
+//         RED(new Color((int)(255*brightnessScaler), (int)(0*brightnessScaler), (int)(0*brightnessScaler))),
+//         GREEN(new Color((int)(0*brightnessScaler), (int)(255*brightnessScaler), (int)(0*brightnessScaler))),
+//         BLUE(new Color((int)(0*brightnessScaler),(int)(0*brightnessScaler),(int)(255*brightnessScaler))),
+//         PURPLE(new Color((int)(255*brightnessScaler), (int)(0*brightnessScaler), (int)(255*brightnessScaler))),
+//         YELLOW(new Color((int)(255*brightnessScaler), (int)(255*brightnessScaler), (int)(0*brightnessScaler))),
+//         WHITE(new Color ((int)(255*brightnessScaler),(int)(255*brightnessScaler),(int)(255*brightnessScaler))),
+//         ORANGE(new Color((int)(255*brightnessScaler), (int)(80*brightnessScaler), (int)(0*brightnessScaler)));
+
+
         BLACK(Color.kBlack),
         RED(Color.kRed),
         BLUE(Color.kBlue),
@@ -37,6 +55,7 @@ public class LEDIndicator {
          * This "color" is what we tell the LED strip to make it display the actual
          * desired color.
          */
+
         private final Color color;
 
         /**
@@ -87,7 +106,12 @@ public class LEDIndicator {
         buffer = new AddressableLEDBuffer(length);
         led.setData(buffer);
         led.start();
+
+        set(State.BLACK);
+
+
         m_flashing = false;
+
     }
 
     public void setFront(State s) {
@@ -102,6 +126,29 @@ public class LEDIndicator {
         m_flashing = flashing;
     }
 
+    public void setStripRainbow(LEDStrip strip){
+        Patterns.rainbow(strip, buffer);  
+
+    }
+
+    public void displayTeam100() {
+        AddressableLEDBuffer buffer = new AddressableLEDBuffer(kStripLength);
+        for (int i = 0; i < kStripLength; i++) {
+            if( Arrays.asList(165,153,154,155,156,157,158,138,139,140,141,129,134,122,123,124,125,106,107,108,109,97,102,90,91,92,93).contains(i) ){
+                currentColor = State.WHITE;
+            }
+            else {
+                currentColor = State.ORANGE;
+            }
+            buffer.setLED(i, currentColor.color);
+        }
+        led.setData(buffer);
+    }
+  
+    public void setStripChase(LEDStrip strip){
+        Color[] colors = {new Color(), new Color()};
+        Patterns.chase(colors, strip, buffer);  
+      
     /**
      * Periodic does all the real work in this class.
      */
@@ -110,6 +157,7 @@ public class LEDIndicator {
         for (LEDStrip strip : m_backStrips) {
             strip.solid(buffer, m_back.color);
         }
+
 
         // front depends on flashing state
         // if (m_flashing) {
