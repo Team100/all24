@@ -1,0 +1,304 @@
+{
+  "Docking": {
+    "Data": [
+      "DockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,16 Size=1666,740 CentralNode=1"
+    ]
+  },
+  "MainWindow": {
+    "GLOBAL": {
+      "fps": "120",
+      "height": "741",
+      "maximized": "0",
+      "style": "0",
+      "userScale": "2",
+      "width": "1403",
+      "xpos": "187",
+      "ypos": "201"
+    }
+  },
+  "Table": {
+    "0x542B5671,2": {
+      "Column 0  Width": "265",
+      "Column 1  Width": "203",
+      "RefScale": "10"
+    },
+    "0x886CDEDE,2": {
+      "Column 0  Width": "100",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "10"
+    },
+    "0x965B9C9E,2": {
+      "Column 0  Width": "100",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "10"
+    },
+    "0xD5C61D1D,2": {
+      "Column 0  Width": "100",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "10"
+    },
+    "0xE56EC1C2,4": {
+      "Column 0  Weight": "1.0000",
+      "Column 1  Weight": "1.0000",
+      "Column 2  Weight": "1.0000",
+      "Column 3  Weight": "1.0000"
+    }
+  },
+  "Window": {
+    "###/FMSInfo": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "145,140"
+    },
+    "###/SmartDashboard/AutoNoteDetection": {
+      "Collapsed": "0",
+      "Pos": "10,26",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/DriveToNoteWithRotation": {
+      "Collapsed": "0",
+      "Pos": "12,77",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Driver Skill Level": {
+      "Collapsed": "0",
+      "Pos": "13,127",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/DrumShooter": {
+      "Collapsed": "0",
+      "Pos": "687,474",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/FlushOften": {
+      "Collapsed": "0",
+      "Pos": "12,177",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Front Left_SwerveModule100": {
+      "Collapsed": "0",
+      "Pos": "1204,491",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/FullStateTrajectoryFollower": {
+      "Collapsed": "0",
+      "Pos": "13,229",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/HeedVision": {
+      "Collapsed": "0",
+      "Pos": "12,279",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Intake": {
+      "Collapsed": "0",
+      "Pos": "687,473",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/IntakeRoller": {
+      "Collapsed": "0",
+      "Pos": "892,473",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Manual Drive Mode": {
+      "Collapsed": "0",
+      "Pos": "12,328",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/OscillateDirect": {
+      "Collapsed": "0",
+      "Pos": "13,378",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/OscillateTheta": {
+      "Collapsed": "0",
+      "Pos": "14,428",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Shooter": {
+      "Collapsed": "0",
+      "Pos": "890,472",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/StickyHeading": {
+      "Collapsed": "0",
+      "Pos": "15,477",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Swerve Viz Front Left_SimulatedSwerveModule10": {
+      "Collapsed": "0",
+      "Pos": "811,61",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz Front Right_SimulatedSwerveModule": {
+      "Collapsed": "0",
+      "Pos": "1021,61",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz Rear Left_SimulatedSwerveModule100": {
+      "Collapsed": "0",
+      "Pos": "812,265",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz Rear Right_SimulatedSwerveModule10": {
+      "Collapsed": "0",
+      "Pos": "1021,266",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz Simulate": {
+      "Collapsed": "0",
+      "Pos": "662,158",
+      "Size": "308,164"
+    },
+    "###/SmartDashboard/Swerve Viz Simulated": {
+      "Collapsed": "0",
+      "Pos": "298,169",
+      "Size": "306,164"
+    },
+    "###/SmartDashboard/Swerve Viz SimulatedS": {
+      "Collapsed": "0",
+      "Pos": "254,337",
+      "Size": "382,145"
+    },
+    "###/SmartDashboard/Swerve Viz/Front Left_SimulatedSwerveModule10": {
+      "Collapsed": "0",
+      "Pos": "691,228",
+      "Size": "110,112"
+    },
+    "###/SmartDashboard/Swerve Viz/Front Right_SimulatedSwerveModule": {
+      "Collapsed": "0",
+      "Pos": "804,229",
+      "Size": "106,114"
+    },
+    "###/SmartDashboard/Swerve Viz/Rear Left_SimulatedSwerveModule100": {
+      "Collapsed": "0",
+      "Pos": "687,350",
+      "Size": "114,118"
+    },
+    "###/SmartDashboard/Swerve Viz/Rear Right_SimulatedSwerveModule10": {
+      "Collapsed": "0",
+      "Pos": "806,349",
+      "Size": "109,115"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Front Left_Sw": {
+      "Collapsed": "0",
+      "Pos": "1115,68",
+      "Size": "199,200"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Front Right_": {
+      "Collapsed": "0",
+      "Pos": "1315,66",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Rear Left_Swer": {
+      "Collapsed": "0",
+      "Pos": "1115,269",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Swerve Viz/Swerve Modules_Rear Right_Sw": {
+      "Collapsed": "0",
+      "Pos": "1316,269",
+      "Size": "200,200"
+    },
+    "###/SmartDashboard/Telemetry Level": {
+      "Collapsed": "0",
+      "Pos": "15,527",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/Triangulate": {
+      "Collapsed": "0",
+      "Pos": "16,578",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseClosedLoopVelocity": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseInitialVelocity": {
+      "Collapsed": "0",
+      "Pos": "16,628",
+      "Size": "200,48"
+    },
+    "###/SmartDashboard/UseSetpointGenerator": {
+      "Collapsed": "0",
+      "Pos": "16,678",
+      "Size": "200,48"
+    },
+    "###/field": {
+      "Collapsed": "0",
+      "Pos": "689,21",
+      "Size": "400,200"
+    },
+    "###NetworkTables": {
+      "Collapsed": "0",
+      "Pos": "238,27",
+      "Size": "438,471"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "93,364",
+      "Size": "475,338"
+    },
+    "###NetworkTables Log": {
+      "Collapsed": "0",
+      "Pos": "37,204",
+      "Size": "811,381"
+    },
+    "###NetworkTables Settings": {
+      "Collapsed": "0",
+      "Pos": "20,21",
+      "Size": "258,148"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "680,58",
+      "Size": "569,234"
+    },
+    "###Plot <1>": {
+      "Collapsed": "0",
+      "Pos": "964,278",
+      "Size": "546,224"
+    },
+    "About": {
+      "Collapsed": "0",
+      "Pos": "87,237",
+      "Size": "233,112"
+    },
+    "Dear ImGui Debug Log": {
+      "Collapsed": "0",
+      "Pos": "78,96",
+      "Size": "503,480"
+    },
+    "Dear ImGui Demo": {
+      "Collapsed": "0",
+      "Pos": "650,20",
+      "Size": "550,680"
+    },
+    "Dear ImGui Metrics/Debugger": {
+      "Collapsed": "0",
+      "Pos": "788,72",
+      "Size": "361,471"
+    },
+    "Debug##Default": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "400,400"
+    },
+    "DockSpaceViewport_11111111": {
+      "Collapsed": "0",
+      "Pos": "0,16",
+      "Size": "1666,740"
+    },
+    "Example: Console": {
+      "Collapsed": "0",
+      "Pos": "755,49",
+      "Size": "520,523"
+    },
+    "Example: Log": {
+      "Collapsed": "0",
+      "Pos": "80,153",
+      "Size": "500,400"
+    }
+  }
+}

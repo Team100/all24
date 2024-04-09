@@ -10,55 +10,48 @@ import edu.wpi.first.math.geometry.Translation3d;
 /**
  * Represents all the cameras. Some may be mounted on one robot, some on
  * another. Keep this up to date when you move cameras around.
+ * //TODO for delta you need correct serial numbers, put them here
  */
 public enum Camera {
+
     /**
-     * BETA front
+     * Delta shooter
      */
-    A("10000000caeaae82",
+    //TODO get real y offset
+    SHOOTER("10000000a7a892c0", 
             new Transform3d(
-                    new Translation3d(.1625, 0.0889, 0.762),
-                    new Rotation3d(0, Math.toRadians(-18), 0))),
+                    new Translation3d(-0.1265, 0.0682,  0.612),
+                    new Rotation3d(0, Math.toRadians(-25), Math.toRadians(-2)))),
+
     /**
-     * BETA back
+     * Delta amp-placer
      */
-    B("1000000013c9c96c",
+    RIGHTAMP("10000000caeaae82",
+    //TODO get real y offset
             new Transform3d(
-                    new Translation3d(0.1825, -0.06985, 0.76),
-                    new Rotation3d(0, Math.toRadians(-24), Math.PI))),
+                    new Translation3d(-0.1265, -0.1063625, 0.61),
+                    new Rotation3d(0, Math.toRadians(-26), Math.toRadians(-63)))),
+
     /**
-     * 
+     * Delta amp-placer
      */
-    C("10000000a7c673d9",
+    LEFTAMP("100000004e0a1fb9",
+    //TODO get real y offset
             new Transform3d(
-                    new Translation3d(0, 0, 0.75),
-                    new Rotation3d(0, Math.toRadians(30), 0))),
+                    new Translation3d(-0.1265,  0.1532, 0.61),
+                    new Rotation3d(0, Math.toRadians(-22 ), Math.toRadians(59)))),
     /**
-     * Gamma shooter
+     * Delta intake
      */
-    SHOOTER("10000000a7c673da",
+    GAME_PIECE("1000000013c9c96c",
             new Transform3d(
-                    new Translation3d(.09, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-20), 0))),
-    /**
-     * Gamma amp-placer
-     */
-    AMP("10000000a7c673db",
-            new Transform3d(
-                    new Translation3d(-0.03, -.2748, 0.5),
-                    new Rotation3d(0, Math.toRadians(-40), Math.PI))),
-    /**
-     * Gamma intake
-     */
-    GAME_PIECE("10000000e31d4a24",
-            new Transform3d(
-                    new Translation3d(-0.321, -0.04, .29),
-                    new Rotation3d(0, Math.toRadians(27), Math.PI))),
+                    new Translation3d(-0.1265, 0.03, 0.61),
+                    new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
     
-    G("10000000a7a892c0",
-            new Transform3d(
-                    new Translation3d(0, 0, 1),
-                    new Rotation3d(0, Math.toRadians(30), 0))),           
+    // G("10000000a7a892c0",
+    //         new Transform3d(
+    //                 new Translation3d(0, 0, 1),
+    //                 new Rotation3d(0, Math.toRadians(30), 0))),           
 
     TEST1("test1",
             new Transform3d(

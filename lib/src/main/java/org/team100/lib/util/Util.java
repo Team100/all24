@@ -10,6 +10,7 @@ public class Util {
         return true;
     }
 
+    /** This exists to make it clear which println statements to keep. */
     public static void println(String s) {
         System.out.println(s);
     }

@@ -1,7 +1,6 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.frc2024.SensorInterface;
-import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.lib.config.Identity;
 
 /**
@@ -13,7 +12,7 @@ public class IntakeFactory {
             case COMP_BOT:
             case BETA_BOT:
             default:
-                return new IntakeRoller(sensors, 27, 4, 6 ); //Definitely real numbers
+                return new IntakeRoller(sensors, 28, 4, 5 ); //Definitely real numbers
         }
     }
 

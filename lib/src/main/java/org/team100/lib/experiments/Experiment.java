@@ -33,5 +33,31 @@ public enum Experiment {
      * Pay attention to camera input. It's useful to turn this off for testing and
      * calibration.
      */
-    HeedVision
+    HeedVision,
+    /**
+     * Control heading when manually steering in snaps mode, to prevent
+     * rotational drifting.
+     */
+    StickyHeading,
+    /**
+     * Drive to note turns toward the note
+     */
+    DriveToNoteWithRotation,
+    /**
+     * Use note detection in auto
+     */
+    AutoNoteDetection,
+    /**
+     * Use full state feedback for trajectory following
+     */
+    FullStateTrajectoryFollower,
+    /**
+     * Compensate for drive/steer coupling
+     * https://docs.google.com/document/d/1Zm6VpteqNMmT0VaTDhN5U6-jF3VS11uCoykzZUIGQdU/edit
+     */
+    DriveSteerCouplingCompensation,
+    /**
+     * Use softer vision update gains
+     */
+    AvoidVisionJitter
 }

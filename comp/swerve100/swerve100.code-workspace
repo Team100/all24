@@ -20,6 +20,12 @@
         "editor.detectIndentation": false,
         "java.debug.settings.onBuildFailureProceed": true,
         "editor.parameterHints.cycle": false,
-        "java.signatureHelp.enabled": false
+        "java.signatureHelp.enabled": false,
+        "java.saveActions.organizeImports": false,
+        "debug.console.fontSize": 16,
+        "workbench.colorCustomizations": {
+            "debugConsole.infoForeground":"#000000"
+        },
+        "debug.console.fontFamily": "courier"
     }
 }

@@ -1,15 +1,12 @@
 package org.team100.frc2024.motion.drivetrain;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -71,14 +68,12 @@ public class DriveToWithAutoStart extends Command100 {
 
     @Override
     public void initialize100() {
-        System.out.println("DRIVE TO WAYPOINT");
         Pose2d startPose = m_swerve.getPose();
         Translation2d startTranslation = new Translation2d();
         Translation2d endTranslation = m_goalWaypoint.getTranslation();
         Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
                 angleToGoal);
-
 
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
@@ -132,8 +127,6 @@ public class DriveToWithAutoStart extends Command100 {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("DRIVE TO FINISHED");
-
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

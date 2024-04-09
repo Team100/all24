@@ -6,12 +6,10 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
-
-
+import com.revrobotics.CANSparkMax;
 
 /**
  * Arm motor from 2023.
@@ -21,12 +19,13 @@ import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 public class JointMotor implements Motor100<Angle100> {
     /** Very much not calibrated. */
     private static final double kV = 0.1;
+    private static final double kTNm_amp = 0.02; // https://motors.vex.com/
     private final Telemetry t = Telemetry.get();
     private final CANSparkMax m_motor;
     private final String m_name;
 
     /**
-     * @param name may not start with a slash.
+     * @param name         may not start with a slash.
      * @param canId
      * @param currentLimit
      */
@@ -35,7 +34,7 @@ public class JointMotor implements Motor100<Angle100> {
             throw new IllegalArgumentException();
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
-        
+
         m_motor.setSmartCurrentLimit(currentLimit);
         m_motor.setSecondaryCurrentLimit(currentLimit);
         m_motor.setIdleMode(IdleMode.kBrake);
@@ -55,10 +54,30 @@ public class JointMotor implements Motor100<Angle100> {
 
     /**
      * Velocity is just kV feedforward and that's all.
+     * 
+     * @param velocity used with kV to get duty cycle
+     * @param accel    ignored
      */
     @Override
     public void setVelocity(double velocity, double accel) {
         m_motor.set(kV * velocity);
+    }
+
+    /**
+     * Velocity is just kV feedforward and that's all.
+     * 
+     * @param velocity used with kV to get duty cycle
+     * @param accel    ignored
+     * @param torque   ignored
+     */
+    @Override
+    public void setVelocity(double velocity, double accel, double torque) {
+        m_motor.set(kV * velocity);
+    }
+
+    @Override
+    public double getTorque() {
+        return kTNm_amp * m_motor.getOutputCurrent();
     }
 
     @Override
@@ -75,5 +94,4 @@ public class JointMotor implements Motor100<Angle100> {
     public void periodic() {
         //
     }
-
 }

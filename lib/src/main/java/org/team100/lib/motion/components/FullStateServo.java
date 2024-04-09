@@ -1,6 +1,7 @@
 package org.team100.lib.motion.components;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
@@ -18,7 +19,7 @@ import edu.wpi.first.math.controller.PIDController;
  * It is essential to call reset() before first use and after disuse, to prevent
  * transients.
  */
-public class FullStateServo<T extends Measure100> {
+public class FullStateServo<T extends Measure100> implements Glassy {
     // private static final double kDeadband = 0.03;
 
     private final Telemetry t = Telemetry.get();
@@ -152,4 +153,11 @@ public class FullStateServo<T extends Measure100> {
     public void periodic() {
         m_encoder.periodic();
     }
+
+    @Override
+    public String getGlassName() {
+        return "FullStateServo";
+    }
+
+    
 }

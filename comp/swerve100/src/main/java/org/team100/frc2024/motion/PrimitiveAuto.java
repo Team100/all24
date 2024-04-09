@@ -3,25 +3,14 @@ package org.team100.frc2024.motion;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
-import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
-import org.team100.lib.commands.drivetrain.DriveWithTrajectory;
-import org.team100.lib.commands.drivetrain.Rotate;
-import org.team100.lib.commands.drivetrain.RotateTo180;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.proto.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 
@@ -45,7 +34,7 @@ public class PrimitiveAuto extends SequentialCommandGroup {
     
 
     addCommands(
-        new DriveToWaypoint100(goal, m_drive, planner, pidfController, limits, () -> ShooterUtil.getRobotRotationToSpeaker(goal.getTranslation(), 0.25))
+        // new DriveToWaypoint100(goal, m_drive, planner, pidfController, limits, () -> ShooterUtil.getRobotRotationToSpeaker(goal.getTranslation(), 0.25, 1))
         // new DriveToWaypoint3(goal, m_drive, maker, new HolonomicDriveController3())
         // new ParallelDeadlineGroup(new DriveBackwards(m_drive, 0.05), new IntakeWithSensor()),
         // new DriveSimple(m_drive, shooterLock),

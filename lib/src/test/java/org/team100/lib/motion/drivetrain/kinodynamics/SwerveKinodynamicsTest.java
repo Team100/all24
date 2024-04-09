@@ -6,12 +6,16 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
+/**
+ * None of the tests here involve the Tire model.
+ */
 class SwerveKinodynamicsTest {
     private static final double kDelta = 0.001;
 
@@ -20,7 +24,7 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveV = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
         assertEquals(1, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -36,7 +40,7 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveV = 4;
-        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -52,7 +56,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double driveV = 4;
-        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -68,7 +72,7 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveA = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -85,7 +89,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double driveA = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -103,7 +107,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double vcg = 0.3;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, 1, 1, 1, 20 * Math.PI, track, wheelbase, vcg);
+        SwerveKinodynamics k = new SwerveKinodynamics(1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, vcg);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double fulcrum = Math.min(track / 2, wheelbase / 2);
@@ -391,32 +395,32 @@ class SwerveKinodynamicsTest {
             double x2 = Math.abs(i2.vxMetersPerSecond);
             double x1 = Math.abs(i1.vxMetersPerSecond);
             if (x2 > x1 + 1e-6) {
-                // System.out.printf("X high %.8f %.8f\n", x2, x1);
+                Util.printf("X high %.8f %.8f\n", x2, x1);
                 dump(i, s, i1, i2);
             }
             // but i1 shouldn't be *too* much faster.
             if ((x2 - x1) / x1 > 0.1) {
-                // System.out.printf("X low %.8f %.8f\n", x2, x1);
+                Util.printf("X low %.8f %.8f\n", x2, x1);
                 dump(i, s, i1, i2);
             }
             double y2 = Math.abs(i2.vyMetersPerSecond);
             double y1 = Math.abs(i1.vyMetersPerSecond);
             if (y2 > y1 + 1e-6) {
-                // System.out.printf("Y high %.8f %.8f\n", y2, y1);
+                Util.printf("Y high %.8f %.8f\n", y2, y1);
                 dump(i, s, i1, i2);
             }
             if ((y2 - y1) / y1 > 0.1) {
-                // System.out.printf("Y low %.8f %.8f\n", y2, y1);
+                Util.printf("Y low %.8f %.8f\n", y2, y1);
                 dump(i, s, i1, i2);
             }
             double o2 = Math.abs(i2.omegaRadiansPerSecond);
             double o1 = Math.abs(i1.omegaRadiansPerSecond);
             if (o2 > o1 + 1e-6) {
-                // System.out.printf("omega high %.8f %.8f\n", o2, o1);
+                Util.printf("omega high %.8f %.8f\n", o2, o1);
                 dump(i, s, i1, i2);
             }
             if ((o2 - o1) / o1 > 0.1) {
-                // System.out.printf("omega low %.8f %.8f\n", o2, o1);
+                Util.printf("omega low %.8f %.8f\n", o2, o1);
                 dump(i, s, i1, i2);
             }
         }
@@ -446,32 +450,32 @@ class SwerveKinodynamicsTest {
             double x2 = Math.abs(i2.vxMetersPerSecond);
             double x1 = Math.abs(i1.vxMetersPerSecond);
             if (x2 > x1 + 1e-6) {
-                // System.out.printf("X high %.8f %.8f\n", x2, x1);
+                Util.printf("X high %.8f %.8f\n", x2, x1);
                 dump(i, s, i1, i2);
             }
             // but i1 shouldn't be *too* much faster.
             if ((x2 - x1) / x1 > 0.1) {
-                // System.out.printf("X low %.8f %.8f\n", x2, x1);
+                Util.printf("X low %.8f %.8f\n", x2, x1);
                 dump(i, s, i1, i2);
             }
             double y2 = Math.abs(i2.vyMetersPerSecond);
             double y1 = Math.abs(i1.vyMetersPerSecond);
             if (y2 > y1 + 1e-6) {
-                // System.out.printf("Y high %.8f %.8f\n", y2, y1);
+                Util.printf("Y high %.8f %.8f\n", y2, y1);
                 dump(i, s, i1, i2);
             }
             if ((y2 - y1) / y1 > 0.1) {
-                // System.out.printf("Y low %.8f %.8f\n", y2, y1);
+                Util.printf("Y low %.8f %.8f\n", y2, y1);
                 dump(i, s, i1, i2);
             }
             double o2 = Math.abs(i2.omegaRadiansPerSecond);
             double o1 = Math.abs(i1.omegaRadiansPerSecond);
             if (o2 > o1 + 1e-6) {
-                // System.out.printf("omega high %.8f %.8f\n", o2, o1);
+                Util.printf("omega high %.8f %.8f\n", o2, o1);
                 dump(i, s, i1, i2);
             }
             if ((o2 - o1) / o1 > 0.1) {
-                // System.out.printf("omega low %.8f %.8f\n", o2, o1);
+                Util.printf("omega low %.8f %.8f\n", o2, o1);
                 dump(i, s, i1, i2);
             }
         }
@@ -608,7 +612,7 @@ class SwerveKinodynamicsTest {
     }
 
     private void dump(int i, ChassisSpeeds s, ChassisSpeeds i1, ChassisSpeeds i2) {
-        System.out.printf("%d -- IN: %s OUT1: %s OUT2: %s\n", i, s, i1, i2);
+        Util.printf("%d -- IN: %s OUT1: %s OUT2: %s\n", i, s, i1, i2);
     }
 
 }

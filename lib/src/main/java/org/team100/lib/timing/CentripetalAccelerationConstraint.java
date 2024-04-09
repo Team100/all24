@@ -5,14 +5,23 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 /**
  * Velocity limit based on curvature and centripetal acceleration limit, which
- * is taken to be the capsize limit.
+ * is taken to be the capsize limit (scaled).
  */
 public class CentripetalAccelerationConstraint implements TimingConstraint {
     // m/s^2
     final double mMaxCentripetalAccel;
 
-    public CentripetalAccelerationConstraint(SwerveKinodynamics limits) {
-        mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2();
+    /**
+     * Use the factory.
+     * 
+     * @param limits absolute maxima
+     * @param scale  apply to the maximum capsize accel to get the actual
+     *               constraint. this is useful to slow down trajectories in
+     *               sharp curves, which makes odometry more accurate and reduces
+     *               the effect of steering lag.
+     */
+    CentripetalAccelerationConstraint(SwerveKinodynamics limits, double scale) {
+        mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2() * scale;
     }
 
     @Override
@@ -21,8 +30,8 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
     }
 
     /**
-     * The capsize limit is not applied here, this just handles "cross track"
-     * acceleration.
+     * The capsize limit is not applied to acceleration along the path. This
+     * constraint only handles "cross track" acceleration.
      */
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {

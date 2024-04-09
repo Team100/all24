@@ -1,5 +1,6 @@
 package org.team100.lib.telemetry;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.timing.TimedPose;
@@ -21,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -75,7 +78,7 @@ public class Telemetry {
             this.priority = priority;
         }
 
-        boolean admit(Level other) {
+        public boolean admit(Level other) {
             return this.priority >= other.priority;
         }
     }
@@ -110,13 +113,13 @@ public class Telemetry {
         // set this to SILENT unless you want the logs for analysis
 
         Util.warn("Setting default telemetry to DEBUG.  Fix this for comp.");
-        m_levelChooser.setDefaultOption(Level.DEBUG.name(), Level.DEBUG);
+        m_levelChooser.setDefaultOption(Level.TRACE.name(), Level.TRACE);
         // m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
-
 
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
         m_levelUpdater = new Notifier(this::updateLevel);
+        m_levelUpdater.setName("Telemetry Level Updater Notifier");
         m_levelUpdater.startPeriodic(1);
         DataLogManager.start();
     }
@@ -133,8 +136,7 @@ public class Telemetry {
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);
-        if (kAlsoPrint)
-            Util.println(key + ": " + val);
+        print(key, val);
         pub(key, k -> {
             BooleanTopic t = inst.getBooleanTopic(k);
             t.publish();
@@ -159,12 +161,28 @@ public class Telemetry {
                 e -> consumer.accept(e.valueData.value.getDouble()));
     }
 
-    public void log(Level level, String root, String leaf, double val) {
+    public void log(Level level, String root, String leaf, Double val) {
+        if (val == null)
+            return;
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);
-        if (kAlsoPrint)
-            Util.println(key + ": " + val);
+        print(key, val);
+        pub(key, k -> {
+            DoubleTopic t = inst.getDoubleTopic(k);
+            t.publish();
+            t.setRetained(true);
+            return t.publish();
+        }, DoublePublisher.class).set(val);
+    }
+
+    public void log(Level level, String root, String leaf, float val) {
+        // if(val == null)
+        // return;
+        if (!m_level.admit(level))
+            return;
+        String key = Telemetry.append(root, leaf);
+        print(key, val);
         pub(key, k -> {
             DoubleTopic t = inst.getDoubleTopic(k);
             t.publish();
@@ -177,8 +195,7 @@ public class Telemetry {
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);
-        if (kAlsoPrint)
-            Util.println(key + ": " + val);
+        print(key, val);
         pub(key, k -> {
             DoubleArrayTopic t = inst.getDoubleArrayTopic(k);
             t.publish();
@@ -191,8 +208,7 @@ public class Telemetry {
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);
-        if (kAlsoPrint)
-            Util.println(key + ": " + val);
+        print(key, val);
         pub(key, k -> {
             IntegerTopic t = inst.getIntegerTopic(k);
             t.publish();
@@ -205,8 +221,7 @@ public class Telemetry {
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);
-        if (kAlsoPrint)
-            Util.println(key + ": " + val);
+        print(key, val);
         pub(key, k -> {
             StringTopic t = inst.getStringTopic(k);
             t.publish();
@@ -220,8 +235,7 @@ public class Telemetry {
         if (!m_level.admit(level))
             return;
         String key = Telemetry.append(root, leaf);
-        if (kAlsoPrint)
-            Util.println(key + ": " + val);
+        print(key, val);
         pub(key, k -> {
             StringArrayTopic t = inst.getStringArrayTopic(k);
             t.publish();
@@ -242,6 +256,12 @@ public class Telemetry {
     public void log(Level level, String root, String leaf, Translation2d val) {
         log(level, Telemetry.append(root, leaf), "x", val.getX());
         log(level, Telemetry.append(root, leaf), "y", val.getY());
+    }
+
+    public void log(Level level, String root, String leaf, Vector2d val) {
+        log(level, Telemetry.append(root, leaf), "x", val.getX());
+        log(level, Telemetry.append(root, leaf), "y", val.getY());
+
     }
 
     public void log(Level level, String root, String leaf, Rotation2d val) {
@@ -295,6 +315,11 @@ public class Telemetry {
         log(level, Telemetry.append(root, leaf), "theta", state.theta());
     }
 
+    public void log(Level level, String root, String leaf, SwerveModulePosition val) {
+        log(level, Telemetry.append(root, leaf), "distance", val.distanceMeters);
+        log(level, Telemetry.append(root, leaf), "angle", val.angle);
+    }
+
     public void log(Level level, String root, String leaf, ArmAngles angles) {
         log(level, Telemetry.append(root, leaf), "th1", angles.th1);
         log(level, Telemetry.append(root, leaf), "th2", angles.th2);
@@ -328,6 +353,50 @@ public class Telemetry {
 
     /** Make a key for the root level (with a leading slash). */
     private static String append(String root, String leaf) {
+        if (root.startsWith("/"))
+            return root + "/" + leaf;
         return "/" + root + "/" + leaf;
+    }
+
+    private static void print(String key, boolean val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %b\n", key, val);
+    }
+
+    private void print(String key, Double val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %5.5f\n", key, val);
+    }
+
+    private void print(String key, float val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %5.5f\n", key, val);
+    }
+
+    private void print(String key, double[] val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %s\n", key, Arrays.toString(val));
+    }
+
+    private void print(String key, long val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %d\n", key, val);
+    }
+
+    private void print(String key, String val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %s\n", key, val);
+    }
+
+    private void print(String key, Supplier<String[]> val) {
+        if (!kAlsoPrint)
+            return;
+        Util.printf("%s: %s\n", key, Arrays.toString(val.get()));
     }
 }

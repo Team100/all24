@@ -11,7 +11,6 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
 
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 /**
  * A real swerve subsystem populated with simulated motors and encoders,
@@ -36,6 +35,7 @@ public class Fixture {
                 heading.getHeadingNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
+                0, // initial time is zero here for testing
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 

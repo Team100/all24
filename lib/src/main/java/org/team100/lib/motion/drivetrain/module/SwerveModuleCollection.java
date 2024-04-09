@@ -15,11 +15,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection {
-    private static final String kFrontLeft = "Front Left";
-    private static final String kFrontRight = "Front Right";
-    private static final String kRearLeft = "Rear Left";
-    private static final String kRearRight = "Rear Right";
-
+    private static final String kSwerveModules = "Swerve Modules";
+    private static final String kFrontLeft = kSwerveModules + "/Front Left";
+    private static final String kFrontRight = kSwerveModules + "/Front Right";
+    private static final String kRearLeft = kSwerveModules + "/Rear Left";
+    private static final String kRearRight = kSwerveModules + "/Rear Right";
+    // private static final String kFrontLeft =  "Front Left";
+    // private static final String kFrontRight =  "Front Right";
+    // private static final String kRearLeft =  "Rear Left";
+    // private static final String kRearRight =  "Rear Right";
+    
     private final SwerveModule100 m_frontLeft;
     private final SwerveModule100 m_frontRight;
     private final SwerveModule100 m_rearLeft;
@@ -43,21 +48,21 @@ public class SwerveModuleCollection {
             double currentLimit,
             SwerveKinodynamics kinodynamics) {
         switch (Identity.instance) {
-            case COMP_BOT:
+            case BETA_BOT:
                 Util.println("************** WCP MODULES using AI 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
                                 kFrontLeft, currentLimit, 30, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 11, 0, 0.615074, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
+                                AnalogTurningEncoder.class, 11, 0, 0.620381, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kFrontRight, currentLimit, 12, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 32, 1, 0.147709, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
+                                AnalogTurningEncoder.class, 32, 1, 0.162019, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearLeft, currentLimit, 31, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 21, 2, 0.886266, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
+                                AnalogTurningEncoder.class, 21, 2, 0.875648, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
                                 kRearRight, currentLimit, 22, DriveRatio.FAST,
-                                AnalogTurningEncoder.class, 33, 3, 0.303879, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE));
+                                AnalogTurningEncoder.class, 33, 3, 0.323889, kinodynamics, Drive.DIRECT, MotorPhase.REVERSE));
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
@@ -95,36 +100,36 @@ public class SwerveModuleCollection {
                         SimulatedSwerveModule100.get(kFrontRight, kinodynamics),
                         SimulatedSwerveModule100.get(kRearLeft, kinodynamics),
                         SimulatedSwerveModule100.get(kRearRight, kinodynamics));
-            case BETA_BOT:
+            case COMP_BOT:
                 Util.println("************** WCP MODULES using DIO 0,1,2,3 **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(
-                                kFrontLeft, currentLimit, 3, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kFrontLeft, currentLimit, 4, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
-                                34,
-                                2,
-                                0.792486,
+                                54,
+                                9,
+                                0.058735,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kFrontRight, currentLimit, 22, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kFrontRight, currentLimit, 22, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
-                                25,
-                                1,
-                                0.896253,
+                                52,
+                                8,
+                                0.773486,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearLeft, currentLimit, 13, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kRearLeft, currentLimit, 56, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
-                                12,
-                                3,
-                                0.134011,
+                                51,
+                                6,
+                                0.334580,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(
-                                kRearRight, currentLimit, 11, WCPSwerveModule100.DriveRatio.MEDIUM,
+                                kRearRight, currentLimit, 11, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
                                 21,
-                                0,
-                                0.884858,
+                                7,
+                                0.714328,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE));
             default:
                 Util.println("WARNING: using default module collection");

@@ -42,7 +42,7 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
 
     /** Position of the mechanism in radians. */
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return m_positionRad;
     }
 

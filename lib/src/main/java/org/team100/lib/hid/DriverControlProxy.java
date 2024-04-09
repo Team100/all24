@@ -24,6 +24,7 @@ public class DriverControlProxy implements DriverControl {
 
     public DriverControlProxy() {
         m_notifier = new Notifier(this::refresh);
+        m_notifier.setName("DriverControlProxy Notifier");
         refresh();
 
         m_notifier.startPeriodic(kFreq);
@@ -88,6 +89,11 @@ public class DriverControlProxy implements DriverControl {
     public boolean driveToNote() {
         return m_driverControl.driveToNote();
     }
+
+    @Override
+    public boolean driveToAmp() {
+        return m_driverControl.driveToAmp();
+    }    
 
     @Override
     public Translation2d target() {
@@ -178,4 +184,14 @@ public class DriverControlProxy implements DriverControl {
     public boolean shooterLock(){
         return m_driverControl.shooterLock();
     }
+
+    @Override
+    public boolean outtakeFromAmp(){
+        return m_driverControl.shooterLock();
+    }
+    @Override
+    public boolean ampLock() {
+        return m_driverControl.ampLock();
+    }
+
 }

@@ -1,27 +1,63 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.team100.lib.indicator;
 
-/** Add your docs here. */
+
+import org.team100.lib.indicator.LEDIndicator2.State;
+
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.util.Color;
+
+/**
+ * Represents a segment of an LED buffer: a range with a start (inclusive) and
+ * end (exclusive).
+ */
 public class LEDStrip {
+    private final int m_start;
+    private final int m_end;
+    private final LEDGroup m_group;;
+    private Color color = Color.kBlack;
 
-    public double m_length;
-    public int m_offset;
-
-
-
-    public LEDStrip(double length, int offset){
-        m_length = length;
-        m_offset = offset;
+    public LEDStrip(int start, int end) {
+        m_start = start;
+        m_end = end;
+        m_group = LEDGroup.ONE;
     }
 
-    public double getLength(){
-        return m_length;
+
+    public LEDStrip(LEDGroup group, int start, int end) {
+        m_start = start;
+        m_end = end;
+        m_group = group;
     }
 
-    public int getOffset(){
-        return m_offset;
+
+    /**
+     * Fill the appropriate section of the buffer.
+     */
+    public void solid(AddressableLEDBuffer buffer, Color color) {
+        for (int i = start(); i < end(); i++) {
+            buffer.setLED(i, color);
+        }
+    }
+
+    /** First led in the range. */
+    int start() {
+        return m_start;
+    }
+
+    /** End of the range, plus one */
+    int end() {
+        return m_end;
+    }
+
+    LEDGroup group() {
+        return m_group;
+    }
+
+    Color color(){
+        return color;
+    }
+
+    void setColor(Color c){
+        color = c;
     }
 }

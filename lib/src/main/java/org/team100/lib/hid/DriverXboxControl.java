@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public class DriverXboxControl implements DriverControl {
     private static final double kDeadband = 0.05;
-    private static final double kExpo = 0.75;
+    private static final double kExpo = 0.65;
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
     private final Telemetry t = Telemetry.get();
@@ -42,6 +42,11 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean driveToNote() {
+        return m_controller.getYButton();
+    }
+
+    @Override
+    public boolean driveToAmp() {
         return m_controller.getLeftStickButton();
     }
 
@@ -99,8 +104,15 @@ public class DriverXboxControl implements DriverControl {
     public boolean resetPose() {
         // @joel 2/19/24 removed this for slow mode instead
         // return m_controller.getLeftBumper();
-        return m_controller.getRightStickButton();
+        // @joel 3/15/24 removed this entirely
+        // return m_controller.getRightStickButton();
+        return false;
     } 
+
+    @Override
+    public boolean ampLock() {
+        return m_controller.getAButton();
+    }
 
     @Override
     public Rotation2d desiredRotation() {
@@ -120,7 +132,8 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public boolean steer90() {
-        return m_controller.getYButton();
+        // return m_controller.getYButton();
+        return false;
     }
 
     @Override
@@ -130,10 +143,10 @@ public class DriverXboxControl implements DriverControl {
         return false;
     }
 
-    @Override
-    public boolean circle() {
-        return m_controller.getAButton();
-    }
+    // @Override
+    // public boolean circle() {
+    //     return m_controller.getAButton();
+    // }
 
     public boolean choreo(){
         return m_controller.getRawButton(2);
@@ -163,4 +176,6 @@ public class DriverXboxControl implements DriverControl {
     public boolean shooterLock(){
         return m_controller.getBButton();
     }
+
+    
 }

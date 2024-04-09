@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,9 +28,7 @@ class QuinticHermiteOptimizerTest {
 
         long startTime = System.currentTimeMillis();
         assertTrue(HolonomicSpline.optimizeSpline(splines) < 0.014);
-        if (dump)
-            Util.println("Optimization time (ms): " + (System.currentTimeMillis() -
-                    startTime));
+
 
         Pose2d d = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(90));
         Pose2d e = new Pose2d(new Translation2d(0, 50), Rotation2d.fromDegrees(0));
@@ -45,9 +42,7 @@ class QuinticHermiteOptimizerTest {
 
         startTime = System.currentTimeMillis();
         assertTrue(HolonomicSpline.optimizeSpline(splines1) < 0.16);
-        if (dump)
-            Util.println("Optimization time (ms): " + (System.currentTimeMillis() -
-                    startTime));
+       
 
         Pose2d h = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
         Pose2d i = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
@@ -65,8 +60,6 @@ class QuinticHermiteOptimizerTest {
         assertTrue(HolonomicSpline.optimizeSpline(splines2) < 0.05);
         assertEquals(0.0, splines2.get(0).getCurvature(1.0), kEpsilon);
         assertEquals(0.0, splines2.get(2).getCurvature(1.0), kEpsilon);
-        if (dump)
-            Util.println("Optimization time (ms): " + (System.currentTimeMillis() - startTime));
     }
 
     @Test
@@ -84,9 +77,7 @@ class QuinticHermiteOptimizerTest {
 
         long startTime = System.currentTimeMillis();
         assertTrue(HolonomicSpline.optimizeSpline(splines) < 0.014);
-        if (dump)
-            Util.println("Optimization time (ms): " + (System.currentTimeMillis() -
-                    startTime));
+     
 
         Pose2d d = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(90));
         Pose2d e = new Pose2d(new Translation2d(0, 50), Rotation2d.fromDegrees(0));
@@ -100,9 +91,7 @@ class QuinticHermiteOptimizerTest {
 
         startTime = System.currentTimeMillis();
         assertTrue(HolonomicSpline.optimizeSpline(splines1) < 0.16);
-        if (dump)
-            Util.println("Optimization time (ms): " + (System.currentTimeMillis() -
-                    startTime));
+
 
         Pose2d h = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
         Pose2d i = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
@@ -120,8 +109,7 @@ class QuinticHermiteOptimizerTest {
         assertTrue(HolonomicSpline.optimizeSpline(splines2) < 0.05);
         assertEquals(0.0, splines2.get(0).getCurvature(1.0), kEpsilon);
         assertEquals(0.0, splines2.get(2).getCurvature(1.0), kEpsilon);
-        Util.println("Optimization time (ms): " + (System.currentTimeMillis() -
-                startTime));
+ 
     }
 
 }

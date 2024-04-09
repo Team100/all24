@@ -1,5 +1,7 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.dashboard.Glassy;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -14,7 +16,7 @@ import edu.wpi.first.math.geometry.Twist2d;
  * represent the control's effect on the robot. So, for example, velocity inputs
  * are scaled to control units, ([-1,1]), not robot units (m/s).
  */
-public interface DriverControl {
+public interface DriverControl extends Glassy {
     public enum Speed {
         SLOW,
         MEDIUM,
@@ -56,9 +58,15 @@ public interface DriverControl {
         return null;
     }
 
+    default boolean driveToAmp() {
+        return false;
+    }
+
+
     default boolean driveToNote() {
         return false;
     }
+
 
     default boolean trigger() {
         return false;
@@ -128,5 +136,18 @@ public interface DriverControl {
 
     default boolean shooterLock(){
         return false;
+    }
+
+    default boolean ampLock() {
+        return false;
+    }
+
+    default boolean outtakeFromAmp(){
+        return false;
+    }
+
+    @Override
+    default String getGlassName() {
+        return "DriverControl";
     }
 }

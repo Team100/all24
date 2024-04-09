@@ -1,5 +1,6 @@
 package org.team100.lib.encoder;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
 /**
@@ -7,7 +8,7 @@ import org.team100.lib.units.Measure100;
  * 
  * @param <T> unit, angle or distance
  */
-public interface Encoder100<T extends Measure100> {
+public interface Encoder100<T extends Measure100> extends Glassy {
 
     /**
      * Angle or distance depending on parameter.
@@ -16,7 +17,7 @@ public interface Encoder100<T extends Measure100> {
      * Angle measure is counterclockwise-positive rad, and accumulates
      * turns; use MathUtil.AngleModulus if you want.
      */
-    double getPosition();
+    Double getPosition();
 
     /**
      * Angular or linear velocity depending on parameter.
@@ -42,5 +43,10 @@ public interface Encoder100<T extends Measure100> {
      * to collect measurements once per cycle, to save time.
      */
     void periodic();
+
+    @Override
+    default String getGlassName() {
+        return "Encoder100";
+    }
 
 }

@@ -5,6 +5,7 @@ from enum import Enum
 import cv2
 import libcamera
 import numpy as np
+import sys
 
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
@@ -16,13 +17,14 @@ import math
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
-
-    A = "10000000caeaae82"  # "BETA FRONT"
-    B = "1000000013c9c96c"  # "BETA BACK"
+    # TODO get correct serial numbers for Delta
+    # A = "10000000caeaae82"  # "BETA FRONT"
+    # B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
-    SHOOTER = "10000000a7c673da"  # "DELTA SHOOTER"
-    AMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
-    GAME_PIECE = "10000000e31d4a24"  # "DELTA INTAKE"
+    SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
+    RIGHTAMP = "10000000caeaae82"  # "DELTA AMP-PLACER"
+    LEFTAMP = "100000004e0a1fb9"  # "DELTA AMP-PLACER"
+    GAME_PIECE = "1000000013c9c96c"  # "DELTA INTAKE"
     G = "10000000a7a892c0"  # ""
     UNKNOWN = None
 
@@ -39,83 +41,51 @@ class GamePieceFinder:
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (4,200, 100)
-        self.object_higher = (12, 255, 255)
+        self.object_lower = (4,150, 100)
+        self.object_higher = (16, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
 
+        # from testing on 3/22/24, k1 and k2 only
+
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
-            self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        -1.18341279e00,
-                        7.13453990e-01,
-                        7.90204163e-04,
-                        -7.38879856e-04,
-                        -2.94529084e-03,
-                        -1.14073111e00,
-                        6.16356154e-01,
-                        5.86094708e-02,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
+            fx = 498
+            fy = 498
+            cx = 584
+            cy = 316
+            k1 = 0.01
+            k2 = -0.0365
         elif self.model == "imx219":
             print("V2 CAMERA (NOT WIDE ANGLE)")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
+            fx = 660
+            fy = 660
+            cx = 426
+            cy = 303
+            k1 = -0.003
+            k2 = 0.04
+        # TODO get these real distortion values
+        elif model == "imx296":
+            fx = 660
+            fy = 660
+            cx = 728
+            cy = 544
+            k1 = 0
+            k2 = 0
         else:
-            print("UNKNOWN CAMERA")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
-        self.horzFOV = 2 * math.atan(self.mtx[0,2]/self.mtx[0,0])
-        self.vertFOV = 2 * math.atan(self.mtx[1,2]/self.mtx[1,1])
+            print("UNKNOWN CAMERA MODEL")
+            sys.exit()
+
+        p1 = 0
+        p2 = 0
+
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+        self.dist = np.array([[k1, k2, p1, p2]])
+
+        # self.horzFOV = 2 * math.atan(self.mtx[0,2]/self.mtx[0,0])
+        # self.vertFOV = 2 * math.atan(self.mtx[1,2]/self.mtx[1,1])
+
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def initialize_nt(self):
@@ -132,11 +102,6 @@ class GamePieceFinder:
             topic_name + "/latency"
         ).publish()
 
-        # work around https://github.com/robotpy/mostrobotpy/issues/60
-        self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
-            Rotation3d(0, 0, 0)
-        )
-
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/Rotation3d", Rotation3d
         ).publish(nt.PubSubOptions(keepDuplicates=True))
@@ -148,7 +113,7 @@ class GamePieceFinder:
         serial = getserial()
         identity = Camera(serial)
         if identity == Camera.GAME_PIECE:
-            img_bgr = img_bgr[0:self.height,:,:]
+            img_bgr = img_bgr[65:583,:,:]
 
         img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -261,6 +226,14 @@ def main():
         # medium detection resolution, compromise speed vs range
         width = 832
         height = 616
+    elif model == "imx296":
+        print("GS Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1456   # slightly larger than the detector, to match stride
+        fullheight = 1088
+        # medium detection resolution, compromise speed vs range
+        width = 1456
+        height = 1088
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100
@@ -283,15 +256,13 @@ def main():
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
             "AwbEnable": False,
             "AeEnable": False,
-            "ExposureTime": 30000,
+            "ExposureTime": 40000,
             # "AnalogueGain": 1.0
         },
     )
 
     serial = getserial()
     identity = Camera(serial)
-    if identity == Camera.GAME_PIECE:
-        camera_config["transform"] = libcamera.Transform(hflip=-1, vflip=-1)
 
     print("\nREQUESTED CONFIG")
     print(camera_config)

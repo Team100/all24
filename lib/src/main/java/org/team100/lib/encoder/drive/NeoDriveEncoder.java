@@ -41,7 +41,7 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
 
     /** Position in meters. */
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return m_positionM;
     }
 

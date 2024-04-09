@@ -1,11 +1,8 @@
 package org.team100.lib.hid;
 
-import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 
-import edu.wpi.first.util.concurrent.Event;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.event.EventLoop;
 
 public class OperatorV2Control implements OperatorControl {
     private static final double kDeadband = 0.1;
@@ -29,6 +26,7 @@ public class OperatorV2Control implements OperatorControl {
     public boolean outtake(){
         return m_controller.getBButton();
     }
+    
 
     @Override
     public boolean rampAndPivot(){
@@ -57,12 +55,16 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public double getLeftAxis(){
-        return -m_controller.getLeftY();
+        return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
+        // return -m_controller.getRightY();
+
     }
 
     @Override
     public double getRightAxis(){
-        return -m_controller.getRightY();
+        return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
+        // return -m_controller.getLeftY();
+
     }
 
     @Override
@@ -88,5 +90,20 @@ public class OperatorV2Control implements OperatorControl {
     @Override
     public boolean outtakeFromAmp(){
         return m_controller.getRightStickButton();
+    }
+
+    @Override
+    public double pivotUp(){
+        return deadband(m_controller.getLeftTriggerAxis(), 0.2, Double.MAX_VALUE);
+    }
+
+    @Override
+    public double pivotDown(){
+        return  deadband(m_controller.getRightTriggerAxis(), 0.2, Double.MAX_VALUE);
+    }
+
+    @Override
+    public boolean rezero(){
+        return m_controller.getStartButton();
     }
 }

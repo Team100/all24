@@ -51,7 +51,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     }
 
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return m_position;
     }
 

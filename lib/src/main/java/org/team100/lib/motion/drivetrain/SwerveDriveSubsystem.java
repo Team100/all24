@@ -6,8 +6,6 @@ import org.team100.lib.commands.InitCommand;
 import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.config.DriverSkill;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.sensors.HeadingInterface;
@@ -19,8 +17,10 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -28,21 +28,19 @@ import edu.wpi.first.wpilibj2.command.Command;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends Subsystem100 {
-    // multiply field-relative speeds for medium and slow modes.
-    private static final double kMedium = 0.5;
-    private static final double kSlow = 0.15;
-
     private final Telemetry t = Telemetry.get();
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
-    public final SwerveLocal m_swerveLocal;
+    private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
 
     private ChassisSpeeds m_prevSpeeds;
     // maintained in periodic.
     private Pose2d m_pose;
+    // TODO: do not use Twist for this
     private Twist2d m_velocity;
+    // TODO: do not use Twist for this
     private Twist2d m_accel;
     private SwerveState m_state;
 
@@ -94,11 +92,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateAcceleration(dt);
         updateState();
 
-        t.log(Level.TRACE, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
         t.log(Level.DEBUG, m_name, "pose", m_pose);
         t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
 
-        t.log(Level.TRACE, m_name, "pose array",
+        t.log(Level.DEBUG, m_name, "pose array",
                 new double[] { m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians() });
         t.log(Level.TRACE, m_name, "velocity", m_velocity);
         t.log(Level.TRACE, m_name, "acceleration", m_accel);
@@ -118,7 +115,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
-     * The speed implied by the module states.
+     * The robot-relative speed implied by the module states.
      * 
      * @param dt for discretization
      */
@@ -189,6 +186,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * 
      * Feasibility is enforced by the setpoint generator (if enabled) and the
      * desaturator.
+     * 
+     * @param speeds in robot coordinates
+     * @param kDtSec time increment for the setpoint generator
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         // scale for driver skill; default is half speed.
@@ -228,7 +228,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     public void resetPose(Pose2d robotPose) {
-        m_poseEstimator.resetPosition(m_heading.getHeadingNWU(), m_swerveLocal.positions(), robotPose);
+        m_poseEstimator.resetPosition(
+                m_heading.getHeadingNWU(),
+                new SwerveDriveWheelPositions(m_swerveLocal.positions()),
+                robotPose,
+                Timer.getFPGATimestamp());// TODO: use a real time
         m_pose = robotPose;
         // TODO: should we really assume we're motionless when we call this??
         m_velocity = new Twist2d();
@@ -296,6 +300,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal.close();
     }
 
+    @Override
+    public String getGlassName() {
+        return "SwerveDriveSubsystem";
+    }
+
     /////////////////////////////////////////////////////////////////
     //
     // Private
@@ -309,10 +318,13 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * of odometry are self-consistent.
      */
     private void updatePosition() {
-        m_poseEstimator.update(m_heading.getHeadingNWU(), m_swerveLocal.positions());
-        m_pose = m_poseEstimator.getEstimatedPosition();
+        m_pose = m_poseEstimator.update(
+                Timer.getFPGATimestamp(),
+                m_heading.getHeadingNWU(),
+                new SwerveDriveWheelPositions(m_swerveLocal.positions()));
     }
 
+    // TODO: use odometry to get the speeds
     private void updateVelocity(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
@@ -321,6 +333,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     }
 
+    // TODO: use odometry to get the speeds
     private void updateAcceleration(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         if (m_prevSpeeds == null) {

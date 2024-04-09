@@ -4,22 +4,18 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.selftest.AmpSelfTest;
-import org.team100.frc2024.selftest.IndexerSelfTest;
 import org.team100.frc2024.selftest.IntakeSelfTest;
-import org.team100.frc2024.selftest.ShooterSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
-import org.team100.lib.selftest.BatterySelfTest;
 import org.team100.lib.selftest.DefenseSelfTest;
 import org.team100.lib.selftest.DriveManuallySelfTest;
 import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
-import org.team100.lib.selftest.SquareSelfTest;
 import org.team100.lib.selftest.VeeringSelfTest;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
@@ -73,7 +69,8 @@ public class SelfTestRunner extends Command {
 
         if (kTestDrivetrain) {
             // "treatment" is in situ.
-            addCase(new SquareSelfTest(drivetrain, m_listener), m_container.m_driveInALittleSquare);
+            // commented out to simplify the container for comp
+            // addCase(new SquareSelfTest(drivetrain, m_listener), m_container.m_driveInALittleSquare);
 
             // treatment is a specific manual input, supplied by the test case.
             DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
@@ -106,8 +103,8 @@ public class SelfTestRunner extends Command {
             IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
             addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
 
-            IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
-            addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
+            // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
+            // addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
 
             AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
             addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
@@ -146,6 +143,7 @@ public class SelfTestRunner extends Command {
             if (waitCounter > kLimit) {
                 Util.warn("Cancelling self test due to enable");
                 cancel();
+                return;
             }
             Util.println("Hold down enable (operator start, '8' in sim) to proceed...");
             sleep1();

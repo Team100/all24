@@ -8,24 +8,23 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
-import org.team100.lib.timing.SwerveDriveDynamicsConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
-import org.team100.lib.timing.YawRateConstraint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
+/**
+ * joel 20240311: this class no longer applies default constraints (drive, yaw,
+ * centripetal) so if you want those, supply them.
+ */
 public class TrajectoryPlanner {
     private static final double kMaxDx = 0.0127; // m
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
 
-    private final SwerveKinodynamics m_limits;
-
-    public TrajectoryPlanner(SwerveKinodynamics limits) {
-        m_limits = limits;
+    public TrajectoryPlanner() {
+        //
     }
 
     public Trajectory100 generateTrajectory(
@@ -51,8 +50,9 @@ public class TrajectoryPlanner {
             final List<TimingConstraint> constraints,
             double start_vel,
             double end_vel,
-            SwerveKinodynamics limits){
-        return generateTrajectory(reversed, waypoints, headings, constraints, start_vel, end_vel, limits.getMaxDriveVelocityM_S(), limits.getMaxDriveAccelerationM_S2());
+            SwerveKinodynamics limits) {
+        return generateTrajectory(reversed, waypoints, headings, constraints, start_vel, end_vel,
+                limits.getMaxDriveVelocityM_S(), limits.getMaxDriveAccelerationM_S2());
     }
 
     public Trajectory100 generateTrajectory(
@@ -93,27 +93,13 @@ public class TrajectoryPlanner {
             trajectory = new Path100(flipped_points);
         }
 
-        final SwerveDriveDynamicsConstraint drive_constraints = new SwerveDriveDynamicsConstraint(m_limits);
-        final YawRateConstraint yaw_constraint = new YawRateConstraint(m_limits);
-
-        final CentripetalAccelerationConstraint centripetal_accel_constraint = new CentripetalAccelerationConstraint(
-                m_limits);
-
-        List<TimingConstraint> all_constraints = new ArrayList<>();
-        all_constraints.add(drive_constraints);
-        all_constraints.add(yaw_constraint);
-        all_constraints.add(centripetal_accel_constraint);
-        if (constraints != null) {
-            all_constraints.addAll(constraints);
-        }
-
         // Generate the timed trajectory.
         PathDistanceSampler distance_view = new PathDistanceSampler(trajectory);
         return TimingUtil.timeParameterizeTrajectory(
                 reversed,
                 distance_view,
                 kMaxDx,
-                all_constraints,
+                constraints,
                 start_vel,
                 end_vel,
                 max_vel,

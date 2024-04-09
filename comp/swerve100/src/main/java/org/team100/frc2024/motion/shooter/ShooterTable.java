@@ -1,37 +1,36 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.team100.frc2024.motion.shooter;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
-/** Add your docs here. */
 public class ShooterTable {
 
-    public static ShooterTable instance = new ShooterTable();
+    public static final ShooterTable instance = new ShooterTable();
 
-    InterpolatingDoubleTreeMap m_table;
+    private final InterpolatingDoubleTreeMap m_table;
 
-    public ShooterTable(){
+    public ShooterTable() {
         // loadTable();
         m_table = new InterpolatingDoubleTreeMap();
         loadTable();
     }
 
-    public double getAngle(double m){
-        // System.out.println(m_table.get(m));
+    public double getAngle(double m) {
         return m_table.get(m);
     }
-    
-    //MORE NUMBERSSDDD
-    public void loadTable(){
-        m_table.put(1.0, 43.0);
-        m_table.put(2.0, 33.0);
-        m_table.put(3.0, 27.0);
-        m_table.put(4.0, 24.0);
-        m_table.put(4.5, 22.5);
+
+    // MORE NUMBERSSDDD
+    public void loadTable() {
+        m_table.put(1.49, 0.9);
+        m_table.put(2.07, 0.78);
+        m_table.put(2.5, 0.66);
+        m_table.put(3.02, 0.59);
+        m_table.put(3.59, 0.53);
+        m_table.put(4.1, 0.475);
+        m_table.put(4.5, 0.44);
+
+
 
 
     }
+
 }

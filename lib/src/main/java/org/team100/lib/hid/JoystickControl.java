@@ -64,6 +64,12 @@ public abstract class JoystickControl implements DriverControl {
     }
 
     @Override
+    public boolean outtakeFromAmp() {
+        // return false;
+        return button(5);
+    }
+
+    @Override
     public boolean resetPose() {
         return button(4);
     }
@@ -114,6 +120,11 @@ public abstract class JoystickControl implements DriverControl {
     @Override
     public boolean driveToNote() {
         return m_controller.getRawButton(7);
+    }
+
+    @Override
+    public boolean driveToAmp() {
+        return m_controller.getRawButton(8);
     }
 
     private boolean button(int button) {

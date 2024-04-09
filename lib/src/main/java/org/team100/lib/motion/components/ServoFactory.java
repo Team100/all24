@@ -5,14 +5,12 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
-import org.team100.lib.encoder.drive.Falcon6DriveEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.drive.NeoVortexDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
-import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
@@ -22,7 +20,6 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class ServoFactory {
 
@@ -59,7 +56,7 @@ public class ServoFactory {
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI / param.gearRatio());
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
                 motor,
@@ -69,43 +66,6 @@ public class ServoFactory {
                 param.maxAccelM_S2(),
                 param.maxDecelM_S2());
     }
-
-    public static LimitedVelocityServo<Distance100> limitedVelocityFalconServo(
-            String name,
-            int canId,
-            boolean motorPhase,
-            int currentLimit,
-            SysParam param,
-            FeedforwardConstants lowLevelFeedforwardConstants,
-            PIDConstants lowLevelVelocityConstants) {
-
-        Falcon6DriveMotor motor = new Falcon6DriveMotor(
-                name,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
-                lowLevelVelocityConstants,
-                lowLevelFeedforwardConstants
-                );
-                
-        Falcon6DriveEncoder encoder = new Falcon6DriveEncoder(
-                name,
-                motor,
-                param.wheelDiameter() * Math.PI);
-                
-        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
-        return new LimitedVelocityServo<>(v,
-                param.maxVelM_S(),
-                param.maxAccelM_S2(),
-                param.maxDecelM_S2());
-    }
-        
-
 
     public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
             String name,
@@ -132,7 +92,7 @@ public class ServoFactory {
             MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
-            PIDConstants controller, 
+            PIDConstants controller,
             FeedforwardConstants lowLevelFeedforwardConstants,
             PIDConstants lowLevelVelocityConstants) {
         NeoTurningMotor motor = new NeoTurningMotor(
@@ -147,11 +107,6 @@ public class ServoFactory {
                 name,
                 motor,
                 param.gearRatio());
-        
-        VelocityServo<Angle100> vServo = new OutboardVelocityServo<>(
-                name,
-                motor,
-                encoder);
 
         return new PositionServo<>(
                 name,
@@ -163,10 +118,6 @@ public class ServoFactory {
                 Angle100.instance);
     }
 
-
-
-    
-
     /**
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
@@ -177,7 +128,7 @@ public class ServoFactory {
             MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
-            PIDController controller, 
+            PIDController controller,
             FeedforwardConstants lowLevelFeedforwardConstants,
             PIDConstants lowLevelVelocityConstants) {
         NeoVortexTurningMotor motor = new NeoVortexTurningMotor(
@@ -208,11 +159,11 @@ public class ServoFactory {
             PIDController controller) {
         SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name);
         SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(
-            name,
-             motor,
-              1,
-              0, // minimum hard stop
-               2); // maximum hard stop
+                name,
+                motor,
+                1,
+                0, // minimum hard stop
+                2); // maximum hard stop
         return new PositionServo<>(
                 name,
                 motor,
@@ -248,7 +199,7 @@ public class ServoFactory {
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI / param.gearRatio());
         return new PositionServo<>(
                 name,
                 motor,
@@ -259,11 +210,13 @@ public class ServoFactory {
                 Distance100.instance);
     }
 
-     /**
+    /**
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
+     * 
+     * @param lowLevelFeedforwardConstants in VOLTS VOLTS VOLTS
      */
-    public static PositionServoInterface<Distance100> neoVortexDistanceServo(
+    public static PositionServo<Distance100> neoVortexDistanceServo(
             String name,
             int canId,
             boolean motorPhase,
@@ -284,7 +237,7 @@ public class ServoFactory {
         Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
                 name,
                 motor,
-                param.wheelDiameter() * Math.PI);
+                param.wheelDiameter() * Math.PI / param.gearRatio());
         return new PositionServo<>(
                 name,
                 motor,

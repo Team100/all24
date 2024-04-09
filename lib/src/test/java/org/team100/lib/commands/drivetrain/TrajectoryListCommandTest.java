@@ -14,6 +14,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -25,6 +26,9 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
 
     @Test
     void testSimple() {
+        // no wheel slip
+        fixture.poseEstimator.f.mutable(Tire.kSaturationLabel, 0).set(Double.MAX_VALUE);
+
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         HolonomicDriveController3 control = new HolonomicDriveController3();
         TrajectoryListCommand c = new TrajectoryListCommand(

@@ -11,6 +11,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * Remind myself what's in the JSON file.
@@ -21,13 +22,12 @@ class TagTest {
 
     @Test
     void testBlueLayout() throws IOException {
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
-                .blueLayout("2024-crescendo.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
         /*
          * from the blue perspective, tag 7 has small x
          * and large y, and oriented at pi theta.
          */
-        Pose3d tag7Pose = layout.getTagPose(7).get();
+        Pose3d tag7Pose = layout.getTagPose(Alliance.Blue, 7).get();
         assertEquals(-0.038, tag7Pose.getTranslation().getX(), kDelta); // behind the glass
         assertEquals(5.548, tag7Pose.getTranslation().getY(), kDelta); // far to left
         assertEquals(1.451, tag7Pose.getTranslation().getZ(), kDelta); // 1.5m feet up
@@ -39,13 +39,13 @@ class TagTest {
 
     @Test
     void testRedLayout() throws IOException {
-        AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation
-                .redLayout("2024-crescendo.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
+        
         /*
          * from the red perspective, tag 7 has large x
          * and small y, and oriented at zero theta.
          */
-        Pose3d tag7Pose = layout.getTagPose(7).get();
+        Pose3d tag7Pose = layout.getTagPose(Alliance.Red, 7).get();
         assertEquals(16.5791, tag7Pose.getTranslation().getX(), kDelta); // far ahead
         assertEquals(2.663, tag7Pose.getTranslation().getY(), kDelta); // close to right side
         assertEquals(1.451, tag7Pose.getTranslation().getZ(), kDelta); // 1.5m up (as above)

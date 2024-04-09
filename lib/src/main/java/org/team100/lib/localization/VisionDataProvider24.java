@@ -9,6 +9,7 @@ import java.util.function.ObjDoubleConsumer;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -33,7 +34,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -42,15 +45,7 @@ import edu.wpi.first.wpilibj.Timer;
  * This "24" version uses the "struct" method instead of the "msgpack" method,
  * which matches the TagFinder24 code on the camera.
  */
-public class VisionDataProvider24 {
-    /**
-     * Standard deviation of pose estimate, as a fraction of target range.
-     * This is a guess based on figure 5 in the Apriltag2 paper:
-     * https://april.eecs.umich.edu/media/media/pdfs/wang2016iros.pdf
-     * The error is much worse at very long range but I don't think that
-     * matters for us.
-     */
-    private static final double kRelativeError = 0.05;
+public class VisionDataProvider24 implements Glassy {
     /**
      * Time between events in reality and their appearance here; the average
      * end-to-end latency of the camera, detection code, network tables, and rio
@@ -81,12 +76,10 @@ public class VisionDataProvider24 {
 
     private final Telemetry t = Telemetry.get();
 
-    private final DoubleFunction<Optional<Rotation2d>> rotationSupplier;
-
-    private final SwerveDrivePoseEstimator100 poseEstimator;
-    private final AprilTagFieldLayoutWithCorrectOrientation layout;
+    private final PoseEstimator100 m_poseEstimator;
+    private final FireControl m_fireControl;
+    private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final String m_name;
-    private final Alliance m_alliance;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -94,23 +87,23 @@ public class VisionDataProvider24 {
     // reuse the buffer since it takes some time to make
     private StructBuffer<Blip24> m_buf = StructBuffer.create(Blip24.struct);
 
+    private long latestTimeUs = 0;
+
     /**
      * @param layout
-     * @param poseEstimator can be null for testing.
+     * @param poseEstimator
      * @param rotationSupplier rotation for the given time in seconds
      * @throws IOException
      */
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
-            SwerveDrivePoseEstimator100 poseEstimator,
-            DoubleFunction<Optional<Rotation2d>> rotationSupplier,
-            Alliance alliance) throws IOException {
+            PoseEstimator100 poseEstimator,
+            FireControl fireControl) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
-        this.layout = layout;
-        this.poseEstimator = poseEstimator;
-        this.rotationSupplier = rotationSupplier;
-        m_alliance = alliance;
+        m_layout = layout;
+        m_poseEstimator = poseEstimator;
+        m_fireControl = fireControl;
         m_name = Names.name(this);
     }
 
@@ -120,6 +113,15 @@ public class VisionDataProvider24 {
                 new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::accept);
+    }
+
+    /**
+     * The age of the last pose estimate, in microseconds.
+     * The caller could use this to, say, indicate tag visibility.
+     */
+    public long getPoseAgeUs() {
+        long nowUs = RobotController.getFPGATime();
+        return nowUs - latestTimeUs;
     }
 
     /**
@@ -155,13 +157,15 @@ public class VisionDataProvider24 {
             // the ID of the camera
             String cameraSerialNumber = fields[1];
 
+            Optional<Alliance> alliance = DriverStation.getAlliance();
+            if (!alliance.isPresent())
+                return;
+
             // TODO: add a real firing solution consumer.
             estimateRobotPose(
-                    poseEstimator::addVisionMeasurement,
-                    f -> {
-                    },
                     cameraSerialNumber,
-                    blips);
+                    blips,
+                    alliance.get());
         } else {
             // this event is not for us
             // Util.println("weird vision update key: " + name);
@@ -175,15 +179,14 @@ public class VisionDataProvider24 {
      * @param blips              all the targets the camera sees right now
      */
     void estimateRobotPose(
-            final ObjDoubleConsumer<Pose2d> estimateConsumer,
-            Consumer<Translation2d> firingSolutionConsumer,
             String cameraSerialNumber,
-            final Blip24[] blips) {
+            final Blip24[] blips,
+            Alliance alliance) {
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
         // Estimated instant represented by the blips
-        final double frameTime = Timer.getFPGATimestamp() - kTotalLatencySeconds;
-        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTime);
+        final double frameTimeSec = Timer.getFPGATimestamp() - kTotalLatencySeconds;
+        Optional<Rotation2d> optionalGyroRotation = m_poseEstimator.getSampledRotation(frameTimeSec);
 
         if (optionalGyroRotation.isEmpty()) {
             Util.warn("No gyro rotation available!");
@@ -193,18 +196,28 @@ public class VisionDataProvider24 {
         final Rotation2d gyroRotation = optionalGyroRotation.get();
 
         estimateFromBlips(
-                estimateConsumer,
                 cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
-                frameTime,
-                gyroRotation);
+                frameTimeSec,
+                gyroRotation,
+                alliance);
 
         if (Experiments.instance.enabled(Experiment.Triangulate)) {
-            triangulate(estimateConsumer, cameraSerialNumber, blips, cameraInRobotCoordinates, frameTime, gyroRotation);
+            triangulate(
+                    cameraSerialNumber,
+                    blips,
+                    cameraInRobotCoordinates,
+                    frameTimeSec,
+                    gyroRotation,
+                    alliance);
         }
 
-        firingSolution(firingSolutionConsumer, cameraSerialNumber, blips, cameraInRobotCoordinates);
+        firingSolution(
+                cameraSerialNumber,
+                blips,
+                cameraInRobotCoordinates,
+                alliance);
 
     }
 
@@ -212,48 +225,52 @@ public class VisionDataProvider24 {
      * a firing solution is a robot-relative translation2d to the correct target --
      * 7 if we're blue, 5 if we're red.
      * 
-     * @param firingSolutionConsumer
      * @param blips
      * @param cameraInRobotCoordinates
      */
     private void firingSolution(
-            Consumer<Translation2d> firingSolutionConsumer,
             final String cameraSerialNumber,
-
             final Blip24[] blips,
-            final Transform3d cameraInRobotCoordinates) {
+            final Transform3d cameraInRobotCoordinates,
+            Alliance alliance) {
         for (Blip24 blip : blips) {
-            if ((blip.getId() == 7 && m_alliance == Alliance.Blue) ||
-                    (blip.getId() == 5 && m_alliance == Alliance.Red)) {
+            if ((blip.getId() == 7 && alliance == Alliance.Blue) ||
+                    (blip.getId() == 5 && alliance == Alliance.Red)) {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
                 if (Experiments.instance.enabled(Experiment.HeedVision)) {
                     double distance = translation2d.getNorm();
-                    if (poseEstimator != null)
-                        poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distance));
-                    firingSolutionConsumer.accept(translation2d);
+                    if (m_poseEstimator != null)
+                        m_poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distance));
+                    m_fireControl.accept(translation2d);
                 }
             }
         }
     }
 
     private void estimateFromBlips(
-            final ObjDoubleConsumer<Pose2d> estimateConsumer,
             final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
-            final double frameTime,
-            final Rotation2d gyroRotation) {
+            final double frameTimeSec,
+            final Rotation2d gyroRotation,
+            Alliance alliance) {
         for (Blip24 blip : blips) {
 
             // this is just for logging
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
-            Optional<Pose3d> tagInFieldCoordsOptional = layout.getTagPose(blip.getId());
+            Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())
                 continue;
+
+            if (blip.getPose().getTranslation().getNorm() > 5) {
+                return;
+            }
 
             // Gyro only produces yaw so use zero roll and zero pitch
             Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
@@ -281,30 +298,27 @@ public class VisionDataProvider24 {
                     // this hard limit excludes false positives, which were a bigger problem in 2023
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                        if (poseEstimator != null)
-                            poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
-                        estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                        m_poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distanceM));
+                        latestTimeUs = RobotController.getFPGATime();
+                        m_poseEstimator.addVisionMeasurement(
+                                currentRobotinFieldCoords,
+                                frameTimeSec);
                     }
-                } else {
-                    // System.out.println("IGNORE " + currentRobotinFieldCoords);
-                    // System.out.println("previous " + lastRobotInFieldCoords);
-                    // System.out.println("blip " + blip);
-                    // System.out.println("distance " + distanceM);
                 }
             }
-
             lastRobotInFieldCoords = currentRobotinFieldCoords;
-
         }
     }
 
     private void triangulate(
-            ObjDoubleConsumer<Pose2d> estimateConsumer,
             final String cameraSerialNumber,
             Blip24[] blips,
             Transform3d cameraInRobotCoordinates,
-            double frameTime,
-            Rotation2d gyroRotation) {
+            double frameTimeSec,
+            Rotation2d gyroRotation,
+            Alliance alliance) {
         // if multiple tags are in view, triangulate to get another (perhaps more
         // accurate) estimate
         for (int i = 0; i < blips.length - 1; i++) {
@@ -312,8 +326,8 @@ public class VisionDataProvider24 {
             for (int j = i + 1; j < blips.length; ++j) {
                 Blip24 b1 = blips[j];
 
-                Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(b0.getId());
-                Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(b1.getId());
+                Optional<Pose3d> tagInFieldCordsOptional0 = m_layout.getTagPose(alliance, b0.getId());
+                Optional<Pose3d> tagInFieldCordsOptional1 = m_layout.getTagPose(alliance, b1.getId());
 
                 if (!tagInFieldCordsOptional0.isPresent())
                     continue;
@@ -350,15 +364,12 @@ public class VisionDataProvider24 {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                            if (poseEstimator != null)
-                                poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs(distanceM));
-                            estimateConsumer.accept(currentRobotinFieldCoords, frameTime);
+                            m_poseEstimator.setStdDevs(
+                                    stateStdDevs(),
+                                    visionMeasurementStdDevs(distanceM));
+                            latestTimeUs = RobotController.getFPGATime();
+                            m_poseEstimator.addVisionMeasurement(currentRobotinFieldCoords, frameTimeSec);
                         }
-                    } else {
-                        // System.out.println("triangulation too far");
-                        // System.out.println("IGNORE " + currentRobotinFieldCoords);
-                        // System.out.println("previous " + lastRobotInFieldCoords);
-                        // System.out.println("distance " + distanceM);
                     }
                 }
                 lastRobotInFieldCoords = currentRobotinFieldCoords;
@@ -366,10 +377,39 @@ public class VisionDataProvider24 {
         }
     }
 
+    static Matrix<N3, N1> stateStdDevs() {
+        double stateStdDev = 0.1;
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            stateStdDev = 0.001; // guess: try adjusting this.
+        }
+        return VecBuilder.fill(stateStdDev, stateStdDev, 0.1);
+    }
+
     /** This is an educated guess. */
     static Matrix<N3, N1> visionMeasurementStdDevs(double distanceM) {
+        /*
+         * Standard deviation of pose estimate, as a fraction of target range.
+         * This is a guess based on figure 5 in the Apriltag2 paper:
+         * https://april.eecs.umich.edu/media/media/pdfs/wang2016iros.pdf
+         * The error is much worse at very long range but I don't think that
+         * matters for us.
+         */
+        double kRelativeError = 0.1;
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            /*
+             * actual stdev seem like between 0.03 at 1m or 0.15 at 5m so
+             * actual k might be 0.03, this needs to be accompanied by the
+             * much lower state stddev in RobotContainer.
+             */
+            kRelativeError = 0.03;
+        }
         double stddev = kRelativeError * distanceM;
         return VecBuilder.fill(stddev, stddev, Double.MAX_VALUE);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "VisionDataProvider24";
     }
 
 }

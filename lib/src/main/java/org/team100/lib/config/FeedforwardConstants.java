@@ -1,5 +1,13 @@
 package org.team100.lib.config;
 
+/**
+ * WARNING WARNING WARNING
+ * 
+ * this class makes no mention of units. sometimes the units might be volts,
+ * sometimes duty cycle, or maybe even amps? or torque?
+ * 
+ * TODO: use a consistent unit.
+ */
 public class FeedforwardConstants {
     private final double m_kV;
     private final double m_kA;
@@ -7,36 +15,44 @@ public class FeedforwardConstants {
     private final double m_kDS;
 
     /**
-    *Default no friction or attached objects contraints for NEO
-    */
+     * Default no friction or attached objects contraints for NEO
+     */
     public static FeedforwardConstants makeNeo() {
         return new FeedforwardConstants(0.122, 0, 0.1, 0.065);
     }
 
+    /**
+     * Default no friction or attached objects contraints for NEO
+     * //TODO tune this
+     */
+    public static FeedforwardConstants makeNeoVortex() {
+        return new FeedforwardConstants(0.122, 0, 0.1, 0.065);
+    }
+    
     public static FeedforwardConstants makeWCPSwerveTurningFalcon() {
         return new FeedforwardConstants(0.11, 0, 0.18, 0.01);
     }
 
-    //TODO tune the static and dynamic friction
+    // TODO tune the static and dynamic friction
     public static FeedforwardConstants makeWCPSwerveTurningFalcon6() {
         return new FeedforwardConstants(0.16, 0, 0.08, 0.1);
     }
-    
+
     public static FeedforwardConstants makeWCPSwerveDriveFalcon() {
         return new FeedforwardConstants(0.11, 0, 0.375, 0.27);
     }
 
     public static FeedforwardConstants makeWCPSwerveDriveFalcon6() {
-        return new FeedforwardConstants(0.13, .07, .374, .37);
+        return new FeedforwardConstants(.13, .13, .374, .37);
         // return new FeedforwardConstants(0, 0, 0, 0);
 
     }
 
     public FeedforwardConstants() {
-       m_kV = 0;
-       m_kA = 0;
-       m_kSS = 0;
-       m_kDS = 0;
+        m_kV = 0;
+        m_kA = 0;
+        m_kSS = 0;
+        m_kDS = 0;
     }
 
     public FeedforwardConstants(double kV) {
@@ -44,28 +60,28 @@ public class FeedforwardConstants {
         m_kA = 0;
         m_kSS = 0;
         m_kDS = 0;
-     }
-
-    public FeedforwardConstants(double kV, double kA, double kSS, double kDS) {
-       m_kV = kV;
-       m_kA = kA;
-       m_kSS = kSS;
-       m_kDS = kDS;
     }
 
-    public double getkV(){
+    public FeedforwardConstants(double kV, double kA, double kSS, double kDS) {
+        m_kV = kV;
+        m_kA = kA;
+        m_kSS = kSS;
+        m_kDS = kDS;
+    }
+
+    public double getkV() {
         return m_kV;
     }
 
-    public double getkA(){
+    public double getkA() {
         return m_kA;
     }
 
-    public double getkSS(){
+    public double getkSS() {
         return m_kSS;
     }
 
-    public double getkDS(){
+    public double getkDS() {
         return m_kDS;
     }
 }

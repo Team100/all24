@@ -103,7 +103,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(pov, clipped);
+        m_goal = m_latch.latchedRotation(currentRotation, pov, clipped);
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             t.log(Level.TRACE, m_name, "mode", "free");
@@ -163,4 +163,10 @@ public class ManualWithHeading implements FieldRelativeDriver {
         twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
         return twistWithSnapM_S;
     }
+
+    @Override
+    public String getGlassName() {
+        return "ManualWithHeading";
+    }
+
 }

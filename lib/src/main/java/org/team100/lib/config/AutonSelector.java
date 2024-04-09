@@ -2,7 +2,11 @@ package org.team100.lib.config;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 
-/** Uses digital inputs 0, 1, 2, and 3. */
+/**
+ * A physical thumb switch that uses digital inputs 0, 1, 2, and 3.
+ * 
+ * This is not used in 2024.
+*/
 public class AutonSelector {
     private final DigitalInput auto1;
     private final DigitalInput auto2;

@@ -4,10 +4,12 @@
 # pylint: disable=import-error
 import dataclasses
 import time
+import pprint
 
 from enum import Enum
 
 import cv2
+import sys
 import libcamera
 import numpy as np
 import ntcore
@@ -29,13 +31,16 @@ class Blip24:
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
-
+    # TODO get correct serial numbers for Delta
     A = "10000000caeaae82"  # "BETA FRONT"
-    B = "1000000013c9c96c"  # "BETA BACK"
+    # B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
-    SHOOTER = "10000000a7c673da"  # "DELTA SHOOTER"
-    AMP = "10000000a7c673db"  # "DELTA AMP-PLACER"
-    GAME_PIECE = "10000000e31d4a24"  # "DELTA INTAKE"
+
+    SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
+    RIGHTAMP = "10000000caeaae82"  # "DELTA AMP-PLACER"
+    LEFTAMP = "100000004e0a1fb9"  # "DELTA AMP-PLACER"
+    GAME_PIECE = "1000000013c9c96c"  # "DELTA INTAKE"
+
     G = "10000000a7a892c0"  # ""
     UNKNOWN = None
 
@@ -62,103 +67,52 @@ class TagFinder:
 
         self.at_detector = robotpy_apriltag.AprilTagDetector()
         self.at_detector.addFamily("tag36h11")
-
+        
+        # from testing on 3/22/24, k1 and k2 only
+        
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
-            self.mtx = np.array([[497, 0, 578], [0, 498, 328], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        -1.18341279e00,
-                        7.13453990e-01,
-                        7.90204163e-04,
-                        -7.38879856e-04,
-                        -2.94529084e-03,
-                        -1.14073111e00,
-                        6.16356154e-01,
-                        5.86094708e-02,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    497,  # fx
-                    498,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            fx = 498
+            fy = 498
+            cx = 584
+            cy = 316
+            k1 = 0.01
+            k2 = -0.0365
         elif self.model == "imx219":
             print("V2 CAMERA (NOT WIDE ANGLE)")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
-            )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    658,  # fx
-                    660,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+            fx = 660
+            fy = 660
+            cx = 426
+            cy = 303
+            k1 = -0.003
+            k2 = 0.04
+        # TODO get these real distortion values
+        elif model == "imx296":
+            fx = 660
+            fy = 660
+            cx = 728
+            cy = 544
+            k1 = 0
+            k2 = 0
         else:
-            print("UNKNOWN CAMERA")
-            self.mtx = np.array([[658, 0, 422], [0, 660, 318], [0, 0, 1]])
-            self.dist = np.array(
-                [
-                    [
-                        2.26767723e-02,
-                        3.92792657e01,
-                        5.34833047e-04,
-                        -1.76949201e-03,
-                        -6.59779907e01,
-                        -5.75883422e-02,
-                        3.81831051e01,
-                        -6.37029103e01,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                        0.00000000e00,
-                    ]
-                ]
+            print("UNKNOWN CAMERA MODEL")
+            sys.exit()
+
+        tag_size = 0.1651  # tagsize 6.5 inches
+        p1 = 0
+        p2 = 0
+
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+        self.dist = np.array([[k1, k2, p1, p2]])
+        self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
+            robotpy_apriltag.AprilTagPoseEstimator.Config(
+                tag_size,
+                fx,
+                fy,
+                cx,
+                cy,
             )
-            self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
-                robotpy_apriltag.AprilTagPoseEstimator.Config(
-                    0.1651,  # tagsize 6.5 inches
-                    666,  # fx
-                    666,  # fy
-                    width / 2,  # cx
-                    height / 2,  # cy
-                )
-            )
+        )
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
@@ -173,7 +127,6 @@ class TagFinder:
 
         # this  makes a view, very fast (150 ns)
         img = img.reshape((self.height, self.width))
-
         # TODO: crop regions that never have targets
         # this also makes a view, very fast (150 ns)
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
@@ -321,6 +274,14 @@ def main():
         # medium detection resolution, compromise speed vs range
         width = 832
         height = 616
+    elif model == "imx296":
+        print("GS Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1472   # slightly larger than the detector, to match stride
+        fullheight = 1088
+        # medium detection resolution, compromise speed vs range
+        width = 1472
+        height = 1088
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100
@@ -346,15 +307,19 @@ def main():
             # fast shutter means more gain
             # "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-            # "ExposureTime": 3000,
+            # 3/23/24, reduced to 2ms, even less blur.
+            "ExposureTime": 3000,
+            "AnalogueGain": 8,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            # "ScalerCrop":(0,0,width/2,height/2),
         },
     )
-
+    print("SENSOR MODES AVAILABLE")
+    pprint.pprint(camera.sensor_modes)
     serial = getserial()
     identity = Camera(serial)
     # if identity == Camera.FRONT:

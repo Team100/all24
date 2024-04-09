@@ -11,11 +11,14 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 class YawRateConstraintTest {
     private static final double kDelta = 0.001;
+// for testing, use the aboslute maximum. This shouldn't be used in a real
+    // robot.
+    private static final double kYawRateScale = 1.0;
 
     @Test
     void testSpin() {
         // one radian/m in place i.e. no constraint
-        YawRateConstraint c = new YawRateConstraint(SwerveKinodynamicsFactory.forTest());
+        YawRateConstraint c = new YawRateConstraint(SwerveKinodynamicsFactory.forTest(), kYawRateScale);
         Pose2dWithMotion p = new Pose2dWithMotion(
                 new Pose2d(), new Twist2d(0, 0, 1), 0, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
@@ -25,8 +28,9 @@ class YawRateConstraintTest {
 
     @Test
     void testNormal() {
-        // towards +x, 1 rad/m, 1 m/s wheel -> 1 rad/s limit => 2.8 m/s (which violates the linear constraint but it's ok)
-        YawRateConstraint c = new YawRateConstraint(SwerveKinodynamicsFactory.forTest());
+        // towards +x, 1 rad/m, 1 m/s wheel -> 1 rad/s limit => 2.8 m/s (which violates
+        // the linear constraint but it's ok)
+        YawRateConstraint c = new YawRateConstraint(SwerveKinodynamicsFactory.forTest(), kYawRateScale);
         Pose2dWithMotion p = new Pose2dWithMotion(
                 new Pose2d(),
                 new Twist2d(1, 0, 1), // spatial, so rad/m
@@ -36,11 +40,10 @@ class YawRateConstraintTest {
         assertEquals(2.828, c.getMaxVelocity(p), kDelta);
     }
 
-
     @Test
     void testNormal2() {
         // towards +x, 1 rad/m, 2 rad/s limit => 2 m/s
-        YawRateConstraint c = new YawRateConstraint(SwerveKinodynamicsFactory.forTest2());
+        YawRateConstraint c = new YawRateConstraint(SwerveKinodynamicsFactory.forTest2(), kYawRateScale);
         Pose2dWithMotion p = new Pose2dWithMotion(
                 new Pose2d(),
                 new Twist2d(1, 0, 1), // spatial, so rad/m

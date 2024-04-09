@@ -54,7 +54,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     }
 
     @Override
-    public double getPosition() {
+    public Double getPosition() {
         return m_positionRad;
     }
 

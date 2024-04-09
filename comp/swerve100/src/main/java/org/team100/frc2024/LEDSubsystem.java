@@ -1,35 +1,92 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.team100.frc2024;
 
+import java.util.Optional;
+
+import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
+import org.team100.lib.localization.VisionDataProvider24;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LEDSubsystem extends SubsystemBase {
-    /** Creates a new LEDSubsystem. */
+    /**
+     * flash if the vision input is older than 0.3 sec. Typical "good" frame rate is
+     * 15 hz, so 0.06 sec, much less.
+     */
+    private static final long kPersistenceUs = 300000;
 
-    LEDIndicator m_indicator;
-    SensorInterface m_sensors;
+    private final LEDIndicator m_indicator;
+    private final SensorInterface m_sensors;
+    private final Shooter m_shooter;
+    private final VisionDataProvider24 m_vision;
 
-    public LEDSubsystem(LEDIndicator indicator, SensorInterface sensors) {
+    /**
+     * 
+     * @param indicator output
+     * @param sensors   green when note in position
+     * @param shooter   purple when at shooting speed
+     * @param vision    flash when vision has a poor fix, solid when it's good.
+     * 
+     */
+    public LEDSubsystem(
+            LEDIndicator indicator,
+            SensorInterface sensors,
+            Shooter shooter,
+            VisionDataProvider24 vision) {
         m_indicator = indicator;
         m_sensors = sensors;
+        m_shooter = shooter;
+        m_vision = vision;
     }
 
     @Override
     public void periodic() {
-        if (m_sensors.getFeederSensor()) {
-            m_indicator.setStripRed(0, State.GREEN);
+        m_indicator.setBack(State.WHITE);
+
+        if (!DriverStation.isDSAttached() || DriverStation.isDisabled()) {
+
+            // when disabled, show alliance (or orange if not connected), steady.
+
+            Optional<Alliance> alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+                if (alliance.get() == Alliance.Red) {
+                    m_indicator.setFront(State.RED);
+                } else {
+                    m_indicator.setFront(State.BLUE);
+                }
+            } else {
+                m_indicator.setFront(State.ORANGE);
+            }
+            m_indicator.setFlashing(false);
         } else {
-            m_indicator.setStripGreen(0, State.RED);
 
+            // when enabled, show shooter velocity and feeder state, with
+            // flashing to show vision state
+
+            boolean atVelocitySetpoint = m_shooter.atVelocitySetpoint(false);
+            SmartDashboard.putBoolean("VELOCITY", atVelocitySetpoint);
+            if (atVelocitySetpoint) {
+                m_indicator.setFront(State.PURPLE);
+            } else {
+                boolean indexerIsEmpty = m_sensors.getFeederSensor();
+                SmartDashboard.putBoolean("FEEDER", indexerIsEmpty);
+                if (indexerIsEmpty) {
+                    m_indicator.setFront(State.RED);
+                } else {
+                    m_indicator.setFront(State.GREEN);
+                }
+            }
+
+            // flash if the pose is too old
+            long poseAgeUs = m_vision.getPoseAgeUs();
+            m_indicator.setFlashing(poseAgeUs > kPersistenceUs);
         }
-        System.out.println("LEDSS R RUNNINNG");
-        // m_indicator.setStripSolid(0, State.RED);
 
+        // actually change the indicator
+        m_indicator.periodic();
     }
 }

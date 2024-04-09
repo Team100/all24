@@ -1,15 +1,12 @@
 package org.team100.lib.localization;
 
-import org.opencv.calib3d.Calib3d;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,30 +15,89 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N3;
 
 /**
  * Static methods used to interpret camera input.
  */
 public class PoseEstimationHelper {
     private static final Telemetry t = Telemetry.get();
-    private static final String m_name = Names.name(PoseEstimationHelper.class);
+    private static final String kName = PoseEstimationHelper.class.getSimpleName();
 
-    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates, Rotation3d cameraObject) {
-            double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + cameraObject.getY());
-            if (robotRelativeAngle == 0) {
-                return new Translation2d();
-            }
-            double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
-            if (cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
-                x =-x; 
-            }
-            double y = x * Math.tan(cameraObject.getZ() + cameraInRobotCoordinates.getRotation().getZ());
-            return new Translation2d(x + cameraInRobotCoordinates.getX(), y + cameraInRobotCoordinates.getY());
+    /**
+     * Converts camera rotation to an object to a robot relative translation,
+     * accounts for roll, pitch, and yaw offsets by using the unit circle. For roll,
+     * it takes the the angle between the pitch and yaw (roll) to the object and
+     * adds the offseted roll, then gets the Cos (x in unit circle) and multiples it
+     * by the norm, it does the same for yaw
+     */
+    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates,
+            Rotation3d yawPitch) {
+        Rotation2d angleNoRollOffset = new Rotation2d(yawPitch.getZ(), yawPitch.getY());
+        Rotation2d angleWRoll = new Rotation2d(cameraInRobotCoordinates.getRotation().getX()).plus(angleNoRollOffset);
+        double normInCamera = Math.hypot(yawPitch.getZ(), yawPitch.getY());
+        Rotation3d rotToObject = new Rotation3d(0, angleWRoll.getSin() * normInCamera,
+                angleWRoll.getCos() * normInCamera);
+        double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + rotToObject.getY());
+        if (robotRelativeAngle == 0) {
+            return new Translation2d();
+        }
+        double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
+        double y = x * Math.tan(rotToObject.getZ());
+        Rotation2d cameraRelativeTranslation = new Rotation2d(x, y);
+        double znorm = Math.hypot(x, y);
+        Rotation2d angleToObject = new Rotation2d(cameraInRobotCoordinates.getRotation().getZ())
+                .plus(cameraRelativeTranslation);
+        Translation2d robotRelativeTranslation2dNoOffsets = new Translation2d(
+                angleToObject.getCos() * znorm,
+                angleToObject.getSin() * znorm);
+        return robotRelativeTranslation2dNoOffsets.plus(cameraInRobotCoordinates.getTranslation().toTranslation2d());
     }
 
-    public static Translation2d convertToFieldRelative(Pose2d currentPose, Translation2d RobotRelativeTranslation2d) {
-        return currentPose.transformBy(new Transform2d(RobotRelativeTranslation2d, new Rotation2d())).getTranslation();
+    /**
+     * Converts camera rotation to objects into field relative translations
+     */
+    public static List<Translation2d> cameraRotsToFieldRelative(Pose2d currentPose,
+            Transform3d cameraInRobotCoordinates, List<Rotation3d> rots) {
+        ArrayList<Translation2d> Tnotes = new ArrayList<>();
+        for (Rotation3d note : rots)
+            if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
+                Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
+                        cameraInRobotCoordinates,
+                        note);
+                Translation2d fieldRealtiveTranslation = currentPose
+                        .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .getTranslation();
+                if (fieldRealtiveTranslation.getY() > -1 && fieldRealtiveTranslation.getX() > -1) {
+                    if (fieldRealtiveTranslation.getY() < 9.21 && fieldRealtiveTranslation.getX() < 17.54) {
+                        Tnotes.add(fieldRealtiveTranslation);
+                    }
+                }
+            }
+
+        return Tnotes;
+    }
+
+    /**
+     * Converts camera rotation to objects into field relative translations
+     */
+    public static List<Translation2d> cameraRotsToFieldRelativeArray(Pose2d currentPose,
+            Transform3d cameraInRobotCoordinates, Rotation3d[] rots) {
+        ArrayList<Translation2d> Tnotes = new ArrayList<>();
+        for (Rotation3d note : rots)
+            if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
+                Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
+                        cameraInRobotCoordinates,
+                        note);
+                Translation2d fieldRelativeNote = currentPose
+                        .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .getTranslation();
+                if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
+                    if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
+                        Tnotes.add(fieldRelativeNote);
+                    }
+                }
+            }
+        return Tnotes;
     }
 
     /**
@@ -53,38 +109,6 @@ public class PoseEstimationHelper {
     public static Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
-            Blip blip,
-            Rotation3d robotRotationInFieldCoordsFromGyro,
-            double thresholdMeters) {
-
-        Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
-
-        if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, m_name, "rotation_source", "CAMERA");
-            return getRobotPoseInFieldCoords(
-                    cameraInRobotCoords,
-                    tagInFieldCoords,
-                    blip);
-        }
-
-        t.log(Level.DEBUG, m_name, "rotation_source", "GYRO");
-
-        return getRobotPoseInFieldCoords(
-                cameraInRobotCoords,
-                tagInFieldCoords,
-                blip,
-                robotRotationInFieldCoordsFromGyro);
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting transform is correct.
-     */
-    public static Pose3d getRobotPoseInFieldCoords(
-            Transform3d cameraInRobotCoords,
-            Pose3d tagInFieldCoords,
             Blip24 blip,
             Rotation3d robotRotationInFieldCoordsFromGyro,
             double thresholdMeters) {
@@ -92,14 +116,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, m_name, "rotation_source", "CAMERA");
+            t.log(Level.DEBUG, kName, "rotation_source", "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        t.log(Level.DEBUG, m_name, "rotation_source", "GYRO");
+        t.log(Level.DEBUG, kName, "rotation_source", "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -115,21 +139,6 @@ public class PoseEstimationHelper {
      * return the robot pose in field coordinates.
      * 
      * This method trusts the tag rotation calculated by the camera.
-     */
-    public static Pose3d getRobotPoseInFieldCoords(
-            Transform3d cameraInRobotCoords,
-            Pose3d tagInFieldCoords,
-            Blip blip) {
-        Transform3d tagInCameraCoords = blipToTransform(blip);
-        Pose3d cameraInFieldCoords = toFieldCoordinates(tagInCameraCoords, tagInFieldCoords);
-        return applyCameraOffset(cameraInFieldCoords, cameraInRobotCoords);
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting transform is correct.
      */
     public static Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
@@ -169,35 +178,6 @@ public class PoseEstimationHelper {
     public static Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
-            Blip blip,
-            Rotation3d robotRotationInFieldCoordsFromGyro) {
-        Rotation3d cameraRotationInFieldCoords = cameraRotationInFieldCoords(
-                cameraInRobotCoords,
-                robotRotationInFieldCoordsFromGyro);
-        Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
-        Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
-                tagInFieldCoords.getRotation(),
-                cameraRotationInFieldCoords);
-        Transform3d tagInCameraCoords = new Transform3d(
-                tagTranslationInCameraCoords,
-                tagRotationInCameraCoords);
-        Pose3d cameraInFieldCoords = toFieldCoordinates(
-                tagInCameraCoords,
-                tagInFieldCoords);
-        return applyCameraOffset(
-                cameraInFieldCoords,
-                cameraInRobotCoords);
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting pose is correct.
-     */
-    public static Pose3d getRobotPoseInFieldCoords(
-            Transform3d cameraInRobotCoords,
-            Pose3d tagInFieldCoords,
             Blip24 blip,
             Rotation3d robotRotationInFieldCoordsFromGyro) {
 
@@ -207,21 +187,14 @@ public class PoseEstimationHelper {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        t.log(Level.DEBUG, m_name, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
-        t.log(Level.DEBUG, m_name, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("TAG TRANLSAION IN CAM COORDS :" + tagTranslationInCameraCoords.toTranslation2d());
-        // System.out.println("CAMERA ROT IN FIELD COORDS: " + cameraRotationInFieldCoords.toRotation2d());
-
-        // System.out.println("TAG IN FIELD COORDS COOORDS" + tagInFieldCoords.toPose2d());
+        t.log(Level.DEBUG, kName, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
+        t.log(Level.DEBUG, kName, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        t.log(Level.DEBUG, m_name, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
-    
-
-        // System.out.println("TAG ROTATION IN CAM COOORDS"+ tagRotationInCameraCoords.toRotation2d());        
+        t.log(Level.DEBUG, kName, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -230,9 +203,8 @@ public class PoseEstimationHelper {
         Pose3d cameraInFieldCoords = toFieldCoordinates(
                 tagInCameraCoords,
                 tagInFieldCoords);
-        
-        // System.out.println("CAM IN FIELD COORDS:::: " + cameraInFieldCoords.toPose2d());
-        t.log(Level.DEBUG, m_name, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+
+        t.log(Level.DEBUG, kName, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,
@@ -259,19 +231,6 @@ public class PoseEstimationHelper {
      * translation and rotation as an NWU x-forward transform. Package-private for
      * testing.
      */
-    static Transform3d blipToTransform(Blip b) {
-        return new Transform3d(blipToTranslation(b), blipToRotation(b));
-    }
-
-    /**
-     * ALERT: the new python code uses a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting transform is correct.
-     * 
-     * @param b
-     * @return
-     */
     static Transform3d blipToTransform(Blip24 b) {
         return new Transform3d(blipToTranslation(b), blipToRotation(b));
     }
@@ -283,19 +242,6 @@ public class PoseEstimationHelper {
      * renormalized, but it's not very accurate, so we don't consume it.
      * Package-private for testing.
      */
-    static Translation3d blipToTranslation(Blip b) {
-        return new Translation3d(b.pose_t[2][0], -1.0 * b.pose_t[0][0], -1.0 * b.pose_t[1][0]);
-    }
-
-    /**
-     * ALERT: the new python code produces a different result type so this might be
-     * wrong.
-     * 
-     * TODO: check that the resulting translation orientation is correct
-     * 
-     * @param b
-     * @return
-     */
     static Translation3d blipToTranslation(Blip24 b) {
         return GeometryUtil.zForwardToXForward(b.getPose().getTranslation());
     }
@@ -304,52 +250,6 @@ public class PoseEstimationHelper {
      * Extract the rotation from the "z forward" blip and return the same rotation
      * expressed in our usual "x forward" NWU coordinates. Package-private for
      * testing.
-     */
-    static Rotation3d blipToRotation(Blip b) {
-        Mat rmat = new Mat(3, 3, CvType.CV_64F);
-        rmat.put(0, 0, b.pose_R[2][2]);
-        rmat.put(0, 1, -b.pose_R[2][0]);
-        rmat.put(0, 2, -b.pose_R[2][1]);
-
-        rmat.put(1, 0, -b.pose_R[0][2]);
-        rmat.put(1, 1, b.pose_R[0][0]);
-        rmat.put(1, 2, b.pose_R[0][1]);
-
-        rmat.put(2, 0, -b.pose_R[1][2]);
-        rmat.put(2, 1, b.pose_R[1][0]);
-        rmat.put(2, 2, b.pose_R[1][1]);
-
-        // convert it to axis-angle
-        Mat rvec = new Mat(3, 1, CvType.CV_64F);
-        Calib3d.Rodrigues(rmat, rvec);
-
-        // convert back to rotation matrix -- this should be orthogonal
-        Mat rmat2 = new Mat();
-        Calib3d.Rodrigues(rvec, rmat2);
-
-        Matrix<N3, N3> matrix = new Matrix<>(Nat.N3(), Nat.N3());
-        for (int row = 0; row < 3; ++row) {
-            for (int col = 0; col < 3; ++col) {
-                matrix.set(row, col, rmat2.get(row, col)[0]);
-            }
-        }
-
-        return new Rotation3d(matrix);
-    }
-
-    /**
-     * ALERT! the new python code uses a different estimator which may (probably)
-     * use a different convention for rotation -- the original AprilTag library uses
-     * Z-into-tag whereas I think the WPI convention is Z-out-of-tag.
-     * 
-     * it doesn't matter that much because we don't actually use the tag rotation
-     * for anything (we use the gyro instead), but it would be good for it to be
-     * correct.
-     * 
-     * TODO: verify the polarity of this rotation
-     * 
-     * @param b
-     * @return
      */
     static Rotation3d blipToRotation(Blip24 b) {
         return GeometryUtil.zForwardToXForward(b.getPose().getRotation());

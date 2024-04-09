@@ -41,10 +41,28 @@ public class PWMTurningMotor implements Motor100<Angle100> {
 
     /**
      * Velocity is just kV feedforward and that's all.
+     * 
+     * @param outputRad_S times kV
+     * @param accelRad_S2 ignored
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2) {
         m_motor.set(kV * outputRad_S);
+    }
+
+    /**
+     * @param velocity times kv
+     * @param accel    ignored
+     * @param torque   ignored
+     */
+    @Override
+    public void setVelocity(double velocity, double accel, double torque) {
+        m_motor.set(kV * velocity);
+    }
+
+    @Override
+    public double getTorque() {
+        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
     }
 
     @Override

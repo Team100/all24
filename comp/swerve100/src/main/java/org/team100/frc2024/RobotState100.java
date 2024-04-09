@@ -1,15 +1,18 @@
 package org.team100.frc2024;
 
-import org.team100.frc2024.motion.intake.Intake;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 public class RobotState100 {
+    private static final Telemetry t = Telemetry.get();
+
 
     public enum State100{
         MANUAL, SHOOTING, AMPING, NONE
     }
 
     public enum ShooterState100{
-        FEED, NONE, DEFAULTSHOOT, READYTOSHOOT, DOWN, STOP
+        FEED, NONE, DEFAULTSHOOT, READYTOSHOOT, DOWN, STOP, TEST, LOB
     }
 
     public enum AmpState100{
@@ -56,6 +59,7 @@ public class RobotState100 {
     }
 
     public static void changeIntakeState(IntakeState100 state){
+        t.log(Level.DEBUG, "ChangeIntakeState", "state", state);
         currentIntakeState = state;
     }
 

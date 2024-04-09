@@ -8,15 +8,27 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
- * Linear velocity limit based on spatial yaw rate and drivetrain omega limit.
+ * Linear velocity limit based on spatial yaw rate and drivetrain omega limit
+ * (scaled).
  * 
  * Slows the path velocity to accommodate the desired yaw rate.
+* 
+ * Does not affect maximum acceleration.
  */
 public class YawRateConstraint implements TimingConstraint {
     private final double m_maxOmegaRad_S;
 
-    public YawRateConstraint(SwerveKinodynamics limits) {
-        m_maxOmegaRad_S = limits.getMaxAngleSpeedRad_S();
+    /**
+     * Use the factory.
+     * 
+     * @param limits absolute maxima
+     * @param scale  apply to the maximum angular speed to get the actual
+     *               constraint. The absolute maximum yaw rate is *very* high, and
+     *               never useful for trajectories. A good number to try here might
+     *               be 0.2.
+     */
+    YawRateConstraint(SwerveKinodynamics limits, double scale) {
+        m_maxOmegaRad_S = limits.getMaxAngleSpeedRad_S() * scale;
     }
 
     @Override

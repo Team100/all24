@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -23,7 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The swerve drive in local, or robot, reference frame. This class knows
  * nothing about the outside world, it just accepts chassis speeds.
  */
-public class SwerveLocal {
+public class SwerveLocal implements Glassy {
     private static final SwerveModuleState[] states0 = new SwerveModuleState[] {
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
@@ -85,7 +86,6 @@ public class SwerveLocal {
             setChassisSpeedsNormally(speeds, gyroRateRad_S, kDtSec);
         }
     }
-
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         setChassisSpeedsNormally(speeds, 0, 0.02);
@@ -170,8 +170,10 @@ public class SwerveLocal {
     }
 
     /**
-     * The speed implied by the module states.
+     * The robot-relative speed implied by the module states.
      * performs inverse discretization and extra correction
+     * 
+     * TODO: this seems like it should be in odometry.
      * 
      * @param gyroRateRad_S gyro rate
      * @param dt            for discretization
@@ -208,8 +210,6 @@ public class SwerveLocal {
         m_modules.periodic();
     }
 
-    ///////////////////////////////////////////////////////////
-
     public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState[] states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
@@ -217,6 +217,13 @@ public class SwerveLocal {
         setModuleStates(states);
         prevSetpoint = new SwerveSetpoint(speeds, states);
     }
+
+    @Override
+    public String getGlassName() {
+        return "SwerveLocal";
+    }
+
+    /////////////////////////////////////////////////////////
 
     private void setChassisSpeedsWithSetpointGenerator(
             ChassisSpeeds speeds,
@@ -240,11 +247,6 @@ public class SwerveLocal {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S());
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
-
-        // log what we did, note this is not using discretization but it probably should
-        ChassisSpeeds speeds = m_swerveKinodynamics.toChassisSpeeds(states);
-        t.log(Level.TRACE, m_name, "implied speed", speeds);
-        t.log(Level.TRACE, m_name, "moving", isMoving(speeds));
     }
 
     private static boolean isMoving(ChassisSpeeds speeds) {

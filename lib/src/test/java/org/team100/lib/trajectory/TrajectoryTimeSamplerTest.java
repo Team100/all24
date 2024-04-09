@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,8 +25,8 @@ class TrajectoryTimeSamplerTest {
 
     @Test
     void testSample() {
-        SwerveKinodynamics limits =  SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner(limits);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        TrajectoryPlanner planner = new TrajectoryPlanner();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -44,8 +44,7 @@ class TrajectoryTimeSamplerTest {
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(limits));
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
 
         Trajectory100 trajectory = planner
                 .generateTrajectory(

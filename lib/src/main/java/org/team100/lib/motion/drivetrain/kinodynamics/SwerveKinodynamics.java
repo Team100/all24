@@ -1,6 +1,9 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import org.team100.lib.copies.SwerveDriveKinematics100;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
+import org.team100.lib.copies.TrajectoryConfig100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Constraints100;
@@ -11,18 +14,15 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -36,17 +36,18 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  * 
  * In particular, the maximum spin rate is likely to seem quite high. Do not
  * lower it here.
- */ 
-public class SwerveKinodynamics {
+ */
+public class SwerveKinodynamics implements Glassy {
     private final Telemetry t = Telemetry.get();
 
     // geometry
     private final double m_fronttrack;
     private final double m_backtrack;
     private final double m_wheelbase;
+    private final double m_frontoffset;
     private final double m_radius;
     private final double m_vcg;
-    private final SwerveDriveKinematics m_kinematics;
+    private final SwerveDriveKinematics100 m_kinematics;
     private final double m_MaxCapsizeAccelM_S2;
 
     // configured inputs
@@ -82,6 +83,7 @@ public class SwerveKinodynamics {
             double maxSteeringAcceleration,
             double track,
             double wheelbase,
+            double frontoffset,
             double vcg) {
         if (track < 0.1)
             throw new IllegalArgumentException();
@@ -91,10 +93,11 @@ public class SwerveKinodynamics {
         m_fronttrack = track;
         m_backtrack = track;
         m_wheelbase = wheelbase;
+        m_frontoffset = frontoffset;
         m_vcg = vcg;
         // distance from center to wheel
         m_radius = Math.hypot(track / 2, m_wheelbase / 2);
-        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase);
+        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
         double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
@@ -140,6 +143,7 @@ public class SwerveKinodynamics {
             double fronttrack,
             double backtrack,
             double wheelbase,
+            double frontoffset,
             double vcg) {
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
@@ -149,10 +153,11 @@ public class SwerveKinodynamics {
         m_fronttrack = fronttrack;
         m_backtrack = backtrack;
         m_wheelbase = wheelbase;
+        m_frontoffset = frontoffset;
         m_vcg = vcg;
         // distance from center to wheel
-        m_radius = Math.hypot((fronttrack+backtrack) / 4, m_wheelbase / 2);
-        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase);
+        m_radius = Math.hypot((fronttrack + backtrack) / 4, m_wheelbase / 2);
+        m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, m_frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
         double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
@@ -215,7 +220,7 @@ public class SwerveKinodynamics {
         m_steeringProfile = new TrapezoidProfile100(
                 m_MaxSteeringVelocityRad_S,
                 m_maxSteeringAccelerationRad_S2,
-                0.05);
+                0.02);
     }
 
     public Profile100 getSteeringProfile() {
@@ -280,12 +285,20 @@ public class SwerveKinodynamics {
                 getMaxDriveAccelerationM_S2());
     }
 
-    private static SwerveDriveKinematics get(double fronttrack,double backtrack, double wheelbase) {
-        return new SwerveDriveKinematics(
-                new Translation2d(wheelbase / 2, fronttrack / 2),
-                new Translation2d(wheelbase / 2, -fronttrack / 2),
-                new Translation2d(-wheelbase / 2, backtrack / 2),
-                new Translation2d(-wheelbase / 2, -backtrack / 2));
+    /**
+     * @param fronttrack
+     * @param backtrack
+     * @param wheelbase
+     * @param frontoffset distance from center of mass to front wheel
+     * @return
+     */
+    private static SwerveDriveKinematics100 get(double fronttrack, double backtrack, double wheelbase,
+            double frontoffset) {
+        return new SwerveDriveKinematics100(
+                new Translation2d(frontoffset, fronttrack / 2),
+                new Translation2d(frontoffset, -fronttrack / 2),
+                new Translation2d(frontoffset - wheelbase, backtrack / 2),
+                new Translation2d(frontoffset - wheelbase, -backtrack / 2));
     }
 
     public void resetHeadings(Rotation2d... moduleHeadings) {
@@ -325,9 +338,13 @@ public class SwerveKinodynamics {
 
     /**
      * Forward kinematics, module states => chassis speeds.
+     * 
      * Does not do inverse discretization.
+     * 
+     * Does not take Tires into account.
      */
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
+        // does not take tires into account
         return m_kinematics.toChassisSpeeds(moduleStates);
     }
 
@@ -336,6 +353,8 @@ public class SwerveKinodynamics {
      * instead of velocities, it is not needed.
      * 
      * It performs inverse discretization and an extra correction.
+     * 
+     * Does not take Tires into account.
      */
     public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
             SwerveModuleState... moduleStates) {
@@ -356,18 +375,11 @@ public class SwerveKinodynamics {
                 angle.unaryMinus());
     }
 
-    public SwerveDrivePoseEstimator newPoseEstimator(
-            Rotation2d gyroAngle,
-            SwerveModulePosition[] modulePositions,
-            Pose2d initialPoseMeters) {
-        return new SwerveDrivePoseEstimator(
-                m_kinematics, gyroAngle, modulePositions, initialPoseMeters);
-    }
-
     public SwerveDrivePoseEstimator100 newPoseEstimator(
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
+            double timestampSeconds,
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         return new SwerveDrivePoseEstimator100(
@@ -375,13 +387,14 @@ public class SwerveKinodynamics {
                 gyroAngle,
                 modulePositions,
                 initialPoseMeters,
+                timestampSeconds,
                 stateStdDevs,
                 visionMeasurementStdDevs);
     }
 
-    public TrajectoryConfig newTrajectoryConfig(
+    public TrajectoryConfig100 newTrajectoryConfig(
             double maxVelocityMetersPerSecond, double maxAccelerationMetersPerSecondSq) {
-        TrajectoryConfig result = new TrajectoryConfig(
+        TrajectoryConfig100 result = new TrajectoryConfig100(
                 maxVelocityMetersPerSecond, maxAccelerationMetersPerSecondSq);
         result.setKinematics(m_kinematics);
         return result;
@@ -468,6 +481,11 @@ public class SwerveKinodynamics {
                 ratio * maxV * Math.cos(xyAngle),
                 ratio * maxV * Math.sin(xyAngle),
                 speeds.dtheta);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "SwerveKinodynamics";
     }
 
 }

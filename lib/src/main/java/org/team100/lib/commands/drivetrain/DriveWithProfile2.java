@@ -10,8 +10,6 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -69,8 +67,6 @@ public class DriveWithProfile2 extends Command100 {
 
     @Override
     public void initialize100() {
-        // System.out.println("START X " + m_swerve.getState().x().v());
-        System.out.println("DRIVE WITH PROFILE");
         xSetpoint = m_swerve.getState().x();
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();

@@ -1,81 +1,86 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.team100.frc2024.motion.intake;
 
-import org.team100.frc2024.Robot;
 import org.team100.frc2024.RobotState100;
 import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class IntakeDefault extends Command {
-  /** Creates a new IntakeDefault. */
-  Intake m_intake;
-  public IntakeDefault(Intake intake) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    m_intake = intake;
-    addRequirements(m_intake);
-  }
+    private static final Telemetry t = Telemetry.get();
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {}
+    Intake m_intake;
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    
-    // if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
-    //     // System.out.println("WE ARE INTAKING");
-    //     m_intake.intake();
-
-    // } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
-    //     // System.out.println("WE ARE OUTTAKING");
-    //     m_intake.outtake();
-
-    // }else if(RobotState100.getIntakeState() == IntakeState100.NONE){
-    //     // System.out.println("WE ARE NONNNEE");
-    //     m_intake.stop();
-
-    // }
-    
-    switch(RobotState100.getIntakeState()){
-        case INTAKE:
-            // System.out.println("INTAKINGGGG");
-            m_intake.intakeSmart();
-            break;
-        case OUTTAKE:
-            // System.out.println("OUTTTTTTT");
-            m_intake.outtake();
-            break;
-        case STOP:
-            // System.out.println("NOOOEEEEE");
-            m_intake.stop();
-            break;
-        default:
-            
+    public IntakeDefault(Intake intake) {
+        m_intake = intake;
+        addRequirements(m_intake);
     }
 
-    switch(RobotState100.getFeederState()){
-        case FEED:
-            m_intake.runUpper();
-            break;
-        default:
-            
+    @Override
+    public void initialize() {
+        t.log(Level.DEBUG, "IntakeDefault", "command state", "initialize");
     }
-  }
 
-  
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
+    @Override
+    public void execute() {
+        t.log(Level.DEBUG, "IntakeDefault", "command state", "execute");
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
+        // if(RobotState100.getIntakeState() == IntakeState100.INTAKE){
+        // m_intake.intake();
+
+        // } else if(RobotState100.getIntakeState() == IntakeState100.OUTTAKE){
+        // m_intake.outtake();
+
+        // }else if(RobotState100.getIntakeState() == IntakeState100.NONE){
+        // m_intake.stop();
+
+        // }
+
+        IntakeState100 intakeState = RobotState100.getIntakeState();
+        t.log(Level.DEBUG, "IntakeDefault", "state", intakeState);
+        switch (intakeState) {
+            case INTAKE:
+                m_intake.intakeSmart();
+                break;
+            case OUTTAKE:
+                m_intake.outtake();
+                break;
+            case STOP:
+                m_intake.stop();
+                break;
+                
+            default:
+
+        }
+
+        switch (RobotState100.getFeederState()) {
+            case FEED:
+                // m_intake.runUpper();
+                m_intake.intake();
+                break;
+            default:
+
+        }
+
+        switch (RobotState100.getShooterState()) {
+            case LOB:
+                // m_intake.runUpper();
+                m_intake.intakeSmart();
+                break;
+            default:
+
+        }
+
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        t.log(Level.DEBUG, "IntakeDefault", "command state", "end");
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 }

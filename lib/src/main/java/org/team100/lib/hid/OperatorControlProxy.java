@@ -22,6 +22,7 @@ public class OperatorControlProxy implements OperatorControl {
 
     public OperatorControlProxy() {
         m_notifier = new Notifier(this::refresh);
+        m_notifier.setName("OperatorControlProxy Notifier");
         refresh();
         m_notifier.startPeriodic(kFreq);
     }
@@ -42,6 +43,9 @@ public class OperatorControlProxy implements OperatorControl {
 
     private static OperatorControl getOperatorControl(String name) {
         if (name.contains("F310")) {
+            return new OperatorV2Control();
+        }
+        if (name.contains("Xbox")) {
             return new OperatorV2Control();
         }
         if (name.startsWith("MSP430")) {
@@ -172,6 +176,20 @@ public class OperatorControlProxy implements OperatorControl {
 
     
     public boolean outtakeFromAmp(){
-        return  m_operatorControl.outtakeFromAmp();
+        return m_operatorControl.outtakeFromAmp();
     }
+
+    public double pivotUp(){
+        return m_operatorControl.pivotUp();
+    }
+
+    public double pivotDown(){
+        return m_operatorControl.pivotDown();
+    }
+
+    public boolean rezero(){
+        return m_operatorControl.rezero();
+    }
+
+    
 }

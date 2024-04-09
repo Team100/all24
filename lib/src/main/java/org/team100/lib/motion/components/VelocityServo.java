@@ -1,8 +1,9 @@
 package org.team100.lib.motion.components;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
-public interface VelocityServo<T extends Measure100> {
+public interface VelocityServo<T extends Measure100> extends Glassy {
 
     void reset();
 
@@ -22,6 +23,11 @@ public interface VelocityServo<T extends Measure100> {
      */
     double getVelocity();
 
+    /**
+     * @return Current applied torque.  Used for drive/steer decoupling.
+     */
+    double getTorque();
+
     void stop();
 
     double getDistance();
@@ -30,4 +36,11 @@ public interface VelocityServo<T extends Measure100> {
     double getSetpoint();
 
     void periodic();
+
+    @Override
+    default String getGlassName() {
+        return "VelocityServo";
+    }
+
+    
 }

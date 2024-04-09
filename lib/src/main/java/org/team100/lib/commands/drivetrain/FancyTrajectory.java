@@ -4,13 +4,11 @@ import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DrivePIDFController;
+import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.timing.CentripetalAccelerationConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -38,16 +36,16 @@ public class FancyTrajectory extends Command100 {
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final TrajectoryPlanner m_planner;
-    private final SwerveKinodynamics m_limits;
+    private final List<TimingConstraint> m_constraints;
 
     public FancyTrajectory(
             SwerveDriveSubsystem robotDrive,
             TrajectoryPlanner planner,
-            SwerveKinodynamics limits) {
+            List<TimingConstraint> constraints) {
         m_robotDrive = robotDrive;
-        m_controller = new DrivePIDFController(false, 2.4, 2.4);
+        m_controller = DriveMotionControllerFactory.fancyPIDF();
         m_planner = planner;
-        m_limits = limits;
+        m_constraints = constraints;
         addRequirements(m_robotDrive);
     }
 
@@ -60,10 +58,7 @@ public class FancyTrajectory extends Command100 {
         List<Rotation2d> headings = List.of(
                 GeometryUtil.fromDegrees(0),
                 GeometryUtil.fromDegrees(0));
-        // these don't actually do anything.
-        List<TimingConstraint> constraints = List.of(
-                new CentripetalAccelerationConstraint(m_limits));
-
+        
         double start_vel = 0;
         double end_vel = 0;
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
@@ -71,7 +66,7 @@ public class FancyTrajectory extends Command100 {
                 false,
                 waypointsM,
                 headings,
-                constraints,
+                m_constraints,
                 start_vel,
                 end_vel,
                 kMaxVelM_S,
