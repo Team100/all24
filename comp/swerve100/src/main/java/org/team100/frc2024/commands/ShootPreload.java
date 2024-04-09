@@ -147,7 +147,7 @@ public class ShootPreload extends Command {
         t.log(Level.DEBUG, "ShootSmart", "command state", "end");
         t.log(Level.DEBUG, "ShootSmart", "command state", "end");
         t.log(Level.DEBUG, "ShootSmart", "END", 1);
-
+        System.out.println("IIOII HAVVVE FINNISHED");
         atVelocity = false;
         finished = false;
         m_timer.stop();

@@ -149,7 +149,7 @@ public class GravityServo {
     }
 
     public void setPositionWithSteadyState(double goal) {
-        m_motor.setSmartCurrentLimit(m_currentLimit);
+        // m_motor.setSmartCurrentLimit(m_currentLimit);
 
         double measurement = m_encoder.getPosition();
 
@@ -209,7 +209,7 @@ public class GravityServo {
     public void periodic() {
         // t.log(Level.DEBUG, m_name, "Get Raw Position", m_encoder.);
         t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
-        t.log(Level.TRACE, m_name, "ENCODEr", m_encoder.getPosition());
+        t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
         t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
         m_encoder.periodic();
     }

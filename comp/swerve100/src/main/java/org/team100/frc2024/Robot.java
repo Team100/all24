@@ -15,8 +15,10 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -35,6 +37,7 @@ public class Robot extends TimedRobot implements Glassy {
         Util.printf("WPILib Version: %s\n", WPILibVersion.Version); // 2023.2.1
         Util.printf("RoboRIO serial number: %s\n", RobotController.getSerialNumber());
         Util.printf("Identity: %s\n", Identity.instance.name());
+        RobotController.setBrownoutVoltage(5.5);
         banner();
 
         // By default, LiveWindow turns off the CommandScheduler in test mode,
@@ -59,6 +62,14 @@ public class Robot extends TimedRobot implements Glassy {
     public void robotPeriodic() {
         m_robotContainer.beforeCommandCycle();
         CommandScheduler.getInstance().run();
+        
+        // t.log(Level.DEBUG, m_name, "Voltage", m_pdh.getVoltage());
+        // t.log(Level.DEBUG, m_name, "Total Current", m_pdh.getTotalCurrent());
+
+        // for(int channel = 0; channel < 20; channel++){
+        //     t.log(Level.DEBUG, m_name, "Channel " + String.valueOf(channel), m_pdh.getCurrent(channel));
+
+        // }
 
         t.log(Level.DEBUG, m_name, "DriverStation MatchTime", DriverStation.getMatchTime());
         t.log(Level.DEBUG, m_name, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
@@ -141,6 +152,8 @@ public class Robot extends TimedRobot implements Glassy {
     @Override
     public void teleopPeriodic() {
         t.log(Level.DEBUG, m_name, "mode", "teleop");
+        t.log(Level.DEBUG, "Robot", "voltage", RobotController.getBatteryVoltage());
+
     }
 
     @Override

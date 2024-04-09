@@ -116,9 +116,10 @@ public class DriveWithProfileNote extends Command100 {
 
         if (!goal.isPresent()) {
             m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
+            t.log(Level.INFO, m_name, "Note detected", false);
             return;
         }
-
+        t.log(Level.INFO, m_name, "Note detected", true);
         Rotation2d rotationGoal;
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
             rotationGoal = new Rotation2d(
@@ -160,7 +161,7 @@ public class DriveWithProfileNote extends Command100 {
         // }
         // return m_end.getAsBoolean();
 
-        return m_timer.get() >= 4 || m_end.getAsBoolean();
+        return false;
     }
 
     @Override

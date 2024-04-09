@@ -49,6 +49,7 @@ public class IntakeDefault extends Command {
             case STOP:
                 m_intake.stop();
                 break;
+                
             default:
 
         }
@@ -57,6 +58,15 @@ public class IntakeDefault extends Command {
             case FEED:
                 // m_intake.runUpper();
                 m_intake.intake();
+                break;
+            default:
+
+        }
+
+        switch (RobotState100.getShooterState()) {
+            case LOB:
+                // m_intake.runUpper();
+                m_intake.intakeSmart();
                 break;
             default:
 

@@ -30,6 +30,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
 public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
+    
     /**
      * Motor resistance, Kraken. Falcon is 0.03.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
@@ -264,14 +265,14 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         m_velocityM_S = m_velocityRev_S * m_distancePerTurn;
 
         t.log(Level.TRACE, m_name, "position (rev)", m_positionRev);
-        t.log(Level.TRACE, m_name, "position (m)", m_positionM);
+        t.log(Level.DEBUG, m_name, "position (m)", m_positionM);
         t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocityRev_S);
-        t.log(Level.TRACE, m_name, "velocity (m_s)", m_velocityM_S);
+        t.log(Level.DEBUG, m_name, "velocity (m_s)", m_velocityM_S);
 
-        t.log(Level.TRACE, m_name, "output [-1,1]", m_outputDutyCycle);
+        t.log(Level.DEBUG, m_name, "output [-1,1]", m_outputDutyCycle);
         t.log(Level.TRACE, m_name, "error (rev_s)", getErrorRev_S());
-        t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
     }
 
     //////////////////////////

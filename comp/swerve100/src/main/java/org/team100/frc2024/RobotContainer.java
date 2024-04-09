@@ -31,6 +31,7 @@ import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.IntakeFactory;
+import org.team100.frc2024.motion.intake.RunIntake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
 import org.team100.frc2024.motion.shooter.Shooter;
@@ -99,7 +100,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * don't need right now, cut and paste it into {@link RobotContainerParkingLot}.
  */
 public class RobotContainer implements Glassy {
-    private static final double kDriveCurrentLimit = 60;
+    private static final double kDriveCurrentLimit = 50;
     private final Telemetry t = Telemetry.get();
 
     private final HeadingInterface m_heading;
@@ -230,7 +231,7 @@ public class RobotContainer implements Glassy {
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
 
         // joel 3/15/24 removed ResetPose
-        // onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+        // onTrue(driverControl::resetRotion0, new ResetPose(m_drive, 0, 0, 0));
         // on xbox this is left bumper
         // on joystick this is button 4
         // on starting zone line lined up with note
@@ -282,9 +283,12 @@ public class RobotContainer implements Glassy {
 
         // whileTrue(driverControl::test, run);
 
+        // whileTrue(operatorControl::intake,
+        //         new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        //                 () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+
         whileTrue(operatorControl::intake,
-                new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-                        () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+                new RunIntake(m_intake));
 
         whileTrue(operatorControl::outtake,
                 new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
@@ -336,7 +340,7 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(4, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(2.5, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0); // .5
         PIDController omega2Controller = new PIDController(0, 0, 0); // .5
@@ -459,7 +463,7 @@ public class RobotContainer implements Glassy {
                 m_heading,
                 constraints);
 
-        // whileTrue(driverControl::circle, m_AutoMaker.fiveNoteAuto());
+        whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
         // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
         // driverControl::twist, m_drive));
         // whileTrue(driverControl::shooterLock,m_AutoMaker.fourNoteAuto(Alliance.Red,
@@ -488,8 +492,8 @@ public class RobotContainer implements Glassy {
         whileTrue(driverControl::shooterLock,
                 new ShooterLockCommand(shooterLock, driverControl::twist, m_drive));
 
-        whileTrue(driverControl::test,
-                new AmpLockCommand(ampLock, driverControl::twist, m_drive));
+        // whileTrue(driverControl::test,
+        //         new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
         // new ClimberPosition(m_climber));
@@ -530,35 +534,45 @@ public class RobotContainer implements Glassy {
         // swerveKinodynamics, m_sensors);
 
         // joel mar 13: the alliance command chooses which of these autos to run
-        m_auton = new AllianceCommand(
-                m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
-                m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
+        // m_auton = new AllianceCommand(
+        //         m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
+        //         m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(
                 Map.of(
-                        AutonChooser.Routine.FOUR_NOTE, new AllianceCommand(
+                        AutonChooser.Routine.FIVE_NOTE, new AllianceCommand(
                                 m_AutoMaker.fourNoteAuto(
                                         Alliance.Red, m_sensors),
                                 m_AutoMaker.fourNoteAuto(
                                         Alliance.Blue, m_sensors)),
-                        AutonChooser.Routine.FIVE_NOTE, new AllianceCommand(
-                                new PrintCommand("five note red goes here"),
-                                new PrintCommand("five note blue goes here")),
                         AutonChooser.Routine.COMPLEMENTARY, new AllianceCommand(
-                                new PrintCommand("complementary red goes here"),
-                                new PrintCommand("complementary blue goes here")),
+                                m_AutoMaker.citrus(
+                                        Alliance.Red),
+                                m_AutoMaker.citrus(
+                                        Alliance.Blue)),
+                        AutonChooser.Routine.COMPLEMENTARY2, new AllianceCommand(
+                                m_AutoMaker.citrusv2(
+                                        Alliance.Red),
+                                m_AutoMaker.citrusv2(
+                                        Alliance.Blue)),
+                        AutonChooser.Routine.SIBLING, new AllianceCommand(
+                                m_AutoMaker.sibling(
+                                        Alliance.Red),
+                                m_AutoMaker.sibling(
+                                        Alliance.Blue)),
                         AutonChooser.Routine.NOTHING, new AllianceCommand(
                                 new PrintCommand("nothing red goes here"),
                                 new PrintCommand("nothing blue goes here"))),
                 AutonChooser::routine);
+        m_auton = choosableAuton;
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
     public void beforeCommandCycle() {
-        ModeSelector.selectMode(operatorControl::pov);
+        // ModeSelector.selectMode(operatorControl::pov);
     }
 
     public void onTeleop() {

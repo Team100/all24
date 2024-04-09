@@ -57,7 +57,7 @@ public class DriveMotionControllerFactory {
     }
 
     public static DriveMotionController fasterCurves() {
-        return new DrivePIDFController(true, 3.5, 3.5);
+        return new DrivePIDFController(true, 4.5, 4.5);
     }
     private DriveMotionControllerFactory() {
         //

@@ -40,7 +40,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      */
     private static final double kTNm_amp = 0.019;
 
-    private static final double kCurrentLimit = 40;
+    private static final double kCurrentLimit = 10;
 
     /**
      * The speed, below which, static friction applies, in motor revolutions per

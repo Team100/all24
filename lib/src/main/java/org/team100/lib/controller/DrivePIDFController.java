@@ -70,7 +70,7 @@ m_trajectory = iter.trajectory();
         if (m_iter == null)
             return new ChassisSpeeds();
 
-        t.log(Level.TRACE, m_name, "measurement", measurement);
+        t.log(Level.DEBUG, m_name, "measurement", measurement);
         
         // if (isDone()) {
             // return new ChassisSpeeds();
@@ -82,7 +82,7 @@ m_trajectory = iter.trajectory();
         }
         TimedPose setpoint = optionalSetpoint.get();
         SmartDashboard.putNumber("setpointX", setpoint.state().getPose().getX());
-        t.log(Level.TRACE, m_name, "setpoint", setpoint);
+        t.log(Level.DEBUG, m_name, "setpoint", setpoint);
 
         error = DriveMotionControllerUtil.getError(measurement, setpoint);
         

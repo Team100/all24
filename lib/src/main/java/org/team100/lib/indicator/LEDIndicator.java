@@ -72,16 +72,12 @@ public class LEDIndicator {
         m_frontStrips = new ArrayList<>();
         m_backStrips = new ArrayList<>();
         
-        m_frontStrips.add(new LEDStrip(0, 7));
-        m_backStrips.add(new LEDStrip(7, 17));
-        m_frontStrips.add(new LEDStrip(17,26));
-        m_backStrips.add(new LEDStrip(26, 35));
-        m_frontStrips.add(new LEDStrip(35, 44));
-        m_backStrips.add(new LEDStrip(44, 54));
-        m_frontStrips.add(new LEDStrip(54, 64));
-        m_backStrips.add(new LEDStrip(64, 73));
-        m_frontStrips.add(new LEDStrip(73, 83));
-        m_backStrips.add(new LEDStrip(83, 92));
+        m_frontStrips.add(new LEDStrip(0, 8));
+        m_backStrips.add(new LEDStrip(8, 18));
+        m_frontStrips.add(new LEDStrip(18,27));
+        m_backStrips.add(new LEDStrip(27, 37));
+        m_frontStrips.add(new LEDStrip(37, 46));
+        m_backStrips.add(new LEDStrip(46, 55));
 
         int length = Math.max(
                 m_frontStrips.stream().map(LEDStrip::end).reduce(0, Integer::max),
@@ -116,21 +112,21 @@ public class LEDIndicator {
         }
 
         // front depends on flashing state
-        if (m_flashing) {
-            if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
-                for (LEDStrip strip : m_frontStrips) {
-                    strip.solid(buffer, Color.kBlack);
-                }
-            } else {
-                for (LEDStrip strip : m_frontStrips) {
-                    strip.solid(buffer, m_front.color);
-                }
-            }
-        } else {
+        // if (m_flashing) {
+        //     if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
+        //         for (LEDStrip strip : m_frontStrips) {
+        //             strip.solid(buffer, Color.kBlack);
+        //         }
+        //     } else {
+        //         for (LEDStrip strip : m_frontStrips) {
+        //             strip.solid(buffer, m_front.color);
+        //         }
+        //     }
+        // } else {
             for (LEDStrip strip : m_frontStrips) {
                 strip.solid(buffer, m_front.color);
             }
-        }
+        // }
 
         // update the output with the buffer we constructed.
         led.setData(buffer);
