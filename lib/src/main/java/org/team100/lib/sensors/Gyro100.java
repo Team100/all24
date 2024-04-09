@@ -5,26 +5,26 @@ import org.team100.lib.dashboard.Glassy;
 /**
  * Allows a no-op implementation for robots without a gyro.
  */
-public interface RedundantGyroInterface extends Glassy {
+public interface Gyro100 extends Glassy {
     /**
      * Degrees per second, clockwise-positive NED.
      */
-    float getRedundantGyroRateNED();
+    float getYawRateNEDDeg_s();
 
     /**
      * Degrees, [-180,180]
      */
-    float getRedundantPitch();
+    float getPitchDeg();
 
     /**
      * Degrees, [-180,180]
      */
-    float getRedundantRoll();
+    float getRollDeg();
 
     /**
      * Degrees, [-180,180], clockwise-positive NED.
      */
-    float getRedundantYawNED();
+    float getYawNEDDeg();
 
     @Override
     default String getGlassName() {
