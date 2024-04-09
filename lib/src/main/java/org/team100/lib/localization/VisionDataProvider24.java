@@ -76,10 +76,9 @@ public class VisionDataProvider24 implements Glassy {
 
     private final Telemetry t = Telemetry.get();
 
-    private final DoubleFunction<Optional<Rotation2d>> rotationSupplier;
-
-    private final SwerveDrivePoseEstimator100 poseEstimator;
-    private final AprilTagFieldLayoutWithCorrectOrientation layout;
+    private final PoseEstimator100 m_poseEstimator;
+    private final FireControl m_fireControl;
+    private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final String m_name;
 
     // for blip filtering
@@ -92,19 +91,19 @@ public class VisionDataProvider24 implements Glassy {
 
     /**
      * @param layout
-     * @param poseEstimator    can be null for testing.
+     * @param poseEstimator
      * @param rotationSupplier rotation for the given time in seconds
      * @throws IOException
      */
     public VisionDataProvider24(
             AprilTagFieldLayoutWithCorrectOrientation layout,
-            SwerveDrivePoseEstimator100 poseEstimator,
-            DoubleFunction<Optional<Rotation2d>> rotationSupplier) throws IOException {
+            PoseEstimator100 poseEstimator,
+            FireControl fireControl) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
-        this.layout = layout;
-        this.poseEstimator = poseEstimator;
-        this.rotationSupplier = rotationSupplier;
+        m_layout = layout;
+        m_poseEstimator = poseEstimator;
+        m_fireControl = fireControl;
         m_name = Names.name(this);
     }
 
@@ -164,9 +163,6 @@ public class VisionDataProvider24 implements Glassy {
 
             // TODO: add a real firing solution consumer.
             estimateRobotPose(
-                    poseEstimator::addVisionMeasurement,
-                    f -> {
-                    },
                     cameraSerialNumber,
                     blips,
                     alliance.get());
@@ -183,8 +179,6 @@ public class VisionDataProvider24 implements Glassy {
      * @param blips              all the targets the camera sees right now
      */
     void estimateRobotPose(
-            final ObjDoubleConsumer<Pose2d> estimateConsumer,
-            Consumer<Translation2d> firingSolutionConsumer,
             String cameraSerialNumber,
             final Blip24[] blips,
             Alliance alliance) {
@@ -192,7 +186,7 @@ public class VisionDataProvider24 implements Glassy {
 
         // Estimated instant represented by the blips
         final double frameTimeSec = Timer.getFPGATimestamp() - kTotalLatencySeconds;
-        Optional<Rotation2d> optionalGyroRotation = rotationSupplier.apply(frameTimeSec);
+        Optional<Rotation2d> optionalGyroRotation = m_poseEstimator.getSampledRotation(frameTimeSec);
 
         if (optionalGyroRotation.isEmpty()) {
             Util.warn("No gyro rotation available!");
@@ -202,7 +196,6 @@ public class VisionDataProvider24 implements Glassy {
         final Rotation2d gyroRotation = optionalGyroRotation.get();
 
         estimateFromBlips(
-                estimateConsumer,
                 cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
@@ -212,7 +205,6 @@ public class VisionDataProvider24 implements Glassy {
 
         if (Experiments.instance.enabled(Experiment.Triangulate)) {
             triangulate(
-                    estimateConsumer,
                     cameraSerialNumber,
                     blips,
                     cameraInRobotCoordinates,
@@ -222,7 +214,6 @@ public class VisionDataProvider24 implements Glassy {
         }
 
         firingSolution(
-                firingSolutionConsumer,
                 cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
@@ -234,12 +225,10 @@ public class VisionDataProvider24 implements Glassy {
      * a firing solution is a robot-relative translation2d to the correct target --
      * 7 if we're blue, 5 if we're red.
      * 
-     * @param firingSolutionConsumer
      * @param blips
      * @param cameraInRobotCoordinates
      */
     private void firingSolution(
-            Consumer<Translation2d> firingSolutionConsumer,
             final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
@@ -252,18 +241,17 @@ public class VisionDataProvider24 implements Glassy {
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
                 if (Experiments.instance.enabled(Experiment.HeedVision)) {
                     double distance = translation2d.getNorm();
-                    if (poseEstimator != null)
-                        poseEstimator.setStdDevs(
+                    if (m_poseEstimator != null)
+                        m_poseEstimator.setStdDevs(
                                 stateStdDevs(),
                                 visionMeasurementStdDevs(distance));
-                    firingSolutionConsumer.accept(translation2d);
+                    m_fireControl.accept(translation2d);
                 }
             }
         }
     }
 
     private void estimateFromBlips(
-            final ObjDoubleConsumer<Pose2d> estimateConsumer,
             final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
@@ -276,7 +264,7 @@ public class VisionDataProvider24 implements Glassy {
             Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
             t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
-            Optional<Pose3d> tagInFieldCoordsOptional = layout.getTagPose(alliance, blip.getId());
+            Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())
                 continue;
 
@@ -310,12 +298,13 @@ public class VisionDataProvider24 implements Glassy {
                     // this hard limit excludes false positives, which were a bigger problem in 2023
                     // due to the coarse tag family used. in 2024 this might not be an issue.
                     if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                        if (poseEstimator != null)
-                            poseEstimator.setStdDevs(
-                                    stateStdDevs(),
-                                    visionMeasurementStdDevs(distanceM));
+                        m_poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distanceM));
                         latestTimeUs = RobotController.getFPGATime();
-                        estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
+                        m_poseEstimator.addVisionMeasurement(
+                                currentRobotinFieldCoords,
+                                frameTimeSec);
                     }
                 }
             }
@@ -324,7 +313,6 @@ public class VisionDataProvider24 implements Glassy {
     }
 
     private void triangulate(
-            ObjDoubleConsumer<Pose2d> estimateConsumer,
             final String cameraSerialNumber,
             Blip24[] blips,
             Transform3d cameraInRobotCoordinates,
@@ -338,8 +326,8 @@ public class VisionDataProvider24 implements Glassy {
             for (int j = i + 1; j < blips.length; ++j) {
                 Blip24 b1 = blips[j];
 
-                Optional<Pose3d> tagInFieldCordsOptional0 = layout.getTagPose(alliance, b0.getId());
-                Optional<Pose3d> tagInFieldCordsOptional1 = layout.getTagPose(alliance, b1.getId());
+                Optional<Pose3d> tagInFieldCordsOptional0 = m_layout.getTagPose(alliance, b0.getId());
+                Optional<Pose3d> tagInFieldCordsOptional1 = m_layout.getTagPose(alliance, b1.getId());
 
                 if (!tagInFieldCordsOptional0.isPresent())
                     continue;
@@ -376,12 +364,11 @@ public class VisionDataProvider24 implements Glassy {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                            if (poseEstimator != null)
-                                poseEstimator.setStdDevs(
-                                        stateStdDevs(),
-                                        visionMeasurementStdDevs(distanceM));
+                            m_poseEstimator.setStdDevs(
+                                    stateStdDevs(),
+                                    visionMeasurementStdDevs(distanceM));
                             latestTimeUs = RobotController.getFPGATime();
-                            estimateConsumer.accept(currentRobotinFieldCoords, frameTimeSec);
+                            m_poseEstimator.addVisionMeasurement(currentRobotinFieldCoords, frameTimeSec);
                         }
                     }
                 }

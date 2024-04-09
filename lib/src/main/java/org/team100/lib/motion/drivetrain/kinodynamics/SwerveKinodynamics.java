@@ -379,6 +379,7 @@ public class SwerveKinodynamics implements Glassy {
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
+            double timestampSeconds,
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         return new SwerveDrivePoseEstimator100(
@@ -386,6 +387,7 @@ public class SwerveKinodynamics implements Glassy {
                 gyroAngle,
                 modulePositions,
                 initialPoseMeters,
+                timestampSeconds,
                 stateStdDevs,
                 visionMeasurementStdDevs);
     }

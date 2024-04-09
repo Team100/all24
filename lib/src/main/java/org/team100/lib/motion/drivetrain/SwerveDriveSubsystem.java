@@ -92,7 +92,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         updateAcceleration(dt);
         updateState();
 
-        t.log(Level.TRACE, m_name, "GYRO OFFSET", m_poseEstimator.getGyroOffset());
         t.log(Level.DEBUG, m_name, "pose", m_pose);
         t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
 
@@ -229,8 +228,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     public void resetPose(Pose2d robotPose) {
-        m_poseEstimator.resetPosition(m_heading.getHeadingNWU(),
-                new SwerveDriveWheelPositions(m_swerveLocal.positions()), robotPose);
+        m_poseEstimator.resetPosition(
+                m_heading.getHeadingNWU(),
+                new SwerveDriveWheelPositions(m_swerveLocal.positions()),
+                robotPose,
+                Timer.getFPGATimestamp());// TODO: use a real time
         m_pose = robotPose;
         // TODO: should we really assume we're motionless when we call this??
         m_velocity = new Twist2d();

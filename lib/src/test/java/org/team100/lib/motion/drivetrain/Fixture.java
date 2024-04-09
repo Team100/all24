@@ -35,6 +35,7 @@ public class Fixture {
                 heading.getHeadingNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
+                0, // initial time is zero here for testing
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
