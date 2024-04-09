@@ -107,9 +107,6 @@ public class LEDIndicator {
         led.setData(buffer);
         led.start();
 
-        set(State.BLACK);
-
-
         m_flashing = false;
 
     }
@@ -147,7 +144,8 @@ public class LEDIndicator {
   
     public void setStripChase(LEDStrip strip){
         Color[] colors = {new Color(), new Color()};
-        Patterns.chase(colors, strip, buffer);  
+        Patterns.chase(colors, strip, buffer); 
+    } 
       
     /**
      * Periodic does all the real work in this class.
