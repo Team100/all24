@@ -4,12 +4,12 @@ import org.team100.frc2024.SensorInterface;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ChangeIntakeState extends Command {
+public class ChangeIntakeState2 extends Command {
     private final Intake m_intake;
     private final SensorInterface m_sensors;
     private boolean finished = false;
 
-    public ChangeIntakeState(Intake intake, SensorInterface sensors) {
+    public ChangeIntakeState2(Intake intake, SensorInterface sensors) {
         m_intake = intake;
         m_sensors = sensors;
         addRequirements(intake);
@@ -40,6 +40,6 @@ public class ChangeIntakeState extends Command {
 
     @Override
     public boolean isFinished() {
-        return false;
+        return finished;
     }
 }

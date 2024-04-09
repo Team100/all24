@@ -100,7 +100,7 @@ public class DrivePursuitController implements DriveMotionController {
             return null;
         }
 
-        t.log(Level.TRACE, m_name, "current state", measurement);
+        t.log(Level.DEBUG, m_name, "current state", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }

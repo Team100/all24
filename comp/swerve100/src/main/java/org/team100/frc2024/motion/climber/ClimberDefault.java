@@ -47,7 +47,7 @@ public class ClimberDefault extends Command {
         if(m_povSupplier.get() == -1){
             m_climber.setLeft(m_leftSupplier.get());
             m_climber.setRight(m_rightSupplier.get());
-        } else if(m_povSupplier.get() == 90){
+        } else if(m_povSupplier.get() == 0){
             double rightPose = m_climber.getRightPosition();
             double leftPose = m_climber.getLeftPosition();
             double leftValue = leftController.calculate(leftPose, 85);
@@ -57,7 +57,7 @@ public class ClimberDefault extends Command {
             m_climber.setLeft(leftValue);
             m_climber.setRight(rightValue);
 
-        } else if(m_povSupplier.get() == 270){
+        } else if(m_povSupplier.get() == 180){
             double rightPose = m_climber.getRightPosition();
             double leftPose = m_climber.getLeftPosition();
             double leftValue = leftController.calculate(leftPose, 10);

@@ -34,7 +34,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void starve() {
-        feedRoller.setSpeed(-1);
+        feedRoller.setSpeed(-0.2);
     }
 
     public void feed() {

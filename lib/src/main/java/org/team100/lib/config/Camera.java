@@ -30,7 +30,7 @@ public enum Camera {
     //TODO get real y offset
             new Transform3d(
                     new Translation3d(-0.1265, -0.1063625, 0.61),
-                    new Rotation3d(0, Math.toRadians(-20), -Math.PI/3))),
+                    new Rotation3d(0, Math.toRadians(-26), Math.toRadians(-63)))),
 
     /**
      * Delta amp-placer
@@ -39,7 +39,7 @@ public enum Camera {
     //TODO get real y offset
             new Transform3d(
                     new Translation3d(-0.1265,  0.1532, 0.61),
-                    new Rotation3d(0, Math.toRadians(-20), Math.PI/3))),
+                    new Rotation3d(0, Math.toRadians(-22 ), Math.toRadians(59)))),
     /**
      * Delta intake
      */

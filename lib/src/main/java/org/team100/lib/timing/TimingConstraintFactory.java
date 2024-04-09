@@ -20,7 +20,7 @@ public class TimingConstraintFactory {
      * figure out what you need, don't just change them here.
      */
     public List<TimingConstraint> allGood() {
-        return scaled(0.4, 0.2);
+        return scaled(0.2, 0.2);
     }
 
     /**

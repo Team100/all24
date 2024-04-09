@@ -9,7 +9,7 @@ public abstract class Intake extends SubsystemBase implements Speeding, Glassy  
     public abstract void intake();
     public abstract void intakeSmart();
     public abstract void runLowerIntake();
-
+    public abstract void resetCurrentCount();
     public abstract void outtake();
     public abstract void stop();
     public abstract void runUpper();

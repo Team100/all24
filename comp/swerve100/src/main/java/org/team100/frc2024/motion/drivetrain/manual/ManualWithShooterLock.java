@@ -111,7 +111,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Rotation2d bearing = bearing(currentTranslation, target);
         Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state); //make this integreate with shooter blah blah blah h mhh bh h                                                                                                                    
 
-        t.log(Level.TRACE, m_name, "bearing", bearing);
+        t.log(Level.DEBUG, m_name, "bearing", bearing);
 
         // take the short path
         double measurement = currentRotation.getRadians();
