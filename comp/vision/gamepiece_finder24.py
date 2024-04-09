@@ -5,6 +5,7 @@ from enum import Enum
 import cv2
 import libcamera
 import numpy as np
+import sys
 
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
@@ -64,6 +65,14 @@ class GamePieceFinder:
             cy = 303
             k1 = -0.003
             k2 = 0.04
+        # TODO get these real distortion values
+        elif model == "imx296":
+            fx = 660
+            fy = 660
+            cx = 728
+            cy = 544
+            k1 = 0
+            k2 = 0
         else:
             print("UNKNOWN CAMERA MODEL")
             sys.exit()
@@ -92,11 +101,6 @@ class GamePieceFinder:
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
-
-        # work around https://github.com/robotpy/mostrobotpy/issues/60
-        self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
-            Rotation3d(0, 0, 0)
-        )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/Rotation3d", Rotation3d
@@ -222,6 +226,14 @@ def main():
         # medium detection resolution, compromise speed vs range
         width = 832
         height = 616
+    elif model == "imx296":
+        print("GS Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1456   # slightly larger than the detector, to match stride
+        fullheight = 1088
+        # medium detection resolution, compromise speed vs range
+        width = 1456
+        height = 1088
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100

@@ -4,6 +4,7 @@
 # pylint: disable=import-error
 import dataclasses
 import time
+import pprint
 
 from enum import Enum
 
@@ -85,6 +86,14 @@ class TagFinder:
             cy = 303
             k1 = -0.003
             k2 = 0.04
+        # TODO get these real distortion values
+        elif model == "imx296":
+            fx = 660
+            fy = 660
+            cx = 728
+            cy = 544
+            k1 = 0
+            k2 = 0
         else:
             print("UNKNOWN CAMERA MODEL")
             sys.exit()
@@ -118,7 +127,6 @@ class TagFinder:
 
         # this  makes a view, very fast (150 ns)
         img = img.reshape((self.height, self.width))
-
         # TODO: crop regions that never have targets
         # this also makes a view, very fast (150 ns)
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
@@ -266,6 +274,14 @@ def main():
         # medium detection resolution, compromise speed vs range
         width = 832
         height = 616
+    elif model == "imx296":
+        print("GS Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1472   # slightly larger than the detector, to match stride
+        fullheight = 1088
+        # medium detection resolution, compromise speed vs range
+        width = 1472
+        height = 1088
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100
@@ -293,14 +309,17 @@ def main():
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # 3/23/24, reduced to 2ms, even less blur.
             "ExposureTime": 3000,
+            "AnalogueGain": 8,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            # "ScalerCrop":(0,0,width/2,height/2),
         },
     )
-
+    print("SENSOR MODES AVAILABLE")
+    pprint.pprint(camera.sensor_modes)
     serial = getserial()
     identity = Camera(serial)
     # if identity == Camera.FRONT:
