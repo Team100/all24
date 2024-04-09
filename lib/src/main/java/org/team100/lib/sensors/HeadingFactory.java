@@ -24,7 +24,7 @@ public class HeadingFactory {
                     // this seems only to be a problem in some test or
                     // simulation scenarios.
                     // System.loadLibrary("vmxHaljni");
-                    RedundantGyroInterface ahrsclass = new RedundantGyroFactory(Identity.instance).get();
+                    Gyro100 ahrsclass = new GyroFactory(Identity.instance).get();
                     return new Heading(ahrsclass);
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.

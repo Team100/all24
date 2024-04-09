@@ -14,14 +14,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Heading implements HeadingInterface {
     private final Telemetry t = Telemetry.get();
 
-    private final RedundantGyroInterface m_gyro;
+    private final Gyro100 m_gyro;
     private final String m_name;
 
     // updated by periodic.
     private Rotation2d m_currentHeadingNWU;
     private double m_currentHeadingRateNWU;
 
-    public Heading(RedundantGyroInterface gyro) {
+    public Heading(Gyro100 gyro) {
         m_gyro = gyro;
         m_name = Names.name(this);
         // initialize
@@ -43,8 +43,8 @@ public class Heading implements HeadingInterface {
     @Override
     public void periodic() {
         // invert NED to get NWU
-        m_currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getRedundantYawNED());
-        m_currentHeadingRateNWU = Math.toRadians(-1.0 * m_gyro.getRedundantGyroRateNED());
+        m_currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getYawNEDDeg());
+        m_currentHeadingRateNWU = Math.toRadians(-1.0 * m_gyro.getYawRateNEDDeg_s());
         t.log(Level.TRACE, m_name, "Heading NWU (rad)", m_currentHeadingNWU);
         t.log(Level.TRACE, m_name, "Heading Rate NWU (rad_s)", m_currentHeadingRateNWU);
     }

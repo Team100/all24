@@ -1,24 +1,24 @@
 package org.team100.lib.sensors;
 
 /** A non-functional implementation, for robots with no gyro. */
-public class NullRedundantGyro implements RedundantGyroInterface {
+public class NullGyro implements Gyro100 {
     @Override
-    public float getRedundantGyroRateNED() {
+    public float getYawRateNEDDeg_s() {
         return 0;
     }
 
     @Override
-    public float getRedundantPitch() {
+    public float getPitchDeg() {
         return 0;
     }
 
     @Override
-    public float getRedundantRoll() {
+    public float getRollDeg() {
         return 0;
     }
 
     @Override
-    public float getRedundantYawNED() {
+    public float getYawNEDDeg() {
         return 0;
     }
 }
