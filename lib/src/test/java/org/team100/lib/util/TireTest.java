@@ -11,8 +11,16 @@ import org.team100.lib.persistent_parameter.ParameterFactory;
 
 class TireTest {
     private static final double kDelta = 0.001;
-    ParameterFactory factory = new ParameterFactory(new HashMap<>());
-    Tire tire = new Tire(factory);
+    private final ParameterFactory factory;
+    private final Tire tire;
+
+    TireTest() {
+        factory = new ParameterFactory(new HashMap<>());
+        tire = new Tire(factory);
+        // override the preference to make the test independent.
+        factory.mutable(
+                Tire.kSaturationLabel, 0).set(10);
+    }
 
     @Test
     void testDesiredAccel() {
@@ -36,11 +44,11 @@ class TireTest {
 
     @Test
     void testFraction() {
-        Vector2d accel = new Vector2d(0.1, 0);
+        Vector2d accel = new Vector2d(1, 0);
         assertEquals(0.1, tire.fraction(accel), kDelta);
-        accel = new Vector2d(0.5, 0);
+        accel = new Vector2d(5, 0);
         assertEquals(0.5, tire.fraction(accel), kDelta);
-        accel = new Vector2d(2.0, 0);
+        accel = new Vector2d(20, 0);
         assertEquals(2.0, tire.fraction(accel), kDelta);
     }
 
@@ -70,26 +78,31 @@ class TireTest {
 
     @Test
     void testLimit() {
-        Vector2d limitedAccel = tire.limit(new Vector2d(1.0, 0));
-        assertEquals(1.0, limitedAccel.getX(), kDelta);
+        Vector2d limitedAccel = tire.limit(new Vector2d(10, 0));
+        assertEquals(10, limitedAccel.getX(), kDelta);
         assertEquals(0, limitedAccel.getY(), kDelta);
-        limitedAccel = tire.limit(new Vector2d(1.5, 0));
-        assertEquals(1.0, limitedAccel.getX(), kDelta);
+
+        limitedAccel = tire.limit(new Vector2d(15, 0));
+        assertEquals(10, limitedAccel.getX(), kDelta);
         assertEquals(0, limitedAccel.getY(), kDelta);
-        limitedAccel = tire.limit(new Vector2d(0.5, 0));
-        assertEquals(0.5, limitedAccel.getX(), kDelta);
+
+        limitedAccel = tire.limit(new Vector2d(5, 0));
+        assertEquals(5, limitedAccel.getX(), kDelta);
         assertEquals(0, limitedAccel.getY(), kDelta);
-        limitedAccel = tire.limit(new Vector2d(-0.5, 0));
-        assertEquals(-0.5, limitedAccel.getX(), kDelta);
+
+        limitedAccel = tire.limit(new Vector2d(-5, 0));
+        assertEquals(-5, limitedAccel.getX(), kDelta);
         assertEquals(0, limitedAccel.getY(), kDelta);
-        limitedAccel = tire.limit(new Vector2d(-1.5, 0));
-        assertEquals(-1.0, limitedAccel.getX(), kDelta);
+
+        limitedAccel = tire.limit(new Vector2d(-15, 0));
+        assertEquals(-10, limitedAccel.getX(), kDelta);
         assertEquals(0, limitedAccel.getY(), kDelta);
     }
 
     @Test
     void testMotionless() {
-        Vector2d actual = tire.actual(new Vector2d(0, 0), new Vector2d(0, 0), 0.02);
+        Vector2d actual = tire.actual(
+                new Vector2d(0, 0), new Vector2d(0, 0), 0.02);
         assertEquals(0, actual.getX(), kDelta);
         assertEquals(0, actual.getY(), kDelta);
     }
@@ -97,7 +110,8 @@ class TireTest {
     @Test
     void testParallel() {
         // wheel wants to go the same speed as the corner
-        Vector2d actual = tire.actual(new Vector2d(1, 0), new Vector2d(1, 0), 0.02);
+        Vector2d actual = tire.actual(
+                new Vector2d(1, 0), new Vector2d(1, 0), 0.02);
         assertEquals(1, actual.getX(), kDelta);
         assertEquals(0, actual.getY(), kDelta);
     }
@@ -105,7 +119,8 @@ class TireTest {
     @Test
     void testNear() {
         // wheel wants to speed up a little, slips a little
-        Vector2d actual = tire.actual(new Vector2d(1, 0), new Vector2d(1.005, 0), 0.02);
+        Vector2d actual = tire.actual(
+                new Vector2d(1, 0), new Vector2d(1.005, 0), 0.02);
         assertEquals(1.004875, actual.getX(), kDelta);
         assertEquals(0, actual.getY(), kDelta);
     }
@@ -117,25 +132,28 @@ class TireTest {
         assertEquals(0.5, desired.getX(), kDelta);
         assertEquals(0, desired.getY(), kDelta);
         // that's half the saturation value so it slips 5%
-        Vector2d actual = tire.actual(new Vector2d(1, 0), new Vector2d(1.01, 0), 0.02);
+        Vector2d actual = tire.actual(
+                new Vector2d(1, 0), new Vector2d(1.01, 0), 0.02);
         assertEquals(1.0095, actual.getX(), kDelta);
         assertEquals(0, actual.getY(), kDelta);
     }
 
     @Test
     void testSaturation() {
-        // wheel is saturated, max dv is 0.02 * saturation (1) -> 0.02.
-        Vector2d actual = tire.actual(new Vector2d(1, 0), new Vector2d(5.0, 0), 0.02);
-        assertEquals(1.02, actual.getX(), kDelta);
+        // wheel is saturated, max dv is 0.02 * saturation (10) -> 0.2.
+        Vector2d actual = tire.actual(
+                new Vector2d(1, 0), new Vector2d(5.0, 0), 0.02);
+        assertEquals(1.2, actual.getX(), kDelta);
         assertEquals(0, actual.getY(), kDelta);
     }
 
     @Test
     void testSaturation2() {
         // wheel is saturated in a different direction
-        Vector2d actual = tire.actual(new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
-        assertEquals(0.996, actual.getX(), kDelta);
-        assertEquals(0.020, actual.getY(), kDelta);
+        Vector2d actual = tire.actual(
+                new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
+        assertEquals(0.961, actual.getX(), kDelta);
+        assertEquals(0.196, actual.getY(), kDelta);
     }
 
     @Test
@@ -146,7 +164,7 @@ class TireTest {
         // saturation.reset();
         Parameter slip = factory2.mutable(Tire.kSlipLabel, 0);
         // the defaults work
-        assertEquals(1, saturation.get(), kDelta);
+        assertEquals(10, saturation.get(), kDelta);
         assertEquals(0.1, slip.get(), kDelta);
 
         // override the defaults
@@ -156,7 +174,8 @@ class TireTest {
         assertEquals(Double.MAX_VALUE, saturation.get(), kDelta);
         assertEquals(0.0, slip.get(), kDelta);
 
-        // try the saturated2 case.  here we want to stop the x motion and start some y motion,
+        // try the saturated2 case. here we want to stop the x motion and start some y
+        // motion,
         // all in 0.02s so these are high accelerations.
         Vector2d actual = tire2.actual(new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
         // the tire sticks!

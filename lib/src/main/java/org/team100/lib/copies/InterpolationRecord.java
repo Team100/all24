@@ -47,8 +47,12 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     }
 
     /**
-     * Return the interpolated record. This object is assumed to be the starting
+     * Return the "interpolated" record. This object is assumed to be the starting
      * position, or lower bound.
+     * 
+     * Interpolates the wheel positions.
+     * Interpolates the gyro angle.
+     * ***INTEGRATES*** to find the pose; ignores the supplied end pose unless t >= 1 :-(.
      *
      * @param endValue The upper bound, or end.
      * @param t        How far between the lower and upper bound we are. This should
@@ -98,4 +102,11 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     public int hashCode() {
         return Objects.hash(m_gyroAngle, m_wheelPositions, m_poseMeters);
     }
+
+    @Override
+    public String toString() {
+        return "InterpolationRecord [m_poseMeters=" + m_poseMeters + ", m_gyroAngle=" + m_gyroAngle
+                + ", m_wheelPositions=" + m_wheelPositions + "]";
+    }
+
 }

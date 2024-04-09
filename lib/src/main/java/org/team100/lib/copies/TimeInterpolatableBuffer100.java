@@ -6,6 +6,9 @@ import java.util.SortedMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.interpolation.Interpolatable;
 import edu.wpi.first.math.interpolation.Interpolator;
@@ -14,6 +17,8 @@ import edu.wpi.first.math.interpolation.Interpolator;
  * Uses an Interpolator to provide interpolated sampling with a history limit.
  */
 public final class TimeInterpolatableBuffer100<T> {
+    private static final Telemetry t = Telemetry.get();
+
     private final double m_historySize;
     private final Interpolator<T> m_interpolatingFunc;
     // @joel 2/19/24: using ConcurrentSkipListMap here to avoid concurrent
@@ -102,10 +107,14 @@ public final class TimeInterpolatableBuffer100<T> {
         if (topBound == null && bottomBound == null) {
             return Optional.empty();
         } else if (topBound == null) {
+            t.log(Level.TRACE, "buffer", "bottom", bottomBound.getValue().toString());
             return Optional.of(bottomBound.getValue());
         } else if (bottomBound == null) {
+            t.log(Level.TRACE, "buffer", "top", topBound.getValue().toString());
             return Optional.of(topBound.getValue());
         } else {
+            t.log(Level.TRACE, "buffer", "bottom", bottomBound.getValue().toString());
+            t.log(Level.TRACE, "buffer", "top", topBound.getValue().toString());
             // Otherwise, interpolate. Because T is between [0, 1], we want the ratio of
             // (the difference between the current time and bottom bound) and (the
             // difference between top and bottom bounds).

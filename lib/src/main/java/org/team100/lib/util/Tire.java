@@ -3,6 +3,8 @@ package org.team100.lib.util;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.persistent_parameter.Parameter;
 import org.team100.lib.persistent_parameter.ParameterFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * Tire/carpet interaction model.
@@ -12,18 +14,22 @@ import org.team100.lib.persistent_parameter.ParameterFactory;
  */
 public class Tire {
     // use these in tests
-    static final String kSaturationLabel = "TireSaturation (m_s_s)";
+    public static final String kSaturationLabel = "TireSaturation (m_s_s)";
     static final String kSlipLabel = "TireSlipAtSaturation (0-1)";
     // this is surely too low
     // TODO: measure for different wheel/floors; Colson on tile will be much lower.
-    private static final double kDefaultSaturationM_s_s = 1.0;
+    private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
+
+    private final Telemetry t = Telemetry.get();
 
     private final Parameter m_saturationM_s_s;
     private final Parameter m_slipAtSaturation0_1;
 
     public Tire(ParameterFactory parameters) {
         m_saturationM_s_s = parameters.mutable(kSaturationLabel, kDefaultSaturationM_s_s);
+        // override the preference for now.
+        m_saturationM_s_s.set(kDefaultSaturationM_s_s);
         m_slipAtSaturation0_1 = parameters.mutable(kSlipLabel, kDefaultSlipAtSaturation0_1);
     }
 
@@ -39,12 +45,22 @@ public class Tire {
      * @param dtS       length of the current period
      */
     public Vector2d actual(Vector2d cornerM_s, Vector2d wheelM_s, double dtS) {
+        t.log(Level.WARN, "tire", "corner M_s", cornerM_s);
+        t.log(Level.WARN, "tire", "wheel M_s", wheelM_s);
+        t.log(Level.INFO, "tire", "dtS", dtS); // usually about 0.02
+
         Vector2d desiredAccelM_s_s = desiredAccelM_s_s(cornerM_s, wheelM_s, dtS);
+        t.log(Level.INFO, "tire", "desired accel M_s_s", desiredAccelM_s_s);
         double fraction = fraction(desiredAccelM_s_s);
         double scale = scale(fraction);
         Vector2d scaledAccelM_s_s = scaledAccelM_s_s(desiredAccelM_s_s, scale);
         Vector2d limitedAccelM_s_s = limit(scaledAccelM_s_s);
-        return apply(cornerM_s, limitedAccelM_s_s, dtS);
+        t.log(Level.INFO, "tire", "limited accel M_s_s", limitedAccelM_s_s);
+
+        // Vector2d actual = apply(cornerM_s, desiredAccelM_s_s, dtS);
+        Vector2d actual = apply(cornerM_s, limitedAccelM_s_s, dtS);
+        t.log(Level.WARN, "tire", "actual M_s", actual);
+        return actual;
     }
 
     //////////////////////////////////
@@ -92,8 +108,12 @@ public class Tire {
     Vector2d limit(Vector2d scaledAccelM_s_s) {
         double normM_s_s = scaledAccelM_s_s.norm();
         double saturationM_s_s = m_saturationM_s_s.get();
-        if (normM_s_s <= saturationM_s_s)
+        if (normM_s_s <= saturationM_s_s) {
+            t.log(Level.DEBUG, "tire", "limit M_s_s", scaledAccelM_s_s);
             return scaledAccelM_s_s;
-        return scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
+        }
+        Vector2d limitedM_s_s = scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
+        t.log(Level.DEBUG, "tire", "limit M_s_s", limitedM_s_s);
+        return limitedM_s_s;
     }
 }
