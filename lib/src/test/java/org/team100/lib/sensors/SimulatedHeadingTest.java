@@ -24,8 +24,7 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(0, h.getHeadingRateNWU(), kDelta);
     }
 
-    // TODO: fix this test
-    // @Test
+    @Test
     void testTranslation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(10, l);
@@ -54,8 +53,7 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(0.42, p[3].distanceMeters, 0.03);
     }
 
-    // TODO: fix this test
-    // @Test
+    @Test
     void testRotation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(10, l);
@@ -81,8 +79,7 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(1, h.getHeadingRateNWU(), kDelta);
     }
 
-    // TODO: fix this test
-    // @Test
+    @Test
     void testHolonomic() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
