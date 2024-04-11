@@ -38,18 +38,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * up, so set the acceleration a bit higher than that to start.
  */
 public class DrumShooter extends Shooter {
+    /** Left roller setpoint, m/s */
+    private static final double kLeftRollerVelocity = 20;
+    /** Right roller setpoint m/s */
+    private static final double kRightRollerVelocity = 15;
+
     private final Telemetry t = Telemetry.get();
 
-    // TODO: tune the current limit
-    /**
-     * Muzzle velocity of game piece exiting the shooter.
-     * 
-     * The shooter should do whatever is necessary to achieve this;
-     * a good approximation for a sticky shooter is the surface
-     * speed of whatever wheels are contacting the game piece,
-     * but there are many factors that affect the relationship in
-     * the real world.
-     */
     private final String m_name;
     private final DutyCycleEncoder100 m_encoder;
     private final VelocityServo<Distance100> leftRoller;
@@ -58,27 +53,18 @@ public class DrumShooter extends Shooter {
     private final CANSparkMax pivotMotor;
     private final SpeedingVisualization m_viz;
 
-    public final double kLeftRollerVelocity = 20;
-    public final double kRightRollerVelocity = 15;
-
     public DrumShooter(int leftID, int rightID, int pivotID, int currentLimit) {
         m_name = Names.name(this);
         m_encoder = new DutyCycleEncoder100("SHOOTER PIVOT", 0, 0.5087535877188397, false);
-        // m_encoder.reset();
-        int shooterCurrentLimit = 40;
-        int pivotLimit = 40;
-        int feederLimit = 40;
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
         SysParam pivotParams = SysParam.neoPositionServoSystem(
                 165,
                 300,
                 300);
-        SysParam feederParams = SysParam.limitedNeoVelocityServoSystem(1, 0.1, 30, 40, -40);
 
         switch (Identity.instance) {
             case COMP_BOT:
-                // TODO tune kV
 
                 MotorWithEncoder100<Distance100> leftMotor = new Falcon6DriveMotor(
                         m_name + "/Left",
@@ -154,7 +140,6 @@ public class DrumShooter extends Shooter {
     public void forward() {
         leftRoller.setVelocity(kLeftRollerVelocity);
         rightRoller.setVelocity(kRightRollerVelocity);
-
         // leftRoller.setVelocity(5);
         // rightRoller.setVelocity(2);
     }
@@ -178,7 +163,6 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void setAngle(Double goal) {
-
         pivotServo.setPosition(goal);
         // pivotServo.setDutyCycle(0.1);
 
@@ -186,7 +170,6 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void setAngleWithOverride(Double goal, double pivotUp, double pivotDown) {
-
         // if(pivotUp >= 0){
         // pivotServo.setDutyCycle(pivotUp);
         // } else if(pivotDown >= 0){
@@ -196,10 +179,9 @@ public class DrumShooter extends Shooter {
         // }
 
         // pivotServo.setPosition(goal);
-
     }
 
-    public double getAngle() {
+    public double getAngleRad() {
         return pivotServo.getPosition();
 
     }
@@ -214,43 +196,39 @@ public class DrumShooter extends Shooter {
         t.log(Level.DEBUG, "Drum SHooter", "right velocity", rightRoller.getVelocity());
         t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());
 
-
         m_viz.periodic();
-
         // pivotServo.setDutyCycle(0.1);
-
     }
 
     public void pivotAndRamp(SwerveDriveSubsystem m_drive, double kThreshold) {
         if (m_drive.getPose().getX() < kThreshold) {
             forward();
-            t.log(Level.DEBUG, m_name, "Angle", ShooterUtil.getAngle(m_drive.getPose().getX()));
+            t.log(Level.DEBUG, m_name, "Angle", ShooterUtil.getAngleRad(m_drive.getPose().getX()));
             t.log(Level.DEBUG, m_name, "Pose X", m_drive.getPose().getX());
-
-            setAngle(ShooterUtil.getAngle(m_drive.getPose().getX()));
+            setAngle(ShooterUtil.getAngleRad(m_drive.getPose().getX()));
         }
     }
 
+    @Override
     public boolean readyToShoot(Alliance alliance, SwerveDriveSubsystem m_drive) {
-        if (ShooterUtil.getRobotRotationToSpeaker(alliance, m_drive.getPose().getTranslation(), 0.25)
-                .getDegrees() < 1) {
-            if (getAngle() - ShooterUtil.getAngle(m_drive.getPose().getX()) < 0.1) {
-                return true;
-            }
-        }
-
-        return false;
+        double bearingDeg = ShooterUtil.getRobotRotationToSpeaker(
+                alliance,
+                m_drive.getPose().getTranslation(),
+                0.25).getDegrees();
+        // TODO: note this range is wrong since it's just pose.x. It should be the
+        // range to the target; i think this method is probably not used.
+        // TODO: remove this
+        double elevationErrorRad = getAngleRad() - ShooterUtil.getAngleRad(m_drive.getPose().getX());
+        return (Math.abs(bearingDeg) < 1) && (Math.abs(elevationErrorRad) < 0.1);
     }
 
     public boolean readyToShoot() {
-        // TODO get real values here
-        return leftRoller.getVelocity() > 30 && rightRoller.getVelocity() > 30;
+        return atVelocitySetpoint(false);
     }
 
     public void setDutyCycle(double value) {
         leftRoller.setDutyCycle(value);
         rightRoller.setDutyCycle(value);
-
     }
 
     public double getPivotPosition() {
@@ -277,34 +255,27 @@ public class DrumShooter extends Shooter {
         return 0;
     }
 
+    /** uses pretty wide tolerance, applied symmetrically. */
     @Override
     public boolean atVelocitySetpoint() {
-        if (Math.abs(leftRoller.getVelocity() - kLeftRollerVelocity) < 10) {
-            if (Math.abs(rightRoller.getVelocity() - kRightRollerVelocity) < 10) {
-                return true;
-            }
-        }
-
-        return false;
+        double leftError = leftRoller.getVelocity() - kLeftRollerVelocity;
+        double rightError = rightRoller.getVelocity() - kRightRollerVelocity;
+        return (Math.abs(leftError) < 10) && (Math.abs(rightError) < 10);
     }
 
+    /**
+     * @param wide if true, use very wide velocity tolernace, for when we don't care
+     *             exactly what the speed is. otherwise, use very narrow tolerance.
+     */
     @Override
-    public boolean atVelocitySetpoint(boolean bool) {
-
-        if (bool) {
-            if (leftRoller.getVelocity() > (kLeftRollerVelocity / 2)) {
-                if (rightRoller.getVelocity() > (kRightRollerVelocity / 2)) {
-                    return true;
-                }
-            }
-        } else {
-            if (Math.abs(leftRoller.getVelocity() - kLeftRollerVelocity) < 0.5) {
-                if (Math.abs(rightRoller.getVelocity() - kRightRollerVelocity) < 0.5) {
-                    return true;
-                }
-            }
+    public boolean atVelocitySetpoint(boolean wide) {
+        if (wide) {
+            double leftRatio = leftRoller.getVelocity() / kLeftRollerVelocity;
+            double rightRatio = rightRoller.getVelocity() / kRightRollerVelocity;
+            return (leftRatio > 0.5) && (rightRatio > 0.5);
         }
-
-        return false;
+        double leftError = leftRoller.getVelocity() - kLeftRollerVelocity;
+        double rightError = rightRoller.getVelocity() - kRightRollerVelocity;
+        return (Math.abs(leftError) < 0.5) && (Math.abs(rightError) < 0.5);
     }
 }

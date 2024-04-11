@@ -27,14 +27,12 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
 
     private boolean m_reversed;
 
-
     /**
      * @param name        may not start with a slash
      * @param channel     roboRIO analog input channel
      * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
      *                    measurement
-     * @param gearRatio
-     * @param drive       polarity
+     * @param reversed    polarity
      */
     public DutyCycleEncoder100(
             String name,
@@ -44,31 +42,29 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
-        m_reversed = reversed; 
+        m_reversed = reversed;
         m_name = Names.append(name, this);
         // m_input = new AnalogInput(channel);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);
         m_encoder.setConnectedFrequencyThreshold(1000);
-        
+
         // t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
     }
 
     @Override
     public Double getPosition() {
 
-        if(!m_encoder.isConnected()){
+        if (!m_encoder.isConnected()) {
             return null;
         }
-        if(m_reversed){
-            return -(m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
+        if (m_reversed) {
+            return -(m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset())
+                    * m_encoder.getDistancePerRotation();
         }
         return (m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
     }
-
-    
-
 
     /**
      * Current rate in rad/s.
@@ -88,8 +84,8 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
 
     @Override
     public void reset() {
-        // ALERT!  @joel 2/19/24: I think encoder reset changes the internal offset
-        // which is never what we want.  but this might be wrong
+        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want. but this might be wrong
         // for some other reason
         // m_encoder.reset();
         m_positionRad = 0;

@@ -82,7 +82,7 @@ public class ShootSmart extends Command {
         m_timer.reset();
         m_shooter.forward();
         // if(m_pivotOverride == -1){
-        m_shooter.setAngle(ShooterUtil.getAngle(distance));
+        m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
         // } else {
         // m_shooter.setAngle(m_pivotOverride);
         // }
@@ -107,7 +107,7 @@ public class ShootSmart extends Command {
         if (m_pivotOverride == -1) {
             double distance = m_drive.getPose().getTranslation()
                     .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
-            angle = ShooterUtil.getAngle(distance);
+            angle = ShooterUtil.getAngleRad(distance);
         } else {
             angle = m_pivotOverride;
         }

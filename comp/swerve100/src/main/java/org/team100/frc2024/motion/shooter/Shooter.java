@@ -15,7 +15,7 @@ public abstract class Shooter extends SubsystemBase implements Speeding, Glassy 
     public abstract void setAngleWithOverride(Double angle, double pivotUp, double pivotDown);
     public abstract void setAngle(Double angle);
 
-    public abstract double getAngle();
+    public abstract double getAngleRad();
     public abstract boolean atVelocitySetpoint();
     public abstract boolean atVelocitySetpoint(boolean bool);
 
