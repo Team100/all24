@@ -200,15 +200,17 @@ public class RobotContainerParkingLot {
 
         // calibration
 
+        TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
+
         // make a one-meter line
         whileTrue(driverControl::never,
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> List.of(TrajectoryMaker.line(swerveKinodynamics, x))));
+                        x -> List.of(maker.line(x))));
 
         // make a one-meter square
         whileTrue(driverControl::never,
                 new TrajectoryListCommand(m_drive, controller,
-                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+                        maker::square));
 
         whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller,
                 null));
@@ -216,15 +218,15 @@ public class RobotContainerParkingLot {
         // one-meter square with reset at the corners
         whileTrue(driverControl::never,
                 new PermissiveTrajectoryListCommand(m_drive, controller,
-                        TrajectoryMaker.permissiveSquare(swerveKinodynamics)));
+                        maker.permissiveSquare()));
 
         // one-meter square with position and velocity feedback control
         whileTrue(driverControl::never,
                 new FullStateTrajectoryListCommand(m_drive,
-                        x -> TrajectoryMaker.square(swerveKinodynamics, x)));
+                        maker::square));
 
         // this should be a field.
-        final DrawSquare m_drawCircle = new DrawSquare(m_drive, swerveKinodynamics, controller);
+        final DrawSquare m_drawCircle = new DrawSquare(m_drive, controller);
         whileTrue(driverControl::circle, m_drawCircle);
     }
 

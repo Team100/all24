@@ -12,8 +12,13 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.testing.Timeless;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
@@ -23,6 +28,12 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
+
+    TrajectoryPlanner planner = new TrajectoryPlanner();
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+
+    List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
+    TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
 
     @Test
     void testSimple() {
@@ -34,7 +45,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         TrajectoryListCommand c = new TrajectoryListCommand(
                 fixture.drive,
                 control,
-                x -> List.of(TrajectoryMaker.line(fixture.swerveKinodynamics, x)));
+                x -> List.of(maker.line(x)));
         c.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         c.execute();
@@ -48,7 +59,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         }
         // at goal; wide tolerance due to test timing
         assertTrue(c.isFinished());
-        assertEquals(1.033, fixture.drive.getPose().getX(), 0.001);
+        assertEquals(1.031, fixture.drive.getPose().getX(), 0.001);
     }
 
     /**
@@ -61,7 +72,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         TrajectoryListCommand command = new TrajectoryListCommand(
                 fixture.drive,
                 controller,
-                x -> TrajectoryMaker.square(fixture.swerveKinodynamics, x));
+                x -> maker.square(x));
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, false);
         fixture.drive.periodic();
         command.initialize();
@@ -74,8 +85,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
-                Util.printf("time %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
-                        command.m_timer.get(),
+                Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
                         goal.angle.getRadians(),
                         setpoint.x(),
                         setpoint.v(),

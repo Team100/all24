@@ -44,7 +44,8 @@ public class TrajectoryPlanner {
                 max_accel);
     }
 
-    public Trajectory100 generateTrajectory100(boolean reversed,
+    public Trajectory100 generateTrajectory100(
+            boolean reversed,
             final List<Pose2d> waypoints,
             final List<Rotation2d> headings,
             final List<TimingConstraint> constraints,
@@ -78,7 +79,7 @@ public class TrajectoryPlanner {
 
         // Create a trajectory from splines.
         Path100 trajectory = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
-                waypoints_maybe_flipped, headings_maybe_flipped, 
+                waypoints_maybe_flipped, headings_maybe_flipped,
                 kMaxDx, kMaxDy, kMaxDTheta);
 
         if (reversed) {

@@ -1,6 +1,10 @@
 package org.team100.lib.motion.drivetrain;
 
+import java.util.Optional;
+
 import org.team100.lib.controller.State100;
+import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -41,7 +45,7 @@ public class SwerveState {
                 new State100(x.getY(), v.dy, a.dy),
                 new State100(x.getRotation().getRadians(), v.dtheta, a.dtheta));
     }
-    
+
     public SwerveState() {
         this(new State100(), new State100(), new State100());
     }
@@ -73,6 +77,8 @@ public class SwerveState {
 
     /**
      * turn a wpi trajectory state into a swervestate.
+     * 
+     * does not account for centripetal acceleration.
      */
     public static SwerveState fromState(State desiredState, Rotation2d desiredRot) {
         double xx = desiredState.poseMeters.getX();
@@ -82,6 +88,7 @@ public class SwerveState {
         double xv = desiredState.velocityMetersPerSecond * desiredState.poseMeters.getRotation().getCos();
         double yv = desiredState.velocityMetersPerSecond * desiredState.poseMeters.getRotation().getSin();
 
+        // TODO: account for centripetal acceleration
         double xa = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getCos();
         double ya = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getSin();
 
@@ -89,7 +96,35 @@ public class SwerveState {
                 new State100(xx, xv, xa),
                 new State100(yx, yv, ya),
                 new State100(thetax, 0, 0));
+    }
 
+    /**
+     * Transform timed pose into swerve state.
+     * 
+     * does not account for centripetal acceleration.
+     */
+    public static SwerveState fromTimedPose(TimedPose timedPose) {
+        double xx = timedPose.state().getPose().getX();
+        double yx = timedPose.state().getPose().getY();
+        double thetax = timedPose.state().getHeading().getRadians();
+
+        double velocityM_s = timedPose.velocityM_S();
+        Optional<Rotation2d> course = timedPose.state().getCourse();
+        Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationZero;
+        double xv = motion_direction.getCos() * velocityM_s;
+        double yv = motion_direction.getSin() * velocityM_s;
+        double thetav = timedPose.state().getHeadingRate() * velocityM_s;
+
+        // TODO: account for centripetal acceleration
+        double accelM_s_s = timedPose.acceleration();
+        double xa = motion_direction.getCos() * accelM_s_s;
+        double ya = motion_direction.getSin() * accelM_s_s;
+        double thetaa = timedPose.state().getHeadingRate() * accelM_s_s;
+
+        return new SwerveState(
+                new State100(xx, xv, xa),
+                new State100(yx, yv, ya),
+                new State100(thetax, thetav, thetaa));
     }
 
     public String toString() {

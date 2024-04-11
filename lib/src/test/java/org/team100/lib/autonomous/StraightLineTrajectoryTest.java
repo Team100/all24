@@ -2,67 +2,68 @@ package org.team100.lib.autonomous;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
-import org.team100.lib.copies.TrajectoryConfig100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.trajectory.Trajectory;
 
 class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
+    TrajectoryPlanner planner = new TrajectoryPlanner();
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+    List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
+    TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
 
     @Test
     void testRestToRest() {
-        TrajectoryConfig100 c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
-        assertEquals(0, c.getStartVelocity(), kDelta);
-        StraightLineTrajectory t = new StraightLineTrajectory(c);
+        StraightLineTrajectory t = new StraightLineTrajectory(maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, GeometryUtil.kTwist2dIdentity);
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
-        Trajectory traj = t.apply(start, end);
-        assertEquals(1.414, traj.getTotalTimeSeconds(), kDelta);
+        Trajectory100 traj = t.apply(start, end);
+        assertEquals(1, traj.getTotalTimeSeconds(), kDelta);
     }
 
     @Test
     void testMovingToRest() {
         Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
-        TrajectoryConfig100 c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
-        assertEquals(0, c.getStartVelocity(), kDelta);
-        StraightLineTrajectory t = new StraightLineTrajectory(c);
+        StraightLineTrajectory t = new StraightLineTrajectory(maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
-        Trajectory traj = t.apply(start, end);
-        assertEquals(1.082, traj.getTotalTimeSeconds(), kDelta);
+        Trajectory100 traj = t.apply(start, end);
+        assertEquals(1.5, traj.getTotalTimeSeconds(), kDelta);
     }
 
     @Test
     void testBackingUp() {
         Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
-        TrajectoryConfig100 c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
-        assertEquals(0, c.getStartVelocity(), kDelta);
-        StraightLineTrajectory t = new StraightLineTrajectory(c);
+        StraightLineTrajectory t = new StraightLineTrajectory(maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(-1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
-        Trajectory traj = t.apply(start, end);
-        // it can't do this because the spline generator gets confused
-        assertEquals(0, traj.getTotalTimeSeconds(), kDelta);
+        Trajectory100 traj = t.apply(start, end);
+        assertEquals(1.824, traj.getTotalTimeSeconds(), kDelta);
     }
 
     @Test
     void test2d() {
         Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
-        TrajectoryConfig100 c = SwerveKinodynamicsFactory.get().newTrajectoryConfig(2, 2);
-        assertEquals(0, c.getStartVelocity(), kDelta);
-        StraightLineTrajectory t = new StraightLineTrajectory(c);
+        StraightLineTrajectory t = new StraightLineTrajectory(maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(0, 1, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
-        Trajectory traj = t.apply(start, end);
-        assertEquals(1.452, traj.getTotalTimeSeconds(), kDelta);
+        Trajectory100 traj = t.apply(start, end);
+        assertEquals(2.109, traj.getTotalTimeSeconds(), kDelta);
     }
 }
