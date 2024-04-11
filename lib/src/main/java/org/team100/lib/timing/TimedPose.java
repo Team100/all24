@@ -15,7 +15,11 @@ public class TimedPose {
     private final double m_velocityM_S; // ds/dt
     private double m_accelM_S_S; // d^2s/dt^2
 
-    public TimedPose(final Pose2dWithMotion state, double t, double velocity, double acceleration) {
+    public TimedPose(
+            final Pose2dWithMotion state,
+            double t,
+            double velocity,
+            double acceleration) {
         m_state = state;
         m_timeS = t;
         m_velocityM_S = velocity;

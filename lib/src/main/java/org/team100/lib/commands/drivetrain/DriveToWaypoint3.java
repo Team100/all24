@@ -1,5 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.Optional;
+
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
@@ -7,14 +9,17 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.StraightLineTrajectory;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectorySamplePoint;
+import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.Trajectory.State;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Drive from the current state to a field-relative goal.
@@ -33,9 +38,10 @@ public class DriveToWaypoint3 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
     private final HolonomicDriveController3 m_controller;
-    private final Timer m_timer;
 
-    private Trajectory m_trajectory;
+    private Trajectory100 m_trajectory;
+    private TrajectoryTimeIterator m_iter;
+
     /**
      * Trajectory waits until wheels are aligned. If we depend on the setpoint
      * generator to do it, then we're behind the profile timer. After the initial
@@ -56,7 +62,6 @@ public class DriveToWaypoint3 extends Command100 {
         m_swerve = drivetrain;
         m_trajectories = trajectories;
         m_controller = controller;
-        m_timer = new Timer();
         addRequirements(m_swerve);
     }
 
@@ -64,9 +69,9 @@ public class DriveToWaypoint3 extends Command100 {
     public void initialize100() {
         m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
+        m_iter = new TrajectoryTimeIterator(
+                new TrajectoryTimeSampler(m_trajectory));
         TrajectoryVisualization.setViz(m_trajectory);
-        m_timer.stop();
-        m_timer.reset();
         m_steeringAligned = false;
     }
 
@@ -75,40 +80,58 @@ public class DriveToWaypoint3 extends Command100 {
         if (m_trajectory == null)
             return;
 
-        double curTime = m_timer.get();
-        State desiredState = m_trajectory.sample(curTime);
-        Pose2d currentPose = m_swerve.getPose();
-        SwerveState reference = SwerveState.fromState(desiredState, m_goal.getRotation());
-        Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-
         if (m_steeringAligned) {
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(dt);
+            if (optSamplePoint.isEmpty()) {
+                Util.warn("broken trajectory, cancelling!");
+                cancel(); // this should not happen
+                return;
+            }
+            TrajectorySamplePoint samplePoint = optSamplePoint.get();
+
+            TimedPose desiredState = samplePoint.state();
+            t.log(Level.TRACE, m_name, "Desired X", desiredState.state().getPose().getX());
+            t.log(Level.TRACE, m_name, "Desired Y", desiredState.state().getPose().getY());
+            Pose2d currentPose = m_swerve.getPose();
+            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+
             // follow normally
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
-            // not aligned yet, try aligning
-            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
-            if (aligned) {
-                m_steeringAligned = true;
-                m_timer.start();
-                m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
+            // not aligned yet, try aligning by *previewing* next point
+
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(dt);
+            if (optSamplePoint.isEmpty()) {
+                Util.warn("broken trajectory, cancelling!");
+                cancel(); // this should not happen
+                return;
             }
+            TrajectorySamplePoint samplePoint = optSamplePoint.get();
+
+            TimedPose desiredState = samplePoint.state();
+            t.log(Level.TRACE, m_name, "Desired X", desiredState.state().getPose().getX());
+            t.log(Level.TRACE, m_name, "Desired Y", desiredState.state().getPose().getY());
+            Pose2d currentPose = m_swerve.getPose();
+            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+
+            m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
         t.log(Level.TRACE, m_name, "Aligned", m_steeringAligned);
-        t.log(Level.TRACE, m_name, "Desired X", desiredState.poseMeters.getX());
-        t.log(Level.TRACE, m_name, "Desired Y", desiredState.poseMeters.getY());
+
         t.log(Level.TRACE, m_name, "Pose X", m_swerve.getPose().getX());
         t.log(Level.TRACE, m_name, "Pose Y", m_swerve.getPose().getY());
         t.log(Level.TRACE, m_name, "Desired Rot", m_goal.getRotation().getRadians());
         t.log(Level.TRACE, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
-        t.log(Level.TRACE, m_name, "Time", curTime);
     }
 
     @Override
     public boolean isFinished() {
         if (m_trajectory == null)
             return true;
-        return m_timer.get() > m_trajectory.getTotalTimeSeconds() && m_controller.atReference();
+        return m_iter.isDone() && m_controller.atReference();
     }
 
     @Override

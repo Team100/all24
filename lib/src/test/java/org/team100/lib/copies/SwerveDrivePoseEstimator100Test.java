@@ -22,6 +22,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
 class SwerveDrivePoseEstimator100Test {
@@ -378,14 +380,14 @@ class SwerveDrivePoseEstimator100Test {
         // no wheel slip
         estimator.f.mutable(Tire.kSaturationLabel, 0).set(Double.MAX_VALUE);
 
-        var trajectory = TrajectoryGenerator100.generateTrajectory(
+        var trajectory = TrajectoryGenerator.generateTrajectory(
                 List.of(
                         new Pose2d(0, 0, Rotation2d.fromDegrees(45)),
                         new Pose2d(3, 0, Rotation2d.fromDegrees(-90)),
                         new Pose2d(0, 0, Rotation2d.fromDegrees(135)),
                         new Pose2d(-3, 0, Rotation2d.fromDegrees(-90)),
                         new Pose2d(0, 0, Rotation2d.fromDegrees(45))),
-                new TrajectoryConfig100(2, 2));
+                new TrajectoryConfig(2, 2));
 
         testFollowTrajectory(
                 kinematics,
@@ -434,14 +436,14 @@ class SwerveDrivePoseEstimator100Test {
         // no wheel slip
         estimator.f.mutable(Tire.kSaturationLabel, 0).set(Double.MAX_VALUE);
 
-        var trajectory = TrajectoryGenerator100.generateTrajectory(
+        var trajectory = TrajectoryGenerator.generateTrajectory(
                 List.of(
                         new Pose2d(0, 0, Rotation2d.fromDegrees(45)),
                         new Pose2d(3, 0, Rotation2d.fromDegrees(-90)),
                         new Pose2d(0, 0, Rotation2d.fromDegrees(135)),
                         new Pose2d(-3, 0, Rotation2d.fromDegrees(-90)),
                         new Pose2d(0, 0, Rotation2d.fromDegrees(45))),
-                new TrajectoryConfig100(2, 2));
+                new TrajectoryConfig(2, 2));
 
         for (int offset_direction_degs = 0; offset_direction_degs < 360; offset_direction_degs += 45) {
             for (int offset_heading_degs = 0; offset_heading_degs < 360; offset_heading_degs += 45) {

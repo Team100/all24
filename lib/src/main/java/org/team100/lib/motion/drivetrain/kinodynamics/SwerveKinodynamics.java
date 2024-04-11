@@ -2,7 +2,6 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.copies.SwerveDriveKinematics100;
 import org.team100.lib.copies.SwerveDrivePoseEstimator100;
-import org.team100.lib.copies.TrajectoryConfig100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
@@ -390,15 +389,6 @@ public class SwerveKinodynamics implements Glassy {
                 timestampSeconds,
                 stateStdDevs,
                 visionMeasurementStdDevs);
-    }
-
-    public TrajectoryConfig100 newTrajectoryConfig(
-            double maxVelocityMetersPerSecond, double maxAccelerationMetersPerSecondSq) {
-        TrajectoryConfig100 result = new TrajectoryConfig100(
-                maxVelocityMetersPerSecond, maxAccelerationMetersPerSecondSq);
-        result.setKinematics(m_kinematics);
-        return result;
-
     }
 
     /**

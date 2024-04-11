@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
@@ -11,32 +12,35 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.timing.TimedPose;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectorySamplePoint;
+import org.team100.lib.trajectory.TrajectoryTimeIterator;
+import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.Trajectory.State;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Similar to TrajectoryListCommand, but each trajectory starts wherever the
  * robot ends up, instead of at the end of the previous trajectory. This is
  * essentially like ignoring cross-track error.
  * 
- * This just holds the starting rotation.  If you want a holonomic trajectory
+ * This just holds the starting rotation. If you want a holonomic trajectory
  * follower, try the {@link DriveMotionController} classes.
  */
 public class PermissiveTrajectoryListCommand extends Command100 {
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
-    final Timer m_timer;
     private final HolonomicFieldRelativeController m_controller;
-    private final List<Function<Pose2d, Trajectory>> m_trajectories;
-    private Iterator<Function<Pose2d, Trajectory>> m_trajectoryIter;
-    private Trajectory m_currentTrajectory;
+    private final List<Function<Pose2d, Trajectory100>> m_trajectories;
+    private Iterator<Function<Pose2d, Trajectory100>> m_trajectoryIter;
+    private Trajectory100 m_currentTrajectory;
+    private TrajectoryTimeIterator m_iter;
     private boolean done;
     private Rotation2d m_rotation;
     private boolean m_aligned;
@@ -44,10 +48,9 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     public PermissiveTrajectoryListCommand(
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
-            List<Function<Pose2d, Trajectory>> trajectories) {
+            List<Function<Pose2d, Trajectory100>> trajectories) {
         m_swerve = swerve;
         m_controller = controller;
-        m_timer = new Timer();
         m_trajectories = trajectories;
         addRequirements(m_swerve);
     }
@@ -59,21 +62,19 @@ public class PermissiveTrajectoryListCommand extends Command100 {
         m_rotation = currentPose.getRotation();
         m_trajectoryIter = m_trajectories.iterator();
         m_currentTrajectory = null;
-        m_timer.stop();
-        m_timer.reset();
         done = false;
         m_aligned = false;
     }
 
     @Override
     public void execute100(double dt) {
-        if (m_currentTrajectory == null || m_timer.get() > m_currentTrajectory.getTotalTimeSeconds()) {
+        if (m_currentTrajectory == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
                 m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getPose());
+                m_iter = new TrajectoryTimeIterator(
+                        new TrajectoryTimeSampler(m_currentTrajectory));
                 TrajectoryVisualization.setViz(m_currentTrajectory);
-                m_timer.stop();
-                m_timer.reset();
                 m_aligned = false;
             } else {
                 done = true;
@@ -84,24 +85,36 @@ public class PermissiveTrajectoryListCommand extends Command100 {
         // now there is a trajectory to follow
 
         if (m_aligned) {
-            State desiredState = m_currentTrajectory.sample(m_timer.get());
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(dt);
+            if (optSamplePoint.isEmpty()) {
+                Util.warn("broken trajectory, cancelling!");
+                cancel(); // this should not happen
+                return;
+            }
+            TrajectorySamplePoint samplePoint = optSamplePoint.get();
+            TimedPose desiredState = samplePoint.state();
+
             Pose2d currentPose = m_swerve.getPose();
-            SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
+            SwerveState reference = SwerveState.fromTimedPose(desiredState);
             t.log(Level.TRACE, m_name, "reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
-            // look just one loop ahead
-            State desiredState = m_currentTrajectory.sample(m_timer.get() + 0.02);
+            // look just one loop ahead by *previewing* the next point
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(dt);
+            if (optSamplePoint.isEmpty()) {
+                Util.warn("broken trajectory, cancelling!");
+                cancel(); // this should not happen
+                return;
+            }
+            TrajectorySamplePoint samplePoint = optSamplePoint.get();
+            TimedPose desiredState = samplePoint.state();
+
             Pose2d currentPose = m_swerve.getPose();
-            SwerveState reference = SwerveState.fromState(desiredState, m_rotation);
+            SwerveState reference = SwerveState.fromTimedPose(desiredState);
             t.log(Level.TRACE, m_name, "reference", reference);
             Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            boolean aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
-            if (aligned) {
-                m_aligned = true;
-                m_timer.start();
-            }
+            m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
     }
 

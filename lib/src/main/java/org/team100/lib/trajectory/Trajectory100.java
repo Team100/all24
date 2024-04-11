@@ -36,6 +36,10 @@ public class Trajectory100 {
         return m_points.get(length() - 1);
     }
 
+    public double getTotalTimeSeconds() {
+        return getLastPoint().state().getTimeS();
+    }
+
     public TrajectoryPoint getPoint(final int index) {
         return m_points.get(index);
     }
