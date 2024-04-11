@@ -8,7 +8,6 @@ import java.util.function.DoubleFunction;
 import java.util.function.ObjDoubleConsumer;
 
 import org.team100.lib.config.Camera;
-import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;

@@ -1,4 +1,4 @@
-package org.team100.lib.copies;
+package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import java.util.Arrays;
 
@@ -21,9 +21,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * Note: forward kinematics is never more accurate than the gyro and we
  * absolutely cannot operate without a functional gyro, so we should use the
  * gyro instead. see https://github.com/Team100/all24/issues/350
- * 
- * Note: we should model tire slip with respect to the carpet, see
- * https://github.com/Team100/all24/issues/347
  */
 public class SwerveDriveKinematics100 {
     private static final double kEpsilon = 1e-6;

@@ -1,7 +1,8 @@
-package org.team100.lib.copies;
+package org.team100.lib.localization;
 
 import java.util.Objects;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.copies.SwerveDriveKinematics100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.persistent_parameter.ParameterFactory;
 

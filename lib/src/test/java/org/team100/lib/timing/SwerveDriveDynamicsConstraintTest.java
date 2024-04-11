@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
@@ -11,7 +12,6 @@ import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
@@ -78,7 +78,7 @@ class SwerveDriveDynamicsConstraintTest {
         assertEquals(4.464, ms[3].speedMetersPerSecond, kDelta);
 
         // this is slowed to the max possible wheel speed
-        SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+        SwerveDriveKinematics100.desaturateWheelSpeeds(ms, maxV);
         assertEquals(2.384, ms[0].speedMetersPerSecond, kDelta);
         assertEquals(3.639, ms[1].speedMetersPerSecond, kDelta);
         assertEquals(2.906, ms[2].speedMetersPerSecond, kDelta);
@@ -100,7 +100,7 @@ class SwerveDriveDynamicsConstraintTest {
         // possible at 5 rad/s; this is about 8 rad/m.
         ChassisSpeeds s = new ChassisSpeeds(0.62, 0, 5);
         SwerveModuleState[] ms = l.toSwerveModuleStates(s, 5, 0.02);
-        SwerveDriveKinematics.desaturateWheelSpeeds(ms, maxV);
+        SwerveDriveKinematics100.desaturateWheelSpeeds(ms, maxV);
 
         ChassisSpeeds implied = l.toChassisSpeeds(ms);
         assertEquals(0.611, implied.vxMetersPerSecond, kDelta);

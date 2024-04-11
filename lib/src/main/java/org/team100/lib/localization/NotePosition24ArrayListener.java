@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SimulatedCamera;
-import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.util.NotePicker;
 import org.team100.lib.util.Util;
 
