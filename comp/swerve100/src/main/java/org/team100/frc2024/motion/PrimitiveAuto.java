@@ -1,8 +1,6 @@
 package org.team100.frc2024.motion;
 
-import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;

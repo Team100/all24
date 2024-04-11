@@ -8,7 +8,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
-import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -276,9 +275,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     }
 
     private void require(REVLibError responseCode) {
-        // TODO: make this throw
         if (responseCode != REVLibError.kOk)
-            Util.warn("NeoTurningMotor received response code " + responseCode.name());
-        // throw new IllegalStateException();
+            throw new IllegalStateException("NeoTurningMotor received response code " + responseCode.name());
     }
 }

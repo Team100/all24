@@ -1,8 +1,6 @@
 package org.team100.lib.sensors;
 
 import edu.wpi.first.hal.CANData;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.CAN;
 
 public class Team100CANIMU {

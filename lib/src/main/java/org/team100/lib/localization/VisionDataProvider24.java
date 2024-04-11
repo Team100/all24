@@ -3,9 +3,6 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.DoubleFunction;
-import java.util.function.ObjDoubleConsumer;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.dashboard.Glassy;

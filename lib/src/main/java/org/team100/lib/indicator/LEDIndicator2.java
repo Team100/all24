@@ -67,7 +67,6 @@ public class LEDIndicator2 {
     private boolean m_flashing;
 
     public LEDIndicator2(int port) {
-        // TODO: change the ranges to match the actual LEDs
         strips = new ArrayList<>();
         
         strips.add(new LEDStrip(0, 16));

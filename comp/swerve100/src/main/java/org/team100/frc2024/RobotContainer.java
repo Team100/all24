@@ -7,7 +7,6 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
-import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
