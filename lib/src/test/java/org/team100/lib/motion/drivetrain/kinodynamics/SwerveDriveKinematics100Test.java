@@ -1,4 +1,4 @@
-package org.team100.lib.copies;
+package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

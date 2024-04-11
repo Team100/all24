@@ -1,9 +1,8 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
-import org.team100.lib.copies.SwerveDriveKinematics100;
-import org.team100.lib.copies.SwerveDrivePoseEstimator100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.Profile100;

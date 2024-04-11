@@ -3,7 +3,7 @@ package org.team100.lib.sensors;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.team100.lib.copies.TimeInterpolatableBuffer100;
+import org.team100.lib.localization.TimeInterpolatableBuffer100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;

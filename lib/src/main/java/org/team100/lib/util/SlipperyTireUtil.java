@@ -1,7 +1,7 @@
 package org.team100.lib.util;
 
-import org.team100.lib.copies.SwerveDriveKinematics100;
 import org.team100.lib.geometry.Vector2d;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
