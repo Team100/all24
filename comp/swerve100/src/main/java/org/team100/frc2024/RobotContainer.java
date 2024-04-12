@@ -29,7 +29,6 @@ import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
-import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.intake.RunIntake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
@@ -76,7 +75,6 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -87,7 +85,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -100,7 +97,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer implements Glassy {
     private static final double kDriveCurrentLimit = 50;
-    private final Telemetry t = Telemetry.get();
 
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -128,7 +124,7 @@ public class RobotContainer implements Glassy {
 
     private final String m_name;
 
-    public RobotContainer(TimedRobot robot) throws IOException {
+    public RobotContainer() throws IOException {
         m_name = Names.name(this);
 
         driverControl = new DriverControlProxy();
@@ -185,9 +181,9 @@ public class RobotContainer implements Glassy {
                 swerveLocal,
                 driverControl::speed);
 
-        m_feeder = new FeederSubsystem(3);
+        m_feeder = new FeederSubsystem();
 
-        m_intake = IntakeFactory.get(m_sensors);
+        m_intake = new Intake(m_sensors);
 
         // @sanjan 3/25
         // LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);

@@ -13,15 +13,15 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final String m_name;
     private final PWM feedRoller;
 
-    public FeederSubsystem(int feederPWM) {
+    public FeederSubsystem() {
         m_name = Names.name(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                feedRoller = new PWM(feederPWM);
+                feedRoller = new PWM(3);
                 break;
             case BLANK:
             default:
-                feedRoller = new PWM(feederPWM);
+                feedRoller = new PWM(3);
         }
     }
 

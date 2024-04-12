@@ -8,10 +8,15 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.State100;
+import org.team100.lib.util.Util;
 
 class TrapezoidProfile100Test {
     private static final double kDt = 0.01;
     private static final double kDelta = 0.001;
+
+    private void dump(double tt, State100 sample) {
+        Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+    }
 
     /** Now we expose acceleration in the profile state, so make sure it's right. */
     @Test
@@ -805,11 +810,11 @@ class TrapezoidProfile100Test {
 
         double tt = 0;
         // the first sample is near the starting state
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
         assertEquals(0, sample.x(), kDelta);
         assertEquals(0.04, sample.v(), kDelta);
 
@@ -817,7 +822,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.68; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         // halfway there, going fast
         assertEquals(0.5, sample.x(), 0.01);
@@ -827,7 +832,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.86; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(1.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -845,7 +850,7 @@ class TrapezoidProfile100Test {
         final State100 end = new State100(-1, 0);
 
         // the first sample is near the starting state
-        // Util.printf("%f %f %f\n", 0.0, sample.x(), sample.v());
+        dump(0, sample);
         sample = profileX.calculate(0.02, sample, end);
         assertEquals(0, sample.x(), kDelta);
         assertEquals(-0.04, sample.v(), kDelta);
@@ -853,7 +858,7 @@ class TrapezoidProfile100Test {
         // step to the middle of the profile
         for (double t = 0; t < 0.68; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
-            // Util.printf("%f %f %f\n", t, sample.x(), sample.v());
+            dump(t, sample);
         }
         // halfway there, going fast
         assertEquals(-0.5, sample.x(), 0.01);
@@ -862,7 +867,7 @@ class TrapezoidProfile100Test {
         // step to the end of the profile ... this was 0.72.
         for (double t = 0; t < 0.86; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
-            // Util.printf("%f %f %f\n", t, sample.x(), sample.v());
+            dump(t, sample);
         }
         assertEquals(-1.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -879,11 +884,11 @@ class TrapezoidProfile100Test {
         double tt = 0;
 
         // the first sample is near the starting state
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         assertEquals(0, sample.x(), kDelta);
         assertEquals(0.04, sample.v(), kDelta);
@@ -892,7 +897,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.25, sample.x(), 0.01);
         assertEquals(1.0, sample.v(), kDelta);
@@ -901,7 +906,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.5; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.75, sample.x(), 0.01);
         assertEquals(1.0, sample.v(), kDelta);
@@ -910,7 +915,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.66; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(1.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -930,12 +935,12 @@ class TrapezoidProfile100Test {
         final State100 end = new State100(0, 0);
 
         double tt = 0;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         // the first sample is near the starting state
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
         assertEquals(0.120, sample.x(), kDelta);
         assertEquals(0.96, sample.v(), kDelta);
 
@@ -943,7 +948,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.35, sample.x(), kDelta);
         assertEquals(0.0, sample.v(), kDelta);
@@ -952,7 +957,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.4; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.19, sample.x(), kDelta);
         assertEquals(-0.8, sample.v(), kDelta);
@@ -961,7 +966,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.46; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -977,12 +982,12 @@ class TrapezoidProfile100Test {
         State100 sample = new State100(-0.1, -1);
         final State100 end = new State100(0, 0);
         double tt = 0;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         // the first sample is near the starting state
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         assertEquals(-0.120, sample.x(), kDelta);
         assertEquals(-0.96, sample.v(), kDelta);
@@ -991,7 +996,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(-0.35, sample.x(), kDelta);
         assertEquals(0.0, sample.v(), kDelta);
@@ -1000,7 +1005,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.4; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(-0.19, sample.x(), kDelta);
         assertEquals(0.8, sample.v(), kDelta);
@@ -1009,7 +1014,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.46; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -1029,12 +1034,12 @@ class TrapezoidProfile100Test {
         State100 sample = new State100(0, 1);
         final State100 end = new State100(0, 0);
         double tt = 0;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         // the first sample is near the starting state
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         assertEquals(0.02, sample.x(), kDelta);
         assertEquals(0.96, sample.v(), kDelta);
@@ -1044,7 +1049,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
 
         }
         assertEquals(0.25, sample.x(), kDelta);
@@ -1055,7 +1060,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.4; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
 
         }
         assertEquals(0.1, sample.x(), 0.01);
@@ -1066,7 +1071,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
 
         }
         assertEquals(0.0, sample.x(), 0.01);
@@ -1085,12 +1090,12 @@ class TrapezoidProfile100Test {
         State100 sample = new State100(0, -1);
         final State100 end = new State100(0, 0);
         double tt = 0;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         // the first sample is near the starting state
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
         assertEquals(-0.02, sample.x(), kDelta);
         assertEquals(-0.96, sample.v(), kDelta);
 
@@ -1099,7 +1104,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(-0.25, sample.x(), kDelta);
         assertEquals(0.0, sample.v(), kDelta);
@@ -1109,7 +1114,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.4; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(-0.1, sample.x(), 0.01);
         assertEquals(0.615, sample.v(), 0.01);
@@ -1119,7 +1124,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.44; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -1141,12 +1146,12 @@ class TrapezoidProfile100Test {
         State100 sample = new State100(-0.1, 1);
         final State100 end = new State100(0, 0);
         double tt = 0;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         // the first sample is near the starting state
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
         assertEquals(-0.08, sample.x(), kDelta);
         assertEquals(0.96, sample.v(), kDelta);
 
@@ -1154,7 +1159,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.48; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.15, sample.x(), kDelta);
         assertEquals(0.0, sample.v(), kDelta);
@@ -1164,7 +1169,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.26; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.07, sample.x(), 0.01);
         assertEquals(-0.53, sample.v(), 0.01);
@@ -1174,7 +1179,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.6; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
         }
         assertEquals(0.0, sample.x(), 0.01);
         assertEquals(0.0, sample.v(), 0.05);
@@ -1212,12 +1217,12 @@ class TrapezoidProfile100Test {
         // goal is moving
         final State100 end = new State100(0, 1);
         double tt = 0;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         // the first sample is near the starting state
         sample = profileX.calculate(0.02, sample, end);
         tt += 0.02;
-        // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        dump(tt, sample);
 
         assertEquals(0, sample.x(), kDelta);
         assertEquals(-0.04, sample.v(), kDelta);
@@ -1226,7 +1231,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 0.7; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
             if (sample.near(end, 0.05))
                 break;
 
@@ -1239,7 +1244,7 @@ class TrapezoidProfile100Test {
         for (double t = 0; t < 1; t += 0.02) {
             sample = profileX.calculate(0.02, sample, end);
             tt += 0.02;
-            // Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+            dump(tt, sample);
             if (sample.near(end, 0.05))
                 break;
             // if (profileX.isFinished())
