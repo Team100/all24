@@ -252,8 +252,6 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
 
-        // whileTrue(operatorControl::ramp, new Ramp());
-
         // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
         // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
@@ -299,6 +297,7 @@ public class RobotContainer implements Glassy {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
                         m_name,
@@ -325,8 +324,7 @@ public class RobotContainer implements Glassy {
                         swerveKinodynamics,
                         m_heading,
                         thetaController,
-                        omegaController,
-                        0.25));
+                        omegaController));
 
         // whileTrue(driverControl::test, Commands.startEnd(() ->
         // RobotState100.changeIntakeState(IntakeState100.INTAKE),
@@ -344,8 +342,7 @@ public class RobotContainer implements Glassy {
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
-                omega2Controller,
-                0.25);
+                omega2Controller);
 
         ManualWithAmpLock ampLock = new ManualWithAmpLock(
                 m_name,
@@ -378,10 +375,8 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
 
-        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
-        // driverControl::twist, m_drive));
-        // whileTrue(driverControl::shooterLock,m_AutoMaker.fourNoteAuto(Alliance.Red,
-        // swerveKinodynamics, m_sensors));
+
+ 
 
         // whileTrue(driverControl::shooterLock,
         // new ManualWithShooterLock(m_name, swerveKinodynamics, m_heading,
@@ -401,8 +396,7 @@ public class RobotContainer implements Glassy {
         // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
         // swerveKinodynamics, 0, m_alliance);
 
-        // on a roborio 1 this takes 0.2 sec, so 10 cycles. less than 0.8 but still a
-        // lot.
+
         whileTrue(driverControl::shooterLock,
                 new ShooterLockCommand(shooterLock, driverControl::twist, m_drive));
 
@@ -434,10 +428,7 @@ public class RobotContainer implements Glassy {
                 driveManually,
                 Priority.ONE);
         SubsystemPriority.addSubsystem(m_shooter,
-                new ShooterDefault(
-                        m_shooter, m_drive,
-                        operatorControl::pivotUp,
-                        operatorControl::pivotDown),
+                new ShooterDefault(m_shooter, m_drive),
                 Priority.TWO);
         SubsystemPriority.addSubsystem(m_feeder,
                 new FeederDefault(m_feeder, m_sensors),

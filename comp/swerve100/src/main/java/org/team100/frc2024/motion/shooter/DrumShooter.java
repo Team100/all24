@@ -138,8 +138,6 @@ public class DrumShooter extends Shooter {
     public void forward() {
         leftRoller.setVelocity(kLeftRollerVelocity);
         rightRoller.setVelocity(kRightRollerVelocity);
-        // leftRoller.setVelocity(5);
-        // rightRoller.setVelocity(2);
     }
 
     @Override
@@ -162,26 +160,10 @@ public class DrumShooter extends Shooter {
     @Override
     public void setAngle(Double goal) {
         pivotServo.setPosition(goal);
-        // pivotServo.setDutyCycle(0.1);
-
-    }
-
-    @Override
-    public void setAngleWithOverride(Double goal, double pivotUp, double pivotDown) {
-        // if(pivotUp >= 0){
-        // pivotServo.setDutyCycle(pivotUp);
-        // } else if(pivotDown >= 0){
-        // pivotServo.setDutyCycle(pivotDown);
-        // } else {
-        // pivotServo.setPosition(goal);
-        // }
-
-        // pivotServo.setPosition(goal);
     }
 
     public double getAngleRad() {
         return pivotServo.getPosition();
-
     }
 
     @Override

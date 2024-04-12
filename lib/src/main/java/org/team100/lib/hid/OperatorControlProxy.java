@@ -184,16 +184,6 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public double pivotUp() {
-        return m_operatorControl.pivotUp();
-    }
-
-    @Override
-    public double pivotDown() {
-        return m_operatorControl.pivotDown();
-    }
-
-    @Override
     public boolean rezero() {
         return m_operatorControl.rezero();
     }

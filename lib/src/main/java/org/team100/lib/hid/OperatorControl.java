@@ -24,7 +24,7 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default boolean pivotToAmpPosition(){
+    default boolean pivotToAmpPosition() {
         return false;
     }
 
@@ -36,15 +36,15 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default boolean rampAndPivot(){
+    default boolean rampAndPivot() {
         return false;
     }
 
-    default boolean feed(){
+    default boolean feed() {
         return false;
     }
 
-    default int pov(){
+    default int pov() {
         return 0;
     }
 
@@ -86,39 +86,31 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default double getLeftAxis(){
+    default double getLeftAxis() {
         return 1;
     }
 
-    default double getRightAxis(){
+    default double getRightAxis() {
         return 0;
     }
 
-    default boolean getClimberOveride(){
+    default boolean getClimberOveride() {
         return false;
     }
 
-    default boolean pivotToDownPosition(){
+    default boolean pivotToDownPosition() {
         return false;
     }
 
-    default boolean feedToAmp(){
+    default boolean feedToAmp() {
         return false;
     }
 
-    default boolean outtakeFromAmp(){
+    default boolean outtakeFromAmp() {
         return false;
     }
 
-    default double pivotUp(){
-        return 0;
-    }
-
-    default double pivotDown(){
-        return 0;
-    }
-
-    default boolean rezero(){
+    default boolean rezero() {
         return false;
     }
 

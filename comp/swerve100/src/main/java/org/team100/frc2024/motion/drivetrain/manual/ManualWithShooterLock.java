@@ -59,7 +59,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     Translation2d m_ballV;
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
-    private final double m_scale;
     private boolean isAligned;
 
     public ManualWithShooterLock(
@@ -67,13 +66,11 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             PIDController thetaController,
-            PIDController omegaController,
-            double scale) {
+            PIDController omegaController) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_scale = scale;
         isAligned = false;
         m_name =  Names.append(parent, this);
         m_trigger = () -> false;
@@ -108,9 +105,9 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
 
         Translation2d currentTranslation = state.pose().getTranslation();
-        Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get(), state, m_scale);
+        Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
         Rotation2d bearing = bearing(currentTranslation, target);
-        Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
+        // Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
 
         t.log(Level.DEBUG, m_name, "bearing", bearing);
 
