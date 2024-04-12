@@ -21,7 +21,6 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 /**
@@ -37,12 +36,11 @@ public class TrajectoryListCommand extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
+
     private Iterator<Trajectory100> m_trajectoryIter;
-    private Trajectory100 m_currentTrajectory;
     private TrajectoryTimeIterator m_iter;
-    private boolean done;
-    private Rotation2d m_rotation;
     private boolean m_aligned;
+    private boolean done;
 
     public TrajectoryListCommand(
             SwerveDriveSubsystem swerve,
@@ -58,19 +56,18 @@ public class TrajectoryListCommand extends Command100 {
     public void initialize100() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getPose();
-        m_rotation = currentPose.getRotation();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
-        m_currentTrajectory = null;
+        m_iter = null;
         done = false;
         m_aligned = false;
     }
 
     @Override
     public void execute100(double dt) {
-        if (m_currentTrajectory == null || m_iter.isDone()) {
+        if (m_iter == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
-                m_currentTrajectory = m_trajectoryIter.next();
+                Trajectory100 m_currentTrajectory = m_trajectoryIter.next();
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
                 TrajectoryVisualization.setViz(m_currentTrajectory);

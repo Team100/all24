@@ -63,6 +63,7 @@ public class ShooterUtil {
         return new Translation2d(fieldConstants.getShooterCenterX(), offsetDistance);
     }
 
+    /** absolute bearing */
     public static Rotation2d getRobotRotationToSpeaker(
             Alliance alliance,
             Translation2d translation,

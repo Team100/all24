@@ -214,7 +214,7 @@ public class DrumShooter extends Shooter {
         double bearingDeg = ShooterUtil.getRobotRotationToSpeaker(
                 alliance,
                 m_drive.getPose().getTranslation(),
-                0.25).getDegrees();
+                0.25).getDegrees() - m_drive.getPose().getRotation().getDegrees();
         // TODO: note this range is wrong since it's just pose.x. It should be the
         // range to the target; i think this method is probably not used.
         // TODO: remove this
