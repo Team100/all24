@@ -1,8 +1,5 @@
 package org.team100.lib.indicator;
 
-
-import org.team100.lib.indicator.LEDIndicator2.State;
-
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
 
@@ -13,7 +10,7 @@ import edu.wpi.first.wpilibj.util.Color;
 public class LEDStrip {
     private final int m_start;
     private final int m_end;
-    private final LEDGroup m_group;;
+    private final LEDGroup m_group;
     private Color color = Color.kBlack;
 
     public LEDStrip(int start, int end) {
@@ -22,13 +19,11 @@ public class LEDStrip {
         m_group = LEDGroup.ONE;
     }
 
-
     public LEDStrip(LEDGroup group, int start, int end) {
         m_start = start;
         m_end = end;
         m_group = group;
     }
-
 
     /**
      * Fill the appropriate section of the buffer.
@@ -53,11 +48,11 @@ public class LEDStrip {
         return m_group;
     }
 
-    Color color(){
+    Color color() {
         return color;
     }
 
-    void setColor(Color c){
+    void setColor(Color c) {
         color = c;
     }
 }

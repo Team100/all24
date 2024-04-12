@@ -185,7 +185,7 @@ public class RobotContainer implements Glassy {
                 swerveLocal,
                 driverControl::speed);
 
-        m_feeder = new FeederSubsystem(39);
+        m_feeder = new FeederSubsystem(3);
 
         m_intake = IntakeFactory.get(m_sensors);
 

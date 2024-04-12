@@ -16,7 +16,6 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
-import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -27,13 +26,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithWaypoints extends Command100 {
+    private static final Telemetry t = Telemetry.get();
+
+    private static final double max_vel = 5;
+    private static final double max_acc = 5;
+    private static final double start_vel = 0;
+    private static final double end_vel = 0;
+
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
-    private final SwerveKinodynamics m_limits;
-    private static final Telemetry t = Telemetry.get();
-    // private final List<Pose2d> m_waypoints;
-    // private final List<Rotation2d> m_headings;
+    private final List<TimingConstraint> constraints;
     private final Supplier<List<Pose2d>> m_goal;
 
     public DriveWithWaypoints(SwerveDriveSubsystem drivetrain,
@@ -44,41 +47,23 @@ public class DriveWithWaypoints extends Command100 {
         m_swerve = drivetrain;
         m_planner = planner;
         m_controller = controller;
-        m_limits = limits;
+        constraints = new TimingConstraintFactory(limits).allGood();
         m_goal = goal;
-        // m_waypoints = waypoints;
-        // m_headings = headings;
-
         addRequirements(m_swerve);
     }
 
     @Override
     public void initialize100() {
-
         final Pose2d start = m_swerve.getPose();
-        final Pose2d end = m_goal.get().get(0);
-
         List<Pose2d> newWaypointM = new ArrayList<>(m_goal.get());
         newWaypointM.add(0, start);
 
         List<Rotation2d> headings = new ArrayList<>();
-
         for (int i = 0; i < newWaypointM.size(); i++) {
             headings.add(newWaypointM.get(i).getRotation());
         }
 
         newWaypointM = getWaypointsList(newWaypointM);
-
-
-        // List<Pose2d> waypointsM = getWaypoints(start, end);
-
-        List<TimingConstraint> constraints = new TimingConstraintFactory(m_limits).allGood();
-
-        double max_vel = 5;
-        double max_acc = 5;
-        double start_vel = 0;
-        double end_vel = 0;
-
 
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
@@ -86,18 +71,14 @@ public class DriveWithWaypoints extends Command100 {
                         newWaypointM,
                         headings,
                         constraints,
-                        0,
-                        0,
-                        5,
-                        5);
-
-        // TrajectosryVisualization.setViz(trajectory);
+                        start_vel,
+                        end_vel,
+                        max_vel,
+                        max_acc);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
-
         m_controller.setTrajectory(iter);
-
     }
 
     @Override
@@ -110,7 +91,6 @@ public class DriveWithWaypoints extends Command100 {
                 currentSpeed.vyMetersPerSecond,
                 currentSpeed.omegaRadiansPerSecond);
         ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
-
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
@@ -119,7 +99,6 @@ public class DriveWithWaypoints extends Command100 {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
     }
 
     @Override
@@ -128,13 +107,6 @@ public class DriveWithWaypoints extends Command100 {
     }
 
     private static List<Pose2d> getWaypointsList(List<Pose2d> m) {
-        // Translation2d t0 = m.get(0).getTranslation();
-        // Translation2d t1 = m.get(1).getTranslation();
-        // Rotation2d theta = t1.minus(t0).getAngle();
-        // return List.of(
-        // new Pose2d(t0, theta),
-        // new Pose2d(t1, theta));
-
         List<Pose2d> waypointsM = new ArrayList<>();
         for (int i = 0; i < m.size() - 1; i += 1) {
             Translation2d t0 = m.get(i).getTranslation();
@@ -146,11 +118,7 @@ public class DriveWithWaypoints extends Command100 {
         Translation2d t0 = m.get(m.size() - 1).getTranslation();
         Translation2d t1 = m.get(m.size() - 2).getTranslation();
         Rotation2d theta = t0.minus(t1).getAngle();
-        // double newTheta = 180 - theta.getDegrees();
         waypointsM.add(new Pose2d(t0, theta));
-
         return waypointsM;
-
     }
-
 }
