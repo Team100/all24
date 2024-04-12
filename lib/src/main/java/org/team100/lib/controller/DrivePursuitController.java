@@ -150,8 +150,7 @@ public class DrivePursuitController implements DriveMotionController {
                                     GeometryUtil.fromTranslation(new Translation2d(
                                             (mIsReversed ? -1.0 : 1.0) * (kPathMinLookaheadDistance -
                                                     actual_lookahead_distance),
-                                            0.0))),
-                            0.0),
+                                            0.0)))),
                     lookahead_state.getTimeS(), lookahead_state.velocityM_S(), lookahead_state.acceleration());
         }
         t.log(Level.TRACE, m_name, "updated lookahead state", lookahead_state);

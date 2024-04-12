@@ -67,13 +67,12 @@ public class TrajectoryPlanner {
             double max_accel) {
         List<Pose2d> waypoints_maybe_flipped = waypoints;
         List<Rotation2d> headings_maybe_flipped = headings;
-        final Pose2d flip = GeometryUtil.fromRotation(new Rotation2d(-1, 0));
         if (reversed) {
             waypoints_maybe_flipped = new ArrayList<>(waypoints.size());
             headings_maybe_flipped = new ArrayList<>(headings.size());
             for (int i = 0; i < waypoints.size(); ++i) {
-                waypoints_maybe_flipped.add(GeometryUtil.transformBy(waypoints.get(i), flip));
-                headings_maybe_flipped.add(headings.get(i).rotateBy(flip.getRotation()));
+                waypoints_maybe_flipped.add(waypoints.get(i).transformBy(GeometryUtil.kFlip));
+                headings_maybe_flipped.add(headings.get(i).rotateBy(GeometryUtil.kFlip.getRotation()));
             }
         }
 
@@ -85,11 +84,7 @@ public class TrajectoryPlanner {
         if (reversed) {
             List<Pose2dWithMotion> flipped_points = new ArrayList<>(trajectory.length());
             for (int i = 0; i < trajectory.length(); ++i) {
-                flipped_points.add(
-                        new Pose2dWithMotion(GeometryUtil.transformBy(trajectory.getPoint(i).state().getPose(), flip),
-                                -trajectory
-                                        .getPoint(i).state().getCurvature(),
-                                trajectory.getPoint(i).state().getDCurvatureDs()));
+                flipped_points.add(trajectory.getPoint(i).state().flip());
             }
             trajectory = new Path100(flipped_points);
         }

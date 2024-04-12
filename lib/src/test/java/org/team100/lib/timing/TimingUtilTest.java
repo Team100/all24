@@ -26,10 +26,10 @@ public class TimingUtilTest {
     public static final double kTestEpsilon = 1e-12;
 
     public static final List<Pose2dWithMotion> kWaypoints = Arrays.asList(
-            new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), GeometryUtil.kRotationZero), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(24.0, 0.0), GeometryUtil.kRotationZero), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(36.0, 12.0), GeometryUtil.kRotationZero), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(60.0, 12.0), GeometryUtil.kRotationZero), 0));
+            new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), GeometryUtil.kRotationZero)),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(24.0, 0.0), GeometryUtil.kRotationZero)),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(36.0, 12.0), GeometryUtil.kRotationZero)),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(60.0, 12.0), GeometryUtil.kRotationZero)));
 
     public static final List<Rotation2d> kHeadings = List.of(
             GeometryUtil.fromDegrees(0),

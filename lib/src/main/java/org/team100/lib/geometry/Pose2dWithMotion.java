@@ -18,7 +18,8 @@ import edu.wpi.first.math.geometry.Twist2d;
  * Note, Pose2dWithMotion is a purely spatial construct.
  */
 public class Pose2dWithMotion {
-    public static final Pose2dWithMotion kIdentity = new Pose2dWithMotion();
+    public static final Pose2dWithMotion kIdentity = new Pose2dWithMotion(
+            GeometryUtil.kPoseZero, GeometryUtil.kTwist2dIdentity, 0, 0);
 
     private final Pose2d m_pose;
 
@@ -50,25 +51,13 @@ public class Pose2dWithMotion {
      */
     private final double m_dCurvatureDsRad_M2;
 
-    /** Motionless. */
-    private Pose2dWithMotion() {
-        this(GeometryUtil.kPoseZero, 0);
-    }
-
     /**
-     * Motionless but with curvature? this makes no sense.
-     * TODO: get rid of this constructor
+     * Motionless, no curvature.
+     * 
+     * @param pose
      */
-    public Pose2dWithMotion(Pose2d pose, double curvatureRad_M) {
-        this(pose, curvatureRad_M, 0);
-    }
-
-    /**
-     * Motionless but with curvature? this makes no sense.
-     * TODO: get rid of this constructor
-     */
-    public Pose2dWithMotion(Pose2d pose, double curvatureRad_M, double dCurvatureDsRad_M2) {
-        this(pose, new Twist2d(0.0, 0.0, 0.0), curvatureRad_M, dCurvatureDsRad_M2);
+    public Pose2dWithMotion(Pose2d pose) {
+        this(pose, GeometryUtil.kTwist2dIdentity, 0, 0);
     }
 
     /**
@@ -98,9 +87,18 @@ public class Pose2dWithMotion {
 
     public Pose2dWithMotion mirror() {
         return new Pose2dWithMotion(
-                GeometryUtil.mirror(getPose()), GeometryUtil.mirror(
-                        m_fieldRelativeMotionDirection),
-                -getCurvature(), -getDCurvatureDs());
+                GeometryUtil.mirror(getPose()),
+                GeometryUtil.mirror(m_fieldRelativeMotionDirection),
+                -getCurvature(),
+                -getDCurvatureDs());
+    }
+
+    public Pose2dWithMotion flip() {
+        return new Pose2dWithMotion(
+                GeometryUtil.flip(getPose()),
+                GeometryUtil.flip(m_fieldRelativeMotionDirection),
+                -getCurvature(),
+                getDCurvatureDs());
     }
 
     /** Radians per meter. */
