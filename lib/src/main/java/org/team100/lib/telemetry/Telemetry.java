@@ -14,6 +14,8 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.util.Util;
@@ -301,6 +303,18 @@ public class Telemetry {
         log(level, Telemetry.append(root, leaf), "vx m_s", val.vxMetersPerSecond);
         log(level, Telemetry.append(root, leaf), "vy m_s", val.vyMetersPerSecond);
         log(level, Telemetry.append(root, leaf), "omega rad_s", val.omegaRadiansPerSecond);
+    }
+
+    public void log(Level level, String root, String leaf, FieldRelativeVelocity val) {
+        log(level, Telemetry.append(root, leaf), "x m_s", val.x());
+        log(level, Telemetry.append(root, leaf), "y m_s", val.y());
+        log(level, Telemetry.append(root, leaf), "theta rad_s", val.theta());
+    }
+
+    public void log(Level level, String root, String leaf, FieldRelativeAcceleration val) {
+        log(level, Telemetry.append(root, leaf), "x m_s_s", val.x());
+        log(level, Telemetry.append(root, leaf), "y m_s_s", val.y());
+        log(level, Telemetry.append(root, leaf), "theta rad_s_s", val.theta());
     }
 
     public void log(Level level, String root, String leaf, State100 state) {

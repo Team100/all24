@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -44,6 +46,13 @@ public class SwerveState {
                 new State100(x.getX(), v.dx, a.dx),
                 new State100(x.getY(), v.dy, a.dy),
                 new State100(x.getRotation().getRadians(), v.dtheta, a.dtheta));
+    }
+
+    public SwerveState(Pose2d x, FieldRelativeVelocity v, FieldRelativeAcceleration a) {
+        this(
+                new State100(x.getX(), v.x(), a.x()),
+                new State100(x.getY(), v.y(), a.y()),
+                new State100(x.getRotation().getRadians(), v.theta(), a.theta()));
     }
 
     public SwerveState() {
