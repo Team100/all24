@@ -64,6 +64,11 @@ public class AprilTagFieldLayoutWithCorrectOrientation {
         layouts.put(Alliance.Blue, blueLayout);
     }
 
+    public AprilTagFieldLayout getLayout(Alliance alliance) {
+        AprilTagFieldLayout layout = layouts.get(alliance);
+        return layout;
+    }
+
     /**
      * @return Tag pose with correct yaw (inverted compared to json file)
      */

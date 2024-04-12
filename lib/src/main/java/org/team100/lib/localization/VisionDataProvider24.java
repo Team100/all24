@@ -109,7 +109,7 @@ public class VisionDataProvider24 implements Glassy {
                 new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::accept);
-    }
+    } 
 
     /**
      * The age of the last pose estimate, in microseconds.

@@ -16,7 +16,7 @@ public enum Camera {
     /**
      * Delta shooter
      */
-    SHOOTER("10000000a7a892c0",
+    SHOOTER("10000000a7a892c0", 
             new Transform3d(
                     new Translation3d(-0.1265, 0.0682, 0.612),
                     new Rotation3d(0, Math.toRadians(-25), Math.toRadians(-2)))),
@@ -57,7 +57,12 @@ public enum Camera {
     TEST3("test3",
             new Transform3d(
                     new Translation3d(0, 0, 0),
-                    new Rotation3d(0, Math.PI / 6, 0))),
+                    new Rotation3d(0, Math.PI/6, 0))),
+
+    TEST4("test4",
+            new Transform3d(
+                    new Translation3d(0, 0, 0),
+                    new Rotation3d(0, -Math.PI/4, 0))),
 
     UNKNOWN(null, new Transform3d());
 
@@ -83,5 +88,9 @@ public enum Camera {
 
     public Transform3d getOffset() {
         return m_Offset;
+    }
+
+    public String getSerial() {
+        return m_serialNumber;
     }
 }

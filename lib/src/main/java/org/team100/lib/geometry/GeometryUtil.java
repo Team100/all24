@@ -246,6 +246,27 @@ public class GeometryUtil {
     }
 
     /**
+     * Transform the NWU coordinates translation to camera-coordinates.
+     * 
+     * @param xForward translation in WPI coordinates, x-forward
+     * @return translation in camera coordinates, z-forward.
+     */
+    public static Translation3d xForwardToZForward(Translation3d xForward) {
+        return new Translation3d(-xForward.getY(), -xForward.getZ(), xForward.getX());
+    }
+     /**
+     * Transform the NWU coordinates rotation to camera-coordinates.
+     * 
+     * @param xForward rotation in WPI coordinates, x-forward
+     * @return rotation in camera coordinates, z-forward.
+     */
+    public static Rotation3d xForwardToZForward(Rotation3d xForward) {
+        Quaternion q = xForward.getQuaternion();
+        Quaternion q2 = new Quaternion(q.getW(), -q.getY(), -q.getZ(), q.getX());
+        return new Rotation3d(q2);
+    }
+
+    /**
      * Transform the camera-coordinates rotation to NWU coordinates. Note an
      * additional transform will be required to account for the camera orientation
      * relative to the robot.

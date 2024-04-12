@@ -22,7 +22,9 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -206,7 +208,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         newPose,
                         sample.m_gyroAngle,
                         sample.m_wheelPositions));
-
         // Step 7: Replay odometry inputs between sample time and latest recorded sample
         // to update the pose buffer and correct odometry.
         // note exclusive tailmap, don't need to reprocess the entry we just put there.

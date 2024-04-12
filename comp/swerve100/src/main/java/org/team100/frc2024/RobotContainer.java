@@ -52,6 +52,7 @@ import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
+import org.team100.lib.localization.CameraUpdater;
 import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
@@ -98,7 +99,7 @@ public class RobotContainer implements Glassy {
     private final SelfTestRunner m_selfTest;
     private final Shooter m_shooter;
     private final String m_name;
-
+    private final CameraUpdater cameraUpdater;
     final SwerveDriveSubsystem m_drive;
     final AmpSubsystem m_amp;
 
@@ -157,6 +158,7 @@ public class RobotContainer implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
+        cameraUpdater = new CameraUpdater(poseEstimator::getEstimatedPosition, m_layout);
 
         final FeederSubsystem m_feeder = new FeederSubsystem();
 
@@ -433,6 +435,7 @@ public class RobotContainer implements Glassy {
     }
 
     public void beforeCommandCycle() {
+        cameraUpdater.update();
         // ModeSelector.selectMode(operatorControl::pov);
     }
 

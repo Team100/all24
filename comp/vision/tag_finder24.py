@@ -48,7 +48,6 @@ class Camera(Enum):
     def _missing_(cls, value):
         return Camera.UNKNOWN
 
-
 class TagFinder:
     def __init__(self, serial, width, height, model):
         self.frame_time = time.time()
@@ -142,7 +141,7 @@ class TagFinder:
         img = cv2.undistort(img, self.mtx, self.dist)
 
         result = self.at_detector.detect(img)
-
+        
         blips = []
         for result_item in result:
             if result_item.getHamming() > 0:
@@ -232,16 +231,10 @@ class TagFinder:
             topic_name + "/latency"
         ).publish()
 
-        # work around https://github.com/robotpy/mostrobotpy/issues/60
-        self.inst.getStructTopic("bugfix", Blip24).publish().set(
-            Blip24(0, Transform3d())
-        )
-
-        # blip array topic
         self.vision_nt_struct = self.inst.getStructArrayTopic(
-            topic_name + "/blips", Blip24
-        ).publish()
-
+            topic_name + "/estimatedTagPose", Transform3d
+        ).subscribe()
+ 
 
 def getserial():
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
