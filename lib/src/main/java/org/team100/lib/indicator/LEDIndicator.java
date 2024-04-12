@@ -1,12 +1,12 @@
 package org.team100.lib.indicator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.util.Color;
 
 /**
@@ -21,25 +21,11 @@ import edu.wpi.first.wpilibj.util.Color;
  */
 public class LEDIndicator {
 
-    private static final int kStripLength = 256;
-    private static final double brightnessScaler = 50.0/255.0;
-    private State currentColor;
-    
+    /** Turns flashing on or off, in case you find it annoying. */
+    private static final boolean kFlash = false;
 
-    /**
-     * Maps indicator colors to WS2811 colors.
-     */
+    /** Maps indicator colors to WS2811 colors. */
     public enum State {
-
-//         BLACK(new Color((int)(0*brightnessScaler), (int)(0*brightnessScaler), (int)(0*brightnessScaler))),
-//         RED(new Color((int)(255*brightnessScaler), (int)(0*brightnessScaler), (int)(0*brightnessScaler))),
-//         GREEN(new Color((int)(0*brightnessScaler), (int)(255*brightnessScaler), (int)(0*brightnessScaler))),
-//         BLUE(new Color((int)(0*brightnessScaler),(int)(0*brightnessScaler),(int)(255*brightnessScaler))),
-//         PURPLE(new Color((int)(255*brightnessScaler), (int)(0*brightnessScaler), (int)(255*brightnessScaler))),
-//         YELLOW(new Color((int)(255*brightnessScaler), (int)(255*brightnessScaler), (int)(0*brightnessScaler))),
-//         WHITE(new Color ((int)(255*brightnessScaler),(int)(255*brightnessScaler),(int)(255*brightnessScaler))),
-//         ORANGE(new Color((int)(255*brightnessScaler), (int)(80*brightnessScaler), (int)(0*brightnessScaler)));
-
 
         BLACK(Color.kBlack),
         RED(Color.kRed),
@@ -48,7 +34,7 @@ public class LEDIndicator {
         PURPLE(Color.kFuchsia),
         YELLOW(Color.kYellow),
         ORANGE(Color.kOrange),
-        WHITE(Color.kBlack);
+        WHITE(Color.kBlack); // turn off white to save battery
 
         /**
          * This "color" is what we tell the LED strip to make it display the actual
@@ -88,10 +74,10 @@ public class LEDIndicator {
     public LEDIndicator(int port) {
         m_frontStrips = new ArrayList<>();
         m_backStrips = new ArrayList<>();
-        
+
         m_frontStrips.add(new LEDStrip(0, 8));
         m_backStrips.add(new LEDStrip(8, 18));
-        m_frontStrips.add(new LEDStrip(18,27));
+        m_frontStrips.add(new LEDStrip(18, 27));
         m_backStrips.add(new LEDStrip(27, 37));
         m_frontStrips.add(new LEDStrip(37, 46));
         m_backStrips.add(new LEDStrip(46, 55));
@@ -121,30 +107,6 @@ public class LEDIndicator {
         m_flashing = flashing;
     }
 
-    public void setStripRainbow(LEDStrip strip){
-        Patterns.rainbow(strip, buffer);  
-
-    }
-
-    public void displayTeam100() {
-        AddressableLEDBuffer buffer = new AddressableLEDBuffer(kStripLength);
-        for (int i = 0; i < kStripLength; i++) {
-            if( Arrays.asList(165,153,154,155,156,157,158,138,139,140,141,129,134,122,123,124,125,106,107,108,109,97,102,90,91,92,93).contains(i) ){
-                currentColor = State.WHITE;
-            }
-            else {
-                currentColor = State.ORANGE;
-            }
-            buffer.setLED(i, currentColor.color);
-        }
-        led.setData(buffer);
-    }
-  
-    public void setStripChase(LEDStrip strip){
-        Color[] colors = {new Color(), new Color()};
-        Patterns.chase(colors, strip, buffer); 
-    } 
-      
     /**
      * Periodic does all the real work in this class.
      */
@@ -154,23 +116,28 @@ public class LEDIndicator {
             strip.solid(buffer, m_back.color);
         }
 
-
-        // front depends on flashing state
-        // if (m_flashing) {
-        //     if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
-        //         for (LEDStrip strip : m_frontStrips) {
-        //             strip.solid(buffer, Color.kBlack);
-        //         }
-        //     } else {
-        //         for (LEDStrip strip : m_frontStrips) {
-        //             strip.solid(buffer, m_front.color);
-        //         }
-        //     }
-        // } else {
+        if (kFlash) {
+            // front depends on flashing state
+            if (m_flashing) {
+                if ((RobotController.getFPGATime() / kFlashDurationMicrosec) % 2 == 0) {
+                    for (LEDStrip strip : m_frontStrips) {
+                        strip.solid(buffer, Color.kBlack);
+                    }
+                } else {
+                    for (LEDStrip strip : m_frontStrips) {
+                        strip.solid(buffer, m_front.color);
+                    }
+                }
+            } else {
+                for (LEDStrip strip : m_frontStrips) {
+                    strip.solid(buffer, m_front.color);
+                }
+            }
+        } else {
             for (LEDStrip strip : m_frontStrips) {
                 strip.solid(buffer, m_front.color);
             }
-        // }
+        }
 
         // update the output with the buffer we constructed.
         led.setData(buffer);

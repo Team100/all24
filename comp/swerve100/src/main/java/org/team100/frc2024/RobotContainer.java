@@ -208,8 +208,10 @@ public class RobotContainer implements Glassy {
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfileNote(notePositionDetector::getClosestTranslation2d, m_drive, dthetaController,
-                        swerveKinodynamics, () -> !m_sensors.getIntakeSensor(), m_intake));
+                new DriveWithProfileNote(
+                        notePositionDetector::getClosestTranslation2d,
+                        m_drive, dthetaController,
+                        swerveKinodynamics));
 
         // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
         // drivePID, swerveKinodynamics));
@@ -258,8 +260,6 @@ public class RobotContainer implements Glassy {
         // (m_amp.inPosition())));
         // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
         // (!m_intake.noteInIntake())));
-
-
 
         ///////////////////////////
         //
@@ -327,8 +327,6 @@ public class RobotContainer implements Glassy {
                         thetaController,
                         omegaController,
                         0.25));
-
-
 
         // whileTrue(driverControl::test, Commands.startEnd(() ->
         // RobotState100.changeIntakeState(IntakeState100.INTAKE),

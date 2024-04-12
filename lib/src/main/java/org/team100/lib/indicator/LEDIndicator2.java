@@ -1,6 +1,7 @@
 package org.team100.lib.indicator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -18,20 +19,26 @@ import edu.wpi.first.wpilibj.util.Color;
  * 
  * Note these strips use a different order: red-blue-green, not
  * red-green-blue, so the colors need some fixing up.
+ * 
+ * This copy includes stuff about the 5-volt LED panel, which
+ * we decided not to use in 2024.
  */
 public class LEDIndicator2 {
+    // keeps the current below uh 2 amps i think?
+    private static final double brightnessScaler = 50.0 / 255.0;
+
     /**
      * Maps indicator colors to WS2811 colors.
      */
     public enum State {
-        BLACK(Color.kBlack),
-        RED(Color.kRed),
-        BLUE(Color.kBlue),
-        GREEN(Color.kLime),
-        PURPLE(Color.kFuchsia),
-        YELLOW(Color.kYellow),
-        ORANGE(Color.kOrange),
-        WHITE(Color.kWhite);
+        BLACK(new Color(0, 0, 0)),
+        RED(new Color(brightnessScaler, 0, 0)),
+        GREEN(new Color(0, brightnessScaler, 0)),
+        BLUE(new Color(0, 0, brightnessScaler)),
+        PURPLE(new Color(brightnessScaler, 0, brightnessScaler)),
+        YELLOW(new Color(brightnessScaler, brightnessScaler, 0)),
+        WHITE(new Color(brightnessScaler, brightnessScaler, brightnessScaler)),
+        ORANGE(new Color(brightnessScaler, 0.31 * brightnessScaler, 0));
 
         /**
          * This "color" is what we tell the LED strip to make it display the actual
@@ -65,10 +72,12 @@ public class LEDIndicator2 {
     private State m_front;
     private State m_back;
     private boolean m_flashing;
+    private static final int kStripLength = 256;
+    private State currentColor;
 
     public LEDIndicator2(int port) {
         strips = new ArrayList<>();
-        
+
         strips.add(new LEDStrip(0, 16));
         strips.add(new LEDStrip(16, 32));
         strips.add(new LEDStrip(32, 48));
@@ -90,9 +99,9 @@ public class LEDIndicator2 {
         m_flashing = false;
     }
 
-    public void setGroup(LEDGroup group, Color c){
-        for(LEDStrip strip : strips){
-            if(strip.group() == group){
+    public void setGroup(LEDGroup group, Color c) {
+        for (LEDStrip strip : strips) {
+            if (strip.group() == group) {
                 strip.setColor(c);
             }
         }
@@ -130,5 +139,29 @@ public class LEDIndicator2 {
 
         // update the output with the buffer we constructed.
         led.setData(buffer);
+    }
+
+    public void displayTeam100() {
+        AddressableLEDBuffer buffer2 = new AddressableLEDBuffer(kStripLength);
+        for (int i = 0; i < kStripLength; i++) {
+            if (Arrays.asList(165, 153, 154, 155, 156, 157, 158, 138, 139, 140, 141, 129, 134, 122, 123, 124, 125, 106,
+                    107, 108, 109, 97, 102, 90, 91, 92, 93).contains(i)) {
+                currentColor = State.WHITE;
+            } else {
+                currentColor = State.ORANGE;
+            }
+            buffer2.setLED(i, currentColor.color);
+        }
+        led.setData(buffer2);
+    }
+
+    public void setStripRainbow(LEDStrip strip) {
+        Patterns.rainbow(strip, buffer);
+
+    }
+
+    public void setStripChase(LEDStrip strip) {
+        Color[] colors = { new Color(), new Color() };
+        Patterns.chase(colors, strip, buffer);
     }
 }
