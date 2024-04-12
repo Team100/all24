@@ -11,7 +11,6 @@ import org.team100.lib.timing.TimedPose;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
 /**
@@ -30,22 +29,11 @@ public class SwerveState {
         m_theta = theta;
     }
 
-    /**
-     * SwerveState with the specified field-relative pose and field-relative
-     * velocity, and zero accelerations.
-     */
-    public SwerveState(Pose2d p, Twist2d t) {
+    public SwerveState(Pose2d x, FieldRelativeVelocity v) {
         this(
-                new State100(p.getX(), t.dx, 0),
-                new State100(p.getY(), t.dy, 0),
-                new State100(p.getRotation().getRadians(), t.dtheta, 0));
-    }
-
-    public SwerveState(Pose2d x, Twist2d v, Twist2d a) {
-        this(
-                new State100(x.getX(), v.dx, a.dx),
-                new State100(x.getY(), v.dy, a.dy),
-                new State100(x.getRotation().getRadians(), v.dtheta, a.dtheta));
+                new State100(x.getX(), v.x(), 0),
+                new State100(x.getY(), v.y(), 0),
+                new State100(x.getRotation().getRadians(), v.theta(), 0));
     }
 
     public SwerveState(Pose2d x, FieldRelativeVelocity v, FieldRelativeAcceleration a) {
@@ -68,8 +56,8 @@ public class SwerveState {
         return new Translation2d(m_x.x(), m_y.x());
     }
 
-    public Twist2d twist() {
-        return new Twist2d(m_x.v(), m_y.v(), m_theta.v());
+    public FieldRelativeVelocity velocity() {
+        return new FieldRelativeVelocity(m_x.v(), m_y.v(), m_theta.v());
     }
 
     public State100 x() {

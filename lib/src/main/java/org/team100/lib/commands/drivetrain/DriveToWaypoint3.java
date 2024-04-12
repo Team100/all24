@@ -7,6 +7,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -19,7 +20,6 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Drive from the current state to a field-relative goal.
@@ -94,7 +94,7 @@ public class DriveToWaypoint3 extends Command100 {
             t.log(Level.TRACE, m_name, "Desired Y", desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
             // follow normally
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
@@ -114,7 +114,7 @@ public class DriveToWaypoint3 extends Command100 {
             t.log(Level.TRACE, m_name, "Desired Y", desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }

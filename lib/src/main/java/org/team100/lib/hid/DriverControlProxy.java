@@ -4,7 +4,6 @@ import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 
@@ -76,8 +75,8 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Twist2d twist() {
-        return m_driverControl.twist();
+    public Velocity velocity() {
+        return m_driverControl.velocity();
     }
 
     @Override

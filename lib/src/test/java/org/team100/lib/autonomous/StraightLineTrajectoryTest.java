@@ -9,6 +9,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.timing.TimingConstraint;
@@ -19,7 +20,6 @@ import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
@@ -31,7 +31,7 @@ class StraightLineTrajectoryTest {
     @Test
     void testRestToRest() {
         StraightLineTrajectory t = new StraightLineTrajectory(maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, GeometryUtil.kTwist2dIdentity);
+        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(1, traj.getTotalTimeSeconds(), kDelta);
@@ -41,7 +41,7 @@ class StraightLineTrajectoryTest {
     void testMovingToRest() {
         Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
         StraightLineTrajectory t = new StraightLineTrajectory(maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(1, 0, 0));
+        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(1.5, traj.getTotalTimeSeconds(), kDelta);
@@ -51,7 +51,7 @@ class StraightLineTrajectoryTest {
     void testBackingUp() {
         Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
         StraightLineTrajectory t = new StraightLineTrajectory(maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(-1, 0, 0));
+        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(-1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(1.824, traj.getTotalTimeSeconds(), kDelta);
@@ -61,7 +61,7 @@ class StraightLineTrajectoryTest {
     void test2d() {
         Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
         StraightLineTrajectory t = new StraightLineTrajectory(maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new Twist2d(0, 1, 0));
+        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 1, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(2.109, traj.getTotalTimeSeconds(), kDelta);

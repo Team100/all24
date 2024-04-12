@@ -12,6 +12,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -21,7 +22,6 @@ import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -109,7 +109,7 @@ public class DriveWithProfileNote extends Command100 {
         thetaSetpoint = thetaProfile.calculate(dt, thetaSetpoint, thetaGoal);
 
         SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
-        Twist2d twistGoal = m_controller.calculate(m_swerve.getState(), goalState);
+        FieldRelativeVelocity twistGoal = m_controller.calculate(m_swerve.getState(), goalState);
 
         t.log(Level.DEBUG, "field", "target", new double[] {
                 goal.getX(),

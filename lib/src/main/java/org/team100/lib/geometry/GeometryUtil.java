@@ -2,6 +2,8 @@ package org.team100.lib.geometry;
 
 import java.util.Optional;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -31,12 +33,23 @@ public class GeometryUtil {
     public static final Rotation3d kRotation3Zero = new Rotation3d();
     public static final Transform2d kFlip = new Transform2d(kTranslation2dIdentity, kRotation180);
 
-
     private GeometryUtil() {
+    }
+
+    public static Twist2d discretize(ChassisSpeeds continuous, double dt) {
+        ChassisSpeeds speeds = ChassisSpeeds.discretize(continuous, dt);
+        return new Twist2d(
+                speeds.vxMetersPerSecond * dt,
+                speeds.vyMetersPerSecond * dt,
+                speeds.omegaRadiansPerSecond * dt);
     }
 
     public static Twist2d scale(Twist2d twist, double scale) {
         return new Twist2d(twist.dx * scale, twist.dy * scale, twist.dtheta * scale);
+    }
+
+    public static FieldRelativeVelocity scale(FieldRelativeVelocity twist, double scale) {
+        return new FieldRelativeVelocity(twist.x() * scale, twist.y() * scale, twist.theta() * scale);
     }
 
     public static Pose2d transformBy(Pose2d a, Pose2d b) {
@@ -110,6 +123,13 @@ public class GeometryUtil {
         return Math.hypot(a.dx, a.dy);
     }
 
+    public static double norm(ChassisSpeeds a) {
+        // Common case of dy == 0
+        if (a.vyMetersPerSecond == 0.0)
+            return Math.abs(a.vxMetersPerSecond);
+        return Math.hypot(a.vxMetersPerSecond, a.vyMetersPerSecond);
+    }
+
     public static Rotation2d flip(Rotation2d a) {
         return new Rotation2d(a.getRadians() + Math.PI);
     }
@@ -178,6 +198,15 @@ public class GeometryUtil {
         }
     }
 
+    /** robot-relative course */
+    public static Optional<Rotation2d> getCourse(ChassisSpeeds t) {
+        if (norm(t) > 1e-12) {
+            return Optional.of(new Rotation2d(t.vxMetersPerSecond, t.vyMetersPerSecond));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public static Twist2d mirror(Twist2d t) {
         return new Twist2d(t.dx, -t.dy, -t.dtheta);
     }
@@ -198,8 +227,10 @@ public class GeometryUtil {
                 p.getRotation().unaryMinus());
     }
 
-    public static Twist2d toTwist2d(ChassisSpeeds x) {
-        return new Twist2d(x.vxMetersPerSecond, x.vyMetersPerSecond, x.omegaRadiansPerSecond);
+    public static boolean isZero(ChassisSpeeds x) {
+        return Math.abs(x.vxMetersPerSecond) < 1E-9
+                && Math.abs(x.vyMetersPerSecond) < 1E-9
+                && Math.abs(x.omegaRadiansPerSecond) < 1E-9;
     }
 
     /**

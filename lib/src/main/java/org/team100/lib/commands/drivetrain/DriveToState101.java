@@ -20,7 +20,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -39,16 +38,6 @@ public class DriveToState101 extends Command100 {
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
-
-    /**
-     * @param goal        Pose2d
-     * @param endVelocity Twist2d
-     * @param drivetrain  SwerveDriveSubsystem
-     * @param planner     TrajectoryPlanner
-     * @param controller  DriveMotionController
-     * @param limits      SwerveKinodynamics
-     * @param viz         ok to be null
-     */
 
     public DriveToState101(
             Pose2d goal,
@@ -107,11 +96,7 @@ public class DriveToState101 extends Command100 {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getPose();
         ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
-        Twist2d velocity = new Twist2d(
-                currentSpeed.vxMetersPerSecond,
-                currentSpeed.vyMetersPerSecond,
-                currentSpeed.omegaRadiansPerSecond);
-        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);

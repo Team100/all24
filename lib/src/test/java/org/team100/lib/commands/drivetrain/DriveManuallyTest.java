@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -13,16 +14,14 @@ import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 
-import edu.wpi.first.math.geometry.Twist2d;
-
 class DriveManuallyTest extends Fixtured {
     String desiredMode = null;
-    Twist2d desiredTwist = new Twist2d(1, 0, 0);
+    DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);
 
 
     @Test
     void testSimple() {
-        Supplier<Twist2d> twistSupplier = () -> desiredTwist;
+        Supplier<DriverControl.Velocity> twistSupplier = () -> desiredTwist;
         SwerveDriveSubsystem robotDrive = fixture.drive;
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 

@@ -357,8 +357,12 @@ public class SwerveKinodynamics implements Glassy {
     public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
             SwerveModuleState... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
+       Twist2d twist =  new Twist2d(
+                discreteSpeeds.vxMetersPerSecond * dt,
+                discreteSpeeds.vyMetersPerSecond * dt,
+                discreteSpeeds.omegaRadiansPerSecond * dt);
 
-        Pose2d deltaPose = GeometryUtil.sexp(GeometryUtil.toTwist2d(discreteSpeeds.times(dt)));
+        Pose2d deltaPose = GeometryUtil.sexp(twist);
         ChassisSpeeds continuousSpeeds = new ChassisSpeeds(
                 deltaPose.getX(),
                 deltaPose.getY(),
@@ -431,45 +435,60 @@ public class SwerveKinodynamics implements Glassy {
      * @param speeds twist in m/s and rad/s
      * @return
      */
-    public Twist2d analyticDesaturation(Twist2d speeds) {
+    public FieldRelativeVelocity analyticDesaturation(FieldRelativeVelocity speeds) {
         double maxV = getMaxDriveVelocityM_S();
         double maxOmega = getMaxAngleSpeedRad_S();
-        double xySpeed = Math.hypot(speeds.dx, speeds.dy);
-        double xyAngle = Math.atan2(speeds.dy, speeds.dx);
+        double xySpeed = Math.hypot(speeds.x(), speeds.y());
+        double xyAngle = Math.atan2(speeds.y(), speeds.x());
         double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
-        if (Math.abs(speeds.dtheta) <= omegaForSpeed) {
+        if (Math.abs(speeds.theta()) <= omegaForSpeed) {
             return speeds;
         }
         if (xySpeed < 1e-12) {
-            return new Twist2d(0, 0, maxOmega);
+            return new FieldRelativeVelocity(0, 0, maxOmega);
         }
-        if (Math.abs(speeds.dtheta) < 1e-12) {
-            return new Twist2d(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
+        if (Math.abs(speeds.theta()) < 1e-12) {
+            return new FieldRelativeVelocity(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
         }
 
-        double v = maxOmega * xySpeed * maxV / (maxOmega * xySpeed + Math.abs(speeds.dtheta) * maxV);
+        double v = maxOmega * xySpeed * maxV / (maxOmega * xySpeed + Math.abs(speeds.theta()) * maxV);
 
         double vRatio = v / xySpeed;
 
-        return new Twist2d(
-                vRatio * speeds.dx,
-                vRatio * speeds.dy,
-                vRatio * speeds.dtheta);
+        return new FieldRelativeVelocity(
+                vRatio * speeds.x(),
+                vRatio * speeds.y(),
+                vRatio * speeds.theta());
     }
 
     /** Scales translation to accommodate the rotation. */
-    public Twist2d preferRotation(Twist2d speeds) {
-        double oRatio = Math.min(1, speeds.dtheta / getMaxAngleSpeedRad_S());
-        double xySpeed = Math.hypot(speeds.dx, speeds.dy);
+    public ChassisSpeeds preferRotation(ChassisSpeeds speeds) {
+        double oRatio = Math.min(1, speeds.omegaRadiansPerSecond / getMaxAngleSpeedRad_S());
+        double xySpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
         double maxV = getMaxDriveVelocityM_S();
         double xyRatio = Math.min(1, xySpeed / maxV);
         double ratio = Math.min(1 - oRatio, xyRatio);
-        double xyAngle = Math.atan2(speeds.dy, speeds.dx);
+        double xyAngle = Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond);
 
-        return new Twist2d(
+        return new ChassisSpeeds(
                 ratio * maxV * Math.cos(xyAngle),
                 ratio * maxV * Math.sin(xyAngle),
-                speeds.dtheta);
+                speeds.omegaRadiansPerSecond);
+    }
+
+    /** Scales translation to accommodate the rotation. */
+    public FieldRelativeVelocity preferRotation(FieldRelativeVelocity speeds) {
+        double oRatio = Math.min(1, speeds.theta() / getMaxAngleSpeedRad_S());
+        double xySpeed = Math.hypot(speeds.x(), speeds.y());
+        double maxV = getMaxDriveVelocityM_S();
+        double xyRatio = Math.min(1, xySpeed / maxV);
+        double ratio = Math.min(1 - oRatio, xyRatio);
+        double xyAngle = Math.atan2(speeds.y(), speeds.x());
+
+        return new FieldRelativeVelocity(
+                ratio * maxV * Math.cos(xyAngle),
+                ratio * maxV * Math.sin(xyAngle),
+                speeds.theta());
     }
 
     @Override

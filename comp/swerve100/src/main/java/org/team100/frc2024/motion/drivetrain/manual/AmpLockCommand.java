@@ -2,19 +2,20 @@ package org.team100.frc2024.motion.drivetrain.manual;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class AmpLockCommand extends Command {
     private final ManualWithAmpLock m_driver;
-    private final Supplier<Twist2d> m_twistSupplier;
+    private final Supplier<DriverControl.Velocity> m_twistSupplier;
     private final SwerveDriveSubsystem m_drive;
 
     public AmpLockCommand(
             ManualWithAmpLock driver,
-            Supplier<Twist2d> twistSupplier,
+            Supplier<DriverControl.Velocity> twistSupplier,
             SwerveDriveSubsystem drive) {
         m_driver = driver;
         m_twistSupplier = twistSupplier;
@@ -29,7 +30,7 @@ public class AmpLockCommand extends Command {
 
     @Override
     public void execute() {
-        Twist2d twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
+        FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
         m_drive.driveInFieldCoords(twist, 0.02);
     }
 }

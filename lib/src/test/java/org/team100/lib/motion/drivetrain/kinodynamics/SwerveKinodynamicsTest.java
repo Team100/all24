@@ -5,10 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.util.Util;
 
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -23,7 +21,8 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveV = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
+                1);
         assertEquals(1, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -39,7 +38,8 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveV = 4;
-        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
+                1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -55,7 +55,8 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double driveV = 4;
-        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
+                1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -71,7 +72,8 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveA = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
+                1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -88,7 +90,8 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double driveA = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, 1);
+        SwerveKinodynamics k = new SwerveKinodynamics(1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
+                1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -106,7 +109,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double vcg = 0.3;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase/2, vcg);
+        SwerveKinodynamics k = new SwerveKinodynamics(1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2, vcg);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double fulcrum = Math.min(track / 2, wheelbase / 2);
@@ -443,8 +446,7 @@ class SwerveKinodynamicsTest {
             // takes theta into account, can go faster sometimes
             ChassisSpeeds i1 = l.toChassisSpeeds(ms);
             // does not take theta into account
-            Twist2d t = l.analyticDesaturation(GeometryUtil.toTwist2d(s));
-            ChassisSpeeds i2 = new ChassisSpeeds(t.dx, t.dy, t.dtheta);
+            ChassisSpeeds i2 = l.analyticDesaturation(s);
             // i2 should never be faster
             double x2 = Math.abs(i2.vxMetersPerSecond);
             double x1 = Math.abs(i1.vxMetersPerSecond);
@@ -486,11 +488,11 @@ class SwerveKinodynamicsTest {
         assertEquals(11.313, l.getMaxAngleSpeedRad_S(), kDelta);
         {
             // trivial case works
-            Twist2d t = new Twist2d(0, 0, 0);
-            Twist2d i = l.preferRotation(t);
-            assertEquals(0, i.dx, kDelta);
-            assertEquals(0, i.dy, kDelta);
-            assertEquals(0, i.dtheta, kDelta);
+            FieldRelativeVelocity t = new FieldRelativeVelocity(0, 0, 0);
+            FieldRelativeVelocity i = l.preferRotation(t);
+            assertEquals(0, i.x(), kDelta);
+            assertEquals(0, i.y(), kDelta);
+            assertEquals(0, i.theta(), kDelta);
         }
     }
 
@@ -500,27 +502,27 @@ class SwerveKinodynamicsTest {
         assertEquals(11.313, l.getMaxAngleSpeedRad_S(), kDelta);
         {
             // inside the envelope => no change
-            Twist2d t = new Twist2d(1, 0, 1);
-            Twist2d i = l.preferRotation(t);
-            assertEquals(1, i.dx, kDelta);
-            assertEquals(0, i.dy, kDelta);
-            assertEquals(1, i.dtheta, kDelta);
+            FieldRelativeVelocity t = new FieldRelativeVelocity(1, 0, 1);
+            FieldRelativeVelocity i = l.preferRotation(t);
+            assertEquals(1, i.x(), kDelta);
+            assertEquals(0, i.y(), kDelta);
+            assertEquals(1, i.theta(), kDelta);
         }
         {
             // full v, half omega => half v
-            Twist2d t = new Twist2d(4, 0, 5.656);
-            Twist2d i = l.preferRotation(t);
-            assertEquals(2, i.dx, kDelta);
-            assertEquals(0, i.dy, kDelta);
-            assertEquals(5.656, i.dtheta, kDelta);
+            FieldRelativeVelocity t = new FieldRelativeVelocity(4, 0, 5.656);
+            FieldRelativeVelocity i = l.preferRotation(t);
+            assertEquals(2, i.x(), kDelta);
+            assertEquals(0, i.y(), kDelta);
+            assertEquals(5.656, i.theta(), kDelta);
         }
         {
             // full v, full omega => zero v, sorry
-            Twist2d t = new Twist2d(4, 0, 11.313);
-            Twist2d i = l.preferRotation(t);
-            assertEquals(0, i.dx, kDelta);
-            assertEquals(0, i.dy, kDelta);
-            assertEquals(11.313, i.dtheta, kDelta);
+            FieldRelativeVelocity t = new FieldRelativeVelocity(4, 0, 11.313);
+            FieldRelativeVelocity i = l.preferRotation(t);
+            assertEquals(0, i.x(), kDelta);
+            assertEquals(0, i.y(), kDelta);
+            assertEquals(11.313, i.theta(), kDelta);
         }
     }
 

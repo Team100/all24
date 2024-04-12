@@ -17,7 +17,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -150,7 +149,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @param twist  Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void driveInFieldCoords(Twist2d twist, double kDtSec) {
+    public void driveInFieldCoords(FieldRelativeVelocity twist, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
         t.log(Level.TRACE, m_name, "control_speed", speed);
 
@@ -160,9 +159,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         twist = GeometryUtil.scale(twist, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.dx,
-                twist.dy,
-                twist.dtheta,
+                twist.x(),
+                twist.y(),
+                twist.theta(),
                 m_pose.getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
@@ -175,9 +174,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @return true if aligned
      * 
      */
-    public boolean steerAtRest(Twist2d twist, double kDtSec) {
+    public boolean steerAtRest(FieldRelativeVelocity twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, m_pose.getRotation());
+                twist.x(), twist.y(), twist.theta(), m_pose.getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 

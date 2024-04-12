@@ -20,7 +20,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DrivePursuitControllerTest {
@@ -81,7 +80,7 @@ class DrivePursuitControllerTest {
          
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
-                    new Twist2d());
+                    new ChassisSpeeds());
             // I turned on minimum speed so it's not zero.
             assertEquals(-2, output.vxMetersPerSecond, 0.05);
             assertEquals(0, output.vyMetersPerSecond, 0.05);
@@ -94,7 +93,7 @@ class DrivePursuitControllerTest {
             Pose2d current_state = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0,
                     current_state,
-                    new Twist2d());
+                    new ChassisSpeeds());
             // remember, facing +90, moving -90, so this should be like -1
             // turning slowly to the left
             // i think pure pursuit might ignore omega
@@ -120,7 +119,7 @@ class DrivePursuitControllerTest {
             Pose2d current_state = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0,
                     current_state,
-                    new Twist2d());
+                    new ChassisSpeeds());
             // this is more Y than PID because it looks ahead
             verify(-3.764, -0.43, 0, output);
 

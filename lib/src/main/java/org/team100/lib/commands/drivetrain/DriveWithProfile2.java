@@ -7,6 +7,7 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -14,7 +15,6 @@ import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
@@ -90,7 +90,7 @@ public class DriveWithProfile2 extends Command100 {
 
         thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, m_thetaGoalRaw);
         SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
-        Twist2d goal = m_controller.calculate(m_swerve.getState(), goalState);
+        FieldRelativeVelocity goal = m_controller.calculate(m_swerve.getState(), goalState);
         m_swerve.driveInFieldCoords(goal, 0.02);
     }
 

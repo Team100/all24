@@ -1,12 +1,12 @@
 package org.team100.lib.selftest;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -31,13 +31,13 @@ public class DriveManuallySelfTest extends Command {
         m_timer = new Timer();
     }
 
-    public Twist2d treatment() {
+    public DriverControl.Velocity treatment() {
         // allow 0.1s to move the wheels 90 degrees; at 0.1m/s for 0.1s this should only
         // move 0.01m.
         if (m_timer.get() < 0.1)
-            return new Twist2d(0.1, 0, 0);
+            return new DriverControl.Velocity(0.1, 0, 0);
         // then move in +x at 0.5 m/s for 2 s so the result should be about 1m
-        return new Twist2d(0.5, 0, 0);
+        return new DriverControl.Velocity(0.5, 0, 0);
     }
 
     @Override

@@ -373,13 +373,13 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
 
         // on the setpoint: since we're facing 180, v is -x.
-        Twist2d currentVelocity = new Twist2d(-1, 0, 0);
-        Twist2d error = DriveMotionControllerUtil.getVelocityError(currentState,
+        ChassisSpeeds currentVelocity = new ChassisSpeeds(-1, 0, 0);
+        ChassisSpeeds error = DriveMotionControllerUtil.getVelocityError(currentState,
                 setpoint, currentVelocity);
         // we're exactly on the setpoint so zero error
-        assertEquals(0, error.dx, kDelta);
-        assertEquals(0, error.dy, kDelta);
-        assertEquals(0, error.dtheta, kDelta);
+        assertEquals(0, error.vxMetersPerSecond, kDelta);
+        assertEquals(0, error.vyMetersPerSecond, kDelta);
+        assertEquals(0, error.omegaRadiansPerSecond, kDelta);
     }
 
     @Test
@@ -407,13 +407,13 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
 
         // totally the wrong direction
-        Twist2d currentVelocity = new Twist2d(0, 1, 0);
-        Twist2d error = DriveMotionControllerUtil.getVelocityError(currentState,
+        ChassisSpeeds currentVelocity = new ChassisSpeeds(0, 1, 0);
+        ChassisSpeeds error = DriveMotionControllerUtil.getVelocityError(currentState,
                 setpoint, currentVelocity);
         // error should include both components
-        assertEquals(1, error.dx, kDelta);
-        assertEquals(-1, error.dy, kDelta);
-        assertEquals(0, error.dtheta, kDelta);
+        assertEquals(1, error.vxMetersPerSecond, kDelta);
+        assertEquals(-1, error.vyMetersPerSecond, kDelta);
+        assertEquals(0, error.omegaRadiansPerSecond, kDelta);
     }
 
     @Test
@@ -444,7 +444,7 @@ class DriveMotionControllerUtilTest {
         double kPCartV = 1.0;
         double kPThetaV = 1.0;
         // motion is on setpoint
-        Twist2d currentVelocity = new Twist2d(1, 0, 0);
+        ChassisSpeeds currentVelocity = new ChassisSpeeds(1, 0, 0);
         ChassisSpeeds speeds = DriveMotionControllerUtil.fullFeedback(
                 currentState, setpoint,
                  kPCart, kPTheta,
@@ -484,7 +484,7 @@ class DriveMotionControllerUtilTest {
         double kPCartV = 1.0;
         double kPThetaV = 1.0;
         // motion is in the right direction but too slow
-        Twist2d robotRelativeCurrentVelocity = new Twist2d(0, -0.5, 0);
+        ChassisSpeeds robotRelativeCurrentVelocity = new ChassisSpeeds(0, -0.5, 0);
         ChassisSpeeds speeds = DriveMotionControllerUtil.fullFeedback(
                 currentPose, setpoint, 
                 kPCart, kPTheta,
@@ -526,7 +526,7 @@ class DriveMotionControllerUtilTest {
         double kPCartV = 1.0;
         double kPThetaV = 1.0;
         // motion is in the right direction but too slow
-        Twist2d robotRelativeCurrentVelocity = new Twist2d(0, -0.5, 0);
+        ChassisSpeeds robotRelativeCurrentVelocity = new ChassisSpeeds(0, -0.5, 0);
         ChassisSpeeds positionFeedback = DriveMotionControllerUtil.feedback(
                 currentPose, setpoint, kPCart, kPTheta);
         // field-relative y is ahead, we're at 90, so pull back robot-relative x

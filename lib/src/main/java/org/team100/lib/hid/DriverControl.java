@@ -4,7 +4,6 @@ import org.team100.lib.dashboard.Glassy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Represents the HID used by the "driver" role, which typically focuses on
@@ -17,6 +16,14 @@ import edu.wpi.first.math.geometry.Twist2d;
  * are scaled to control units, ([-1,1]), not robot units (m/s).
  */
 public interface DriverControl extends Glassy {
+    /**
+     * This represents driver's velocity command, usually mapped to three axes in
+     * the control, so the ranges are [-1,1]
+     */
+    public static record Velocity(double x, double y, double theta) {
+
+    }
+
     public enum Speed {
         SLOW,
         MEDIUM,
@@ -46,8 +53,8 @@ public interface DriverControl extends Glassy {
      * the SwerveDriveKinemataics desaturator address this issue, though at a lower
      * level.
      */
-    default Twist2d twist() {
-        return new Twist2d();
+    default Velocity velocity() {
+        return new Velocity(0, 0, 0);
     }
 
     default Rotation2d desiredRotation() {
@@ -120,7 +127,7 @@ public interface DriverControl extends Glassy {
         return -1;
     }
 
-    default boolean shooterLock(){
+    default boolean shooterLock() {
         return false;
     }
 
@@ -128,7 +135,7 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
-    default boolean outtakeFromAmp(){
+    default boolean outtakeFromAmp() {
         return false;
     }
 

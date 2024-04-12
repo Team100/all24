@@ -89,9 +89,9 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 desired_vy,
                 desired_heading);
 
-        if (all_modules_should_flip &&
-                !GeometryUtil.toTwist2d(prevSetpoint.getChassisSpeeds()).equals(GeometryUtil.kTwist2dIdentity) &&
-                !GeometryUtil.toTwist2d(desiredState).equals(GeometryUtil.kTwist2dIdentity)) {
+        if (all_modules_should_flip
+                && !GeometryUtil.isZero(prevSetpoint.getChassisSpeeds())
+                && !GeometryUtil.isZero(desiredState)) {
             // It will (likely) be faster to stop the robot, rotate the modules in place to
             // the complement of the desired angle, and accelerate again.
             return generateSetpoint(prevSetpoint, new ChassisSpeeds(), kDtSec);
@@ -154,7 +154,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 overrideSteering,
                 kDtSec);
     }
-    
+
     @Override
     public String getGlassName() {
         return "AsymSwerveSetpointGenerator";

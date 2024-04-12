@@ -8,7 +8,9 @@ import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.geometry.Vector2d;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -24,7 +26,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -72,7 +73,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         isAligned = false;
-        m_name =  Names.append(parent, this);
+        m_name = Names.append(parent, this);
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -94,13 +95,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
      */
     @Override
-    public Twist2d apply(SwerveState state, Twist2d input) {
+    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input) {
         Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
         if (!optionalAlliance.isPresent())
-            return new Twist2d();
+            return new FieldRelativeVelocity(0, 0, 0);
 
         // clip the input to the unit circle
-        Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
+        DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
 
@@ -134,7 +135,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
-        Twist2d scaledInput = DriveUtil.scale(
+        FieldRelativeVelocity scaledInput = DriveUtil.scale(
                 clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
@@ -160,7 +161,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        Twist2d twistWithLockM_S = new Twist2d(scaledInput.dx, scaledInput.dy, omega);
+        FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);
 
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);

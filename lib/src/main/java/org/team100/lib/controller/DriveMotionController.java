@@ -4,7 +4,6 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -23,7 +22,7 @@ public interface DriveMotionController extends Glassy {
      *                         obtained from drivetrain.speeds().
      * @return velocity control input
      */
-    ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d current_velocity);
+    ChassisSpeeds update(double timestamp, Pose2d measurement, ChassisSpeeds current_velocity);
 
     boolean isDone();
 }

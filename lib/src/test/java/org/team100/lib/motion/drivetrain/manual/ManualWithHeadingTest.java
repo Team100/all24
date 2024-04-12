@@ -11,7 +11,9 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -20,7 +22,6 @@ import org.team100.lib.sensors.MockHeading;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 class ManualWithHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
@@ -48,16 +49,16 @@ class ManualWithHeadingTest {
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
 
-        Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
+        DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
-        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
+        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
         verify(0, 0, 0, twistM_S);
 
         // with a non-null desired rotation we're in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         desiredRotation = null;
 
-        twist1_1 = new Twist2d(0, 0, 1);
+        twist1_1 = new DriverControl.Velocity(0, 0, 1);
         twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
         // with a nonzero desired twist, we're out of snap mode
         assertNull(m_manualWithHeading.m_goal);
@@ -89,15 +90,17 @@ class ManualWithHeadingTest {
         // no desired rotation
         desiredRotation = null;
 
-        Twist2d twist1_1 = new Twist2d(0, 0, 1);
+        DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
 
-        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, new Twist2d()), twist1_1);
+        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
+                new SwerveState(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                twist1_1);
 
         // not in snap mode
         assertNull(m_manualWithHeading.m_goal);
         verify(0, 0, 2.828, twistM_S);
 
-        twist1_1 = new Twist2d(1, 0, 0);
+        twist1_1 = new DriverControl.Velocity(1, 0, 0);
 
         twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
         assertNull(m_manualWithHeading.m_goal);
@@ -133,9 +136,11 @@ class ManualWithHeadingTest {
         // face towards +y
         desiredRotation = GeometryUtil.kRotation90;
         // no user input
-        Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
+        DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
-        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, new Twist2d()), twist1_1);
+        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
+                new SwerveState(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         // but at t0 it hasn't started yet.
@@ -207,9 +212,11 @@ class ManualWithHeadingTest {
         desiredRotation = GeometryUtil.kRotation90;
         // no dtheta
 
-        Twist2d twist1_1 = GeometryUtil.kTwist2dIdentity;
+        DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
-        Twist2d twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, new Twist2d()), twist1_1);
+        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
+                new SwerveState(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                twist1_1);
 
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
@@ -247,9 +254,9 @@ class ManualWithHeadingTest {
         verify(0, 0, 0, twistM_S);
     }
 
-    private void verify(double dx, double dy, double dtheta, Twist2d twist) {
-        assertEquals(dx, twist.dx, kDelta);
-        assertEquals(dy, twist.dy, kDelta);
-        assertEquals(dtheta, twist.dtheta, kDelta);
+    private void verify(double dx, double dy, double dtheta, FieldRelativeVelocity twist) {
+        assertEquals(dx, twist.x(), kDelta);
+        assertEquals(dy, twist.y(), kDelta);
+        assertEquals(dtheta, twist.theta(), kDelta);
     }
 }

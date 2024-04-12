@@ -1,10 +1,10 @@
 package org.team100.lib.geometry;
 
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Static methods for targeting.
@@ -43,10 +43,10 @@ public class TargetUtil {
         Translation2d translation = target.minus(robot);
         double range = translation.getNorm();
         Rotation2d bearing = translation.getAngle();
-        Twist2d twist = state.twist();
-        Rotation2d course = new Rotation2d(twist.dx, twist.dy);
+        FieldRelativeVelocity twist = state.velocity();
+        Rotation2d course = new Rotation2d(twist.x(), twist.y());
         Rotation2d relativeBearing = bearing.minus(course);
-        double speed = GeometryUtil.norm(twist);
+        double speed = twist.norm();
         return speed * relativeBearing.getSin() / range;
     }
 

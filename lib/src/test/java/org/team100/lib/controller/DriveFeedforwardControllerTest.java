@@ -19,7 +19,6 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveFeedforwardControllerTest {
@@ -77,14 +76,14 @@ class DriveFeedforwardControllerTest {
           
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
-                    new Twist2d());
+                    new ChassisSpeeds());
             verify(0, 0, 0, output);
         }
 
         {
             
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
-            ChassisSpeeds output = controller.update(4.0, measurement, new Twist2d());
+            ChassisSpeeds output = controller.update(4.0, measurement, new ChassisSpeeds());
             // remember, facing +90, moving -90, so this should be like -1
             // turning slowly to the left
             verify(-1, -0.1, 0.1, output);
@@ -107,7 +106,7 @@ class DriveFeedforwardControllerTest {
         {
             
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
-            ChassisSpeeds output = controller.update(8.0, measurement, new Twist2d());
+            ChassisSpeeds output = controller.update(8.0, measurement, new ChassisSpeeds());
             verify(-0.96, -0.05, 0.18, output);
 
             TimedPose path_setpoint = controller.getSetpoint(8).get();

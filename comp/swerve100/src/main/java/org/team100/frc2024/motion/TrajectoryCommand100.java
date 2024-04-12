@@ -2,7 +2,6 @@ package org.team100.frc2024.motion;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -12,7 +11,6 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -53,8 +51,7 @@ public class TrajectoryCommand100 extends Command100 {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getPose();
         ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.speeds(dt);
-        Twist2d robotRelativeVelocity = GeometryUtil.toTwist2d(currentRobotRelativeSpeed);
-        ChassisSpeeds output = m_controller.update(now, currentPose, robotRelativeVelocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, currentRobotRelativeSpeed);
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);
 

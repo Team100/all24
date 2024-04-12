@@ -10,6 +10,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -21,7 +22,6 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Follow a list of trajectories.
@@ -93,7 +93,7 @@ public class TrajectoryListCommand extends Command100 {
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             t.log(Level.TRACE, m_name, "reference", reference);
-            Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
             // look one loop ahead by *previewing* the next point
@@ -109,7 +109,7 @@ public class TrajectoryListCommand extends Command100 {
             Pose2d currentPose = m_swerve.getPose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             t.log(Level.TRACE, m_name, "reference", reference);
-            Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
     }

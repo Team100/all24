@@ -268,7 +268,7 @@ public class RobotContainer implements Glassy {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0); // .5
 
-        DriveManually driveManually = new DriveManually(driverControl::twist, m_drive);
+        DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
         driveManually.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(m_name, swerveKinodynamics));
@@ -351,16 +351,6 @@ public class RobotContainer implements Glassy {
                 thetaController,
                 omega2Controller);
 
-        // whileTrue(driverControl::shooterLock, new ShooterLockCommand(shooterLock,
-        // driverControl::twist, m_drive));
-
-        // whileTrue(driverControl::test, new ShooterLockCommand(shooterLock,
-        // driverControl::twist, m_drive));
-
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
-        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
-        // planner, drivePID, swerveKinodynamics));
-
         AutoMaker m_AutoMaker = new AutoMaker(
                 m_drive,
                 planner,
@@ -375,52 +365,11 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
 
-
- 
-
-        // whileTrue(driverControl::shooterLock,
-        // new ManualWithShooterLock(m_name, swerveKinodynamics, m_heading,
-        // thetaController, omegaController,
-        // kDriveCurrentLimit));
-
         whileTrue(driverControl::ampLock,
-                new AmpLockCommand(ampLock, driverControl::twist, m_drive));
-
-        // whileTrue(driverControl::shooterLock,
-        // new AllianceCommand(m_AutoMaker.tuningTrajectory6(),
-        // m_AutoMaker.tuningTrajectory6()));
-
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
-        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
-        // planner, drivePID, swerveKinodynamics));
-        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
-        // swerveKinodynamics, 0, m_alliance);
-
+                new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShooterLockCommand(shooterLock, driverControl::twist, m_drive));
-
-        // whileTrue(driverControl::test,
-        // new AmpLockCommand(ampLock, driverControl::twist, m_drive));
-
-        // whileTrue(driverControl::shooterLock,
-        // new ClimberPosition(m_climber));
-        // whileTrue(driverControl::shooterLock, new ShootSmart(m_sensors, m_shooter,
-        // m_intake, m_feeder, m_drive));
-
-        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
-        // swerveKinodynamics, 0, m_alliance);
-        // whileTrue(driverControl::shooterLock, m_AutoMaker.eightNoteAuto());
-
-        // whileTrue(driverControl::test, new DriveToState101(new Pose2d(15.446963,
-        // 1.522998, Rotation2d.fromDegrees(-60)), new Twist2d(0, 0, 0), m_drive,
-        // planner, drivePID, swerveKinodynamics));
-        // AutoMaker m_AutoMaker = new AutoMaker(m_drive, planner, drivePID,
-        // swerveKinodynamics, 0, m_alliance, m_shooter, m_feeder);
-        // whileTrue(driverControl::test, m_AutoMaker.eightNoteAuto());
-
-        // whileTrue(driverControl::test, new PrimitiveAuto(m_drive, shooterLock,
-        // planner, drivePID, drivePP, swerveKinodynamics, m_heading));
+                new ShooterLockCommand(shooterLock, driverControl::velocity, m_drive));
 
         m_drive.setDefaultCommand(driveManually);
 
