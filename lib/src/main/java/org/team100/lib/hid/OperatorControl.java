@@ -56,15 +56,9 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    /** @return position in range [0,1] */
-    default double ampPosition(){
-        return 0;
-    }
-
     default double climberState() {
         return 0;
     }
-
 
     default double lower() {
         return 0;

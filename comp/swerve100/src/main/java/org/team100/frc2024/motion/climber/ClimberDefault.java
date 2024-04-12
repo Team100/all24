@@ -14,7 +14,6 @@ public class ClimberDefault extends Command {
     private final ClimberSubsystem m_climber;
     private final Supplier<Double> m_leftSupplier;
     private final Supplier<Double> m_rightSupplier;
-    private final Supplier<Boolean> m_overrideSupplier;
     private final Supplier<Integer> m_povSupplier;
 
      private final PIDController leftController = new PIDController(0.1, 0, 0);
@@ -25,13 +24,11 @@ public class ClimberDefault extends Command {
             ClimberSubsystem climber,
             Supplier<Double> leftSupplier,
             Supplier<Double> rightSupplier,
-            Supplier<Boolean> overideSupplier,
             Supplier<Integer> povSupplier) {
         m_povSupplier = povSupplier;
         m_leftSupplier = leftSupplier;
         m_rightSupplier = rightSupplier;
         m_climber = climber;
-        m_overrideSupplier = overideSupplier;
         addRequirements(m_climber);
     }
 

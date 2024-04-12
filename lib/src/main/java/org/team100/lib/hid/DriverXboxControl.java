@@ -125,29 +125,6 @@ public class DriverXboxControl implements DriverControl {
         return previousRotation;
     }
 
-    @Override
-    public boolean steer0() {
-        return m_controller.getXButton();
-    }
-
-    @Override
-    public boolean steer90() {
-        // return m_controller.getYButton();
-        return false;
-    }
-
-    @Override
-    public boolean rotate0() {
-        // @joel 2/19/24 removed so slow mode works
-        // return m_controller.getLeftBumper();
-        return false;
-    }
-
-    // @Override
-    // public boolean circle() {
-    //     return m_controller.getAButton();
-    // }
-
     public boolean choreo(){
         return m_controller.getRawButton(2);
     }
@@ -175,7 +152,5 @@ public class DriverXboxControl implements DriverControl {
     @Override
     public boolean shooterLock(){
         return m_controller.getBButton();
-    }
-
-    
+    }    
 }

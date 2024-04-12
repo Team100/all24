@@ -131,21 +131,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean steer0() {
-        return m_driverControl.steer0();
-    }
-
-    @Override
-    public boolean steer90() {
-        return m_driverControl.steer90();
-    }
-
-    @Override
-    public boolean rotate0() {
-        return m_driverControl.rotate0();
-    }
-
-    @Override
     public boolean driveWithFancyTrajec() {
         return m_driverControl.driveWithFancyTrajec();
     }

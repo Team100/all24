@@ -41,6 +41,7 @@ public class Blip24ArrayListener {
             }
             for (Blip24 blip : blips) {
                 // this is where you would do something useful with the payload
+                Util.println(blip.toString());
             }
         } else {
             Util.warn("weird vision update key: " + name);

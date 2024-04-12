@@ -26,7 +26,6 @@ public class OperatorV2Control implements OperatorControl {
         return m_controller.getBButton();
     }
     
-
     @Override
     public boolean rampAndPivot(){
         return m_controller.getLeftBumper();
@@ -55,7 +54,6 @@ public class OperatorV2Control implements OperatorControl {
     @Override
     public double getLeftAxis(){
         return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
-
     }
 
     @Override

@@ -62,11 +62,9 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
-
     default boolean driveToNote() {
         return false;
     }
-
 
     default boolean trigger() {
         return false;
@@ -89,18 +87,6 @@ public interface DriverControl extends Glassy {
     }
 
     default boolean defense() {
-        return false;
-    }
-
-    default boolean steer0() {
-        return false;
-    }
-
-    default boolean steer90() {
-        return false;
-    }
-
-    default boolean rotate0() {
         return false;
     }
 
