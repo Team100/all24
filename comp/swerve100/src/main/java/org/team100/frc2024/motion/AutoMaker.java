@@ -712,17 +712,17 @@ public class AutoMaker {
         return new SequentialCommandGroup(
                 new ShootPreload(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, true),
                 new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
-                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve,  false)),
 
                 new ParallelDeadlineGroup(
                         test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), alliance),
                                 forAlliance(new Translation2d(2.3, 5.5583), alliance), FieldPoint.NOTE2, 3, 2),
-                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve,  false)),
 
                 new ParallelDeadlineGroup(
                         test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), alliance),
                                 forAlliance(new Translation2d(2.307, 6.67), alliance), FieldPoint.NOTE1, 3, 2),
-                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false)),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
                 new ParallelDeadlineGroup(
                         driveStraightWithWaypoints(
                                 alliance,
@@ -736,7 +736,7 @@ public class AutoMaker {
                                                 kShooterScale)),
                                 alliance),
                         new RampShooter(m_shooter)),
-                new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, false));
+                new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve,  false));
     }
 
     public Command sibling(Alliance alliance) {
