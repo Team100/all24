@@ -158,11 +158,7 @@ public class SwerveDriveKinematics100 {
      * 
      * does not take tires into account
      * 
-     * TODO: remove this, use exclusively the twist version
-     * 
-     * @deprecated
      */
-    @Deprecated
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState... states) {
         checkLength(states);
         // [v cos; v sin; ...] (2n x 1)
