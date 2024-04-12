@@ -100,11 +100,10 @@ public class DrumShooter extends Shooter {
                         new PIDController(4.5, 0.0, 0.000), // same
                         new TrapezoidProfile100(8, 8, 0.001),
                         0.02,
-                        0,
                         m_encoder,
                         new double[] { 0, 45 }
 
-                ); // same
+                );
 
                 break;
             case BLANK:
@@ -126,7 +125,6 @@ public class DrumShooter extends Shooter {
                         new PIDController(0.07, 0.0, 0.000), // same
                         new TrapezoidProfile100(450, 450, 0.02),
                         0.02,
-                        0,
                         m_encoder,
                         new double[] { 0, 45 }
 

@@ -14,22 +14,15 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/**
- * A 1-dof arm driven by two separate motors with opposite phases.
- */
 public class AmpSubsystem extends SubsystemBase implements Glassy {
-    // ALERT! notice this very high current limit!! ALERT!
-    private static final int kCurrentLimit = 80;
-
     private final String m_name;
     private final SysParam m_params;
     private final GravityServo ampAngleServo;
     private final CANSparkMax ampDrive;
     private final DutyCycleEncoder100 m_encoder;
+    private final CANSparkMax m_motor;
 
-    CANSparkMax m_motor;
-
-    public AmpSubsystem(int pivotID) {
+    public AmpSubsystem() {
         m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.645439, true);
         m_name = Names.name(this);
         m_params = SysParam.neoPositionServoSystem(
@@ -39,43 +32,22 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
-
-                m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
-                // TODO tune kV
+                m_motor = new CANSparkMax(2, MotorType.kBrushless);
                 ampAngleServo = new GravityServo(
-                    m_motor, 
-                    30,
-                    m_name, 
-                    m_params, 
-                    new PIDController(0.8, 0, 0), 
-                    new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05), 
-                    0.02, 
-                    -0.06, 
-                    m_encoder,
-                    new double[]{0, 0}
-                );
-
-
+                        m_motor,
+                        30,
+                        m_name,
+                        m_params,
+                        new PIDController(0.8, 0, 0),
+                        new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
+                        0.02,
+                        m_encoder,
+                        new double[] { 0, 0 });
                 ampDrive = new CANSparkMax(33, MotorType.kBrushless);
                 break;
             case BLANK:
             default:
-                m_motor = new CANSparkMax(pivotID, MotorType.kBrushless);
-
-                // ampAngleServo = new GravityServo(
-                // m_motor,
-                // 5,
-                // m_name,
-                // m_params,
-                // new PIDController(3, 0, 0),
-                // new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                // pivotID,
-                // 0.02,
-                // -0.06,
-                // new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 2, 0.51, false),
-                // new double[]{0, 0}
-                // );
-
+                m_motor = new CANSparkMax(2, MotorType.kBrushless);
                 ampAngleServo = new GravityServo(
                         m_motor,
                         30,
@@ -84,22 +56,12 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
                         new PIDController(0.7, 0, 0),
                         new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
                         0.02,
-                        -0.06,
                         m_encoder,
                         new double[] { 0, 0 });
                 ampDrive = new CANSparkMax(33, MotorType.kBrushless);
-
         }
     }
 
-    /**
-     * Set angle relative to the zero.
-     * 
-     * TODO: calibrate to the horizontal, reset the actual angle at the stop,
-     * and/or use an absolute encoder.
-     * 
-     * @param value
-     */
     public void setAmpPosition(double value) {
         ampAngleServo.setPositionWithSteadyState(value);
     }
@@ -121,13 +83,10 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     }
 
     public Double getPositionRad() {
-        // return (ampAngleServoRight.getPosition() + ampAngleServoLeft.getPosition()) /
-        // 2;
         return ampAngleServo.getPosition();
     }
 
     public boolean inPosition() {
-        // TODO get real values here
         return getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI;
     }
 

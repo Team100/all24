@@ -400,7 +400,7 @@ class PoseEstimationHelperTest {
         assertEquals(0, tagInCameraCoords.getRotation().getY(), kDelta);
         assertEquals(0, tagInCameraCoords.getRotation().getZ(), kDelta);
 
-        // "raw" layout, which is "out of the page" tag orientation.
+        // "raw" layout, which is "out of the page" tag orientation.j
         // which is WRONG WRONG WRONG
         Path path = Filesystem.getDeployDirectory().toPath().resolve("2024-crescendo.json");
         AprilTagFieldLayout layout = new AprilTagFieldLayout(path);

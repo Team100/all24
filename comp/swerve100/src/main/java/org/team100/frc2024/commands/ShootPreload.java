@@ -76,15 +76,12 @@ public class ShootPreload extends Command {
 
         t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
 
-        double targetShooterAngle;
-
         double distance = m_drive.getPose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
         m_timer.reset();
         m_shooter.forward();
         // if(m_pivotOverride == -1){
         m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
-        
 
         m_timer.reset();
     }
@@ -92,7 +89,6 @@ public class ShootPreload extends Command {
     @Override
     public void execute() {
         t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-
         t.log(Level.DEBUG, "ShootSmart", "END", 0);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
@@ -107,31 +103,22 @@ public class ShootPreload extends Command {
             angle = m_pivotOverride;
         }
 
-        if (m_pivotOverride == -1) {
-            m_shooter.setAngle(angle);
-        } else {
-            m_shooter.setAngle(angle);
-        }
+        m_shooter.setAngle(angle);
 
         t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT", Math.abs(m_shooter.getPivotPosition() - angle));
-
-        // t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT",
-        // Math.abs(m_shooter.getPivotPosition() - angle));
 
         if (!m_sensor.getFeederSensor() && !m_sensor.getIntakeSensor()) {
 
             m_intake.stop();
             m_feeder.stop();
 
-            if (m_shooter.atVelocitySetpoint(m_isPreload)) {
-                if (Math.abs(m_shooter.getPivotPosition() - angle) < 0.01) {
-                    atVelocity = true;
-                    m_timer.start();
-                }
+            if (m_shooter.atVelocitySetpoint(m_isPreload)
+                    && Math.abs(m_shooter.getPivotPosition() - angle) < 0.01) {
+                atVelocity = true;
+                m_timer.start();
             }
         }
 
-        
         if (atVelocity) {
             m_feeder.feed();
             m_intake.intake();
@@ -147,14 +134,12 @@ public class ShootPreload extends Command {
         t.log(Level.DEBUG, "ShootSmart", "command state", "end");
         t.log(Level.DEBUG, "ShootSmart", "command state", "end");
         t.log(Level.DEBUG, "ShootSmart", "END", 1);
-        System.out.println("IIOII HAVVVE FINNISHED");
         atVelocity = false;
         finished = false;
         m_timer.stop();
         m_shooter.stop();
         m_intake.stop();
         m_feeder.stop();
-
     }
 
     @Override

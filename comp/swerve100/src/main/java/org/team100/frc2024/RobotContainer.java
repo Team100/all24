@@ -200,7 +200,7 @@ public class RobotContainer implements Glassy {
                 visionDataProvider);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
-        m_amp = new AmpSubsystem(2);
+        m_amp = new AmpSubsystem();
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         m_climber = new ClimberSubsystem(60, 61);
@@ -279,8 +279,9 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::test, run);
 
         // whileTrue(operatorControl::intake,
-        //         new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-        //                 () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        // new StartEndCommand(() ->
+        // RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
         whileTrue(operatorControl::intake,
                 new RunIntake(m_intake));
@@ -447,15 +448,12 @@ public class RobotContainer implements Glassy {
                 m_drive,
                 planner,
                 drivePID,
-                swerveKinodynamics,
                 0,
                 m_feeder,
                 m_shooter,
                 m_intake,
                 m_sensors,
                 notePositionDetector,
-                m_amp,
-                m_heading,
                 constraints);
 
         whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
@@ -488,7 +486,7 @@ public class RobotContainer implements Glassy {
                 new ShooterLockCommand(shooterLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::test,
-        //         new AmpLockCommand(ampLock, driverControl::twist, m_drive));
+        // new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
         // new ClimberPosition(m_climber));
@@ -517,8 +515,13 @@ public class RobotContainer implements Glassy {
                 Priority.TWO);
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
-        SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
-                operatorControl::getRightAxis, operatorControl::getClimberOveride, operatorControl::pov),
+        SubsystemPriority.addSubsystem(m_climber,
+                new ClimberDefault(
+                        m_climber,
+                        operatorControl::getLeftAxis,
+                        operatorControl::getRightAxis,
+                        operatorControl::getClimberOveride,
+                        operatorControl::pov),
                 Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
@@ -530,8 +533,8 @@ public class RobotContainer implements Glassy {
 
         // joel mar 13: the alliance command chooses which of these autos to run
         // m_auton = new AllianceCommand(
-        //         m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
-        //         m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
+        // m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
+        // m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(
