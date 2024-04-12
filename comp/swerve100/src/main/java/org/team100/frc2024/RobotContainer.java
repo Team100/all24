@@ -29,7 +29,6 @@ import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
-import org.team100.frc2024.motion.intake.IntakeFactory;
 import org.team100.frc2024.motion.intake.RunIntake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
@@ -76,7 +75,6 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -87,7 +85,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -100,7 +97,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer implements Glassy {
     private static final double kDriveCurrentLimit = 50;
-    private final Telemetry t = Telemetry.get();
 
     private final HeadingInterface m_heading;
     private final LEDIndicator m_indicator;
@@ -128,7 +124,7 @@ public class RobotContainer implements Glassy {
 
     private final String m_name;
 
-    public RobotContainer(TimedRobot robot) throws IOException {
+    public RobotContainer() throws IOException {
         m_name = Names.name(this);
 
         driverControl = new DriverControlProxy();
@@ -160,11 +156,10 @@ public class RobotContainer implements Glassy {
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                Timer.getFPGATimestamp(), // TODO: is this the right time???
+                Timer.getFPGATimestamp(),
                 VecBuilder.fill(stateStdDev, stateStdDev, 0.1),
                 VecBuilder.fill(visionStdDev, visionStdDev, Double.MAX_VALUE)); // 0.1 0.1
 
-        // TODO: make this do something
         FireControl fireControl = new FireControl() {
         };
 
@@ -185,9 +180,9 @@ public class RobotContainer implements Glassy {
                 swerveLocal,
                 driverControl::speed);
 
-        m_feeder = new FeederSubsystem(3);
+        m_feeder = new FeederSubsystem();
 
-        m_intake = IntakeFactory.get(m_sensors);
+        m_intake = new Intake(m_sensors);
 
         // @sanjan 3/25
         // LEDStrip strip1 = new LEDStrip(LEDGroup.ONE, 160, 0);
@@ -204,7 +199,7 @@ public class RobotContainer implements Glassy {
                 visionDataProvider);
 
         // / = new IndexerSubsystem(63); // NEED CAN FOR AMP MOTOR //5
-        m_amp = new AmpSubsystem(2);
+        m_amp = new AmpSubsystem();
         m_pivotAmp = new PivotAmp(m_amp, operatorControl::ampPosition);
 
         m_climber = new ClimberSubsystem(60, 61);
@@ -283,8 +278,9 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::test, run);
 
         // whileTrue(operatorControl::intake,
-        //         new StartEndCommand(() -> RobotState100.changeIntakeState(IntakeState100.INTAKE),
-        //                 () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
+        // new StartEndCommand(() ->
+        // RobotState100.changeIntakeState(IntakeState100.INTAKE),
+        // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
 
         whileTrue(operatorControl::intake,
                 new RunIntake(m_intake));
@@ -451,15 +447,12 @@ public class RobotContainer implements Glassy {
                 m_drive,
                 planner,
                 drivePID,
-                swerveKinodynamics,
                 0,
                 m_feeder,
                 m_shooter,
                 m_intake,
                 m_sensors,
                 notePositionDetector,
-                m_amp,
-                m_heading,
                 constraints);
 
         whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
@@ -492,7 +485,7 @@ public class RobotContainer implements Glassy {
                 new ShooterLockCommand(shooterLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::test,
-        //         new AmpLockCommand(ampLock, driverControl::twist, m_drive));
+        // new AmpLockCommand(ampLock, driverControl::twist, m_drive));
 
         // whileTrue(driverControl::shooterLock,
         // new ClimberPosition(m_climber));
@@ -521,8 +514,13 @@ public class RobotContainer implements Glassy {
                 Priority.TWO);
         SubsystemPriority.addSubsystem(m_feeder, new FeederDefault(m_feeder, m_sensors), Priority.THREE);
         SubsystemPriority.addSubsystem(m_intake, new IntakeDefault(m_intake), Priority.FOUR);
-        SubsystemPriority.addSubsystem(m_climber, new ClimberDefault(m_climber, operatorControl::getLeftAxis,
-                operatorControl::getRightAxis, operatorControl::getClimberOveride, operatorControl::pov),
+        SubsystemPriority.addSubsystem(m_climber,
+                new ClimberDefault(
+                        m_climber,
+                        operatorControl::getLeftAxis,
+                        operatorControl::getRightAxis,
+                        operatorControl::getClimberOveride,
+                        operatorControl::pov),
                 Priority.FIVE);
         SubsystemPriority.addSubsystem(m_amp, new AmpDefault(m_amp), Priority.SIX);
 
@@ -534,8 +532,8 @@ public class RobotContainer implements Glassy {
 
         // joel mar 13: the alliance command chooses which of these autos to run
         // m_auton = new AllianceCommand(
-        //         m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
-        //         m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
+        // m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors),
+        // m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(

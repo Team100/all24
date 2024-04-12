@@ -7,7 +7,6 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
-import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Names;
@@ -22,24 +21,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * feedback.
  */
 public class DrivePIDFController implements DriveMotionController {
-    // gains for velocity feedback
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
+    private static final Telemetry t = Telemetry.get();
 
-    private static final double kTolerance = 0.05;
-    private static final double kThetaTolerance = 0.05;
-
-    public static final Telemetry t = Telemetry.get();
     private final boolean m_feedforwardOnly;
     private final String m_name;
+    private final double m_kPCart;
+    private final double m_kPTheta;
 
     private TrajectoryTimeIterator m_iter;
     private double m_prevTimeS;
-    private Pose2d error = new Pose2d();
-    private double m_kPCart;
-    private double m_kPTheta;
-    private Trajectory100 m_trajectory = new Trajectory100();
-    private Pose2d goalPose;
 
     /** Use the factory. */
     DrivePIDFController(
@@ -54,9 +46,6 @@ public class DrivePIDFController implements DriveMotionController {
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator iter) {
-        m_trajectory = iter.trajectory();
-        goalPose = m_trajectory.getLastPoint().state().state().getPose();
-
         m_iter = iter;
         m_prevTimeS = Double.POSITIVE_INFINITY;
     }
@@ -72,10 +61,6 @@ public class DrivePIDFController implements DriveMotionController {
 
         t.log(Level.DEBUG, m_name, "measurement", measurement);
 
-        // if (isDone()) {
-        // return new ChassisSpeeds();
-        // }
-
         Optional<TimedPose> optionalSetpoint = getSetpoint(timeS);
         if (!optionalSetpoint.isPresent()) {
             return new ChassisSpeeds();
@@ -84,18 +69,9 @@ public class DrivePIDFController implements DriveMotionController {
         SmartDashboard.putNumber("setpointX", setpoint.state().getPose().getX());
         t.log(Level.DEBUG, m_name, "setpoint", setpoint);
 
-        error = DriveMotionControllerUtil.getError(measurement, setpoint);
-
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, setpoint);
-        // if (m_feedforwardOnly)
-        // return u_FF;
-
-        // ChassisSpeeds u_FB = DriveMotionControllerUtil.feedback(measurement,
-        // mSetpoint.get(), m_kPCart, m_kPTheta);
-
-        // ChassisSpeeds output = u_FF.plus(u_FB);
-
-        // if(output.equals(output))
+        if (m_feedforwardOnly)
+            return u_FF;
 
         ChassisSpeeds u_FB;
         if (Experiments.instance.enabled(Experiment.FullStateTrajectoryFollower)) {
@@ -141,6 +117,8 @@ public class DrivePIDFController implements DriveMotionController {
 
     @Override
     public boolean isDone() {
+        // this used to also wait for the pose to match the goal, but that
+        // took more time, so it's gone.
         return m_iter != null && m_iter.isDone();
     }
 

@@ -63,7 +63,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
                 // beamBreak1 = new DigitalInput(4);
                 // beamBreak2 = new DigitalInput(8);
 
-                //TODO tune kV
+
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,

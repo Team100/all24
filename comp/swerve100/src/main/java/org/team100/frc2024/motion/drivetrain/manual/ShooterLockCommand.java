@@ -7,21 +7,18 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-//TODO crappy implementation of this just for EPA, will change this - Sanjan
-
 public class ShooterLockCommand extends Command {
+    private final ManualWithShooterLock m_driver;
+    private final Supplier<Twist2d> m_twistSupplier;
+    private final SwerveDriveSubsystem m_drive;
 
-    ManualWithShooterLock m_driver;
-    Supplier<Twist2d> m_twistSupplier;
-    SwerveDriveSubsystem m_drive;
-
-    public ShooterLockCommand(ManualWithShooterLock driver, Supplier<Twist2d> twistSupplier,
+    public ShooterLockCommand(
+            ManualWithShooterLock driver,
+            Supplier<Twist2d> twistSupplier,
             SwerveDriveSubsystem drive) {
-
         m_driver = driver;
         m_twistSupplier = twistSupplier;
         m_drive = drive;
-
         addRequirements(m_drive);
     }
 
@@ -30,21 +27,9 @@ public class ShooterLockCommand extends Command {
         m_driver.reset(m_drive.getPose());
     }
 
-    
     @Override
     public void execute() {
         Twist2d twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
-
         m_drive.driveInFieldCoords(twist, 0.02);
-
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-    }
-
-    @Override
-    public boolean isFinished() {
-        return false;
     }
 }

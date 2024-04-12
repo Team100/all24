@@ -38,7 +38,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * robot or target is moving. That effect can be compensated, though.
  */
 public class ManualWithAmpLock implements FieldRelativeDriver {
-    private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for

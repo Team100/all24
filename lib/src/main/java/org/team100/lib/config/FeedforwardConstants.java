@@ -23,7 +23,6 @@ public class FeedforwardConstants {
 
     /**
      * Default no friction or attached objects contraints for NEO
-     * //TODO tune this
      */
     public static FeedforwardConstants makeNeoVortex() {
         return new FeedforwardConstants(0.122, 0, 0.1, 0.065);
@@ -33,7 +32,6 @@ public class FeedforwardConstants {
         return new FeedforwardConstants(0.11, 0, 0.18, 0.01);
     }
 
-    // TODO tune the static and dynamic friction
     public static FeedforwardConstants makeWCPSwerveTurningFalcon6() {
         return new FeedforwardConstants(0.16, 0, 0.08, 0.1);
     }
@@ -44,8 +42,6 @@ public class FeedforwardConstants {
 
     public static FeedforwardConstants makeWCPSwerveDriveFalcon6() {
         return new FeedforwardConstants(.13, .13, .374, .37);
-        // return new FeedforwardConstants(0, 0, 0, 0);
-
     }
 
     public FeedforwardConstants() {

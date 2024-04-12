@@ -16,16 +16,13 @@ import edu.wpi.first.math.controller.PIDController;
 public class GravityServo {
     private final Telemetry t = Telemetry.get();
     private final CANSparkMax m_motor;
-    private final int m_currentLimit;
     private final String m_name;
     private final SysParam m_params;
     private final PIDController m_controller;
     private final Profile100 m_profile;
     private final double m_period;
-    private final double m_gravityScale;
     private final Encoder100<Distance100> m_encoder;
     private final double[] m_softLimits;
-    private double m_maxRadsM_S;
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
@@ -38,13 +35,11 @@ public class GravityServo {
             PIDController controller,
             Profile100 profile,
             double period,
-            double gravityScale,
             Encoder100<Distance100> encoder,
             double[] softLimits) {
         m_motor = motor;
         m_motor.setIdleMode(IdleMode.kCoast);
         m_motor.setSmartCurrentLimit(currentLimit);
-        m_currentLimit = currentLimit;
         m_name = name;
         m_params = params;
         m_controller = controller;
@@ -52,13 +47,11 @@ public class GravityServo {
         m_controller.setTolerance(0.02);
         m_profile = profile;
         m_period = period;
-        m_gravityScale = gravityScale;
         m_encoder = encoder;
         m_softLimits = softLimits;
     }
 
     public void reset() {
-        // m_encoder.setPosition(0);
         m_controller.reset();
         if (getPosition() == null) {
             return;
@@ -139,18 +132,14 @@ public class GravityServo {
                 m_motor.set(0);
                 return;
             }
-        } else if (value <= 0) {
-            if (m_encoder.getPosition() <= m_softLimits[0]) {
-                m_motor.set(0);
-                return;
-            }
+        } else if (value <= 0 && m_encoder.getPosition() <= m_softLimits[0]) {
+            m_motor.set(0);
+            return;
         }
         m_motor.set(value);
     }
 
     public void setPositionWithSteadyState(double goal) {
-        // m_motor.setSmartCurrentLimit(m_currentLimit);
-
         double measurement = m_encoder.getPosition();
 
         // use the modulus closest to the measurement.
@@ -161,34 +150,16 @@ public class GravityServo {
                 (m_setpoint.x()),
                 m_setpoint.v());
 
-        double diff = m_goal.x() - m_setpoint.x();
-
         m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
 
         double u_FB = m_controller.calculate(measurement, m_setpoint.x());
-        double u_FF = m_setpoint.v() * 0.01; //rot/s to rpm conversion
-
+        double u_FF = m_setpoint.v() * 0.01; // rot/s to rpm conversion
 
         double gravityTorque = 0.015 * 3 * Math.cos((m_encoder.getPosition() / m_params.gearRatio()));
         gravityTorque = gravityTorque * 0.9;
         double u_TOTAL = gravityTorque + u_FF + u_FB;
 
-        // if(diff <= 0.1){
-        // m_motor.setSmartCurrentLimit(2);
-        // m_motor.set(0.2);
-        // } else {
-        // m_motor.set(u_TOTAL);
-        // }
-
-        m_motor.set(gravityTorque + u_FF + u_FB); 
-
-
-
-        // if(diff < 0.1){
-        // m_motor.set(0.05);
-        // } else {
-        // m_motor.set(u_TOTAL);
-        // }
+        m_motor.set(gravityTorque + u_FF + u_FB);
 
         m_controller.setIntegratorRange(0, 0.1);
 
@@ -207,7 +178,6 @@ public class GravityServo {
     }
 
     public void periodic() {
-        // t.log(Level.DEBUG, m_name, "Get Raw Position", m_encoder.);
         t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
         t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());

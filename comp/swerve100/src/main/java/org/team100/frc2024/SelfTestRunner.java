@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.selftest.AmpSelfTest;
-import org.team100.frc2024.selftest.IntakeSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
@@ -100,8 +99,6 @@ public class SelfTestRunner extends Command {
 
         if (kTestMechanisms) {
             // mechanism tests
-            IntakeSelfTest intakeSelfTest = new IntakeSelfTest(container.m_intake, m_listener);
-            addCase(intakeSelfTest, container.m_intake.run(intakeSelfTest::treatment));
 
             // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
             // addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.DoubleFunction;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
@@ -32,8 +31,6 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testEstimateRobotPose() throws IOException {
-        // always at the origin
-        DoubleFunction<Optional<Rotation2d>> robotRotation = (t) -> Optional.of(GeometryUtil.kRotationZero);
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
         // these lists receive the updates
         final List<Pose2d> poseEstimate = new ArrayList<Pose2d>();

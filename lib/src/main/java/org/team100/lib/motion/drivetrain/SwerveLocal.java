@@ -248,10 +248,4 @@ public class SwerveLocal implements Glassy {
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
     }
-
-    private static boolean isMoving(ChassisSpeeds speeds) {
-        return (speeds.vxMetersPerSecond >= 0.1
-                || speeds.vyMetersPerSecond >= 0.1
-                || speeds.omegaRadiansPerSecond >= 0.1);
-    }
 }

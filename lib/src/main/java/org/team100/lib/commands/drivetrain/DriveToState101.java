@@ -28,8 +28,6 @@ import edu.wpi.first.wpilibj.Timer;
  * cribbed from 254.
  */
 public class DriveToState101 extends Command100 {
-    // inject these, make them the same as the kinematic limits, inside the
-    // trajectory supplier.
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
     private static final Telemetry t = Telemetry.get();
@@ -69,35 +67,18 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public void initialize100() {
-
-        Transform2d transform = new Transform2d(m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()),
-                m_goal.getTranslation().minus(m_swerve.getPose().getTranslation()).getAngle());
-
-        transform = transform.inverse();
-
+        Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getPose().getTranslation());
+        Transform2d transform = new Transform2d(toGoal, toGoal.getAngle()).inverse();
         Pose2d startPose = new Pose2d(m_swerve.getPose().getTranslation(), transform.getRotation());
-
         Twist2d startVelocity = m_swerve.getVelocity();
-
-        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), new Rotation2d(1, 1));
-
-        if (startVelocity.dx == 0 && startVelocity.dy == 0) {
-            startWaypoint = startPose;
-        } else {
-            startWaypoint = new Pose2d(startPose.getTranslation(), new Rotation2d(startVelocity.dx, startVelocity.dy));
-
-        }
-
-        Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(),
-                new Rotation2d(1, -1));
-
+        Pose2d startWaypoint = getStartWaypoint(startPose, startVelocity);
+        Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(), new Rotation2d(1, -1));
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
                 endWaypoint);
         List<Rotation2d> headings = List.of(
                 m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
-
         Trajectory100 trajectory = m_planner
                 .generateTrajectory(
                         false,
@@ -110,15 +91,13 @@ public class DriveToState101 extends Command100 {
                         kMaxAccelM_S_S);
 
         if (trajectory.length() == 0) {
-            end(false);
+            cancel();
             return;
         }
 
         TrajectoryVisualization.setViz(trajectory);
-
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
-
         m_controller.setTrajectory(iter);
     }
 
@@ -140,7 +119,6 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public boolean isFinished() {
-
         return m_controller.isDone();
     }
 
@@ -150,16 +128,11 @@ public class DriveToState101 extends Command100 {
         TrajectoryVisualization.clear();
     }
 
-    ////////////////////////////////////////////////////
-
-    /** Waypoints where the rotation points in the direction of motion. */
-    private static List<Pose2d> getWaypoints(Pose2d p0, Pose2d p1) {
-        Translation2d t0 = p0.getTranslation();
-        Translation2d t1 = p1.getTranslation();
-        Rotation2d theta = t1.minus(t0).getAngle();
-        return List.of(
-                new Pose2d(t0, theta),
-                new Pose2d(t1, theta));
+    private Pose2d getStartWaypoint(Pose2d startPose, Twist2d startVelocity) {
+        if (Math.abs(startVelocity.dx) < 0.01 && Math.abs(startVelocity.dy) < 0.01) {
+            return startPose;
+        } else {
+            return new Pose2d(startPose.getTranslation(), new Rotation2d(startVelocity.dx, startVelocity.dy));
+        }
     }
-
 }

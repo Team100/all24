@@ -71,8 +71,6 @@ class DriveMotionPlannerTest {
         Pose2d pose = timed_trajectory.getPoint(0).state().state().getPose();
         Twist2d velocity = new Twist2d();
 
-// this overshoots 0.02 in y and about 1 degree in heading
-        // TODO: figure out why that is
         double time = 0.0;
         double mDt = 0.005;
         while (!controller.isDone()) {
@@ -85,7 +83,6 @@ class DriveMotionPlannerTest {
         }
         Assertions.assertEquals(196, pose.getTranslation().getX(), 0.2);
         Assertions.assertEquals(13, pose.getTranslation().getY(), 0.1);
-        // TODO: reduce the heading tolerance in this test
         Assertions.assertEquals(0, pose.getRotation().getDegrees(), 1.0);
     }
 

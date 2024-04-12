@@ -17,6 +17,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -74,7 +75,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_omegaController = omegaController;
         m_scale = scale;
         isAligned = false;
-        m_name = "MANUALLLLL";
+        m_name =  Names.append(parent, this);
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -109,7 +110,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get(), state, m_scale);
         Rotation2d bearing = bearing(currentTranslation, target);
-        Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state); //make this integreate with shooter blah blah blah h mhh bh h                                                                                                                    
+        Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
 
         t.log(Level.DEBUG, m_name, "bearing", bearing);
 
@@ -227,7 +228,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // double angleWithoutMoving = bearing.getRadians();
 
         Rotation2d angleInRads = bearing;
-        
+
         Vector2d stationaryRobotVector = new Vector2d(shooterVelocity, angleInRads);
 
         Vector2d robotMovingVector = new Vector2d(state.y().v(), 0);

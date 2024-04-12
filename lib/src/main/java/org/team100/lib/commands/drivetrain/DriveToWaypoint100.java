@@ -30,7 +30,7 @@ public class DriveToWaypoint100 extends Command100 {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
-    private static final double kMaxAccelM_S_S = 2; // TODO THIS IS LOWW
+    private static final double kMaxAccelM_S_S = 2;
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;

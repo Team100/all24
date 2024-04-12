@@ -232,9 +232,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 m_heading.getHeadingNWU(),
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()),
                 robotPose,
-                Timer.getFPGATimestamp());// TODO: use a real time
+                Timer.getFPGATimestamp());
         m_pose = robotPose;
-        // TODO: should we really assume we're motionless when we call this??
         m_velocity = new Twist2d();
         m_accel = new Twist2d();
     }

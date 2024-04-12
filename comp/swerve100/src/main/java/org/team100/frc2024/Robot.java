@@ -28,7 +28,6 @@ public class Robot extends TimedRobot implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name = Names.name(this);
     private RobotContainer m_robotContainer;
-    private String m_logName = "";
 
     @Override
     public void robotInit() {
@@ -46,7 +45,7 @@ public class Robot extends TimedRobot implements Glassy {
         SmartDashboard.putData(CommandScheduler.getInstance());
 
         try {
-            m_robotContainer = new RobotContainer(this);
+            m_robotContainer = new RobotContainer();
         } catch (IOException e) {
             throw new IllegalStateException("Robot Container Instantiation Failed", e);
         }
@@ -60,12 +59,13 @@ public class Robot extends TimedRobot implements Glassy {
     public void robotPeriodic() {
         m_robotContainer.beforeCommandCycle();
         CommandScheduler.getInstance().run();
-        
+
         // t.log(Level.DEBUG, m_name, "Voltage", m_pdh.getVoltage());
         // t.log(Level.DEBUG, m_name, "Total Current", m_pdh.getTotalCurrent());
 
         // for(int channel = 0; channel < 20; channel++){
-        //     t.log(Level.DEBUG, m_name, "Channel " + String.valueOf(channel), m_pdh.getCurrent(channel));
+        // t.log(Level.DEBUG, m_name, "Channel " + String.valueOf(channel),
+        // m_pdh.getCurrent(channel));
 
         // }
 
@@ -78,10 +78,6 @@ public class Robot extends TimedRobot implements Glassy {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");
             NetworkTableInstance.getDefault().flush();
         }
-    }
-
-    public void setLogName(String logName) {
-        m_logName = logName;
     }
 
     @Override
