@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -21,14 +20,10 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Follow a list of trajectories with the full state controller.
- * 
- * This just holds the starting rotation. If you want a holonomic trajectory
- * follower, try the {@link DriveMotionController} classes.
  */
 public class FullStateTrajectoryListCommand extends Command100 {
     private final Telemetry t = Telemetry.get();
@@ -36,10 +31,8 @@ public class FullStateTrajectoryListCommand extends Command100 {
     private final FullStateDriveController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
     private Iterator<Trajectory100> m_trajectoryIter;
-    private Trajectory100 m_currentTrajectory;
     private TrajectoryTimeIterator m_iter;
     private boolean done;
-    private Rotation2d m_rotation;
     private boolean m_aligned;
 
     public FullStateTrajectoryListCommand(
@@ -54,19 +47,18 @@ public class FullStateTrajectoryListCommand extends Command100 {
     @Override
     public void initialize100() {
         Pose2d currentPose = m_swerve.getPose();
-        m_rotation = currentPose.getRotation();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
-        m_currentTrajectory = null;
-        done = false;
+        m_iter = null;
         m_aligned = false;
+        done = false;
     }
 
     @Override
     public void execute100(double dt) {
-        if (m_currentTrajectory == null || m_iter.isDone()) {
+        if (m_iter == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
-                m_currentTrajectory = m_trajectoryIter.next();
+                Trajectory100 m_currentTrajectory = m_trajectoryIter.next();
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
                 TrajectoryVisualization.setViz(m_currentTrajectory);
