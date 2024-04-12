@@ -54,7 +54,7 @@ public class DriveRamseteController implements DriveMotionController {
      * https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
      */
     @Override
-    public ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d measurementV) {
+    public ChassisSpeeds update(double timestamp, Pose2d measurement, ChassisSpeeds measurementV) {
         if (m_iter == null)
             return null;
 
@@ -72,6 +72,7 @@ public class DriveRamseteController implements DriveMotionController {
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
+        // robot-relative course
         Optional<Rotation2d> maybe_robot_to_course = GeometryUtil.getCourse(measurementV);
         if (maybe_robot_to_course.isPresent()) {
             // Course is robot_to_course, we want to be field_to_course.

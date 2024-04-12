@@ -206,7 +206,6 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     @Override
     public double getTorque() {
         StatusSignal<Double> statorCurrentAmpsStatus = m_motor.getTorqueCurrent();
-        // TODO: latency compensation
         double statorCurrentAmps = statorCurrentAmpsStatus.getValueAsDouble();
         return statorCurrentAmps * kTNm_amp;
     }

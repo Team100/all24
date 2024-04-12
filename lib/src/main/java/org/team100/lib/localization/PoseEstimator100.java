@@ -28,8 +28,6 @@ public interface PoseEstimator100 {
      * Sets the pose estimator's trust of global measurements. This might be used to
      * change trust in vision measurements after the autonomous period, or to change
      * trust as distance to a vision target increases.
-     * 
-     * TODO: get rid of this as a public method, adjust the stdevs on every update.
      *
      * @param stateStdDevs             standard deviations of the state. Increase
      *                                 these numbers to trust the state less, i.e.

@@ -5,12 +5,12 @@ import java.util.List;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
 
 /** Make straight lines, rest-to-rest. */
@@ -34,10 +34,11 @@ public class StraightLineTrajectory {
     }
 
     private Trajectory100 movingToRest(SwerveState startState, Pose2d end) {
-        if (Math.abs(startState.twist().dx) < 1e-6 && Math.abs(startState.twist().dy) < 1e-6)
+        if (Math.abs(startState.velocity().x()) < 1e-6 && Math.abs(startState.velocity().y()) < 1e-6)
             return m_maker.restToRest(startState.translation(), end.getTranslation());
+
         Translation2d currentTranslation = startState.translation();
-        Twist2d currentSpeed = startState.twist();
+        FieldRelativeVelocity currentSpeed = startState.velocity();
         Translation2d goalTranslation = end.getTranslation();
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
@@ -48,13 +49,13 @@ public class StraightLineTrajectory {
                     List.of(
                         new Pose2d(
                             currentTranslation, 
-                            new Rotation2d(currentSpeed.dx, currentSpeed.dy)),
+                            currentSpeed.angle()),
                         new Pose2d(
                             goalTranslation, 
                             angleToGoal)),
                     List.of(new Rotation2d(), new Rotation2d()),
                     m_maker.m_constraints,
-                    Math.hypot(currentSpeed.dx, currentSpeed.dy),
+                    currentSpeed.norm(),
                     0,
                     1,  // guess
                     1); // guess

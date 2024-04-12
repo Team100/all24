@@ -5,12 +5,12 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Timer;
@@ -56,7 +56,7 @@ public class TrajectoryCommand extends Command100 {
         Pose2d currentPose = m_swerve.getPose();
         State lastState = m_trajectory.sample(Double.MAX_VALUE);
         SwerveState reference = SwerveState.fromState(desiredState, lastState.poseMeters.getRotation());
-        Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 

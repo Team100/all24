@@ -2,11 +2,11 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.SquareWave;
 
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -39,7 +39,7 @@ public class Veering extends Command100 {
     public void execute100(double dt) {
         double time = m_timer.get();
         double dx = m_square.applyAsDouble(time);
-        Twist2d input = new Twist2d(dx, 0, kOmega);
+        FieldRelativeVelocity input = new FieldRelativeVelocity(dx, 0, kOmega);
         m_swerve.driveInFieldCoords(input, dt);
         t.log(Level.TRACE, m_name, "input", input);
     }

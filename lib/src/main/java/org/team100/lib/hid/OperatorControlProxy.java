@@ -67,6 +67,7 @@ public class OperatorControlProxy implements OperatorControl {
     public boolean doSomething() {
         return m_operatorControl.doSomething();
     }
+
     @Override
     public boolean index() {
         return m_operatorControl.index();
@@ -108,11 +109,6 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public double ampPosition() {
-        return m_operatorControl.ampPosition();
-    }
-
-    @Override
     public double climberState() {
         return m_operatorControl.climberState();
     }
@@ -142,54 +138,54 @@ public class OperatorControlProxy implements OperatorControl {
         return m_operatorControl.selfTestEnable();
     }
 
-    public boolean rampAndPivot(){
+    @Override
+    public boolean rampAndPivot() {
         return m_operatorControl.rampAndPivot();
     }
 
-    public boolean feed(){
+    @Override
+    public boolean feed() {
         return m_operatorControl.feed();
     }
 
-    public int pov(){
+    @Override
+    public int pov() {
         return m_operatorControl.pov();
     }
 
-    public boolean ramp(){
+    @Override
+    public boolean ramp() {
         return m_operatorControl.ramp();
     }
 
-    public double getLeftAxis(){
+    @Override
+    public double getLeftAxis() {
         return m_operatorControl.getLeftAxis();
     }
 
-    public double getRightAxis(){
-        return  m_operatorControl.getRightAxis();
+    @Override
+    public double getRightAxis() {
+        return m_operatorControl.getRightAxis();
     }
 
-    public boolean getClimberOveride(){
-        return  m_operatorControl.getClimberOveride();
+    @Override
+    public boolean getClimberOveride() {
+        return m_operatorControl.getClimberOveride();
     }
 
-    public boolean feedToAmp(){
-        return  m_operatorControl.feedToAmp();
+    @Override
+    public boolean feedToAmp() {
+        return m_operatorControl.feedToAmp();
     }
 
-    
-    public boolean outtakeFromAmp(){
+    @Override
+    public boolean outtakeFromAmp() {
         return m_operatorControl.outtakeFromAmp();
     }
 
-    public double pivotUp(){
-        return m_operatorControl.pivotUp();
-    }
-
-    public double pivotDown(){
-        return m_operatorControl.pivotDown();
-    }
-
-    public boolean rezero(){
+    @Override
+    public boolean rezero() {
         return m_operatorControl.rezero();
     }
 
-    
 }

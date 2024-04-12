@@ -3,6 +3,7 @@ package org.team100.lib.controller;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
@@ -10,7 +11,6 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Drivetrain control with three independent PID controllers.
@@ -69,7 +69,7 @@ public class HolonomicDriveController100 implements Glassy {
     /**
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
-    public Twist2d calculate(
+    public FieldRelativeVelocity calculate(
             SwerveState currentPose,
             SwerveState desiredState) {
 
@@ -97,7 +97,7 @@ public class HolonomicDriveController100 implements Glassy {
         t.log(Level.TRACE, m_name, "error/y", m_yController.getPositionError());
         t.log(Level.TRACE, m_name, "error/theta", m_thetaController.getPositionError());
 
-        return new Twist2d(xFF + xFB, yFF + yFB, omega);
+        return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }
 
     public void reset() {
@@ -128,6 +128,7 @@ public class HolonomicDriveController100 implements Glassy {
                 pid = new PIDController(3, 2, 0);
                 pid.setIntegratorRange(-0.1, 0.1);
                 pid.setTolerance(0.01); // 1 cm
+                return pid;
             case BLANK:
                 // for testing
                 pid = new PIDController(3, 1, 0);

@@ -14,27 +14,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 public class ShooterUtil {
     public static final ShooterTable instance = new ShooterTable();
 
-    public static Translation2d getOffsetTranslation(Alliance alliance, SwerveState state, double kScale) {
-        Translation2d currentTranslation = state.pose().getTranslation();
-
+    public static Translation2d getOffsetTranslation(Alliance alliance) {
         FieldConstants fieldConstants = FieldConstantsFactory.get(alliance);
-
-        Translation2d shooterCenter = new Translation2d(
-                fieldConstants.getShooterCenterX(),
-                fieldConstants.getShooterCenterY());
-
-        // double distanceHorizontal = currentTranslation.getY() - shooterCenter.getY();
-
-        // double offsetDistance = MathUtil.clamp(
-        // FieldConstants.instance.getShooterCenterY() + distanceHorizontal * -1 *
-        // kScale,
-        // FieldConstants.instance.getShooterLeftSideY(),
-        // FieldConstants.instance.getShooterRightSideY());
-
         return new Translation2d(
                 fieldConstants.getShooterCenterX(),
                 fieldConstants.getShooterCenterY());
-
     }
 
     public static Translation2d getSpeakerTranslation(Alliance alliance) {
@@ -86,9 +70,7 @@ public class ShooterUtil {
         double xComponent = velocityM_s * Math.sin(angleInRads);
         double yComponent = velocityM_s * Math.cos(angleInRads);
         double xComponentWithoutSpeed = xComponent - (state.x().v() * -1);
-        double angleWhileMoving = Math.atan(xComponentWithoutSpeed / yComponent);
-        double angleWhileMovingDegrees = angleWhileMoving * 180 / Math.PI;
-        return angleWhileMoving;
+        return Math.atan2(yComponent, xComponentWithoutSpeed);
     }
 
     public static double getShooterAngleWhileMoving(

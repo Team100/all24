@@ -9,7 +9,6 @@ import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motion.simple.SpeedingVisualization;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
@@ -28,10 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * though, so try a high accel limit.
  */
 public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy {
-    // TODO: tune the current limit
     private static final int kCurrentLimit = 30;
-
-    Telemetry t = Telemetry.get();
 
     /**
      * Surface velocity of whatever is turning in the indexer.

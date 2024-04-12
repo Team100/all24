@@ -9,6 +9,7 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -20,7 +21,6 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Follow a list of trajectories with the full state controller.
@@ -82,7 +82,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
 
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             SwerveState measurement = m_swerve.getState();
-            Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
             t.log(Level.TRACE, m_name, "reference", reference);
         } else {
@@ -98,7 +98,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
 
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             SwerveState measurement = m_swerve.getState();
-            Twist2d fieldRelativeTarget = m_controller.calculate(measurement, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
             t.log(Level.TRACE, m_name, "reference", reference);
         }

@@ -4,8 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-
-import edu.wpi.first.math.geometry.Twist2d;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 /**
  * Rotate in place at the specified speed.
@@ -28,7 +27,7 @@ public class DriveRotation extends Command100 {
             rot = 0;
         }
 
-        Twist2d fieldRelative = new Twist2d(0, 0, rot);
+        FieldRelativeVelocity fieldRelative = new FieldRelativeVelocity(0, 0, rot);
         m_robotDrive.driveInFieldCoords(fieldRelative, dt);
     }
 

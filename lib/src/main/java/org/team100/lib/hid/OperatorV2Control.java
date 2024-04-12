@@ -22,28 +22,27 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public boolean outtake(){
+    public boolean outtake() {
         return m_controller.getBButton();
     }
-    
 
     @Override
-    public boolean rampAndPivot(){
+    public boolean rampAndPivot() {
         return m_controller.getLeftBumper();
     }
 
     @Override
-    public boolean ramp(){
+    public boolean ramp() {
         return m_controller.getAButton();
     }
 
     @Override
-    public boolean feed(){
+    public boolean feed() {
         return m_controller.getYButton();
     }
 
-    @Override 
-    public int pov(){
+    @Override
+    public int pov() {
         return m_controller.getPOV();
     }
 
@@ -53,53 +52,43 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public double getLeftAxis(){
+    public double getLeftAxis() {
         return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
-
     }
 
     @Override
-    public double getRightAxis(){
+    public double getRightAxis() {
         return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
     }
 
     @Override
-    public boolean getClimberOveride(){
+    public boolean getClimberOveride() {
         // return m_controller.getLeftBumper();
         return false;
     }
 
-     @Override
-    public boolean pivotToAmpPosition(){
+    @Override
+    public boolean pivotToAmpPosition() {
         return m_controller.getLeftBumper();
     }
 
     @Override
-    public boolean pivotToDownPosition(){
+    public boolean pivotToDownPosition() {
         return m_controller.getRightBumper();
     }
 
     @Override
-    public boolean feedToAmp(){
+    public boolean feedToAmp() {
         return m_controller.getLeftStickButton();
     }
+
     @Override
-    public boolean outtakeFromAmp(){
+    public boolean outtakeFromAmp() {
         return m_controller.getRightStickButton();
     }
 
     @Override
-    public double pivotUp(){
-        return deadband(m_controller.getLeftTriggerAxis(), 0.2, Double.MAX_VALUE);
-    }
-
-    @Override
-    public double pivotDown(){
-        return  deadband(m_controller.getRightTriggerAxis(), 0.2, Double.MAX_VALUE);
-    }
-
-    @Override
-    public boolean rezero(){
+    public boolean rezero() {
         return m_controller.getStartButton();
     }
 }

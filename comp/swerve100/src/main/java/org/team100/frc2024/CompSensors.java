@@ -4,15 +4,13 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-// import edu.wpi.first.wpilibj.Timer;
 
 public class CompSensors implements SensorInterface {
-  private static final Telemetry t = Telemetry.get();
+    private static final Telemetry t = Telemetry.get();
 
     private final DigitalInput intakeSensor;
     private final DigitalInput feederSensor;
     private final DigitalInput ampSensor;
-
 
     public CompSensors(int port1, int port2, int port3) {
         intakeSensor = new DigitalInput(port1);
@@ -26,7 +24,6 @@ public class CompSensors implements SensorInterface {
         t.log(Level.DEBUG, "CompSensors", "intake", sensorState);
         return sensorState;
     }
-
 
     @Override
     public boolean getAmpSensor() {

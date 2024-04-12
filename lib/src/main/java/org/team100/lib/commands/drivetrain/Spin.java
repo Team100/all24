@@ -5,11 +5,11 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Turn clockwise in place.
@@ -65,10 +65,10 @@ public class Spin extends Command100 {
 
         SwerveState reference = new SwerveState(xState, yState, rotation);
 
-        Twist2d fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
         // force dx and dy to zero, clamp dtheta
-        Twist2d clamped = new Twist2d(0, 0,
-                MathUtil.clamp(fieldRelativeTarget.dtheta, -kMaxSpeed, kMaxSpeed));
+        FieldRelativeVelocity clamped = new FieldRelativeVelocity(0, 0,
+                MathUtil.clamp(fieldRelativeTarget.theta(), -kMaxSpeed, kMaxSpeed));
         m_swerve.driveInFieldCoords(clamped, dt);
     }
 

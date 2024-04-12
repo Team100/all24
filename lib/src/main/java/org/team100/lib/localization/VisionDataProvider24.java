@@ -157,7 +157,6 @@ public class VisionDataProvider24 implements Glassy {
             if (!alliance.isPresent())
                 return;
 
-            // TODO: add a real firing solution consumer.
             estimateRobotPose(
                     cameraSerialNumber,
                     blips,
@@ -235,14 +234,17 @@ public class VisionDataProvider24 implements Glassy {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
-                if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                    double distance = translation2d.getNorm();
-                    if (m_poseEstimator != null)
-                        m_poseEstimator.setStdDevs(
-                                stateStdDevs(),
-                                visionMeasurementStdDevs(distance));
-                    m_fireControl.accept(translation2d);
-                }
+                
+                if (!Experiments.instance.enabled(Experiment.HeedVision))
+                    continue;
+
+                double distance = translation2d.getNorm();
+                if (m_poseEstimator != null)
+                    m_poseEstimator.setStdDevs(
+                            stateStdDevs(),
+                            visionMeasurementStdDevs(distance));
+                m_fireControl.accept(translation2d);
+
             }
         }
     }
@@ -288,20 +290,22 @@ public class VisionDataProvider24 implements Glassy {
 
             t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
 
+            if (!Experiments.instance.enabled(Experiment.HeedVision))
+                continue;
+
             if (lastRobotInFieldCoords != null) {
                 double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
                 if (distanceM <= kVisionChangeToleranceMeters) {
                     // this hard limit excludes false positives, which were a bigger problem in 2023
                     // due to the coarse tag family used. in 2024 this might not be an issue.
-                    if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                        m_poseEstimator.setStdDevs(
-                                stateStdDevs(),
-                                visionMeasurementStdDevs(distanceM));
-                        latestTimeUs = RobotController.getFPGATime();
-                        m_poseEstimator.addVisionMeasurement(
-                                currentRobotinFieldCoords,
-                                frameTimeSec);
-                    }
+                    m_poseEstimator.setStdDevs(
+                            stateStdDevs(),
+                            visionMeasurementStdDevs(distanceM));
+                    latestTimeUs = RobotController.getFPGATime();
+                    m_poseEstimator.addVisionMeasurement(
+                            currentRobotinFieldCoords,
+                            frameTimeSec);
+
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;
@@ -354,18 +358,19 @@ public class VisionDataProvider24 implements Glassy {
 
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
 
+                if (!Experiments.instance.enabled(Experiment.HeedVision))
+                    continue;
+
                 if (lastRobotInFieldCoords != null) {
                     double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
                     if (distanceM <= kVisionChangeToleranceMeters) {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
-                        if (Experiments.instance.enabled(Experiment.HeedVision)) {
-                            m_poseEstimator.setStdDevs(
-                                    stateStdDevs(),
-                                    visionMeasurementStdDevs(distanceM));
-                            latestTimeUs = RobotController.getFPGATime();
-                            m_poseEstimator.addVisionMeasurement(currentRobotinFieldCoords, frameTimeSec);
-                        }
+                        m_poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distanceM));
+                        latestTimeUs = RobotController.getFPGATime();
+                        m_poseEstimator.addVisionMeasurement(currentRobotinFieldCoords, frameTimeSec);
                     }
                 }
                 lastRobotInFieldCoords = currentRobotinFieldCoords;

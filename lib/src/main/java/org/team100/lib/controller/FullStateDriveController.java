@@ -3,9 +3,9 @@ package org.team100.lib.controller;
 import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Proportional position and velocity control.
@@ -22,7 +22,7 @@ public class FullStateDriveController {
 
     private boolean m_atSetpoint = false;
 
-    public Twist2d calculate(SwerveState measurement, SwerveState setpoint) {
+    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState setpoint) {
         m_atSetpoint = true;
         double dx = calculate(kXK1, kXK2, kXTolerance, kXDotTolerance,
                 measurement.x(), setpoint.x(), x -> x);
@@ -30,7 +30,7 @@ public class FullStateDriveController {
                 measurement.y(), setpoint.y(), x -> x);
         double dtheta = calculate(kThetaK1, kThetaK2, kThetaTolerance, kOmegaTolerance,
                 measurement.theta(), setpoint.theta(), MathUtil::angleModulus);
-        return new Twist2d(dx, dy, dtheta);
+        return new FieldRelativeVelocity(dx, dy, dtheta);
     }
 
     private double calculate(

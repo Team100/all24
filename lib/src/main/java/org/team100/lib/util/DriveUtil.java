@@ -1,5 +1,8 @@
 package org.team100.lib.util;
 
+import org.team100.lib.hid.DriverControl;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -9,6 +12,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 public class DriveUtil {
     /**
+     * Scales driver input to field-relative velocity.
+     * 
      * This makes no attempt to address infeasibilty, it just multiplies.
      * 
      * @param twist    [-1,1]
@@ -16,14 +21,16 @@ public class DriveUtil {
      * @param maxRot   radians per second
      * @return meters and rad per second as specified by speed limits
      */
-    public static Twist2d scale(Twist2d twist, double maxSpeed, double maxRot) {
-        return new Twist2d(
-                maxSpeed * MathUtil.clamp(twist.dx, -1, 1),
-                maxSpeed * MathUtil.clamp(twist.dy, -1, 1),
-                maxRot * MathUtil.clamp(twist.dtheta, -1, 1));
+    public static FieldRelativeVelocity scale(DriverControl.Velocity twist, double maxSpeed, double maxRot) {
+        return new FieldRelativeVelocity(
+                maxSpeed * MathUtil.clamp(twist.x(), -1, 1),
+                maxSpeed * MathUtil.clamp(twist.y(), -1, 1),
+                maxRot * MathUtil.clamp(twist.theta(), -1, 1));
     }
 
     /**
+     * Scales driver input to robot-relative velocity.
+     * 
      * This makes no attempt to address infeasibilty, it just multiplies.
      * 
      * @param twist    [-1,1]
@@ -31,12 +38,11 @@ public class DriveUtil {
      * @param maxRot   radians per second
      * @return meters and rad per second as specified by speed limits
      */
-    public static ChassisSpeeds scaleChassisSpeeds(Twist2d twist, double maxSpeed, double maxRot) {
-        Twist2d scaled = scale(twist, maxSpeed, maxRot);
+    public static ChassisSpeeds scaleChassisSpeeds(DriverControl.Velocity twist, double maxSpeed, double maxRot) {
         return new ChassisSpeeds(
-                scaled.dx,
-                scaled.dy,
-                scaled.dtheta);
+                maxSpeed * MathUtil.clamp(twist.x(), -1, 1),
+                maxSpeed * MathUtil.clamp(twist.y(), -1, 1),
+                maxRot * MathUtil.clamp(twist.theta(), -1, 1));
     }
 
     /**
@@ -55,13 +61,13 @@ public class DriveUtil {
      * If you'd like to avoid clipping, then squash the input upstream, in the
      * control class.
      */
-    public static Twist2d clampTwist(Twist2d input, double maxMagnitude) {
-        double hyp = Math.hypot(input.dx, input.dy);
+    public static DriverControl.Velocity clampTwist(DriverControl.Velocity input, double maxMagnitude) {
+        double hyp = Math.hypot(input.x(), input.y());
         if (hyp < 1e-12)
             return input;
         double clamped = Math.min(hyp, maxMagnitude);
         double ratio = clamped / hyp;
-        return new Twist2d(ratio * input.dx, ratio * input.dy, input.dtheta);
+        return new DriverControl.Velocity(ratio * input.x(), ratio * input.y(), input.theta());
     }
 
     /** crash the robot in simulation or just substitute zero in prod */

@@ -10,7 +10,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.XboxController;
 
 /**
@@ -60,7 +59,7 @@ public class DriverXboxControl implements DriverControl {
      * joysticks.
      */
     @Override
-    public Twist2d twist() {
+    public Velocity velocity() {
         double dx = 0;
         double dy = 0;
 
@@ -83,11 +82,11 @@ public class DriverXboxControl implements DriverControl {
         t.log(Level.TRACE, m_name, "Xbox/left x", m_controller.getLeftX());
         switch (speed) {
             case SLOW:
-                return new Twist2d(kSlow * dx, kSlow * dy, kSlow * dtheta);
+                return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);
             case MEDIUM:
-                return new Twist2d(kMedium * dx, kMedium * dy, kMedium * dtheta);
+                return new Velocity(kMedium * dx, kMedium * dy, kMedium * dtheta);
             default:
-                return new Twist2d(dx, dy, dtheta);
+                return new Velocity(dx, dy, dtheta);
         }
     }
 
@@ -125,29 +124,6 @@ public class DriverXboxControl implements DriverControl {
         return previousRotation;
     }
 
-    @Override
-    public boolean steer0() {
-        return m_controller.getXButton();
-    }
-
-    @Override
-    public boolean steer90() {
-        // return m_controller.getYButton();
-        return false;
-    }
-
-    @Override
-    public boolean rotate0() {
-        // @joel 2/19/24 removed so slow mode works
-        // return m_controller.getLeftBumper();
-        return false;
-    }
-
-    // @Override
-    // public boolean circle() {
-    //     return m_controller.getAButton();
-    // }
-
     public boolean choreo(){
         return m_controller.getRawButton(2);
     }
@@ -175,7 +151,5 @@ public class DriverXboxControl implements DriverControl {
     @Override
     public boolean shooterLock(){
         return m_controller.getBButton();
-    }
-
-    
+    }    
 }

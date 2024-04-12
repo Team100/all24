@@ -5,6 +5,7 @@ import java.util.List;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
@@ -19,7 +20,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -33,25 +33,15 @@ public class DriveToState101 extends Command100 {
     private static final Telemetry t = Telemetry.get();
 
     private final Pose2d m_goal;
-    private final Twist2d m_endVelocity;
+    private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
     private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
 
-    /**
-     * @param goal        Pose2d
-     * @param endVelocity Twist2d
-     * @param drivetrain  SwerveDriveSubsystem
-     * @param planner     TrajectoryPlanner
-     * @param controller  DriveMotionController
-     * @param limits      SwerveKinodynamics
-     * @param viz         ok to be null
-     */
-
     public DriveToState101(
             Pose2d goal,
-            Twist2d endVelocity,
+            FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,
             TrajectoryPlanner planner,
             DriveMotionController controller,
@@ -70,7 +60,7 @@ public class DriveToState101 extends Command100 {
         Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getPose().getTranslation());
         Transform2d transform = new Transform2d(toGoal, toGoal.getAngle()).inverse();
         Pose2d startPose = new Pose2d(m_swerve.getPose().getTranslation(), transform.getRotation());
-        Twist2d startVelocity = m_swerve.getVelocity();
+        FieldRelativeVelocity startVelocity = m_swerve.getVelocity();
         Pose2d startWaypoint = getStartWaypoint(startPose, startVelocity);
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(), new Rotation2d(1, -1));
         List<Pose2d> waypointsM = List.of(
@@ -85,8 +75,8 @@ public class DriveToState101 extends Command100 {
                         waypointsM,
                         headings,
                         m_constraints,
-                        Math.hypot(startVelocity.dx, startVelocity.dy),
-                        Math.hypot(m_endVelocity.dx, m_endVelocity.dy),
+                        Math.hypot(startVelocity.x(), startVelocity.y()),
+                        Math.hypot(m_endVelocity.x(), m_endVelocity.y()),
                         kMaxVelM_S,
                         kMaxAccelM_S_S);
 
@@ -106,11 +96,7 @@ public class DriveToState101 extends Command100 {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getPose();
         ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
-        Twist2d velocity = new Twist2d(
-                currentSpeed.vxMetersPerSecond,
-                currentSpeed.vyMetersPerSecond,
-                currentSpeed.omegaRadiansPerSecond);
-        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
@@ -128,11 +114,11 @@ public class DriveToState101 extends Command100 {
         TrajectoryVisualization.clear();
     }
 
-    private Pose2d getStartWaypoint(Pose2d startPose, Twist2d startVelocity) {
-        if (Math.abs(startVelocity.dx) < 0.01 && Math.abs(startVelocity.dy) < 0.01) {
+    private Pose2d getStartWaypoint(Pose2d startPose, FieldRelativeVelocity startVelocity) {
+        if (Math.abs(startVelocity.x()) < 0.01 && Math.abs(startVelocity.y()) < 0.01) {
             return startPose;
         } else {
-            return new Pose2d(startPose.getTranslation(), new Rotation2d(startVelocity.dx, startVelocity.dy));
+            return new Pose2d(startPose.getTranslation(), new Rotation2d(startVelocity.x(), startVelocity.y()));
         }
     }
 }

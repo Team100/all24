@@ -26,6 +26,7 @@ import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -43,7 +44,6 @@ import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -175,7 +175,7 @@ public class RobotContainerParkingLot {
         whileTrue(driverControl::test,
                 new DriveToState101(
                         goal,
-                        new Twist2d(2, 0, 0),
+                        new FieldRelativeVelocity(2, 0, 0),
                         m_drive,
                         planner,
                         drivePP,

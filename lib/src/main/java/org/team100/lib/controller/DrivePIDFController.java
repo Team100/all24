@@ -12,7 +12,6 @@ import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -55,7 +54,7 @@ public class DrivePIDFController implements DriveMotionController {
     public ChassisSpeeds update(
             double timeS,
             Pose2d measurement,
-            Twist2d currentRobotRelativeVelocity) {
+            ChassisSpeeds currentRobotRelativeVelocity) {
         if (m_iter == null)
             return new ChassisSpeeds();
 

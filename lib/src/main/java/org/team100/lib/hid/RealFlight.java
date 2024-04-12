@@ -4,7 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.GenericHID;
 
 /**
@@ -55,11 +54,11 @@ public class RealFlight implements DriverControl {
      * The square response of this joystick should be clamped by the consumer.
      */
     @Override
-    public Twist2d twist() {
+    public DriverControl.Velocity velocity() {
         double dx = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
         double dy = expo(deadband(-1.0 * clamp(scaled(1), 1), kDeadband, 1), kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
-        return new Twist2d(dx, dy, dtheta);
+        return new DriverControl.Velocity(dx, dy, dtheta);
     }
 
     @Override

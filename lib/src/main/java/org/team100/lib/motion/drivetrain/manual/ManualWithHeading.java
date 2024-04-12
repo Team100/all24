@@ -5,7 +5,9 @@ import java.util.function.Supplier;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.controller.State100;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -20,7 +22,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Function that supports manual cartesian control, and both manual and locked
@@ -49,7 +50,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
     State100 m_thetaSetpoint;
 
     public ManualWithHeading(
-            String parent, 
+            String parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation,
@@ -92,11 +93,11 @@ public class ManualWithHeading implements FieldRelativeDriver {
      * @param twist1_1    control units, [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    public Twist2d apply(SwerveState state, Twist2d twist1_1) {
+    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
         Pose2d currentPose = state.pose();
 
         // clip the input to the unit circle
-        Twist2d clipped = DriveUtil.clampTwist(twist1_1, 1.0);
+        DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
 
         Rotation2d currentRotation = currentPose.getRotation();
         double headingMeasurement = currentRotation.getRadians();
@@ -109,7 +110,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
             t.log(Level.TRACE, m_name, "mode", "free");
 
             // scale to max in both translation and rotation
-            Twist2d twistM_S = DriveUtil.scale(
+            FieldRelativeVelocity twistM_S = DriveUtil.scale(
                     clipped,
                     m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                     m_swerveKinodynamics.getMaxAngleSpeedRad_S());
@@ -133,11 +134,11 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goalState);
 
         // this is user input
-        Twist2d twistM_S = DriveUtil.scale(
+        FieldRelativeVelocity twistM_S = DriveUtil.scale(
                 clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        
+
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
@@ -149,7 +150,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        Twist2d twistWithSnapM_S = new Twist2d(twistM_S.dx, twistM_S.dy, omega);
+        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");
         t.log(Level.TRACE, m_name, "theta setpoint", m_thetaSetpoint);

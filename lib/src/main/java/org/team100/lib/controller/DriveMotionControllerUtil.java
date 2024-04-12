@@ -68,18 +68,18 @@ public class DriveMotionControllerUtil {
     public static ChassisSpeeds velocityFeedback(
             Pose2d currentPose,
             TimedPose setpoint,
-            Twist2d currentRobotRelativeVelocity,
+            ChassisSpeeds currentRobotRelativeVelocity,
             final double kPCartV,
             final double kPThetaV) {
-        final Twist2d velocityError = getVelocityError(
+        final ChassisSpeeds velocityError = getVelocityError(
                 currentPose,
                 setpoint,
                 currentRobotRelativeVelocity);
         t.log(Level.TRACE, kName, "velocityError", velocityError);
         final ChassisSpeeds u_VFB = new ChassisSpeeds(
-                kPCartV * velocityError.dx,
-                kPCartV * velocityError.dy,
-                kPThetaV * velocityError.dtheta);
+                kPCartV * velocityError.vxMetersPerSecond,
+                kPCartV * velocityError.vyMetersPerSecond,
+                kPThetaV * velocityError.omegaRadiansPerSecond);
         t.log(Level.TRACE, kName, "u_VFB", u_VFB);
         return u_VFB;
     }
@@ -98,7 +98,7 @@ public class DriveMotionControllerUtil {
             TimedPose setpoint,
             final double kPCart,
             final double kPTheta,
-            Twist2d currentRobotRelativeVelocity,
+            ChassisSpeeds currentRobotRelativeVelocity,
             final double kPCartV,
             final double kPThetaV) {
 
@@ -120,20 +120,20 @@ public class DriveMotionControllerUtil {
         return u_XFB.plus(u_VFB);
     }
 
-    static Twist2d getVelocityError(
+    static ChassisSpeeds getVelocityError(
             Pose2d currentPose,
             TimedPose setpoint,
-            Twist2d currentRobotRelativeVelocity) {
+            ChassisSpeeds currentRobotRelativeVelocity) {
         final double velocity_m = setpoint.velocityM_S();
         Rotation2d robotRelativeMotionDirection = direction(currentPose, setpoint);
         double vx = robotRelativeMotionDirection.getCos() * velocity_m;
         double vy = robotRelativeMotionDirection.getSin() * velocity_m;
         // heading rate is rad/m of movement, so multiply by m/s to get rad/s
         double omega = velocity_m * setpoint.state().getHeadingRate();
-        return new Twist2d(
-                vx - currentRobotRelativeVelocity.dx,
-                vy - currentRobotRelativeVelocity.dy,
-                omega - currentRobotRelativeVelocity.dtheta);
+        return new ChassisSpeeds(
+                vx - currentRobotRelativeVelocity.vxMetersPerSecond,
+                vy - currentRobotRelativeVelocity.vyMetersPerSecond,
+                omega - currentRobotRelativeVelocity.omegaRadiansPerSecond);
     }
 
     /**

@@ -19,7 +19,6 @@ import org.team100.lib.util.DriveUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -91,11 +90,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getPose();
         ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
-        Twist2d velocity = new Twist2d(
-                currentSpeed.vxMetersPerSecond,
-                currentSpeed.vyMetersPerSecond,
-                currentSpeed.omegaRadiansPerSecond);
-        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);

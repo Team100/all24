@@ -108,7 +108,7 @@ public class SwerveUtil {
             SwerveModuleState[] desiredModuleStates,
             SwerveModuleState[] prevModuleStates) {
         boolean need_to_steer = true;
-        if (GeometryUtil.toTwist2d(desiredState).equals(GeometryUtil.kTwist2dIdentity)) {
+        if (GeometryUtil.isZero(desiredState)) {
             need_to_steer = false;
             for (int i = 0; i < prevModuleStates.length; ++i) {
                 desiredModuleStates[i].angle = prevModuleStates[i].angle;

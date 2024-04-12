@@ -54,7 +54,7 @@ class AsymSwerveSetpointGeneratorTest {
             ChassisSpeeds goal,
             AsymSwerveSetpointGenerator generator) {
         int iteration = 0;
-        while (!GeometryUtil.toTwist2d(prevSetpoint.getChassisSpeeds()).equals(GeometryUtil.toTwist2d(goal))) {
+        while (GeometryUtil.norm(goal.minus(prevSetpoint.getChassisSpeeds())) > 1e-6) {
             SwerveSetpoint newsetpoint = generator.generateSetpoint(prevSetpoint, goal, 0.02);
             SatisfiesConstraints(iteration, prevSetpoint, newsetpoint);
             prevSetpoint = newsetpoint;
@@ -259,8 +259,8 @@ class AsymSwerveSetpointGeneratorTest {
 
         // first slow from 4 m/s to 0 m/s stop at 10 m/s^2, so 0.4s
         for (int i = 0; i < 50; ++i) {
-            Twist2d twist = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
-            currentPose = currentPose.exp(GeometryUtil.scale(twist, kDt));
+            Twist2d discrete = GeometryUtil.discretize(setpoint.getChassisSpeeds(), kDt); 
+            currentPose = currentPose.exp(discrete);
             setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds, 0.02);
 
             double ax = (setpoint.getChassisSpeeds().vxMetersPerSecond - prev.getChassisSpeeds().vxMetersPerSecond)

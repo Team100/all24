@@ -17,7 +17,6 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -82,8 +81,7 @@ public class FancyTrajectory extends Command100 {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getPose();
         ChassisSpeeds currentSpeed = m_robotDrive.speeds(dt);
-        Twist2d velocity = GeometryUtil.toTwist2d(currentSpeed);
-        ChassisSpeeds output = m_controller.update(now, currentPose, velocity);
+        ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         t.log(Level.TRACE, m_name, "chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output, dt);
     }

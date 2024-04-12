@@ -5,13 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.NamedChooser;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -40,14 +40,14 @@ public class DriveManually extends Command100 {
      * Velocity control in control units, [-1,1] on all axes. This needs to be
      * mapped to a feasible velocity control as early as possible.
      */
-    private final Supplier<Twist2d> m_twistSupplier;
+    private final Supplier<DriverControl.Velocity> m_twistSupplier;
     private final SwerveDriveSubsystem m_drive;
     private final Map<String, Driver> m_drivers;
     private final Driver m_defaultDriver;
 
     String currentManualMode = null;
 
-    public DriveManually(Supplier<Twist2d> twistSupplier, SwerveDriveSubsystem robotDrive) {
+    public DriveManually(Supplier<DriverControl.Velocity> twistSupplier, SwerveDriveSubsystem robotDrive) {
         m_mode = m_manualModeChooser::getSelected;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -91,7 +91,7 @@ public class DriveManually extends Command100 {
         }
 
         // input in [-1,1] control units
-        Twist2d input = m_twistSupplier.get();
+        DriverControl.Velocity input = m_twistSupplier.get();
         SwerveState state = m_drive.getState();
         Driver d = m_drivers.getOrDefault(manualMode, m_defaultDriver);
         d.apply(state, input, dt);
@@ -118,7 +118,7 @@ public class DriveManually extends Command100 {
         m_drivers.put(
                 name,
                 new Driver() {
-                    public void apply(SwerveState s, Twist2d t, double dt) {
+                    public void apply(SwerveState s, DriverControl.Velocity t, double dt) {
                         m_drive.setRawModuleStates(d.apply(t));
                     }
 
@@ -134,7 +134,7 @@ public class DriveManually extends Command100 {
         m_drivers.put(
                 name,
                 new Driver() {
-                    public void apply(SwerveState s, Twist2d t, double dt) {
+                    public void apply(SwerveState s, DriverControl.Velocity t, double dt) {
                         m_drive.setChassisSpeeds(d.apply(s,t), dt);
                     }
 
@@ -150,7 +150,7 @@ public class DriveManually extends Command100 {
         m_drivers.put(
                 name,
                 new Driver() {
-                    public void apply(SwerveState s, Twist2d t, double dt) {
+                    public void apply(SwerveState s, DriverControl.Velocity t, double dt) {
                         m_drive.driveInFieldCoords(d.apply(s, t), dt);
                     }
 
@@ -164,7 +164,7 @@ public class DriveManually extends Command100 {
 
     private Driver stop() {
         return new Driver() {
-            public void apply(SwerveState s, Twist2d t, double dt) {
+            public void apply(SwerveState s, DriverControl.Velocity t, double dt) {
                 m_drive.stop();
             }
 

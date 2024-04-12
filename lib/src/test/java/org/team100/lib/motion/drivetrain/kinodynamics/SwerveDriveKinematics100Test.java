@@ -324,19 +324,6 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(2 * Math.PI, twist.dtheta, 0.1));
     }
 
-    private void assertModuleState(
-            SwerveModuleState expected, SwerveModuleState actual, SwerveModuleState tolerance) {
-        assertAll(
-                () -> assertEquals(
-                        expected.speedMetersPerSecond,
-                        actual.speedMetersPerSecond,
-                        tolerance.speedMetersPerSecond),
-                () -> assertEquals(
-                        expected.angle.getDegrees(),
-                        actual.angle.getDegrees(),
-                        tolerance.angle.getDegrees()));
-    }
-
     @Test
     void testOffCenterCORRotationAndTranslationForwardKinematics() {
         SwerveModuleState flState = new SwerveModuleState(23.43, Rotation2d.fromDegrees(-140.19));

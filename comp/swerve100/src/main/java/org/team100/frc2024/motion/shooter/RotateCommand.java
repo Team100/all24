@@ -3,12 +3,12 @@ package org.team100.frc2024.motion.shooter;
 import java.util.Optional;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,7 +36,7 @@ public class RotateCommand extends Command {
         double setpoint = m_goal.getRadians();
         setpoint = Math100.getMinDistance(measurement, setpoint);
         double dtheta = m_controller.calculate(measurement, setpoint);
-        Twist2d twist = new Twist2d(0, 0, dtheta);
+        FieldRelativeVelocity twist = new FieldRelativeVelocity(0, 0, dtheta);
         m_drive.driveInFieldCoords(twist, 0.02);
     }
 

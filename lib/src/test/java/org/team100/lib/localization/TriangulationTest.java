@@ -121,7 +121,6 @@ class TriangulationTest {
     }
 
     Translation2d foo(Translation2d a, Translation2d b, double thetaA, double thetaB) {
-        // TODO make this work for any orientation of a and b
         double bToA = a.minus(b).getY();
         double perpendicularDistance = bToA * Math.cos(thetaA) * Math.cos(thetaB) / Math.sin(thetaA - thetaB);
         double alphaL = perpendicularDistance * Math.tan(thetaA);

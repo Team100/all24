@@ -7,7 +7,6 @@ import static org.team100.lib.hid.ControlUtil.expo;
 import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.GenericHID;
 
 /**
@@ -49,11 +48,11 @@ public class Pilot implements DriverControl {
      * The square response of this joystick should be clamped by the consumer.
      */
     @Override
-    public Twist2d twist() {
+    public DriverControl.Velocity velocity() {
         double dx = expo(deadband(-1.0 * clamp(axis(1), 1), kDeadband, 1), kExpo);
         double dy = expo(deadband(-1.0 * clamp(axis(0), 1), kDeadband, 1), kExpo);
         double dtheta = 0; // there is no rotational velocity control.
-        return new Twist2d(dx, dy, dtheta);
+        return new DriverControl.Velocity(dx, dy, dtheta);
     }
 
     @Override

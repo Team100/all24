@@ -19,7 +19,6 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -94,7 +93,7 @@ public class DrivePursuitController implements DriveMotionController {
      * @return velocity control input
      */
     @Override
-    public ChassisSpeeds update(double timestamp, Pose2d measurement, Twist2d current_velocity) {
+    public ChassisSpeeds update(double timestamp, Pose2d measurement, ChassisSpeeds current_velocity) {
         if (m_iter == null) {
             Util.warn("Null iter!");
             return null;

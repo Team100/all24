@@ -5,6 +5,7 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -15,7 +16,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -104,7 +104,7 @@ public class Rotate extends Command100 {
                 new State100(currentPose.getY(), 0, 0),
                 new State100(refTheta.x(), refTheta.v(), refTheta.a()));
 
-        Twist2d fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
         if (m_steeringAligned) {
             // steer normally.

@@ -8,6 +8,7 @@ import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.TargetUtil;
+import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
@@ -24,7 +25,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -98,14 +98,13 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
      * @return feasible robot-relative velocity in m/s and rad/s
      */
 
-    public ChassisSpeeds apply(SwerveState state, Twist2d input) {
+    public ChassisSpeeds apply(SwerveState state, DriverControl.Velocity input) {
         // clip the input to the unit circle
         Optional<Translation2d> target = m_target.get();
-        Twist2d clipped = DriveUtil.clampTwist(input, 1.0);
+        DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         if (!target.isPresent()) {
-            Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, clipped.dtheta);
-            // desaturate to feasibility by preferring the rotational velocity.
-            twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
+            DriverControl.Velocity twistWithLock = new DriverControl.Velocity(clipped.x(), clipped.y(),
+                    clipped.theta());
 
             m_prevPose = state.pose();
             ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
@@ -113,9 +112,10 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                     m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                     m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
 
+            // prefer rotational velocity
+            scaled = m_swerveKinodynamics.preferRotation(scaled);
             // desaturate to feasibility
-            ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
-            return speeds;
+            return m_swerveKinodynamics.analyticDesaturation(scaled);
         }
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
@@ -177,9 +177,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                     m_ball.getY(),
                     0 });
         }
-        Twist2d twistWithLock = new Twist2d(clipped.dx, clipped.dy, omega);
-        // desaturate to feasibility by preferring the rotational velocity.
-        twistWithLock = m_swerveKinodynamics.preferRotation(twistWithLock);
+        DriverControl.Velocity twistWithLock = new DriverControl.Velocity(clipped.x(), clipped.y(), omega);
 
         m_prevPose = state.pose();
         ChassisSpeeds scaled = DriveUtil.scaleChassisSpeeds(
@@ -187,17 +185,16 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
         ChassisSpeeds withRot = new ChassisSpeeds(scaled.vxMetersPerSecond, scaled.vyMetersPerSecond,
-                twistWithLock.dtheta);
+                twistWithLock.theta());
+        // prefer rotational velocity
+        withRot = m_swerveKinodynamics.preferRotation(withRot);
         // desaturate to feasibility
-        ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(withRot);
-        return speeds;
+        return m_swerveKinodynamics.analyticDesaturation(withRot);
     }
 
     @Override
     public String getGlassName() {
         return "ManualWithNoteRotation";
     }
-
-    
 
 }

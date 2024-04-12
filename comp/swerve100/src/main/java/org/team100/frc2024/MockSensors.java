@@ -1,6 +1,6 @@
 package org.team100.frc2024;
 
-public class MockSensors implements SensorInterface{
+public class MockSensors implements SensorInterface {
 
     @Override
     public boolean getIntakeSensor() {
@@ -16,5 +16,5 @@ public class MockSensors implements SensorInterface{
     public boolean getFeederSensor() {
         return false;
     }
-    
+
 }

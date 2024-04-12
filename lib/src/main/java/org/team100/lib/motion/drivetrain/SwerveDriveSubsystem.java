@@ -8,6 +8,8 @@ import org.team100.lib.config.DriverSkill;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
@@ -15,7 +17,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -38,10 +39,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private ChassisSpeeds m_prevSpeeds;
     // maintained in periodic.
     private Pose2d m_pose;
-    // TODO: do not use Twist for this
-    private Twist2d m_velocity;
-    // TODO: do not use Twist for this
-    private Twist2d m_accel;
+    private FieldRelativeVelocity m_velocity;
+    private FieldRelativeAcceleration m_accel;
     private SwerveState m_state;
 
     public SwerveDriveSubsystem(
@@ -56,8 +55,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_name = Names.name(this);
         m_prevSpeeds = new ChassisSpeeds();
         m_pose = new Pose2d();
-        m_velocity = new Twist2d();
-        m_accel = new Twist2d();
+        m_velocity = new FieldRelativeVelocity(0, 0, 0);
+        m_accel = new FieldRelativeAcceleration(0, 0, 0);
         m_state = new SwerveState();
 
         stop();
@@ -150,7 +149,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @param twist  Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void driveInFieldCoords(Twist2d twist, double kDtSec) {
+    public void driveInFieldCoords(FieldRelativeVelocity twist, double kDtSec) {
         DriverControl.Speed speed = m_speed.get();
         t.log(Level.TRACE, m_name, "control_speed", speed);
 
@@ -160,9 +159,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         twist = GeometryUtil.scale(twist, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.dx,
-                twist.dy,
-                twist.dtheta,
+                twist.x(),
+                twist.y(),
+                twist.theta(),
                 m_pose.getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
@@ -175,9 +174,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @return true if aligned
      * 
      */
-    public boolean steerAtRest(Twist2d twist, double kDtSec) {
+    public boolean steerAtRest(FieldRelativeVelocity twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.dx, twist.dy, twist.dtheta, m_pose.getRotation());
+                twist.x(), twist.y(), twist.theta(), m_pose.getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -234,8 +233,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 robotPose,
                 Timer.getFPGATimestamp());
         m_pose = robotPose;
-        m_velocity = new Twist2d();
-        m_accel = new Twist2d();
+        m_velocity = new FieldRelativeVelocity(0, 0, 0);
+        m_accel = new FieldRelativeAcceleration(0, 0, 0);
     }
 
     ///////////////////////////////////////////////////////////////
@@ -249,26 +248,23 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /**
-     * Field-relative velocity. This is intended for tuning. Snapshot from
-     * periodic().
+     * This is intended for tuning. Snapshot from periodic().
      * 
      * The omega signal here will be delayed relative to the gyro. Use the gyro if
      * you really just want omega.
      * 
-     * @return a twist where the values are speeds in meters and radians per second
+     * @return meters and radians per second
      */
-    public Twist2d getVelocity() {
+    public FieldRelativeVelocity getVelocity() {
         return m_velocity;
     }
 
     /**
-     * Field-relative acceleration. This is intended for tuning. Snapshot from
-     * periodic.
+     * This is intended for tuning. Snapshot from periodic.
      * 
-     * @return a twist where the values are accelerations in meters and radians per
-     *         second squared
+     * @return meters and radians per second squared
      */
-    public Twist2d getAcceleration() {
+    public FieldRelativeAcceleration getAcceleration() {
         return m_accel;
     }
 
@@ -328,8 +324,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
                 speeds, m_pose.getRotation());
-        m_velocity = new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
-
+        m_velocity = new FieldRelativeVelocity(field.vxMetersPerSecond, field.vyMetersPerSecond,
+                field.omegaRadiansPerSecond);
     }
 
     // TODO: use odometry to get the speeds
@@ -337,14 +333,15 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         if (m_prevSpeeds == null) {
             m_prevSpeeds = speeds;
-            m_accel = GeometryUtil.kTwist2dIdentity;
+            m_accel = new FieldRelativeAcceleration(0, 0, 0);
             return;
         }
         ChassisSpeeds accel = speeds.minus(m_prevSpeeds);
         m_prevSpeeds = speeds;
         ChassisSpeeds field = ChassisSpeeds.fromFieldRelativeSpeeds(accel, m_pose.getRotation());
-        Twist2d deltaV = new Twist2d(field.vxMetersPerSecond, field.vyMetersPerSecond, field.omegaRadiansPerSecond);
-        m_accel = GeometryUtil.scale(deltaV, 1.0 / dt);
+        m_accel = new FieldRelativeAcceleration(field.vxMetersPerSecond / dt, field.vyMetersPerSecond / dt,
+                field.omegaRadiansPerSecond / dt);
+
     }
 
     private void updateState() {

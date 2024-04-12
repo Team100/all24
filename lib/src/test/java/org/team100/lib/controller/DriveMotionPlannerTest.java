@@ -69,15 +69,17 @@ class DriveMotionPlannerTest {
         controller.setTrajectory(traj_iterator);
 
         Pose2d pose = timed_trajectory.getPoint(0).state().state().getPose();
-        Twist2d velocity = new Twist2d();
+        ChassisSpeeds velocity = new ChassisSpeeds();
 
         double time = 0.0;
         double mDt = 0.005;
         while (!controller.isDone()) {
             ChassisSpeeds speeds = controller.update(time, pose, velocity);
-            Twist2d twist = new Twist2d(speeds.vxMetersPerSecond * mDt, speeds.vyMetersPerSecond * mDt,
+            Twist2d twist = new Twist2d(
+                    speeds.vxMetersPerSecond * mDt,
+                    speeds.vyMetersPerSecond * mDt,
                     speeds.omegaRadiansPerSecond * mDt);
-            velocity = GeometryUtil.toTwist2d(speeds);
+            velocity = speeds;
             pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
             time += mDt;
         }
@@ -99,10 +101,10 @@ class DriveMotionPlannerTest {
                     new TrajectoryTimeSampler(traj));
             controller.setTrajectory(traj_iterator);
             final Pose2d kInjectedError = new Pose2d(0.3, -0.1, Rotation2d.fromDegrees(9.0));
-            final Twist2d kInjectedVelocityError = new Twist2d(0.1, 0.3, 0.0);
+            final ChassisSpeeds kInjectedVelocityError = new ChassisSpeeds(0.1, 0.3, 0.0);
             final double kInjectionTime = 20.0;
             Pose2d pose = traj.getPoint(0).state().state().getPose();
-            Twist2d velocity = new Twist2d();
+            ChassisSpeeds velocity = new ChassisSpeeds();
             SwerveSetpoint setpoint = null;
             double time = 0.0;
             double mDt = 0.005;
@@ -110,14 +112,14 @@ class DriveMotionPlannerTest {
             while (!controller.isDone()) {
                 if (!error_injected && time >= kInjectionTime) {
                     pose = GeometryUtil.transformBy(pose, kInjectedError);
-                    velocity = new Twist2d(velocity.dx + kInjectedVelocityError.dx,
-                            velocity.dy + kInjectedVelocityError.dy, velocity.dtheta + kInjectedVelocityError.dtheta);
+                    velocity = velocity.plus(kInjectedVelocityError);
                     error_injected = true;
                 }
                 ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
                     // Initialize from first chassis speeds.
-                    SwerveModuleState[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds, velocity.dtheta,
+                    SwerveModuleState[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds,
+                            velocity.omegaRadiansPerSecond,
                             0.02);
                     setpoint = new SwerveSetpoint(speeds, states);
                 }
@@ -129,7 +131,7 @@ class DriveMotionPlannerTest {
                                 setpoint.getChassisSpeeds().vyMetersPerSecond * mDt),
                         Rotation2d.fromRadians(setpoint.getChassisSpeeds().omegaRadiansPerSecond * mDt));
                 pose = GeometryUtil.transformBy(pose, delta);
-                velocity = GeometryUtil.toTwist2d(setpoint.getChassisSpeeds());
+                velocity = setpoint.getChassisSpeeds();
 
                 // Inches and degrees
                 Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose),

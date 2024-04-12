@@ -8,7 +8,6 @@ import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
@@ -79,11 +78,11 @@ public abstract class JoystickControl implements DriverControl {
      * The square response of this joystick should be clamped by the consumer.
      */
     @Override
-    public Twist2d twist() {
+    public DriverControl.Velocity velocity() {
         double dx = expo(deadband(-1.0 * clamp(m_controller.getY(), 1), kDeadband, 1), kExpo);
         double dy = expo(deadband(-1.0 * clamp(m_controller.getX(), 1), kDeadband, 1), kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getTwist(), 1), kDeadband, 1), kExpo);
-        return new Twist2d(dx, dy, dtheta);
+        return new DriverControl.Velocity(dx, dy, dtheta);
     }
 
     @Override
