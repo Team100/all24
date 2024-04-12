@@ -7,7 +7,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
-import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -277,10 +276,8 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
     }
 
     private void require(REVLibError responseCode) {
-        // TODO: make this throw
         if (responseCode != REVLibError.kOk)
-            Util.warn("NeoDriveMotor received response code " + responseCode.name());
-        // throw new IllegalStateException();
+            throw new IllegalStateException("NeoDriveMotor received response code " + responseCode.name());
     }
 
 }

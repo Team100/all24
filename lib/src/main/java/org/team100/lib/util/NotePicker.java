@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 public class NotePicker {
 
-    // TODO Get real values here
     /**
      * This is the field relative position of every note on the field, going from
      * left buttom to right top
@@ -28,7 +27,7 @@ public class NotePicker {
             new Translation2d(13.66, 4.11),
     };
 
-/**
+    /**
      * @param notes  the field relative pose of detected notes
      * @param noteID the field id of the note you want to go for, left bottom to
      *               right top IDs are 1-11
@@ -101,5 +100,9 @@ public class NotePicker {
             }
         }
         return bestNoteTranslation;
+    }
+
+    private NotePicker() {
+        //
     }
 }

@@ -14,10 +14,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class RotateToShooter extends Command {
+    private static final double kToleranceRad = 0.05;
     private final SwerveDriveSubsystem m_drive;
+    private final PIDController m_controller;
 
     public RotateToShooter(SwerveDriveSubsystem drive) {
         m_drive = drive;
+        m_controller = new PIDController(2, 0, 0);
         addRequirements(m_drive);
     }
 
@@ -26,15 +29,16 @@ public class RotateToShooter extends Command {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
-        PIDController controller = new PIDController(2, 0, 0);
+
         double measurement = m_drive.getPose().getRotation().getRadians();
-        double setpoint = ShooterUtil.getRobotRotationToSpeaker(alliance.get(),
+        double setpoint = ShooterUtil.getRobotRotationToSpeaker(
+                alliance.get(),
                 m_drive.getPose().getTranslation(), 0).getRadians();
 
         setpoint = Math100.getMinDistance(measurement, setpoint);
 
-        double value = controller.calculate(m_drive.getPose().getRotation().getRadians(), setpoint);
-        Twist2d twist = new Twist2d(0, 0, value);
+        double dtheta = m_controller.calculate(measurement, setpoint);
+        Twist2d twist = new Twist2d(0, 0, dtheta);
         m_drive.driveInFieldCoords(twist, 0.02);
     }
 
@@ -45,9 +49,10 @@ public class RotateToShooter extends Command {
             Util.warn("no alliance present!");
             return true;
         }
-        return Math.abs(ShooterUtil.getRobotRotationToSpeaker(
+        double bearingRad = ShooterUtil.getRobotRotationToSpeaker(
                 alliance.get(),
                 m_drive.getPose().getTranslation(), 0).getRadians()
-                - m_drive.getPose().getRotation().getRadians()) < 0.05;
+                - m_drive.getPose().getRotation().getRadians();
+        return Math.abs(bearingRad) < kToleranceRad;
     }
 }

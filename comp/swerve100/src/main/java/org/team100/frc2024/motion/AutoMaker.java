@@ -3,7 +3,6 @@ package org.team100.frc2024.motion;
 import java.util.List;
 import java.util.Optional;
 
-import org.team100.frc2024.FieldConstants;
 import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.commands.ShootPreload;
 import org.team100.frc2024.motion.amp.AmpSubsystem;
@@ -13,7 +12,6 @@ import org.team100.frc2024.motion.intake.ChangeIntakeState;
 import org.team100.frc2024.motion.intake.ChangeIntakeState2;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.RampShooter;
-import org.team100.frc2024.motion.shooter.RotateCommand;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.controller.DriveMotionController;

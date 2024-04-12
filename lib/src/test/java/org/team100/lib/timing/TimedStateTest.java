@@ -16,13 +16,13 @@ class TimedStateTest {
         // At (0,0,0), t=0, v=0, acceleration=1
         TimedPose start_state = new TimedPose(
                 new Pose2dWithMotion(
-                        GeometryUtil.fromTranslation(new Translation2d(0.0, 0.0)), 0.0),
+                        GeometryUtil.fromTranslation(new Translation2d(0.0, 0.0))),
                 0.0, 0.0, 1.0);
 
         // At (.5,0,0), t=1, v=1, acceleration=0
         TimedPose end_state = new TimedPose(
                 new Pose2dWithMotion(
-                        GeometryUtil.fromTranslation(new Translation2d(0.5, 0.0)), 0.0),
+                        GeometryUtil.fromTranslation(new Translation2d(0.5, 0.0))),
                 1.0, 1.0, 0.0);
 
         TimedPose i0 = start_state.interpolate2(end_state, 0.0);

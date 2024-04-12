@@ -5,7 +5,6 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class OperatorV2Control implements OperatorControl {
-    private static final double kDeadband = 0.1;
     private final XboxController m_controller;
 
     public OperatorV2Control() {
@@ -56,15 +55,12 @@ public class OperatorV2Control implements OperatorControl {
     @Override
     public double getLeftAxis(){
         return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
-        // return -m_controller.getRightY();
 
     }
 
     @Override
     public double getRightAxis(){
         return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
-        // return -m_controller.getLeftY();
-
     }
 
     @Override

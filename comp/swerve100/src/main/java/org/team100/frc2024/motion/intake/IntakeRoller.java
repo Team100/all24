@@ -16,7 +16,6 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Direct-drive roller intake

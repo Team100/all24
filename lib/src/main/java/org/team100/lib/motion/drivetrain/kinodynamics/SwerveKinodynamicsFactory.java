@@ -30,7 +30,6 @@ public class SwerveKinodynamicsFactory {
                 // these numbers are a guess based on the betabot numbers.
                 // the comp but uses the "fast" ratio and FOC falcons
                 // so should be a bit higher top speed and less acceleration.
-                // TODO: measure the comp bot.
                 return new SwerveKinodynamics(
                         5, // max vel m/s
                         3, // max accel m/s/s
@@ -49,7 +48,6 @@ public class SwerveKinodynamicsFactory {
             case BLANK:
                 // this is used for tests and simulation; if you change it you should fix all
                 // the broken tests.
-                // TODO: make tests specify kinodynamics instead.
                 return new SwerveKinodynamics(4, 4, 4, 13, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
             case BETA_BOT:
                 // these numbers were extracted from module mode acceleration

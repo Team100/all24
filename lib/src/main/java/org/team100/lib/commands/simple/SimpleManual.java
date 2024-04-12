@@ -11,11 +11,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 /**
  * Manual control of a single degree of freedom.
  * 
- * Three modes are provided: duty-cycle, closed-loop velocity, and closed-loop
- * position.
+ * Two modes are provided: closed-loop velocity, and closed-loop position.
  */
 public class SimpleManual extends Command {
-    private static final double kMaxDutyCycle = 0.5;
     private static final double kMaxVelocity = 2; // m/s
     private static final double kMaxPosition = 2; // m
 

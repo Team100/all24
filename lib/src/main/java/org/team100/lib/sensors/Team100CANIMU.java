@@ -1,88 +1,75 @@
 package org.team100.lib.sensors;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
+
 import edu.wpi.first.hal.CANData;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.CAN;
 
 public class Team100CANIMU {
-    public static final int CAN_DEVICE_MANUFACTURER = 8;
-    public static final int CAN_DEVICE_TYPE = 4;
-    public static final int API_ID_EULER_ANGLES = 17;
-    public static final int API_ID_QUATERNION = 18;
+    private static final int CAN_DEVICE_MANUFACTURER = 8;
+    private static final int CAN_DEVICE_TYPE = 4;
+    private static final int API_ID_EULER_ANGLES = 17;
+    // private static final int API_ID_QUATERNION = 18;
     // the 16 bit values on the CAN bus must be divided by 163.84 then 200 should be
     // subtracted from the value
-    public static final double INT_TO_ENG_COEFF = 1 / 163.84;
-    public static final double INT_TO_ENG_OFFSET = -200;
-    public static final double INT_TO_ENG_ACC = 1 / 655.36;
+    private static final double INT_TO_ENG_COEFF = 1 / 163.84;
+    private static final double INT_TO_ENG_OFFSET = -200;
+    private static final double INT_TO_ENG_ACC = 1 / 655.36;
 
-    private long rollValueInt, pitchValueInt, yawValueInt, accValueInt;
-    private int deviceID;
-    private boolean result;
-    private CAN Team100CANIMU;
-    private CANData IMUData;
-    private EulerAngles EAngles;
+    private final CAN m_device;
 
-    /*
-     * Constructor
-     */
     public Team100CANIMU(int deviceID) {
-        this.deviceID = deviceID;
-        Team100CANIMU = new CAN(this.deviceID, CAN_DEVICE_MANUFACTURER, CAN_DEVICE_TYPE);
-        IMUData = new CANData();
-        EAngles = new EulerAngles();
-
+        m_device = new CAN(deviceID, CAN_DEVICE_MANUFACTURER, CAN_DEVICE_TYPE);
     }
 
-    /*
-     * Destructor
-     */
-//  public void close() {
-//    Team100CANIMU.close();
-//  }
+    public Optional<EulerAngles> getEulerAngles() {
+        CANData m_IMUData = new CANData();
+        boolean valid = m_device.readPacketLatest(API_ID_EULER_ANGLES, m_IMUData);
+        if (!valid)
+            return Optional.empty();
 
-    /*
-     * Get Euler Angles
-     */
-    public EulerAngles getEulerAngles() {
-        result = Team100CANIMU.readPacketLatest(API_ID_EULER_ANGLES, IMUData);
-        rollValueInt = ((IMUData.data[0]<<8) & 0xFF00) + (IMUData.data[1] & 0xFF);
-        EAngles.setRoll(rollValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
-        pitchValueInt = ((IMUData.data[2]<<8) & 0xFF00) + (IMUData.data[3] & 0xFF);
-        EAngles.setPitch(pitchValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
-        yawValueInt = ((IMUData.data[4]<<8) & 0xFF00) + (IMUData.data[5] & 0xFF);
-        EAngles.setYaw(yawValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
-        accValueInt = ((IMUData.data[6]<<8) & 0xFF00) + (IMUData.data[7] & 0xFF);
-        EAngles.setAcc(accValueInt * INT_TO_ENG_ACC);
-        return EAngles;
+        int rollValueInt = fromBytes(m_IMUData.data[0], m_IMUData.data[1]);
+        int pitchValueInt = fromBytes(m_IMUData.data[2], m_IMUData.data[3]);
+        int yawValueInt = fromBytes(m_IMUData.data[4], m_IMUData.data[5]);
+        int accValueInt = fromBytes(m_IMUData.data[6], m_IMUData.data[7]);
+
+        double roll = (rollValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
+        double pitch = (pitchValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
+        double yaw = (yawValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
+        double accuracy = (accValueInt * INT_TO_ENG_ACC);
+
+        return Optional.of(new EulerAngles(roll, pitch, yaw, accuracy));
     }
 
-    /*
-     * Get Roll Angle
-     */
-    public double getRollAngle() {
-        result = Team100CANIMU.readPacketLatest(API_ID_EULER_ANGLES, IMUData);
-        rollValueInt = ((IMUData.data[0]<<8) & 0xFF00) + (IMUData.data[1] & 0xFF);
-        return (rollValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
+    public OptionalDouble getRollAngle() {
+        CANData m_IMUData = new CANData();
+        boolean valid = m_device.readPacketLatest(API_ID_EULER_ANGLES, m_IMUData);
+        if (!valid)
+            return OptionalDouble.empty();
+        int rollValueInt = fromBytes(m_IMUData.data[0], m_IMUData.data[1]);
+        return OptionalDouble.of(rollValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
     }
 
-    /*
-     * Get Pitch Angle
-     */
-    public double getPitchAngle() {
-        result = Team100CANIMU.readPacketLatest(API_ID_EULER_ANGLES, IMUData);
-        pitchValueInt = ((IMUData.data[2]<<8) & 0xFF00) + (IMUData.data[3] & 0xFF);
-        return (pitchValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
+    public OptionalDouble getPitchAngle() {
+        CANData m_IMUData = new CANData();
+        boolean valid = m_device.readPacketLatest(API_ID_EULER_ANGLES, m_IMUData);
+        if (!valid)
+            return OptionalDouble.empty();
+        int pitchValueInt = fromBytes(m_IMUData.data[2], m_IMUData.data[3]);
+        return OptionalDouble.of(pitchValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
     }
 
-    /*
-     * Get Yaw Angle
-     */
-    public double getYawAngle() {
-        result = Team100CANIMU.readPacketLatest(API_ID_EULER_ANGLES, IMUData);
-        yawValueInt = ((IMUData.data[4]<<8) & 0xFF00) + (IMUData.data[5] & 0xFF);
-        return (yawValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
+    public OptionalDouble getYawAngle() {
+        CANData m_IMUData = new CANData();
+        boolean valid = m_device.readPacketLatest(API_ID_EULER_ANGLES, m_IMUData);
+        if (!valid)
+            return OptionalDouble.empty();
+        int yawValueInt = fromBytes(m_IMUData.data[4], m_IMUData.data[5]);
+        return OptionalDouble.of(yawValueInt * INT_TO_ENG_COEFF + INT_TO_ENG_OFFSET);
     }
 
-
+    private int fromBytes(byte hi, byte lo) {
+        return ((hi << 8) & 0xFF00) + (lo & 0xFF);
+    }
 }

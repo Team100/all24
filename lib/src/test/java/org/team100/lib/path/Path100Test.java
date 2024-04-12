@@ -24,10 +24,10 @@ class Path100Test {
             GeometryUtil.fromDegrees(90));
 
     private static final List<Pose2dWithMotion> kWaypoints = Arrays.asList(
-            new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), kHeadings.get(0)), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(24.0, 0.0), kHeadings.get(1)), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(36.0, 12.0), kHeadings.get(2)), 0),
-            new Pose2dWithMotion(new Pose2d(new Translation2d(60.0, 12.0), kHeadings.get(3)), 0));
+            new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), kHeadings.get(0))),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(24.0, 0.0), kHeadings.get(1))),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(36.0, 12.0), kHeadings.get(2))),
+            new Pose2dWithMotion(new Pose2d(new Translation2d(60.0, 12.0), kHeadings.get(3))));
 
     @Test
     void testConstruction() {

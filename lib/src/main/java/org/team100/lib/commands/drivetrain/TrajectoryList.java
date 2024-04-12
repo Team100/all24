@@ -5,6 +5,9 @@ import java.util.List;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
+/** a list of poses and rotations equivalent to a trajectory
+ * TODO: call this something else
+ */
 public class TrajectoryList {
 
     public List<Pose2d> m_pose2dArray;

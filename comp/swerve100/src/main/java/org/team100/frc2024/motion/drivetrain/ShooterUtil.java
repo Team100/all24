@@ -63,6 +63,7 @@ public class ShooterUtil {
         return new Translation2d(fieldConstants.getShooterCenterX(), offsetDistance);
     }
 
+    /** absolute bearing */
     public static Rotation2d getRobotRotationToSpeaker(
             Alliance alliance,
             Translation2d translation,
@@ -72,15 +73,15 @@ public class ShooterUtil {
         return target.minus(currentTranslation).getAngle();
     }
 
-    public static double getAngle(double distance) {
-        return instance.getAngle(distance);
+    public static double getAngleRad(double distance) {
+        return instance.getAngleRad(distance);
     }
 
     public static double getShooterAngleWhileMovingTest(
             double distanceM,
             double velocityM_s,
             SwerveState state) {
-        double angleWithoutMoving = getAngle(distanceM);
+        double angleWithoutMoving = getAngleRad(distanceM);
         double angleInRads = angleWithoutMoving * Math.PI / 180;
         double xComponent = velocityM_s * Math.sin(angleInRads);
         double yComponent = velocityM_s * Math.cos(angleInRads);
@@ -94,7 +95,7 @@ public class ShooterUtil {
             double distanceM,
             double velocityM_s,
             SwerveState state) {
-        double angleWithoutMoving = getAngle(distanceM);
+        double angleWithoutMoving = getAngleRad(distanceM);
         Rotation2d angleInRads = Rotation2d.fromDegrees(angleWithoutMoving);
         Vector2d stationaryRobotVector = new Vector2d(velocityM_s, angleInRads);
         Vector2d robotMovingVector = new Vector2d(state.x().v(), 0);

@@ -51,7 +51,7 @@ public class ShooterDefault extends Command {
                         // m_pivotUpSupplier.get(), m_pivotDownSupplier.get()); //22.5a
                         // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2)); //22.5a
                         // m_shooter.setAngle(0.4);
-                        m_shooter.setAngle(ShooterUtil.getAngle(distance));
+                        m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
 
                         break;
                     case TEST:

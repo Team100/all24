@@ -29,8 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * TODO: add climber to selftest.
  */
 public class ClimberSubsystem extends SubsystemBase implements Glassy {
-    // TODO: tune the current limit
-    private static final int kCurrentLimit = 2;
+    private static final int kCurrentLimit = 40;
     private final String m_name;
     private final SysParam m_params;
     private final CANSparkFlex s1;
@@ -57,8 +56,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 s2.setInverted(false);
                 s1.setInverted(true);
                 
-                s1.setSmartCurrentLimit(40);
-                s2.setSmartCurrentLimit(40);
+                s1.setSmartCurrentLimit(kCurrentLimit);
+                s2.setSmartCurrentLimit(kCurrentLimit);
 
                 // @vasili 3/25
                 // s1 = ServoFactory.neoVortexDistanceServo(m_name + "Left Climber", leftClimberID, true, kCurrentLimit,

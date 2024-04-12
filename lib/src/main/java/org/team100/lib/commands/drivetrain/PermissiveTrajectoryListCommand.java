@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -21,19 +20,14 @@ import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Similar to TrajectoryListCommand, but each trajectory starts wherever the
  * robot ends up, instead of at the end of the previous trajectory. This is
  * essentially like ignoring cross-track error.
- * 
- * This just holds the starting rotation. If you want a holonomic trajectory
- * follower, try the {@link DriveMotionController} classes.
  */
 public class PermissiveTrajectoryListCommand extends Command100 {
-
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
@@ -42,7 +36,6 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     private Trajectory100 m_currentTrajectory;
     private TrajectoryTimeIterator m_iter;
     private boolean done;
-    private Rotation2d m_rotation;
     private boolean m_aligned;
 
     public PermissiveTrajectoryListCommand(
@@ -58,8 +51,6 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     @Override
     public void initialize100() {
         m_controller.reset();
-        Pose2d currentPose = m_swerve.getPose();
-        m_rotation = currentPose.getRotation();
         m_trajectoryIter = m_trajectories.iterator();
         m_currentTrajectory = null;
         done = false;

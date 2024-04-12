@@ -8,7 +8,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
-import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -94,11 +93,7 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
         m_motor.setIdleMode(IdleMode.kBrake);
-        if (motorPhase == MotorPhase.FORWARD) {
-            m_motor.setInverted(false);
-        } else {
-            m_motor.setInverted(true);
-        }
+        m_motor.setInverted(motorPhase != MotorPhase.FORWARD);
 
         require(m_motor.setSmartCurrentLimit(currentLimit));
 
@@ -269,9 +264,7 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
     }
 
     private void require(REVLibError responseCode) {
-        // TODO: make this throw
         if (responseCode != REVLibError.kOk)
-            Util.warn("NeoTurningMotor received response code " + responseCode.name());
-        // throw new IllegalStateException();
+            throw new IllegalStateException("NeoTurningMotor received response code " + responseCode.name());
     }
 }
