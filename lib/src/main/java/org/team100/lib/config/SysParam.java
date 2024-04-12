@@ -1,22 +1,12 @@
 package org.team100.lib.config;
 
-/**
- * TODO(sanjan): make several of these sysparam classes, one per subsystem,
- * instead of using optional parameters.
- * 
- * @param gearRatio
- * @param wheelDiameter
- * @param maxVelM_S
- * @param maxAccelM_S2
- * @param maxDecelM_S2 must be non-positive.
- */
+
 public record SysParam(
         double gearRatio,
         double wheelDiameter,
         double maxVelM_S,
         double maxAccelM_S2,
         double maxDecelM_S2) {
-    // No need to explicitly declare a constructor or getter/setter methods
 
     public static SysParam limitedNeoVelocityServoSystem(double gearRatio, double wheelDiameter, double maxVel,
             double maxAccel, double maxDecel) {

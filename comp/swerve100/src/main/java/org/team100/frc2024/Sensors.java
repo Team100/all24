@@ -10,32 +10,29 @@ public class Sensors {
     public DigitalInput feederSensor;
     public Timer m_timer = new Timer();
 
-
-    public Sensors(int port1, int port2, int port3){
-
-        //TODO get this real value
+    public Sensors(int port1, int port2, int port3) {
         intakeSensor = new DigitalInput(5);
         // superStructureSensor = new DigitalInput(port2);
         feederSensor = new DigitalInput(9);
         m_timer.restart();
-        
+
     }
 
-    public boolean getIntakeSensor(){
+    public boolean getIntakeSensor() {
         return intakeSensor.get();
     }
-     
-    public boolean getSuperSensor(){
-        
+
+    public boolean getSuperSensor() {
+
         return false;
 
         // return superStructureSensor.get();
     }
 
-    public boolean getFeederSensor(){
+    public boolean getFeederSensor() {
 
         // if(m_timer.get() < 10){
-        //     return false;
+        // return false;
         // }
         // return true;
         return feederSensor.get();

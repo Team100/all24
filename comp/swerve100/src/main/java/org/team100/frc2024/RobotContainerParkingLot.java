@@ -78,7 +78,7 @@ public class RobotContainerParkingLot {
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                Timer.getFPGATimestamp(), // TODO: make this a real time
+                Timer.getFPGATimestamp(),
                 VecBuilder.fill(0.1, 0.1, 0.1),
                 VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); // 0.1 0.1
         SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
@@ -96,7 +96,6 @@ public class RobotContainerParkingLot {
         // joel 2/22/24 removing for SVR, put it back after that.
         // 20 words per minute is 60 ms.
         m_beep = new MorseCodeBeep(0.06);
-        // TODO: try a simple beep instead?
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() ||
                 m_beep.getOutput();

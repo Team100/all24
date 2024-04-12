@@ -27,7 +27,6 @@ public class SimulatedCamera {
         m_focalLength = focalLength;
     }
 
-    //TODO make this work with any camera yaw or roll
     /**
      * Gets the rotation to the object in the frame
      * @param robotPose Pose of the robot

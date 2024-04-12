@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class JSONParser {
 
-    public static TrajectoryList getTrajectoryList(String src) {
+    public static PathArrays getTrajectoryList(String src) {
         List<Pose2d> poseArray = new ArrayList<>();
         List<Rotation2d> headingArray = new ArrayList<>();
 
@@ -34,7 +34,7 @@ public class JSONParser {
                 headingArray.add(new Rotation2d(heading));
             }
 
-            return new TrajectoryList(poseArray, headingArray);
+            return new PathArrays(poseArray, headingArray);
 
             // Print the array
         } catch (Exception e) {

@@ -43,7 +43,7 @@ public class DriveWithTrajectory extends Command100 {
         m_swerve = drivetrain;
         m_controller = controller;
 
-        TrajectoryList trajectoryList = JSONParser.getTrajectoryList(fileName);
+        PathArrays trajectoryList = JSONParser.getTrajectoryList(fileName);
         trajectoryList.removeLastIndex();
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(limits).allGood();

@@ -86,7 +86,6 @@ public class LEDIndicator {
     private boolean m_flashing;
 
     public LEDIndicator(int port) {
-        // TODO: change the ranges to match the actual LEDs
         m_frontStrips = new ArrayList<>();
         m_backStrips = new ArrayList<>();
         
