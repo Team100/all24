@@ -1,7 +1,6 @@
 package org.team100.frc2024.motion.shooter;
 
 import org.team100.frc2024.motion.GravityServo;
-import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -10,7 +9,6 @@ import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
@@ -25,7 +23,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * Direct-drive shooter with top and bottom drums.
@@ -177,29 +174,6 @@ public class DrumShooter extends Shooter {
         t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());
 
         m_viz.periodic();
-        // pivotServo.setDutyCycle(0.1);
-    }
-
-    public void pivotAndRamp(SwerveDriveSubsystem m_drive, double kThreshold) {
-        if (m_drive.getPose().getX() < kThreshold) {
-            forward();
-            t.log(Level.DEBUG, m_name, "Angle", ShooterUtil.getAngleRad(m_drive.getPose().getX()));
-            t.log(Level.DEBUG, m_name, "Pose X", m_drive.getPose().getX());
-            setAngle(ShooterUtil.getAngleRad(m_drive.getPose().getX()));
-        }
-    }
-
-    @Override
-    public boolean readyToShoot(Alliance alliance, SwerveDriveSubsystem m_drive) {
-        double bearingDeg = ShooterUtil.getRobotRotationToSpeaker(
-                alliance,
-                m_drive.getPose().getTranslation(),
-                0.25).getDegrees() - m_drive.getPose().getRotation().getDegrees();
-        // TODO: note this range is wrong since it's just pose.x. It should be the
-        // range to the target; i think this method is probably not used.
-        // TODO: remove this
-        double elevationErrorRad = getAngleRad() - ShooterUtil.getAngleRad(m_drive.getPose().getX());
-        return (Math.abs(bearingDeg) < 1) && (Math.abs(elevationErrorRad) < 0.1);
     }
 
     public boolean readyToShoot() {
