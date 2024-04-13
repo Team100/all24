@@ -13,7 +13,7 @@ import sys
 import libcamera
 import numpy as np
 import ntcore
-
+from ntcore import EventFlags
 import robotpy_apriltag
 
 from cscore import CameraServer
@@ -217,11 +217,13 @@ class TagFinder:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
+    def accept(self, estimatedTagPose):
+        print("ay" + str(estimatedTagPose.readQueue()))
+
     def initialize_nt(self):
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
-
         # roboRio address. windows machines can impersonate this for simulation.
         self.inst.setServer("10.1.0.2")
 
@@ -231,10 +233,23 @@ class TagFinder:
             topic_name + "/latency"
         ).publish()
 
+        # work around https://github.com/robotpy/mostrobotpy/issues/60
+        self.inst.getStructTopic("bugfix", Blip24).publish().set(
+            Blip24(0, Transform3d())
+        )
+        # blip array topic
         self.vision_nt_struct = self.inst.getStructArrayTopic(
-            topic_name + "/estimatedTagPose", Transform3d
-        ).subscribe()
- 
+            topic_name + "/blips", Blip24
+        ).publish()
+
+        self.estimatedTagPose = self.inst.getStructArrayTopic(
+            topic_name + "/estimatedTagPose", Blip24
+        ).subscribe([],ntcore.PubSubOptions())
+
+        try: self.inst.addListener(self.estimatedTagPose,EventFlags.kValueAll, self.accept(self.estimatedTagPose))
+        finally: print("RUH ROH")
+        
+
 
 def getserial():
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
@@ -330,6 +345,7 @@ def main():
     output = TagFinder(serial, width, height, model)
 
     camera.start()
+    # output.startListening()
     try:
         while True:
             # the most recent completed frame, from the recent past

@@ -13,6 +13,8 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public enum Camera {
 
+    C("10000000a7c673d9",
+            new Transform3d()),
     /**
      * Delta shooter
      */

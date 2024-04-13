@@ -1,18 +1,24 @@
 package org.team100.lib.localization;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.opencv.core.Core;
 import org.team100.lib.config.Camera;
 import org.team100.lib.telemetry.Telemetry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTablesJNI;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.util.CombinedRuntimeLoader;
+import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -21,19 +27,20 @@ public class CameraUpdater {
     private final Supplier<Pose2d> m_robotPose;
     private final List<Blip24> blips = new ArrayList<>();
     private HashMap<Camera, StructArrayPublisher<Blip24>> blipsPublishers = new HashMap<>();
-
-    public CameraUpdater(Supplier<Pose2d> robotPose, AprilTagFieldLayoutWithCorrectOrientation layout) {
+    public CameraUpdater(Supplier<Pose2d> robotPose, AprilTagFieldLayoutWithCorrectOrientation layout) throws IOException {
         m_layout = layout;
         m_robotPose = robotPose;
+        var inst = NetworkTableInstance.getDefault();
+        // inst.startServer();
         Blip24Struct struct = new Blip24Struct();
         for (Camera camera : Camera.values()) {
             if (camera == Camera.UNKNOWN ||camera == Camera.TEST1 || camera == Camera.TEST2 || camera == Camera.TEST3 || camera == Camera.TEST4)
                 continue;
-            blipsPublishers.put(camera, NetworkTableInstance.getDefault()
+            blipsPublishers.put(camera, inst
                     .getStructArrayTopic("vision/" + camera.getSerial() + "/estimatedTagPose", struct).publish());
         }
         for (int i = 0; i < m_layout.getLayout(Alliance.Red).getTags().size(); i++) {
-            blips.add(new Blip24(i + 1, new Transform3d()));
+            blips.add(new Blip24(i + 1, new Transform3d()));    
         }
     }
 
