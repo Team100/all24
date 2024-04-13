@@ -101,6 +101,10 @@ class GamePieceFinder:
         self.vision_latency = self.inst.getDoubleTopic(
             topic_name + "/latency"
         ).publish()
+        # work around https://github.com/robotpy/mostrobotpy/issues/60
+        self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
+            Rotation3d(0,0,0)
+        )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/Rotation3d", Rotation3d
