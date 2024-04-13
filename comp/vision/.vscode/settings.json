@@ -11,6 +11,6 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "workbench.colorTheme": "Default Light+",
+    "workbench.colorTheme": "Default Dark Modern",
     "editor.minimap.enabled": false
 }
