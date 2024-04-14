@@ -1,9 +1,9 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.util.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
 
 /**
  * Checks periodically for changes in the HID connected to port 2, and changes
@@ -12,18 +12,16 @@ import edu.wpi.first.wpilibj.Notifier;
 public class ThirdControlProxy implements ThirdControl {
     private static class NoThirdControl implements ThirdControl {
     }
+
     private static final int kPort = 2;
     private static final double kFreq = 1;
 
-    private final Notifier m_notifier;
     private String m_name;
     private ThirdControl m_ThirdControl;
 
     public ThirdControlProxy() {
-        m_notifier = new Notifier(this::refresh);
-        m_notifier.setName("ThirdControlProxy Notifier");
         refresh();
-        m_notifier.startPeriodic(kFreq);
+        Async.runner.addPeriodic(this::refresh, kFreq);
     }
 
     public void refresh() {

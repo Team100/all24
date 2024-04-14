@@ -2,13 +2,13 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Async;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.kauailabs.navx.frc.AHRS.SerialDataType;
 
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -19,7 +19,6 @@ public class SingleNavXGyro implements Gyro100 {
     private static final byte kUpdateRateHz = (byte) 200;
     private final Telemetry t = Telemetry.get();
     private final AHRS m_gyro1;
-    private final Notifier periodicLogger;
     private final String m_name;
 
     public SingleNavXGyro() {
@@ -39,11 +38,7 @@ public class SingleNavXGyro implements Gyro100 {
         }
 
         m_gyro1.zeroYaw();
-
-        // periodic notifier so we can see it without any command running
-        periodicLogger = new Notifier(this::logStuff);
-        periodicLogger.setName("Gyro Periodic Logger Notifier");
-        periodicLogger.startPeriodic(1);
+        Async.runner.addPeriodic(this::logStuff, 1);
     }
 
     /**

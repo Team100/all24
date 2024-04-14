@@ -1,9 +1,9 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.util.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
 
 /**
  * Checks periodically for changes in the HID connected to port 1, and changes
@@ -16,15 +16,12 @@ public class OperatorControlProxy implements OperatorControl {
     private static final int kPort = 1;
     private static final double kFreq = 1;
 
-    private final Notifier m_notifier;
     private String m_name;
     private OperatorControl m_operatorControl;
 
     public OperatorControlProxy() {
-        m_notifier = new Notifier(this::refresh);
-        m_notifier.setName("OperatorControlProxy Notifier");
         refresh();
-        m_notifier.startPeriodic(kFreq);
+        Async.runner.addPeriodic(this::refresh, kFreq);
     }
 
     public void refresh() {
