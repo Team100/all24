@@ -37,7 +37,6 @@ class Angle100PositionServoTest {
                 Angle100.instance);
         servo.reset();
         servo.setPosition(1);
-        servo.periodic();
         assertEquals(0, turningMotor.output, 0.001);
         assertEquals(0.5, servo.getSetpoint().x(), kDelta);
         assertEquals(1.0, servo.getSetpoint().v(), kDelta);

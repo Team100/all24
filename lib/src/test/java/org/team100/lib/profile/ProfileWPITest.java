@@ -7,10 +7,12 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.util.Util;
 
 class ProfileWPITest {
+    private static final boolean actuallyPrint = false;
     private static final double kDelta = 0.001;
 
     private void dump(double tt, State100 sample) {
-        Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        if (actuallyPrint)
+            Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
     }
 
     /**

@@ -1,7 +1,9 @@
-package org.team100.lib.motion.drivetrain.module;
+package org.team100.lib.visualization;
 
+import org.team100.lib.motion.drivetrain.module.SwerveModule100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelChooser;
+import org.team100.lib.util.Async;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -19,7 +21,12 @@ public class SwerveModuleVisualization {
     private final MechanismLigament2d m_steer;
     private final MechanismLigament2d m_drive;
 
-    public SwerveModuleVisualization(SwerveModule100 module) {
+    public static void make(SwerveModule100 module) {
+        SwerveModuleVisualization v = new SwerveModuleVisualization(module);
+        Async.runner.addPeriodic(v::viz, 0.1);
+    }
+
+    private SwerveModuleVisualization(SwerveModule100 module) {
         // the glass visualization requires the key to be a root key
         // so eliminate the slashes.
         String name = module.getName().replace("/", "_");
@@ -36,8 +43,8 @@ public class SwerveModuleVisualization {
         SmartDashboard.putData("Swerve Viz/" + name, m_mechanism);
     }
 
-    public void periodic() {
-        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG) ) {
+    private void viz() {
+        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG)) {
             m_drive.setAngle(angle());
             m_drive.setLength(speed());
             m_steer.setAngle(angle());

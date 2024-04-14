@@ -3,6 +3,7 @@ package org.team100.frc2024.motion;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.PWM;
@@ -47,7 +48,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(org.team100.lib.telemetry.Telemetry.Level.DEBUG, m_name, "speed", feedRoller.getSpeed());
+        t.log(Level.DEBUG, m_name, "speed", feedRoller.getSpeed());
     }
 
     @Override

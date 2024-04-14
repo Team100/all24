@@ -11,12 +11,13 @@ import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
-import org.team100.lib.motor.turning.PWMTurningMotor;
+import org.team100.lib.motor.turning.TurningMotorController100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
 /**
  * Stock AndyMark module with Falcon drive and PWM 775 steering.
@@ -84,7 +85,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
-        PWMTurningMotor turningMotor = new PWMTurningMotor(name, turningMotorChannel);
+        TurningMotorController100 turningMotor = new TurningMotorController100(name, 
+                 new VictorSP(turningMotorChannel),
+                turningMotorChannel);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
                 name,
                 turningEncoderChannel,

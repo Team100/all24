@@ -120,10 +120,9 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition() / m_params.gearRatio())));
         t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition() / m_params.gearRatio());
-    }
-
-    public void setDutyCycle(double value) {
-        m_motor.set(value);
+        t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
+        t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
+        t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
     }
 
     public void setWithSoftLimits(double value) {
@@ -175,13 +174,9 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition() / m_params.gearRatio())));
         t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition() / m_params.gearRatio());
-    }
-
-    public void periodic() {
         t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
         t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
-        m_encoder.periodic();
     }
 
     public void set(double value) {
@@ -191,5 +186,4 @@ public class GravityServo {
     public void stop() {
         m_motor.set(0);
     }
-
 }

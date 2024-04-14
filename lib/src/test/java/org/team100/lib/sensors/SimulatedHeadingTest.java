@@ -42,7 +42,6 @@ class SimulatedHeadingTest implements Timeless {
         for (int i = 0; i < 20; ++i) {
             c.setDesiredStates(states);
             stepTime(0.02);
-            c.periodic();
         }
         assertEquals(0, h.getHeadingNWU().getRadians(), kDelta);
         assertEquals(0, h.getHeadingRateNWU(), kDelta);
@@ -68,7 +67,6 @@ class SimulatedHeadingTest implements Timeless {
             // get the modules pointing the right way (wait for the steering profiles)
             c.setDesiredStates(states);
             stepTime(0.02);
-            c.periodic();
         }
 
         // target is 1 rad/sec, we went 0.4 sec. some of that time is spent accelerating
@@ -105,7 +103,6 @@ class SimulatedHeadingTest implements Timeless {
             // get the modules pointing the right way (wait for the steering profiles)
             c.setDesiredStates(states);
             stepTime(0.02);
-            c.periodic();
         }
         SwerveModuleState[] states2 = c.states();
 

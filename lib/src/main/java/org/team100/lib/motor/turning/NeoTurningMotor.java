@@ -72,11 +72,6 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     private final CANSparkMax m_motor;
     private final String m_name;
 
-    /** Current velocity measurement, obtained in periodic(). */
-    private double m_encoderVelocity;
-    /** Current position measurement, obtained in periodic(). */
-    private double m_encoderPosition;
-
     /**
      * 
      * @param name
@@ -137,6 +132,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
+        log();
     }
 
     @Override
@@ -157,7 +153,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         double motorRad_S2 = m_gearRatio * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
         double velocityFF = velocityFFVolts(motorRevs_S);
-        double frictionFF = frictionFFVolts(m_encoderVelocity / 60, motorRevs_S);
+        double frictionFF = frictionFFVolts(m_encoder.getVelocity() / 60, motorRevs_S);
         double accelFF = accelFFVolts(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
@@ -167,6 +163,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFF);
         t.log(Level.TRACE, m_name, "accel feedforward [-1,1]", accelFF);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRevs_S);
+        log();
     }
 
     @Override
@@ -178,7 +175,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
 
         double velocityFFVolts = velocityFFVolts(motorRevs_S);
-        double frictionFFVolts = frictionFFVolts(m_encoderVelocity / 60, motorRevs_S);
+        double frictionFFVolts = frictionFFVolts(m_encoder.getVelocity() / 60, motorRevs_S);
         double accelFFVolts = accelFFVolts(motorRevs_S2);
 
         double torqueFFAmps = torqueNm / kTNm_amp;
@@ -193,6 +190,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRevs_S);
+        log();
     }
 
     @Override
@@ -202,7 +200,6 @@ public class NeoTurningMotor implements Motor100<Angle100> {
 
     public void resetPosition() {
         m_encoder.setPosition(0);
-        m_encoderPosition = 0;
     }
 
     @Override
@@ -211,21 +208,16 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     }
 
     public double getPositionRot() {
-        return m_encoderPosition;
+        return m_encoder.getPosition();
     }
 
     public double getRateRPM() {
-        return m_encoderVelocity;
+        return m_encoder.getVelocity();
     }
 
-    /**
-     * Update measurements.
-     */
-    public void periodic() {
-        m_encoderPosition = m_encoder.getPosition();
-        m_encoderVelocity = m_encoder.getVelocity();
-        t.log(Level.TRACE, m_name, "position (rev)", m_encoderPosition);
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_encoderVelocity / 60);
+    public void log() {
+        t.log(Level.TRACE, m_name, "position (rev)", m_encoder.getPosition());
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_encoder.getVelocity() / 60);
         t.log(Level.TRACE, m_name, "current (A)", m_motor.getOutputCurrent());
         t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
         t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());

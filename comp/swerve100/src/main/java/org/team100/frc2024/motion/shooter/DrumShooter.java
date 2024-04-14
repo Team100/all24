@@ -9,7 +9,6 @@ import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -17,6 +16,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.visualization.SpeedingVisualization;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -48,7 +48,6 @@ public class DrumShooter extends Shooter {
     private final VelocityServo<Distance100> rightRoller;
     private final GravityServo pivotServo;
     private final CANSparkMax pivotMotor;
-    private final SpeedingVisualization m_viz;
 
     public DrumShooter(int leftID, int rightID, int pivotID, int currentLimit) {
         m_name = Names.name(this);
@@ -128,7 +127,7 @@ public class DrumShooter extends Shooter {
                 ); // same
 
         }
-        m_viz = new SpeedingVisualization(m_name, this);
+        SpeedingVisualization.make(m_name, this);
     }
 
     @Override
@@ -141,7 +140,7 @@ public class DrumShooter extends Shooter {
     public void stop() {
         leftRoller.setDutyCycle(0.05);
         rightRoller.setDutyCycle(0.05);
-        pivotServo.setDutyCycle(0);
+        pivotServo.stop();
     }
 
     @Override
@@ -165,15 +164,9 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void periodic() {
-        leftRoller.periodic();
-        rightRoller.periodic();
-        pivotServo.periodic();
-
         t.log(Level.DEBUG, "Drum SHooter", "left velocity", leftRoller.getVelocity());
         t.log(Level.DEBUG, "Drum SHooter", "right velocity", rightRoller.getVelocity());
         t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());
-
-        m_viz.periodic();
     }
 
     public boolean readyToShoot() {

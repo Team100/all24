@@ -69,11 +69,5 @@ public class NullPositionServo<T extends Measure100> implements PositionServoInt
     @Override
     public State100 getSetpoint() {
         return new State100();
-    }
-
-    @Override
-    public void periodic() {
-        //
-    }
-    
+    }    
 }

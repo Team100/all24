@@ -1,9 +1,11 @@
-package org.team100.lib.trajectory;
+package org.team100.lib.visualization;
 
 import java.util.List;
 
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.trajectory.Trajectory100;
+import org.team100.lib.trajectory.TrajectoryPoint;
 
 import com.choreo.lib.ChoreoTrajectory;
 

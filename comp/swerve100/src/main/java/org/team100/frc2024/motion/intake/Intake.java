@@ -125,7 +125,6 @@ public class Intake extends SubsystemBase implements Glassy  {
 
     @Override
     public void periodic() {
-        superRollers.periodic();
         t.log(Level.DEBUG, m_name, "lower", intakePWM.getSpeed());
         t.log(Level.DEBUG, m_name, "upper", superRollers.getVelocity());
         t.log(Level.DEBUG, m_name, "centerin", centeringPWM.getSpeed());

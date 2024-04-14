@@ -35,12 +35,8 @@ public interface VelocityServo<T extends Measure100> extends Glassy {
     /** For testing */
     double getSetpoint();
 
-    void periodic();
-
     @Override
     default String getGlassName() {
         return "VelocityServo";
     }
-
-    
 }

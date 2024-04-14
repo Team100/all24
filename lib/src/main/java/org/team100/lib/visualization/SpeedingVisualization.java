@@ -1,4 +1,7 @@
-package org.team100.lib.motion.simple;
+package org.team100.lib.visualization;
+
+import org.team100.lib.motion.simple.Speeding;
+import org.team100.lib.util.Async;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -17,7 +20,12 @@ public class SpeedingVisualization {
     private final Mechanism2d m_sideView;
     private final MechanismLigament2d m_ligament;
 
-    public SpeedingVisualization(String name, Speeding subsystem) {
+    public static void make(String name, Speeding subsystem) {
+        SpeedingVisualization v = new SpeedingVisualization(name, subsystem);
+        Async.runner.addPeriodic(v::viz, 0.1);
+    }
+
+    private SpeedingVisualization(String name, Speeding subsystem) {
         m_subsystem = subsystem;
         double position = m_subsystem.getVelocity();
         m_sideView = new Mechanism2d(100, 100);
@@ -27,7 +35,7 @@ public class SpeedingVisualization {
         SmartDashboard.putData(name, m_sideView);
     }
 
-    public void periodic() {
+    private void viz() {
         double position = m_subsystem.getVelocity();
         m_ligament.setLength(kScale * position);
     }

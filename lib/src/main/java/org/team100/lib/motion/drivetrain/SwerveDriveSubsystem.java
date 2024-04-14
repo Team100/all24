@@ -85,7 +85,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // the order of these calls is important
         // since the odometry depends on the module state
         // and acceleration depends on odometry...
-        m_swerveLocal.periodic();
         updatePosition();
         updateVelocity(dt);
         updateAcceleration(dt);

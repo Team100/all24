@@ -1,11 +1,11 @@
 package org.team100.lib.hid;
 
+import org.team100.lib.util.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
 
 /**
  * Checks periodically for changes in the HID connected to port 0, and changes
@@ -17,16 +17,12 @@ public class DriverControlProxy implements DriverControl {
     private static final int kPort = 0;
     private static final double kFreq = 1;
 
-    private final Notifier m_notifier;
     private String m_name;
     private DriverControl m_driverControl;
 
     public DriverControlProxy() {
-        m_notifier = new Notifier(this::refresh);
-        m_notifier.setName("DriverControlProxy Notifier");
         refresh();
-
-        m_notifier.startPeriodic(kFreq);
+        Async.runner.addPeriodic(this::refresh, kFreq);
     }
 
 

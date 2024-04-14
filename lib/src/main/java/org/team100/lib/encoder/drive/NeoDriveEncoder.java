@@ -19,11 +19,6 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     private final NeoDriveMotor m_motor;
     private final double m_distancePerTurn;
 
-    /** updated in periodic() */
-    private double m_positionM;
-    /** updated in periodic() */
-    private double m_velocityM_S;
-
     /**
      * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
@@ -42,19 +37,18 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     /** Position in meters. */
     @Override
     public Double getPosition() {
-        return m_positionM;
+        return getPositionM();
     }
 
     /** Velocity in meters/sec. */
     @Override
     public double getRate() {
-        return m_velocityM_S;
+        return getVelocityM_S();
     }
 
     @Override
     public void reset() {
         m_motor.resetPosition();
-        m_positionM = 0;
     }
 
     @Override
@@ -62,24 +56,22 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
         //
     }
 
-    @Override
-    public void periodic() {
-        updatePosition();
-        updateVelocity();
-        t.log(Level.DEBUG, m_name, "position (m)", m_positionM);
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", m_velocityM_S);
-    }
-
     //////////////////////////////////
 
-    private void updatePosition() {
+    private double getPositionM() {
         // raw position is in rotations
-        m_positionM = m_motor.getPositionRot() * m_distancePerTurn;
+        // this is fast so we don't need to cache it
+        double positionM = m_motor.getPositionRot() * m_distancePerTurn;
+        t.log(Level.DEBUG, m_name, "position (m)", positionM);
+        return positionM;
     }
 
-    private void updateVelocity() {
+    private double getVelocityM_S() {
         // raw velocity is in RPM
-        m_velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
+        // this is fast so we don't need to cache it
+        double velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
+        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
+        return velocityM_S;
     }
 
 }

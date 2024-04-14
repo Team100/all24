@@ -14,16 +14,10 @@ import edu.wpi.first.wpilibj.Timer;
 public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    // private final AnalogInput m_input;
     public final DutyCycleEncoder m_encoder;
 
     private Double prevAngle = null;
     private Double prevTime = null;
-
-    /** Current position, updated in periodic() */
-    private double m_positionRad;
-    /** Current velocity, updated in periodic() */
-    private double m_rateRad_S;
 
     private boolean m_reversed;
 
@@ -44,13 +38,10 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
 
         m_reversed = reversed;
         m_name = Names.append(name, this);
-        // m_input = new AnalogInput(channel);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);
         m_encoder.setConnectedFrequencyThreshold(1000);
-
-        // t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
     }
 
     @Override
@@ -79,7 +70,7 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
      */
     @Override
     public double getRate() {
-        return m_rateRad_S;
+        return getRateRad_S();
     }
 
     @Override
@@ -88,7 +79,6 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         // which is never what we want. but this might be wrong
         // for some other reason
         // m_encoder.reset();
-        m_positionRad = 0;
     }
 
     public void close() {
@@ -96,32 +86,25 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         m_encoder.close();
     }
 
-    @Override
-    public void periodic() {
-        updatePosition();
-        updateRate();
-        t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
-        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
-        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
-        // t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
-
-    }
 
     //////////////////////////////////////////////
 
-    private void updatePosition() {
-        m_positionRad = m_encoder.get();
+    private double getPositionRad() {
+        t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
+        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
+        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
+        // should be fast, no cache needed.
+        return m_encoder.getDistance();
     }
 
-    /** Update position before calling this. */
-    private void updateRate() {
-        double angle = m_positionRad;
+    /** finite difference == noise! */
+    private double getRateRad_S() {
+        double angle = getPositionRad();
         double time = Timer.getFPGATimestamp();
         if (prevAngle == null) {
             prevAngle = angle;
             prevTime = time;
-            m_rateRad_S = 0;
-            return;
+            return 0;
         }
         double dx = angle - prevAngle;
         double dt = time - prevTime;
@@ -129,6 +112,6 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         prevAngle = angle;
         prevTime = time;
 
-        m_rateRad_S = dx / dt;
+        return dx / dt;
     }
 }

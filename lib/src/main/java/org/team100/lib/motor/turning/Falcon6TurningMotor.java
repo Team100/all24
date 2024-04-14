@@ -30,12 +30,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  */
 public class Falcon6TurningMotor implements Motor100<Angle100> {
     /**
-     * Motor resistance, Kraken.  Falcon is 0.03.
+     * Motor resistance, Kraken. Falcon is 0.03.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
      */
     private static final double kROhms = 0.025;
     /**
-     * Motor torque constant, Kraken.  Falcon is 0.018.
+     * Motor torque constant, Kraken. Falcon is 0.018.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
      */
     private static final double kTNm_amp = 0.019;
@@ -72,13 +72,6 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     private final TalonFX m_motor;
     private final double m_gearRatio;
     private final String m_name;
-
-    /** Current velocity, updated in periodic(). */
-    private double m_velocityRev_S;
-    /** Current output, updated in periodic() */
-    private double m_outputDutyCycle;
-    /** Current motor error, updated in periodic() */
-    private double m_errorRev_S;
 
     public Falcon6TurningMotor(
             String name,
@@ -140,6 +133,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         DutyCycleOut d = new DutyCycleOut(output);
         m_motor.setControl(d);
         t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
+        log();
     }
 
     /**
@@ -151,11 +145,10 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double motorRev_S = outputRev_S * m_gearRatio;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
-        double currentMotorRev_S = m_velocityRev_S;
+        double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
         double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = velocityFFVolts(motorRev_S);
         double accelFFVolts = accelFFVolts(accelRad_S_S);
-
 
         double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
@@ -168,10 +161,11 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
         t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
-        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+        log();
+
     }
 
-        /**
+    /**
      * Supports accel feedforward.
      */
     public void setVelocity(double outputRad_S, double accelRad_S_S, double torqueNm) {
@@ -180,7 +174,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double motorRev_S = outputRev_S * m_gearRatio;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
-        double currentMotorRev_S = m_velocityRev_S;
+        double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
         double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = velocityFFVolts(motorRev_S);
         double accelFFVolts = accelFFVolts(accelRad_S_S);
@@ -200,7 +194,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
-        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+        log();
     }
 
     @Override
@@ -220,14 +214,11 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         m_motor.close();
     }
 
-    @Override
-    public void periodic() {
-        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
-        m_outputDutyCycle = m_motor.getDutyCycle().getValueAsDouble();
-        m_errorRev_S = m_motor.getClosedLoopError().getValueAsDouble();
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocityRev_S);
-        t.log(Level.TRACE, m_name, "output [-1,1]", m_outputDutyCycle);
-        t.log(Level.TRACE, m_name, "error (rev_s)", getErrorRev_S());
+    public void log() {
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_motor.getVelocity().getValueAsDouble());
+        t.log(Level.TRACE, m_name, "output [-1,1]", m_motor.getDutyCycle().getValueAsDouble());
+        t.log(Level.TRACE, m_name, "error (rev_s)", m_motor.getClosedLoopError().getValueAsDouble());
+        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
     }
 
     //////////////////////////////////////////////////////////////////
@@ -251,9 +242,5 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      */
     private double accelFFVolts(double accelRad_S_S) {
         return accelFFVolts_Rev_S_S * accelRad_S_S;
-    }
-
-    private double getErrorRev_S() {
-        return m_errorRev_S;
     }
 }

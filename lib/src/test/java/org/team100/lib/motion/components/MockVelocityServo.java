@@ -46,10 +46,4 @@ public class MockVelocityServo<T extends Measure100> implements VelocityServo<T>
     public double getSetpoint() {
         return m_setpoint;
     }
-
-    @Override
-    public void periodic() {
-        //
-    }
-
 }

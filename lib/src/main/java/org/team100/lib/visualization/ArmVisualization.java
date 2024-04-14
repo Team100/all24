@@ -1,4 +1,8 @@
-package org.team100.lib.motion.arm;
+package org.team100.lib.visualization;
+
+import org.team100.lib.motion.arm.ArmAngles;
+import org.team100.lib.motion.arm.ArmSubsystem;
+import org.team100.lib.util.Async;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -19,7 +23,12 @@ public class ArmVisualization {
     private final MechanismLigament2d m_boomLigament;
     private final MechanismLigament2d m_stickLigament;
 
-    public ArmVisualization(ArmSubsystem armSubsystem) {
+    public static void make(ArmSubsystem armSubsystem) {
+        ArmVisualization v = new ArmVisualization(armSubsystem);
+        Async.runner.addPeriodic(v::viz, 0.1);
+    }
+
+    private ArmVisualization(ArmSubsystem armSubsystem) {
         m_armSubsystem = armSubsystem;
 
         ArmAngles angles = m_armSubsystem.getPosition();
@@ -39,7 +48,7 @@ public class ArmVisualization {
         SmartDashboard.putData("SideView", m_mechanism);
     }
 
-    public void periodic() {
+    private void viz() {
         ArmAngles angles = m_armSubsystem.getPosition();
         m_boomLigament.setAngle(boomAngleDeg(angles));
         m_stickLigament.setAngle(stickAngleDeg(angles));

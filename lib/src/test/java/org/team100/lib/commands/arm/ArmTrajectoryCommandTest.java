@@ -51,14 +51,12 @@ class ArmTrajectoryCommandTest implements Timeless {
         // the command takes 2s or so
         for (int i = 0; i < 116; ++i) {
             stepTime(0.02);
-            armSubSystem.periodic();
             command.execute();
             assertFalse(command.isFinished());
         }
         // let the controllers catch up
         for (int i = 0; i < 30; ++i) {
             stepTime(0.02);
-            armSubSystem.periodic();
             command.execute();
         }
         assertTrue(command.isFinished());

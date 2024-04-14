@@ -212,13 +212,6 @@ public class SwerveModuleCollection {
         };
     }
 
-    public void periodic() {
-        m_frontLeft.periodic();
-        m_frontRight.periodic();
-        m_rearLeft.periodic();
-        m_rearRight.periodic();
-    }
-
     public void close() {
         m_frontLeft.close();
         m_frontRight.close();
