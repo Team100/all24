@@ -6,32 +6,38 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
-import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
+import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
 /**
- * Swerve steering motor using PWM control.
+ * Calibrated angle motor wrapping any MotorController.
  */
-public class PWMTurningMotor implements Motor100<Angle100> {
-    /** Very much not calibrated. */
-    private static final double kV = 0.1;
+public class TurningMotorController100 implements Motor100<Angle100> {
+    /**
+     * Very much not calibrated.
+     * Say 600 rad/s max so 0.0016?
+     */
+    private static final double velocityFFDutyCycle_Rad_S = 0.0016;
     private final Telemetry t = Telemetry.get();
-    private final PWMMotorController m_motor;
+    private final MotorController m_motor;
     private final String m_name;
+    private final double m_gearRatio;
 
-    public PWMTurningMotor(String name, int channel) {
+    public TurningMotorController100(
+            String name,
+            MotorController motorController,
+            double kDriveReduction) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-        m_motor = new VictorSP(channel);
+        m_motor = motorController;
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
-        t.log(Level.TRACE, m_name, "Device ID", channel);
+        m_gearRatio = kDriveReduction;
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
+        t.log(Level.TRACE, m_name, "duty cycle", output);
     }
 
     @Override
@@ -47,17 +53,20 @@ public class PWMTurningMotor implements Motor100<Angle100> {
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2) {
-        m_motor.set(kV * outputRad_S);
+        double motorRad_S = outputRad_S * m_gearRatio;
+        double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
+        m_motor.set(motorDutyCycle);
+        t.log(Level.TRACE, m_name, "duty cycle", motorDutyCycle);
     }
 
     /**
-     * @param velocity times kv
-     * @param accel    ignored
-     * @param torque   ignored
+     * @param outputRad_S times kv
+     * @param accelRad_S2 ignored
+     * @param torque      ignored
      */
     @Override
-    public void setVelocity(double velocity, double accel, double torque) {
-        m_motor.set(kV * velocity);
+    public void setVelocity(double outputRad_S, double accelRad_S2, double torque) {
+        setVelocity(outputRad_S, accelRad_S2);
     }
 
     @Override
@@ -67,7 +76,7 @@ public class PWMTurningMotor implements Motor100<Angle100> {
 
     @Override
     public void close() {
-        m_motor.close();
+        // m_motor.close();
     }
 
     @Override

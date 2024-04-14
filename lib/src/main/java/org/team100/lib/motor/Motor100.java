@@ -3,13 +3,19 @@ package org.team100.lib.motor;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
+/**
+ * The Motor100 class is for calibrated motor commands.
+ */
 public interface Motor100<T extends Measure100> extends Glassy {
 
     /**
      * Open-loop duty cycle control.
      * 
+     * @deprecated we shouldn't use duty cycle anywhere.
+     * 
      * @param output in range [-1, 1]
      */
+    @Deprecated
     void setDutyCycle(double output);
 
     /**
