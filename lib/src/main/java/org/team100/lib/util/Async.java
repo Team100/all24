@@ -18,6 +18,11 @@ public class Async {
     private final PriorityQueue<Callback> m_callbacks;
     private final Notifier m_notifier;
 
+    /** Run in t sec and every t sec thereafter. */
+    public void addPeriodic(Runnable runnable, double periodS) {
+        m_callbacks.add(new Callback(runnable, periodS));
+    }
+
     private Async() {
         m_callbacks = new PriorityQueue<>();
         m_notifier = new Notifier(this::run);
@@ -41,11 +46,6 @@ public class Async {
             callback.m_expirationTimeS += callback.m_periodS;
             m_callbacks.add(callback);
         }
-    }
-
-    /** Run in t sec and every t sec thereafter. */
-    public void addPeriodic(Runnable runnable, double periodS) {
-        m_callbacks.add(new Callback(runnable, periodS));
     }
 
     /** This is cribbed from TimedRobot.java */
