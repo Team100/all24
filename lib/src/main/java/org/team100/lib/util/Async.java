@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Runs low-priority, timing-insensitive stuff asynchronously.
@@ -32,10 +33,22 @@ public class Async {
     }
 
     private static class MinPriorityThreads implements ThreadFactory {
+        private final AtomicInteger id;
+
+        private MinPriorityThreads() {
+            id = new AtomicInteger();
+        }
+
+        /**
+         * Should only ever be called once but just in case, there's an incrementing
+         * id so we can tell what's happening.
+         */
         @Override
         public Thread newThread(Runnable r) {
             Thread thread = new Thread(r);
             thread.setPriority(1);
+            thread.setDaemon(true);
+            thread.setName("Async Thread " + id.getAndIncrement());
             return thread;
         }
     }
