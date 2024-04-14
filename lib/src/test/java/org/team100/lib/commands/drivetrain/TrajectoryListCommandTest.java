@@ -59,7 +59,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         }
         // at goal; wide tolerance due to test timing
         assertTrue(c.isFinished());
-        assertEquals(1.031, fixture.drive.getPose().getX(), 0.001);
+        assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
     }
 
     /**

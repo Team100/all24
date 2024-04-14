@@ -87,13 +87,6 @@ public class SwerveModule100 implements Glassy {
         return m_turningServo.getSetpoint();
     }
 
-    /**
-     * Only SwerveModuleCollection calls this.
-     */
-    void periodic() {
-        m_viz.periodic();
-    }
-
     public void close() {
         m_turningServo.close();
     }

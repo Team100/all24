@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelChooser;
 
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -18,6 +19,7 @@ public class SwerveModuleVisualization {
     private final Mechanism2d m_mechanism;
     private final MechanismLigament2d m_steer;
     private final MechanismLigament2d m_drive;
+    private final Notifier periodicLogger;
 
     public SwerveModuleVisualization(SwerveModule100 module) {
         // the glass visualization requires the key to be a root key
@@ -34,10 +36,14 @@ public class SwerveModuleVisualization {
         root.append(m_drive);
         root.append(m_steer);
         SmartDashboard.putData("Swerve Viz/" + name, m_mechanism);
+        // periodic notifier so we can see it without any command running
+        periodicLogger = new Notifier(this::viz);
+        periodicLogger.setName("Swerve Visualization Periodic Logger Notifier");
+        periodicLogger.startPeriodic(0.1);
     }
 
-    public void periodic() {
-        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG) ) {
+    public void viz() {
+        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG)) {
             m_drive.setAngle(angle());
             m_drive.setLength(speed());
             m_steer.setAngle(angle());
