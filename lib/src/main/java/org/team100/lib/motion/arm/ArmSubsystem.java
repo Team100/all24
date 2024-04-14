@@ -69,8 +69,6 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
     public void periodic() {
         m_lowerArmMotor.periodic();
         m_upperArmMotor.periodic();
-        m_lowerArmEncoder.periodic();
-        m_upperArmEncoder.periodic();
         m_viz.periodic();
     }
 

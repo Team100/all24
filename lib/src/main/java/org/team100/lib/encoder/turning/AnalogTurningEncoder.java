@@ -22,11 +22,6 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     private Double prevAngle = null;
     private Double prevTime = null;
 
-    /** Current position, updated in periodic() */
-    private double m_positionRad;
-    /** Current velocity, updated in periodic() */
-    private double m_rateRad_S;
-
     /**
      * @param name        may not start with a slash
      * @param channel     roboRIO analog input channel
@@ -60,7 +55,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
 
     @Override
     public Double getPosition() {
-        return m_positionRad;
+        return getPositionRad();
     }
 
     /**
@@ -76,16 +71,15 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
      */
     @Override
     public double getRate() {
-        return m_rateRad_S;
+        return getRateRad_S();
     }
 
     @Override
     public void reset() {
-        // ALERT!  @joel 2/19/24: I think encoder reset changes the internal offset
-        // which is never what we want.  but this might be wrong
+        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want. but this might be wrong
         // for some other reason
         // m_encoder.reset();
-        m_positionRad = 0;
     }
 
     public void close() {
@@ -93,31 +87,32 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         m_encoder.close();
     }
 
-    @Override
-    public void periodic() {
-        updatePosition();
-        updateRate();
-        t.log(Level.DEBUG, m_name, "position (rad)", m_encoder.getDistance());
-        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
-        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
-        t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
-    }
+ 
 
     //////////////////////////////////////////////
 
-    private void updatePosition() {
-        m_positionRad = m_encoder.getDistance();
+    private double getPositionRad() {
+        // this should be fast, need not be cached.
+        double positionRad = m_encoder.getDistance();
+        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
+        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
+        t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
+        return positionRad;
     }
 
-    /** Update position before calling this. */
-    private void updateRate() {
-        double angle = m_positionRad;
+    /**
+     * This is *just* the discrete difference looking back one time period, so it
+     * will be very noisy.
+     */
+    private double getRateRad_S() {
+
+        double angle = getPositionRad();
         double time = Timer.getFPGATimestamp();
         if (prevAngle == null) {
             prevAngle = angle;
             prevTime = time;
-            m_rateRad_S = 0;
-            return;
+            return 0;
         }
         double dx = angle - prevAngle;
         double dt = time - prevTime;
@@ -125,6 +120,8 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         prevAngle = angle;
         prevTime = time;
 
-        m_rateRad_S = dx / dt;
+        double rateRad_S = dx / dt;
+        t.log(Level.DEBUG, m_name, "rate (rad)s)", rateRad_S);
+        return rateRad_S;
     }
 }

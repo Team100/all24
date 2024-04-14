@@ -51,8 +51,7 @@ public interface Motor100<T extends Measure100> extends Glassy {
      * Used to collect measurements once per cycle, to save time and improve
      * consistency.
      */
-    void periodic();
-
+    default void periodic() {}
     @Override
     default String getGlassName() {
         return "Motor100";

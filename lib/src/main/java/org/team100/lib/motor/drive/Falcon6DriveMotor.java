@@ -30,7 +30,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
 public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
-    
+
     /**
      * Motor resistance, Kraken. Falcon is 0.03.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
@@ -74,20 +74,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     private final double m_wheelDiameter;
     private final String m_name;
     private final double m_distancePerTurn;
-
-    /** Current position, updated in periodic(). */
-    private double m_positionRev;
-    /** Current velocity, updated in periodic(). */
-    private double m_velocityRev_S;
-    /** Current output, updated in periodic() */
-    private double m_outputDutyCycle;
-    /** Current motor error, updated in periodic() */
-    private double m_errorRev_S;
-
-    /** updated in periodic() */
-    private double m_positionM;
-    /** updated in periodic() */
-    private double m_velocityM_S;
 
     public Falcon6DriveMotor(
             String name,
@@ -167,7 +153,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         double wheelRev_S2 = accelM_S_S / (m_wheelDiameter * Math.PI);
         double motorRev_S = wheelRev_S * m_gearRatio;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
-        double currentMotorRev_S = m_velocityRev_S;
+        double currentMotorRev_S = getVelocityRev_S();
 
         double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = velocityFFVolts(motorRev_S);
@@ -185,6 +171,12 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
         t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
+
+        t.log(Level.DEBUG, m_name, "output [-1,1]", m_motor.getDutyCycle().getValueAsDouble());
+        t.log(Level.TRACE, m_name, "error (rev_s)", m_motor.getClosedLoopError().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+
     }
 
     /**
@@ -196,7 +188,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         double wheelRev_S2 = accelM_S_S / (m_wheelDiameter * Math.PI);
         double motorRev_S = wheelRev_S * m_gearRatio;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
-        double currentMotorRev_S = m_velocityRev_S;
+        double currentMotorRev_S = getVelocityRev_S();
 
         double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = velocityFFVolts(motorRev_S);
@@ -218,6 +210,12 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
+
+        t.log(Level.DEBUG, m_name, "output [-1,1]", m_motor.getDutyCycle().getValueAsDouble());
+        t.log(Level.TRACE, m_name, "error (rev_s)", m_motor.getClosedLoopError().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
+        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
+
     }
 
     @Override
@@ -242,7 +240,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      * @return integrated sensor velocity in rev per sec
      */
     public double getVelocityRev_S() {
-        return m_velocityRev_S;
+        return m_motor.getVelocity().getValueAsDouble();
     }
 
     /**
@@ -250,29 +248,6 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      */
     public void resetPosition() {
         m_motor.setPosition(0);
-        m_positionRev = 0;
-    }
-
-    @Override
-    public void periodic() {
-        m_positionRev = m_motor.getPosition().getValueAsDouble();
-        m_velocityRev_S = m_motor.getVelocity().getValueAsDouble();
-
-        m_outputDutyCycle = m_motor.getDutyCycle().getValueAsDouble();
-        m_errorRev_S = m_motor.getClosedLoopError().getValueAsDouble();
-
-        m_positionM = m_positionRev * m_distancePerTurn;
-        m_velocityM_S = m_velocityRev_S * m_distancePerTurn;
-
-        t.log(Level.TRACE, m_name, "position (rev)", m_positionRev);
-        t.log(Level.DEBUG, m_name, "position (m)", m_positionM);
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocityRev_S);
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", m_velocityM_S);
-
-        t.log(Level.DEBUG, m_name, "output [-1,1]", m_outputDutyCycle);
-        t.log(Level.TRACE, m_name, "error (rev_s)", getErrorRev_S());
-        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
-        t.log(Level.DEBUG, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
     }
 
     //////////////////////////
@@ -281,19 +256,28 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     /** Position in meters */
     @Override
     public Double getPosition() {
-        return m_positionM;
+        double positionRev = m_motor.getPosition().getValueAsDouble();
+        double positionM = positionRev * m_distancePerTurn;
+        t.log(Level.TRACE, m_name, "position (rev)", positionRev);
+        t.log(Level.DEBUG, m_name, "position (m)", positionM);
+
+        return positionM;
     }
 
     /** Velocity in meters/sec */
     @Override
     public double getRate() {
-        return m_velocityM_S;
+        double velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        double velocityM_S = velocityRev_S * m_distancePerTurn;
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
+        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
+
+        return velocityM_S;
     }
 
     @Override
     public void reset() {
         resetPosition();
-        m_positionM = 0;
     }
 
     ///////////////////////////////////////////////////////////////
@@ -321,9 +305,5 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
      */
     private double accelFFVolts(double accelM_S_S) {
         return accelFFVolts_M_S_S * accelM_S_S;
-    }
-
-    private double getErrorRev_S() {
-        return m_errorRev_S;
     }
 }

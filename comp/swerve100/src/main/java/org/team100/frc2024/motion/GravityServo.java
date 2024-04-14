@@ -181,7 +181,6 @@ public class GravityServo {
         t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
         t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
-        m_encoder.periodic();
     }
 
     public void set(double value) {

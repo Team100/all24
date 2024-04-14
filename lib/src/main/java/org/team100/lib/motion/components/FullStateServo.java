@@ -150,10 +150,6 @@ public class FullStateServo<T extends Measure100> implements Glassy {
         return m_setpoint;
     }
 
-    public void periodic() {
-        m_encoder.periodic();
-    }
-
     @Override
     public String getGlassName() {
         return "FullStateServo";

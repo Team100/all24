@@ -38,12 +38,6 @@ public interface Encoder100<T extends Measure100> extends Glassy {
      */
     void close();
 
-    /**
-     * For visualization and odometry (for simulated encoders), and
-     * to collect measurements once per cycle, to save time.
-     */
-    void periodic();
-
     @Override
     default String getGlassName() {
         return "Encoder100";

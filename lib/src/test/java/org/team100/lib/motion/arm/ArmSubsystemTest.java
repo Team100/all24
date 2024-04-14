@@ -14,7 +14,8 @@ class ArmSubsystemTest implements Timeless {
         ArmSubsystem armSubSystem = ArmFactory.get();
 
         assertEquals(0, armSubSystem.getPosition().th1, kDelta);
-        assertEquals(0, armSubSystem.getPosition().th2, kDelta);
+        // upper joint lower limit is 0.1 but the IIR filter takes a bit to realize it.
+        assertEquals(0.074, armSubSystem.getPosition().th2, kDelta);
 
         // short time to stay inside the physical limit
         for (int i = 0; i < 10; ++i) {
@@ -24,7 +25,7 @@ class ArmSubsystemTest implements Timeless {
         }
 
         assertEquals(0.5, armSubSystem.getPosition().th1, 0.1);
-        assertEquals(0.5, armSubSystem.getPosition().th2, 0.1);
+        assertEquals(0.624, armSubSystem.getPosition().th2, 0.1);
 
         armSubSystem.close();
     }
