@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.Fixture;
@@ -26,6 +27,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.wpilibj.DataLogManager;
 
 class SwerveDrivePoseEstimator100Test {
     private static final double kDelta = 0.001;
@@ -41,6 +43,11 @@ class SwerveDrivePoseEstimator100Test {
         assertEquals(x, estimate.getX(), kDelta);
         assertEquals(0, estimate.getY(), kDelta);
         assertEquals(0, estimate.getRotation().getRadians(), kDelta);
+    }
+
+    @BeforeEach
+    void nolog() {
+        DataLogManager.stop();
     }
 
     @Test

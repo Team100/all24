@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Util;
 import org.team100.lib.telemetry.TelemetryLevelChooser;
 
 import edu.wpi.first.wpilibj.Notifier;
@@ -43,10 +44,15 @@ public class SwerveModuleVisualization {
     }
 
     public void viz() {
-        if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG)) {
-            m_drive.setAngle(angle());
-            m_drive.setLength(speed());
-            m_steer.setAngle(angle());
+        try {
+            if (TelemetryLevelChooser.get().getSelected().admit(Level.DEBUG)) {
+                m_drive.setAngle(angle());
+                m_drive.setLength(speed());
+                m_steer.setAngle(angle());
+            }
+        } catch (Throwable e) {
+            // no need to bother the notifier.
+            Util.warn(e.toString());
         }
     }
 

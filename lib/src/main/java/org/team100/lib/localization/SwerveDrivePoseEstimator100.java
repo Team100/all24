@@ -224,8 +224,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Pose2d pose,
             double timestampSeconds) {
 
-        System.out.println("RESET POSITION");
-
         checkLength(modulePositions);
 
         m_gyroOffset = pose.getRotation().minus(gyroAngle);

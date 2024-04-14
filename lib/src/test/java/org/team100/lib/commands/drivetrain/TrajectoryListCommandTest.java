@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
@@ -23,6 +24,7 @@ import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DataLogManager;
 
 class TrajectoryListCommandTest extends Fixtured implements Timeless {
     boolean dump = false;
@@ -34,6 +36,11 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
 
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
+
+    @BeforeEach
+    void nolog() {
+        DataLogManager.stop();
+    }
 
     @Test
     void testSimple() {
