@@ -4,7 +4,7 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
-import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;

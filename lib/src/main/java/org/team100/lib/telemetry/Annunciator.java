@@ -1,5 +1,7 @@
 package org.team100.lib.telemetry;
 
+import org.team100.lib.visualization.AnnunciatorVisualization;
+
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalOutput;
 
@@ -9,16 +11,19 @@ import edu.wpi.first.wpilibj.DigitalOutput;
  */
 public class Annunciator implements BooleanConsumer {
     private final DigitalOutput m_pwm;
-    private final AnnunciatorVisualization m_viz;
+    private boolean state;
 
     public Annunciator(int channel) {
         m_pwm = new DigitalOutput(channel);
-        m_viz = new AnnunciatorVisualization();
+        AnnunciatorVisualization.make(this);
     }
-    
+
     @Override
     public void accept(boolean value) {
         m_pwm.set(value);
-        m_viz.set(value);
+    }
+
+    public boolean get() {
+        return state;
     }
 }

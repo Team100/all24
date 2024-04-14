@@ -7,6 +7,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
+import org.team100.lib.visualization.ArmVisualization;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -27,8 +28,6 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
     private final Motor100<Angle100> m_upperArmMotor;
     private final Encoder100<Angle100> m_lowerArmEncoder;
     private final Encoder100<Angle100> m_upperArmEncoder;
-
-    private final ArmVisualization m_viz;
 
     private ArmAngles m_previousPosition;
 
@@ -59,15 +58,8 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
         m_upperArmMotor = upperMotor;
         m_upperArmEncoder = upperEncoder;
 
-
-        m_viz = new ArmVisualization(this);
-
         m_previousPosition = getPosition();
-    }
-
-    @Override
-    public void periodic() {
-        m_viz.periodic();
+        ArmVisualization.make(this);
     }
 
     /** Arm angles (radians), 0 up, positive forward. */
@@ -112,6 +104,4 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
     public String getGlassName() {
         return "Arm";
     }
-
-    
 }

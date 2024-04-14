@@ -8,9 +8,9 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
-import org.team100.lib.motion.simple.SpeedingVisualization;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.visualization.SpeedingVisualization;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,7 +35,6 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
     private static final double kIndexerVelocityM_S = 5;
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
-    private final SpeedingVisualization m_viz;
     private final PIDConstants m_velocityConstants;
     private final FeedforwardConstants m_lowLevelFeedforwardConstants;
 
@@ -75,7 +74,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
                         m_name,
                         params);
         }
-        m_viz = new SpeedingVisualization(m_name, this);
+        SpeedingVisualization.make(m_name, this);
     }
 
     public void index() {
@@ -105,14 +104,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
     }
 
     @Override
-    public void periodic() {
-        m_viz.periodic();
-    }
-
-    @Override
     public String getGlassName() {
         return "Indexer";
     }
-
-    
 }

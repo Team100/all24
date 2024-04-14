@@ -9,6 +9,7 @@ import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -30,7 +31,6 @@ public class SwerveModule100 implements Glassy {
     private final String m_name;
     private final VelocityServo<Distance100> m_driveServo;
     private final PositionServoInterface<Angle100> m_turningServo;
-    private final SwerveModuleVisualization m_viz;
 
     public SwerveModule100(
             String name,
@@ -41,7 +41,7 @@ public class SwerveModule100 implements Glassy {
         m_name = Names.append(name, this);
         m_driveServo = driveServo;
         m_turningServo = turningServo;
-        m_viz = new SwerveModuleVisualization(this);
+        SwerveModuleVisualization.make(this);
     }
 
     /**
@@ -106,11 +106,11 @@ public class SwerveModule100 implements Glassy {
     //
 
     /** @return current measurements */
-    SwerveModuleState getState() {
+    public SwerveModuleState getState() {
         return new SwerveModuleState(m_driveServo.getVelocity(), new Rotation2d(m_turningServo.getPosition()));
     }
 
-    SwerveModulePosition getPosition() {
+    public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(m_driveServo.getDistance(), new Rotation2d(m_turningServo.getPosition()));
     }
 
