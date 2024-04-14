@@ -271,7 +271,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
     @Override
     public void periodic() {
-        m_motor.periodic();
+        //
     }
 
     ////////////////////////////////////////////////

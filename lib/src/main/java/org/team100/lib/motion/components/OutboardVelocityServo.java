@@ -111,6 +111,6 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
 
     @Override
     public void periodic() {
-        m_motor.periodic();
+        //
     }
 }

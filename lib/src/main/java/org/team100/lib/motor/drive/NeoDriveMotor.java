@@ -117,6 +117,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.TRACE, m_name, "Output", output);
+        log();
     }
 
     @Override
@@ -152,6 +153,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        log();
     }
 
     @Override
@@ -179,6 +181,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        log();
     }
 
     @Override
@@ -214,10 +217,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
         m_encoder.setPosition(0);
     }
 
-    /**
-     * Logging
-     */
-    public void periodic() {
+    public void log() {
         t.log(Level.DEBUG, m_name, "position (rev)", m_encoder.getPosition());
         t.log(Level.DEBUG, m_name, "velocity (rev_s)", m_encoder.getVelocity() / 60);
         t.log(Level.TRACE, m_name, "RPM", m_encoder.getVelocity());

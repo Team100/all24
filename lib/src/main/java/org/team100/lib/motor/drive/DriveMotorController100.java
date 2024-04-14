@@ -81,10 +81,4 @@ public class DriveMotorController100 implements Motor100<Distance100> {
     public void close() {
         // m_motor.close();
     }
-
-    @Override
-    public void periodic() {
-        //
-    }
-
 }

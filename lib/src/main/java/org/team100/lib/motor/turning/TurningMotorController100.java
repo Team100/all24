@@ -78,9 +78,4 @@ public class TurningMotorController100 implements Motor100<Angle100> {
     public void close() {
         // m_motor.close();
     }
-
-    @Override
-    public void periodic() {
-        //
-    }
 }

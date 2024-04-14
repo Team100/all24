@@ -80,9 +80,4 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     public void close() {
         //
     }
-
-    @Override
-    public void periodic() {
-        //
-    }
 }

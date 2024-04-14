@@ -135,6 +135,7 @@ public class CANTurningMotor implements Motor100<Angle100> {
     public void setDutyCycle(double output) {
         m_motor.set(output);
         t.log(Level.TRACE, m_name, "Output", output);
+        log();
     }
 
     @Override
@@ -155,10 +156,11 @@ public class CANTurningMotor implements Motor100<Angle100> {
         double velocityFF = velocityFF(motorRev_S);
         double frictionFF = frictionFF(motorRev_S);
         double accelFF = accelFF(accelRad_S2);
-        
+
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
+        log();
     }
 
     /**
@@ -179,8 +181,7 @@ public class CANTurningMotor implements Motor100<Angle100> {
         m_motor.close();
     }
 
-    @Override
-    public void periodic() {
+    public void log() {
         t.log(Level.TRACE, m_name, "Encoder Value",
                 m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
         t.log(Level.TRACE, m_name, "Velocity Value",
