@@ -50,8 +50,6 @@ public interface PositionServoInterface<T extends Measure100> extends Glassy {
     /** for testing only */
     State100 getSetpoint();
 
-    void periodic();
-
     @Override
     default String getGlassName() {
         return "PositionServo";

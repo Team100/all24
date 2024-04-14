@@ -91,8 +91,6 @@ public class SwerveModule100 implements Glassy {
      * Only SwerveModuleCollection calls this.
      */
     void periodic() {
-        m_turningServo.periodic();
-        m_driveServo.periodic();
         m_viz.periodic();
     }
 

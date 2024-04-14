@@ -77,9 +77,4 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     public double getSetpoint() {
         return m_servo.getSetpoint();
     }
-
-    @Override
-    public void periodic() {
-        m_servo.periodic();
-    }
 }

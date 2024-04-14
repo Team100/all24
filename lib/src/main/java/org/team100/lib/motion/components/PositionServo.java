@@ -269,11 +269,6 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         return m_setpoint;
     }
 
-    @Override
-    public void periodic() {
-        //
-    }
-
     ////////////////////////////////////////////////
 
     /**

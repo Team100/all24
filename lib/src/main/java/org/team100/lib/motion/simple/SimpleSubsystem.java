@@ -21,7 +21,6 @@ public class SimpleSubsystem extends SubsystemBase implements Positioning {
 
     @Override
     public void periodic() {
-        m_actuator.periodic();
         m_viz.periodic();
     }
 

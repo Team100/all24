@@ -141,7 +141,7 @@ public class DrumShooter extends Shooter {
     public void stop() {
         leftRoller.setDutyCycle(0.05);
         rightRoller.setDutyCycle(0.05);
-        pivotServo.setDutyCycle(0);
+        pivotServo.stop();
     }
 
     @Override
@@ -165,10 +165,6 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void periodic() {
-        leftRoller.periodic();
-        rightRoller.periodic();
-        pivotServo.periodic();
-
         t.log(Level.DEBUG, "Drum SHooter", "left velocity", leftRoller.getVelocity());
         t.log(Level.DEBUG, "Drum SHooter", "right velocity", rightRoller.getVelocity());
         t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());

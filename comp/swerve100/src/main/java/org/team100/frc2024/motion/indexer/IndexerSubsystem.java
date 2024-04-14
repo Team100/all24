@@ -106,8 +106,6 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
 
     @Override
     public void periodic() {
-
-        m_servo.periodic();
         m_viz.periodic();
     }
 

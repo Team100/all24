@@ -91,11 +91,6 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
     }
 
     @Override
-    public void periodic() {
-        ampAngleServo.periodic();
-    }
-
-    @Override
     public String getGlassName() {
         return "AMMMPPPPPPPPPP";
     }
