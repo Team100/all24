@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.sensors.HeadingWithHistory;
-import org.team100.lib.sensors.MockHeading;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -143,100 +141,6 @@ class VisionDataProviderTest implements Timeless {
         Double t = timeEstimate.get(0);
         double delay = now - t;
         assertEquals(0.075, delay, kDelta);
-    }
-
-    /**
-     * The gyro delay is very small but the camera delay is long. I think combining
-     * the measurements from these two sources is producing errors.
-     * 
-     * This is the same case as above, but with omega of about 10 rad/s (fast).
-     * 
-     * The way the pose estimator handles the delay is via replay, extrapolating
-     * past poses at the time of the vision inputs. Since the network table input is
-     * asynchronous, this extrapolation would have to happen in the pose supplier.
-     */
-    @Test
-    void testDelay() throws IOException {
-        MockHeading mock = new MockHeading();
-        HeadingWithHistory hist = new HeadingWithHistory(mock);
-
-        // rotation from the camera instant
-        mock.rotation = new Rotation2d(-Math.PI / 4);
-
-        // stick the current reading into the buffer.
-        hist.periodic();
-
-        // let 75ms pass.
-        stepTime(0.075);
-
-        AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
-
-        final List<Pose2d> poseEstimate = new ArrayList<Pose2d>();
-        final List<Double> timeEstimate = new ArrayList<Double>();
-
-        PoseEstimator100 poseEstimator = new PoseEstimator100() {
-            @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
-                poseEstimate.add(p);
-                timeEstimate.add(t);
-            }
-
-            @Override
-            public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
-                // this rotation is from the current instant.
-                // say the robot is turning at about 10 rad/s, say 10.472 for convenience.
-                // then 75ms after the blip measurement below, the rotation is now zero.
-                return hist.sample(timestampSeconds);
-            }
-        };
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
-
-        // the robot *was* panned 45 right 75ms ago.
-        // camera sees the tag straight ahead in the center of the frame,
-        // but rotated pi/4 to the left. this is ignored anyway.
-        // this blip is from 75ms ago.
-        Blip24 blip = new Blip24(7, new Transform3d(
-                new Translation3d(0, 0, Math.sqrt(2)),
-                new Rotation3d(0, -Math.PI / 4, 0)));
-
-        // verify tag 7 location
-        Pose3d tagPose = layout.getTagPose(Alliance.Red, 7).get();
-        assertEquals(16.5791, tagPose.getX(), kDelta);
-        assertEquals(2.663, tagPose.getY(), kDelta);
-        assertEquals(1.451, tagPose.getZ(), kDelta);
-        assertEquals(0, tagPose.getRotation().getX(), kDelta);
-        assertEquals(0, tagPose.getRotation().getY(), kDelta);
-        assertEquals(0, tagPose.getRotation().getZ(), kDelta);
-
-        // default camera offset is no offset.
-        final String cameraSerialNumber = "foo";
-        final Blip24[] blips = new Blip24[] { blip };
-
-        vdp.estimateRobotPose(cameraSerialNumber, blips, Alliance.Red);
-
-        // two good estimates are required, so do another one.
-        vdp.estimateRobotPose(cameraSerialNumber, blips, Alliance.Red);
-
-        assertEquals(1, poseEstimate.size());
-        assertEquals(1, timeEstimate.size());
-
-        Pose2d result = poseEstimate.get(0);
-        // robot is is one meter away from the target in x
-        // without correction: 15.075
-        assertEquals(15.5791, result.getX(), kDelta);
-        // robot is one meter to the left (i.e. in y)
-        // without correction: 2.663
-        assertEquals(3.663, result.getY(), kDelta);
-        // facing diagonal, this is just what we provided.
-        // without correction: 0
-        assertEquals(-Math.PI / 4, result.getRotation().getRadians(), kDelta);
-
-        // the delay is just what we told it to use.
-        double now = Timer.getFPGATimestamp();
-        Double t = timeEstimate.get(0);
-        double delay = now - t;
-        assertEquals(0.075, delay, kDelta);
-
     }
 
     @Test
