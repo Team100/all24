@@ -55,4 +55,8 @@ public class ExpiringMemoizingSupplier<T> implements Supplier<T> {
         }
         return m_value.get();
     }
+
+    public void reset() {
+        m_expirationMicroS.set(0);
+    }
 }

@@ -14,6 +14,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.ExpiringMemoizingSupplier;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,8 +38,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final String m_name;
 
     private ChassisSpeeds m_prevSpeeds;
-    // maintained in periodic.
-    private Pose2d m_pose;
+    private ExpiringMemoizingSupplier<Pose2d> m_pose;
     private FieldRelativeVelocity m_velocity;
     private FieldRelativeAcceleration m_accel;
     private SwerveState m_state;
@@ -54,7 +54,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_speed = speed;
         m_name = Names.name(this);
         m_prevSpeeds = new ChassisSpeeds();
-        m_pose = new Pose2d();
+        // for now, leave the pose calculation at 50 hz.
+        // TODO: raise the pose calculation rate to 200 hz.
+        m_pose = new ExpiringMemoizingSupplier<>(this::getPosition, 20000);
         m_velocity = new FieldRelativeVelocity(0, 0, 0);
         m_accel = new FieldRelativeAcceleration(0, 0, 0);
         m_state = new SwerveState();
@@ -85,16 +87,16 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // the order of these calls is important
         // since the odometry depends on the module state
         // and acceleration depends on odometry...
-        updatePosition();
+
         updateVelocity(dt);
         updateAcceleration(dt);
         updateState();
 
-        t.log(Level.DEBUG, m_name, "pose", m_pose);
-        t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
+        t.log(Level.DEBUG, m_name, "pose", m_pose.get());
+        t.log(Level.TRACE, m_name, "Tur Deg", m_pose.get().getRotation().getDegrees());
 
         t.log(Level.DEBUG, m_name, "pose array",
-                new double[] { m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians() });
+                new double[] { m_pose.get().getX(), m_pose.get().getY(), m_pose.get().getRotation().getRadians() });
         t.log(Level.TRACE, m_name, "velocity", m_velocity);
         t.log(Level.TRACE, m_name, "acceleration", m_accel);
         t.log(Level.DEBUG, m_name, "state", m_state);
@@ -103,9 +105,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
         t.log(Level.INFO, "field", "robot", new double[] {
-                m_pose.getX(),
-                m_pose.getY(),
-                m_pose.getRotation().getDegrees()
+                m_pose.get().getX(),
+                m_pose.get().getY(),
+                m_pose.get().getRotation().getDegrees()
         });
 
         t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
@@ -161,7 +163,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 twist.x(),
                 twist.y(),
                 twist.theta(),
-                m_pose.getRotation());
+                m_pose.get().getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -175,7 +177,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     public boolean steerAtRest(FieldRelativeVelocity twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.x(), twist.y(), twist.theta(), m_pose.getRotation());
+                twist.x(), twist.y(), twist.theta(), m_pose.get().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -231,7 +233,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()),
                 robotPose,
                 Timer.getFPGATimestamp());
-        m_pose = robotPose;
+        m_pose.reset();
         m_velocity = new FieldRelativeVelocity(0, 0, 0);
         m_accel = new FieldRelativeAcceleration(0, 0, 0);
     }
@@ -243,7 +245,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     /** Pose snapshot from periodic(). */
     public Pose2d getPose() {
-        return m_pose;
+        return m_pose.get();
     }
 
     /**
@@ -303,16 +305,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     //
     // Private
 
-    /**
-     * Note this doesn't include the gyro reading directly, the estimate is
-     * considerably massaged by the odometry logic.
-     * 
-     * the poseEstimator can be asynchronously updated by network tables events,
-     * which is why we update it once in periodic, so that the various derivatives
-     * of odometry are self-consistent.
-     */
-    private void updatePosition() {
-        m_pose = m_poseEstimator.update(
+    private Pose2d getPosition() {
+        return m_poseEstimator.update(
                 Timer.getFPGATimestamp(),
                 m_heading.getHeadingNWU(),
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()));
@@ -322,7 +316,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private void updateVelocity(double dt) {
         ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
         ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
-                speeds, m_pose.getRotation());
+                speeds, m_pose.get().getRotation());
         m_velocity = new FieldRelativeVelocity(field.vxMetersPerSecond, field.vyMetersPerSecond,
                 field.omegaRadiansPerSecond);
     }
@@ -337,13 +331,13 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         }
         ChassisSpeeds accel = speeds.minus(m_prevSpeeds);
         m_prevSpeeds = speeds;
-        ChassisSpeeds field = ChassisSpeeds.fromFieldRelativeSpeeds(accel, m_pose.getRotation());
+        ChassisSpeeds field = ChassisSpeeds.fromFieldRelativeSpeeds(accel, m_pose.get().getRotation());
         m_accel = new FieldRelativeAcceleration(field.vxMetersPerSecond / dt, field.vyMetersPerSecond / dt,
                 field.omegaRadiansPerSecond / dt);
 
     }
 
     private void updateState() {
-        m_state = new SwerveState(m_pose, m_velocity, m_accel);
+        m_state = new SwerveState(m_pose.get(), m_velocity, m_accel);
     }
 }
