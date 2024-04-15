@@ -15,6 +15,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
  * Represents an odometry record. The record contains the inputs provided as
  * well as the pose that was observed based on these inputs, as well as the
  * previous record and its inputs.
+ * 
+ * TODO: add velocity and acceleration.
  */
 class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     private final SwerveDriveKinematics100 m_kinematics;

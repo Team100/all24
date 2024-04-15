@@ -1,6 +1,7 @@
 package org.team100.lib.localization;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -42,6 +43,8 @@ import edu.wpi.first.math.numbers.N3;
  */
 public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private static final double kBufferDuration = 1.5;
+    // look back a little to get a pose for velocity estimation
+    private static final double velocityDtS = 0.02;
 
     private final Telemetry t = Telemetry.get();
     private final String m_name;
@@ -141,13 +144,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         return m_poseBuffer.lastEntry().getValue().m_poseMeters;
     }
 
-    public void dump() {
-        System.out.println();
-        for (Entry<Double, InterpolationRecord> e : m_poseBuffer.tailMap(0, true).entrySet()) {
-            Util.printf("%f %f\n", e.getKey(), e.getValue().m_poseMeters.getX());
-        }
-    }
-
     @Override
     public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
         InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
@@ -158,11 +154,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
         // Step 0: If this measurement is old enough to be outside the pose buffer's
         // timespan, skip.
-        try {
-            if (m_poseBuffer.lastKey() - kBufferDuration > timestampSeconds) {
-                return;
-            }
-        } catch (NoSuchElementException ex) {
+
+        if (m_poseBuffer.lastKey() - kBufferDuration > timestampSeconds) {
             return;
         }
 
@@ -249,35 +242,45 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     }
 
     /**
-     * Updates the pose estimator with wheel encoder and gyro information.
+     * Updates the pose estimator with wheel encoder and gyro information and
+     * returns
+     * the pose estimate for the given time.
      * 
      * This should be called periodically.
-     * 
-     * TODO: add the start and end timestamps to remove ambiguity about the time
-     * span being described here.
      *
-     * @param currentTimeSeconds Time at which this method was called, in seconds.
-     * @param gyroAngle          The current gyroscope angle.
-     * @param wheelPositions     The current distance measurements and rotations of
-     *                           the swerve modules.
-     * @return The estimated pose of the robot in meters.
+     * @param currentTimeS   Time at which this method was called, in seconds.
+     * @param gyroAngle      Current gyroscope angle.
+     * @param wheelPositions Current distance measurements and rotations of
+     *                       the swerve modules.
+     * @return The estimated pose of the robot at the given time.
      */
     public Pose2d update(
-            double currentTimeSeconds,
+            double currentTimeS,
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions wheelPositions) {
         checkLength(wheelPositions);
 
-        // if we're replaying the past, we want the entry right before this one.
-        Entry<Double, InterpolationRecord> lowerEntry = m_poseBuffer.lowerEntry(currentTimeSeconds);
+        List<Entry<Double, InterpolationRecord>> consistentPair = m_poseBuffer.consistentPair(
+                currentTimeS, velocityDtS);
 
-        if (lowerEntry == null) {
-            // we're at the beginning. there's nothing to apply the wheel position delta to,
-            // so just return something? This should never happen in reality.
-            return m_poseBuffer.ceilingEntry(currentTimeSeconds).getValue().m_poseMeters;
+        if (consistentPair.isEmpty()) {
+            // we're at the beginning. there's nothing to apply the wheel position delta to.
+            // the buffer is never empty, so there's always a ceiling.
+            return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_poseMeters;
         }
 
-        double t1 = currentTimeSeconds - lowerEntry.getKey();
+        // the entry right before this one.
+        Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
+        // Entry<Double, InterpolationRecord> lowerEntry =
+        // m_poseBuffer.lowerEntry(currentTimeS);
+
+        if (lowerEntry == null) {
+            // we're at the beginning. there's nothing to apply the wheel position delta to.
+            // the buffer is never empty, so there's always a ceiling.
+            return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_poseMeters;
+        }
+
+        double t1 = currentTimeS - lowerEntry.getKey();
         t.log(Level.DEBUG, m_name, "t1", t1);
         InterpolationRecord value = lowerEntry.getValue();
         Pose2d previousPose = value.m_poseMeters;
@@ -286,10 +289,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 value.m_wheelPositions,
                 wheelPositions);
 
-        // look back a little to get a pose for velocity estimation
-        double velocityDtS = 0.02;
-
         // get an earlier pose in order to calculate the corner velocities
+
+        ///////
+        // ****TODO: this needs to be consistent with the lower entry, so add some sort
+        /////// of lock.
+
         Map.Entry<Double, InterpolationRecord> earlierEntry = m_poseBuffer.lowerEntry(
                 lowerEntry.getKey() - velocityDtS);
         if (earlierEntry == null) {
@@ -309,7 +314,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             t.log(Level.DEBUG, m_name, "delta0", modulePositionDelta[0]);
             modulePositionDelta = u.adjust(
                     corners, t0, modulePositionDelta,
-                    currentTimeSeconds - lowerEntry.getKey());
+                    currentTimeS - lowerEntry.getKey());
             // delta1 grows without bound (negatively)
             t.log(Level.DEBUG, m_name, "delta1", modulePositionDelta[0]);
         }
@@ -327,7 +332,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         t.log(Level.TRACE, m_name, "posex", newPose.getX());
 
         m_poseBuffer.put(
-                currentTimeSeconds,
+                currentTimeS,
                 new InterpolationRecord(m_kinematics, newPose, gyroAngle, wheelPositions.copy()));
 
         Transform2d deltaTransform = newPose.minus(previousPose).div(t1);
