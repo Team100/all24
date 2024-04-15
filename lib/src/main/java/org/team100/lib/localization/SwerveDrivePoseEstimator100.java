@@ -8,6 +8,9 @@ import java.util.Map.Entry;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
+import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.persistent_parameter.ParameterFactory;
 import org.team100.lib.telemetry.Telemetry;
@@ -23,6 +26,7 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -91,20 +95,16 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_kinematics = kinematics;
         m_q = new Matrix<>(Nat.N3(), Nat.N1());
         m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
-        m_poseBuffer = TimeInterpolatableBuffer100.createBuffer(kBufferDuration);
-
-        m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
-
-        setStdDevs(stateStdDevs, visionMeasurementStdDevs);
-
-        // plant the starting point in the buffer
-        m_poseBuffer.addSample(
+        m_poseBuffer = new TimeInterpolatableBuffer100<>(
+                kBufferDuration,
                 timestampSeconds,
                 new InterpolationRecord(
                         m_kinematics,
                         initialPoseMeters,
                         gyroAngle,
                         new SwerveDriveWheelPositions(modulePositions)));
+        m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
+        setStdDevs(stateStdDevs, visionMeasurementStdDevs);
     }
 
     @Override
@@ -150,10 +150,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     @Override
     public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
-        Optional<InterpolationRecord> sample = m_poseBuffer.getSample(timestampSeconds);
-        if (sample.isEmpty())
-            return Optional.empty();
-        return Optional.of(sample.get().m_poseMeters.getRotation());
+        InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
+        return Optional.of(sample.m_poseMeters.getRotation());
     }
 
     @Override
@@ -170,12 +168,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         // Step 1: Get the pose odometry measured at the moment the vision measurement
         // was made.
-        Optional<InterpolationRecord> optionalSample = m_poseBuffer.getSample(timestampSeconds);
-
-        if (optionalSample.isEmpty()) {
-            return;
-        }
-        InterpolationRecord sample = optionalSample.get();
+        InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
 
         // Step 2: Measure the twist between the odometry pose and the vision pose.
         Twist2d twist = sample.m_poseMeters.log(visionRobotPoseMeters);
@@ -199,7 +192,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         // Step 6: Record the current pose to allow multiple measurements from the same
         // timestamp
-        m_poseBuffer.addSample(
+        m_poseBuffer.put(
                 timestampSeconds,
                 new InterpolationRecord(
                         m_kinematics,
@@ -227,9 +220,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         checkLength(modulePositions);
 
         m_gyroOffset = pose.getRotation().minus(gyroAngle);
-        m_poseBuffer.clear();
-        // keep the current pose in the buffer
-        m_poseBuffer.addSample(
+
+        // empty the buffer and add the current pose
+        m_poseBuffer.reset(
                 timestampSeconds,
                 new InterpolationRecord(m_kinematics, pose, gyroAngle, modulePositions.copy()));
 
@@ -284,6 +277,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             return m_poseBuffer.ceilingEntry(currentTimeSeconds).getValue().m_poseMeters;
         }
 
+        double t1 = currentTimeSeconds - lowerEntry.getKey();
+        t.log(Level.DEBUG, m_name, "t1", t1);
         InterpolationRecord value = lowerEntry.getValue();
         Pose2d previousPose = value.m_poseMeters;
 
@@ -302,12 +297,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         } else {
             double t0 = lowerEntry.getKey() - earlierEntry.getKey();
             t.log(Level.DEBUG, m_name, "t0", t0);
-            t.log(Level.DEBUG, m_name, "t1", currentTimeSeconds - lowerEntry.getKey());
             // adjust the wheel velocities
             // these are robot-relative.
+            Pose2d earlierPose = earlierEntry.getValue().m_poseMeters;
             Vector2d[] corners = SlipperyTireUtil.cornerDeltas(
                     m_kinematics,
-                    earlierEntry.getValue().m_poseMeters,
+                    earlierPose,
                     previousPose);
 
             // adjust the corner deltas
@@ -331,9 +326,18 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         t.log(Level.TRACE, m_name, "posex", newPose.getX());
 
-        m_poseBuffer.addSample(
+        m_poseBuffer.put(
                 currentTimeSeconds,
                 new InterpolationRecord(m_kinematics, newPose, gyroAngle, wheelPositions.copy()));
+
+        Transform2d deltaTransform = newPose.minus(previousPose).div(t1);
+        FieldRelativeVelocity velocity = new FieldRelativeVelocity(
+                deltaTransform.getX(),
+                deltaTransform.getY(),
+                deltaTransform.getRotation().getRadians());
+
+        // TODO finish this
+        SwerveState state = new SwerveState(newPose, velocity, new FieldRelativeAcceleration(0, 0, 0));
 
         // this produces a *lot* of output
         // dump();
