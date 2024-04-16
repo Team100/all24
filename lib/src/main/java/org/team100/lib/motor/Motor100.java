@@ -11,11 +11,8 @@ public interface Motor100<T extends Measure100> extends Glassy {
     /**
      * Open-loop duty cycle control.
      * 
-     * @deprecated we shouldn't use duty cycle anywhere.
-     * 
      * @param output in range [-1, 1]
      */
-    @Deprecated
     void setDutyCycle(double output);
 
     /**

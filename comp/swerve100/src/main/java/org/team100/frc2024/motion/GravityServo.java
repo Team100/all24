@@ -3,19 +3,17 @@ package org.team100.frc2024.motion;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkMax;
-
 import edu.wpi.first.math.controller.PIDController;
 
 public class GravityServo {
     private final Telemetry t = Telemetry.get();
-    private final CANSparkMax m_motor;
+    private final Motor100<Distance100> m_motor;
     private final String m_name;
     private final SysParam m_params;
     private final PIDController m_controller;
@@ -28,8 +26,7 @@ public class GravityServo {
     private State100 m_setpoint = new State100(0, 0);
 
     public GravityServo(
-            CANSparkMax motor,
-            int currentLimit,
+            Motor100<Distance100> motor,
             String name,
             SysParam params,
             PIDController controller,
@@ -38,12 +35,9 @@ public class GravityServo {
             Encoder100<Distance100> encoder,
             double[] softLimits) {
         m_motor = motor;
-        m_motor.setIdleMode(IdleMode.kCoast);
-        m_motor.setSmartCurrentLimit(currentLimit);
         m_name = name;
         m_params = params;
         m_controller = controller;
-        // m_controller.setIntegratorRange(-0.02, 0.02);
         m_controller.setTolerance(0.02);
         m_profile = profile;
         m_period = period;
@@ -101,8 +95,7 @@ public class GravityServo {
 
         // double u_TOTAL = gravityTorque + u_FF + u_FB + staticFF;
         double u_TOTAL = gravityTorque + u_FF + u_FB;
-
-        m_motor.set(u_TOTAL);
+        m_motor.setDutyCycle(u_TOTAL);
 
         m_controller.setIntegratorRange(0, 0.1);
 
@@ -110,7 +103,6 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "u_FF", u_FF);
         t.log(Level.DEBUG, m_name, "static FF", staticFF);
         t.log(Level.DEBUG, m_name, "gravity T", gravityTorque);
-        t.log(Level.DEBUG, m_name, "DUTY CYCLE", m_motor.getAppliedOutput());
         t.log(Level.DEBUG, m_name, "u_TOTAL", u_TOTAL);
         t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Goal", m_goal);
@@ -120,22 +112,20 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition() / m_params.gearRatio())));
         t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition() / m_params.gearRatio());
-        t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
-        t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
     }
 
     public void setWithSoftLimits(double value) {
         if (value >= 0) {
             if (m_encoder.getPosition() >= m_softLimits[1]) {
-                m_motor.set(0);
+                m_motor.setDutyCycle(0);
                 return;
             }
         } else if (value <= 0 && m_encoder.getPosition() <= m_softLimits[0]) {
-            m_motor.set(0);
+            m_motor.setDutyCycle(0);
             return;
         }
-        m_motor.set(value);
+        m_motor.setDutyCycle(value);
     }
 
     public void setPositionWithSteadyState(double goal) {
@@ -158,7 +148,7 @@ public class GravityServo {
         gravityTorque = gravityTorque * 0.9;
         double u_TOTAL = gravityTorque + u_FF + u_FB;
 
-        m_motor.set(gravityTorque + u_FF + u_FB);
+        m_motor.setDutyCycle(gravityTorque + u_FF + u_FB);
 
         m_controller.setIntegratorRange(0, 0.1);
 
@@ -174,16 +164,14 @@ public class GravityServo {
         t.log(Level.DEBUG, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.DEBUG, m_name, "COOSIIINEEE", Math.cos((m_encoder.getPosition() / m_params.gearRatio())));
         t.log(Level.DEBUG, m_name, "POSE * GEAR RAT", m_encoder.getPosition() / m_params.gearRatio());
-        t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
         t.log(Level.DEBUG, m_name, "ENCODEr", m_encoder.getPosition());
-        t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
     }
 
     public void set(double value) {
-        m_motor.set(value);
+        m_motor.setDutyCycle(value);
     }
 
     public void stop() {
-        m_motor.set(0);
+        m_motor.setDutyCycle(0);
     }
 }

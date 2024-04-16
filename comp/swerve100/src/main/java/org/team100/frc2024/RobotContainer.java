@@ -162,7 +162,7 @@ public class RobotContainer implements Glassy {
 
         final Intake m_intake = new Intake(m_sensors);
 
-        m_shooter = new DrumShooter(3, 13, 7, 58);
+        m_shooter = new DrumShooter(3, 13, 27, 58);
 
         ///////////////////////////
         //

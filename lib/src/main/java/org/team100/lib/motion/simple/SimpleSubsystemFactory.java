@@ -65,7 +65,8 @@ public class SimpleSubsystemFactory {
     }
 
     private SimpleSubsystem simulated() {
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>("simple/drive");
+        // example with a lot of reduction, 1 m/s free speed
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>("simple/drive", 1);
         Encoder100<Distance100> encoder = new SimulatedEncoder<>(
                 "simple/encoder",
                 motor,

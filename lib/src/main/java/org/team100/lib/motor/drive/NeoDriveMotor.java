@@ -32,8 +32,6 @@ public class NeoDriveMotor implements Motor100<Distance100> {
      */
     private static final double kTNm_amp = 0.028;
 
-    private final RelativeEncoder m_encoder;
-
     private final double staticFrictionFFVolts;
 
     /**
@@ -58,6 +56,7 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     private final Telemetry t = Telemetry.get();
     private final SparkPIDController m_pidController;
     private final CANSparkMax m_motor;
+    private final RelativeEncoder m_encoder;
     private final double m_gearRatio;
     private final double m_wheelDiameter;
     private final String m_name;

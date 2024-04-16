@@ -38,19 +38,19 @@ public class ArmFactory {
         // NOTE: the encoder inversion used to be in the subsystem,
         // but now it is here.
         Encoder100<Angle100> lowerEncoder = new AnalogTurningEncoder(
-                kLower, 
+                kLower,
                 1, // analog input 1
-                 kLowerEncoderOffset,
-                 1, // encoder is 1:1 with the arm joint
-                 Drive.INVERSE);
+                kLowerEncoderOffset,
+                1, // encoder is 1:1 with the arm joint
+                Drive.INVERSE);
 
         Motor100<Angle100> upperMotor = new JointMotor(kUpper, 30, 1);
         Encoder100<Angle100> upperEncoder = new AnalogTurningEncoder(
                 kUpper,
-                 0, // analog input 0
-                kUpperEncoderOffset, 
-                1,// encoder is 1:1 with the arm joint
-                 Drive.DIRECT);
+                0, // analog input 0
+                kUpperEncoderOffset,
+                1, // encoder is 1:1 with the arm joint
+                Drive.DIRECT);
 
         return new ArmSubsystem(
                 kArm,
@@ -63,11 +63,13 @@ public class ArmFactory {
     private static ArmSubsystem simulated() {
         // for testing
         // note very high reduction ratio
-        SimulatedMotor<Angle100> lowerMotor = new SimulatedMotor<>(kLower);
+        // motor speed is rad/s
+
+        SimulatedMotor<Angle100> lowerMotor = new SimulatedMotor<>(kLower, 600);
         SimulatedEncoder<Angle100> lowerEncoder = new SimulatedEncoder<>(
                 kLower, lowerMotor, 200, -1, 1);
 
-        SimulatedMotor<Angle100> upperMotor = new SimulatedMotor<>(kUpper);
+        SimulatedMotor<Angle100> upperMotor = new SimulatedMotor<>(kUpper, 600);
         SimulatedEncoder<Angle100> upperEncoder = new SimulatedEncoder<>(
                 kUpper, upperMotor, 200, 0.1, 2.5);
         return new ArmSubsystem(

@@ -2,12 +2,16 @@ package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.duty_cycle.VortexEncoder;
+import org.team100.lib.motor.duty_cycle.VortexProxy;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
-
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -15,36 +19,41 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 40;
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    private final CANSparkFlex s1;
-    private final CANSparkFlex s2;
+    private final Motor100<Distance100> v1;
+    private final Encoder100<Distance100> e1;
+    private final Motor100<Distance100> v2;
+    private final Encoder100<Distance100> e2;
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                s1 = new CANSparkFlex(leftClimberID, MotorType.kBrushless);
-                s2 = new CANSparkFlex(rightClimberID, MotorType.kBrushless);
-                s2.setInverted(false);
-                s1.setInverted(true);
-                s1.setSmartCurrentLimit(kCurrentLimit);
-                s2.setSmartCurrentLimit(kCurrentLimit);
+                VortexProxy vp1 = new VortexProxy(m_name + "/left", leftClimberID, true, kCurrentLimit);
+                e1 = new VortexEncoder( vp1);
+                v1 = vp1;
+                VortexProxy vp2 = new VortexProxy(m_name + "/right", rightClimberID, false, kCurrentLimit);
+                e2 = new VortexEncoder( vp2);
+                v2 = vp2;
                 break;
-            case BLANK:
             default:
-                s1 = new CANSparkFlex(60, MotorType.kBrushless);
-                s2 = new CANSparkFlex(61, MotorType.kBrushless);
-                s2.setInverted(true);
+                // for testing and simulation
+                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(m_name + "left", 1);
+                e1 = new SimulatedEncoder<>(m_name + "left", vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
+                v1 = vs1;
+                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(m_name + "right", 1);
+                e2 = new SimulatedEncoder<>(m_name + "right", vs2, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
+                v2 = vs2;
         }
     }
 
     public void setLeftWithSoftLimits(double value) {
-        if (s1.getEncoder().getPosition() > 300 && value >= 0) {
-            s1.set(0);
+        if (e1.getPosition() > 300 && value >= 0) {
+            v1.setDutyCycle(0);
             return;
         }
 
-        if (s1.getEncoder().getPosition() < 5 && value <= 0) {
-            s1.set(0);
+        if (e1.getPosition() < 5 && value <= 0) {
+            v1.setDutyCycle(0);
             return;
         }
         // s1.set(value);
@@ -52,13 +61,13 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void setRightWithSoftLimits(double value) {
-        if (s2.getEncoder().getPosition() > 300 && value >= 0) {
-            s2.set(0);
+        if (e2.getPosition() > 300 && value >= 0) {
+            v2.setDutyCycle(0);
             return;
         }
 
-        if (s2.getEncoder().getPosition() < 5 && value <= 0) {
-            s2.set(0);
+        if (e2.getPosition() < 5 && value <= 0) {
+            v2.setDutyCycle(0);
             return;
         }
         // s2.set(value);
@@ -66,37 +75,33 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void zeroClimbers() {
-        s1.getEncoder().setPosition(0);
-        s2.getEncoder().setPosition(0);
+        e1.reset();
+        e2.reset();
 
     }
 
     public void setLeft(double value) {
-        s1.set(value);
+        v1.setDutyCycle(value);
     }
 
     public void setRight(double value) {
-        s2.set(value);
+        v2.setDutyCycle(value);
     }
 
     public double getRightPosition() {
-        return s2.getEncoder().getPosition();
+        return e2.getPosition();
     }
 
     public double getLeftPosition() {
-        return s1.getEncoder().getPosition();
+        return e1.getPosition();
     }
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", s1.getEncoder().getPosition());
-        t.log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", s2.getEncoder().getPosition());
-        t.log(Level.DEBUG, m_name, "current (A) CLIMVER 1", s1.getOutputCurrent());
-        t.log(Level.DEBUG, m_name, "current (A) CLIMBER 2", s2.getOutputCurrent());
-        t.log(Level.DEBUG, m_name, "DUTY CYCLE 1", s1.getAppliedOutput());
-        t.log(Level.DEBUG, m_name, "DUTY CYCLE 2", s2.getAppliedOutput());
-        t.log(Level.DEBUG, m_name, "RPM 1", s1.getEncoder().getVelocity());
-        t.log(Level.DEBUG, m_name, "RPM 2", s2.getEncoder().getVelocity());
+        t.log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", e1.getPosition());
+        t.log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", e2.getPosition());
+        t.log(Level.DEBUG, m_name, "RPM 1", e1.getRate());
+        t.log(Level.DEBUG, m_name, "RPM 2", e2.getRate());
     }
 
     @Override

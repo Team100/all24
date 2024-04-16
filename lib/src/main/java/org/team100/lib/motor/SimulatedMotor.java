@@ -8,28 +8,34 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.math.MathUtil;
 
 /**
- * Very simple simulated motor.
+ * Very simple simulated motor. Use whatever unit you want: if you set a
+ * velocity then you get it back, immediately. If you want to use duty cycle,
+ * you should choose a reasonable free speed.
+ * 
+ * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
+    private final double m_freeSpeed;
     private double m_velocity = 0;
 
     /**
      * @param name may not start with slash
+     * @param kV   velocity units at full output
      */
-    public SimulatedMotor(String name) {
+    public SimulatedMotor(String name, double freeSpeed) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        m_freeSpeed = freeSpeed;
     }
 
     @Override
     public void setDutyCycle(double output) {
         output = MathUtil.clamp(output, -1, 1);
         t.log(Level.TRACE, m_name, "duty_cycle", output);
-        // 100% output => about 6k rpm
-        setVelocity(output * 600, 0);
+        setVelocity(output * m_freeSpeed, 0);
     }
 
     @Override
