@@ -135,7 +135,7 @@ public class DriveToWaypoint3 extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

@@ -13,8 +13,7 @@ public class IndexCommand extends Command100 {
         addRequirements(m_index);
     }
 
-    @Override
-    public void initialize100() {}
+
 
     @Override
     public void execute100(double dt) {
@@ -25,11 +24,5 @@ public class IndexCommand extends Command100 {
         } 
     }
 
-    @Override
-    public void end(boolean interrupted) {}
 
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
 }

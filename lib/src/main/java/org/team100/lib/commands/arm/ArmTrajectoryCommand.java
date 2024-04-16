@@ -169,7 +169,7 @@ public class ArmTrajectoryCommand extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_armSubsystem.set(0, 0);
         m_trajectory = null;
     }

@@ -103,7 +103,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }
