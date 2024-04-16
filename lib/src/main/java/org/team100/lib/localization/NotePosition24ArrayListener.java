@@ -62,9 +62,11 @@ public class NotePosition24ArrayListener {
                 return;
             }
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
-            notes = Optional
-                    .of(PoseEstimationHelper.cameraRotsToFieldRelativeArray(m_poseEstimator.getEstimatedPosition(),
-            cameraInRobotCoordinates, positions));
+            notes = Optional.of(
+                    PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                            m_poseEstimator.getEstimatedPosition().pose(),
+                            cameraInRobotCoordinates,
+                            positions));
         } else {
             Util.warn("note weird vision update key: " + name);
         }
@@ -79,14 +81,16 @@ public class NotePosition24ArrayListener {
                 Transform3d cameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
                 SimulatedCamera simCamera = new SimulatedCamera(cameraInRobotCoordinates,
                         new Rotation3d(0, Math.toRadians(31.5), Math.toRadians(40)));
-                Optional<ArrayList<Rotation3d>> rot = simCamera.getRotation(m_poseEstimator.getEstimatedPosition(),
+                Optional<ArrayList<Rotation3d>> rot = simCamera.getRotation(
+                        m_poseEstimator.getEstimatedPosition().pose(),
                         NotePicker.autoNotes);
-                    if (!rot.isPresent()) {
-                        return Optional.empty();
-                    }
+                if (!rot.isPresent()) {
+                    return Optional.empty();
+                }
                 return Optional
-                        .of(PoseEstimationHelper.cameraRotsToFieldRelative(m_poseEstimator.getEstimatedPosition(),
-                        cameraInRobotCoordinates, rot.get()));
+                        .of(PoseEstimationHelper.cameraRotsToFieldRelative(
+                                m_poseEstimator.getEstimatedPosition().pose(),
+                                cameraInRobotCoordinates, rot.get()));
             default:
                 if (latestTime > Timer.getFPGATimestamp() - 0.1) {
                     return notes;
@@ -99,7 +103,9 @@ public class NotePosition24ArrayListener {
      * @return The translation of all the closest note, field relative
      */
     public Optional<Translation2d> getClosestTranslation2d() {
-        return NotePicker.closestNote(getTranslation2dArray(), m_poseEstimator.getEstimatedPosition());
+        return NotePicker.closestNote(
+                getTranslation2dArray(),
+                m_poseEstimator.getEstimatedPosition().pose());
     }
 
     public Optional<Translation2d> getTranslation2dAuto(Translation2d noteID) {

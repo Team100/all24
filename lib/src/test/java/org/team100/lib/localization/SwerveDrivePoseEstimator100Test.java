@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.Fixture;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.util.Tire;
 
@@ -39,7 +40,8 @@ class SwerveDrivePoseEstimator100Test {
 
     private final Fixture fixture = new Fixture();
 
-    private static void verify(double x, Pose2d estimate) {
+    private static void verify(double x, SwerveState state) {
+        Pose2d estimate = state.pose();
         assertEquals(x, estimate.getX(), kDelta);
         assertEquals(0, estimate.getY(), kDelta);
         assertEquals(0, estimate.getRotation().getRadians(), kDelta);
@@ -555,7 +557,7 @@ class SwerveDrivePoseEstimator100Test {
                 positions[i].angle = moduleStates[i].angle.plus(new Rotation2d(rand.nextGaussian() * 0.005));
             }
 
-            var xHat = estimator.update(
+            SwerveState xHat = estimator.update(
                     t,
                     groundTruthState.poseMeters
                             .getRotation()
@@ -563,7 +565,7 @@ class SwerveDrivePoseEstimator100Test {
                             .minus(trajectory.getInitialPose().getRotation()),
                     new SwerveDriveWheelPositions(positions));
 
-            double error = groundTruthState.poseMeters.getTranslation().getDistance(xHat.getTranslation());
+            double error = groundTruthState.poseMeters.getTranslation().getDistance(xHat.pose().getTranslation());
             if (error > maxError) {
                 maxError = error;
             }
@@ -574,12 +576,12 @@ class SwerveDrivePoseEstimator100Test {
         }
 
         assertEquals(
-                endingPose.getX(), estimator.getEstimatedPosition().getX(), 0.08, "Incorrect Final X");
+                endingPose.getX(), estimator.getEstimatedPosition().pose().getX(), 0.08, "Incorrect Final X");
         assertEquals(
-                endingPose.getY(), estimator.getEstimatedPosition().getY(), 0.08, "Incorrect Final Y");
+                endingPose.getY(), estimator.getEstimatedPosition().pose().getY(), 0.08, "Incorrect Final Y");
         assertEquals(
                 endingPose.getRotation().getRadians(),
-                estimator.getEstimatedPosition().getRotation().getRadians(),
+                estimator.getEstimatedPosition().pose().getRotation().getRadians(),
                 0.15,
                 "Incorrect Final Theta");
 
@@ -641,11 +643,11 @@ class SwerveDrivePoseEstimator100Test {
                     + " -> "
                     + measurement;
 
-            var dx = Math.abs(measurement.getX() - estimator.getEstimatedPosition().getX());
-            var dy = Math.abs(measurement.getY() - estimator.getEstimatedPosition().getY());
+            var dx = Math.abs(measurement.getX() - estimator.getEstimatedPosition().pose().getX());
+            var dy = Math.abs(measurement.getY() - estimator.getEstimatedPosition().pose().getY());
             var dtheta = Math.abs(
                     measurement.getRotation().getDegrees()
-                            - estimator.getEstimatedPosition().getRotation().getDegrees());
+                            - estimator.getEstimatedPosition().pose().getRotation().getDegrees());
 
             assertTrue(dx > 0.08 || dy > 0.08 || dtheta > 0.08, errorLog);
         }
@@ -698,11 +700,11 @@ class SwerveDrivePoseEstimator100Test {
                 VecBuilder.fill(0.1, 0.1, 0.1),
                 VecBuilder.fill(0.1, 0.1, 0.1));
 
-        assertEquals(odometryPose.getX(), estimator.getEstimatedPosition().getX(), "Incorrect Final X");
-        assertEquals(odometryPose.getY(), estimator.getEstimatedPosition().getY(), "Incorrect Final Y");
+        assertEquals(odometryPose.pose().getX(), estimator.getEstimatedPosition().pose().getX(), "Incorrect Final X");
+        assertEquals(odometryPose.pose().getY(), estimator.getEstimatedPosition().pose().getY(), "Incorrect Final Y");
         assertEquals(
-                odometryPose.getRotation().getRadians(),
-                estimator.getEstimatedPosition().getRotation().getRadians(),
+                odometryPose.pose().getRotation().getRadians(),
+                estimator.getEstimatedPosition().pose().getRotation().getRadians(),
                 "Incorrect Final Theta");
     }
 }

@@ -3,9 +3,8 @@ package org.team100.lib.localization;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
@@ -20,7 +19,6 @@ import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.SlipperyTireUtil;
 import org.team100.lib.util.Tire;
-import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -103,7 +101,10 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 timestampSeconds,
                 new InterpolationRecord(
                         m_kinematics,
-                        initialPoseMeters,
+                        new SwerveState(
+                                initialPoseMeters,
+                                new FieldRelativeVelocity(0, 0, 0),
+                                new FieldRelativeAcceleration(0, 0, 0)),
                         gyroAngle,
                         new SwerveDriveWheelPositions(modulePositions)));
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
@@ -140,14 +141,14 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * This should really only be used by other threads, so the order of
      * update and reading doesn't matter.
      */
-    public Pose2d getEstimatedPosition() {
-        return m_poseBuffer.lastEntry().getValue().m_poseMeters;
+    public SwerveState getEstimatedPosition() {
+        return m_poseBuffer.lastEntry().getValue().m_state;
     }
 
     @Override
     public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
         InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
-        return Optional.of(sample.m_poseMeters.getRotation());
+        return Optional.of(sample.m_state.pose().getRotation());
     }
 
     @Override
@@ -164,7 +165,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
 
         // Step 2: Measure the twist between the odometry pose and the vision pose.
-        Twist2d twist = sample.m_poseMeters.log(visionRobotPoseMeters);
+        Twist2d twist = sample.m_state.pose().log(visionRobotPoseMeters);
 
         // Step 3: We should not trust the twist entirely, so instead we scale this
         // twist by a Kalman gain matrix representing how much we trust vision
@@ -174,7 +175,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         // Step 4: Convert back to Twist2d.
         Twist2d scaledTwist = new Twist2d(k_times_twist.get(0, 0), k_times_twist.get(1, 0), k_times_twist.get(2, 0));
 
-        Pose2d newPose = sample.m_poseMeters.exp(scaledTwist);
+        Pose2d newPose = sample.m_state.pose().exp(scaledTwist);
 
         // Step 5: Adjust the gyro offset so that the adjusted pose is consistent with
         // the unadjusted gyro angle
@@ -189,7 +190,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 timestampSeconds,
                 new InterpolationRecord(
                         m_kinematics,
-                        newPose,
+                        new SwerveState(newPose, sample.m_state.velocity(), sample.m_state.acceleration()),
                         sample.m_gyroAngle,
                         sample.m_wheelPositions));
 
@@ -217,7 +218,14 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         // empty the buffer and add the current pose
         m_poseBuffer.reset(
                 timestampSeconds,
-                new InterpolationRecord(m_kinematics, pose, gyroAngle, modulePositions.copy()));
+                new InterpolationRecord(
+                        m_kinematics,
+                        new SwerveState(
+                                pose,
+                                new FieldRelativeVelocity(0, 0, 0),
+                                new FieldRelativeAcceleration(0, 0, 0)),
+                        gyroAngle,
+                        modulePositions.copy()));
 
         t.log(Level.TRACE, m_name, "GYRO OFFSET", m_gyroOffset);
     }
@@ -254,7 +262,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      *                       the swerve modules.
      * @return The estimated pose of the robot at the given time.
      */
-    public Pose2d update(
+    public SwerveState update(
             double currentTimeS,
             Rotation2d gyroAngle,
             SwerveDriveWheelPositions wheelPositions) {
@@ -266,7 +274,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         if (consistentPair.isEmpty()) {
             // we're at the beginning. there's nothing to apply the wheel position delta to.
             // the buffer is never empty, so there's always a ceiling.
-            return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_poseMeters;
+            return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_state;
         }
 
         // the entry right before this one, the basis for integration.
@@ -275,23 +283,25 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         double t1 = currentTimeS - lowerEntry.getKey();
         t.log(Level.DEBUG, m_name, "t1", t1);
         InterpolationRecord value = lowerEntry.getValue();
-        Pose2d previousPose = value.m_poseMeters;
+        SwerveState previousPose = value.m_state;
 
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 value.m_wheelPositions,
                 wheelPositions);
 
+        SwerveState earlierPose = null;
+        double t0 = 0;
         if (consistentPair.size() > 1) {
             // get an earlier pose in order to adjust the corner velocities
             Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
 
-            double t0 = lowerEntry.getKey() - earlierEntry.getKey();
+            t0 = lowerEntry.getKey() - earlierEntry.getKey();
             t.log(Level.DEBUG, m_name, "t0", t0);
-            Pose2d earlierPose = earlierEntry.getValue().m_poseMeters;
+            earlierPose = earlierEntry.getValue().m_state;
             Vector2d[] corners = SlipperyTireUtil.cornerDeltas(
                     m_kinematics,
-                    earlierPose,
-                    previousPose);
+                    earlierPose.pose(),
+                    previousPose.pose());
             t.log(Level.DEBUG, m_name, "delta0", modulePositionDelta[0]);
             modulePositionDelta = u.adjust(corners, t0, modulePositionDelta, t1);
             t.log(Level.DEBUG, m_name, "delta1", modulePositionDelta[0]);
@@ -303,28 +313,33 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         // pose angle based on the gyro (which is more accurate)
 
         Rotation2d angle = gyroAngle.plus(m_gyroOffset);
-        twist.dtheta = angle.minus(previousPose.getRotation()).getRadians();
+        twist.dtheta = angle.minus(previousPose.pose().getRotation()).getRadians();
 
-        Pose2d newPose = new Pose2d(previousPose.exp(twist).getTranslation(), angle);
+        Pose2d newPose = new Pose2d(previousPose.pose().exp(twist).getTranslation(), angle);
 
         t.log(Level.TRACE, m_name, "posex", newPose.getX());
 
-        m_poseBuffer.put(
-                currentTimeS,
-                new InterpolationRecord(m_kinematics, newPose, gyroAngle, wheelPositions.copy()));
-
-        Transform2d deltaTransform = newPose.minus(previousPose).div(t1);
+        Transform2d deltaTransform = newPose.minus(previousPose.pose()).div(t1);
         FieldRelativeVelocity velocity = new FieldRelativeVelocity(
                 deltaTransform.getX(),
                 deltaTransform.getY(),
                 deltaTransform.getRotation().getRadians());
+        FieldRelativeAcceleration accel = new FieldRelativeAcceleration(0, 0, 0);
+        if (earlierPose != null) {
+            Transform2d earlierTransform = previousPose.pose().minus(earlierPose.pose()).div(t0);
+            accel = new FieldRelativeAcceleration(
+                    earlierTransform.getX(),
+                    earlierTransform.getY(),
+                    earlierTransform.getRotation().getRadians());
+        }
 
-        // TODO finish this
-        SwerveState state = new SwerveState(newPose, velocity, new FieldRelativeAcceleration(0, 0, 0));
+        SwerveState swerveState = new SwerveState(newPose, velocity, accel);
 
-        // this produces a *lot* of output
-        // dump();
-        return newPose;
+        m_poseBuffer.put(
+                currentTimeS,
+                new InterpolationRecord(m_kinematics, swerveState, gyroAngle, wheelPositions.copy()));
+
+        return swerveState;
     }
 
     @Override
