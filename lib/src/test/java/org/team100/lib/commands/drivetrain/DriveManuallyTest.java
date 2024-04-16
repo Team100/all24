@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.commands.Command100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -18,7 +19,6 @@ class DriveManuallyTest extends Fixtured {
     String desiredMode = null;
     DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);
 
-
     @Test
     void testSimple() {
         Supplier<DriverControl.Velocity> twistSupplier = () -> desiredTwist;
@@ -26,7 +26,7 @@ class DriveManuallyTest extends Fixtured {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 
         DriveManually command = new DriveManually(twistSupplier, robotDrive);
-
+        DriveManually.shutDownForTest();
 
         command.register("MODULE_STATE", false,
                 new SimpleManualModuleStates("foo", swerveKinodynamics));
@@ -42,18 +42,16 @@ class DriveManuallyTest extends Fixtured {
         command.initialize();
 
         desiredMode = "MODULE_STATE";
-        command.execute();
+        command.execute100(0.02);
 
         robotDrive.periodic();
         assertEquals(1, robotDrive.speeds(0.02).vxMetersPerSecond, 0.001);
 
         desiredMode = "ROBOT_RELATIVE_CHASSIS_SPEED";
-        command.execute();
-        // assertEquals(1, robotDrive.speeds().vxMetersPerSecond, 0.001);
+        command.execute100(0.02);
 
         desiredMode = "FIELD_RELATIVE_TWIST";
-        command.execute();
-        // assertEquals(1, robotDrive.twist.dx, 0.001);
+        command.execute100(0.02);
 
         command.end(false);
     }

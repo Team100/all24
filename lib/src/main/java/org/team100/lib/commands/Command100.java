@@ -46,7 +46,9 @@ public abstract class Command100 extends Command implements Glassy {
         //
     }
 
-    /** @param dt duration since the previous call. */
+    /**
+     * @param dt duration since the previous call.
+     */
     public abstract void execute100(double dt);
 
     public void end100(boolean interrupted) {
@@ -58,19 +60,41 @@ public abstract class Command100 extends Command implements Glassy {
         t.log(Level.DEBUG, m_name, "command state", "initialize");
         prevTime = Timer.getFPGATimestamp();
         initialize100();
+        if (m_scheduler.isShutdown()) {
+            Util.warn("TEST MODE: skipping scheduler.");
+            return;
+        }
         m_task = m_scheduler.scheduleAtFixedRate(new CrashWrapper(), 0, kExecutePeriodMilliS, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public final void execute() {
+        // command100 execute does nothing, the scheduler does the work.
+        if (m_scheduler.isShutdown()) {
+            throw new IllegalStateException(
+                    "Tests should not call Command.execute(), use Command100.execute100() instead.");
+        }
     }
 
     @Override
     public final void end(boolean interrupted) {
         // "false" -> don't interrupt the thread
-        m_task.cancel(false);
+        if (m_task != null)
+            m_task.cancel(false);
         end100(interrupted);
     }
 
     @Override
     public final String getGlassName() {
         return this.getClass().getSimpleName();
+    }
+
+    /**
+     * {@link #execute100()} is usually run in a separate thread, but for tests,
+     * it's better to run it in the test itself.
+     */
+    public static void shutDownForTest() {
+        m_scheduler.shutdownNow();
     }
 
     private static class MaxPriorityThreads implements ThreadFactory {

@@ -13,6 +13,7 @@ import edu.wpi.first.math.MathUtil;
 public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
+    private double m_velocity = 0;
 
     /**
      * @param name may not start with slash
@@ -22,8 +23,6 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
     }
-
-    private double m_velocity = 0;
 
     @Override
     public void setDutyCycle(double output) {

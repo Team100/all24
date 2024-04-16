@@ -6,5 +6,21 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/TireSaturation (m_s_s)",
+    "type": "double",
+    "value": 10.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TireSlipAtSaturation (0-1)",
+    "type": "double",
+    "value": 0.1,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

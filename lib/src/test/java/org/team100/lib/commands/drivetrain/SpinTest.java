@@ -16,10 +16,11 @@ class SpinTest extends Fixtured implements Timeless {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
 
         Spin command = new Spin(fixture.drive, fixture.controller);
+        Spin.shutDownForTest();
         command.initialize();
         stepTime(0.02);
         // starts from rest
-        command.execute();
+        command.execute100(0.02);
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);
@@ -29,7 +30,7 @@ class SpinTest extends Fixtured implements Timeless {
         assertEquals(-0.785, fixture.drive.desiredStates()[0].angle.getRadians(), 0.01);
 
         stepTime(5);
-        command.execute();
+        command.execute100(5);
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);
