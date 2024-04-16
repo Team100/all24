@@ -155,35 +155,35 @@ class SwerveDrivePoseEstimator100Test {
                 new SwerveDriveWheelPositions(positionZero)));
 
         // wheels have moved 0.1m in +x, at t=0.04.
-        // the "odometry opinion" should be 0.1 since the last odometry estimate was
-        // 0, but instead odometry is applied relative to the latest estimate, which
-        // was based on vision. so the actual odometry stddev is like *zero*.
-
+        // but the velocity estimate says we're sliding, so it's a bit more than 0.1
+        // note the sliding rate is limited here.
         verify(0.267, poseEstimator.update(0.04, GeometryUtil.kRotationZero,
                 new SwerveDriveWheelPositions(position01)));
 
-        // here's the delayed update from above, which moves the estimate to 0.305 and
-        // then the odometry is applied on top of that, yielding 0.405.
+        // here's the delayed update from above, which replays the history
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.015);
 
         verify(0.405, poseEstimator.getEstimatedPosition());
 
         // wheels are in the same position as the previous iteration,
         // but we've moved since then so we must be sliding.
-        verify(0.481, poseEstimator.update(0.06, GeometryUtil.kRotationZero,
+        verify(0.501, poseEstimator.update(0.06, GeometryUtil.kRotationZero,
                 new SwerveDriveWheelPositions(position01)));
 
         // a little earlier than the previous estimate does nothing.
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.014);
-        verify(0.481, poseEstimator.getEstimatedPosition());
+        verify(0.501, poseEstimator.getEstimatedPosition());
 
         // a little later than the previous estimate works normally.
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.016);
-        verify(0.601, poseEstimator.getEstimatedPosition());
+        verify(0.617, poseEstimator.getEstimatedPosition());
 
         // wheels not moving -> no change,
         // except we are still sliding.
-        verify(0.686, poseEstimator.update(0.08, GeometryUtil.kRotationZero,
+        verify(0.711, poseEstimator.update(0.08, GeometryUtil.kRotationZero,
+                new SwerveDriveWheelPositions(position01)));
+
+        verify(0.932, poseEstimator.update(1, GeometryUtil.kRotationZero,
                 new SwerveDriveWheelPositions(position01)));
     }
 

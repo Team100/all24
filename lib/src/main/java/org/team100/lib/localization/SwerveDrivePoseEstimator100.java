@@ -269,16 +269,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_poseMeters;
         }
 
-        // the entry right before this one.
+        // the entry right before this one, the basis for integration.
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
-        // Entry<Double, InterpolationRecord> lowerEntry =
-        // m_poseBuffer.lowerEntry(currentTimeS);
-
-        if (lowerEntry == null) {
-            // we're at the beginning. there's nothing to apply the wheel position delta to.
-            // the buffer is never empty, so there's always a ceiling.
-            return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_poseMeters;
-        }
 
         double t1 = currentTimeS - lowerEntry.getKey();
         t.log(Level.DEBUG, m_name, "t1", t1);
@@ -289,33 +281,19 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 value.m_wheelPositions,
                 wheelPositions);
 
-        // get an earlier pose in order to calculate the corner velocities
+        if (consistentPair.size() > 1) {
+            // get an earlier pose in order to adjust the corner velocities
+            Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
 
-        ///////
-        // ****TODO: this needs to be consistent with the lower entry, so add some sort
-        /////// of lock.
-
-        Map.Entry<Double, InterpolationRecord> earlierEntry = m_poseBuffer.lowerEntry(
-                lowerEntry.getKey() - velocityDtS);
-        if (earlierEntry == null) {
-            // no velocity estimation, so just use the wheel velocities.
-        } else {
             double t0 = lowerEntry.getKey() - earlierEntry.getKey();
             t.log(Level.DEBUG, m_name, "t0", t0);
-            // adjust the wheel velocities
-            // these are robot-relative.
             Pose2d earlierPose = earlierEntry.getValue().m_poseMeters;
             Vector2d[] corners = SlipperyTireUtil.cornerDeltas(
                     m_kinematics,
                     earlierPose,
                     previousPose);
-
-            // adjust the corner deltas
             t.log(Level.DEBUG, m_name, "delta0", modulePositionDelta[0]);
-            modulePositionDelta = u.adjust(
-                    corners, t0, modulePositionDelta,
-                    currentTimeS - lowerEntry.getKey());
-            // delta1 grows without bound (negatively)
+            modulePositionDelta = u.adjust(corners, t0, modulePositionDelta, t1);
             t.log(Level.DEBUG, m_name, "delta1", modulePositionDelta[0]);
         }
 
