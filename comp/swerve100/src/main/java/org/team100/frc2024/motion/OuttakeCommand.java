@@ -1,6 +1,6 @@
 package org.team100.frc2024.motion;
 
-import org.team100.frc2024.motion.amp.AmpSubsystem;
+import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.Shooter;
 
@@ -9,13 +9,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class OuttakeCommand extends Command {
     private final Intake m_intake;
     private final Shooter m_shooter;
-    private final AmpSubsystem m_amp;
+    private final AmpFeeder m_amp;
     private final FeederSubsystem m_feeder;
 
     public OuttakeCommand(
             Intake intake,
             Shooter shooter,
-            AmpSubsystem amp,
+            AmpFeeder amp,
             FeederSubsystem feeder) {
         m_intake = intake;
         m_shooter = shooter;
@@ -29,12 +29,12 @@ public class OuttakeCommand extends Command {
         m_feeder.starve();
         m_intake.outtake();
         m_shooter.outtake();
-        m_amp.driveFeeder(1);
+        m_amp.outtake();
     }
 
     @Override
     public void end(boolean interrupted) {
         m_shooter.stop();
-        m_amp.driveFeeder(0);
+        m_amp.stop();
     }
 }

@@ -1,25 +1,27 @@
 package org.team100.frc2024.motion;
 
-import org.team100.frc2024.motion.amp.AmpSubsystem;
+import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.Shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Feed to amp placer. */
-public class FeedCommand extends Command {
+/**
+ * Feed to amp placer.
+ */
+public class FeedToAmp extends Command {
     private static final double kShooterAngleRad = 0.14;
     private static final double kToleranceRad = 0.1;
 
     private final Intake m_intake;
     private final Shooter m_shooter;
-    private final AmpSubsystem m_amp;
+    private final AmpFeeder m_amp;
     private final FeederSubsystem m_feeder;
 
-    public FeedCommand(
+    public FeedToAmp(
             Intake intake,
             Shooter shooter,
-            AmpSubsystem amp,
+            AmpFeeder amp,
             FeederSubsystem feeder) {
         m_intake = intake;
         m_shooter = shooter;
@@ -36,14 +38,13 @@ public class FeedCommand extends Command {
             m_feeder.feed();
             m_intake.intake();
             m_shooter.feed();
-            m_amp.driveFeeder(-1);
+            m_amp.intake();
         }
     }
 
     @Override
     public void end(boolean interrupted) {
         m_shooter.stop();
-        m_amp.driveFeeder(0);
+        m_amp.stop();
     }
-
 }

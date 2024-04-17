@@ -1,6 +1,6 @@
 package org.team100.frc2024.selftest;
 
-import org.team100.frc2024.motion.amp.AmpSubsystem;
+import org.team100.frc2024.motion.amp.AmpPivot;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
@@ -17,14 +17,14 @@ public class AmpSelfTest extends Command {
     private static final double kDownTime = 3;
     private static final double kExpectedPosition = 2;
 
-    private final AmpSubsystem m_amp;
+    private final AmpPivot m_amp;
     private final SelfTestListener m_listener;
     private final Timer m_timer;
 
     private double position = 0;
     private boolean pass = false;
 
-    public AmpSelfTest(AmpSubsystem amp, SelfTestListener listener) {
+    public AmpSelfTest(AmpPivot amp, SelfTestListener listener) {
         m_amp = amp;
         m_listener = listener;
         m_timer = new Timer();

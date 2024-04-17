@@ -45,6 +45,7 @@ public class GravityServo {
         m_softLimits = softLimits;
     }
 
+    /** Zeros controller errors, sets setpoint to current position. */
     public void reset() {
         m_controller.reset();
         if (getPosition() == null) {

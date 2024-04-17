@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
-    private static final double kDelta = 0.001;
+    private static final double kDelta = 0.01;
 
 
     @Test

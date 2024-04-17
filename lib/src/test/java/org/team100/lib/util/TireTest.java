@@ -160,27 +160,32 @@ class TireTest {
     void testNoSlipInfiniteSaturation() {
         ParameterFactory factory2 = new ParameterFactory(new HashMap<>());
         Tire tire2 = new Tire(factory2);
-        Parameter saturation = factory2.mutable(Tire.kSaturationLabel, 0);
+        Parameter saturation = factory2.mutable(Tire.kSaturationLabel, 10);
         // saturation.reset();
-        Parameter slip = factory2.mutable(Tire.kSlipLabel, 0);
+        Parameter slip = factory2.mutable(Tire.kSlipLabel, 0.1);
         // the defaults work
         assertEquals(10, saturation.get(), kDelta);
         assertEquals(0.1, slip.get(), kDelta);
 
         // override the defaults
-        saturation.set(Double.MAX_VALUE);
-        slip.set(0.0);
-        // check that the overrides work
-        assertEquals(Double.MAX_VALUE, saturation.get(), kDelta);
-        assertEquals(0.0, slip.get(), kDelta);
+        try {
+            saturation.set(Double.MAX_VALUE);
+            slip.set(0.0);
+            // check that the overrides work
+            assertEquals(Double.MAX_VALUE, saturation.get(), kDelta);
+            assertEquals(0.0, slip.get(), kDelta);
 
-        // try the saturated2 case. here we want to stop the x motion and start some y
-        // motion,
-        // all in 0.02s so these are high accelerations.
-        Vector2d actual = tire2.actual(new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
-        // the tire sticks!
-        assertEquals(0.0, actual.getX(), kDelta);
-        assertEquals(5.0, actual.getY(), kDelta);
+            // try the saturated2 case. here we want to stop the x motion and start some y
+            // motion,
+            // all in 0.02s so these are high accelerations.
+            Vector2d actual = tire2.actual(new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
+            // the tire sticks!
+            assertEquals(0.0, actual.getX(), kDelta);
+            assertEquals(5.0, actual.getY(), kDelta);
+        } finally {
+            saturation.reset();
+            slip.reset();
+        }
     }
 
     @Test
