@@ -81,6 +81,7 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
         ampAngleServo.reset();
     }
 
+    /** 1 = outtake, -1 = intake */
     public void driveFeeder(double value) {
         ampDrive.setDutyCycle(value);
     }

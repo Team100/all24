@@ -32,41 +32,29 @@ public class ShooterDefault extends Command {
         Translation2d robotLocation = m_drive.getPose().getTranslation();
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
         double distance = robotLocation.getDistance(speakerLocation);
-        switch (RobotState100.getRobotState()) {
-            case SHOOTING:
-                switch (RobotState100.getShooterState()) {
-                    case DEFAULTSHOOT:
-                        m_shooter.forward();
-                        // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2));
-                        m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
-                        break;
-                    case TEST:
-                        m_shooter.forward();
-                        // m_shooter.setAngle(Smart/Dashboard.getNumber("Shooter Angle", 0.2));
-                        m_shooter.setAngle(0.445);
-                        break;
-                    case STOP:
-                        m_shooter.stop();
-                        break;
-                    case LOB:
-                        m_shooter.forward();
-                        m_shooter.setAngle(0.6);
-                        break;
-                    default:
-                        m_shooter.setDutyCycle(0);
-                        break;
-                }
+
+        switch (RobotState100.getShooterState()) {
+            case DEFAULTSHOOT:
+                m_shooter.forward();
+                // m_shooter.setAngle(SmartDashboard.getNumber("Shooter Angle", 0.2));
+                m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
                 break;
-            case AMPING:
-                // m_shooter.stop();
+            case TEST:
+                m_shooter.forward();
+                // m_shooter.setAngle(Smart/Dashboard.getNumber("Shooter Angle", 0.2));
+                m_shooter.setAngle(0.445);
                 break;
-            case NONE:
-                // m_shooter.stop();
+            case STOP:
+                m_shooter.stop();
+                break;
+            case LOB:
+                m_shooter.forward();
+                m_shooter.setAngle(0.6);
                 break;
             default:
+                m_shooter.setDutyCycle(0);
                 break;
-            // m_shooter.stop();
-            // m_shooter.setAngle(0.0);
         }
+
     }
 }

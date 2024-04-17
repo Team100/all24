@@ -33,8 +33,6 @@ import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.SetDefaultShoot;
 import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.ShooterDefault;
-import org.team100.lib.SubsystemPriority;
-import org.team100.lib.SubsystemPriority.Priority;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -371,33 +369,26 @@ public class RobotContainer implements Glassy {
         whileTrue(driverControl::shooterLock,
                 new ShooterLockCommand(shooterLock, driverControl::velocity, m_drive));
 
+        //////////////////
+        //
+        // DEFAULT COMMANDS
+        //
+
         m_drive.setDefaultCommand(driveManually);
+        m_shooter.setDefaultCommand(new ShooterDefault(m_shooter, m_drive));
+        m_feeder.setDefaultCommand(new FeederDefault(m_feeder));
+        m_intake.setDefaultCommand(new IntakeDefault(m_intake));
+        m_climber.setDefaultCommand(new ClimberDefault(
+                m_climber,
+                operatorControl::getLeftAxis,
+                operatorControl::getRightAxis,
+                operatorControl::pov));
+        m_amp.setDefaultCommand(new AmpDefault(m_amp));
 
-        SubsystemPriority.addSubsystem(m_drive,
-                driveManually,
-                Priority.ONE);
-        SubsystemPriority.addSubsystem(m_shooter,
-                new ShooterDefault(m_shooter, m_drive),
-                Priority.TWO);
-        SubsystemPriority.addSubsystem(m_feeder,
-                new FeederDefault(m_feeder, m_sensors),
-                Priority.THREE);
-        SubsystemPriority.addSubsystem(m_intake,
-                new IntakeDefault(m_intake),
-                Priority.FOUR);
-        SubsystemPriority.addSubsystem(m_climber,
-                new ClimberDefault(
-                        m_climber,
-                        operatorControl::getLeftAxis,
-                        operatorControl::getRightAxis,
-                        operatorControl::pov),
-                Priority.FIVE);
-        SubsystemPriority.addSubsystem(m_amp,
-                new AmpDefault(m_amp),
-                Priority.SIX);
-
-        // Registers the subsystems so that they run with the specified priority
-        // SubsystemPriority.registerWithPriority();
+        ////////////////////
+        //
+        // AUTONOMOUS
+        //
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(
@@ -430,10 +421,6 @@ public class RobotContainer implements Glassy {
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
-    }
-
-    public void beforeCommandCycle() {
-        // ModeSelector.selectMode(operatorControl::pov);
     }
 
     public void onTeleop() {

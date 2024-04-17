@@ -10,7 +10,7 @@ public class OuttakeAmp extends Command {
 
     @Override
     public void initialize() {
-        previousState = RobotState100.currentAmpState;
+        previousState = RobotState100.getAmpState();
         RobotState100.changeAmpState(AmpState100.OUTTAKE);
     }
 
