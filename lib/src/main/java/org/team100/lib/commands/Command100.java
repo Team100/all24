@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public abstract class Command100 extends Command implements Glassy {
     // TODO: allow subclasses to specify the period they want.
-    private static final int kExecutePeriodMilliS = 20;
+    private static final int kExecutePeriodMilliS = 5;
 
     private static final Telemetry t = Telemetry.get();
 
