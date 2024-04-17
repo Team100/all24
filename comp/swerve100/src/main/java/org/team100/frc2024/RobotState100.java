@@ -7,7 +7,7 @@ public class RobotState100 {
     private static final Telemetry t = Telemetry.get();
 
     public enum ShooterState100 {
-        DEFAULTSHOOT, STOP, TEST, LOB
+        DEFAULTSHOOT, STOP, TEST
     }
 
     public enum AmpState100 {
@@ -44,11 +44,12 @@ public class RobotState100 {
     }
 
     public static void changeIntakeState(IntakeState100 state) {
-        t.log(Level.DEBUG, "ChangeIntakeState", "state", state);
+        t.log(Level.DEBUG, "changeIntakeState", "state", state);
         currentIntakeState = state;
     }
 
     public static IntakeState100 getIntakeState() {
+        t.log(Level.DEBUG, "getIntakeState", "state", currentIntakeState);
         return currentIntakeState;
     }
 

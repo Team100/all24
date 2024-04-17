@@ -9,6 +9,7 @@ import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
 import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.commands.AutonCommand;
+import org.team100.frc2024.commands.Lob;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.config.AutonChooser;
 import org.team100.frc2024.motion.AutoMaker;
@@ -249,6 +250,9 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
 
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
+
+        // TODO: finish the "lob" command.
+        whileTrue(operatorControl::never, new Lob());
 
         // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
         // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));

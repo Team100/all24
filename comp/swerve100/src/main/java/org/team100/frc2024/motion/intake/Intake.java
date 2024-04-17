@@ -107,10 +107,6 @@ public class Intake extends SubsystemBase implements Glassy  {
         intakePWM.setSpeed(-1);
     }
 
-    public void runUpper() {
-        superRollers.setDutyCycle(0.8);
-    }
-
     public void outtake() {
         intakePWM.setSpeed(0.8);
         centeringPWM.setSpeed(-0.8);
