@@ -7,7 +7,6 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.RobotState100.AmpState100;
 import org.team100.frc2024.RobotState100.FeederState100;
-import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.Lob;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
@@ -31,9 +30,9 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.IntakeDefault;
 import org.team100.frc2024.motion.intake.RunIntake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
-import org.team100.frc2024.motion.shooter.SetDefaultShoot;
+import org.team100.frc2024.motion.shooter.Ramp;
 import org.team100.frc2024.motion.shooter.Shooter;
-import org.team100.frc2024.motion.shooter.ShooterDefault;
+import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -229,8 +228,7 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::outtake,
                 new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
 
-        whileTrue(operatorControl::ramp,
-                new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
+        whileTrue(operatorControl::ramp, new Ramp(m_shooter, m_drive));
 
         // whileTrue(operatorControl::ramp,
         // new ClimberPosition(m_climber));
@@ -243,16 +241,17 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::pivotToAmpPosition, new ChangeAmpState(AmpState100.UP, m_amp));
 
-        whileTrue(operatorControl::pivotToDownPosition, new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
+        // TODO: what does this actually do?
+        whileTrue(operatorControl::pivotToDownPosition, new Ramp(m_shooter, m_drive));
 
         whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
 
-        whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
+        whileTrue(operatorControl::rezero, new TestShoot(m_shooter));
 
         whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
 
         // TODO: finish the "lob" command.
-        whileTrue(operatorControl::never, new Lob());
+        whileTrue(operatorControl::never, new Lob(m_shooter, m_intake));
 
         // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
         // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
@@ -379,7 +378,7 @@ public class RobotContainer implements Glassy {
         //
 
         m_drive.setDefaultCommand(driveManually);
-        m_shooter.setDefaultCommand(new ShooterDefault(m_shooter, m_drive));
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
         m_feeder.setDefaultCommand(new FeederDefault(m_feeder));
         m_intake.setDefaultCommand(new IntakeDefault(m_intake));
         m_climber.setDefaultCommand(new ClimberDefault(

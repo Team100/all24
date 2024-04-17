@@ -6,10 +6,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 public class RobotState100 {
     private static final Telemetry t = Telemetry.get();
 
-    public enum ShooterState100 {
-        DEFAULTSHOOT, STOP, TEST
-    }
-
     public enum AmpState100 {
         UP, OUTTAKE, NONE
     }
@@ -22,18 +18,10 @@ public class RobotState100 {
         FEED, STOP
     }
 
-    private static ShooterState100 currentShooterState = ShooterState100.STOP;
     private static AmpState100 currentAmpState = AmpState100.NONE;
     private static IntakeState100 currentIntakeState = IntakeState100.STOP;
     private static FeederState100 currentFeederState = FeederState100.STOP;
 
-    public static void changeShooterState(ShooterState100 state) {
-        currentShooterState = state;
-    }
-
-    public static ShooterState100 getShooterState() {
-        return currentShooterState;
-    }
 
     public static void changeAmpState(AmpState100 state) {
         currentAmpState = state;
