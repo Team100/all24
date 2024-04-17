@@ -9,6 +9,9 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * Feeder feeds the shooter.
+ */
 public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name;

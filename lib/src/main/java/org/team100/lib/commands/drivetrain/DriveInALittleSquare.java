@@ -34,17 +34,16 @@ public class DriveInALittleSquare extends Command100 {
     private static final double kDriveLengthM = 1;
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
-
     private static final double kXToleranceRad = 0.02;
+    private static final State100 kStart = new State100(0, 0);
+    private static final State100 kGoal = new State100(kDriveLengthM, 0);
     private static final double kVToleranceRad_S = 0.02;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final State100 start = new State100(0, 0);
-    private final State100 goal = new State100(kDriveLengthM, 0);
+    private final TrapezoidProfile100 m_driveProfile;
 
-    final TrapezoidProfile100 m_driveProfile;
     /** Current speed setpoint. */
-    State100 speedM_S;
+    State100 m_setpoint;
     /** Current swerve steering axis goal. */
     Rotation2d m_goal;
     DriveState m_state;
@@ -61,23 +60,23 @@ public class DriveInALittleSquare extends Command100 {
         // First get the wheels pointing the right way.
         m_state = DriveState.STEERING;
         m_goal = GeometryUtil.kRotationZero;
-        speedM_S = start;
-        speedM_S = m_driveProfile.calculate(0, speedM_S, goal);
+        m_setpoint = kStart;
+        m_setpoint = m_driveProfile.calculate(0, m_setpoint, kGoal);
     }
 
     @Override
     public void execute100(double dt) {
         switch (m_state) {
             case DRIVING:
-                if (MathUtil.isNear(speedM_S.x(), goal.x(), kXToleranceRad)
-                        && MathUtil.isNear(speedM_S.v(), goal.v(), kVToleranceRad_S)) {
+                if (MathUtil.isNear(m_setpoint.x(), kGoal.x(), kXToleranceRad)
+                        && MathUtil.isNear(m_setpoint.v(), kGoal.v(), kVToleranceRad_S)) {
                     // we were driving, but the timer elapsed, so switch to steering
                     m_state = DriveState.STEERING;
                     m_goal = m_goal.plus(GeometryUtil.kRotation90);
-                    speedM_S = start;
+                    m_setpoint = kStart;
                 } else {
                     // keep going
-                    speedM_S = m_driveProfile.calculate(dt, speedM_S, goal);
+                    m_setpoint = m_driveProfile.calculate(dt, m_setpoint, kGoal);
                 }
                 break;
             case STEERING:
@@ -85,8 +84,8 @@ public class DriveInALittleSquare extends Command100 {
                     // we were steering, but all the setpoints have been reached, so switch to
                     // driving
                     m_state = DriveState.DRIVING;
-                    speedM_S = start;
-                    speedM_S = m_driveProfile.calculate(dt, speedM_S, goal);
+                    m_setpoint = kStart;
+                    m_setpoint = m_driveProfile.calculate(dt, m_setpoint, kGoal);
                 } else {
                     // wait to reach the setpoint
                 }
@@ -95,16 +94,16 @@ public class DriveInALittleSquare extends Command100 {
 
         // there are four states here because state is mutable :-(
         SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(speedM_S.x(), m_goal),
-                new SwerveModuleState(speedM_S.x(), m_goal),
-                new SwerveModuleState(speedM_S.x(), m_goal),
-                new SwerveModuleState(speedM_S.x(), m_goal)
+                new SwerveModuleState(m_setpoint.v(), m_goal),
+                new SwerveModuleState(m_setpoint.v(), m_goal),
+                new SwerveModuleState(m_setpoint.v(), m_goal),
+                new SwerveModuleState(m_setpoint.v(), m_goal)
         };
         m_swerve.setRawModuleStates(states);
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_swerve.stop();
     }
 }

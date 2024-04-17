@@ -137,7 +137,7 @@ public class Rotate extends Command100 {
     }
 
     @Override
-    public void end(boolean isInterupted) {
+    public void end100(boolean isInterupted) {
         m_robotDrive.stop();
     }
 }

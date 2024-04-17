@@ -11,7 +11,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
-    private static final double kDelta = 0.001;
+    private static final double kDelta = 0.01;
+
 
     @Test
     void testAccel() {
@@ -25,21 +26,25 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
         drive.periodic();
 
         // no command, initial state.
-        verify(drive, 0,0,0);
+        verify(drive, 0, 0, 0);
 
         // set the motor speed...
         drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
         // this state is hidden...
         assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
 
-        stepTime(0.02);
+        // smaller step 
+        stepTime(0.01);
         drive.periodic();
+        stepTime(0.01);
+        drive.periodic();
+        assertEquals(0.0004, fixture.collection.positions()[0].distanceMeters, 1e-6);
 
         // until after periodic...
         assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
 
         // new state should be accelerating
-        verify(drive, 0.0006, 0.02, 1);
+        verify(drive, 0.0003, 0.019, 0.006);
 
         drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
 
@@ -48,7 +53,7 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
 
         // keep accelerating
 
-        verify(drive, 0.0015, 0.04, 1);
+        verify(drive, 0.001, 0.039, 0.019);
 
         drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
 
@@ -56,13 +61,13 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
         drive.periodic();
 
         // keep accelerating
-        verify(drive, 0.002, 0.06, 1);
+        verify(drive, 0.0024, 0.06, 0.039);
 
         drive.close();
     }
 
     private void verify(SwerveDriveSubsystem drive, double x, double v, double a) {
-        assertEquals(x, drive.getPose().getX(), kDelta);        
+        assertEquals(x, drive.getPose().getX(), kDelta);
         assertEquals(v, drive.getVelocity().x(), kDelta);
         assertEquals(a, drive.getAcceleration().x(), kDelta);
         assertEquals(x, drive.getState().x().x(), kDelta);

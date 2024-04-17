@@ -1,7 +1,5 @@
 package org.team100.frc2024.motion.intake;
 
-import org.team100.frc2024.RobotState100;
-import org.team100.frc2024.RobotState100.IntakeState100;
 import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.FeedforwardConstants;
 import org.team100.lib.config.Identity;
@@ -18,7 +16,7 @@ import org.team100.lib.util.Names;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Intake extends SubsystemBase implements Glassy  {
+public class Intake extends SubsystemBase implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final SensorInterface m_sensors;
@@ -59,26 +57,26 @@ public class Intake extends SubsystemBase implements Glassy  {
         }
     }
 
+    boolean intakeSmartReady = false;
+
     public void intakeSmart() {
+        if (intakeSmartReady)
+            return;
         if (!m_sensors.getFeederSensor()) {
             count++;
         } else {
             if (currentCount >= 0) {
                 intakePWM.setSpeed(-1);
             }
-
             if (currentCount >= 1) {
                 intakePWM.setSpeed(-1);
                 centeringPWM.setSpeed(0.2);
-
             }
-
             if (currentCount >= 2) {
                 intakePWM.setSpeed(-1);
                 centeringPWM.setSpeed(0.2);
                 superRollers.setDutyCycle(1);
             }
-
         }
 
         if (count >= 4) {
@@ -86,7 +84,7 @@ public class Intake extends SubsystemBase implements Glassy  {
             centeringPWM.setSpeed(0);
             superRollers.setVelocity(0);
             count = 0;
-            RobotState100.changeIntakeState(IntakeState100.STOP);
+            intakeSmartReady = true;
         }
 
         currentCount++;
@@ -100,15 +98,12 @@ public class Intake extends SubsystemBase implements Glassy  {
 
     public void resetCurrentCount() {
         currentCount = 0;
+        intakeSmartReady = false;
     }
 
     public void runLowerIntake() {
         centeringPWM.setSpeed(0.8);
         intakePWM.setSpeed(-1);
-    }
-
-    public void runUpper() {
-        superRollers.setDutyCycle(0.8);
     }
 
     public void outtake() {

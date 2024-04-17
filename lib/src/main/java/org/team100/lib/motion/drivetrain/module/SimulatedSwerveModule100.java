@@ -25,7 +25,8 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private static VelocityServo<Distance100> simulatedDriveServo(String name) {
-        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(name);
+        // simulated drive motor free speed is 5 m/s
+        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(name, 5);
         SimulatedEncoder<Distance100> driveEncoder = new SimulatedEncoder<>(
                 name,
                 driveMotor,
@@ -41,7 +42,8 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     private static PositionServoInterface<Angle100> simulatedTurningServo(
             String name,
             SwerveKinodynamics kinodynamics) {
-        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(name);
+        // simulated turning motor free speed is 20 rad/s
+        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(name, 20);
         SimulatedEncoder<Angle100> turningEncoder = new SimulatedEncoder<>(
                 name,
                 turningMotor,

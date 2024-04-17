@@ -5,60 +5,64 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.DutyCycleEncoder100;
+import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
-
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class AmpSubsystem extends SubsystemBase implements Glassy {
+/**
+ * The pivot is independent from the feeder, so it's a separate subsystem.
+ */
+public class AmpPivot extends SubsystemBase implements Glassy {
     private final String m_name;
-    private final SysParam m_params;
     private final GravityServo ampAngleServo;
-    private final CANSparkMax ampDrive;
-    private final DutyCycleEncoder100 m_encoder;
-    private final CANSparkMax m_motor;
 
-    public AmpSubsystem() {
-        m_encoder = new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.645439, true);
+    public AmpPivot() {
         m_name = Names.name(this);
-        m_params = SysParam.neoPositionServoSystem(
+        SysParam m_params = SysParam.neoPositionServoSystem(
                 55,
                 60,
                 60);
 
+        TrapezoidProfile100 profile = new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05);
+        double period = 0.02;
+
         switch (Identity.instance) {
             case COMP_BOT:
-                m_motor = new CANSparkMax(2, MotorType.kBrushless);
                 ampAngleServo = new GravityServo(
-                        m_motor,
-                        30,
+                        new NeoProxy(m_name, 2, false, 30),
                         m_name,
                         m_params,
                         new PIDController(0.8, 0, 0),
-                        new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                        0.02,
-                        m_encoder,
+                        profile,
+                        period,
+                        new DutyCycleEncoder100("ANALOG ENCODER PIVOT", 3, 0.645439, true),
                         new double[] { 0, 0 });
-                ampDrive = new CANSparkMax(33, MotorType.kBrushless);
                 break;
-            case BLANK:
             default:
-                m_motor = new CANSparkMax(2, MotorType.kBrushless);
+                // For testing and simulation
+                // motor speed is rad/s
+                SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(m_name, 600);
+                SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
+                        m_name,
+                        simMotor,
+                        75, // guess the gear ratio?
+                        -Double.MAX_VALUE,
+                        Double.MAX_VALUE);
                 ampAngleServo = new GravityServo(
-                        m_motor,
-                        30,
+                        simMotor,
                         m_name,
                         m_params,
                         new PIDController(0.7, 0, 0),
-                        new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05),
-                        0.02,
-                        m_encoder,
+                        profile,
+                        period,
+                        simEncoder,
                         new double[] { 0, 0 });
-                ampDrive = new CANSparkMax(33, MotorType.kBrushless);
         }
     }
 
@@ -70,12 +74,9 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
         ampAngleServo.set(value);
     }
 
+    /** Zeros controller errors, sets setpoint to current position. */
     public void reset() {
         ampAngleServo.reset();
-    }
-
-    public void driveFeeder(double value) {
-        ampDrive.set(value);
     }
 
     public void stop() {
@@ -92,7 +93,6 @@ public class AmpSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public String getGlassName() {
-        return "AMMMPPPPPPPPPP";
+        return "Amp Pivot";
     }
-
 }

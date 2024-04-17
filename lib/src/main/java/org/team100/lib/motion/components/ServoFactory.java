@@ -70,7 +70,8 @@ public class ServoFactory {
     public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
             String name,
             SysParam param) {
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name);
+        // motor speed is rad/s
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, 600);
         SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
@@ -157,7 +158,8 @@ public class ServoFactory {
             String name,
             SysParam param,
             PIDController controller) {
-        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name);
+        // motor speed is rad/s
+        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name, 600);
         SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(
                 name,
                 motor,
@@ -252,7 +254,8 @@ public class ServoFactory {
             String name,
             SysParam param,
             PIDController controller) {
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name);
+        // motor speed is rad/s
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, 600);
         Encoder100<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
         return new PositionServo<>(
                 name,

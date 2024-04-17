@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.persistent_parameter.Parameter;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -45,28 +47,34 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     @Test
     void testSimple() {
         // no wheel slip
-        fixture.poseEstimator.f.mutable(Tire.kSaturationLabel, 0).set(Double.MAX_VALUE);
+        Parameter saturation = fixture.poseEstimator.f.mutable(Tire.kSaturationLabel, 10);
+        try {
+            saturation.set(Double.MAX_VALUE);
 
-        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        HolonomicDriveController3 control = new HolonomicDriveController3();
-        TrajectoryListCommand c = new TrajectoryListCommand(
-                fixture.drive,
-                control,
-                x -> List.of(maker.line(x)));
-        c.initialize();
-        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-        c.execute();
-        assertFalse(c.isFinished());
-        // the trajectory takes a little over 2s
-        for (double t = 0; t < 2.02; t += kDtS) {
-            stepTime(kDtS);
-            c.execute();
-            fixture.drive.periodic(); // for updateOdometry
+            Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
+            HolonomicDriveController3 control = new HolonomicDriveController3();
+            TrajectoryListCommand c = new TrajectoryListCommand(
+                    fixture.drive,
+                    control,
+                    x -> List.of(maker.line(x)));
+            TrajectoryListCommand.shutDownForTest();
+            c.initialize();
+            assertEquals(0, fixture.drive.getPose().getX(), kDelta);
+            c.execute100(0);
+            assertFalse(c.isFinished());
+            // the trajectory takes a little over 2s
+            for (double t = 0; t < 2.02; t += kDtS) {
+                stepTime(kDtS);
+                c.execute100(kDtS);
+                fixture.drive.periodic(); // for updateOdometry
 
+            }
+            // at goal; wide tolerance due to test timing
+            assertTrue(c.isFinished());
+            assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
+        } finally {
+            saturation.reset();
         }
-        // at goal; wide tolerance due to test timing
-        assertTrue(c.isFinished());
-        assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
     }
 
     /**
@@ -80,13 +88,18 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 fixture.drive,
                 controller,
                 x -> maker.square(x));
+        TrajectoryListCommand.shutDownForTest();
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, false);
         fixture.drive.periodic();
         command.initialize();
+        int counter = 0;
         do {
+            counter++;
+            if (counter > 1000)
+                fail("counter exceeded");
             stepTime(kDtS);
             fixture.drive.periodic();
-            command.execute();
+            command.execute100(kDtS);
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];

@@ -3,8 +3,7 @@ package org.team100.frc2024.commands.drivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.team100.frc2024.RobotState100;
-import org.team100.frc2024.RobotState100.IntakeState100;
+import org.team100.frc2024.motion.intake.Intake;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
@@ -30,6 +29,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class DriveWithProfileNote extends Command100 {
     private final Telemetry t = Telemetry.get();
 
+    private final Intake m_intake;
+
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
@@ -43,10 +44,12 @@ public class DriveWithProfileNote extends Command100 {
     private State100 thetaSetpoint;
 
     public DriveWithProfileNote(
+            Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
+        m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;
@@ -68,11 +71,12 @@ public class DriveWithProfileNote extends Command100 {
         xSetpoint = m_swerve.getState().x();
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();
-        RobotState100.changeIntakeState(IntakeState100.INTAKE);
     }
 
     @Override
     public void execute100(double dt) {
+        // intake the whole time
+        m_intake.intakeSmart();
         Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
 
         if (optGoal.isEmpty()) {
@@ -119,7 +123,7 @@ public class DriveWithProfileNote extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_swerve.stop();
     }
 }

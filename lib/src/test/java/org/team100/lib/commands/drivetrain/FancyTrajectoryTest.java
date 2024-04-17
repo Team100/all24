@@ -22,9 +22,9 @@ class FancyTrajectoryTest extends Fixtured {
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
 
         FancyTrajectory command = new FancyTrajectory(drive, planner, constraints);
-
+        FancyTrajectory.shutDownForTest();
         command.initialize();
-        command.execute();
+        command.execute100(0.02);
 
         assertEquals(0, drive.speeds(0.02).vxMetersPerSecond, 0.001);
         assertEquals(0, drive.speeds(0.02).vyMetersPerSecond, 0.001);

@@ -14,6 +14,7 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.ExpiringMemoizingSupplier;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,12 +37,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
 
-    private ChassisSpeeds m_prevSpeeds;
-    // maintained in periodic.
-    private Pose2d m_pose;
-    private FieldRelativeVelocity m_velocity;
-    private FieldRelativeAcceleration m_accel;
-    private SwerveState m_state;
+    private ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
@@ -53,16 +49,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal = swerveLocal;
         m_speed = speed;
         m_name = Names.name(this);
-        m_prevSpeeds = new ChassisSpeeds();
-        m_pose = new Pose2d();
-        m_velocity = new FieldRelativeVelocity(0, 0, 0);
-        m_accel = new FieldRelativeAcceleration(0, 0, 0);
-        m_state = new SwerveState();
-
+        // state update at 200 hz.
+        m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 5000);
         stop();
-        // @joel: this needs to be exactly "/field/.type" for glass.
-        // @sanjan: This seems to throw an error sometimes
-        // @joel: if you take it out then it breaks glass. what's the error?
         t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
@@ -82,34 +71,25 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     @Override
     public void periodic100(double dt) {
-        // the order of these calls is important
-        // since the odometry depends on the module state
-        // and acceleration depends on odometry...
-        updatePosition();
-        updateVelocity(dt);
-        updateAcceleration(dt);
-        updateState();
-
-        t.log(Level.DEBUG, m_name, "pose", m_pose);
-        t.log(Level.TRACE, m_name, "Tur Deg", m_pose.getRotation().getDegrees());
-
+        t.log(Level.DEBUG, m_name, "pose", m_stateSupplier.get());
+        t.log(Level.TRACE, m_name, "Tur Deg", m_stateSupplier.get().pose().getRotation().getDegrees());
         t.log(Level.DEBUG, m_name, "pose array",
-                new double[] { m_pose.getX(), m_pose.getY(), m_pose.getRotation().getRadians() });
-        t.log(Level.TRACE, m_name, "velocity", m_velocity);
-        t.log(Level.TRACE, m_name, "acceleration", m_accel);
-        t.log(Level.DEBUG, m_name, "state", m_state);
+                new double[] {
+                        m_stateSupplier.get().pose().getX(),
+                        m_stateSupplier.get().pose().getY(),
+                        m_stateSupplier.get().pose().getRotation().getRadians()
+                });
+        t.log(Level.DEBUG, m_name, "state", m_stateSupplier.get());
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
         t.log(Level.INFO, "field", "robot", new double[] {
-                m_pose.getX(),
-                m_pose.getY(),
-                m_pose.getRotation().getDegrees()
+                m_stateSupplier.get().pose().getX(),
+                m_stateSupplier.get().pose().getY(),
+                m_stateSupplier.get().pose().getRotation().getDegrees()
         });
-
         t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
-
     }
 
     /**
@@ -161,7 +141,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 twist.x(),
                 twist.y(),
                 twist.theta(),
-                m_pose.getRotation());
+                m_stateSupplier.get().pose().getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -175,7 +155,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     public boolean steerAtRest(FieldRelativeVelocity twist, double kDtSec) {
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.x(), twist.y(), twist.theta(), m_pose.getRotation());
+                twist.x(),
+                twist.y(),
+                twist.theta(),
+                m_stateSupplier.get().pose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -231,9 +214,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()),
                 robotPose,
                 Timer.getFPGATimestamp());
-        m_pose = robotPose;
-        m_velocity = new FieldRelativeVelocity(0, 0, 0);
-        m_accel = new FieldRelativeAcceleration(0, 0, 0);
+        m_stateSupplier.reset();
     }
 
     ///////////////////////////////////////////////////////////////
@@ -243,7 +224,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     /** Pose snapshot from periodic(). */
     public Pose2d getPose() {
-        return m_pose;
+        return getState().pose();
     }
 
     /**
@@ -255,7 +236,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @return meters and radians per second
      */
     public FieldRelativeVelocity getVelocity() {
-        return m_velocity;
+        return getState().velocity();
     }
 
     /**
@@ -264,7 +245,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @return meters and radians per second squared
      */
     public FieldRelativeAcceleration getAcceleration() {
-        return m_accel;
+        return getState().acceleration();
     }
 
     /**
@@ -272,7 +253,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * snapshot from periodic, is field relative
      */
     public SwerveState getState() {
-        return m_state;
+        return m_stateSupplier.get();
     }
 
     /** The controllers are on the profiles. */
@@ -303,47 +284,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     //
     // Private
 
-    /**
-     * Note this doesn't include the gyro reading directly, the estimate is
-     * considerably massaged by the odometry logic.
-     * 
-     * the poseEstimator can be asynchronously updated by network tables events,
-     * which is why we update it once in periodic, so that the various derivatives
-     * of odometry are self-consistent.
-     */
-    private void updatePosition() {
-        m_pose = m_poseEstimator.update(
+    /** used by the supplier */
+    private SwerveState update() {
+        return m_poseEstimator.update(
                 Timer.getFPGATimestamp(),
                 m_heading.getHeadingNWU(),
                 new SwerveDriveWheelPositions(m_swerveLocal.positions()));
-    }
-
-    // TODO: use odometry to get the speeds
-    private void updateVelocity(double dt) {
-        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
-        ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(
-                speeds, m_pose.getRotation());
-        m_velocity = new FieldRelativeVelocity(field.vxMetersPerSecond, field.vyMetersPerSecond,
-                field.omegaRadiansPerSecond);
-    }
-
-    // TODO: use odometry to get the speeds
-    private void updateAcceleration(double dt) {
-        ChassisSpeeds speeds = m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
-        if (m_prevSpeeds == null) {
-            m_prevSpeeds = speeds;
-            m_accel = new FieldRelativeAcceleration(0, 0, 0);
-            return;
-        }
-        ChassisSpeeds accel = speeds.minus(m_prevSpeeds);
-        m_prevSpeeds = speeds;
-        ChassisSpeeds field = ChassisSpeeds.fromFieldRelativeSpeeds(accel, m_pose.getRotation());
-        m_accel = new FieldRelativeAcceleration(field.vxMetersPerSecond / dt, field.vyMetersPerSecond / dt,
-                field.omegaRadiansPerSecond / dt);
-
-    }
-
-    private void updateState() {
-        m_state = new SwerveState(m_pose, m_velocity, m_accel);
     }
 }

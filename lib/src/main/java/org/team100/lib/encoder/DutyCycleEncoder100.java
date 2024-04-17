@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
+ * Duty cycle encoder such as the AMS 5048.
  */
 public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     private final Telemetry t = Telemetry.get();
