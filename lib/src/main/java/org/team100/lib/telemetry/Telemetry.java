@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
@@ -200,6 +201,12 @@ public class Telemetry {
             t.setRetained(true);
             return t.publish();
         }, DoubleArrayPublisher.class).set(val);
+    }
+
+    public void log(Level level, String root, String leaf, Double[] val) {
+        if (!m_level.admit(level))
+            return;
+        log(level, root, leaf, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
     }
 
     public void log(Level level, String root, String leaf, long val) {

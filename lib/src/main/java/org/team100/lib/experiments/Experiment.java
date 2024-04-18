@@ -59,5 +59,9 @@ public enum Experiment {
     /**
      * Use softer vision update gains
      */
-    AvoidVisionJitter
+    AvoidVisionJitter,
+    /**
+     * Include sag limiter in setpoint generator
+     */
+    LimitBatterySag
 }

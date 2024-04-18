@@ -1,0 +1,89 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/field": "Field2d"
+    },
+    "windows": {
+      "/field": {
+        "Foe": {
+          "arrowSize": 29,
+          "arrows": false,
+          "length": 0.75,
+          "weight": 8.0,
+          "width": 0.75
+        },
+        "Friend": {
+          "arrowSize": 33,
+          "arrows": false,
+          "color": [
+            0.0,
+            0.0,
+            255.0,
+            255.0
+          ],
+          "length": 0.75,
+          "weight": 8.0,
+          "width": 0.75
+        },
+        "Obstacle": {
+          "arrows": false,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            255.0
+          ],
+          "length": 0.30000001192092896,
+          "weight": 8.0,
+          "width": 0.30000001192092896
+        },
+        "Player": {
+          "arrowColor": [
+            0.988304078578949,
+            0.6284506916999817,
+            0.011559126898646355,
+            255.0
+          ],
+          "arrowWeight": 10.0,
+          "color": [
+            0.05049490928649902,
+            0.017030874267220497,
+            0.9707602262496948,
+            255.0
+          ],
+          "length": 0.75,
+          "weight": 10.0,
+          "width": 0.75
+        },
+        "ball": {
+          "arrows": false,
+          "selectable": false
+        },
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "retained": {
+      "field": {
+        "double[]##v_/field/ball": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  }
+}

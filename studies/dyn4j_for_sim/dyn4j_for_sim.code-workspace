@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../lib"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"java.server.launchMode": "Standard",
+		"workbench.colorTheme": "Default Light Modern",
+        "editor.detectIndentation": false,
+        "editor.inlayHints.enabled": "off",
+        "editor.minimap.enabled": false
+	}
+}
