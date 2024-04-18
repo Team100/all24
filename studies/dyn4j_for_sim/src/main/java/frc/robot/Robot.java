@@ -18,6 +18,7 @@ public class Robot extends TimedRobot {
     private static final Telemetry t = Telemetry.get();
 
     private final World<Body100> world;
+    private final Body100 player;
     private final Body100 friend1;
     private final Body100 friend2;
     private final Body100 foe1;
@@ -29,6 +30,9 @@ public class Robot extends TimedRobot {
         world.setGravity(PhysicsWorld.ZERO_GRAVITY);
 
         // double robotSize = 0.75;
+
+        player = new Player();
+        world.addBody(player);
 
         friend1 = new Friend();
         world.addBody(friend1);
@@ -66,6 +70,7 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         // reset position
         // TODO: velocity units?
+        setState(player, 2, 4, 0, 0);
         setState(friend1, 1, 1, 4, 4);
         setState(friend2, 1, 4, 4, 0);
         setState(foe1, 15, 3, -4, 0);
@@ -171,9 +176,10 @@ public class Robot extends TimedRobot {
                 if (body.getClass() != type)
                     continue;
                 Vector2 p = body.getWorldCenter();
+                double angle = body.getTransform().getRotationAngle();
                 poses.add(p.x);
                 poses.add(p.y);
-                poses.add(0.0);
+                poses.add(angle);
             }
             t.log(Level.DEBUG, kField, type.getSimpleName(),
                     poses.toArray(new Double[0]));

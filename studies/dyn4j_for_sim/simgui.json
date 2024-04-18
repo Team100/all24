@@ -8,10 +8,14 @@
     "windows": {
       "/field": {
         "Foe": {
+          "arrowSize": 29,
+          "arrows": false,
           "length": 0.75,
           "width": 0.75
         },
         "Friend": {
+          "arrowSize": 33,
+          "arrows": false,
           "color": [
             0.0,
             0.0,
@@ -30,8 +34,20 @@
             255.0
           ],
           "length": 0.30000001192092896,
-          "weight": 3.4000000953674316,
+          "weight": 6.0,
           "width": 0.30000001192092896
+        },
+        "Player": {
+          "arrowWeight": 8.0,
+          "color": [
+            0.05049490928649902,
+            0.017030874267220497,
+            0.9707602262496948,
+            255.0
+          ],
+          "length": 0.75,
+          "weight": 8.0,
+          "width": 0.75
         },
         "ball": {
           "arrows": false,
