@@ -49,7 +49,9 @@ public class Robot extends TimedRobot {
         foe3 = new Foe();
         world.addBody(foe3);
 
-        setUpBoundaries();
+        setUpWalls();
+        setUpStages();
+        setUpNotes();
 
         // need the .type for rendering the field2d in sim.
         t.log(Level.INFO, "field", ".type", "Field2d");
@@ -93,65 +95,70 @@ public class Robot extends TimedRobot {
         behavior();
     }
 
-    private void setUpBoundaries() {
-        // this uses simgui coordinates
-
+    private void setUpWalls() {
+        // this uses simgui coordinates for blue
         final double boundaryThickness = 1;
         final double fieldX = 16.541;
         final double fieldY = 8.211;
-
-        Body100 leftSource = new Obstacle(
+        // blue source
+        world.addBody(new Wall(
                 Geometry.createTriangle(
                         new Vector2(0, 0),
                         new Vector2(1.84, 0),
-                        new Vector2(0, 1.1)));
-        world.addBody(leftSource);
-
-        Body100 rightSource = new Obstacle(
+                        new Vector2(0, 1.1))));
+        // red source
+        world.addBody(new Wall(
                 Geometry.createTriangle(
                         new Vector2(16.541, 0),
                         new Vector2(16.541, 1.1),
-                        new Vector2(14.7, 0)));
-        world.addBody(rightSource);
-
-        Body100 leftSubwoofer = new Obstacle(
+                        new Vector2(14.7, 0))));
+        // blue subwoofer
+        world.addBody(new Wall(
                 Geometry.createPolygon(
                         new Vector2(0, 4.498),
                         new Vector2(0.914, 5.019),
                         new Vector2(0.914, 6.062),
-                        new Vector2(0, 6.597)));
-        world.addBody(leftSubwoofer);
-
-        Body100 rightSubwoofer = new Obstacle(
+                        new Vector2(0, 6.597))));
+        // red subwoofer
+        world.addBody(new Wall(
                 Geometry.createPolygon(
                         new Vector2(16.541, 4.498),
                         new Vector2(16.541, 6.597),
                         new Vector2(15.6, 6.062),
-                        new Vector2(15.6, 5.019)));
-        world.addBody(rightSubwoofer);
+                        new Vector2(15.6, 5.019))));
+        // blue wall
+        world.addBody(new Wall(
+                Geometry.createPolygon(
+                        new Vector2(0, 0),
+                        new Vector2(0, fieldY),
+                        new Vector2(-boundaryThickness, fieldY),
+                        new Vector2(-boundaryThickness, 0))));
+        // red wall
+        world.addBody(new Wall(
+                Geometry.createPolygon(
+                        new Vector2(fieldX, fieldY),
+                        new Vector2(fieldX, 0),
+                        new Vector2(fieldX + boundaryThickness, 0),
+                        new Vector2(fieldX + boundaryThickness, fieldY))));
+        // top wall
+        world.addBody(new Wall(
+                Geometry.createPolygon(
+                        new Vector2(0, fieldY),
+                        new Vector2(fieldX, fieldY),
+                        new Vector2(fieldX, fieldY + boundaryThickness),
+                        new Vector2(0, fieldY + boundaryThickness))));
+        // bottom wall
+        world.addBody(new Wall(
+                Geometry.createPolygon(
+                        new Vector2(fieldX, 0),
+                        new Vector2(0, 0),
+                        new Vector2(0, -boundaryThickness),
+                        new Vector2(fieldX, -boundaryThickness))));
+    }
 
-        Body100 wallLeft = new Obstacle(
-                Geometry.createRectangle(boundaryThickness, fieldY));
-        wallLeft.translate(-boundaryThickness / 2, fieldY / 2);
-        world.addBody(wallLeft);
-
-        Body100 wallRight = new Obstacle(
-                Geometry.createRectangle(boundaryThickness, fieldY));
-        wallRight.translate(fieldX + boundaryThickness / 2, fieldY / 2);
-        world.addBody(wallRight);
-
-        Body100 wallTop = new Obstacle(
-                Geometry.createRectangle(fieldX, boundaryThickness));
-        wallTop.translate(fieldX / 2, fieldY + boundaryThickness / 2);
-        world.addBody(wallTop);
-
-        Body100 wallBottom = new Obstacle(
-                Geometry.createRectangle(fieldX, boundaryThickness));
-        wallBottom.translate(fieldX / 2, -boundaryThickness / 2);
-        world.addBody(wallBottom);
-
-        // these are from the onshape cad, adjusted a tiny bit to line up with the sim
-        // png.
+    private void setUpStages() {
+        // these are from the onshape cad,
+        // adjusted a tiny bit to line up with the background image.
         addPost(3.38, 4.10, 0);
         addPost(5.60, 2.80, -1);
         addPost(5.60, 5.38, 1);
@@ -161,10 +168,33 @@ public class Robot extends TimedRobot {
     }
 
     private void addPost(double x, double y, double rad) {
-        Body100 post0 = new Obstacle(Geometry.createCircle(0.3));
-        post0.rotate(rad);
-        post0.translate(x, y);
-        world.addBody(post0);
+        Body100 post = new Obstacle(Geometry.createSquare(0.3));
+        post.rotate(rad);
+        post.translate(x, y);
+        world.addBody(post);
+    }
+
+    private void setUpNotes() {
+        // these are just made to match the background image
+        addNote(2.890, 4.10);
+        addNote(2.890, 5.56);
+        addNote(2.890, 7.01);
+
+        addNote(8.275, 0.75);
+        addNote(8.275, 2.43);
+        addNote(8.275, 4.10);
+        addNote(8.275, 5.79);
+        addNote(8.275, 7.47);
+
+        addNote(13.657, 4.10);
+        addNote(13.657, 5.56);
+        addNote(13.657, 7.01);
+    }
+
+    private void addNote(double x, double y) {
+        Body100 post = new Note(Geometry.createCircle(0.175));
+        post.translate(x, y);
+        world.addBody(post);
     }
 
     /** Show the bodies on the field2d widget */

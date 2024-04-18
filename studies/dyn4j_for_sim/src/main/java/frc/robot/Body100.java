@@ -6,13 +6,19 @@ import org.dyn4j.dynamics.Body;
 
 public abstract class Body100 extends Body {
 
-    /** This is the list of types that will be rendered. */
+    /**
+     * This is the list of types that will be rendered.
+     * 
+     * We don't try to render the {@link Wall} type because simgui can't do it
+     * correctly.
+     */
     public static List<Class<? extends Body100>> types() {
         return List.of(
-                Player.class,
                 Friend.class,
                 Foe.class,
-                Obstacle.class);
+                Note.class,
+                Obstacle.class,
+                Player.class);
     }
 
     public abstract void act();
