@@ -13,6 +13,7 @@ import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 
+/** These just exercise the code, they don't really test anything. */
 class DriveToWaypoint100Test extends Fixtured {
     private static final double kDelta = 0.001;
 
@@ -30,10 +31,10 @@ class DriveToWaypoint100Test extends Fixtured {
                 controller,
                 constraints,
                 0);
-
+        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-        command.execute();
+        command.execute100(0.02);
         command.end(false);
     }
 
@@ -41,7 +42,7 @@ class DriveToWaypoint100Test extends Fixtured {
     void testWithPursuit() {
         TrajectoryPlanner planner = new TrajectoryPlanner();
         DriveMotionController controller = DriveMotionControllerFactory.purePursuit(fixture.swerveKinodynamics);
-List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
 
         DriveToWaypoint100 command = new DriveToWaypoint100(
                 GeometryUtil.kPoseZero,
@@ -50,10 +51,10 @@ List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveK
                 controller,
                 constraints,
                 0);
-
+        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-        command.execute();
+        command.execute100(0.02);
         command.end(false);
     }
 
@@ -70,10 +71,10 @@ List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveK
                 controller,
                 constraints,
                 0);
-
+        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-        command.execute();
+        command.execute100(0.02);
         command.end(false);
     }
 
@@ -90,10 +91,10 @@ List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveK
                 controller,
                 constraints,
                 0);
-
+        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-        command.execute();
+        command.execute100(0.02);
         command.end(false);
     }
 }

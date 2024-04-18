@@ -19,11 +19,6 @@ public class NeoVortexTurningEncoder implements Encoder100<Angle100> {
     private final NeoVortexTurningMotor m_motor;
     private final double m_gearRatio;
 
-    /** Current position measurement of the mechanism, obtained in periodic(). */
-    private double m_positionRad;
-    /** Current velocity measurement of the mechanism, obtained in periodic(). */
-    private double m_rateRad_S;
-
     /**
      * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
@@ -43,13 +38,13 @@ public class NeoVortexTurningEncoder implements Encoder100<Angle100> {
     /** Position of the mechanism in radians. */
     @Override
     public Double getPosition() {
-        return m_positionRad;
+        return getPositionRad();
     }
 
     /** Velocity of the mechanism in radians per second. */
     @Override
     public double getRate() {
-        return m_rateRad_S;
+        return getRateRad_S();
     }
 
     @Override
@@ -62,21 +57,19 @@ public class NeoVortexTurningEncoder implements Encoder100<Angle100> {
         //
     }
 
-    @Override
-    public void periodic() {
-        updatePosition();
-        updateRate();
-        t.log(Level.DEBUG, m_name, "position (rad)", m_positionRad);
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", m_rateRad_S);
-    }
-
     ////////////////////////////////////
 
-    private void updatePosition() {
-        m_positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
+    private double getPositionRad() {
+        // should be fast, no need to cache
+        double positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
+        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        return positionRad;
     }
 
-    private void updateRate() {
-        m_rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
+    private double getRateRad_S() {
+        // should be fast, no need to cache
+        double rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
+        t.log(Level.DEBUG, m_name, "velocity (rad_s)", rateRad_S);
+        return rateRad_S;
     }
 }

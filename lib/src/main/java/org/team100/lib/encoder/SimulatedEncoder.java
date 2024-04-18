@@ -24,13 +24,12 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     private final double m_upperLimit;
     // accumulates.
     private double m_position = 0;
-    private double m_rate = 0;
     private double m_time = Timer.getFPGATimestamp();
 
     /**
-     * @param name      may not start with a slash
+     * @param name       may not start with a slash
      * @param motor
-     * @param reduction ratio between motor and encoder
+     * @param reduction  ratio between motor and encoder
      * @param lowerLimit in m or rad
      * @param upperLimit in m or rad
      */
@@ -52,11 +51,20 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
 
     @Override
     public Double getPosition() {
+        double now = Timer.getFPGATimestamp();
+        double dt = now - m_time;
+        double m_rate = m_motor.getVelocity() / m_reduction;
+        m_position += m_rate * dt;
+        m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
+        m_time = now;
+        t.log(Level.TRACE, m_name, "position", m_position);
         return m_position;
     }
 
     @Override
     public double getRate() {
+        double m_rate = m_motor.getVelocity() / m_reduction;
+        t.log(Level.TRACE, m_name, "rate", m_rate);
         return m_rate;
     }
 
@@ -69,17 +77,5 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     @Override
     public void close() {
         //
-    }
-
-    @Override
-    public void periodic() {
-        double now = Timer.getFPGATimestamp();
-        double dt = now - m_time;
-        m_rate = m_motor.getVelocity() / m_reduction;
-        m_position += m_rate * dt;
-        m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
-        m_time = now;
-        t.log(Level.TRACE, m_name, "position", m_position);
-        t.log(Level.TRACE, m_name, "rate", m_rate);
     }
 }

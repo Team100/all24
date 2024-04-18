@@ -8,7 +8,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
-import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -67,7 +67,7 @@ public class TrajectoryCommand100 extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         t.log(Level.TRACE, m_name, "FINSIHED", true);
         m_robotDrive.stop();
         TrajectoryVisualization.clear();

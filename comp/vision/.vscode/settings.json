@@ -1,7 +1,4 @@
 {
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.formatting.provider": "black",
     "python.testing.unittestArgs": [
         "-v",
         "-s",
@@ -12,5 +9,7 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "workbench.colorTheme": "Default Light+",
-    "editor.minimap.enabled": false
+    "editor.minimap.enabled": false,
+    "python.analysis.typeCheckingMode": "strict",
+    "mypy-type-checker.reportingScope": "workspace"
 }

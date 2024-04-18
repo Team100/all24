@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
@@ -710,14 +711,15 @@ public class AutoMaker {
             SensorInterface sensor) {
 
         return new SequentialCommandGroup(
+                new PrintCommand("FOUR NOTE AUTO"),
                 new ShootPreload(sensor, m_shooter, m_intake, m_feeder, m_swerve, -1, true),
                 new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint.STARTSUBWOOFER, FieldPoint.NOTE3),
-                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve,  false)),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
 
                 new ParallelDeadlineGroup(
                         test(alliance, FieldPoint.NOTE3, forAlliance(new Translation2d(1.99, 5.5583), alliance),
                                 forAlliance(new Translation2d(2.3, 5.5583), alliance), FieldPoint.NOTE2, 3, 2),
-                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve,  false)),
+                        new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
 
                 new ParallelDeadlineGroup(
                         test(alliance, FieldPoint.NOTE2, forAlliance(new Translation2d(1.95, 6.47), alliance),
@@ -736,7 +738,7 @@ public class AutoMaker {
                                                 kShooterScale)),
                                 alliance),
                         new RampShooter(m_shooter)),
-                new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve,  false));
+                new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false));
     }
 
     public Command sibling(Alliance alliance) {

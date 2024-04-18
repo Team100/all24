@@ -2,6 +2,7 @@ package org.team100.lib.motion.simple;
 
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.units.Distance100;
+import org.team100.lib.visualization.SimpleVisualization;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -11,18 +12,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class SimpleSubsystem extends SubsystemBase implements Positioning {
 
     private final PositionServoInterface<Distance100> m_actuator;
-    private final SimpleVisualization m_viz;
 
     // use the factory to instantiate
     SimpleSubsystem(PositionServoInterface<Distance100> actuator) {
         m_actuator = actuator;
-        m_viz = new SimpleVisualization("example", this);
-    }
-
-    @Override
-    public void periodic() {
-        m_actuator.periodic();
-        m_viz.periodic();
+        SimpleVisualization.make("example", this);
     }
 
     @Override

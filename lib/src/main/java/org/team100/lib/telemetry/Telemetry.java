@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
@@ -18,6 +19,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
+import org.team100.lib.util.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -44,7 +46,6 @@ import edu.wpi.first.networktables.StringArrayTopic;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -93,8 +94,6 @@ public class Telemetry {
     private final NetworkTableInstance inst;
     private final Map<String, Publisher> pubs;
     private final SendableChooser<Level> m_levelChooser;
-    // avoids hitting sendable chooser mutex so often.
-    private final Notifier m_levelUpdater;
     private Level m_level;
 
     /**
@@ -120,9 +119,7 @@ public class Telemetry {
 
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
-        m_levelUpdater = new Notifier(this::updateLevel);
-        m_levelUpdater.setName("Telemetry Level Updater Notifier");
-        m_levelUpdater.startPeriodic(1);
+        Async.runner.addPeriodic(this::updateLevel, 1);
         DataLogManager.start();
     }
 
@@ -204,6 +201,12 @@ public class Telemetry {
             t.setRetained(true);
             return t.publish();
         }, DoubleArrayPublisher.class).set(val);
+    }
+
+    public void log(Level level, String root, String leaf, Double[] val) {
+        if (!m_level.admit(level))
+            return;
+        log(level, root, leaf, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
     }
 
     public void log(Level level, String root, String leaf, long val) {

@@ -103,8 +103,8 @@ public class SelfTestRunner extends Command {
             // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
             // addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
 
-            AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_amp, m_listener);
-            addCase(ampSelfTest, container.m_amp.run(ampSelfTest::treatment));
+            AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_ampPivot, m_listener);
+            addCase(ampSelfTest, container.m_ampFeeder.run(ampSelfTest::treatment));
 
             // ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
             // addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));

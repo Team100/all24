@@ -25,9 +25,4 @@ public class MockEncoder100<T extends Measure100> implements Encoder100<T> {
     public void close() {
         //
     }
-
-    @Override
-    public void periodic() {
-        //
-    }
 }

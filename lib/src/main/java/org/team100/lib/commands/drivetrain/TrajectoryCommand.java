@@ -8,7 +8,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.trajectory.TrajectoryVisualization;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -77,7 +77,7 @@ public class TrajectoryCommand extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

@@ -11,11 +11,13 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.util.Util;
 
 class TrapezoidProfile100Test {
+    private static final boolean actuallyPrint = false;
     private static final double kDt = 0.01;
     private static final double kDelta = 0.001;
 
     private void dump(double tt, State100 sample) {
-        Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
+        if (actuallyPrint)
+            Util.printf("%f %f %f\n", tt, sample.x(), sample.v());
     }
 
     /** Now we expose acceleration in the profile state, so make sure it's right. */

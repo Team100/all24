@@ -21,6 +21,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * This class helps produce those corner velocities.
  */
 public class SlipperyTireUtil {
+    /** Clip corner speeds to this. */
+    private static final double kMaxSpeedM_s = 5.0;
     private static final Telemetry t = Telemetry.get();
     private final Tire m_tire;
 
@@ -29,13 +31,14 @@ public class SlipperyTireUtil {
     }
 
     /**
+     * Corner deltas are robot-relative.
      * 
-     * corner deltas are robot-relative.
+     * This imposes a maximum speed to avoid over-responding to noise.
      * 
-     * @param corners current period extrapolated robot-relative corner deltas
+     * @param corners   current period extrapolated robot-relative corner deltas
      * @param cornerDtS time delta for corners
-     * @param deltas  current period wheel deltas, meters
-     * @param dtS     current period time delta, meters
+     * @param deltas    current period wheel deltas, meters
+     * @param dtS       current period time delta, meters
      * @return adjusted corner deltas, suitable for forward kinematics
      */
     public SwerveModulePosition[] adjust(
@@ -58,6 +61,10 @@ public class SlipperyTireUtil {
             // corners are robot-relative
             t.log(Level.WARN, "tireutil", "corner", corners[i]);
             Vector2d cornerSpeedM_s = corners[i].times(1 / cornerDtS);
+            // cap the allowed corner speed.
+            if (cornerSpeedM_s.norm() > kMaxSpeedM_s) {
+                cornerSpeedM_s = cornerSpeedM_s.times(kMaxSpeedM_s / cornerSpeedM_s.norm());
+            }
             Vector2d actualSpeedM_s = m_tire.actual(cornerSpeedM_s, wheelSpeedM_s, dtS);
             t.log(Level.WARN, "tireutil", "cornerSpeed", cornerSpeedM_s);
             t.log(Level.WARN, "tireutil", "actualSpeed", actualSpeedM_s);
@@ -102,7 +109,9 @@ public class SlipperyTireUtil {
     }
 
     /**
-     * Robot-relative corner deltas
+     * Robot-relative corner deltas.
+     * 
+     * Note this can produce unrealistically large deltas, reacting to noise.
      */
     public static Vector2d[] cornerDeltas(
             SwerveDriveKinematics100 kinematics,

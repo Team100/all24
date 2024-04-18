@@ -12,8 +12,8 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
-import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -117,7 +117,7 @@ public class DriveToWaypoint100 extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_timer.stop();
         m_swerve.stop();
         TrajectoryVisualization.clear();

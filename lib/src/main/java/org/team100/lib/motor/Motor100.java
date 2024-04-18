@@ -3,6 +3,9 @@ package org.team100.lib.motor;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
+/**
+ * The Motor100 class is for calibrated motor commands.
+ */
 public interface Motor100<T extends Measure100> extends Glassy {
 
     /**
@@ -23,14 +26,15 @@ public interface Motor100<T extends Measure100> extends Glassy {
     /**
      * Includes feedforward in Nm.
      * TODO: make feedforward use the Measure units (Nm or N).
+     * 
      * @param velocity
      * @param accel
-     * @param torque feedforward torque in Nm.
+     * @param torque   feedforward torque in Nm.
      */
     void setVelocity(double velocity, double accel, double torque);
 
     /**
-     * @return Current applied torque.  Used for drive/steer decoupling.
+     * @return Current applied torque. Used for drive/steer decoupling.
      */
     double getTorque();
 
@@ -40,12 +44,6 @@ public interface Motor100<T extends Measure100> extends Glassy {
      * For test cleanup.
      */
     void close();
-
-    /**
-     * Used to collect measurements once per cycle, to save time and improve
-     * consistency.
-     */
-    void periodic();
 
     @Override
     default String getGlassName() {

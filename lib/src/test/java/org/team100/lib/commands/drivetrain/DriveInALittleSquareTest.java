@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.commands.drivetrain.DriveInALittleSquare.DriveState;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -13,49 +14,48 @@ import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-class DriveInALittleSquareTest extends Fixtured implements Timeless  {
+class DriveInALittleSquareTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
-
 
     /** Confirm that the steering commands are simple steps. */
     @Test
     void testSteering() {
         SwerveDriveSubsystem swerve = fixture.drive;
         DriveInALittleSquare command = new DriveInALittleSquare(swerve);
+        DriveInALittleSquare.shutDownForTest();
         command.initialize();
         // the first time we call execute, drive doesn't yet know it's at the goal
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute();
+        command.execute100(0.02);
         // initially steering
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S.v(), kDelta);
+        assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
 
-        
         // the second time, it knows, so we switch to driving.
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute();
+        command.execute100(0.02);
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
-        assertEquals(0.02, command.speedM_S.v(), kDelta);
+        assertEquals(0.02, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(0.02, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
 
         // step through the driving phase
         stepTime(2.5);
         fixture.drive.periodic();
-        command.execute();
+        command.execute100(2.5);
         // now we should be steering again
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute();
+        command.execute100(0.02);
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S.v(), kDelta);
+        assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(Math.PI / 2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
@@ -64,52 +64,61 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless  {
     @Test
     void testLowLevel() {
         DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
+        DriveInALittleSquare.shutDownForTest();
         command.initialize();
+
         // first align the wheels in case they're not already aligned.
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
+
         fixture.drive.periodic();
-        command.execute();
+        command.execute100(0);
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
 
         // a little while later we should be driving
+        // at this point the speed is still zero
+        assertEquals(0.0, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);
         stepTime(0.1);
         fixture.drive.periodic();
-        command.execute();
+        // this changes the speed
+        command.execute100(0.1);
+        // big jump in speed here since dt is so big
+        // max accel is 1 so waiting 0.1s means 0.1m/s
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
-        assertEquals(0.1, command.speedM_S.v(), 0.05);
+        assertEquals(0.1, command.m_setpoint.v(), 0.05);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        // the actual speed lags slightly
-        assertEquals(0.005, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);
+        assertEquals(0.1, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);
+        // position isn't updated until the next time-step.
+        assertEquals(0.0, fixture.drive.positions()[0].distanceMeters, 0.005);
 
-        // drive to the next corner
-        for (double t = 0; t < 2.1; t += 0.02) {
+        // drive to the next corner. at 1 m/s/s this should be a triangular
+        // profile that takes exactly 2 sec total but we started at 0.1 so 1.9
+        for (double t = 0; t < 1.9; t += 0.02) {
             stepTime(0.02);
             fixture.drive.periodic();
-            command.execute();
-            double measurement = fixture.drive.moduleStates()[0].speedMetersPerSecond;
+            command.execute100(0.02);
+            double speed = fixture.drive.moduleStates()[0].speedMetersPerSecond;
+            double distance = fixture.drive.positions()[0].distanceMeters;
+            DriveState state = command.m_state;
             if (dump)
-                Util.printf("t %5.3f measurement %5.3f\n", t, measurement);
+                Util.printf("t %5.3f state %s speed %5.3f distance %5.3f\n", t, state.toString(), speed, distance);
         }
 
         // steer
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute();
+        command.execute100(0.02);
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
-        assertEquals(0, command.speedM_S.v(), kDelta);
+        assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
         assertFalse(fixture.drive.atGoal()[0]);
-
-        // the modules are not there yet
-        // assertEquals(0.06, fixture.drive.moduleStates()[0].angle.getRadians(), 0.06);
 
         // wait a half second.
         for (double t = 0; t < 0.5; t += 0.02) {
             stepTime(0.02);
             fixture.drive.periodic();
-            command.execute();
+            command.execute100(0.02);
             double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
@@ -131,7 +140,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless  {
         // we're not quite motionless, we're already going a little.
         // there's no specific test here because the velocity seems to depend
         // on the timing in the simulation
-        assertTrue(command.speedM_S.v() > 0);
+        assertTrue(command.m_setpoint.v() > 0);
     }
 
 }

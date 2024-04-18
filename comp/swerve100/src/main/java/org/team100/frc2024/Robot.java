@@ -57,7 +57,6 @@ public class Robot extends TimedRobot implements Glassy {
 
     @Override
     public void robotPeriodic() {
-        m_robotContainer.beforeCommandCycle();
         CommandScheduler.getInstance().run();
 
         // t.log(Level.DEBUG, m_name, "Voltage", m_pdh.getVoltage());

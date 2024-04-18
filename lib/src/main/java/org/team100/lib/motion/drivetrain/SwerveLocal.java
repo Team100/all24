@@ -203,13 +203,6 @@ public class SwerveLocal implements Glassy {
         prevSetpoint = setpoint;
     }
 
-    /**
-     * This is for visualization and simulation update only.
-     */
-    public void periodic() {
-        m_modules.periodic();
-    }
-
     public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState[] states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,

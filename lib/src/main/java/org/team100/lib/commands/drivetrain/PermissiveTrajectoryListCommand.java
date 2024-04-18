@@ -17,8 +17,8 @@ import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
-import org.team100.lib.trajectory.TrajectoryVisualization;
 import org.team100.lib.util.Util;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -115,7 +115,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end100(boolean interrupted) {
         m_swerve.stop();
         TrajectoryVisualization.clear();
     }

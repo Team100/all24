@@ -5,36 +5,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
-import org.team100.frc2024.RobotState100.AmpState100;
-import org.team100.frc2024.RobotState100.FeederState100;
-import org.team100.frc2024.RobotState100.ShooterState100;
 import org.team100.frc2024.commands.AutonCommand;
+import org.team100.frc2024.commands.Feed;
+import org.team100.frc2024.commands.Lob;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.config.AutonChooser;
 import org.team100.frc2024.motion.AutoMaker;
-import org.team100.frc2024.motion.ChangeAmpState;
-import org.team100.frc2024.motion.FeedCommand;
+import org.team100.frc2024.motion.FeedToAmp;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.OuttakeCommand;
-import org.team100.frc2024.motion.amp.AmpDefault;
-import org.team100.frc2024.motion.amp.AmpSubsystem;
-import org.team100.frc2024.motion.amp.OuttakeAmp;
+import org.team100.frc2024.motion.amp.AmpFeeder;
+import org.team100.frc2024.motion.amp.AmpPivot;
+import org.team100.frc2024.motion.amp.AmpSet;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
-import org.team100.frc2024.motion.intake.FeederDefault;
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.frc2024.motion.intake.IntakeDefault;
-import org.team100.frc2024.motion.intake.RunIntake;
+import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
-import org.team100.frc2024.motion.shooter.SetDefaultShoot;
+import org.team100.frc2024.motion.shooter.Ramp;
 import org.team100.frc2024.motion.shooter.Shooter;
-import org.team100.frc2024.motion.shooter.ShooterDefault;
-import org.team100.lib.SubsystemPriority;
-import org.team100.lib.SubsystemPriority.Priority;
+import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -84,7 +78,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -101,7 +94,8 @@ public class RobotContainer implements Glassy {
     private final String m_name;
     private final CameraUpdater cameraUpdater;
     final SwerveDriveSubsystem m_drive;
-    final AmpSubsystem m_amp;
+    final AmpFeeder m_ampFeeder;
+    final AmpPivot m_ampPivot;
 
     public RobotContainer() throws IOException {
         m_name = Names.name(this);
@@ -164,7 +158,7 @@ public class RobotContainer implements Glassy {
 
         final Intake m_intake = new Intake(m_sensors);
 
-        m_shooter = new DrumShooter(3, 13, 7, 58);
+        m_shooter = new DrumShooter(3, 13, 27, 58);
 
         ///////////////////////////
         //
@@ -179,7 +173,8 @@ public class RobotContainer implements Glassy {
                 m_shooter,
                 visionDataProvider);
 
-        m_amp = new AmpSubsystem();
+        m_ampFeeder = new AmpFeeder();
+        m_ampPivot = new AmpPivot();
 
         final ClimberSubsystem m_climber = new ClimberSubsystem(60, 61);
 
@@ -211,55 +206,35 @@ public class RobotContainer implements Glassy {
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
+                        m_intake,
                         notePositionDetector::getClosestTranslation2d,
-                        m_drive, dthetaController,
+                        m_drive,
+                        dthetaController,
                         swerveKinodynamics));
 
-        // whileTrue(driverControl::test, new Amp(m_drive::getPose, m_drive, planner,
-        // drivePID, swerveKinodynamics));
-
-        // whileTrue(driverControl::test, new DriveWithTrajectory(m_drive, planner,
-        // drivePP, swerveKinodynamics, "src/main/deploy/choreo/crossField.traj"));
-
-        // whileTrue(operatorControl::intake,
-        // new StartEndCommand(() ->
-        // RobotState100.changeIntakeState(IntakeState100.INTAKE),
-        // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-
-        whileTrue(operatorControl::intake,
-                new RunIntake(m_intake));
+        whileTrue(operatorControl::intake, new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
 
         whileTrue(operatorControl::outtake,
-                new OuttakeCommand(m_intake, m_shooter, m_amp, m_feeder));
+                new OuttakeCommand(m_intake, m_shooter, m_ampFeeder, m_feeder));
 
-        whileTrue(operatorControl::ramp,
-                new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
+        whileTrue(operatorControl::ramp, new Ramp(m_shooter, m_drive));
 
-        // whileTrue(operatorControl::ramp,
-        // new ClimberPosition(m_climber));
+        whileTrue(operatorControl::feed, new Feed(m_intake, m_feeder));
 
-        whileTrue(operatorControl::feed, new StartEndCommand(() -> RobotState100.changeFeederState(FeederState100.FEED),
-                () -> RobotState100.changeFeederState(FeederState100.STOP)));
+        // hold the amp up while holding the button
+        whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(m_ampPivot, 1.8));
 
-        // whileTrue(operatorControl::pivotToAmpPosition,
-        // new ChangeAmpState(AmpState100.UP, m_amp));
+        // TODO: what does this actually do?
+        whileTrue(operatorControl::pivotToDownPosition, new Ramp(m_shooter, m_drive));
 
-        whileTrue(operatorControl::pivotToAmpPosition, new ChangeAmpState(AmpState100.UP, m_amp));
+        whileTrue(operatorControl::feedToAmp, new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
 
-        whileTrue(operatorControl::pivotToDownPosition, new SetDefaultShoot(m_shooter, ShooterState100.DEFAULTSHOOT));
+        whileTrue(operatorControl::rezero, new TestShoot(m_shooter));
 
-        whileTrue(operatorControl::feedToAmp, new FeedCommand(m_intake, m_shooter, m_amp, m_feeder));
+        whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
 
-        whileTrue(operatorControl::rezero, new SetDefaultShoot(m_shooter, ShooterState100.TEST));
-
-        whileTrue(operatorControl::outtakeFromAmp, new OuttakeAmp());
-
-        // whileTrue(operatorControl::index, m_indexer.run(m_indexer::index));
-        // whileTrue(operatorControl::index, new IndexCommand(m_indexer, () -> true));
-        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
-        // (m_amp.inPosition())));
-        // operatorControl.index().whileTrue(new IndexCommand(m_indexer, () ->
-        // (!m_intake.noteInIntake())));
+        // TODO: finish the "lob" command.
+        whileTrue(operatorControl::never, new Lob(m_shooter, m_intake));
 
         ///////////////////////////
         //
@@ -328,15 +303,6 @@ public class RobotContainer implements Glassy {
                         thetaController,
                         omegaController));
 
-        // whileTrue(driverControl::test, Commands.startEnd(() ->
-        // RobotState100.changeIntakeState(IntakeState100.INTAKE),
-        // () -> RobotState100.changeIntakeState(IntakeState100.STOP)));
-        // whileTrue(driverControl::driveToAmp, new DriveWithProfile2(() -> new
-        // Pose2d(1.834296, 7.474794, new Rotation2d(Math.PI / 2)), m_drive,
-        // new HolonomicDriveController100(), swerveKinodynamics));
-        // whileTrue(driverControl::test, new DriveToAmp(m_drive, swerveKinodynamics,
-        // planner, drivePID, m_alliance));
-
         PIDController omega2Controller = new PIDController(0, 0, 0); // .5
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
@@ -373,33 +339,27 @@ public class RobotContainer implements Glassy {
         whileTrue(driverControl::shooterLock,
                 new ShooterLockCommand(shooterLock, driverControl::velocity, m_drive));
 
+        //////////////////
+        //
+        // DEFAULT COMMANDS
+        //
+
         m_drive.setDefaultCommand(driveManually);
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        m_feeder.setDefaultCommand(m_feeder.run(m_feeder::stop));
+        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
+        m_climber.setDefaultCommand(new ClimberDefault(
+                m_climber,
+                operatorControl::getLeftAxis,
+                operatorControl::getRightAxis,
+                operatorControl::pov));
+        m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
+        m_ampPivot.setDefaultCommand(new AmpSet(m_ampPivot, 0));
 
-        SubsystemPriority.addSubsystem(m_drive,
-                driveManually,
-                Priority.ONE);
-        SubsystemPriority.addSubsystem(m_shooter,
-                new ShooterDefault(m_shooter, m_drive),
-                Priority.TWO);
-        SubsystemPriority.addSubsystem(m_feeder,
-                new FeederDefault(m_feeder, m_sensors),
-                Priority.THREE);
-        SubsystemPriority.addSubsystem(m_intake,
-                new IntakeDefault(m_intake),
-                Priority.FOUR);
-        SubsystemPriority.addSubsystem(m_climber,
-                new ClimberDefault(
-                        m_climber,
-                        operatorControl::getLeftAxis,
-                        operatorControl::getRightAxis,
-                        operatorControl::pov),
-                Priority.FIVE);
-        SubsystemPriority.addSubsystem(m_amp,
-                new AmpDefault(m_amp),
-                Priority.SIX);
-
-        // Registers the subsystems so that they run with the specified priority
-        // SubsystemPriority.registerWithPriority();
+        ////////////////////
+        //
+        // AUTONOMOUS
+        //
 
         // this illustrates how to use AutonCommand together with AllianceCommand
         Command choosableAuton = new AutonCommand(
@@ -438,10 +398,8 @@ public class RobotContainer implements Glassy {
         cameraUpdater.update();
         // ModeSelector.selectMode(operatorControl::pov);
     }
-
     public void onTeleop() {
         m_shooter.reset();
-        m_amp.reset();
     }
 
     public void onInit() {

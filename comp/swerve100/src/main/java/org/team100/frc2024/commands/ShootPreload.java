@@ -94,26 +94,26 @@ public class ShootPreload extends Command {
         if (!alliance.isPresent())
             return;
 
-        double angle;
+        double pivotSetpoint;
         if (m_pivotOverride == -1) {
             double distance = m_drive.getPose().getTranslation()
                     .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
-            angle = ShooterUtil.getAngleRad(distance);
+            pivotSetpoint = ShooterUtil.getAngleRad(distance);
         } else {
-            angle = m_pivotOverride;
+            pivotSetpoint = m_pivotOverride;
         }
 
-        m_shooter.setAngle(angle);
+        m_shooter.setAngle(pivotSetpoint);
 
-        t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT", Math.abs(m_shooter.getPivotPosition() - angle));
+        t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT", Math.abs(m_shooter.getPivotPosition() - pivotSetpoint));
 
         if (!m_sensor.getFeederSensor() && !m_sensor.getIntakeSensor()) {
-
             m_intake.stop();
             m_feeder.stop();
 
+            double error = m_shooter.getPivotPosition() - pivotSetpoint;
             if (m_shooter.atVelocitySetpoint(m_isPreload)
-                    && Math.abs(m_shooter.getPivotPosition() - angle) < 0.01) {
+                    && Math.abs(error) < 0.01) {
                 atVelocity = true;
                 m_timer.start();
             }

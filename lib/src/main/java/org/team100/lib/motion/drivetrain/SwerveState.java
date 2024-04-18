@@ -60,6 +60,10 @@ public class SwerveState {
         return new FieldRelativeVelocity(m_x.v(), m_y.v(), m_theta.v());
     }
 
+    public FieldRelativeAcceleration acceleration() {
+        return new FieldRelativeAcceleration(m_x.a(), m_y.a(), m_theta.a());
+    }
+
     public State100 x() {
         return m_x;
     }

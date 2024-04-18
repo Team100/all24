@@ -108,10 +108,4 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
         previousSetpoint = setpoint;
         return accel;
     }
-
-    @Override
-    public void periodic() {
-        m_motor.periodic();
-        m_encoder.periodic();
-    }
 }

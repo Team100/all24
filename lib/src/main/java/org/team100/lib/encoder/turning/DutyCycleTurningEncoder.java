@@ -25,11 +25,6 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     private Double prevAngle = null;
     private Double prevTime = null;
 
-    /** Current position, updated in periodic() */
-    private double m_positionRad;
-    /** Current velocity, updated in periodic() */
-    private double m_rateRad_S;
-
     public DutyCycleTurningEncoder(
             String name,
             int channel,
@@ -55,12 +50,12 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
 
     @Override
     public Double getPosition() {
-        return m_positionRad;
+        return getPositionRad();
     }
 
     @Override
     public double getRate() {
-        return m_rateRad_S;
+        return getRateRad_S();
     }
 
     @Override
@@ -69,7 +64,6 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         // which is never what we want. but this might be wrong
         // for some other reason
         // m_encoder.reset();
-        m_positionRad = 0;
     }
 
     @Override
@@ -77,33 +71,25 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         m_encoder.close();
     }
 
-    @Override
-    public void periodic() {
-        updatePosition();
-        updateRate();
-        t.log(Level.DEBUG, m_name, "position (rad) ROBOT USES THIS (COUNTER CLOCKWISE IS POSITIVE)",
-                m_encoder.getDistance());
-        t.log(Level.DEBUG, m_name, "position (turns) USE FOR OFFSETS", m_encoder.get());
-        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
-        t.log(Level.DEBUG, m_name, "Wrapped position rads (absolute)", getWrappedPosition());
-
-    }
-
     ////////////////////////////////////
 
-    private void updatePosition() {
-        m_positionRad = m_encoder.getDistance();
+    private double getPositionRad() {
+        double positionRad = m_encoder.getDistance();
+        t.log(Level.DEBUG, m_name, "position (rad) ROBOT USES THIS (CCW POSITIVE)", positionRad);
+        t.log(Level.DEBUG, m_name, "position (turns) USE FOR OFFSETS", m_encoder.get());
+        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
+        t.log(Level.DEBUG, m_name, "Wrapped position rads (absolute)", MathUtil.angleModulus(positionRad));
+        return positionRad;
     }
 
-    /** Update position before calling this. */
-    private void updateRate() {
-        double angle = m_positionRad;
+    /** this is just finite difference over one time step. noisy! */
+    private double getRateRad_S() {
+        double angle = getPositionRad();
         double time = Timer.getFPGATimestamp();
         if (prevAngle == null) {
             prevAngle = angle;
             prevTime = time;
-            m_rateRad_S = 0;
-            return;
+            return 0;
         }
         double dx = angle - prevAngle;
         double dt = time - prevTime;
@@ -111,11 +97,8 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         prevAngle = angle;
         prevTime = time;
 
-        m_rateRad_S = dx / dt;
+        double rateRad_S = dx / dt;
+        t.log(Level.DEBUG, m_name, "rate (rad_s)", rateRad_S);
+        return rateRad_S;
     }
-
-    private double getWrappedPosition() {
-        return MathUtil.angleModulus(m_positionRad);
-    }
-
 }

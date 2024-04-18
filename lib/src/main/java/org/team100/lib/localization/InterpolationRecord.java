@@ -2,10 +2,10 @@ package org.team100.lib.localization;
 
 import java.util.Objects;
 
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.util.DriveUtil;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -15,12 +15,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
  * Represents an odometry record. The record contains the inputs provided as
  * well as the pose that was observed based on these inputs, as well as the
  * previous record and its inputs.
+ * 
+ * TODO: add velocity and acceleration.
  */
 class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     private final SwerveDriveKinematics100 m_kinematics;
 
     // The pose observed given the current sensor inputs and the previous pose.
-    final Pose2d m_poseMeters;
+    final SwerveState m_state;
 
     // The current gyro angle.
     final Rotation2d m_gyroAngle;
@@ -31,18 +33,18 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     /**
      * Constructs an Interpolation Record with the specified parameters.
      *
-     * @param poseMeters     The pose observed given the current sensor inputs and
+     * @param state          The pose observed given the current sensor inputs and
      *                       the previous pose.
      * @param gyro           The current gyro angle.
      * @param wheelPositions The current encoder readings.
      */
     InterpolationRecord(
             SwerveDriveKinematics100 kinematics,
-            Pose2d poseMeters,
+            SwerveState state,
             Rotation2d gyro,
             SwerveDriveWheelPositions wheelPositions) {
         m_kinematics = kinematics;
-        m_poseMeters = poseMeters;
+        m_state = state;
         m_gyroAngle = gyro;
         m_wheelPositions = wheelPositions;
     }
@@ -53,7 +55,8 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
      * 
      * Interpolates the wheel positions.
      * Interpolates the gyro angle.
-     * ***INTEGRATES*** to find the pose; ignores the supplied end pose unless t >= 1 :-(.
+     * ***INTEGRATES*** to find the pose; ignores the supplied end pose unless t >=
+     * 1 :-(.
      *
      * @param endValue The upper bound, or end.
      * @param t        How far between the lower and upper bound we are. This should
@@ -82,7 +85,11 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
                 DriveUtil.modulePositionDelta(m_wheelPositions, wheelLerp));
         twist.dtheta = gyroLerp.minus(m_gyroAngle).getRadians();
 
-        return new InterpolationRecord(m_kinematics, m_poseMeters.exp(twist), gyroLerp, wheelLerp);
+        SwerveState newState = new SwerveState(
+                m_state.pose().exp(twist),
+                m_state.velocity(),
+                m_state.acceleration());
+        return new InterpolationRecord(m_kinematics, newState, gyroLerp, wheelLerp);
     }
 
     @Override
@@ -96,17 +103,17 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
         InterpolationRecord rec = (InterpolationRecord) obj;
         return Objects.equals(m_gyroAngle, rec.m_gyroAngle)
                 && Objects.equals(m_wheelPositions, rec.m_wheelPositions)
-                && Objects.equals(m_poseMeters, rec.m_poseMeters);
+                && Objects.equals(m_state, rec.m_state);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(m_gyroAngle, m_wheelPositions, m_poseMeters);
+        return Objects.hash(m_gyroAngle, m_wheelPositions, m_state);
     }
 
     @Override
     public String toString() {
-        return "InterpolationRecord [m_poseMeters=" + m_poseMeters + ", m_gyroAngle=" + m_gyroAngle
+        return "InterpolationRecord [m_poseMeters=" + m_state + ", m_gyroAngle=" + m_gyroAngle
                 + ", m_wheelPositions=" + m_wheelPositions + "]";
     }
 
