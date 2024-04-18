@@ -3,6 +3,14 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2024.3.1"
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir "../../lib/src/main/java"
+        }
+    }
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -52,6 +60,7 @@ def includeDesktopSupport = true
 dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+    implementation 'org.json:json:20231013'
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -69,6 +78,8 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'org.dyn4j:dyn4j:4.2.0'
 }
 
 test {
