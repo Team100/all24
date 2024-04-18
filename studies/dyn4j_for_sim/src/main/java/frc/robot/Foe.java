@@ -2,7 +2,23 @@ package frc.robot;
 
 import org.dyn4j.geometry.Vector2;
 
-public class Foe extends Nonplayer {
+/**
+ * Foes try to pick from the source and score in the amp corner.
+ * 
+ * TODO: add defensive behavior
+ * TODO: add two kinds of scoring
+ */
+public class Foe extends RobotBody {
+    private static final int kForce = 200;
+    private static final int kTolerance = 2;
+    private static final Vector2 kSource = new Vector2(0, 0);
+    private static final Vector2 kAmpCorner = new Vector2(16, 8);
+
+    private enum Goal {
+        PICK, SCORE
+    }
+
+    private Goal m_goal;
 
     public Foe() {
         // initial goal
@@ -11,26 +27,26 @@ public class Foe extends Nonplayer {
 
     @Override
     public void act() {
-        Vector2 p = getWorldCenter();
+        Vector2 position = getWorldCenter();
         switch (m_goal) {
             case PICK:
-                // foes try to pick from the origin
-                if (p.x < 2 && p.y < 2) {
+                Vector2 toPick = position.to(kSource);
+                if (toPick.getMagnitude() < kTolerance) {
                     // successful pick, now go score
                     m_goal = Goal.SCORE;
                 } else {
                     // keep trying
-                    applyForce(new Vector2(-200, -200));
+                    applyForce(toPick.setMagnitude(kForce));
                 }
                 break;
             case SCORE:
-                // for now, "score" means the opposite corner
-                if (p.x > 13 && p.y > 6) {
+                Vector2 toScore = position.to(kAmpCorner);
+                if (toScore.getMagnitude() < kTolerance) {
                     // successful score, now go pick
                     m_goal = Goal.PICK;
                 } else {
                     // keep trying
-                    applyForce(new Vector2(200, 200));
+                    applyForce(toScore.setMagnitude(kForce));
                 }
                 break;
         }
