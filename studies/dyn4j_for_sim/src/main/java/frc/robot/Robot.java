@@ -152,16 +152,17 @@ public class Robot extends TimedRobot {
 
         // these are from the onshape cad, adjusted a tiny bit to line up with the sim
         // png.
-        addPost(3.38, 4.10);
-        addPost(5.60, 2.80);
-        addPost(5.60, 5.38);
-        addPost(10.95, 2.80);
-        addPost(10.95, 5.38);
-        addPost(13.16, 4.10);
+        addPost(3.38, 4.10, 0);
+        addPost(5.60, 2.80, -1);
+        addPost(5.60, 5.38, 1);
+        addPost(10.95, 2.80, 1);
+        addPost(10.95, 5.38, -1);
+        addPost(13.16, 4.10, 0);
     }
 
-    private void addPost(double x, double y) {
+    private void addPost(double x, double y, double rad) {
         Body100 post0 = new Obstacle(Geometry.createCircle(0.3));
+        post0.rotate(rad);
         post0.translate(x, y);
         world.addBody(post0);
     }
@@ -175,11 +176,11 @@ public class Robot extends TimedRobot {
                 Body100 body = world.getBody(i);
                 if (body.getClass() != type)
                     continue;
-                Vector2 p = body.getWorldCenter();
-                double angle = body.getTransform().getRotationAngle();
-                poses.add(p.x);
-                poses.add(p.y);
-                poses.add(angle);
+                Vector2 positionM = body.getWorldCenter();
+                double angleDeg = body.getTransform().getRotation().toDegrees();
+                poses.add(positionM.x);
+                poses.add(positionM.y);
+                poses.add(angleDeg);
             }
             t.log(Level.DEBUG, kField, type.getSimpleName(),
                     poses.toArray(new Double[0]));
