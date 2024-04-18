@@ -33,4 +33,13 @@ class CameraUpdaterTest {
         assertEquals(aprilTagTransform.getX(), 0, 0.0001);
         System.out.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
     }
+
+    @Test
+    void testRotation3() {
+        Pose3d tagInFieldCoords = new Pose3d();
+        Transform3d aprilTagTransform = PoseEstimationHelper.getTransformFromRobotPose(Camera.TEST4.getOffset(),
+                new Pose2d(1, tagInFieldCoords.getY(), new Rotation2d(Math.PI)), tagInFieldCoords);
+        assertEquals(aprilTagTransform.getX(), 0, 0.0001);
+        System.out.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
+    }
 }

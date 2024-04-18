@@ -267,11 +267,11 @@ def main():
         height = 616
     elif model == "imx296":
         print("GS Camera")
-        fullwidth = 184  # slightly larger than the detector, to match stride
-        fullheight = 136
+        fullwidth = 64  # slightly larger than the detector, to match stride
+        fullheight = 64
         # medium detection resolution, compromise speed vs range
-        width = 184    
-        height = 136    
+        width = 64    
+        height = 64    
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100

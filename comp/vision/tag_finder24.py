@@ -87,10 +87,10 @@ class TagFinder:
             k2 = 0.04
         # TODO get these real distortion values
         elif model == "imx296":
-            fx = 660
-            fy = 660
-            cx = 728
-            cy = 544
+            fx = 1680
+            fy = 1680
+            cx = int(1456/2)
+            cy = int(1088/2)
             k1 = 0
             k2 = 0
         else:
@@ -101,8 +101,8 @@ class TagFinder:
         p1 = 0
         p2 = 0
 
-        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
-        self.dist = np.array([[k1, k2, p1, p2]])
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], np.float32)
+        self.dist = np.array([[k1, k2, p1, p2]], np.float32)
         self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
             robotpy_apriltag.AprilTagPoseEstimator.Config(
                 tag_size,
@@ -116,6 +116,21 @@ class TagFinder:
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def analyze(self, request):
+        potentialTags = self.estimatedTagPose.get()
+        potentialArray = []
+        for Blip24s in potentialTags:
+            translation = Blip24s.pose.translation()
+            if (translation.Z() < 0):
+                continue
+            rvec = np.zeros((3, 1), np.float32) 
+            tvec = np.zeros((3, 1), np.float32) 
+            object_points = np.array([translation.X(), translation.Y(),translation.Z()],np.float32)
+            (point2D, _) = cv2.projectPoints(object_points,rvec,tvec,self.mtx,self.dist)
+            if (point2D[0][0][0] > 0 and point2D[0][0][0] < 1456 and point2D[0][0][1] > 0 and point2D[0][0][1] < 1088):
+                # print(Blip24s.id)
+                # print(object_points)
+                # print(point2D[0][0])
+                potentialArray.append(point2D[0][0])
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -133,10 +148,8 @@ class TagFinder:
         # TODO: probably remove this
         serial = getserial()
         identity = Camera(serial)
-        if identity == Camera.SHOOTER:
-            img = img[62:554, : self.width]
-        else:        
-            img = img[: self.height, : self.width]
+        if len(potentialArray) == 1:
+            img = img[potentialArray[1]-10 : potentialArray[1]+10, potentialArray[0]-10:potentialArray[0]+10]
 
         img = cv2.undistort(img, self.mtx, self.dist)
 
@@ -245,10 +258,8 @@ class TagFinder:
         self.estimatedTagPose = self.inst.getStructArrayTopic(
             topic_name + "/estimatedTagPose", Blip24
         ).subscribe([],ntcore.PubSubOptions())
-
-        try: self.inst.addListener(self.estimatedTagPose,EventFlags.kValueAll, self.accept(self.estimatedTagPose))
-        finally: print("RUH ROH")
         
+
 
 
 def getserial():
@@ -316,7 +327,7 @@ def main():
             # "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # 3/23/24, reduced to 2ms, even less blur.
-            "ExposureTime": 3000,
+            "ExposureTime": 300,
             "AnalogueGain": 8,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
