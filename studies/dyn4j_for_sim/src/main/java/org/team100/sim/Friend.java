@@ -1,6 +1,7 @@
 package org.team100.sim;
 
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.world.World;
 
 /**
  * Foes try to pick from the source and score in the amp corner.
@@ -17,9 +18,11 @@ public class Friend extends RobotBody {
         PICK, SCORE
     }
 
+    private final World<Body100> m_world;
     private Goal m_goal;
 
-    public Friend() {
+    public Friend(World<Body100> world) {
+        m_world = world;
         // initial goal
         m_goal = Goal.PICK;
     }
@@ -48,6 +51,19 @@ public class Friend extends RobotBody {
                     applyForce(toScore.setMagnitude(kForce));
                 }
                 break;
+        }
+
+        // look for nearby notes, brute force
+        for (Body100 body : m_world.getBodies()) {
+            if (body instanceof Note) {
+                double distance = getTransform().getTranslation().distance(
+                        body.getTransform().getTranslation());
+                if (distance > 0.3)
+                    continue;
+                System.out.printf("%s %5.3f\n",
+                        body.getClass().getSimpleName(), distance);
+                // TODO: pick up?
+            }
         }
     }
 }

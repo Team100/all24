@@ -31,19 +31,19 @@ public class SimWorld {
         player = new Player();
         world.addBody(player);
 
-        friend1 = new Friend();
+        friend1 = new Friend(world);
         world.addBody(friend1);
 
-        friend2 = new Friend();
+        friend2 = new Friend(world);
         world.addBody(friend2);
 
-        foe1 = new Foe();
+        foe1 = new Foe(world);
         world.addBody(foe1);
 
-        foe2 = new Foe();
+        foe2 = new Foe(world);
         world.addBody(foe2);
 
-        foe3 = new Foe();
+        foe3 = new Foe(world);
         world.addBody(foe3);
 
         setUpWalls();

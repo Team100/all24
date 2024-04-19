@@ -1,6 +1,13 @@
 package org.team100.sim;
 
+import java.util.List;
+
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.world.DetectFilter;
+import org.dyn4j.world.World;
 
 /**
  * Foes try to pick from the source and score in the amp corner.
@@ -18,9 +25,11 @@ public class Foe extends RobotBody {
         PICK, SCORE
     }
 
+    private final World<Body100> m_world;
     private Goal m_goal;
 
-    public Foe() {
+    public Foe(World<Body100> world) {
+        m_world = world;
         // initial goal
         m_goal = Goal.PICK;
     }
@@ -49,6 +58,19 @@ public class Foe extends RobotBody {
                     applyForce(toScore.setMagnitude(kForce));
                 }
                 break;
+        }
+
+        // look for nearby notes, brute force
+        for (Body100 body : m_world.getBodies()) {
+            if (body instanceof Note) {
+                double distance = getTransform().getTranslation().distance(
+                        body.getTransform().getTranslation());
+                if (distance > 0.3)
+                    continue;
+                System.out.printf("%s %5.3f\n",
+                        body.getClass().getSimpleName(), distance);
+                // TODO: pick up?
+            }
         }
     }
 }
