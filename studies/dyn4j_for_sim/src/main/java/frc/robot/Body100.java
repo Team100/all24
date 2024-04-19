@@ -2,6 +2,7 @@ package frc.robot;
 
 import java.util.List;
 
+import org.dyn4j.collision.TypeFilter;
 import org.dyn4j.dynamics.Body;
 
 public abstract class Body100 extends Body {
@@ -20,6 +21,10 @@ public abstract class Body100 extends Body {
                 Obstacle.class,
                 Player.class);
     }
+
+    public static final TypeFilter FIXED = new FixedFilter();
+    public static final TypeFilter ROBOT = new RobotFilter();
+    public static final TypeFilter NOTE = new NoteFilter();
 
     public abstract void act();
 }

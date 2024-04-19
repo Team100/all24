@@ -12,6 +12,7 @@ public class Obstacle extends Body100 {
         BodyFixture fixture = addFixture(convex, 1.0, 0.5, 0.5);
         // this means the springiness doesn't change with velocity
         fixture.setRestitutionVelocity(0.0);
+        fixture.setFilter(FIXED);
         setMass(MassType.INFINITE);
     }
 

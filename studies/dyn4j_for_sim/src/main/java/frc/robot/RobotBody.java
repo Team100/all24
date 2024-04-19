@@ -17,6 +17,7 @@ public abstract class RobotBody extends Body100 {
                 0.1);
         // this means the springiness doesn't change with velocity
         fixture.setRestitutionVelocity(0.0);
+        fixture.setFilter(ROBOT);
         setMass(MassType.NORMAL);
         // fiddled with damping until it seemed "right"
         setAngularDamping(5);
