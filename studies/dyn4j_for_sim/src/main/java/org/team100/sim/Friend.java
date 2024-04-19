@@ -1,5 +1,6 @@
 package org.team100.sim;
 
+import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
@@ -30,6 +31,7 @@ public class Friend extends RobotBody {
     @Override
     public void act() {
         Vector2 position = getWorldCenter();
+        Vector2 velocity = getLinearVelocity();
         switch (m_goal) {
             case PICK:
                 Vector2 toPick = position.to(kSource);
@@ -56,14 +58,44 @@ public class Friend extends RobotBody {
         // look for nearby notes, brute force
         for (Body100 body : m_world.getBodies()) {
             if (body instanceof Note) {
-                double distance = getTransform().getTranslation().distance(
-                        body.getTransform().getTranslation());
+                double distance = position.distance(body.getWorldCenter());
                 if (distance > 0.3)
                     continue;
-                System.out.printf("%s %5.3f\n",
-                        body.getClass().getSimpleName(), distance);
+                // System.out.printf("%s %5.3f\n",
+                // body.getClass().getSimpleName(), distance);
                 // TODO: pick up?
             }
         }
+
+        // look for objects in the way
+        for (Body100 body : m_world.getBodies()) {
+            if (body == this)
+                continue;
+            Vector2 targetPosition = body.getWorldCenter();
+            double distance = position.distance(targetPosition);
+            if (distance > 2) // ignore far-away obstacles
+                continue;
+            if (body instanceof RobotBody || body instanceof Obstacle) {
+                Vector2 steer = Geometry.steerToAvoid(
+                        position, velocity, targetPosition, 0.5);
+                if (steer.getMagnitude() < 1e-3)
+                    continue;
+                // try very hard
+                Vector2 force = steer.product(5000);
+                System.out.printf("position %s velocity %s target %s force %s\n",
+                        position, velocity, targetPosition, force);
+                applyForce(force);
+            }
+        }
+
+        // avoid the edges of the field
+        if (position.x < 1)
+            applyForce(new Force(100, 0));
+        if (position.x > 15)
+            applyForce(new Force(-100, 0));
+        if (position.y < 1)
+            applyForce(new Force(0, 100));
+        if (position.y > 7)
+            applyForce(new Force(0, -100));
     }
 }
