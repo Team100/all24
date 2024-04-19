@@ -3,11 +3,9 @@ package org.team100.lib.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.config.Camera;
-import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.PoseEstimationHelper;
 
 import edu.wpi.first.math.geometry.Pose2d;

@@ -152,7 +152,7 @@ public class RobotContainer implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
-        cameraUpdater = new CameraUpdater(poseEstimator::getEstimatedPosition, m_layout);
+        cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
 
         final FeederSubsystem m_feeder = new FeederSubsystem();
 
