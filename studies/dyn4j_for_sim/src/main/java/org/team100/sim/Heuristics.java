@@ -59,14 +59,21 @@ public class Heuristics {
      * Given our current location/velocity and the location/velocity of a target,
      * return the point of closest approach.
      * 
-     * https://en.wikipedia.org/wiki/Distance_of_closest_approach
+     * This is the same as the zero-velocity version, but in the target's reference
+     * frame instead of the field frame.
      */
-    public static void closestApproach(
+    public static Vector2 closestApproach(
             Vector2 position,
             Vector2 velocity,
             Vector2 targetPosition,
             Vector2 targetVelocity) {
-
+        Vector2 targetRelativeVelocity = velocity.difference(targetVelocity);
+        Vector2 targetRelativeClosestApproach = closestApproach(
+                position,
+                targetRelativeVelocity,
+                targetPosition);
+        // TODO: this is wrong, need to know the time
+        return targetRelativeClosestApproach.add(targetVelocity);
     }
 
     private Heuristics() {

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.dyn4j.geometry.Vector2;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class HeuristicsTest {
                 position,
                 velocity,
                 targetPosition);
-                // target is behind, closest approach is where we are now
+        // target is behind, closest approach is where we are now
         assertEquals(0, closestApproach.x, kDelta);
         assertEquals(0, closestApproach.y, kDelta);
     }
@@ -193,5 +194,11 @@ class HeuristicsTest {
         // steer left to avoid target on the right
         assertEquals(-0.207, steer.x, kDelta);
         assertEquals(0.207, steer.y, kDelta);
+    }
+
+    @Test
+    void testMovingTarget() {
+        // TODO: finish the moving target case.
+        fail();
     }
 }
