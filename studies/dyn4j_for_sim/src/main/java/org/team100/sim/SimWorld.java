@@ -28,7 +28,7 @@ public class SimWorld {
 
         // double robotSize = 0.75;
 
-        player = new Player();
+        player = new Player(world);
         world.addBody(player);
 
         friend1 = new Friend(world);

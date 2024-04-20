@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.dyn4j.geometry.Vector2;
 import org.junit.jupiter.api.Test;
-import org.team100.sim.Geometry;
+import org.team100.sim.Heuristics;
 
-class GeometryTest {
+class HeuristicsTest {
     private static final double kDelta = 0.001;
 
     @Test
@@ -14,7 +14,7 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(0, 0);
         Vector2 targetPosition = new Vector2(1, 1);
-        Vector2 closestApproach = Geometry.closestApproach(
+        Vector2 closestApproach = Heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -27,7 +27,7 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(2, 0);
-        Vector2 closestApproach = Geometry.closestApproach(
+        Vector2 closestApproach = Heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -40,7 +40,7 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(1, 2);
-        Vector2 closestApproach = Geometry.closestApproach(
+        Vector2 closestApproach = Heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -53,11 +53,12 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(-1, 2);
-        Vector2 closestApproach = Geometry.closestApproach(
+        Vector2 closestApproach = Heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
-        assertEquals(-1, closestApproach.x, kDelta);
+                // target is behind, closest approach is where we are now
+        assertEquals(0, closestApproach.x, kDelta);
         assertEquals(0, closestApproach.y, kDelta);
     }
 
@@ -66,7 +67,7 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 1);
         Vector2 targetPosition = new Vector2(0, 2);
-        Vector2 closestApproach = Geometry.closestApproach(
+        Vector2 closestApproach = Heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -79,7 +80,7 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(2, 0);
-        Vector2 steer = Geometry.steerToAvoid(
+        Vector2 steer = Heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -94,7 +95,7 @@ class GeometryTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(0, 2);
-        Vector2 steer = Geometry.steerToAvoid(
+        Vector2 steer = Heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -105,11 +106,11 @@ class GeometryTest {
     }
 
     @Test
-    void testAvoidRight() {
+    void testAvoidRightAhead() {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
-        Vector2 targetPosition = new Vector2(0, -0.5);
-        Vector2 steer = Geometry.steerToAvoid(
+        Vector2 targetPosition = new Vector2(1, -0.5);
+        Vector2 steer = Heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -120,11 +121,71 @@ class GeometryTest {
     }
 
     @Test
+    void testAvoidRightAheadMotionless() {
+        Vector2 position = new Vector2(0, 0);
+        Vector2 velocity = new Vector2(0, 0);
+        Vector2 targetPosition = new Vector2(1, -0.5);
+        Vector2 steer = Heuristics.steerToAvoid(
+                position,
+                velocity,
+                targetPosition,
+                1);
+        // steer left to avoid target on the right
+        assertEquals(0, steer.x, kDelta);
+        assertEquals(0, steer.y, kDelta);
+    }
+
+    @Test
+    void testAvoidRightAbeamMotionless() {
+        Vector2 position = new Vector2(0, 0);
+        Vector2 velocity = new Vector2(0, 0);
+        Vector2 targetPosition = new Vector2(0, -0.5);
+        Vector2 steer = Heuristics.steerToAvoid(
+                position,
+                velocity,
+                targetPosition,
+                1);
+        // move directly away
+        assertEquals(0, steer.x, kDelta);
+        assertEquals(0.5, steer.y, kDelta);
+    }
+
+    @Test
+    void testAvoidRightAbeam() {
+        Vector2 position = new Vector2(0, 0);
+        Vector2 velocity = new Vector2(1, 0);
+        Vector2 targetPosition = new Vector2(0, -0.5);
+        Vector2 steer = Heuristics.steerToAvoid(
+                position,
+                velocity,
+                targetPosition,
+                1);
+        // move directly away
+        assertEquals(0, steer.x, kDelta);
+        assertEquals(0.5, steer.y, kDelta);
+    }
+
+    @Test
+    void testAvoidRightBehind() {
+        Vector2 position = new Vector2(0, 0);
+        Vector2 velocity = new Vector2(1, 0);
+        Vector2 targetPosition = new Vector2(-1, -0.5);
+        Vector2 steer = Heuristics.steerToAvoid(
+                position,
+                velocity,
+                targetPosition,
+                1);
+        // we've passed it, no steering
+        assertEquals(0, steer.x, kDelta);
+        assertEquals(0, steer.y, kDelta);
+    }
+
+    @Test
     void testAvoidDiagonal() {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 1);
         Vector2 targetPosition = new Vector2(1, 0);
-        Vector2 steer = Geometry.steerToAvoid(
+        Vector2 steer = Heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,

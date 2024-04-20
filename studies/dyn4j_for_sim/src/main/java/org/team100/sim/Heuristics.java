@@ -2,8 +2,7 @@ package org.team100.sim;
 
 import org.dyn4j.geometry.Vector2;
 
-
-public class Geometry {
+public class Heuristics {
 
     /** Return a force vector. */
     public static Vector2 steerToAvoid(
@@ -27,6 +26,12 @@ public class Geometry {
      * Given our current location/velocity and a fixed target, return the point of
      * closest approach.
      * 
+     * If our velocity is zero, then the closest approach is our current position,
+     * since it never changes.
+     * 
+     * If the target is behind us, then the closest approach is our current
+     * position.
+     * 
      * https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#
      * Vector_formulation
      */
@@ -41,7 +46,12 @@ public class Geometry {
 
         Vector2 n = velocity.getNormalized();
         Vector2 targetRelative = targetPosition.difference(position);
-        Vector2 projection = n.product(targetRelative.dot(n));
+        double magnitude = targetRelative.dot(n);
+        if (magnitude < 0) {
+            // target is behind us
+            return position;
+        }
+        Vector2 projection = n.product(magnitude);
         return position.sum(projection);
     }
 
@@ -59,4 +69,7 @@ public class Geometry {
 
     }
 
+    private Heuristics() {
+        //
+    }
 }

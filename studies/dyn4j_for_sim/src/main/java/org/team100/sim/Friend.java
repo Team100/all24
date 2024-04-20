@@ -1,6 +1,5 @@
 package org.team100.sim;
 
-import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
@@ -8,6 +7,8 @@ import org.dyn4j.world.World;
  * Foes try to pick from the source and score in the amp corner.
  * 
  * TODO: add two kinds of scoring
+ * TODO: coordinate "lanes" among alliance-mates
+ * TODO: spin away if close to an opponent
  */
 public class Friend extends RobotBody {
     private static final int kForce = 200;
@@ -19,11 +20,10 @@ public class Friend extends RobotBody {
         PICK, SCORE
     }
 
-    private final World<Body100> m_world;
     private Goal m_goal;
 
     public Friend(World<Body100> world) {
-        m_world = world;
+        super(world);
         // initial goal
         m_goal = Goal.PICK;
     }
@@ -31,7 +31,6 @@ public class Friend extends RobotBody {
     @Override
     public void act() {
         Vector2 position = getWorldCenter();
-        Vector2 velocity = getLinearVelocity();
         switch (m_goal) {
             case PICK:
                 Vector2 toPick = position.to(kSource);
@@ -67,35 +66,9 @@ public class Friend extends RobotBody {
             }
         }
 
-        // look for objects in the way
-        for (Body100 body : m_world.getBodies()) {
-            if (body == this)
-                continue;
-            Vector2 targetPosition = body.getWorldCenter();
-            double distance = position.distance(targetPosition);
-            if (distance > 2) // ignore far-away obstacles
-                continue;
-            if (body instanceof RobotBody || body instanceof Obstacle) {
-                Vector2 steer = Geometry.steerToAvoid(
-                        position, velocity, targetPosition, 0.5);
-                if (steer.getMagnitude() < 1e-3)
-                    continue;
-                // try very hard
-                Vector2 force = steer.product(5000);
-                System.out.printf("position %s velocity %s target %s force %s\n",
-                        position, velocity, targetPosition, force);
-                applyForce(force);
-            }
-        }
+        avoidObstacles();
+        avoidRobots();
+        avoidEdges();
 
-        // avoid the edges of the field
-        if (position.x < 1)
-            applyForce(new Force(100, 0));
-        if (position.x > 15)
-            applyForce(new Force(-100, 0));
-        if (position.y < 1)
-            applyForce(new Force(0, 100));
-        if (position.y > 7)
-            applyForce(new Force(0, -100));
     }
 }
