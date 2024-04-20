@@ -10,6 +10,9 @@ import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+/**
+ * In this world, the player and friends are blue, the foes are red.
+ */
 public class SimWorld {
     private static final String kField = "field";
     private static final Telemetry t = Telemetry.get();
@@ -31,19 +34,19 @@ public class SimWorld {
         player = new Player(world);
         world.addBody(player);
 
-        friend1 = new Friend(world);
+        friend1 = new Friend("blue 1", world);
         world.addBody(friend1);
 
-        friend2 = new Friend(world);
+        friend2 = new Friend("blue 2", world);
         world.addBody(friend2);
 
-        foe1 = new Foe(world);
+        foe1 = new Foe("red 1", world);
         world.addBody(foe1);
 
-        foe2 = new Foe(world);
+        foe2 = new Foe("red 2", world);
         world.addBody(foe2);
 
-        foe3 = new Foe(world);
+        foe3 = new Foe("red 3", world);
         world.addBody(foe3);
 
         setUpWalls();
@@ -113,55 +116,47 @@ public class SimWorld {
         final double boundaryThickness = 1;
         final double fieldX = 16.541;
         final double fieldY = 8.211;
-        // blue source
-        world.addBody(new Wall(
+        world.addBody(new Wall("blue source",
                 Geometry.createTriangle(
                         new Vector2(0, 0),
                         new Vector2(1.84, 0),
                         new Vector2(0, 1.1))));
-        // red source
-        world.addBody(new Wall(
+        world.addBody(new Wall("red source",
                 Geometry.createTriangle(
                         new Vector2(16.541, 0),
                         new Vector2(16.541, 1.1),
                         new Vector2(14.7, 0))));
-        // blue subwoofer
-        world.addBody(new Wall(
+        world.addBody(new Wall("blue subwoofer",
                 Geometry.createPolygon(
                         new Vector2(0, 4.498),
                         new Vector2(0.914, 5.019),
                         new Vector2(0.914, 6.062),
                         new Vector2(0, 6.597))));
-        // red subwoofer
-        world.addBody(new Wall(
+        world.addBody(new Wall("red subwoofer",
                 Geometry.createPolygon(
                         new Vector2(16.541, 4.498),
                         new Vector2(16.541, 6.597),
                         new Vector2(15.6, 6.062),
                         new Vector2(15.6, 5.019))));
-        // blue wall
-        world.addBody(new Wall(
+        world.addBody(new Wall("blue wall",
                 Geometry.createPolygon(
                         new Vector2(0, 0),
                         new Vector2(0, fieldY),
                         new Vector2(-boundaryThickness, fieldY),
                         new Vector2(-boundaryThickness, 0))));
-        // red wall
-        world.addBody(new Wall(
+        world.addBody(new Wall("red wall",
                 Geometry.createPolygon(
                         new Vector2(fieldX, fieldY),
                         new Vector2(fieldX, 0),
                         new Vector2(fieldX + boundaryThickness, 0),
                         new Vector2(fieldX + boundaryThickness, fieldY))));
-        // top wall
-        world.addBody(new Wall(
+        world.addBody(new Wall("top wall",
                 Geometry.createPolygon(
                         new Vector2(0, fieldY),
                         new Vector2(fieldX, fieldY),
                         new Vector2(fieldX, fieldY + boundaryThickness),
                         new Vector2(0, fieldY + boundaryThickness))));
-        // bottom wall
-        world.addBody(new Wall(
+        world.addBody(new Wall("bottom wall",
                 Geometry.createPolygon(
                         new Vector2(fieldX, 0),
                         new Vector2(0, 0),
@@ -172,16 +167,16 @@ public class SimWorld {
     private void setUpStages() {
         // these are from the onshape cad,
         // adjusted a tiny bit to line up with the background image.
-        addPost(3.38, 4.10, 0);
-        addPost(5.60, 2.80, -1);
-        addPost(5.60, 5.38, 1);
-        addPost(10.95, 2.80, 1);
-        addPost(10.95, 5.38, -1);
-        addPost(13.16, 4.10, 0);
+        addPost("east post", 3.38, 4.10, 0);
+        addPost("southeast post", 5.60, 2.80, -1);
+        addPost("northeast post", 5.60, 5.38, 1);
+        addPost("southwest post", 10.95, 2.80, 1);
+        addPost("northwest post", 10.95, 5.38, -1);
+        addPost("west post", 13.16, 4.10, 0);
     }
 
-    private void addPost(double x, double y, double rad) {
-        Body100 post = new Obstacle(Geometry.createSquare(0.3));
+    private void addPost(String id, double x, double y, double rad) {
+        Body100 post = new Obstacle(id, Geometry.createSquare(0.3));
         post.rotate(rad);
         post.translate(x, y);
         world.addBody(post);

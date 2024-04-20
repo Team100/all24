@@ -1,6 +1,8 @@
 package org.team100.sim;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.dyn4j.collision.TypeFilter;
 import org.dyn4j.dynamics.Body;
@@ -26,5 +28,16 @@ public abstract class Body100 extends Body {
     public static final TypeFilter ROBOT = new RobotFilter();
     public static final TypeFilter NOTE = new NoteFilter();
 
+    public static Set<String> ids = new HashSet<>();
+
+    public Body100(String id) {
+        if (ids.contains(id)) throw new IllegalArgumentException("duplicate id: " + id);
+        setUserData(id);
+    }
+
     public abstract void act();
+
+    public String getId() {
+        return (String) getUserData();
+    }
 }

@@ -6,7 +6,9 @@ import org.dyn4j.world.World;
 
 import edu.wpi.first.wpilibj.XboxController;
 
-/** Controls apply force and torque. */
+/**
+ * Controls apply force and torque.
+ */
 public class Player extends RobotBody {
 
     // TODO: force/torque units?
@@ -15,7 +17,7 @@ public class Player extends RobotBody {
     private final XboxController m_control;
 
     public Player(World<Body100> world) {
-        super(world);
+        super("player", world);
         m_control = new XboxController(0);
     }
 

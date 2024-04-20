@@ -1,5 +1,8 @@
 package org.team100.sim;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Geometry;
@@ -7,11 +10,14 @@ import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public abstract class RobotBody extends Body100 {
     private static final int kSteer = 500;
     protected final World<Body100> m_world;
 
-    protected RobotBody(World<Body100> world) {
+    protected RobotBody(String id, World<Body100> world) {
+        super(id);
         m_world = world;
 
         // about 30 inches including bumpers == 24 inch frame
@@ -53,6 +59,15 @@ public abstract class RobotBody extends Body100 {
         }
     }
 
+    /** Last bearing of each Body100. */
+    private Map<String, Bearing> bearings = new HashMap<>();
+
+    private static record Bearing(double time, double bearing) {
+    }
+
+    /**
+     * Track the bearing to each robot.
+     */
     protected void avoidRobots() {
         // TODO: estimate robot velocity
         Vector2 position = getWorldCenter();
@@ -61,6 +76,16 @@ public abstract class RobotBody extends Body100 {
             if (body == this)
                 continue;
             Vector2 targetPosition = body.getWorldCenter();
+            Vector2 relativePosition = targetPosition.subtract(targetPosition);
+            double bearing = relativePosition.getDirection();
+            double time = Timer.getFPGATimestamp();
+            String id = body.getId();
+            double targetBearingOmega = 0;
+            if (bearings.containsKey(id)) {
+                Bearing previousBearing = bearings.get(id);
+                targetBearingOmega = (bearing - previousBearing.bearing)/(time - previousBearing.time);
+            }
+            bearings.put(id, new Bearing(time, bearing));
             double distance = position.distance(targetPosition);
             if (distance > 4) // ignore far-away obstacles
                 continue;

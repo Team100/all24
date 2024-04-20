@@ -4,7 +4,9 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
 /**
- * Foes try to pick from the source and score in the amp corner.
+ * Friends try to pick from the source and score in the amp corner.
+ * 
+ * Friends should have human-readable names.
  * 
  * TODO: add two kinds of scoring
  * TODO: coordinate "lanes" among alliance-mates
@@ -22,8 +24,8 @@ public class Friend extends RobotBody {
 
     private Goal m_goal;
 
-    public Friend(World<Body100> world) {
-        super(world);
+    public Friend(String id, World<Body100> world) {
+        super(id, world);
         // initial goal
         m_goal = Goal.PICK;
     }

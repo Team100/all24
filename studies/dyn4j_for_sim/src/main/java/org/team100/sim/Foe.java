@@ -6,6 +6,8 @@ import org.dyn4j.world.World;
 /**
  * Foes try to pick from the source and score in the amp corner.
  * 
+ * Foes should have human-readable names.
+ * 
  * TODO: add defensive behavior
  * TODO: add two kinds of scoring
  * TODO: coordinate "lanes" among alliance-mates
@@ -23,8 +25,8 @@ public class Foe extends RobotBody {
 
     private Goal m_goal;
 
-    public Foe(World<Body100> world) {
-        super(world);
+    public Foe(String id, World<Body100> world) {
+        super(id, world);
         // initial goal
         m_goal = Goal.PICK;
     }
