@@ -9,6 +9,7 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -77,29 +78,12 @@ public abstract class RobotBody extends Body100 {
         setLinearDamping(0.75);
     }
 
-    public void setGoal(Goal goal) {
-        m_goal = goal;
+    public SimWorld getWorld() {
+        return m_world;
     }
 
-    public void avoidObstacles() {
-        Vector2 position = getWorldCenter();
-        Vector2 velocity = getLinearVelocity();
-        for (Body100 body : m_world.getBodies()) {
-            if (body == this)
-                continue;
-            Vector2 targetPosition = body.getWorldCenter();
-            double distance = position.distance(targetPosition);
-            if (distance > 4) // ignore far-away obstacles
-                continue;
-            if (body instanceof Obstacle) {
-                Vector2 steer = Heuristics.steerToAvoid(
-                        position, velocity, targetPosition, 1);
-                if (steer.getMagnitude() < 1e-3)
-                    continue;
-                Vector2 force = steer.product(kSteer);
-                applyForce(force);
-            }
-        }
+    public void setGoal(Goal goal) {
+        m_goal = goal;
     }
 
     abstract boolean friend(RobotBody body);
@@ -172,6 +156,10 @@ public abstract class RobotBody extends Body100 {
         Vector2 translation = simTransform.getTranslation();
         double angle = simTransform.getRotationAngle();
         return new Pose2d(translation.x, translation.y, new Rotation2d(angle));
+    }
+
+    public FieldRelativeVelocity getVelocity() {
+        return new FieldRelativeVelocity(linearVelocity.x, linearVelocity.y, angularVelocity);
     }
 
     Goal m_previousScoring = Goal.NOTHING;

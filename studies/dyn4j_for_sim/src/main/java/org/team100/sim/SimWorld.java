@@ -10,6 +10,7 @@ import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * In this world, the player and friends are blue, the foes are red.
@@ -19,7 +20,8 @@ public class SimWorld {
     private static final Telemetry t = Telemetry.get();
 
     private final World<Body100> world;
-
+    // this is a copy of the obstacle translations since we use this all the time.
+    private final List<Translation2d> obstacles;
 
     public SimWorld() {
         world = new World<>();
@@ -29,10 +31,18 @@ public class SimWorld {
         setUpStages();
         setUpNotes();
 
+        // cache the obstacle locations since we use them all the time.
+        obstacles = new ArrayList<>();
+        for (Body100 body : world.getBodies()) {
+            if (body instanceof Obstacle) {
+                Vector2 translation = body.getTransform().getTranslation();
+                obstacles.add(new Translation2d(translation.x, translation.y));
+            }
+        }
+
         // need the .type for rendering the field2d in sim.
         t.log(Level.INFO, "field", ".type", "Field2d");
     }
-
 
     public void addBody(RobotBody body) {
         world.addBody(body);
@@ -46,7 +56,10 @@ public class SimWorld {
     public List<Body100> getBodies() {
         return world.getBodies();
     }
-
+    
+    public List<Translation2d> getObstacles() {
+        return obstacles;
+    }
 
     /** Show the bodies on the field2d widget */
     public void render() {

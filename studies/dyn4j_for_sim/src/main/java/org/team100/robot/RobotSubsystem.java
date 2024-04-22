@@ -3,6 +3,7 @@ package org.team100.robot;
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.Torque;
 import org.dyn4j.geometry.Vector2;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,4 +41,7 @@ public class RobotSubsystem extends SubsystemBase {
         return m_robotBody.getPose();
     }
 
+    public FieldRelativeVelocity getVelocity() {
+        return m_robotBody.getVelocity();
+    }
 }

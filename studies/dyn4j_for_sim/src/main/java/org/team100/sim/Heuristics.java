@@ -4,7 +4,10 @@ import org.dyn4j.geometry.Vector2;
 
 public class Heuristics {
 
-    /** Return a force vector. */
+    /**
+     * Return a force vector.
+     * TODO: use wpilib types
+     */
     public static Vector2 steerToAvoid(
             Vector2 position,
             Vector2 velocity,
