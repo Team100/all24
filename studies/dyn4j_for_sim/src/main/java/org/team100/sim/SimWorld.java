@@ -2,6 +2,7 @@ package org.team100.sim;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
@@ -9,7 +10,9 @@ import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.robot.FieldMap;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /**
@@ -148,12 +151,11 @@ public class SimWorld {
     private void setUpStages() {
         // these are from the onshape cad,
         // adjusted a tiny bit to line up with the background image.
-        addPost("east post", 3.38, 4.10, 0);
-        addPost("southeast post", 5.60, 2.80, -1);
-        addPost("northeast post", 5.60, 5.38, 1);
-        addPost("southwest post", 10.95, 2.80, 1);
-        addPost("northwest post", 10.95, 5.38, -1);
-        addPost("west post", 13.16, 4.10, 0);
+        for (Map.Entry<String, Pose2d> post : FieldMap.stagePosts.entrySet()) {
+            String name = post.getKey();
+            Pose2d pose = post.getValue();
+            addPost(name, pose.getX(), pose.getY(), pose.getRotation().getRadians());
+        }
     }
 
     private void addPost(String id, double x, double y, double rad) {

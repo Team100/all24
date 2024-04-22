@@ -1,7 +1,10 @@
 package org.team100.commands;
 
+import java.util.Map;
+
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.robot.FieldMap;
 import org.team100.robot.RobotSubsystem;
 import org.team100.sim.Heuristics;
 
@@ -21,9 +24,9 @@ public class NonplayerDefault extends Command {
 
     @Override
     public void execute() {
-        // m_robot.getRobotBody().avoidObstacles();
         avoidObstacles();
         avoidEdges();
+        avoidSubwoofers();
     }
 
     /**
@@ -42,21 +45,37 @@ public class NonplayerDefault extends Command {
     }
 
     /**
-     * Avoid fixed obstacles.
+     * Avoid the subwoofers.
+     */
+    private void avoidSubwoofers() {
+        Pose2d pose = m_robot.getPose();
+        for (Map.Entry<String, Pose2d> entry : FieldMap.subwoofers.entrySet()) {
+            Translation2d target = entry.getValue().getTranslation();
+            Translation2d robotRelativeToTarget = pose.getTranslation().minus(target);
+            double norm = robotRelativeToTarget.getNorm();
+            if (norm < 3) {
+                // force goes as 1/r.
+                Translation2d force = robotRelativeToTarget.times(500 / (norm * norm));
+                m_robot.apply(force.getX(), force.getY(), 0);
+            }
+        }
+    }
+
+    /**
+     * Avoid the stage posts.
      */
     private void avoidObstacles() {
-        Pose2d position = m_robot.getPose();
+        Pose2d myPosition = m_robot.getPose();
         FieldRelativeVelocity velocity = m_robot.getVelocity();
-        for (Translation2d body : m_robot.getRobotBody().getWorld().getObstacles()) {
-
-            double distance = position.getTranslation().getDistance(body);
+        for (Pose2d pose : FieldMap.stagePosts.values()) {
+            Translation2d obstacleLocation = pose.getTranslation();
+            double distance = myPosition.getTranslation().getDistance(obstacleLocation);
             if (distance > 4) // ignore far-away obstacles
                 continue;
-
             Vector2 steer = Heuristics.steerToAvoid(
-                    new Vector2(position.getX(), position.getY()),
+                    new Vector2(myPosition.getX(), myPosition.getY()),
                     new Vector2(velocity.x(), velocity.y()),
-                    new Vector2(body.getX(), body.getY()), 1);
+                    new Vector2(obstacleLocation.getX(), obstacleLocation.getY()), 1);
             if (steer.getMagnitude() < 1e-3)
                 continue;
             Vector2 force = steer.product(kSteer);
