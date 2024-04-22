@@ -1,7 +1,8 @@
 package org.team100.sim;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Force;
@@ -59,44 +60,76 @@ public abstract class RobotBody extends Body100 {
         }
     }
 
-    /** Last bearing of each Body100. */
-    private Map<String, Bearing> bearings = new HashMap<>();
+    abstract boolean friend(RobotBody body);
 
-    private static record Bearing(double time, double bearing) {
+    /**
+     * Some recent sightings from the camera system.
+     * 
+     * We can't trust that the camera knows the identity of each sighting, just the
+     * position (within some tolerance) and the time (quite precisely). We can also
+     * detect friend-or-foe since the bumper color tells us. Key is time in sec.
+     * Note: some time jitter should be used here since one camera frame may include
+     * multiple sightings.
+     */
+    private NavigableMap<Double, Sighting> sightings = new ConcurrentSkipListMap<>();
+
+    private static record Sighting(boolean friend, Vector2 position) {
     }
+
+    // how old can sightings be and still be trusted?
+    private static final double kLookbackSec = 0.1;
+    // targets appearing to move faster than this are probably false associations.
+    private static final double kMaxTargetVelocity = 4;
 
     /**
      * Track the bearing to each robot.
      */
     protected void avoidRobots() {
-        // TODO: estimate robot velocity
+        double now = Timer.getFPGATimestamp();
+        // first trim the sightings to remove stale ones
+        sightings.keySet().removeAll(sightings.headMap(now - kLookbackSec).keySet());
+
         Vector2 position = getWorldCenter();
         Vector2 velocity = getLinearVelocity();
         for (Body100 body : m_world.getBodies()) {
+
             if (body == this)
                 continue;
-            Vector2 targetPosition = body.getWorldCenter();
-            Vector2 relativePosition = targetPosition.subtract(targetPosition);
-            double bearing = relativePosition.getDirection();
-            double time = Timer.getFPGATimestamp();
-            String id = body.getId();
-            double targetBearingOmega = 0;
-            if (bearings.containsKey(id)) {
-                Bearing previousBearing = bearings.get(id);
-                targetBearingOmega = (bearing - previousBearing.bearing)/(time - previousBearing.time);
-            }
-            bearings.put(id, new Bearing(time, bearing));
-            double distance = position.distance(targetPosition);
-            if (distance > 4) // ignore far-away obstacles
+            if (!(body instanceof RobotBody))
                 continue;
-            if (body instanceof RobotBody) {
-                Vector2 steer = Heuristics.steerToAvoid(
-                        position, velocity, targetPosition, 1.25);
-                if (steer.getMagnitude() < 1e-3)
+            RobotBody robotBody = (RobotBody) body;
+
+            // assume the camera can give us the relative position of the body
+            Vector2 targetPosition = robotBody.getWorldCenter();
+            boolean friend = robotBody.friend(this);
+
+            // have we seen something nearby lately?
+            for (Entry<Double, Sighting> entry : sightings.descendingMap().entrySet()) {
+                if (entry.getValue().friend != friend)
                     continue;
-                Vector2 force = steer.product(kSteer);
-                applyForce(force);
+                // same type, so maybe the same robot?
+                Vector2 targetVelocity = targetPosition.difference(
+                        entry.getValue().position).quotient(now - entry.getKey());
+                if (targetVelocity.getMagnitude() > kMaxTargetVelocity)
+                    continue;
+                // reasonable velocity
+                // TODO: do something with the target velocity.
             }
+
+            Sighting sighting = new Sighting(friend, targetPosition);
+            sightings.put(now, sighting);
+
+            double distance = position.distance(targetPosition);
+            if (distance > 4) // don't react to far-away obstacles
+                continue;
+
+            // treat the target as a fixed obstacle.
+            Vector2 steer = Heuristics.steerToAvoid(
+                    position, velocity, targetPosition, 1.25);
+            if (steer.getMagnitude() < 1e-3)
+                continue;
+            Vector2 force = steer.product(kSteer);
+            applyForce(force);
         }
     }
 

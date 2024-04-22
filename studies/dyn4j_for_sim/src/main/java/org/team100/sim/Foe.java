@@ -32,6 +32,12 @@ public class Foe extends RobotBody {
     }
 
     @Override
+    public boolean friend(RobotBody other) {
+        // only foes are friends
+        return other instanceof Foe;
+    }
+
+    @Override
     public void act() {
         Vector2 position = getWorldCenter();
         switch (m_goal) {

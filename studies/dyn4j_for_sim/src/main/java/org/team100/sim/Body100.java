@@ -28,16 +28,12 @@ public abstract class Body100 extends Body {
     public static final TypeFilter ROBOT = new RobotFilter();
     public static final TypeFilter NOTE = new NoteFilter();
 
-    public static Set<String> ids = new HashSet<>();
+    private static final Set<String> ids = new HashSet<>();
 
-    public Body100(String id) {
+    protected Body100(String id) {
         if (ids.contains(id)) throw new IllegalArgumentException("duplicate id: " + id);
         setUserData(id);
     }
 
     public abstract void act();
-
-    public String getId() {
-        return (String) getUserData();
-    }
 }

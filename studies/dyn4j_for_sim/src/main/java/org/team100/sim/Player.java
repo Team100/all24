@@ -29,4 +29,12 @@ public class Player extends RobotBody {
         applyForce(new Vector2(driveX * kForce, driveY * kForce));
         applyTorque(new Torque(steer * kTorque));
     }
+
+    @Override
+    public boolean friend(RobotBody other) {
+        // only one player so only friends are friends
+        return other instanceof Friend;
+    }
+
+
 }

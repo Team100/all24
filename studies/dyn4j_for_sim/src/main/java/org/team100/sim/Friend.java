@@ -31,6 +31,13 @@ public class Friend extends RobotBody {
     }
 
     @Override
+    public boolean friend(RobotBody other) {
+        // either friends or player
+        return other instanceof Friend
+                || other instanceof Player;
+    }
+
+    @Override
     public void act() {
         Vector2 position = getWorldCenter();
         switch (m_goal) {
