@@ -1,4 +1,11 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -8,15 +15,13 @@
     "windows": {
       "/field": {
         "Foe": {
-          "arrowSize": 29,
-          "arrows": false,
+          "arrowSize": 21,
           "length": 0.75,
           "weight": 8.0,
           "width": 0.75
         },
         "Friend": {
-          "arrowSize": 33,
-          "arrows": false,
+          "arrowSize": 21,
           "color": [
             0.0,
             0.0,
@@ -26,6 +31,18 @@
           "length": 0.75,
           "weight": 8.0,
           "width": 0.75
+        },
+        "Note": {
+          "arrows": false,
+          "color": [
+            0.9941520690917969,
+            0.488355427980423,
+            0.0,
+            255.0
+          ],
+          "length": 0.30000001192092896,
+          "weight": 5.0,
+          "width": 0.30000001192092896
         },
         "Obstacle": {
           "arrows": false,
