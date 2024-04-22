@@ -54,6 +54,7 @@ public class RobotContainer {
         foe1.setState(15, 3, -4, 0);
         foe2.setState(15, 5, -4, -4);
         foe3.setState(13, 7, -4, 4);
+        world.render();
     }
 
     public void periodic() {

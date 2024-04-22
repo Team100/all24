@@ -28,7 +28,7 @@ public class Foe extends RobotBody {
     }
 
     @Override
-    boolean friend(RobotBody other) {
+    public boolean friend(RobotBody other) {
         // only foes are friends
         return other instanceof Foe;
     }
@@ -87,7 +87,7 @@ public class Foe extends RobotBody {
 
         // TODO: defense
 
-        avoidRobots();
+        // avoidRobots();
 
     }
 }
