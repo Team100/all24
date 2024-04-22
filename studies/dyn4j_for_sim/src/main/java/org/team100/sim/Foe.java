@@ -17,24 +17,36 @@ public class Foe extends RobotBody {
     private static final int kForce = 200;
     private static final int kTolerance = 2;
     private static final Vector2 kSource = new Vector2(0, 0);
-    private static final Vector2 kAmpCorner = new Vector2(16, 8);
+    /** This is the robot center when facing the amp */
+    private static final Vector2 kAmpSpot = new Vector2(14.698, 8.204)
+            .sum(0, -kRobotSize / 2);
+    /** Shoot from about 3 meters away */
+    private static final Vector2 kShootingSpot = new Vector2(13.5, 5.5);
+    private static final double kShootingAngle = 0;
 
-    private enum Goal {
-        PICK, SCORE
-    }
-
-    private Goal m_goal;
-
-    public Foe(String id, World<Body100> world) {
-        super(id, world);
-        // initial goal
-        m_goal = Goal.PICK;
+    public Foe(String id, World<Body100> world, Goal initialGoal) {
+        super(id, world, initialGoal);
     }
 
     @Override
-    public boolean friend(RobotBody other) {
+    boolean friend(RobotBody other) {
         // only foes are friends
         return other instanceof Foe;
+    }
+
+    @Override
+    Vector2 ampPosition() {
+        return kAmpSpot;
+    }
+
+    @Override
+    Vector2 shootingPosition() {
+        return kShootingSpot;
+    }
+
+    @Override
+    double shootingAngle() {
+        return kShootingAngle;
     }
 
     @Override
@@ -45,21 +57,20 @@ public class Foe extends RobotBody {
                 Vector2 toPick = position.to(kSource);
                 if (toPick.getMagnitude() < kTolerance) {
                     // successful pick, now go score
-                    m_goal = Goal.SCORE;
+                    nextGoal();
                 } else {
                     // keep trying
                     applyForce(toPick.setMagnitude(kForce));
                 }
                 break;
-            case SCORE:
-                Vector2 toScore = position.to(kAmpCorner);
-                if (toScore.getMagnitude() < kTolerance) {
-                    // successful score, now go pick
-                    m_goal = Goal.PICK;
-                } else {
-                    // keep trying
-                    applyForce(toScore.setMagnitude(kForce));
-                }
+            case SCORE_AMP:
+                driveToAmp();
+                break;
+            case SCORE_SPEAKER:
+                driveToSpeaker();
+                break;
+            default:
+                // do nothing
                 break;
         }
 

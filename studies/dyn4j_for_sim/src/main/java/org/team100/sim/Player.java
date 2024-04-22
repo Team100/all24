@@ -16,8 +16,8 @@ public class Player extends RobotBody {
     private static final double kTorque = 100;
     private final XboxController m_control;
 
-    public Player(World<Body100> world) {
-        super("player", world);
+    public Player(World<Body100> world, Goal initialGoal) {
+        super("player", world, initialGoal);
         m_control = new XboxController(0);
     }
 
@@ -36,5 +36,17 @@ public class Player extends RobotBody {
         return other instanceof Friend;
     }
 
+    @Override
+    Vector2 ampPosition() {
+        return Friend.kAmpSpot;
+    }
 
+    @Override
+    Vector2 shootingPosition() {
+        return Friend.kShootingSpot;
+    }
+
+    double shootingAngle() {
+        return Friend.kShootingAngle;
+    }
 }

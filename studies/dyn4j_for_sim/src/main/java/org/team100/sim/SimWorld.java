@@ -9,6 +9,7 @@ import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.sim.RobotBody.Goal;
 
 /**
  * In this world, the player and friends are blue, the foes are red.
@@ -29,24 +30,22 @@ public class SimWorld {
         world = new World<>();
         world.setGravity(PhysicsWorld.ZERO_GRAVITY);
 
-        // double robotSize = 0.75;
-
-        player = new Player(world);
+        player = new Player(world, Goal.NOTHING);
         world.addBody(player);
 
-        friend1 = new Friend("blue 1", world);
+        friend1 = new Friend("blue 1", world, Goal.SCORE_SPEAKER);
         world.addBody(friend1);
 
-        friend2 = new Friend("blue 2", world);
+        friend2 = new Friend("blue 2", world, Goal.PICK);
         world.addBody(friend2);
 
-        foe1 = new Foe("red 1", world);
+        foe1 = new Foe("red 1", world, Goal.SCORE_SPEAKER);
         world.addBody(foe1);
 
-        foe2 = new Foe("red 2", world);
+        foe2 = new Foe("red 2", world, Goal.PICK);
         world.addBody(foe2);
 
-        foe3 = new Foe("red 3", world);
+        foe3 = new Foe("red 3", world, Goal.PICK);
         world.addBody(foe3);
 
         setUpWalls();
