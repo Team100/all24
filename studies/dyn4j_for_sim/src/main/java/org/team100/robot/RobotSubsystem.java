@@ -110,4 +110,9 @@ public class RobotSubsystem extends SubsystemBase {
         sightings.keySet().removeAll(sightings.headMap(now - kLookbackSec).keySet());
         return sightings.descendingMap();
     }
+
+    public Vector2 shootingPosition() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'shootingPosition'");
+    }
 }

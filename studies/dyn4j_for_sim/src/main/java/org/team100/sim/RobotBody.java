@@ -72,7 +72,7 @@ public abstract class RobotBody extends Body100 {
 
     abstract Vector2 shootingPosition();
 
-    abstract double shootingAngle();
+    public abstract double shootingAngle();
 
     public Pose2d getPose() {
         Transform simTransform = transform;

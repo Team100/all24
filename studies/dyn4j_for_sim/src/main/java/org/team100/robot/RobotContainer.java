@@ -6,6 +6,10 @@ import org.team100.sim.Foe;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
 import org.team100.sim.RobotBody.Goal;
+
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+
 import org.team100.sim.SimWorld;
 
 public class RobotContainer {
@@ -55,6 +59,7 @@ public class RobotContainer {
         foe2.setState(15, 5, -4, -4);
         foe3.setState(13, 7, -4, 4);
         world.render();
+        CommandScheduler.getInstance().schedule(new PrintCommand("foo"));
     }
 
     public void periodic() {
