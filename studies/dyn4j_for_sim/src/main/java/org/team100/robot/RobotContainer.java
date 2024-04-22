@@ -1,5 +1,7 @@
 package org.team100.robot;
 
+import org.team100.commands.NonplayerDefault;
+import org.team100.commands.PlayerDefault;
 import org.team100.sim.Foe;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
@@ -21,21 +23,28 @@ public class RobotContainer {
 
         player = new RobotSubsystem(new Player(world, Goal.NOTHING));
         world.addBody(player.getRobotBody());
+        player.setDefaultCommand(new PlayerDefault(player));
 
         friend1 = new RobotSubsystem(new Friend("blue 1", world, Goal.SCORE_SPEAKER));
         world.addBody(friend1.getRobotBody());
+        friend1.setDefaultCommand(new NonplayerDefault(friend1));
 
         friend2 = new RobotSubsystem(new Friend("blue 2", world, Goal.PICK));
         world.addBody(friend2.getRobotBody());
+        friend2.setDefaultCommand(new NonplayerDefault(friend2));
 
         foe1 = new RobotSubsystem(new Foe("red 1", world, Goal.SCORE_SPEAKER));
         world.addBody(foe1.getRobotBody());
+        foe1.setDefaultCommand(new NonplayerDefault(foe1));
 
         foe2 = new RobotSubsystem(new Foe("red 2", world, Goal.PICK));
         world.addBody(foe2.getRobotBody());
+        foe2.setDefaultCommand(new NonplayerDefault(foe2));
 
         foe3 = new RobotSubsystem(new Foe("red 3", world, Goal.PICK));
         world.addBody(foe3.getRobotBody());
+        foe3.setDefaultCommand(new NonplayerDefault(foe3));
+
     }
 
     public void init() {

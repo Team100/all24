@@ -5,12 +5,14 @@ import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 
 public abstract class RobotBody extends Body100 {
@@ -79,7 +81,7 @@ public abstract class RobotBody extends Body100 {
         m_goal = goal;
     }
 
-    protected void avoidObstacles() {
+    public void avoidObstacles() {
         Vector2 position = getWorldCenter();
         Vector2 velocity = getLinearVelocity();
         for (Body100 body : m_world.getBodies()) {
@@ -165,18 +167,11 @@ public abstract class RobotBody extends Body100 {
         }
     }
 
-    protected void avoidEdges() {
-        Vector2 position = getWorldCenter();
-
-        // avoid the edges of the field
-        if (position.x < 1)
-            applyForce(new Force(100, 0));
-        if (position.x > 15)
-            applyForce(new Force(-100, 0));
-        if (position.y < 1)
-            applyForce(new Force(0, 100));
-        if (position.y > 7)
-            applyForce(new Force(0, -100));
+    public Pose2d getPose() {
+        Transform simTransform = transform;
+        Vector2 translation = simTransform.getTranslation();
+        double angle = simTransform.getRotationAngle();
+        return new Pose2d(translation.x, translation.y, new Rotation2d(angle));
     }
 
     Goal m_previousScoring = Goal.NOTHING;

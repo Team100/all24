@@ -15,18 +15,12 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void robotInit() {
-        // simWorld.render();
-    }
-
-    @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
     }
 
     @Override
     public void teleopInit() {
-        // reset position
         m_robotContainer.init();
     }
 

@@ -87,9 +87,7 @@ public class Foe extends RobotBody {
 
         // TODO: defense
 
-        avoidObstacles();
         avoidRobots();
-        avoidEdges();
 
     }
 }

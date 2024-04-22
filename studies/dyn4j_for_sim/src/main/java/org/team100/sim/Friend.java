@@ -86,9 +86,7 @@ public class Friend extends RobotBody {
             }
         }
 
-        avoidObstacles();
         avoidRobots();
-        avoidEdges();
 
     }
 }
