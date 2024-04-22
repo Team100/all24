@@ -1,7 +1,6 @@
 package org.team100.sim;
 
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.World;
 
 /**
  * Foes try to pick from the source and score in the amp corner.
@@ -24,7 +23,7 @@ public class Foe extends RobotBody {
     private static final Vector2 kShootingSpot = new Vector2(13.5, 5.5);
     private static final double kShootingAngle = 0;
 
-    public Foe(String id, World<Body100> world, Goal initialGoal) {
+    public Foe(String id, SimWorld world, Goal initialGoal) {
         super(id, world, initialGoal);
     }
 

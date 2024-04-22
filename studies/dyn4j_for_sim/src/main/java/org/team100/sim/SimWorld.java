@@ -9,7 +9,7 @@ import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.sim.RobotBody.Goal;
+
 
 /**
  * In this world, the player and friends are blue, the foes are red.
@@ -19,34 +19,11 @@ public class SimWorld {
     private static final Telemetry t = Telemetry.get();
 
     private final World<Body100> world;
-    private final Body100 player;
-    private final Body100 friend1;
-    private final Body100 friend2;
-    private final Body100 foe1;
-    private final Body100 foe2;
-    private final Body100 foe3;
+
 
     public SimWorld() {
         world = new World<>();
         world.setGravity(PhysicsWorld.ZERO_GRAVITY);
-
-        player = new Player(world, Goal.NOTHING);
-        world.addBody(player);
-
-        friend1 = new Friend("blue 1", world, Goal.SCORE_SPEAKER);
-        world.addBody(friend1);
-
-        friend2 = new Friend("blue 2", world, Goal.PICK);
-        world.addBody(friend2);
-
-        foe1 = new Foe("red 1", world, Goal.SCORE_SPEAKER);
-        world.addBody(foe1);
-
-        foe2 = new Foe("red 2", world, Goal.PICK);
-        world.addBody(foe2);
-
-        foe3 = new Foe("red 3", world, Goal.PICK);
-        world.addBody(foe3);
 
         setUpWalls();
         setUpStages();
@@ -56,28 +33,20 @@ public class SimWorld {
         t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
-    public void init() {
-        // reset position
-        // TODO: velocity units?
-        setState(player, 2, 4, 0, 0);
-        setState(friend1, 1, 1, 4, 4);
-        setState(friend2, 1, 4, 4, 0);
-        setState(foe1, 15, 3, -4, 0);
-        setState(foe2, 15, 5, -4, -4);
-        setState(foe3, 13, 7, -4, 4);
-    }
 
-    private void setState(Body100 b, double x, double y, double vx, double vy) {
-        b.getTransform().identity();
-        b.getTransform().translate(x, y);
-        b.setAtRest(false);
-        b.setLinearVelocity(new Vector2(vx, vy));
+    public void addBody(RobotBody body) {
+        world.addBody(body);
     }
 
     public void update() {
         // update the dyn4j sim
         world.update(0.02);
     }
+
+    public List<Body100> getBodies() {
+        return world.getBodies();
+    }
+
 
     /** Show the bodies on the field2d widget */
     public void render() {

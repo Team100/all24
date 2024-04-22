@@ -2,7 +2,6 @@ package org.team100.sim;
 
 import org.dyn4j.dynamics.Torque;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.World;
 
 import edu.wpi.first.wpilibj.XboxController;
 
@@ -16,7 +15,7 @@ public class Player extends RobotBody {
     private static final double kTorque = 100;
     private final XboxController m_control;
 
-    public Player(World<Body100> world, Goal initialGoal) {
+    public Player(SimWorld world, Goal initialGoal) {
         super("player", world, initialGoal);
         m_control = new XboxController(0);
     }

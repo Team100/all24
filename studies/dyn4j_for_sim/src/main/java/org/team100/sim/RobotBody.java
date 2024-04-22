@@ -9,7 +9,6 @@ import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.World;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
@@ -39,7 +38,7 @@ public abstract class RobotBody extends Body100 {
 
     private static final int kSteer = 500;
     protected static final double kRobotSize = 0.75;
-    protected final World<Body100> m_world;
+    protected final SimWorld m_world;
     protected Goal m_goal;
 
     /**
@@ -53,7 +52,7 @@ public abstract class RobotBody extends Body100 {
      */
     private NavigableMap<Double, Sighting> sightings = new ConcurrentSkipListMap<>();
 
-    protected RobotBody(String id, World<Body100> world, Goal initialGoal) {
+    protected RobotBody(String id, SimWorld world, Goal initialGoal) {
         super(id);
         m_world = world;
         m_goal = initialGoal;

@@ -1,7 +1,6 @@
 package org.team100.sim;
 
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.World;
 
 /**
  * Friends try to pick from the source and score in the amp corner.
@@ -24,7 +23,7 @@ public class Friend extends RobotBody {
 
     static final double kShootingAngle = Math.PI;
 
-    public Friend(String id, World<Body100> world, Goal initialGoal) {
+    public Friend(String id, SimWorld world, Goal initialGoal) {
         super(id, world, initialGoal);
     }
 
