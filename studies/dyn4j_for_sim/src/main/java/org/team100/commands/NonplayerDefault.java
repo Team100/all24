@@ -21,6 +21,5 @@ public class NonplayerDefault extends Command {
         m_tactics.avoidSubwoofers();
         m_tactics.steerAroundRobots();
         m_tactics.robotRepulsion();
-        m_robot.getRobotBody().act();
     }
 }

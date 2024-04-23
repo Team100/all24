@@ -9,10 +9,16 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Scheduler": "Scheduler",
       "/SmartDashboard/Telemetry Level": "String Chooser",
       "/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Scheduler": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "Foe": {
           "arrowSize": 21,
@@ -94,6 +100,17 @@
     "retained": {
       "field": {
         "double[]##v_/field/ball": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "Scheduler": {
           "open": true
         },
         "open": true

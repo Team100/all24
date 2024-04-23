@@ -49,6 +49,11 @@ public class Foe extends RobotBody {
     }
 
     @Override
+    public Vector2 sourcePosition() {
+        return kSource;
+    }
+
+    @Override
     public void act() {
         Vector2 position = getWorldCenter();
         switch (m_goal) {
@@ -63,10 +68,10 @@ public class Foe extends RobotBody {
                 }
                 break;
             case SCORE_AMP:
-                driveToAmp();
+                // driveToAmp();
                 break;
             case SCORE_SPEAKER:
-                driveToSpeaker();
+                // driveToSpeaker();
                 break;
             default:
                 // do nothing

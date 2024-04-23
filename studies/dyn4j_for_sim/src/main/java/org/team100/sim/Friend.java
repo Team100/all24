@@ -14,7 +14,7 @@ import org.dyn4j.geometry.Vector2;
 public class Friend extends RobotBody {
     private static final int kForce = 200;
     private static final int kTolerance = 2;
-    private static final Vector2 kSource = new Vector2(16, 0);
+    static final Vector2 kSource = new Vector2(16, 0);
     /** This is the robot center when facing the amp */
     static final Vector2 kAmpSpot = new Vector2(1.840, 8.204)
             .sum(0, -kRobotSize / 2);
@@ -50,6 +50,11 @@ public class Friend extends RobotBody {
     }
 
     @Override
+    public Vector2 sourcePosition() {
+        return kSource;
+    }
+
+    @Override
     public void act() {
         Vector2 position = getWorldCenter();
         switch (m_goal) {
@@ -64,10 +69,10 @@ public class Friend extends RobotBody {
                 }
                 break;
             case SCORE_AMP:
-                driveToAmp();
+                // driveToAmp();
                 break;
             case SCORE_SPEAKER:
-                driveToSpeaker();
+                // driveToSpeaker();
                 break;
             default:
                 // do nothing

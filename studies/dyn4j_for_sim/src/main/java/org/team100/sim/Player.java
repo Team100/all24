@@ -32,7 +32,13 @@ public class Player extends RobotBody {
         return Friend.kShootingSpot;
     }
 
+    @Override
     public double shootingAngle() {
         return Friend.kShootingAngle;
+    }
+
+    @Override
+    public Vector2 sourcePosition() {
+        return Friend.kSource;
     }
 }

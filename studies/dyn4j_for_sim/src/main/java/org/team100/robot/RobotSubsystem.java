@@ -114,4 +114,12 @@ public class RobotSubsystem extends SubsystemBase {
     public Vector2 shootingPosition() {
         return m_robotBody.shootingPosition();
     }
+
+    public Vector2 ampPosition() {
+        return m_robotBody.ampPosition();
+    }
+
+    public Vector2 sourcePosition() {
+        return m_robotBody.sourcePosition();
+    }
 }

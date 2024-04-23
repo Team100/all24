@@ -2,13 +2,16 @@ package org.team100.robot;
 
 import org.team100.commands.Alliance;
 import org.team100.commands.NonplayerDefault;
+import org.team100.commands.PickFromSource;
 import org.team100.commands.PlayerDefault;
+import org.team100.commands.ScoreAmp;
 import org.team100.commands.ScoreSpeaker;
 import org.team100.sim.Foe;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
 import org.team100.sim.RobotBody.Goal;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 
@@ -34,26 +37,27 @@ public class RobotContainer {
         world.addBody(player.getRobotBody());
         player.setDefaultCommand(new PlayerDefault(player));
 
-        friend1 = new RobotSubsystem(new Friend("blue 1", world, Goal.SCORE_SPEAKER));
+        friend1 = new RobotSubsystem(new Friend("blue 1", world, Goal.NOTHING));
         world.addBody(friend1.getRobotBody());
         friend1.setDefaultCommand(new NonplayerDefault(friend1));
 
-        friend2 = new RobotSubsystem(new Friend("blue 2", world, Goal.PICK));
+        friend2 = new RobotSubsystem(new Friend("blue 2", world, Goal.NOTHING));
         world.addBody(friend2.getRobotBody());
         friend2.setDefaultCommand(new NonplayerDefault(friend2));
 
-        foe1 = new RobotSubsystem(new Foe("red 1", world, Goal.SCORE_SPEAKER));
+        foe1 = new RobotSubsystem(new Foe("red 1", world, Goal.NOTHING));
         world.addBody(foe1.getRobotBody());
         foe1.setDefaultCommand(new NonplayerDefault(foe1));
 
-        foe2 = new RobotSubsystem(new Foe("red 2", world, Goal.PICK));
+        foe2 = new RobotSubsystem(new Foe("red 2", world, Goal.NOTHING));
         world.addBody(foe2.getRobotBody());
         foe2.setDefaultCommand(new NonplayerDefault(foe2));
 
-        foe3 = new RobotSubsystem(new Foe("red 3", world, Goal.PICK));
+        foe3 = new RobotSubsystem(new Foe("red 3", world, Goal.NOTHING));
         world.addBody(foe3.getRobotBody());
         foe3.setDefaultCommand(new NonplayerDefault(foe3));
 
+        SmartDashboard.putData(CommandScheduler.getInstance());
     }
 
     public void init() {
@@ -64,8 +68,12 @@ public class RobotContainer {
         foe2.setState(15, 5, -4, -4);
         foe3.setState(13, 7, -4, 4);
         world.render();
-        CommandScheduler.getInstance().schedule(new PrintCommand("foo"));
+        // TODO: move these to Alliance.
         CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, friend1));
+        CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, friend2));
+        CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, foe1));
+        CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, foe2));
+        CommandScheduler.getInstance().schedule(new ScoreAmp(m_alliance, foe3));
     }
 
     public void periodic() {
