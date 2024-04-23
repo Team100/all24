@@ -18,9 +18,4 @@ public class Wall extends Body100 {
         fixture.setFilter(FIXED);
         setMass(MassType.INFINITE);
     }
-
-    @Override
-    public void act() {
-        // do nothing
-    }
 }

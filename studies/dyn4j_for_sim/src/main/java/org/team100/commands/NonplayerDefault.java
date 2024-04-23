@@ -5,9 +5,11 @@ import org.team100.robot.RobotSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class NonplayerDefault extends Command {
+    private final RobotSubsystem m_robot;
     private final Tactics m_tactics;
 
     public NonplayerDefault(RobotSubsystem robot) {
+        m_robot = robot;
         m_tactics = new Tactics(robot);
         addRequirements(robot);
     }
@@ -19,5 +21,6 @@ public class NonplayerDefault extends Command {
         m_tactics.avoidSubwoofers();
         m_tactics.steerAroundRobots();
         m_tactics.robotRepulsion();
+        m_robot.getRobotBody().act();
     }
 }

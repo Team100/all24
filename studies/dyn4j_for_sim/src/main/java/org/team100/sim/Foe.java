@@ -34,17 +34,17 @@ public class Foe extends RobotBody {
     }
 
     @Override
-    Vector2 ampPosition() {
+    public Vector2 ampPosition() {
         return kAmpSpot;
     }
 
     @Override
-    Vector2 shootingPosition() {
+    public Vector2 shootingPosition() {
         return kShootingSpot;
     }
 
     @Override
-    double shootingAngle() {
+    public double shootingAngle() {
         return kShootingAngle;
     }
 

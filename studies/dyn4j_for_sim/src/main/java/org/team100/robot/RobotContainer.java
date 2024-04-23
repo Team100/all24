@@ -1,7 +1,9 @@
 package org.team100.robot;
 
+import org.team100.commands.Alliance;
 import org.team100.commands.NonplayerDefault;
 import org.team100.commands.PlayerDefault;
+import org.team100.commands.ScoreSpeaker;
 import org.team100.sim.Foe;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
@@ -14,6 +16,7 @@ import org.team100.sim.SimWorld;
 
 public class RobotContainer {
     private final SimWorld world;
+    private final Alliance m_alliance;
     private final RobotSubsystem player;
     private final RobotSubsystem friend1;
     private final RobotSubsystem friend2;
@@ -24,6 +27,8 @@ public class RobotContainer {
     public RobotContainer() {
 
         world = new SimWorld();
+
+        m_alliance = new Alliance();
 
         player = new RobotSubsystem(new Player(world, Goal.NOTHING));
         world.addBody(player.getRobotBody());
@@ -60,11 +65,11 @@ public class RobotContainer {
         foe3.setState(13, 7, -4, 4);
         world.render();
         CommandScheduler.getInstance().schedule(new PrintCommand("foo"));
+        CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, friend1));
     }
 
     public void periodic() {
         world.update();
         world.render();
-        world.behavior();
     }
 }

@@ -84,17 +84,6 @@ public class SimWorld {
         }
     }
 
-    /*
-     * make the NPC's do something interesting.
-     * 
-     * what are the units here? newtons?
-     */
-    public void behavior() {
-        for (Body100 body : world.getBodies()) {
-            body.act();
-        }
-    }
-
     private void setUpWalls() {
         // this uses simgui coordinates for blue
         final double boundaryThickness = 1;

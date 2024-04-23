@@ -34,6 +34,4 @@ public abstract class Body100 extends Body {
         if (ids.contains(id)) throw new IllegalArgumentException("duplicate id: " + id);
         setUserData(id);
     }
-
-    public abstract void act();
 }

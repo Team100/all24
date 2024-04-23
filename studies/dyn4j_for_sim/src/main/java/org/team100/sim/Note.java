@@ -19,10 +19,4 @@ public class Note extends Body100 {
         fixture.setFilter(NOTE);
         setMass(MassType.NORMAL);
     }
-
-    @Override
-    public void act() {
-        // do nothing
-    }
-
 }

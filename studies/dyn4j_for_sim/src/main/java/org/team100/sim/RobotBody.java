@@ -58,6 +58,8 @@ public abstract class RobotBody extends Body100 {
         setLinearDamping(0.75);
     }
 
+    public abstract void act();
+
     public SimWorld getWorld() {
         return m_world;
     }
@@ -68,9 +70,9 @@ public abstract class RobotBody extends Body100 {
 
     public abstract boolean friend(RobotBody body);
 
-    abstract Vector2 ampPosition();
+    public abstract Vector2 ampPosition();
 
-    abstract Vector2 shootingPosition();
+    public abstract Vector2 shootingPosition();
 
     public abstract double shootingAngle();
 

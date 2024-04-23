@@ -112,7 +112,6 @@ public class RobotSubsystem extends SubsystemBase {
     }
 
     public Vector2 shootingPosition() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'shootingPosition'");
+        return m_robotBody.shootingPosition();
     }
 }

@@ -23,16 +23,16 @@ public class Player extends RobotBody {
     }
 
     @Override
-    Vector2 ampPosition() {
+    public Vector2 ampPosition() {
         return Friend.kAmpSpot;
     }
 
     @Override
-    Vector2 shootingPosition() {
+    public Vector2 shootingPosition() {
         return Friend.kShootingSpot;
     }
 
-    double shootingAngle() {
+    public double shootingAngle() {
         return Friend.kShootingAngle;
     }
 }
