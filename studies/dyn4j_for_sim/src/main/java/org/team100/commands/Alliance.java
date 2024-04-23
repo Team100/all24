@@ -8,14 +8,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /** Alliance coordinates the behavior of the member robots. */
-public class Alliance {
-
+public abstract class Alliance {
     private final Random random = new Random();
 
     /**
-     * Called by Command.end(), which says not to schedule anything. hm. why?
+     * Called by Command.end(), to signal the alliance to choose a new command.
      */
-    public void nextCommand(RobotSubsystem robot, Command command) {
+    public void onEnd(RobotSubsystem robot, Command command) {
         if (command instanceof ScoreSpeaker) {
             CommandScheduler.getInstance().schedule(new PickFromSource(this, robot));
         } else if (command instanceof ScoreAmp) {

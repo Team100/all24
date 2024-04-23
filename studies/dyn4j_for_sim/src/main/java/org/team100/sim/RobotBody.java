@@ -47,6 +47,10 @@ public abstract class RobotBody extends Body100 {
 
     public abstract Vector2 sourcePosition();
 
+    public abstract Vector2 opponentSourcePosition();
+
+    public abstract Vector2 defenderPosition();
+
     public SimWorld getWorld() {
         return m_world;
     }

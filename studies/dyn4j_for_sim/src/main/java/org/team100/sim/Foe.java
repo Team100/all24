@@ -13,7 +13,7 @@ import org.dyn4j.geometry.Vector2;
  * TODO: spin away if close to an opponent
  */
 public class Foe extends RobotBody {
-    private static final Vector2 kSource = new Vector2(0, 0);
+    static final Vector2 kSource = new Vector2(0, 0);
     /** This is the robot center when facing the amp */
     private static final Vector2 kAmpSpot = new Vector2(14.698, 8.204)
             .sum(0, -kRobotSize / 2);
@@ -50,4 +50,16 @@ public class Foe extends RobotBody {
     public Vector2 sourcePosition() {
         return kSource;
     }
+
+    @Override
+    public Vector2 opponentSourcePosition() {
+        return Friend.kSource;
+    }
+
+    @Override
+    public Vector2 defenderPosition() {
+        // guess about a good spot to wait
+        return Friend.kSource.sum(-3, 2);
+    }
+
 }

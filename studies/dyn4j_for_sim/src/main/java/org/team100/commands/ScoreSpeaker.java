@@ -46,7 +46,7 @@ public class ScoreSpeaker extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        m_alliance.nextCommand(m_robot, this);
+        m_alliance.onEnd(m_robot, this);
     }
 
     private void goToGoal() {

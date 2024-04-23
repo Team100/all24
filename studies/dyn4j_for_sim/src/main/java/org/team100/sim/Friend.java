@@ -51,4 +51,15 @@ public class Friend extends RobotBody {
     public Vector2 sourcePosition() {
         return kSource;
     }
+
+    @Override
+    public Vector2 opponentSourcePosition() {
+        return Foe.kSource;
+    }
+
+    @Override
+    public Vector2 defenderPosition() {
+        // guess about a good spot to wait
+        return Foe.kSource.sum(3, 2);
+    }
 }
