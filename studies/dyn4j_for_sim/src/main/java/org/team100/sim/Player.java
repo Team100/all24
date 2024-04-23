@@ -1,6 +1,6 @@
 package org.team100.sim;
 
-import org.dyn4j.geometry.Vector2;
+import edu.wpi.first.math.geometry.Pose2d;
 
 /**
  * Controls apply force and torque.
@@ -18,33 +18,32 @@ public class Player extends RobotBody {
     }
 
     @Override
-    public Vector2 ampPosition() {
+    public Pose2d ampPosition() {
         return Friend.kAmpSpot;
     }
 
     @Override
-    public Vector2 shootingPosition() {
+    public Pose2d shootingPosition() {
         return Friend.kShootingSpot;
     }
 
     @Override
-    public double shootingAngle() {
-        return Friend.kShootingAngle;
-    }
-
-    @Override
-    public Vector2 sourcePosition() {
+    public Pose2d sourcePosition() {
         return Friend.kSource;
     }
 
     @Override
-    public Vector2 opponentSourcePosition() {
+    public Pose2d opponentSourcePosition() {
         return Foe.kSource;
     }
 
     @Override
-    public Vector2 defenderPosition() {
-        // guess about a good spot to wait
-        return Foe.kSource.sum(3, 2);
+    public Pose2d defenderPosition() {
+        return Friend.kDefendSpot;
+    }
+
+    @Override
+    public Pose2d passingPosition() {
+        return Friend.kPassingSpot;
     }
 }

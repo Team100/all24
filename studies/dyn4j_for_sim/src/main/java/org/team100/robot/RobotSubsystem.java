@@ -146,15 +146,19 @@ public class RobotSubsystem extends SubsystemBase {
         return sightings.descendingMap();
     }
 
-    public Vector2 shootingPosition() {
+    public Pose2d shootingPosition() {
         return m_robotBody.shootingPosition();
     }
 
-    public Vector2 ampPosition() {
+    public Pose2d ampPosition() {
         return m_robotBody.ampPosition();
     }
 
-    public Vector2 sourcePosition() {
+    public Pose2d sourcePosition() {
         return m_robotBody.sourcePosition();
+    }
+
+    public Pose2d passingPosition() {
+        return m_robotBody.passingPosition();
     }
 }

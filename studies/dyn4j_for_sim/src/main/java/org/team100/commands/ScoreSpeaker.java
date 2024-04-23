@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.robot.RobotSubsystem;
 
 import edu.wpi.first.math.MathUtil;
@@ -8,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ScoreSpeaker extends Command {
+    private static final int kSpeakerAttraction = 50;
     private final Alliance m_alliance;
     private final RobotSubsystem m_robot;
     private final Tactics m_tactics;
@@ -30,18 +32,17 @@ public class ScoreSpeaker extends Command {
         goToGoal();
     }
 
+    /**
+     * speaker position tolerance is loose but angle is not
+     */
     @Override
     public boolean isFinished() {
         Pose2d pose = m_robot.getPose();
-        Vector2 position = new Vector2(pose.getX(), pose.getY());
-        Vector2 positionError = position.to(m_robot.shootingPosition());
-        double angle = pose.getRotation().getRadians();
-        // TODO: remove this magic angle
-        double angleError = MathUtil.angleModulus(m_robot.getRobotBody().shootingAngle() - angle);
-        // speaker position tolerance is loose but angle is not
-        return (Math.abs(positionError.x) < 0.5
-                && Math.abs(positionError.y) < 0.5
-                && Math.abs(angleError) < 0.05);
+        Pose2d goal = m_robot.shootingPosition();
+        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, goal);
+        double translationError = t.getTranslation().getNorm();
+        double rotationError = t.getRotation().getRadians();
+        return translationError < 0.5 && Math.abs(rotationError) < 0.05;
     }
 
     @Override
@@ -51,13 +52,15 @@ public class ScoreSpeaker extends Command {
 
     private void goToGoal() {
         Pose2d pose = m_robot.getPose();
-        Vector2 position = new Vector2(pose.getX(), pose.getY());
-        Vector2 positionError = position.to(m_robot.shootingPosition());
-        double angle = pose.getRotation().getRadians();
-        // TODO: remove this magic angle
-        double angleError = MathUtil.angleModulus(m_robot.getRobotBody().shootingAngle() - angle);
-        m_robot.getRobotBody().applyForce(positionError.setMagnitude(200));
-        m_robot.getRobotBody().applyTorque(angleError * 10);
+        Pose2d goal = m_robot.shootingPosition();
+        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, goal);
+        Vector2 positionError = new Vector2(transform.getX(), transform.getY());
+        positionError = new Vector2(
+                Math.min(1, positionError.x),
+                Math.min(1, positionError.y));
+        double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
+        m_robot.getRobotBody().applyForce(positionError.product(kSpeakerAttraction));
+        m_robot.getRobotBody().applyTorque(rotationError * 10);
     }
 
 }

@@ -18,7 +18,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 /** Low level drive motion heuristics that can be used by any command. */
 public class Tactics {
-    // how hard to try to avoid things
+    // this is 1/r
+    private static final int kRobotRepulsion = 50;
+    // steering around robots
+    private static final int kRobotSteer = 100;
+    // coefficient for 1/r
+    private static final int kSubwooferRepulsion = 100;
+    // constant within 1m
+    private static final int kWallRepulsion = 50;
+    // steering around obstacles
     private static final int kSteer = 500;
     // targets appearing to move faster than this are probably false associations.
     private static final double kMaxTargetVelocity = 4;
@@ -35,13 +43,13 @@ public class Tactics {
     public void avoidEdges() {
         Pose2d pose = m_robot.getPose();
         if (pose.getX() < 1)
-            m_robot.apply(100, 0, 0);
+            m_robot.apply(kWallRepulsion, 0, 0);
         if (pose.getX() > 15)
-            m_robot.apply(-100, 0, 0);
+            m_robot.apply(-kWallRepulsion, 0, 0);
         if (pose.getY() < 1)
-            m_robot.apply(0, 100, 0);
+            m_robot.apply(0, kWallRepulsion, 0);
         if (pose.getY() > 7)
-            m_robot.apply(0, -100, 0);
+            m_robot.apply(0, -kWallRepulsion, 0);
     }
 
     /**
@@ -55,7 +63,7 @@ public class Tactics {
             double norm = robotRelativeToTarget.getNorm();
             if (norm < 3) {
                 // force goes as 1/r.
-                Translation2d force = robotRelativeToTarget.times(500 / (norm * norm));
+                Translation2d force = robotRelativeToTarget.times(kSubwooferRepulsion / (norm * norm));
                 m_robot.apply(force.getX(), force.getY(), 0);
             }
         }
@@ -137,7 +145,7 @@ public class Tactics {
 
             if (steer.getMagnitude() < 1e-3)
                 continue;
-            Vector2 force = steer.product(250);
+            Vector2 force = steer.product(kRobotSteer);
             m_robot.apply(force.x, force.y, 0);
         }
 
@@ -172,7 +180,7 @@ public class Tactics {
             double norm = robotRelativeToTarget.getNorm();
             if (norm < 3) {
                 // force goes as 1/r.
-                Translation2d force = robotRelativeToTarget.times(250 / (norm * norm));
+                Translation2d force = robotRelativeToTarget.times(kRobotRepulsion / (norm * norm));
                 m_robot.apply(force.getX(), force.getY(), 0);
             }
 

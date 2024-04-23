@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.robot.RobotSubsystem;
 import org.team100.robot.RobotSubsystem.RobotSighting;
 
@@ -17,6 +18,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Never finishes.
  */
 public class DefendSource extends Command {
+    private static final int kDefensePushing = 50;
+    private static final int kCornerRepulsion = -10;
+    private static final int kWaitingAttraction = 1000;
     private final Alliance m_alliance;
     private final RobotSubsystem m_robot;
     private final Tactics m_tactics;
@@ -54,13 +58,22 @@ public class DefendSource extends Command {
         Vector2 position = new Vector2(pose.getX(), pose.getY());
 
         // attract to the waiting spot
-        Vector2 toWaitingSpot = position.to(m_robot.getRobotBody().defenderPosition());
-        m_robot.getRobotBody().applyForce(toWaitingSpot.setMagnitude(200));
+        FieldRelativeDelta toWaitingSpot = FieldRelativeDelta.delta(pose, m_robot.getRobotBody().defenderPosition())
+                .limit(1, 1);
+        m_robot.getRobotBody().applyForce(
+                new Vector2(toWaitingSpot.getX(), toWaitingSpot.getY()).product(kWaitingAttraction));
 
         // repel from the corner, and don't chase opponents, if too close
-        Vector2 toCorner = position.to(m_robot.getRobotBody().opponentSourcePosition());
-        if (toCorner.getMagnitude() < 2.5) {
-            m_robot.getRobotBody().applyForce(toCorner.setMagnitude(-400));
+        FieldRelativeDelta toCorner = FieldRelativeDelta.delta(pose, m_robot.getRobotBody().opponentSourcePosition());
+        if (toCorner.getTranslation().getNorm() < 2.5) {
+            m_robot.getRobotBody().applyForce(
+                    new Vector2(toCorner.getX(), toCorner.getY()).product(
+                            kCornerRepulsion
+                                    / (toCorner.getTranslation().getNorm() * toCorner.getTranslation().getNorm())));
+            return;
+        }
+        // give up if too far
+        if (toCorner.getTranslation().getNorm() > 4) {
             return;
         }
         // TODO: if there's an opponent nearby, stay between it and the corner.
@@ -77,8 +90,8 @@ public class DefendSource extends Command {
                 // don't react to far-away obstacles
                 continue;
             }
-            double fieldDistance = m_robot.getRobotBody().defenderPosition().distance(
-                    new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()));
+            double fieldDistance = m_robot.getRobotBody().defenderPosition().getTranslation()
+                    .getDistance(mostRecentPosition);
             if (fieldDistance > 3) {
                 // don't chase it too far
                 continue;
@@ -87,7 +100,7 @@ public class DefendSource extends Command {
             // TODO: figure out which side to push on
             Vector2 toOpponent = position.to(
                     new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()));
-            m_robot.getRobotBody().applyForce(toOpponent.setMagnitude(400));
+            m_robot.getRobotBody().applyForce(toOpponent.product(kDefensePushing / toOpponent.getMagnitudeSquared()));
             break;
         }
 

@@ -19,12 +19,15 @@ public abstract class Alliance {
             CommandScheduler.getInstance().schedule(new PickFromSource(this, robot));
         } else if (command instanceof ScoreAmp) {
             CommandScheduler.getInstance().schedule(new PickFromSource(this, robot));
+        } else if (command instanceof Pass) {
+            CommandScheduler.getInstance().schedule(new PickFromSource(this, robot));
         } else if (command instanceof PickFromSource) {
             // TODO: don't choose randomly, use a strategy and/or operator input
             if (random.nextBoolean()) {
                 CommandScheduler.getInstance().schedule(new ScoreSpeaker(this, robot));
             } else {
-                CommandScheduler.getInstance().schedule(new ScoreAmp(this, robot));
+                // CommandScheduler.getInstance().schedule(new ScoreAmp(this, robot));
+                CommandScheduler.getInstance().schedule(new Pass(this, robot));
             }
         }
     }

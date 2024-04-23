@@ -1,6 +1,7 @@
 package org.team100.sim;
 
-import org.dyn4j.geometry.Vector2;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * Foes try to pick from the source and score in the amp corner.
@@ -13,13 +14,14 @@ import org.dyn4j.geometry.Vector2;
  * TODO: spin away if close to an opponent
  */
 public class Foe extends RobotBody {
-    static final Vector2 kSource = new Vector2(0, 0);
+    /** Spot for source pick */
+    static final Pose2d kSource = new Pose2d(1, 2, new Rotation2d(Math.PI));
     /** This is the robot center when facing the amp */
-    private static final Vector2 kAmpSpot = new Vector2(14.698, 8.204)
-            .sum(0, -kRobotSize / 2);
+    private static final Pose2d kAmpSpot = new Pose2d(14.7, 7.5, new Rotation2d(Math.PI / 2));
     /** Shoot from about 3 meters away */
-    private static final Vector2 kShootingSpot = new Vector2(13.5, 5.5);
-    private static final double kShootingAngle = 0;
+    private static final Pose2d kShootingSpot = new Pose2d(13.5, 5.5, new Rotation2d());
+    static final Pose2d kPassingSpot = new Pose2d(6.5, 1, new Rotation2d(Math.PI / 4));
+    static final Pose2d kDefendSpot = new Pose2d(13, 2, new Rotation2d(Math.PI));
 
     public Foe(String id, SimWorld world) {
         super(id, world);
@@ -32,34 +34,33 @@ public class Foe extends RobotBody {
     }
 
     @Override
-    public Vector2 ampPosition() {
+    public Pose2d ampPosition() {
         return kAmpSpot;
     }
 
     @Override
-    public Vector2 shootingPosition() {
+    public Pose2d shootingPosition() {
         return kShootingSpot;
     }
 
     @Override
-    public double shootingAngle() {
-        return kShootingAngle;
-    }
-
-    @Override
-    public Vector2 sourcePosition() {
+    public Pose2d sourcePosition() {
         return kSource;
     }
 
     @Override
-    public Vector2 opponentSourcePosition() {
+    public Pose2d opponentSourcePosition() {
         return Friend.kSource;
     }
 
     @Override
-    public Vector2 defenderPosition() {
-        // guess about a good spot to wait
-        return Friend.kSource.sum(-3, 2);
+    public Pose2d defenderPosition() {
+        return kDefendSpot;
+    }
+
+    @Override
+    public Pose2d passingPosition() {
+        return kPassingSpot;
     }
 
 }

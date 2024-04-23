@@ -33,23 +33,23 @@ public abstract class RobotBody extends Body100 {
         fixture.setFilter(ROBOT);
         setMass(MassType.NORMAL);
         // fiddled with damping until it seemed "right"
-        setAngularDamping(5);
-        setLinearDamping(0.75);
+        setAngularDamping(10);
+        setLinearDamping(0.85);
     }
 
     public abstract boolean friend(RobotBody body);
 
-    public abstract Vector2 ampPosition();
+    public abstract Pose2d ampPosition();
 
-    public abstract Vector2 shootingPosition();
+    public abstract Pose2d shootingPosition();
 
-    public abstract double shootingAngle();
+    public abstract Pose2d sourcePosition();
 
-    public abstract Vector2 sourcePosition();
+    public abstract Pose2d opponentSourcePosition();
 
-    public abstract Vector2 opponentSourcePosition();
+    public abstract Pose2d defenderPosition();
 
-    public abstract Vector2 defenderPosition();
+    public abstract Pose2d passingPosition();
 
     public SimWorld getWorld() {
         return m_world;
