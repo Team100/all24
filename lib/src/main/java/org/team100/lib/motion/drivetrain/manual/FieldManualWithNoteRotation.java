@@ -10,6 +10,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.Constraints100;
@@ -171,7 +172,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             m_ball = currentTranslation;
             // correct for newtonian relativity
             m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
-                    .plus(state.pose().minus(m_prevPose).getTranslation());
+                    .plus(FieldRelativeDelta.delta(m_prevPose, state.pose()).getTranslation());
         }
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
