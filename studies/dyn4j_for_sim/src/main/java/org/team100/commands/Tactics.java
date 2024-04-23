@@ -10,7 +10,7 @@ import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.robot.FieldMap;
 import org.team100.robot.RobotSubsystem;
-import org.team100.robot.RobotSubsystem.Sighting;
+import org.team100.robot.RobotSubsystem.RobotSighting;
 import org.team100.sim.Heuristics;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -92,15 +92,15 @@ public class Tactics {
         Pose2d myPosition = m_robot.getPose();
         FieldRelativeVelocity myVelocity = m_robot.getVelocity();
         // sightings in reverse chrono order
-        NavigableMap<Double, Sighting> recentSightings = m_robot.recentSightings();
+        NavigableMap<Double, RobotSighting> recentSightings = m_robot.recentSightings();
         // look at entries in order of decreasing timestamp
-        for (Entry<Double, Sighting> mostRecent : recentSightings.entrySet()) {
+        for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
             double mostRecentTime = mostRecent.getKey();
-            Sighting mostRecentSighting = mostRecent.getValue();
+            RobotSighting mostRecentSighting = mostRecent.getValue();
             Translation2d mostRecentPosition = mostRecentSighting.position();
 
             // use the rest of the map to try to find the velocity of this sight
-            for (Entry<Double, Sighting> earlier : recentSightings.tailMap(mostRecentTime).entrySet()) {
+            for (Entry<Double, RobotSighting> earlier : recentSightings.tailMap(mostRecentTime).entrySet()) {
                 if (mostRecentSighting.friend() != earlier.getValue().friend()) {
                     // not same type => not the same object
                     continue;
@@ -148,10 +148,10 @@ public class Tactics {
         List<Translation2d> nearby = new ArrayList<>();
         Pose2d myPosition = m_robot.getPose();
         // sightings in reverse chrono order
-        NavigableMap<Double, Sighting> recentSightings = m_robot.recentSightings();
+        NavigableMap<Double, RobotSighting> recentSightings = m_robot.recentSightings();
         // look at entries in order of decreasing timestamp
-        for (Entry<Double, Sighting> mostRecent : recentSightings.entrySet()) {
-            Sighting mostRecentSighting = mostRecent.getValue();
+        for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
+            RobotSighting mostRecentSighting = mostRecent.getValue();
             Translation2d mostRecentPosition = mostRecentSighting.position();
             if (!nearby.isEmpty()) {
                 Translation2d nearest = mostRecentPosition.nearest(nearby);

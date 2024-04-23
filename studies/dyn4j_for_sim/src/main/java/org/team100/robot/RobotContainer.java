@@ -9,13 +9,10 @@ import org.team100.commands.ScoreSpeaker;
 import org.team100.sim.Foe;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
-import org.team100.sim.RobotBody.Goal;
+import org.team100.sim.SimWorld;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
-
-import org.team100.sim.SimWorld;
 
 public class RobotContainer {
     private final SimWorld world;
@@ -33,27 +30,27 @@ public class RobotContainer {
 
         m_alliance = new Alliance();
 
-        player = new RobotSubsystem(new Player(world, Goal.NOTHING));
+        player = new RobotSubsystem(new Player(world));
         world.addBody(player.getRobotBody());
         player.setDefaultCommand(new PlayerDefault(player));
 
-        friend1 = new RobotSubsystem(new Friend("blue 1", world, Goal.NOTHING));
+        friend1 = new RobotSubsystem(new Friend("blue 1", world));
         world.addBody(friend1.getRobotBody());
         friend1.setDefaultCommand(new NonplayerDefault(friend1));
 
-        friend2 = new RobotSubsystem(new Friend("blue 2", world, Goal.NOTHING));
+        friend2 = new RobotSubsystem(new Friend("blue 2", world));
         world.addBody(friend2.getRobotBody());
         friend2.setDefaultCommand(new NonplayerDefault(friend2));
 
-        foe1 = new RobotSubsystem(new Foe("red 1", world, Goal.NOTHING));
+        foe1 = new RobotSubsystem(new Foe("red 1", world));
         world.addBody(foe1.getRobotBody());
         foe1.setDefaultCommand(new NonplayerDefault(foe1));
 
-        foe2 = new RobotSubsystem(new Foe("red 2", world, Goal.NOTHING));
+        foe2 = new RobotSubsystem(new Foe("red 2", world));
         world.addBody(foe2.getRobotBody());
         foe2.setDefaultCommand(new NonplayerDefault(foe2));
 
-        foe3 = new RobotSubsystem(new Foe("red 3", world, Goal.NOTHING));
+        foe3 = new RobotSubsystem(new Foe("red 3", world));
         world.addBody(foe3.getRobotBody());
         foe3.setDefaultCommand(new NonplayerDefault(foe3));
 

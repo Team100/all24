@@ -7,13 +7,8 @@ import org.dyn4j.geometry.Vector2;
  */
 public class Player extends RobotBody {
 
-    public Player(SimWorld world, Goal initialGoal) {
-        super("player", world, initialGoal);
-    }
-
-    @Override
-    public void act() {
-        // TODO: remove this
+    public Player(SimWorld world) {
+        super("player", world);
     }
 
     @Override

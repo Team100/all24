@@ -12,8 +12,6 @@ public class Alliance {
 
     private final Random random = new Random();
 
-    
-
     /**
      * Called by Command.end(), which says not to schedule anything. hm. why?
      */
@@ -23,6 +21,7 @@ public class Alliance {
         } else if (command instanceof ScoreAmp) {
             CommandScheduler.getInstance().schedule(new PickFromSource(this, robot));
         } else if (command instanceof PickFromSource) {
+            // TODO: don't choose randomly, use a strategy and/or operator input
             if (random.nextBoolean()) {
                 CommandScheduler.getInstance().schedule(new ScoreSpeaker(this, robot));
             } else {

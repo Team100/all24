@@ -12,8 +12,6 @@ import org.dyn4j.geometry.Vector2;
  * TODO: spin away if close to an opponent
  */
 public class Friend extends RobotBody {
-    private static final int kForce = 200;
-    private static final int kTolerance = 2;
     static final Vector2 kSource = new Vector2(16, 0);
     /** This is the robot center when facing the amp */
     static final Vector2 kAmpSpot = new Vector2(1.840, 8.204)
@@ -23,8 +21,8 @@ public class Friend extends RobotBody {
 
     static final double kShootingAngle = Math.PI;
 
-    public Friend(String id, SimWorld world, Goal initialGoal) {
-        super(id, world, initialGoal);
+    public Friend(String id, SimWorld world) {
+        super(id, world);
     }
 
     @Override
@@ -52,46 +50,5 @@ public class Friend extends RobotBody {
     @Override
     public Vector2 sourcePosition() {
         return kSource;
-    }
-
-    @Override
-    public void act() {
-        Vector2 position = getWorldCenter();
-        switch (m_goal) {
-            case PICK:
-                Vector2 toPick = position.to(kSource);
-                if (toPick.getMagnitude() < kTolerance) {
-                    // successful pick, now go score
-                    nextGoal();
-                } else {
-                    // keep trying
-                    applyForce(toPick.setMagnitude(kForce));
-                }
-                break;
-            case SCORE_AMP:
-                // driveToAmp();
-                break;
-            case SCORE_SPEAKER:
-                // driveToSpeaker();
-                break;
-            default:
-                // do nothing
-                break;
-        }
-
-        // look for nearby notes, brute force
-        for (Body100 body : m_world.getBodies()) {
-            if (body instanceof Note) {
-                double distance = position.distance(body.getWorldCenter());
-                if (distance > 0.3)
-                    continue;
-                // System.out.printf("%s %5.3f\n",
-                // body.getClass().getSimpleName(), distance);
-                // TODO: pick up?
-            }
-        }
-
-        // avoidRobots();
-
     }
 }

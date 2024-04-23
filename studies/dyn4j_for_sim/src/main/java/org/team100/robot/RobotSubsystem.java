@@ -8,6 +8,7 @@ import org.dyn4j.dynamics.Torque;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Body100;
+import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +19,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /** Contains the sim body. */
 public class RobotSubsystem extends SubsystemBase {
 
-    public static record Sighting(boolean friend, Translation2d position) {
+    public static record RobotSighting(boolean friend, Translation2d position) {
+    }
+
+    public static record NoteSighting(Translation2d position) {
     }
 
     // how old can sightings be and still be trusted?
@@ -28,7 +32,8 @@ public class RobotSubsystem extends SubsystemBase {
     private final RobotBody m_robotBody;
 
     /**
-     * Some recent sightings from the camera system.
+     * Some recent sightings from the camera system, used for robot avoidance and
+     * defense.
      * 
      * We can't trust that the camera knows the identity of each sighting, just the
      * position (within some tolerance) and the time (quite precisely). We can also
@@ -36,7 +41,10 @@ public class RobotSubsystem extends SubsystemBase {
      * Note: some time jitter should be used here since one camera frame may include
      * multiple sightings.
      */
-    private NavigableMap<Double, Sighting> sightings = new ConcurrentSkipListMap<>();
+    private NavigableMap<Double, RobotSighting> sightings = new ConcurrentSkipListMap<>();
+
+    /** Recent note sightings. */
+    private NavigableMap<Double, NoteSighting> noteSightings = new ConcurrentSkipListMap<>();
 
     public RobotSubsystem(RobotBody robotBody) {
         m_robotBody = robotBody;
@@ -70,7 +78,9 @@ public class RobotSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        lookAround();
+        lookForRobots();
+        lookForNotes();
+        trimSightings();
     }
 
     /**
@@ -78,7 +88,7 @@ public class RobotSubsystem extends SubsystemBase {
      * potentially out-of-order) but to keep it simple (and because dyn4j is not
      * thread safe), it's here.
      */
-    private void lookAround() {
+    private void lookForRobots() {
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
             if (body == m_robotBody) {
                 // skip ourselves
@@ -95,19 +105,44 @@ public class RobotSubsystem extends SubsystemBase {
         }
     }
 
+    /**
+     * Camera looking for notes, sticking them in a buffer of note sightings. As
+     * above this would actually be asynchronous.
+     */
+    private void lookForNotes() {
+        Vector2 position = m_robotBody.getWorldCenter();
+        // look for nearby notes, brute force
+        for (Body100 body : m_robotBody.getWorld().getBodies()) {
+            if (body instanceof Note) {
+                Vector2 notePosition = body.getWorldCenter();
+                double distance = position.distance(notePosition);
+                if (distance > 0.3)
+                    continue;
+                double now = Timer.getFPGATimestamp();
+                NoteSighting sighting = new NoteSighting(
+                        new Translation2d(notePosition.x, notePosition.y));
+                noteSightings.put(now, sighting);
+            }
+        }
+    }
+
     /** Add a sighting with the current timestamp. */
     private void addSighting(boolean friend, Vector2 fieldRelativePosition) {
         double now = Timer.getFPGATimestamp();
-        Sighting sighting = new Sighting(
+        RobotSighting sighting = new RobotSighting(
                 friend,
                 new Translation2d(fieldRelativePosition.x, fieldRelativePosition.y));
         sightings.put(now, sighting);
     }
 
-    public NavigableMap<Double, Sighting> recentSightings() {
+    /** Don't remember stale sightings. */
+    private void trimSightings() {
         double now = Timer.getFPGATimestamp();
-        // first trim the sightings to remove stale ones
         sightings.keySet().removeAll(sightings.headMap(now - kLookbackSec).keySet());
+        noteSightings.keySet().removeAll(noteSightings.headMap(now - kLookbackSec).keySet());
+    }
+
+    public NavigableMap<Double, RobotSighting> recentSightings() {
         return sightings.descendingMap();
     }
 
