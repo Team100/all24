@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
@@ -51,6 +52,10 @@ public class SimWorld {
         world.addBody(body);
     }
 
+    public void addJoint(Joint<Body100> joint) {
+        world.addJoint(joint);
+    }
+
     public void update() {
         // update the dyn4j sim
         world.update(0.02);
@@ -59,7 +64,7 @@ public class SimWorld {
     public List<Body100> getBodies() {
         return world.getBodies();
     }
-    
+
     public List<Translation2d> getObstacles() {
         return obstacles;
     }

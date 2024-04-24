@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.Torque;
+import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Body100;
@@ -67,6 +68,11 @@ public class RobotSubsystem extends SubsystemBase {
                 // it's underneath the robot
                 // TODO: intake from one side only
                 m_note = (Note) body;
+                // seems like the choices for attchment are
+                // overriding position of the note, or adding
+                // dyn4j joints. try joints first.
+                WeldJoint<Body100> j = new WeldJoint<>(m_note, m_robotBody, new Vector2());
+                m_robotBody.getWorld().addJoint(j);
                 break;
             }
         }
@@ -103,6 +109,8 @@ public class RobotSubsystem extends SubsystemBase {
         lookForRobots();
         lookForNotes();
         trimSightings();
+        // for now all robots try to intake all the time
+        maybeIntake();
     }
 
     /**
