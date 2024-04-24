@@ -25,7 +25,13 @@ public class PlayerDefault extends Command {
         double driveX = -m_control.getRightY(); // axis 5
         double driveY = -m_control.getRightX(); // axis 4
         m_player.apply(driveX * kForce, driveY * kForce, steer * kTorque);
-    }
 
+        if (m_control.getRawButton(1)) {
+            m_player.intake();
+        }
+        if (m_control.getRawButton(2)) {
+            m_player.outtake();
+        }
+    }
 
 }

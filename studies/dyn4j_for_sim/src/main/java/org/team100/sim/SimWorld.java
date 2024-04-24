@@ -56,6 +56,10 @@ public class SimWorld {
         world.addJoint(joint);
     }
 
+    public boolean removeJoint(Joint<Body100> joint) {
+        return world.removeJoint(joint);
+    }
+
     public void update() {
         // update the dyn4j sim
         world.update(0.02);

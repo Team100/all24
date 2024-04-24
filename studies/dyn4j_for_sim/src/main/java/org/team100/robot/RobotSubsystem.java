@@ -5,10 +5,12 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.Torque;
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Body100;
+import org.team100.sim.CarryFilter;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
@@ -31,8 +33,15 @@ public class RobotSubsystem extends SubsystemBase {
 
     /** For simulation. */
     private final RobotBody m_robotBody;
-    /** We're allowed zero or one notes. */
+
+    /**
+     * We're allowed zero or one notes.
+     * TODO: if the note is present, that should affect the sensor states.
+     */
     private Note m_note;
+
+    /** Joint linking the note to the robot, so we can remove it when ejecting. */
+    private Joint<Body100> m_joint;
 
     /**
      * Some recent sightings from the camera system, used for robot avoidance and
@@ -53,7 +62,7 @@ public class RobotSubsystem extends SubsystemBase {
         m_robotBody = robotBody;
     }
 
-    public void maybeIntake() {
+    public void intake() {
         // just one note allowed
         if (m_note != null)
             return;
@@ -71,8 +80,10 @@ public class RobotSubsystem extends SubsystemBase {
                 // seems like the choices for attchment are
                 // overriding position of the note, or adding
                 // dyn4j joints. try joints first.
-                WeldJoint<Body100> j = new WeldJoint<>(m_note, m_robotBody, new Vector2());
-                m_robotBody.getWorld().addJoint(j);
+                m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
+                m_robotBody.getWorld().addJoint(m_joint);
+                // don't let the note hit other notes while being carried
+                m_note.getFixture(0).setFilter(new CarryFilter());
                 break;
             }
         }
@@ -109,8 +120,6 @@ public class RobotSubsystem extends SubsystemBase {
         lookForRobots();
         lookForNotes();
         trimSightings();
-        // for now all robots try to intake all the time
-        maybeIntake();
     }
 
     /**
@@ -191,5 +200,15 @@ public class RobotSubsystem extends SubsystemBase {
 
     public Pose2d passingPosition() {
         return m_robotBody.passingPosition();
+    }
+
+    public void outtake() {
+        if (m_note != null) {
+            m_robotBody.getWorld().removeJoint(m_joint);
+            m_note.getFixture(0).setFilter(Body100.NOTE);
+            // hm this immediately re-intakes.
+            m_joint = null;
+            m_note = null;
+        }
     }
 }
