@@ -10,12 +10,13 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Body100;
-import org.team100.sim.CarryFilter;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -28,8 +29,25 @@ public class RobotSubsystem extends SubsystemBase {
     public static record NoteSighting(Translation2d position) {
     }
 
-    // how old can sightings be and still be trusted?
+    /**
+     * how old can sightings be and still be trusted?
+     */
     private static final double kLookbackSec = 0.1;
+
+    /**
+     * Shooter impulse is measured in newton-seconds.
+     * For a 0.235 kg note at 20 m/s the impulse is about 4.7 Ns.
+     */
+    private static final double kShootImpulseNs = 4.7;
+    /**
+     * Lob is slower, enough to get about 3.5m high and travel about 6m
+     */
+    private static final double kLobImpulseNs = 3.0;
+
+    /** Shooter angle is actually variable */
+    private static final double kShootElevationRad = -0.75;
+    /** Lob uses a pretty high angle, this is a guess. */
+    private static final double kLobElevationRad = -1.0;
 
     /** For simulation. */
     private final RobotBody m_robotBody;
@@ -82,8 +100,7 @@ public class RobotSubsystem extends SubsystemBase {
                 // dyn4j joints. try joints first.
                 m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
                 m_robotBody.getWorld().addJoint(m_joint);
-                // don't let the note hit other notes while being carried
-                m_note.getFixture(0).setFilter(new CarryFilter());
+                m_note.setInert(true);
                 break;
             }
         }
@@ -205,10 +222,36 @@ public class RobotSubsystem extends SubsystemBase {
     public void outtake() {
         if (m_note != null) {
             m_robotBody.getWorld().removeJoint(m_joint);
-            m_note.getFixture(0).setFilter(Body100.NOTE);
-            // hm this immediately re-intakes.
+            m_note.setInert(false);
             m_joint = null;
             m_note = null;
         }
     }
+
+    /** Shooting is full speed, 20 m/s */
+    public void shoot() {
+        shooter(kShootImpulseNs, kShootElevationRad);
+    }
+
+    /** Lob uses a lower exit velocity. */
+    public void lob() {
+        shooter(kLobImpulseNs, kLobElevationRad);
+    }
+
+    private void shooter(double impulseNs, double elevationRad) {
+        if (m_note != null) {
+            // detatch the note
+            m_robotBody.getWorld().removeJoint(m_joint);
+            // flying notes don't interact with anything
+            m_note.setInert(true);
+            double robotAngle = m_robotBody.getPose().getRotation().getRadians();
+            Translation3d t3 = new Translation3d(
+                    impulseNs,
+                    new Rotation3d(0, elevationRad, robotAngle));
+            m_note.applyImpulse(t3);
+            m_joint = null;
+            m_note = null;
+        }
+    }
+
 }

@@ -32,6 +32,12 @@ public class PlayerDefault extends Command {
         if (m_control.getRawButton(2)) {
             m_player.outtake();
         }
+        if (m_control.getRawButton(3)) {
+            m_player.shoot();
+        }
+        if (m_control.getRawButton(4)) {
+            m_player.lob();
+        }
     }
 
 }

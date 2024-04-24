@@ -41,7 +41,7 @@ public class Red extends Alliance {
 
     /** Think about what to do. */
     public void periodic() {
-
+        //
     }
 
     /**

@@ -181,9 +181,10 @@ public class SimWorld {
     }
 
     private void addNote(double x, double y) {
-        Body100 post = new Note(Geometry.createCircle(0.175));
-        post.translate(x, y);
-        world.addBody(post);
+        Note note = new Note();
+        note.translate(x, y);
+        world.addBody(note);
+        world.addStepListener(note);
     }
 
 }
