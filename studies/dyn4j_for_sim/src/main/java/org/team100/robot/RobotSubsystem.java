@@ -30,6 +30,8 @@ public class RobotSubsystem extends SubsystemBase {
 
     /** For simulation. */
     private final RobotBody m_robotBody;
+    /** We're allowed zero or one notes. */
+    private Note m_note;
 
     /**
      * Some recent sightings from the camera system, used for robot avoidance and
@@ -48,6 +50,26 @@ public class RobotSubsystem extends SubsystemBase {
 
     public RobotSubsystem(RobotBody robotBody) {
         m_robotBody = robotBody;
+    }
+
+    public void maybeIntake() {
+        // just one note allowed
+        if (m_note != null)
+            return;
+        Vector2 position = m_robotBody.getWorldCenter();
+
+        for (Body100 body : m_robotBody.getWorld().getBodies()) {
+            if (body instanceof Note) {
+                Vector2 notePosition = body.getWorldCenter();
+                double distance = position.distance(notePosition);
+                if (distance > 0.1)
+                    continue;
+                // it's underneath the robot
+                // TODO: intake from one side only
+                m_note = (Note) body;
+                break;
+            }
+        }
     }
 
     public RobotBody getRobotBody() {
@@ -116,7 +138,8 @@ public class RobotSubsystem extends SubsystemBase {
             if (body instanceof Note) {
                 Vector2 notePosition = body.getWorldCenter();
                 double distance = position.distance(notePosition);
-                if (distance > 0.3)
+                // can't see that far
+                if (distance > 5)
                     continue;
                 double now = Timer.getFPGATimestamp();
                 NoteSighting sighting = new NoteSighting(
