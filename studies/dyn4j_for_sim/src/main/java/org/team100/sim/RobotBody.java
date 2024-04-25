@@ -11,7 +11,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public abstract class RobotBody extends Body100 {
+    /** All robots are squares about 30 inches on a side. */
     protected static final double kRobotSize = 0.75;
+    /** All robots can fit under the stage but also drive over notes. */
+    private static final Range kVertical = new Range(0.1, 0.7);
 
     private final SimWorld m_world;
 
@@ -30,7 +33,7 @@ public abstract class RobotBody extends Body100 {
                 0.1);
         // this means the springiness doesn't change with velocity
         fixture.setRestitutionVelocity(0.0);
-        fixture.setFilter(ROBOT);
+        fixture.setFilter(this);
         setMass(MassType.NORMAL);
         // fiddled with damping until it seemed "right"
         setAngularDamping(10);
@@ -71,4 +74,10 @@ public abstract class RobotBody extends Body100 {
                 linearVelocity.y,
                 angularVelocity);
     }
+
+    @Override
+    protected Range getVerticalExtent() {
+        return kVertical;
+    }
+
 }

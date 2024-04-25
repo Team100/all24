@@ -45,7 +45,7 @@ public class RobotSubsystem extends SubsystemBase {
     private static final double kLobImpulseNs = 3.0;
 
     /** Shooter angle is actually variable */
-    private static final double kShootElevationRad = -0.75;
+    private static final double kShootElevationRad = -0.5;
     /** Lob uses a pretty high angle, this is a guess. */
     private static final double kLobElevationRad = -1.0;
 
@@ -100,7 +100,7 @@ public class RobotSubsystem extends SubsystemBase {
                 // dyn4j joints. try joints first.
                 m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
                 m_robotBody.getWorld().addJoint(m_joint);
-                m_note.setInert(true);
+                m_note.carry();
                 break;
             }
         }
@@ -222,7 +222,7 @@ public class RobotSubsystem extends SubsystemBase {
     public void outtake() {
         if (m_note != null) {
             m_robotBody.getWorld().removeJoint(m_joint);
-            m_note.setInert(false);
+            m_note.drop();
             m_joint = null;
             m_note = null;
         }
@@ -242,8 +242,8 @@ public class RobotSubsystem extends SubsystemBase {
         if (m_note != null) {
             // detatch the note
             m_robotBody.getWorld().removeJoint(m_joint);
+            m_note.drop();
             // flying notes don't interact with anything
-            m_note.setInert(true);
             double robotAngle = m_robotBody.getPose().getRotation().getRadians();
             Translation3d t3 = new Translation3d(
                     impulseNs,

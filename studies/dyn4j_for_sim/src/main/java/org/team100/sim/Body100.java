@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.dyn4j.collision.TypeFilter;
+import org.dyn4j.collision.Filter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.listener.StepListener;
 
-public abstract class Body100 extends Body implements StepListener<Body100> {
+public abstract class Body100 extends Body implements StepListener<Body100>, Filter {
 
     /**
      * This is the list of types that will be rendered.
@@ -26,9 +26,6 @@ public abstract class Body100 extends Body implements StepListener<Body100> {
                 Obstacle.class,
                 Player.class);
     }
-
-    public static final TypeFilter FIXED = new FixedFilter();
-    public static final TypeFilter ROBOT = new RobotFilter();
 
     private static final Set<String> ids = new HashSet<>();
 
@@ -57,4 +54,19 @@ public abstract class Body100 extends Body implements StepListener<Body100> {
     public void end(TimeStep step, PhysicsWorld<Body100, ?> world) {
         //
     }
+
+    /** Filter based on vertical extent. */
+    @Override
+    public boolean isAllowed(Filter filter) {
+        if (filter instanceof Body100) {
+            Body100 other = (Body100) filter;
+            return getVerticalExtent().overlaps(other.getVerticalExtent());
+        }
+        return true;
+    }
+
+    /**
+     * Vertical extent can vary (e.g. for notes), or be fixed (for everything else).
+     */
+    protected abstract Range getVerticalExtent();
 }
