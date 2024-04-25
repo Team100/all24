@@ -231,7 +231,7 @@ public class SimWorld {
         addNote(13.657, 7.01);
     }
 
-    private void addNote(double x, double y) {
+    public void addNote(double x, double y) {
         Note note = new Note();
         note.translate(x, y);
         world.addBody(note);

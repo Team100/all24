@@ -1,5 +1,6 @@
 package org.team100.commands;
 
+import org.team100.robot.Source;
 import org.team100.robot.RobotSubsystem;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
@@ -11,6 +12,7 @@ public class Blue extends Alliance {
     private final RobotSubsystem player;
     private final RobotSubsystem friend1;
     private final RobotSubsystem friend2;
+    private final Source human;
 
     public Blue(SimWorld world) {
         player = new RobotSubsystem(new Player(world));
@@ -24,6 +26,9 @@ public class Blue extends Alliance {
         friend2 = new RobotSubsystem(new Friend("blue 2", world));
         world.addBody(friend2.getRobotBody());
         friend2.setDefaultCommand(new NonplayerDefault(friend2));
+
+        human = new Source(world, 15.5, 1.0);
+        human.setDefaultCommand(new SourceDefault(human));
     }
 
     public void init() {

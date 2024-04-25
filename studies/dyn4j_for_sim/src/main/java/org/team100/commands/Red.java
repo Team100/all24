@@ -2,6 +2,7 @@ package org.team100.commands;
 
 import java.util.Random;
 
+import org.team100.robot.Source;
 import org.team100.robot.RobotSubsystem;
 import org.team100.sim.Foe;
 import org.team100.sim.SimWorld;
@@ -15,6 +16,7 @@ public class Red extends Alliance {
     private final RobotSubsystem scorer;
     private final RobotSubsystem passer;
     private final RobotSubsystem defender;
+    private final Source human;
 
     public Red(SimWorld world) {
         scorer = new RobotSubsystem(new Foe("red scorer", world));
@@ -28,6 +30,9 @@ public class Red extends Alliance {
         defender = new RobotSubsystem(new Foe("red 3", world));
         world.addBody(defender.getRobotBody());
         defender.setDefaultCommand(new NonplayerDefault(defender));
+
+        human = new Source(world, 1.0, 1.0);
+        human.setDefaultCommand(new SourceDefault(human));
     }
 
     public void init() {
@@ -41,7 +46,10 @@ public class Red extends Alliance {
 
     /** Think about what to do. */
     public void periodic() {
-        //
+        // periodically add a note through the source.
+        // TODO: include source in strategy.
+        // should source be a subsystem?
+
     }
 
     /**
