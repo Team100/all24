@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -45,7 +46,7 @@ public class RobotSubsystem extends SubsystemBase {
      * Shooter angle is actually variable
      * TODO: implement shooter map
      */
-    private static final double kShootElevationRad = -0.5;
+    // private static final double kShootElevationRad = -0.5;
 
     /**
      * Lob is slower, enough to get about 3.5m high and travel about 6m
@@ -71,6 +72,14 @@ public class RobotSubsystem extends SubsystemBase {
     private final RobotBody m_robotBody;
 
     /**
+     * key == range
+     * value == pitch
+     * minimum range == 1.29
+     */
+    InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
+    private final Translation2d m_speakerPosition;
+
+    /**
      * We're allowed zero or one notes.
      * TODO: if the note is present, that should affect the sensor states.
      */
@@ -94,8 +103,29 @@ public class RobotSubsystem extends SubsystemBase {
     /** Recent note sightings. */
     private NavigableMap<Double, NoteSighting> noteSightings = new ConcurrentSkipListMap<>();
 
-    public RobotSubsystem(RobotBody robotBody) {
+    /**
+     * @param robotBody
+     * @param speakerPosition to calculate range for the shooter map
+     */
+    public RobotSubsystem(RobotBody robotBody, Translation2d speakerPosition) {
         m_robotBody = robotBody;
+        m_speakerPosition = speakerPosition;
+        // I experimented and then smoothed the curve by eye.
+        shooterMap.put(0.0, -1.571); // pi/2
+        shooterMap.put(0.5, -1.400);
+        shooterMap.put(1.0, -1.240); // 1.29 is min feasible range
+        shooterMap.put(1.5, -1.090);
+        shooterMap.put(2.0, -0.950);
+        shooterMap.put(2.5, -0.830);
+        shooterMap.put(3.0, -0.730);
+        shooterMap.put(3.5, -0.650);
+        shooterMap.put(4.0, -0.590);
+        shooterMap.put(4.5, -0.540);
+        shooterMap.put(5.0, -0.500);
+        shooterMap.put(5.5, -0.460);
+        shooterMap.put(6.0, -0.435);
+        shooterMap.put(6.5, -0.415);
+        shooterMap.put(7.0, -0.400); // beyond max feasible range
     }
 
     public void intake() {
@@ -245,9 +275,19 @@ public class RobotSubsystem extends SubsystemBase {
         }
     }
 
+    public void rotateToShoot() {
+        Pose2d pose = getPose();
+        double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
+        double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
+        m_robotBody.applyTorque(new Torque(error * 100));
+    }
+
     /** Shooting is full speed, 20 m/s */
     public void shoot() {
-        shooter(kShootImpulseNs, kShootElevationRad, 0);
+        double range = getPose().getTranslation().getDistance(m_speakerPosition);
+        double elevationRad = shooterMap.get(range);
+        // System.out.printf("shoot range %5.3f elevation %5.3f\n", range, elevationRad);
+        shooter(kShootImpulseNs, elevationRad, 0);
     }
 
     /** Lob uses a lower exit velocity. */

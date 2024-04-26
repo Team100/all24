@@ -31,6 +31,7 @@ public class SimWorld {
     // this is just beyond the pocket
     private static final double topWallLimit = 2.146;
     private static final double ampHeight = 1.207;
+    private static final double allianceWallHeightM = 1.983;
     private static final String kField = "field";
     private static final Telemetry t = Telemetry.get();
 
@@ -191,7 +192,7 @@ public class SimWorld {
                                 new Vector2(0, fieldY),
                                 new Vector2(-boundaryThickness, fieldY),
                                 new Vector2(-boundaryThickness, 0)),
-                        1.983));
+                        allianceWallHeightM));
         world.addBody(
                 new Wall("red wall",
                         Geometry.createPolygon(
@@ -199,7 +200,7 @@ public class SimWorld {
                                 new Vector2(fieldX, 0),
                                 new Vector2(fieldX + boundaryThickness, 0),
                                 new Vector2(fieldX + boundaryThickness, fieldY)),
-                        1.983));
+                        allianceWallHeightM));
         world.addBody(
                 new Wall("top wall",
                         Geometry.createPolygon(

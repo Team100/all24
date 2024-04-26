@@ -41,6 +41,9 @@ public class PlayerDefault extends Command {
         if (m_control.getRawButton(5)) {
             m_player.amp();
         }
+        if (m_control.getRawButton(6)) {
+            m_player.rotateToShoot();
+        }
     }
 
 }

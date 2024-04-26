@@ -7,27 +7,28 @@ import org.team100.robot.RobotSubsystem;
 import org.team100.sim.Foe;
 import org.team100.sim.SimWorld;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Red extends Alliance {
+    private static final Translation2d kSpeaker = new Translation2d(16.541, 5.548);
     private final Random random = new Random();
-
     private final RobotSubsystem scorer;
     private final RobotSubsystem passer;
     private final RobotSubsystem defender;
     private final Source human;
 
     public Red(SimWorld world) {
-        scorer = new RobotSubsystem(new Foe("red scorer", world));
+        scorer = new RobotSubsystem(new Foe("red scorer", world), kSpeaker);
         world.addBody(scorer.getRobotBody());
         scorer.setDefaultCommand(new NonplayerDefault(scorer));
 
-        passer = new RobotSubsystem(new Foe("red 2", world));
+        passer = new RobotSubsystem(new Foe("red 2", world), kSpeaker);
         world.addBody(passer.getRobotBody());
         passer.setDefaultCommand(new NonplayerDefault(passer));
 
-        defender = new RobotSubsystem(new Foe("red 3", world));
+        defender = new RobotSubsystem(new Foe("red 3", world), kSpeaker);
         world.addBody(defender.getRobotBody());
         defender.setDefaultCommand(new NonplayerDefault(defender));
 
