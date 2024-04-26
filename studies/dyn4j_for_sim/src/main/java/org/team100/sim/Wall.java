@@ -23,7 +23,7 @@ public class Wall extends Body100 {
     }
 
     @Override
-    protected Range getVerticalExtent() {
+    public Range getVerticalExtent() {
         return m_vertical;
     }
 }

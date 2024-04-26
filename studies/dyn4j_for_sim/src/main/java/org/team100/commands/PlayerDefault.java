@@ -38,6 +38,9 @@ public class PlayerDefault extends Command {
         if (m_control.getRawButton(4)) {
             m_player.lob();
         }
+        if (m_control.getRawButton(5)) {
+            m_player.amp();
+        }
     }
 
 }

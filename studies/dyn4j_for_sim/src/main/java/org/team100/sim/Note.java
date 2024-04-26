@@ -97,13 +97,19 @@ public class Note extends Body100 {
      */
     @Override
     public void end(TimeStep step, PhysicsWorld<Body100, ?> world) {
-        // if the note is being carried, this doesn't do anything.
-        if (m_carried)
+        if (!world.containsBody(this)) {
+            // no point in working on notes that have been removed
             return;
+        }
+        if (m_carried) {
+            // if the note is being carried, it doesn't move vertically.
+            return;
+        }
 
         double postSpeed = getLinearVelocity().getMagnitude();
 
         if (m_altitude > 0 || m_verticalVelocityM_s > 0) {
+            // System.out.printf("note %s center %s altitude %5.3f\n", m_id, getWorldCenter(), m_altitude);
             m_verticalVelocityM_s += step.getDeltaTime() * kGravityM_s2;
             // air drag and collisions
             double linear = postSpeed / preSpeed;
@@ -128,9 +134,13 @@ public class Note extends Body100 {
     }
 
     @Override
-    protected Range getVerticalExtent() {
+    public Range getVerticalExtent() {
         if (m_carried)
             return kCarriedRange;
         return new Range(m_altitude, m_altitude + kHeight);
+    }
+
+    public double getAltitude() {
+        return m_altitude;
     }
 }

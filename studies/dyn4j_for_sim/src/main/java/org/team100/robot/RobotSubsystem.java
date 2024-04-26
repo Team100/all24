@@ -13,6 +13,7 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -39,15 +40,32 @@ public class RobotSubsystem extends SubsystemBase {
      * For a 0.235 kg note at 20 m/s the impulse is about 4.7 Ns.
      */
     private static final double kShootImpulseNs = 4.7;
+
+    /**
+     * Shooter angle is actually variable
+     * TODO: implement shooter map
+     */
+    private static final double kShootElevationRad = -0.5;
+
     /**
      * Lob is slower, enough to get about 3.5m high and travel about 6m
      */
     private static final double kLobImpulseNs = 3.0;
 
-    /** Shooter angle is actually variable */
-    private static final double kShootElevationRad = -0.5;
-    /** Lob uses a pretty high angle, this is a guess. */
+    /**
+     * Lob uses a pretty high angle, this is a guess.
+     */
     private static final double kLobElevationRad = -1.0;
+
+    /**
+     * Amp shot is gentle
+     */
+    private static final double kAmpImpulseNs = 1.2;
+
+    /**
+     * Amp elevation is very high
+     */
+    private static final double kAmpElevationRad = -1.48;
 
     /** For simulation. */
     private final RobotBody m_robotBody;
@@ -90,14 +108,13 @@ public class RobotSubsystem extends SubsystemBase {
             if (body instanceof Note) {
                 Vector2 notePosition = body.getWorldCenter();
                 double distance = position.distance(notePosition);
-                if (distance > 0.1)
+                if (distance > 0.3)
                     continue;
                 // it's underneath the robot
                 // TODO: intake from one side only
                 m_note = (Note) body;
-                // seems like the choices for attchment are
-                // overriding position of the note, or adding
-                // dyn4j joints. try joints first.
+                // move the note to the center of the robot first
+                m_note.setTransform(m_robotBody.getTransform());
                 m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
                 m_robotBody.getWorld().addJoint(m_joint);
                 m_note.carry();
@@ -230,24 +247,29 @@ public class RobotSubsystem extends SubsystemBase {
 
     /** Shooting is full speed, 20 m/s */
     public void shoot() {
-        shooter(kShootImpulseNs, kShootElevationRad);
+        shooter(kShootImpulseNs, kShootElevationRad, 0);
     }
 
     /** Lob uses a lower exit velocity. */
     public void lob() {
-        shooter(kLobImpulseNs, kLobElevationRad);
+        shooter(kLobImpulseNs, kLobElevationRad, 0);
     }
 
-    private void shooter(double impulseNs, double elevationRad) {
+    /** Amp uses very low velocity, opposite rotation. */
+    public void amp() {
+        shooter(kAmpImpulseNs, kAmpElevationRad, Math.PI);
+    }
+
+    private void shooter(double impulseNs, double elevationRad, double yawOffsetRad) {
         if (m_note != null) {
             // detatch the note
             m_robotBody.getWorld().removeJoint(m_joint);
             m_note.drop();
-            // flying notes don't interact with anything
-            double robotAngle = m_robotBody.getPose().getRotation().getRadians();
+            double yawRad = m_robotBody.getPose().getRotation().getRadians();
+            yawRad = MathUtil.angleModulus(yawRad + yawOffsetRad);
             Translation3d t3 = new Translation3d(
                     impulseNs,
-                    new Rotation3d(0, elevationRad, robotAngle));
+                    new Rotation3d(0, elevationRad, yawRad));
             m_note.applyImpulse(t3);
             m_joint = null;
             m_note = null;

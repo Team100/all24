@@ -22,4 +22,13 @@ class RangeTest {
         assertTrue(r1.overlaps(r2));
         assertTrue(r2.overlaps(r1));
     }
+
+    @Test
+    void testContains() {
+        Range r1 = new Range(0, 3);
+        Range r2 = new Range(1, 2);
+        assertTrue(r1.contains(r2));
+        assertFalse(r2.contains(r1));
+
+    }
 }

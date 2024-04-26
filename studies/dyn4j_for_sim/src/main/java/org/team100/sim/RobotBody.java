@@ -37,7 +37,7 @@ public abstract class RobotBody extends Body100 {
         setMass(MassType.NORMAL);
         // fiddled with damping until it seemed "right"
         setAngularDamping(10);
-        setLinearDamping(0.85);
+        setLinearDamping(2);
     }
 
     public abstract boolean friend(RobotBody body);
@@ -76,7 +76,7 @@ public abstract class RobotBody extends Body100 {
     }
 
     @Override
-    protected Range getVerticalExtent() {
+    public Range getVerticalExtent() {
         return kVertical;
     }
 
