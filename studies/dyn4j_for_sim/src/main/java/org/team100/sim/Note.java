@@ -37,6 +37,9 @@ public class Note extends Body100 {
     /** Used in calculation of vertical motion */
     private double preSpeed;
 
+    /** prevent double counting */
+    public boolean scored = false;
+
     /** Don't forget to add the body as a step listener. */
     public Note() {
         super("note " + counter++);

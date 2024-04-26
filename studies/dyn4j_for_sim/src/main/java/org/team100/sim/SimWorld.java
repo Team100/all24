@@ -12,6 +12,7 @@ import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.robot.FieldMap;
+import org.team100.robot.Scorekeeper;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,10 +32,12 @@ public class SimWorld {
         world = new World<>();
         world.setGravity(PhysicsWorld.ZERO_GRAVITY);
         world.setValueMixer(new ValueMixer100());
+        world.setBounds(new Bounds100());
 
         setUpWalls();
         setUpStages();
         setUpNotes();
+        setUpSpeakers();
 
         // cache the obstacle locations since we use them all the time.
         obstacles = new ArrayList<>();
@@ -92,6 +95,28 @@ public class SimWorld {
             t.log(Level.DEBUG, kField, type.getSimpleName(),
                     poses.toArray(new Double[0]));
         }
+    }
+
+    /** Speakers are sensors. */
+    private void setUpSpeakers() {
+        Speaker blueSpeaker = new Speaker("blue speaker",
+                Geometry.createPolygon(
+                        new Vector2(0, 5.018),
+                        new Vector2(0, 6.075),
+                        new Vector2(-3, 6.075),
+                        new Vector2(-3, 5.018)));
+        world.addBody(blueSpeaker);
+        Speaker redSpeaker = new Speaker("red speaker",
+                Geometry.createPolygon(
+                        new Vector2(19.541, 5.018),
+                        new Vector2(19.541, 6.075),
+                        new Vector2(16.541, 6.075),
+                        new Vector2(16.541, 5.018)));
+        world.addBody(redSpeaker);
+        Scorekeeper scorekeeper = new Scorekeeper(blueSpeaker, redSpeaker);
+        world.addCollisionListener(scorekeeper);
+        world.addBoundsListener(scorekeeper);
+        world.addStepListener(scorekeeper);
     }
 
     /**

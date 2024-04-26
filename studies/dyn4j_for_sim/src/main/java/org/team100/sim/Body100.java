@@ -12,6 +12,8 @@ import org.dyn4j.world.listener.StepListener;
 
 public abstract class Body100 extends Body implements StepListener<Body100>, Filter {
 
+    protected final String m_id;
+
     /**
      * This is the list of types that will be rendered.
      * 
@@ -32,6 +34,7 @@ public abstract class Body100 extends Body implements StepListener<Body100>, Fil
     protected Body100(String id) {
         if (ids.contains(id))
             throw new IllegalArgumentException("duplicate id: " + id);
+        m_id = id;
         setUserData(id);
     }
 
@@ -60,7 +63,9 @@ public abstract class Body100 extends Body implements StepListener<Body100>, Fil
     public boolean isAllowed(Filter filter) {
         if (filter instanceof Body100) {
             Body100 other = (Body100) filter;
-            return getVerticalExtent().overlaps(other.getVerticalExtent());
+            Range thisExtent = getVerticalExtent();
+            Range otherExtent = other.getVerticalExtent();
+            return thisExtent.overlaps(otherExtent);
         }
         return true;
     }
@@ -69,4 +74,10 @@ public abstract class Body100 extends Body implements StepListener<Body100>, Fil
      * Vertical extent can vary (e.g. for notes), or be fixed (for everything else).
      */
     protected abstract Range getVerticalExtent();
+
+    @Override
+    public String toString() {
+        return String.format("Body100 [%s]", m_id);
+    }
+
 }

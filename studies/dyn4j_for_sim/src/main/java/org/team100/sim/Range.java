@@ -17,7 +17,12 @@ public class Range {
     }
 
     public boolean overlaps(Range other) {
-        return  m_min <= other.m_max && m_max >= other.m_min;
+        return m_min <= other.m_max && m_max >= other.m_min;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Range [%5.3f, %5.3f]", m_min, m_max);
     }
 
 }
