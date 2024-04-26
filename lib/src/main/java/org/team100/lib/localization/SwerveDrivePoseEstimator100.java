@@ -10,6 +10,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.persistent_parameter.ParameterFactory;
@@ -25,7 +26,6 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -319,14 +319,16 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         t.log(Level.TRACE, m_name, "posex", newPose.getX());
 
-        Transform2d deltaTransform = newPose.minus(previousPose.pose()).div(t1);
+        FieldRelativeDelta deltaTransform = FieldRelativeDelta.delta(
+                previousPose.pose(), newPose).div(t1);
         FieldRelativeVelocity velocity = new FieldRelativeVelocity(
                 deltaTransform.getX(),
                 deltaTransform.getY(),
                 deltaTransform.getRotation().getRadians());
         FieldRelativeAcceleration accel = new FieldRelativeAcceleration(0, 0, 0);
         if (earlierPose != null) {
-            Transform2d earlierTransform = previousPose.pose().minus(earlierPose.pose()).div(t0);
+            FieldRelativeDelta earlierTransform = FieldRelativeDelta.delta(
+                    earlierPose.pose(), previousPose.pose()).div(t0);
             accel = new FieldRelativeAcceleration(
                     earlierTransform.getX(),
                     earlierTransform.getY(),

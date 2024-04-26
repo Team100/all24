@@ -2,14 +2,20 @@ package org.team100.sim;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.sim.RobotBody.Goal;
+import org.team100.robot.FieldMap;
+import org.team100.robot.Scorekeeper;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * In this world, the player and friends are blue, the foes are red.
@@ -19,64 +25,56 @@ public class SimWorld {
     private static final Telemetry t = Telemetry.get();
 
     private final World<Body100> world;
-    private final Body100 player;
-    private final Body100 friend1;
-    private final Body100 friend2;
-    private final Body100 foe1;
-    private final Body100 foe2;
-    private final Body100 foe3;
+    // this is a copy of the obstacle translations since we use this all the time.
+    private final List<Translation2d> obstacles;
 
     public SimWorld() {
         world = new World<>();
         world.setGravity(PhysicsWorld.ZERO_GRAVITY);
-
-        player = new Player(world, Goal.NOTHING);
-        world.addBody(player);
-
-        friend1 = new Friend("blue 1", world, Goal.SCORE_SPEAKER);
-        world.addBody(friend1);
-
-        friend2 = new Friend("blue 2", world, Goal.PICK);
-        world.addBody(friend2);
-
-        foe1 = new Foe("red 1", world, Goal.SCORE_SPEAKER);
-        world.addBody(foe1);
-
-        foe2 = new Foe("red 2", world, Goal.PICK);
-        world.addBody(foe2);
-
-        foe3 = new Foe("red 3", world, Goal.PICK);
-        world.addBody(foe3);
+        world.setValueMixer(new ValueMixer100());
+        world.setBounds(new Bounds100());
 
         setUpWalls();
         setUpStages();
         setUpNotes();
+        setUpSpeakers();
+
+        // cache the obstacle locations since we use them all the time.
+        obstacles = new ArrayList<>();
+        for (Body100 body : world.getBodies()) {
+            if (body instanceof Obstacle) {
+                Vector2 translation = body.getTransform().getTranslation();
+                obstacles.add(new Translation2d(translation.x, translation.y));
+            }
+        }
 
         // need the .type for rendering the field2d in sim.
         t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
-    public void init() {
-        // reset position
-        // TODO: velocity units?
-        setState(player, 2, 4, 0, 0);
-        setState(friend1, 1, 1, 4, 4);
-        setState(friend2, 1, 4, 4, 0);
-        setState(foe1, 15, 3, -4, 0);
-        setState(foe2, 15, 5, -4, -4);
-        setState(foe3, 13, 7, -4, 4);
+    public void addBody(RobotBody body) {
+        world.addBody(body);
     }
 
-    private void setState(Body100 b, double x, double y, double vx, double vy) {
-        b.getTransform().identity();
-        b.getTransform().translate(x, y);
-        b.setAtRest(false);
-        b.setLinearVelocity(new Vector2(vx, vy));
+    public void addJoint(Joint<Body100> joint) {
+        world.addJoint(joint);
+    }
+
+    public boolean removeJoint(Joint<Body100> joint) {
+        return world.removeJoint(joint);
     }
 
     public void update() {
         // update the dyn4j sim
         world.update(0.02);
+    }
+
+    public List<Body100> getBodies() {
+        return world.getBodies();
+    }
+
+    public List<Translation2d> getObstacles() {
+        return obstacles;
     }
 
     /** Show the bodies on the field2d widget */
@@ -99,83 +97,143 @@ public class SimWorld {
         }
     }
 
-    /*
-     * make the NPC's do something interesting.
-     * 
-     * what are the units here? newtons?
-     */
-    public void behavior() {
-        for (Body100 body : world.getBodies()) {
-            body.act();
-        }
+    /** Speakers are sensors. */
+    private void setUpSpeakers() {
+        Speaker blueSpeaker = new Speaker("blue speaker",
+                Geometry.createPolygon(
+                        new Vector2(0, 5.018),
+                        new Vector2(0, 6.075),
+                        new Vector2(-3, 6.075),
+                        new Vector2(-3, 5.018)));
+        world.addBody(blueSpeaker);
+        Speaker redSpeaker = new Speaker("red speaker",
+                Geometry.createPolygon(
+                        new Vector2(19.541, 5.018),
+                        new Vector2(19.541, 6.075),
+                        new Vector2(16.541, 6.075),
+                        new Vector2(16.541, 5.018)));
+        world.addBody(redSpeaker);
+        Scorekeeper scorekeeper = new Scorekeeper(blueSpeaker, redSpeaker);
+        world.addCollisionListener(scorekeeper);
+        world.addBoundsListener(scorekeeper);
+        world.addStepListener(scorekeeper);
     }
 
+    /**
+     * this uses simgui coordinates for blue
+     */
     private void setUpWalls() {
-        // this uses simgui coordinates for blue
         final double boundaryThickness = 1;
         final double fieldX = 16.541;
         final double fieldY = 8.211;
-        world.addBody(new Wall("blue source",
-                Geometry.createTriangle(
-                        new Vector2(0, 0),
-                        new Vector2(1.84, 0),
-                        new Vector2(0, 1.1))));
-        world.addBody(new Wall("red source",
-                Geometry.createTriangle(
-                        new Vector2(16.541, 0),
-                        new Vector2(16.541, 1.1),
-                        new Vector2(14.7, 0))));
-        world.addBody(new Wall("blue subwoofer",
-                Geometry.createPolygon(
-                        new Vector2(0, 4.498),
-                        new Vector2(0.914, 5.019),
-                        new Vector2(0.914, 6.062),
-                        new Vector2(0, 6.597))));
-        world.addBody(new Wall("red subwoofer",
-                Geometry.createPolygon(
-                        new Vector2(16.541, 4.498),
-                        new Vector2(16.541, 6.597),
-                        new Vector2(15.6, 6.062),
-                        new Vector2(15.6, 5.019))));
-        world.addBody(new Wall("blue wall",
-                Geometry.createPolygon(
-                        new Vector2(0, 0),
-                        new Vector2(0, fieldY),
-                        new Vector2(-boundaryThickness, fieldY),
-                        new Vector2(-boundaryThickness, 0))));
-        world.addBody(new Wall("red wall",
-                Geometry.createPolygon(
-                        new Vector2(fieldX, fieldY),
-                        new Vector2(fieldX, 0),
-                        new Vector2(fieldX + boundaryThickness, 0),
-                        new Vector2(fieldX + boundaryThickness, fieldY))));
-        world.addBody(new Wall("top wall",
-                Geometry.createPolygon(
-                        new Vector2(0, fieldY),
-                        new Vector2(fieldX, fieldY),
-                        new Vector2(fieldX, fieldY + boundaryThickness),
-                        new Vector2(0, fieldY + boundaryThickness))));
-        world.addBody(new Wall("bottom wall",
-                Geometry.createPolygon(
-                        new Vector2(fieldX, 0),
-                        new Vector2(0, 0),
-                        new Vector2(0, -boundaryThickness),
-                        new Vector2(fieldX, -boundaryThickness))));
+        world.addBody(
+                new Wall("blue source",
+                        Geometry.createTriangle(
+                                new Vector2(0, 0),
+                                new Vector2(1.84, 0),
+                                new Vector2(0, 1.1)),
+                        1.695));
+        world.addBody(
+                new Wall("red source",
+                        Geometry.createTriangle(
+                                new Vector2(16.541, 0),
+                                new Vector2(16.541, 1.1),
+                                new Vector2(14.7, 0)),
+                        1.695));
+        // TODO: something about the subwoofer vertical shape
+        // extends way past the boundary so that notes won't get stuck between the wall
+        // and subwoofer.
+        world.addBody(
+                new Wall("blue subwoofer",
+                        Geometry.createPolygon(
+                                new Vector2(-3, 4.498),
+                                new Vector2(0, 4.498),
+                                new Vector2(0.914, 5.019),
+                                new Vector2(0.914, 6.062),
+                                new Vector2(0, 6.597),
+                                new Vector2(-3, 6.597)),
+                        0.213));
+        world.addBody(
+                new Wall("red subwoofer",
+                        Geometry.createPolygon(
+                                new Vector2(16.541, 4.498),
+                                new Vector2(19.541, 4.498),
+                                new Vector2(19.541, 6.597),
+                                new Vector2(16.541, 6.597),
+                                new Vector2(15.6, 6.062),
+                                new Vector2(15.6, 5.019)),
+                        0.213));
+        world.addBody(
+                new Wall("blue wall",
+                        Geometry.createPolygon(
+                                new Vector2(0, 0),
+                                new Vector2(0, fieldY),
+                                new Vector2(-boundaryThickness, fieldY),
+                                new Vector2(-boundaryThickness, 0)),
+                        1.983));
+        world.addBody(
+                new Wall("red wall",
+                        Geometry.createPolygon(
+                                new Vector2(fieldX, fieldY),
+                                new Vector2(fieldX, 0),
+                                new Vector2(fieldX + boundaryThickness, 0),
+                                new Vector2(fieldX + boundaryThickness, fieldY)),
+                        1.983));
+        final double ampLength = 2.418;
+        final double ampHeight = 1.207;
+        world.addBody(
+                new Wall("top wall",
+                        Geometry.createPolygon(
+                                new Vector2(ampLength, fieldY),
+                                new Vector2(fieldX - ampLength, fieldY),
+                                new Vector2(fieldX - ampLength, fieldY + boundaryThickness),
+                                new Vector2(ampLength, fieldY + boundaryThickness)),
+                        0.508));
+        world.addBody(
+                new Wall("bottom wall",
+                        Geometry.createPolygon(
+                                new Vector2(fieldX, 0),
+                                new Vector2(0, 0),
+                                new Vector2(0, -boundaryThickness),
+                                new Vector2(fieldX, -boundaryThickness)),
+                        0.508));
+        world.addBody(
+                new Wall("blue amp",
+                        Geometry.createPolygon(
+                                new Vector2(0, fieldY),
+                                new Vector2(ampLength, fieldY),
+                                new Vector2(ampLength, fieldY + boundaryThickness),
+                                new Vector2(0, fieldY + boundaryThickness)),
+                        ampHeight));
+        world.addBody(
+                new Wall("red amp",
+                        Geometry.createPolygon(
+                                new Vector2(fieldX - ampLength, fieldY),
+                                new Vector2(fieldX, fieldY),
+                                new Vector2(fieldX, fieldY + boundaryThickness),
+                                new Vector2(fieldX - ampLength, fieldY + boundaryThickness)),
+                        ampHeight));
+
+        // TODO: add amp wall
+        // TODO: add scoring sensors
     }
 
     private void setUpStages() {
         // these are from the onshape cad,
         // adjusted a tiny bit to line up with the background image.
-        addPost("east post", 3.38, 4.10, 0);
-        addPost("southeast post", 5.60, 2.80, -1);
-        addPost("northeast post", 5.60, 5.38, 1);
-        addPost("southwest post", 10.95, 2.80, 1);
-        addPost("northwest post", 10.95, 5.38, -1);
-        addPost("west post", 13.16, 4.10, 0);
+        for (Map.Entry<String, Pose2d> post : FieldMap.stagePosts.entrySet()) {
+            String name = post.getKey();
+            Pose2d pose = post.getValue();
+            addPost(name, pose.getX(), pose.getY(), pose.getRotation().getRadians());
+        }
+        // TODO: add stage body
     }
 
     private void addPost(String id, double x, double y, double rad) {
-        Body100 post = new Obstacle(id, Geometry.createSquare(0.3));
+        Body100 post = new Obstacle(
+                id,
+                Geometry.createSquare(0.3),
+                1.878);
         post.rotate(rad);
         post.translate(x, y);
         world.addBody(post);
@@ -198,10 +256,11 @@ public class SimWorld {
         addNote(13.657, 7.01);
     }
 
-    private void addNote(double x, double y) {
-        Body100 post = new Note(Geometry.createCircle(0.175));
-        post.translate(x, y);
-        world.addBody(post);
+    public void addNote(double x, double y) {
+        Note note = new Note();
+        note.translate(x, y);
+        world.addBody(note);
+        world.addStepListener(note);
     }
 
 }

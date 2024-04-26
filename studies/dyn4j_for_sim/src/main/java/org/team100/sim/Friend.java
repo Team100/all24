@@ -1,7 +1,7 @@
 package org.team100.sim;
 
-import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.World;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * Friends try to pick from the source and score in the amp corner.
@@ -13,83 +13,52 @@ import org.dyn4j.world.World;
  * TODO: spin away if close to an opponent
  */
 public class Friend extends RobotBody {
-    private static final int kForce = 200;
-    private static final int kTolerance = 2;
-    private static final Vector2 kSource = new Vector2(16, 0);
+    static final Pose2d kSource = new Pose2d(15.5, 2, new Rotation2d(Math.PI));
     /** This is the robot center when facing the amp */
-    static final Vector2 kAmpSpot = new Vector2(1.840, 8.204)
-            .sum(0, -kRobotSize / 2);
+    static final Pose2d kAmpSpot = new Pose2d(1.840, 7.5, new Rotation2d(Math.PI / 2));
     /** Shoot from about 3 meters away */
-    static final Vector2 kShootingSpot = new Vector2(3.0, 5.5);
+    static final Pose2d kShootingSpot = new Pose2d(3.0, 5.5, new Rotation2d(Math.PI));
+    static final Pose2d kPassingSpot = new Pose2d(9.5, 1, new Rotation2d(3 * Math.PI / 4));
+    static final Pose2d kDefendSpot = new Pose2d(3.5, 2, new Rotation2d());
 
-    static final double kShootingAngle = Math.PI;
-
-    public Friend(String id, World<Body100> world, Goal initialGoal) {
-        super(id, world, initialGoal);
+    public Friend(String id, SimWorld world) {
+        super(id, world);
     }
 
     @Override
-    boolean friend(RobotBody other) {
+    public boolean friend(RobotBody other) {
         // either friends or player
         return other instanceof Friend
                 || other instanceof Player;
     }
 
     @Override
-    Vector2 ampPosition() {
+    public Pose2d ampPosition() {
         return kAmpSpot;
     }
 
     @Override
-    Vector2 shootingPosition() {
+    public Pose2d shootingPosition() {
         return kShootingSpot;
     }
 
     @Override
-    double shootingAngle() {
-        return kShootingAngle;
+    public Pose2d sourcePosition() {
+        return kSource;
     }
 
     @Override
-    public void act() {
-        Vector2 position = getWorldCenter();
-        switch (m_goal) {
-            case PICK:
-                Vector2 toPick = position.to(kSource);
-                if (toPick.getMagnitude() < kTolerance) {
-                    // successful pick, now go score
-                    nextGoal();
-                } else {
-                    // keep trying
-                    applyForce(toPick.setMagnitude(kForce));
-                }
-                break;
-            case SCORE_AMP:
-                driveToAmp();
-                break;
-            case SCORE_SPEAKER:
-                driveToSpeaker();
-                break;
-            default:
-                // do nothing
-                break;
-        }
+    public Pose2d opponentSourcePosition() {
+        return Foe.kSource;
+    }
 
-        // look for nearby notes, brute force
-        for (Body100 body : m_world.getBodies()) {
-            if (body instanceof Note) {
-                double distance = position.distance(body.getWorldCenter());
-                if (distance > 0.3)
-                    continue;
-                // System.out.printf("%s %5.3f\n",
-                // body.getClass().getSimpleName(), distance);
-                // TODO: pick up?
-            }
-        }
+    @Override
+    public Pose2d defenderPosition() {
+        return kDefendSpot;
+    }
 
-        avoidObstacles();
-        avoidRobots();
-        avoidEdges();
-
+    @Override
+    public Pose2d passingPosition() {
+        return kPassingSpot;
     }
 }
