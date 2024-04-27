@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import cv2
 import time
@@ -9,7 +10,6 @@ import ntcore as nt
 
 from wpimath.geometry import Translation2d
 from picamera2 import Picamera2
-import sys
 import libcamera
 
 
@@ -47,7 +47,7 @@ class MouseVision:
         )
 
         self.feature_params = dict(
-            maxCorners=20, qualityLevel=0.3, minDistance=10, blockSize=7
+            maxCorners=20, qualityLevel=0.4 , minDistance=10, blockSize=7
         )
 
         self.trajectory_len = 2
@@ -273,7 +273,7 @@ def main():
         width = 64    
         height = 64    
     else:
-        print("UNKNOWN CAMERA: " + model)
+        print(  "UNKNOWN CAMERA: " + model)
         fullwidth = 100
         fullheight = 100
         width = 100
@@ -298,7 +298,7 @@ def main():
             "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # 3/23/24, reduced to 2ms, even less blur.
-            "ExposureTime": 300,
+            "ExposureTime": 4000,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps

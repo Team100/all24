@@ -395,7 +395,6 @@ public class RobotContainer implements Glassy {
     }
 
     public void beforeCommandCycle() {
-        cameraUpdater.update();
         // ModeSelector.selectMode(operatorControl::pov);
     }
     public void onTeleop() {
@@ -429,6 +428,10 @@ public class RobotContainer implements Glassy {
         if (m_auton == null)
             return;
         m_auton.schedule();
+    }
+
+    public void periodic() {
+        cameraUpdater.update();
     }
 
     public void cancelAuton() {

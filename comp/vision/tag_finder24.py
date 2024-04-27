@@ -8,12 +8,11 @@ import pprint
 
 from enum import Enum
 
-import cv2
 import sys
+import cv2
 import libcamera
 import numpy as np
 import ntcore
-from ntcore import EventFlags
 import robotpy_apriltag
 
 from cscore import CameraServer
@@ -86,7 +85,7 @@ class TagFinder:
             k1 = -0.003
             k2 = 0.04
         # TODO get these real distortion values
-        elif model == "imx296":
+        elif self.model == "imx296":
             fx = 1680
             fy = 1680
             cx = int(1456/2)
@@ -118,6 +117,7 @@ class TagFinder:
     def analyze(self, request):
         potentialTags = self.estimatedTagPose.get()
         potentialArray = []
+        z = []
         for Blip24s in potentialTags:
             translation = Blip24s.pose.translation()
             if (translation.Z() < 0):
@@ -130,6 +130,7 @@ class TagFinder:
                 # print(Blip24s.id)
                 # print(object_points)
                 # print(point2D[0][0])
+                z.append(translation.Z())
                 potentialArray.append(point2D[0][0])
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
@@ -148,8 +149,10 @@ class TagFinder:
         # TODO: probably remove this
         serial = getserial()
         identity = Camera(serial)
-        if len(potentialArray) == 1:
-            img = img[potentialArray[1]-10 : potentialArray[1]+10, potentialArray[0]-10:potentialArray[0]+10]
+        if (len(potentialArray) == 1):
+            offset = 100/z[0]
+            if (potentialArray[1]-offset > 0 and potentialArray[0]-offset > 0 and potentialArray[0]+offset < self.width and potentialArray[1]+offset < self.height):
+                img = img[potentialArray[1]-offset : potentialArray[1]+offset, potentialArray[0]-offset:potentialArray[0]+offset]
 
         img = cv2.undistort(img, self.mtx, self.dist)
 
