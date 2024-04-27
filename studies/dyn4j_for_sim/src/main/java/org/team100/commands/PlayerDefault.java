@@ -1,6 +1,6 @@
 package org.team100.commands;
 
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,12 +11,12 @@ public class PlayerDefault extends Command {
     private static final double kTorque = 100;
 
     private final XboxController m_control;
-    private final RobotSubsystem m_player;
+    private final RobotAssembly m_player;
 
-    public PlayerDefault(RobotSubsystem player) {
+    public PlayerDefault(RobotAssembly player) {
         m_control = new XboxController(0);
         m_player = player;
-        addRequirements(player);
+        addRequirements(player.getRobotSubsystem());
     }
 
     @Override

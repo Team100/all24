@@ -1,6 +1,6 @@
 package org.team100.commands;
 
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,17 +13,17 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Strategy {
     private final Alliance m_alliance;
-    private final RobotSubsystem m_scorer;
-    private final RobotSubsystem m_passer;
-    private final RobotSubsystem m_defender;
+    private final RobotAssembly m_scorer;
+    private final RobotAssembly m_passer;
+    private final RobotAssembly m_defender;
     private final Source m_source;
     private final boolean m_blue;
 
     public Strategy(
             Alliance alliance,
-            RobotSubsystem scorer,
-            RobotSubsystem passer,
-            RobotSubsystem defender,
+            RobotAssembly scorer,
+            RobotAssembly passer,
+            RobotAssembly defender,
             Source source,
             boolean blue) {
         m_alliance = alliance;
@@ -45,7 +45,7 @@ public class Strategy {
         m_source.setDefaultCommand(new SourceDefault(m_source));
     }
 
-    public void onEnd(RobotSubsystem robot, Command command) {
+    public void onEnd(RobotAssembly robot, Command command) {
         if (robot == m_scorer) {
             // scorer just goes back and forth from speaker to amp
             // TODO: count amplification events

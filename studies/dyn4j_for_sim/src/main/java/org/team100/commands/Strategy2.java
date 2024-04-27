@@ -2,7 +2,7 @@ package org.team100.commands;
 
 import java.util.Random;
 
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,9 +13,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Strategy2 {
     private final Alliance m_alliance;
-    private final RobotSubsystem m_player;
-    private final RobotSubsystem m_friend1;
-    private final RobotSubsystem m_friend2;
+    private final RobotAssembly m_player;
+    private final RobotAssembly m_friend1;
+    private final RobotAssembly m_friend2;
     private final Source m_source;
     private final boolean m_blue;
 
@@ -23,9 +23,9 @@ public class Strategy2 {
 
     public Strategy2(
             Alliance alliance,
-            RobotSubsystem player,
-            RobotSubsystem friend1,
-            RobotSubsystem friend2,
+            RobotAssembly player,
+            RobotAssembly friend1,
+            RobotAssembly friend2,
             Source source,
             boolean blue) {
         m_alliance = alliance;
@@ -47,7 +47,7 @@ public class Strategy2 {
         m_source.setDefaultCommand(new SourceDefault(m_source));
     }
 
-    public void onEnd(RobotSubsystem robot, Command command) {
+    public void onEnd(RobotAssembly robot, Command command) {
         System.out.printf("on end %s %s\n", robot.getName(), command.getName());
         if (command instanceof ScoreSpeaker) {
             CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));

@@ -2,7 +2,7 @@ package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,14 +13,14 @@ public class Pass extends Command {
 
     private static final int kPassAttraction = 100;
     private final Alliance m_alliance;
-    private final RobotSubsystem m_robot;
+    private final RobotAssembly m_robot;
     private final Tactics m_tactics;
 
-    public Pass(Alliance alliance, RobotSubsystem robot) {
+    public Pass(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
         m_tactics = new Tactics(robot);
-        addRequirements(robot);
+        addRequirements(robot.getRobotSubsystem());
     }
 
     @Override

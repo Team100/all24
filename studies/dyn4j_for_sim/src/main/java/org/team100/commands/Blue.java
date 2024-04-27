@@ -1,7 +1,7 @@
 package org.team100.commands;
 
 import org.team100.robot.Source;
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
 import org.team100.sim.SimWorld;
@@ -16,18 +16,18 @@ public class Blue extends Alliance {
      */
     private static final boolean kRealPlayer = false;
     private static final Translation2d kSpeaker = new Translation2d(0, 5.548);
-    private final RobotSubsystem player;
-    private final RobotSubsystem friend1;
-    private final RobotSubsystem friend2;
+    private final RobotAssembly player;
+    private final RobotAssembly friend1;
+    private final RobotAssembly friend2;
     private final Source source;
     private final Strategy2 strategy;
 
     public Blue(SimWorld world) {
-        player = new RobotSubsystem(new Player(world), kSpeaker);
+        player = new RobotAssembly(new Player(world), kSpeaker);
         world.addBody(player.getRobotBody());
-        friend1 = new RobotSubsystem(new Friend("blue 1", world), kSpeaker);
+        friend1 = new RobotAssembly(new Friend("blue 1", world), kSpeaker);
         world.addBody(friend1.getRobotBody());
-        friend2 = new RobotSubsystem(new Friend("blue 2", world), kSpeaker);
+        friend2 = new RobotAssembly(new Friend("blue 2", world), kSpeaker);
         world.addBody(friend2.getRobotBody());
         source = new Source(world, 15.5, 1.0);
         strategy = new Strategy2(this, player, friend1, friend2, source, true);
@@ -37,9 +37,9 @@ public class Blue extends Alliance {
         strategy.init();
         if (kRealPlayer) {
             // override the scheduled command
-            Command scheduled = CommandScheduler.getInstance().requiring(player);
+            Command scheduled = CommandScheduler.getInstance().requiring(player.getRobotSubsystem());
             System.out.printf("scheduled %s\n", scheduled);
-            player.setDefaultCommand(new PlayerDefault(player));
+            player.getRobotSubsystem().setDefaultCommand(new PlayerDefault(player));
             // this triggers onEnd so there's a condition for it below. :(
             if (scheduled != null)
                 CommandScheduler.getInstance().cancel(scheduled);
@@ -51,7 +51,7 @@ public class Blue extends Alliance {
     }
 
     @Override
-    public void onEnd(RobotSubsystem robot, Command command) {
+    public void onEnd(RobotAssembly robot, Command command) {
         if (kRealPlayer) {
             if (robot == player) {
                 System.out.println("skip rescheduling for player");

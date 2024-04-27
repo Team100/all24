@@ -1,6 +1,6 @@
 package org.team100.commands;
 
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -8,14 +8,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class Steal extends Command {
 
     private final Alliance m_alliance;
-    private final RobotSubsystem m_robot;
+    private final RobotAssembly m_robot;
     private final Tactics m_tactics;
 
-    public Steal(Alliance alliance, RobotSubsystem robot) {
+    public Steal(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
         m_tactics = new Tactics(robot);
-        addRequirements(robot);
+        addRequirements(robot.getRobotSubsystem());
     }
 
     @Override

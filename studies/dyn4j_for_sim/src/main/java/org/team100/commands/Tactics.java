@@ -9,7 +9,7 @@ import java.util.NavigableMap;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.robot.FieldMap;
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 import org.team100.robot.RobotSubsystem.RobotSighting;
 import org.team100.sim.Heuristics;
 
@@ -31,9 +31,9 @@ public class Tactics {
     // targets appearing to move faster than this are probably false associations.
     private static final double kMaxTargetVelocity = 4;
 
-    private final RobotSubsystem m_robot;
+    private final RobotAssembly m_robot;
 
-    public Tactics(RobotSubsystem robot) {
+    public Tactics(RobotAssembly robot) {
         m_robot = robot;
     }
 

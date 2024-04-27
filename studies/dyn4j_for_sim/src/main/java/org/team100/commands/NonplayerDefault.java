@@ -1,15 +1,15 @@
 package org.team100.commands;
 
-import org.team100.robot.RobotSubsystem;
+import org.team100.robot.RobotAssembly;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class NonplayerDefault extends Command {
     private final Tactics m_tactics;
 
-    public NonplayerDefault(RobotSubsystem robot) {
+    public NonplayerDefault(RobotAssembly robot) {
         m_tactics = new Tactics(robot);
-        addRequirements(robot);
+        addRequirements(robot.getRobotSubsystem());
     }
 
     @Override
