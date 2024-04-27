@@ -33,6 +33,11 @@ public class DefendSource extends Command {
     }
 
     @Override
+    public String getName() {
+        return "Defend Source: " + m_robot.getName();
+    }
+
+    @Override
     public void execute() {
         m_tactics.avoidObstacles();
         m_tactics.avoidEdges();

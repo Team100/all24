@@ -22,6 +22,11 @@ public class PickFromSource extends Command {
     }
 
     @Override
+    public String getName() {
+        return "Pick From Source: " + m_robot.getName();
+    }
+
+    @Override
     public void execute() {
         m_tactics.avoidObstacles();
         // TODO: turn off edge repulsion?

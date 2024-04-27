@@ -40,6 +40,10 @@ public abstract class RobotBody extends Body100 {
         setLinearDamping(2);
     }
 
+    public String getName() {
+        return m_id;
+    }
+
     public abstract boolean friend(RobotBody body);
 
     public abstract Pose2d ampPosition();

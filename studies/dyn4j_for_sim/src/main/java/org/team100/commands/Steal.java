@@ -19,6 +19,11 @@ public class Steal extends Command {
     }
 
     @Override
+    public String getName() {
+        return "Steal: " + m_robot.getName();
+    }
+
+    @Override
     public void execute() {
         m_tactics.avoidObstacles();
         m_tactics.avoidEdges();

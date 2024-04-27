@@ -114,10 +114,10 @@ public class RobotSubsystem extends SubsystemBase {
         shooterMap.put(0.0, -1.571); // pi/2
         shooterMap.put(0.5, -1.400);
         shooterMap.put(1.0, -1.240); // 1.29 is min feasible range
-        shooterMap.put(1.5, -1.090);
-        shooterMap.put(2.0, -0.950);
-        shooterMap.put(2.5, -0.830);
-        shooterMap.put(3.0, -0.730);
+        shooterMap.put(1.5, -1.070);
+        shooterMap.put(2.0, -0.930);
+        shooterMap.put(2.5, -0.810);
+        shooterMap.put(3.0, -0.710);
         shooterMap.put(3.5, -0.650);
         shooterMap.put(4.0, -0.590);
         shooterMap.put(4.5, -0.540);
@@ -126,6 +126,11 @@ public class RobotSubsystem extends SubsystemBase {
         shooterMap.put(6.0, -0.435);
         shooterMap.put(6.5, -0.415);
         shooterMap.put(7.0, -0.400); // beyond max feasible range
+    }
+
+    @Override
+    public String getName() {
+        return m_robotBody.getName();
     }
 
     public void intake() {
@@ -286,7 +291,8 @@ public class RobotSubsystem extends SubsystemBase {
     public void shoot() {
         double range = getPose().getTranslation().getDistance(m_speakerPosition);
         double elevationRad = shooterMap.get(range);
-        // System.out.printf("shoot range %5.3f elevation %5.3f\n", range, elevationRad);
+        System.out.printf("shoot range %5.3f elevation %5.3f\n",
+                range, elevationRad);
         shooter(kShootImpulseNs, elevationRad, 0);
     }
 

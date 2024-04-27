@@ -20,6 +20,11 @@ public class PlayerDefault extends Command {
     }
 
     @Override
+    public String getName() {
+        return "Player Default: " + m_player.getName();
+    }
+
+    @Override
     public void execute() {
         double steer = -m_control.getLeftX(); // axis 0
         double driveX = -m_control.getRightY(); // axis 5

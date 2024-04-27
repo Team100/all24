@@ -21,6 +21,11 @@ public class ScoreSpeaker extends Command {
         addRequirements(robot);
     }
 
+    @Override
+    public String getName() {
+        return "Score Speaker: " + m_robot.getName();
+    }
+
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {

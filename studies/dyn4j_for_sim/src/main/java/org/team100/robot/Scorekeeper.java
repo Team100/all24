@@ -68,9 +68,9 @@ public class Scorekeeper
                 // don't double count, don't eject after scoring
                 return false;
             }
-            // System.out.printf("sensor extent %s note extent %s\n",
-            //         sensor.getVerticalExtent(),
-            //         maybeNote.getVerticalExtent());
+            System.out.printf("sensor extent %s note extent %s\n",
+                    sensor.getVerticalExtent(),
+                    maybeNote.getVerticalExtent());
             if (!sensor.getVerticalExtent().contains(maybeNote.getVerticalExtent())) {
                 // bounce out if note is not completely contained by the sensor.
                 return true;
@@ -84,7 +84,7 @@ public class Scorekeeper
             n.scored = true;
             // scored notes leave the field
             m_doomed.add(n);
-            // System.out.printf("center %s altitude %5.3f\n", n.getWorldCenter(), n.getAltitude());
+            System.out.printf("center %s altitude %5.3f\n", n.getWorldCenter(), n.getAltitude());
             handler.run();
             printScore();
             return false;
@@ -115,7 +115,6 @@ public class Scorekeeper
 
     private void printScore() {
         System.out.printf("Blue %d Red %d\n", m_blueScore, m_redScore);
-
     }
 
     @Override
