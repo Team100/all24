@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Manages the note and joint
  */
 public class IndexerSubsystem extends SubsystemBase {
+    private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
 
     /**
@@ -24,7 +25,8 @@ public class IndexerSubsystem extends SubsystemBase {
     /** Joint linking the note to the robot, so we can remove it when ejecting. */
     private Joint<Body100> m_joint;
 
-    public IndexerSubsystem(RobotBody robotBody) {
+    public IndexerSubsystem(RobotAssembly assembly, RobotBody robotBody) {
+        m_assembly = assembly;
         m_robotBody = robotBody;
     }
 
@@ -46,16 +48,19 @@ public class IndexerSubsystem extends SubsystemBase {
     }
 
     /**
-     * Removes and returns the note from the indexer.
+     * Removes and returns the note from the indexer and stashes it in the assembly
+     * handoff.
      * 
-     * Returns null if empty.
+     * Returns false if empty.
      */
-    public Note poll() {
+    public boolean towardsShooter() {
+        if (m_note == null)
+            return false;
         m_robotBody.getWorld().removeJoint(m_joint);
         m_note.drop();
-        Note result = m_note;
+        m_assembly.m_indexerShooterHandoff = m_note;
         m_joint = null;
         m_note = null;
-        return result;
+        return true;
     }
 }

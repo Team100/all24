@@ -45,6 +45,8 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     private static final double kAmpElevationRad = -1.48;
 
+    private final RobotAssembly m_assembly;
+
     private final RobotBody m_robotBody;
     /**
      * key == range
@@ -54,7 +56,9 @@ public class ShooterSubsystem extends SubsystemBase {
     InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
     private final Translation2d m_speakerPosition;
 
-    public ShooterSubsystem(RobotBody robotBody, Translation2d speakerPosition) {
+    public ShooterSubsystem(RobotAssembly assembly, RobotBody robotBody, Translation2d speakerPosition) {
+        m_assembly = assembly;
+
         m_robotBody = robotBody;
         m_speakerPosition = speakerPosition;
         // I experimented and then smoothed the curve by eye.
@@ -76,7 +80,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     /** Shooting is full speed, 20 m/s */
-    public void shoot(Note n) {
+    public void shoot() {
+        Note n = m_assembly.m_indexerShooterHandoff;
+        if (n == null)
+            return;
+
         double range = m_robotBody.getPose().getTranslation().getDistance(m_speakerPosition);
         double elevationRad = shooterMap.get(range);
         System.out.printf("shoot range %5.3f elevation %5.3f\n",

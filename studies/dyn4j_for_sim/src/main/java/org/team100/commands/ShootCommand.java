@@ -2,7 +2,6 @@ package org.team100.commands;
 
 import org.team100.robot.IndexerSubsystem;
 import org.team100.robot.ShooterSubsystem;
-import org.team100.sim.Note;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -24,10 +23,12 @@ public class ShootCommand extends Command {
      */
     @Override
     public void execute() {
-        Note note = m_indexer.poll();
-        if (note == null)
+        // stash the note in the assembly handoff
+        if (!m_indexer.towardsShooter())
             return;
-        m_shooter.shoot(note);
+
+        // take the note from the handoff
+        m_shooter.shoot();
     }
 
 }
