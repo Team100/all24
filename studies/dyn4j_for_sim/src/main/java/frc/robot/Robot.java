@@ -1,21 +1,17 @@
 package frc.robot;
 
-import org.team100.sim.SimWorld;
+import org.team100.robot.RobotContainer;
+
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
 
-    private final SimWorld simWorld;
+    private final RobotContainer m_robotContainer;
 
     public Robot() {
-        simWorld = new SimWorld();
-    }
-
-    @Override
-    public void robotInit() {
-        simWorld.render();
+        m_robotContainer = new RobotContainer();
     }
 
     @Override
@@ -24,15 +20,18 @@ public class Robot extends TimedRobot {
     }
 
     @Override
+    public void robotInit() {
+        m_robotContainer.init();
+    }
+
+    @Override
     public void teleopInit() {
-        // reset position
-        simWorld.init();
+        // reset each time
+        m_robotContainer.init();
     }
 
     @Override
     public void teleopPeriodic() {
-        simWorld.update();
-        simWorld.render();
-        simWorld.behavior();
+        m_robotContainer.periodic();
     }
 }
