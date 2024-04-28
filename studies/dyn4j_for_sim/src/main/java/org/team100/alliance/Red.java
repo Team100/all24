@@ -1,9 +1,10 @@
-package org.team100.commands;
+package org.team100.alliance;
 
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
 import org.team100.sim.SimWorld;
+import org.team100.strategy.Strategy;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;

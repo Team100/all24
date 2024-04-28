@@ -1,5 +1,12 @@
-package org.team100.commands;
+package org.team100.strategy;
 
+import org.team100.alliance.Alliance;
+import org.team100.commands.DefendSource;
+import org.team100.commands.Pass;
+import org.team100.commands.PickFromSource;
+import org.team100.commands.ScoreAmp;
+import org.team100.commands.ScoreSpeaker;
+import org.team100.commands.SourceDefault;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 
@@ -35,17 +42,25 @@ public class Strategy {
     }
 
     public void init() {
-        m_scorer.setState(m_blue ? 2 : 15, m_blue ? 4 : 3, 0, 0);
-        m_passer.setState(m_blue ? 1 : 15, m_blue ? 1 : 5, 0, 0);
-        m_defender.setState(m_blue ? 1 : 13, m_blue ? 4 : 7, 0, 0);
-        CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, m_scorer));
-        CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, m_passer));
-        CommandScheduler.getInstance().schedule(new DefendSource(m_alliance, m_defender));
+        if (m_scorer.isNPC()) {
+            m_scorer.setState(m_blue ? 2 : 15, m_blue ? 4 : 3, 0, 0);
+            CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, m_scorer));
+        }
+        if (m_passer.isNPC()) {
+            m_passer.setState(m_blue ? 1 : 15, m_blue ? 1 : 5, 0, 0);
+            CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, m_passer));
+        }
+        if (m_defender.isNPC()) {
+            m_defender.setState(m_blue ? 1 : 13, m_blue ? 4 : 7, 0, 0);
+            CommandScheduler.getInstance().schedule(new DefendSource(m_alliance, m_defender));
+        }
         // source just runs the default forever
         m_source.setDefaultCommand(new SourceDefault(m_source));
     }
 
     public void onEnd(RobotAssembly robot, Command command) {
+        if (!robot.isNPC())
+            return;
         if (robot == m_scorer) {
             // scorer just goes back and forth from speaker to amp
             // TODO: count amplification events

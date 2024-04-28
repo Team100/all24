@@ -1,14 +1,15 @@
-package org.team100.commands;
+package org.team100.alliance;
 
-import org.team100.robot.Source;
+import org.team100.robot.RealPlayerAssembly;
 import org.team100.robot.RobotAssembly;
+import org.team100.robot.Source;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
 import org.team100.sim.SimWorld;
+import org.team100.strategy.Strategy2;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Blue extends Alliance {
     /**
@@ -23,7 +24,11 @@ public class Blue extends Alliance {
     private final Strategy2 strategy;
 
     public Blue(SimWorld world) {
-        player = new RobotAssembly(new Player(world), kSpeaker);
+        if (kRealPlayer) {
+            player = new RealPlayerAssembly(new Player(world), kSpeaker);
+        } else {
+            player = new RobotAssembly(new Player(world), kSpeaker);
+        }
         world.addBody(player.getRobotBody());
         friend1 = new RobotAssembly(new Friend("blue 1", world), kSpeaker);
         world.addBody(friend1.getRobotBody());
@@ -35,15 +40,9 @@ public class Blue extends Alliance {
 
     public void init() {
         strategy.init();
-        if (kRealPlayer) {
-            // override the scheduled command
-            Command scheduled = CommandScheduler.getInstance().requiring(player.getRobotSubsystem());
-            System.out.printf("scheduled %s\n", scheduled);
-            player.getRobotSubsystem().setDefaultCommand(new PlayerDefault(player));
-            // this triggers onEnd so there's a condition for it below. :(
-            if (scheduled != null)
-                CommandScheduler.getInstance().cancel(scheduled);
-        }
+        if (kRealPlayer)
+            player.setState(2, 4, 0, 0);
+
     }
 
     public void periodic() {
@@ -52,13 +51,6 @@ public class Blue extends Alliance {
 
     @Override
     public void onEnd(RobotAssembly robot, Command command) {
-        if (kRealPlayer) {
-            if (robot == player) {
-                System.out.println("skip rescheduling for player");
-                // let the player continue with the default
-                return;
-            }
-        }
         strategy.onEnd(robot, command);
     }
 

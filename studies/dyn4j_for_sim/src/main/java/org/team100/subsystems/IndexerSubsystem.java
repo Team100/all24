@@ -1,17 +1,16 @@
-package org.team100.robot;
+package org.team100.subsystems;
 
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
+import org.team100.robot.RobotAssembly;
 import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/**
- * Manages the note and joint
- */
+/** Manages the note and joint. */
 public class IndexerSubsystem extends SubsystemBase {
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
@@ -64,7 +63,11 @@ public class IndexerSubsystem extends SubsystemBase {
         return false;
     }
 
-    /** Eject the note. */
+    /**
+     * Ejects the note.
+     * 
+     * Returns false if there is no note to eject.
+     */
     public boolean outtake() {
         if (m_note == null) {
             return false;

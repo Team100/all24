@@ -1,4 +1,4 @@
-package org.team100.robot;
+package org.team100.subsystems;
 
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.Torque;
@@ -12,22 +12,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Contains the sim body. */
-public class RobotSubsystem extends SubsystemBase {
-
-    /** For simulation. */
+public class DriveSubsystem extends SubsystemBase {
     private final RobotBody m_robotBody;
-
     private final Translation2d m_speakerPosition;
 
     /**
      * @param robotBody
      * @param speakerPosition to calculate range for the shooter map
      */
-    public RobotSubsystem(RobotBody robotBody, Translation2d speakerPosition) {
+    public DriveSubsystem(RobotBody robotBody, Translation2d speakerPosition) {
         m_robotBody = robotBody;
         m_speakerPosition = speakerPosition;
-        // I experimented and then smoothed the curve by eye.
-
     }
 
     @Override

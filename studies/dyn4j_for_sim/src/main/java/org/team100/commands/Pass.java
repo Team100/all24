@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.alliance.Alliance;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.robot.RobotAssembly;
 
@@ -20,7 +21,7 @@ public class Pass extends Command {
         m_alliance = alliance;
         m_robot = robot;
         m_tactics = new Tactics(robot);
-        addRequirements(robot.getRobotSubsystem());
+        addRequirements(robot.getDriveSubsystem());
     }
 
     @Override

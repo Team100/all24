@@ -4,9 +4,13 @@ import java.util.NavigableMap;
 
 import org.team100.commands.ShootCommand;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.robot.CameraSubsystem.RobotSighting;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.DriveSubsystem;
+import org.team100.subsystems.IndexerSubsystem;
+import org.team100.subsystems.ShooterSubsystem;
+import org.team100.subsystems.CameraSubsystem.RobotSighting;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,21 +24,19 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * for "real" robot commands to know about them.
  */
 public class RobotAssembly {
-
-    // for now. TODO: remove
-    private final RobotSubsystem m_robot;
+    private final DriveSubsystem m_robot;
     private final IndexerSubsystem m_indexer;
     private final ShooterSubsystem m_shooter;
     private final CameraSubsystem m_camera;
 
     /*
-     * contains a note if the indexer has ejected it towards the shooter, but the
+     * Contains a note if the indexer has ejected it towards the shooter, but the
      * shooter hasn't yet picked it up.
      */
     public Note m_indexerShooterHandoff;
 
     public RobotAssembly(RobotBody robotBody, Translation2d speakerPosition) {
-        m_robot = new RobotSubsystem(robotBody, speakerPosition);
+        m_robot = new DriveSubsystem(robotBody, speakerPosition);
         m_indexer = new IndexerSubsystem(this, robotBody);
         m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition);
         m_camera = new CameraSubsystem(robotBody);
@@ -42,7 +44,12 @@ public class RobotAssembly {
         new Trigger(() -> false).onTrue(new ShootCommand(m_indexer, m_shooter));
     }
 
-    public RobotSubsystem getRobotSubsystem() {
+    /** Am I a nonplayer?  If so, the strategy should determine my behavior. */
+    public boolean isNPC() {
+        return true;
+    }
+
+    public DriveSubsystem getDriveSubsystem() {
         return m_robot;
     }
 

@@ -1,4 +1,4 @@
-package org.team100.commands;
+package org.team100.alliance;
 
 import org.team100.robot.RobotAssembly;
 

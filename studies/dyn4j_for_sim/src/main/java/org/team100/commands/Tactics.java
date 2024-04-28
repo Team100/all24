@@ -7,11 +7,11 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.field.FieldMap;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.robot.FieldMap;
 import org.team100.robot.RobotAssembly;
-import org.team100.robot.CameraSubsystem.RobotSighting;
 import org.team100.sim.Heuristics;
+import org.team100.subsystems.CameraSubsystem.RobotSighting;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;

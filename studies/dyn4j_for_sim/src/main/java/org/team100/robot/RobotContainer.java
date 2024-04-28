@@ -1,7 +1,7 @@
 package org.team100.robot;
 
-import org.team100.commands.Blue;
-import org.team100.commands.Red;
+import org.team100.alliance.Blue;
+import org.team100.alliance.Red;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

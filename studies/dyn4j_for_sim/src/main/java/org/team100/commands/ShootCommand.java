@@ -1,7 +1,7 @@
 package org.team100.commands;
 
-import org.team100.robot.IndexerSubsystem;
-import org.team100.robot.ShooterSubsystem;
+import org.team100.subsystems.IndexerSubsystem;
+import org.team100.subsystems.ShooterSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 

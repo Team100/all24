@@ -6,17 +6,17 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** The "player" robot is manually controlled. */
-public class PlayerDefault extends Command {
+public class PlayerDefaultDrive extends Command {
     private static final double kForce = 200;
     private static final double kTorque = 100;
 
     private final XboxController m_control;
     private final RobotAssembly m_player;
 
-    public PlayerDefault(RobotAssembly player) {
+    public PlayerDefaultDrive(RobotAssembly player) {
         m_control = new XboxController(0);
         m_player = player;
-        addRequirements(player.getRobotSubsystem());
+        addRequirements(player.getDriveSubsystem());
     }
 
     @Override

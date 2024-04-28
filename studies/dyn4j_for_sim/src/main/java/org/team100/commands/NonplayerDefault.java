@@ -9,7 +9,7 @@ public class NonplayerDefault extends Command {
 
     public NonplayerDefault(RobotAssembly robot) {
         m_tactics = new Tactics(robot);
-        addRequirements(robot.getRobotSubsystem());
+        addRequirements(robot.getDriveSubsystem());
     }
 
     @Override
