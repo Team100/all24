@@ -4,7 +4,7 @@ import java.util.NavigableMap;
 
 import org.team100.commands.ShootCommand;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.robot.RobotSubsystem.RobotSighting;
+import org.team100.robot.CameraSubsystem.RobotSighting;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
@@ -25,6 +25,7 @@ public class RobotAssembly {
     private final RobotSubsystem m_robot;
     private final IndexerSubsystem m_indexer;
     private final ShooterSubsystem m_shooter;
+    private final CameraSubsystem m_camera;
 
     /*
      * contains a note if the indexer has ejected it towards the shooter, but the
@@ -36,6 +37,7 @@ public class RobotAssembly {
         m_robot = new RobotSubsystem(robotBody, speakerPosition);
         m_indexer = new IndexerSubsystem(this, robotBody);
         m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition);
+        m_camera = new CameraSubsystem(robotBody);
 
         new Trigger(() -> false).onTrue(new ShootCommand(m_indexer, m_shooter));
     }
@@ -85,7 +87,7 @@ public class RobotAssembly {
     }
 
     public NavigableMap<Double, RobotSighting> recentSightings() {
-        return m_robot.recentSightings();
+        return m_camera.recentSightings();
     }
 
     public Pose2d shootingPosition() {

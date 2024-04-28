@@ -6,7 +6,7 @@ import java.util.NavigableMap;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.robot.RobotAssembly;
-import org.team100.robot.RobotSubsystem.RobotSighting;
+import org.team100.robot.CameraSubsystem.RobotSighting;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
