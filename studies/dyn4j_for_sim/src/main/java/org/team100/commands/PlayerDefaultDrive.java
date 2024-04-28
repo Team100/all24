@@ -1,6 +1,6 @@
 package org.team100.commands;
 
-import org.team100.robot.RobotAssembly;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,17 +11,17 @@ public class PlayerDefaultDrive extends Command {
     private static final double kTorque = 100;
 
     private final XboxController m_control;
-    private final RobotAssembly m_player;
+    private final DriveSubsystem m_drive;
 
-    public PlayerDefaultDrive(RobotAssembly player, XboxController control) {
+    public PlayerDefaultDrive(DriveSubsystem drive, XboxController control) {
         m_control = control;
-        m_player = player;
-        addRequirements(player.getDriveSubsystem());
+        m_drive = drive;
+        addRequirements(drive);
     }
 
     @Override
     public String getName() {
-        return "Player Default: " + m_player.getName();
+        return "Player Default: " + m_drive.getName();
     }
 
     @Override
@@ -29,19 +29,7 @@ public class PlayerDefaultDrive extends Command {
         double steer = -m_control.getLeftX(); // axis 0
         double driveX = -m_control.getRightY(); // axis 5
         double driveY = -m_control.getRightX(); // axis 4
-        m_player.apply(driveX * kForce, driveY * kForce, steer * kTorque);
-
-
-        if (m_control.getRawButton(3)) {
-            m_player.shoot();
-        }
-        if (m_control.getRawButton(4)) {
-            m_player.lob();
-        }
-        if (m_control.getRawButton(5)) {
-            m_player.amp();
-        }
-
+        m_drive.apply(driveX * kForce, driveY * kForce, steer * kTorque);
     }
 
 }

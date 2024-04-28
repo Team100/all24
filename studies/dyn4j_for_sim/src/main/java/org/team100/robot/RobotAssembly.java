@@ -61,10 +61,6 @@ public class RobotAssembly {
         return m_drive.getName();
     }
 
-    public String getSubsystem() {
-        return m_drive.getSubsystem();
-    }
-
     public void addChild(String name, Sendable child) {
         m_drive.addChild(name, child);
     }
@@ -108,20 +104,4 @@ public class RobotAssembly {
     public Pose2d passingPosition() {
         return m_drive.passingPosition();
     }
-
-    public void shoot() {
-        m_indexer.towardsShooter();
-        m_shooter.shoot();
-    }
-
-    public void lob() {
-        m_indexer.towardsShooter();
-        m_shooter.lob();
-    }
-
-    public void amp() {
-        m_indexer.towardsShooter();
-        m_shooter.amp();
-    }
-
 }
