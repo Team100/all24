@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * for "real" robot commands to know about them.
  */
 public class RobotAssembly {
-    private final DriveSubsystem m_robot;
-    private final IndexerSubsystem m_indexer;
-    private final ShooterSubsystem m_shooter;
+    protected final DriveSubsystem m_drive;
+    protected final IndexerSubsystem m_indexer;
+    protected final ShooterSubsystem m_shooter;
     private final CameraSubsystem m_camera;
 
     /*
@@ -36,7 +36,7 @@ public class RobotAssembly {
     public Note m_indexerShooterHandoff;
 
     public RobotAssembly(RobotBody robotBody, Translation2d speakerPosition) {
-        m_robot = new DriveSubsystem(robotBody, speakerPosition);
+        m_drive = new DriveSubsystem(robotBody, speakerPosition);
         m_indexer = new IndexerSubsystem(this, robotBody);
         m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition);
         m_camera = new CameraSubsystem(robotBody);
@@ -50,47 +50,43 @@ public class RobotAssembly {
     }
 
     public DriveSubsystem getDriveSubsystem() {
-        return m_robot;
+        return m_drive;
     }
 
     public RobotBody getRobotBody() {
-        return m_robot.getRobotBody();
+        return m_drive.getRobotBody();
     }
 
     public String getName() {
-        return m_robot.getName();
+        return m_drive.getName();
     }
 
     public String getSubsystem() {
-        return m_robot.getSubsystem();
+        return m_drive.getSubsystem();
     }
 
     public void addChild(String name, Sendable child) {
-        m_robot.addChild(name, child);
-    }
-
-    public void intake() {
-        m_indexer.intake();
+        m_drive.addChild(name, child);
     }
 
     public void setState(double x, double y, double vx, double vy) {
-        m_robot.setState(x, y, vx, vy);
+        m_drive.setState(x, y, vx, vy);
     }
 
     public void apply(double x, double y, double theta) {
-        m_robot.apply(x, y, theta);
+        m_drive.apply(x, y, theta);
     }
 
     public Pose2d getPose() {
-        return m_robot.getPose();
+        return m_drive.getPose();
     }
 
     public FieldRelativeVelocity getVelocity() {
-        return m_robot.getVelocity();
+        return m_drive.getVelocity();
     }
 
     public void periodic() {
-        m_robot.periodic();
+        m_drive.periodic();
     }
 
     public NavigableMap<Double, RobotSighting> recentSightings() {
@@ -98,27 +94,19 @@ public class RobotAssembly {
     }
 
     public Pose2d shootingPosition() {
-        return m_robot.shootingPosition();
+        return m_drive.shootingPosition();
     }
 
     public Pose2d ampPosition() {
-        return m_robot.ampPosition();
+        return m_drive.ampPosition();
     }
 
     public Pose2d sourcePosition() {
-        return m_robot.sourcePosition();
+        return m_drive.sourcePosition();
     }
 
     public Pose2d passingPosition() {
-        return m_robot.passingPosition();
-    }
-
-    public void outtake() {
-        m_indexer.outtake();
-    }
-
-    public void rotateToShoot() {
-        m_robot.rotateToShoot();
+        return m_drive.passingPosition();
     }
 
     public void shoot() {

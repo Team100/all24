@@ -13,8 +13,8 @@ public class PlayerDefaultDrive extends Command {
     private final XboxController m_control;
     private final RobotAssembly m_player;
 
-    public PlayerDefaultDrive(RobotAssembly player) {
-        m_control = new XboxController(0);
+    public PlayerDefaultDrive(RobotAssembly player, XboxController control) {
+        m_control = control;
         m_player = player;
         addRequirements(player.getDriveSubsystem());
     }
@@ -31,12 +31,7 @@ public class PlayerDefaultDrive extends Command {
         double driveY = -m_control.getRightX(); // axis 4
         m_player.apply(driveX * kForce, driveY * kForce, steer * kTorque);
 
-        if (m_control.getRawButton(1)) {
-            m_player.intake();
-        }
-        if (m_control.getRawButton(2)) {
-            m_player.outtake();
-        }
+
         if (m_control.getRawButton(3)) {
             m_player.shoot();
         }
@@ -46,9 +41,7 @@ public class PlayerDefaultDrive extends Command {
         if (m_control.getRawButton(5)) {
             m_player.amp();
         }
-        if (m_control.getRawButton(6)) {
-            m_player.rotateToShoot();
-        }
+
     }
 
 }
