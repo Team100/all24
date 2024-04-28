@@ -151,8 +151,8 @@ class TagFinder:
         identity = Camera(serial)
         if (len(potentialArray) == 1):
             offset = 100/z[0]
-            if (potentialArray[1]-offset > 0 and potentialArray[0]-offset > 0 and potentialArray[0]+offset < self.width and potentialArray[1]+offset < self.height):
-                img = img[potentialArray[1]-offset : potentialArray[1]+offset, potentialArray[0]-offset:potentialArray[0]+offset]
+            if (potentialArray[0][1]-offset > 0 and potentialArray[0][0]-offset > 0 and potentialArray[0][0]+offset < self.width and potentialArray[0][1]+offset < self.height):
+                img = img[int(potentialArray[0][1]-offset) : int(potentialArray[0][1]+offset), int(potentialArray[0][0]-offset):int(potentialArray[0][0]+offset)]
 
         img = cv2.undistort(img, self.mtx, self.dist)
 
