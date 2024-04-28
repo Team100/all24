@@ -5,8 +5,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.Torque;
-import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Body100;
@@ -15,10 +13,7 @@ import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -36,57 +31,10 @@ public class RobotSubsystem extends SubsystemBase {
      */
     private static final double kLookbackSec = 0.1;
 
-    /**
-     * Shooter impulse is measured in newton-seconds.
-     * For a 0.235 kg note at 20 m/s the impulse is about 4.7 Ns.
-     */
-    private static final double kShootImpulseNs = 4.7;
-
-    /**
-     * Shooter angle is actually variable
-     * TODO: implement shooter map
-     */
-    // private static final double kShootElevationRad = -0.5;
-
-    /**
-     * Lob is slower, enough to get about 3.5m high and travel about 6m
-     */
-    private static final double kLobImpulseNs = 3.0;
-
-    /**
-     * Lob uses a pretty high angle, this is a guess.
-     */
-    private static final double kLobElevationRad = -1.0;
-
-    /**
-     * Amp shot is gentle
-     */
-    private static final double kAmpImpulseNs = 1.2;
-
-    /**
-     * Amp elevation is very high
-     */
-    private static final double kAmpElevationRad = -1.48;
-
     /** For simulation. */
     private final RobotBody m_robotBody;
 
-    /**
-     * key == range
-     * value == pitch
-     * minimum range == 1.29
-     */
-    InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
     private final Translation2d m_speakerPosition;
-
-    /**
-     * We're allowed zero or one notes.
-     * TODO: if the note is present, that should affect the sensor states.
-     */
-    private Note m_note;
-
-    /** Joint linking the note to the robot, so we can remove it when ejecting. */
-    private Joint<Body100> m_joint;
 
     /**
      * Some recent sightings from the camera system, used for robot avoidance and
@@ -111,51 +59,12 @@ public class RobotSubsystem extends SubsystemBase {
         m_robotBody = robotBody;
         m_speakerPosition = speakerPosition;
         // I experimented and then smoothed the curve by eye.
-        shooterMap.put(0.0, -1.571); // pi/2
-        shooterMap.put(0.5, -1.400);
-        shooterMap.put(1.0, -1.240); // 1.29 is min feasible range
-        shooterMap.put(1.5, -1.070);
-        shooterMap.put(2.0, -0.930);
-        shooterMap.put(2.5, -0.810);
-        shooterMap.put(3.0, -0.710);
-        shooterMap.put(3.5, -0.650);
-        shooterMap.put(4.0, -0.590);
-        shooterMap.put(4.5, -0.540);
-        shooterMap.put(5.0, -0.500);
-        shooterMap.put(5.5, -0.460);
-        shooterMap.put(6.0, -0.435);
-        shooterMap.put(6.5, -0.415);
-        shooterMap.put(7.0, -0.400); // beyond max feasible range
+
     }
 
     @Override
     public String getName() {
         return m_robotBody.getName();
-    }
-
-    public void intake() {
-        // just one note allowed
-        if (m_note != null)
-            return;
-        Vector2 position = m_robotBody.getWorldCenter();
-
-        for (Body100 body : m_robotBody.getWorld().getBodies()) {
-            if (body instanceof Note) {
-                Vector2 notePosition = body.getWorldCenter();
-                double distance = position.distance(notePosition);
-                if (distance > 0.3)
-                    continue;
-                // it's underneath the robot
-                // TODO: intake from one side only
-                m_note = (Note) body;
-                // move the note to the center of the robot first
-                m_note.setTransform(m_robotBody.getTransform());
-                m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
-                m_robotBody.getWorld().addJoint(m_joint);
-                m_note.carry();
-                break;
-            }
-        }
     }
 
     public RobotBody getRobotBody() {
@@ -271,55 +180,11 @@ public class RobotSubsystem extends SubsystemBase {
         return m_robotBody.passingPosition();
     }
 
-    public void outtake() {
-        if (m_note != null) {
-            m_robotBody.getWorld().removeJoint(m_joint);
-            m_note.drop();
-            m_joint = null;
-            m_note = null;
-        }
-    }
-
     public void rotateToShoot() {
         Pose2d pose = getPose();
         double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
         m_robotBody.applyTorque(new Torque(error * 100));
-    }
-
-    /** Shooting is full speed, 20 m/s */
-    public void shoot() {
-        double range = getPose().getTranslation().getDistance(m_speakerPosition);
-        double elevationRad = shooterMap.get(range);
-        System.out.printf("shoot range %5.3f elevation %5.3f\n",
-                range, elevationRad);
-        shooter(kShootImpulseNs, elevationRad, 0);
-    }
-
-    /** Lob uses a lower exit velocity. */
-    public void lob() {
-        shooter(kLobImpulseNs, kLobElevationRad, 0);
-    }
-
-    /** Amp uses very low velocity, opposite rotation. */
-    public void amp() {
-        shooter(kAmpImpulseNs, kAmpElevationRad, Math.PI);
-    }
-
-    private void shooter(double impulseNs, double elevationRad, double yawOffsetRad) {
-        if (m_note != null) {
-            // detatch the note
-            m_robotBody.getWorld().removeJoint(m_joint);
-            m_note.drop();
-            double yawRad = m_robotBody.getPose().getRotation().getRadians();
-            yawRad = MathUtil.angleModulus(yawRad + yawOffsetRad);
-            Translation3d t3 = new Translation3d(
-                    impulseNs,
-                    new Rotation3d(0, elevationRad, yawRad));
-            m_note.applyImpulse(t3);
-            m_joint = null;
-            m_note = null;
-        }
     }
 
 }

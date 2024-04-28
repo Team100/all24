@@ -35,15 +35,44 @@ public class IndexerSubsystem extends SubsystemBase {
      * 
      * Returns false if the indexer is already full.
      */
-    public boolean offer(Note note) {
-        if (m_note != null)
+    public boolean intake() {
+        if (m_note != null) {
             return false;
-        m_note = note;
-        // move the note to the center of the robot first
-        m_note.setTransform(m_robotBody.getTransform());
-        m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
-        m_robotBody.getWorld().addJoint(m_joint);
-        m_note.carry();
+        }
+
+        Vector2 position = m_robotBody.getWorldCenter();
+
+        for (Body100 body : m_robotBody.getWorld().getBodies()) {
+            if (body instanceof Note) {
+                Vector2 notePosition = body.getWorldCenter();
+                double distance = position.distance(notePosition);
+                if (distance > 0.3)
+                    continue;
+                System.out.println("Intaking");
+                // it's underneath the robot
+                // TODO: intake from one side only
+                m_note = (Note) body;
+
+                // move the note to the center of the robot first
+                m_note.setTransform(m_robotBody.getTransform());
+                m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
+                m_robotBody.getWorld().addJoint(m_joint);
+                m_note.carry();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Eject the note. */
+    public boolean outtake() {
+        if (m_note == null) {
+            return false;
+        }
+        m_robotBody.getWorld().removeJoint(m_joint);
+        m_note.drop();
+        m_joint = null;
+        m_note = null;
         return true;
     }
 
@@ -54,8 +83,10 @@ public class IndexerSubsystem extends SubsystemBase {
      * Returns false if empty.
      */
     public boolean towardsShooter() {
-        if (m_note == null)
+        if (m_note == null) {
             return false;
+        }
+        System.out.println("feed to shooter");
         m_robotBody.getWorld().removeJoint(m_joint);
         m_note.drop();
         m_assembly.m_indexerShooterHandoff = m_note;

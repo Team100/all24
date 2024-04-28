@@ -61,7 +61,7 @@ public class RobotAssembly {
     }
 
     public void intake() {
-        m_robot.intake();
+        m_indexer.intake();
     }
 
     public void setState(double x, double y, double vx, double vy) {
@@ -105,7 +105,7 @@ public class RobotAssembly {
     }
 
     public void outtake() {
-        m_robot.outtake();
+        m_indexer.outtake();
     }
 
     public void rotateToShoot() {
@@ -113,17 +113,18 @@ public class RobotAssembly {
     }
 
     public void shoot() {
-        m_robot.shoot();
+        m_indexer.towardsShooter();
+        m_shooter.shoot();
     }
 
     public void lob() {
-        m_robot.lob();
+        m_indexer.towardsShooter();
+        m_shooter.lob();
     }
 
     public void amp() {
-        m_robot.amp();
+        m_indexer.towardsShooter();
+        m_shooter.amp();
     }
 
-
-    
 }

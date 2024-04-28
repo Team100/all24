@@ -67,9 +67,9 @@ public class ShooterSubsystem extends SubsystemBase {
         shooterMap.put(1.0, -1.240); // 1.29 is min feasible range
         shooterMap.put(1.5, -1.070);
         shooterMap.put(2.0, -0.930);
-        shooterMap.put(2.5, -0.810);
-        shooterMap.put(3.0, -0.710);
-        shooterMap.put(3.5, -0.650);
+        shooterMap.put(2.5, -0.800);
+        shooterMap.put(3.0, -0.700);
+        shooterMap.put(3.5, -0.640);
         shooterMap.put(4.0, -0.590);
         shooterMap.put(4.5, -0.540);
         shooterMap.put(5.0, -0.500);
@@ -81,20 +81,26 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Shooting is full speed, 20 m/s */
     public void shoot() {
-        Note n = m_assembly.m_indexerShooterHandoff;
-        if (n == null)
+        Note note = m_assembly.m_indexerShooterHandoff;
+        if (note == null) {
             return;
+        }
 
         double range = m_robotBody.getPose().getTranslation().getDistance(m_speakerPosition);
         double elevationRad = shooterMap.get(range);
         System.out.printf("shoot range %5.3f elevation %5.3f\n",
                 range, elevationRad);
-        shooter(kShootImpulseNs, elevationRad, 0, n);
+        shooter(kShootImpulseNs, elevationRad, 0, note);
+        m_assembly.m_indexerShooterHandoff = null;
     }
 
     /** Lob uses a lower exit velocity. */
-    public void lob(Note n) {
-        shooter(kLobImpulseNs, kLobElevationRad, 0, n);
+    public void lob() {
+        Note note = m_assembly.m_indexerShooterHandoff;
+        if (note == null)
+            return;
+        shooter(kLobImpulseNs, kLobElevationRad, 0, note);
+        m_assembly.m_indexerShooterHandoff = null;
     }
 
     /**
@@ -102,18 +108,22 @@ public class ShooterSubsystem extends SubsystemBase {
      * 
      * TODO: remove the yaw, make the elevation > pi/2.
      */
-    public void amp(Note n) {
-        shooter(kAmpImpulseNs, kAmpElevationRad, Math.PI, n);
+    public void amp() {
+        Note note = m_assembly.m_indexerShooterHandoff;
+        if (note == null)
+            return;
+        shooter(kAmpImpulseNs, kAmpElevationRad, Math.PI, note);
+        m_assembly.m_indexerShooterHandoff = null;
     }
 
     /** TODO: remove yaw offset */
-    private void shooter(double impulseNs, double elevationRad, double yawOffsetRad, Note n) {
+    private void shooter(double impulseNs, double elevationRad, double yawOffsetRad, Note note) {
         double yawRad = m_robotBody.getPose().getRotation().getRadians();
         yawRad = MathUtil.angleModulus(yawRad + yawOffsetRad);
         Translation3d t3 = new Translation3d(
                 impulseNs,
                 new Rotation3d(0, elevationRad, yawRad));
-        n.applyImpulse(t3);
+        note.applyImpulse(t3);
     }
 
 }
