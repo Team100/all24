@@ -1,8 +1,8 @@
 package org.team100.commands;
 
+import org.team100.control.Pilot;
 import org.team100.subsystems.DriveSubsystem;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** The "player" robot is manually controlled. */
@@ -10,10 +10,10 @@ public class PlayerDefaultDrive extends Command {
     private static final double kForce = 200;
     private static final double kTorque = 100;
 
-    private final XboxController m_control;
+    private final Pilot m_control;
     private final DriveSubsystem m_drive;
 
-    public PlayerDefaultDrive(DriveSubsystem drive, XboxController control) {
+    public PlayerDefaultDrive(DriveSubsystem drive, Pilot control) {
         m_control = control;
         m_drive = drive;
         addRequirements(drive);

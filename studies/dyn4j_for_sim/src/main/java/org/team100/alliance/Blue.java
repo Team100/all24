@@ -1,5 +1,6 @@
 package org.team100.alliance;
 
+import org.team100.control.ManualPilot;
 import org.team100.robot.RealPlayerAssembly;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -25,7 +26,8 @@ public class Blue extends Alliance {
 
     public Blue(SimWorld world) {
         if (kRealPlayer) {
-            player = new RealPlayerAssembly(new Player(world), kSpeaker);
+            player = new RealPlayerAssembly(
+                    new ManualPilot(), new Player(world), kSpeaker);
         } else {
             player = new RobotAssembly(new Player(world), kSpeaker);
         }
