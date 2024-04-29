@@ -17,5 +17,7 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
     public FieldRelativeVelocity plus(FieldRelativeVelocity other) {
         return new FieldRelativeVelocity(x + other.x, y + other.y, theta + other.theta);
     }
-
+    public FieldRelativeVelocity minus(FieldRelativeVelocity other) {
+        return new FieldRelativeVelocity(x - other.x, y - other.y, theta - other.theta);
+    }
 }

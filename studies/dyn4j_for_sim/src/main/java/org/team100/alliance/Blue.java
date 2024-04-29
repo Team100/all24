@@ -25,17 +25,22 @@ public class Blue extends Alliance {
     private final Strategy2 strategy;
 
     public Blue(SimWorld world) {
+        Player playerBody = new Player(world);
         if (kRealPlayer) {
-            player = new RealPlayerAssembly(
-                    new ManualPilot(), new Player(world), kSpeaker);
+            player = new RealPlayerAssembly(new ManualPilot(), playerBody, kSpeaker);
         } else {
-            player = new RobotAssembly(new Player(world), kSpeaker);
+            player = new RobotAssembly(playerBody, kSpeaker);
         }
-        world.addBody(player.getRobotBody());
-        friend1 = new RobotAssembly(new Friend("blue 1", world), kSpeaker);
-        world.addBody(friend1.getRobotBody());
-        friend2 = new RobotAssembly(new Friend("blue 2", world), kSpeaker);
-        world.addBody(friend2.getRobotBody());
+        world.addBody(playerBody);
+
+        Friend blue1 = new Friend("blue 1", world);
+        friend1 = new RobotAssembly(blue1, kSpeaker);
+        world.addBody(blue1);
+
+        Friend blue2 = new Friend("blue 2", world);
+        friend2 = new RobotAssembly(blue2, kSpeaker);
+        world.addBody(blue2);
+
         source = new Source(world, 15.5, 1.0);
         strategy = new Strategy2(this, player, friend1, friend2, source, true);
     }

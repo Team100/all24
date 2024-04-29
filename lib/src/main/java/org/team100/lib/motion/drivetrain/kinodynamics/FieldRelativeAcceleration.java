@@ -12,4 +12,13 @@ public record FieldRelativeAcceleration(double x, double y, double theta) {
     public FieldRelativeAcceleration times(double scalar) {
         return new FieldRelativeAcceleration(x * scalar, y * scalar, theta * scalar);
     }
+
+    public static FieldRelativeAcceleration diff(
+            FieldRelativeVelocity v1,
+            FieldRelativeVelocity v2,
+            double dtSec) {
+        FieldRelativeVelocity dv = v2.minus(v1);
+        return new FieldRelativeAcceleration(dv.x() / dtSec, dv.y() / dtSec, dv.theta() / dtSec);
+
+    }
 }

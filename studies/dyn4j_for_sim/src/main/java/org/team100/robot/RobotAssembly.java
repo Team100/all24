@@ -44,7 +44,7 @@ public class RobotAssembly {
         new Trigger(() -> false).onTrue(new ShootCommand(m_indexer, m_shooter));
     }
 
-    /** Am I a nonplayer?  If so, the strategy should determine my behavior. */
+    /** Am I a nonplayer? If so, the strategy should determine my behavior. */
     public boolean isNPC() {
         return true;
     }
@@ -53,9 +53,9 @@ public class RobotAssembly {
         return m_drive;
     }
 
-    public RobotBody getRobotBody() {
-        return m_drive.getRobotBody();
-    }
+    // private RobotBody getRobotBody() {
+    //     return m_drive.getRobotBody();
+    // }
 
     public String getName() {
         return m_drive.getName();
@@ -69,9 +69,9 @@ public class RobotAssembly {
         m_drive.setState(x, y, vx, vy);
     }
 
-    public void apply(double x, double y, double theta) {
-        m_drive.apply(x, y, theta);
-    }
+    // public void apply(double x, double y, double theta) {
+    // m_drive.apply(x, y, theta);
+    // }
 
     public Pose2d getPose() {
         return m_drive.getPose();
@@ -104,4 +104,16 @@ public class RobotAssembly {
     public Pose2d passingPosition() {
         return m_drive.passingPosition();
     }
+
+    // these are only here because of red/blue differences.
+    // TODO: do that differently.
+
+    public Pose2d getDefenderPosition() {
+        return m_drive.getRobotBody().defenderPosition();
+    }
+
+    public Pose2d getOpponentSourcePosition() {
+        return m_drive.getRobotBody().opponentSourcePosition();
+    }
+
 }

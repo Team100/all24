@@ -18,12 +18,18 @@ public class Red extends Alliance {
     private final Strategy strategy;
 
     public Red(SimWorld world) {
-        scorer = new RobotAssembly(new Foe("red scorer", world), kSpeaker);
-        world.addBody(scorer.getRobotBody());
-        passer = new RobotAssembly(new Foe("red 2", world), kSpeaker);
-        world.addBody(passer.getRobotBody());
-        defender = new RobotAssembly(new Foe("red 3", world), kSpeaker);
-        world.addBody(defender.getRobotBody());
+        Foe scorerBody = new Foe("red scorer", world);
+        scorer = new RobotAssembly(scorerBody, kSpeaker);
+        world.addBody(scorerBody);
+
+        Foe red2 = new Foe("red 2", world);
+        passer = new RobotAssembly(red2, kSpeaker);
+        world.addBody(red2);
+
+        Foe red3 = new Foe("red 3", world);
+        defender = new RobotAssembly(red3, kSpeaker);
+        world.addBody(red3);
+
         source = new Source(world, 1.0, 1.0);
         strategy = new Strategy(this, scorer, passer, defender, source, false);
     }

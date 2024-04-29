@@ -7,11 +7,13 @@ import org.dyn4j.geometry.Vector2;
 import org.team100.alliance.Alliance;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.robot.RobotAssembly;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -25,10 +27,12 @@ public class DefendSource extends Command {
     private static final int kWaitingAttraction = 1000;
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
+    private long timeMicros;
 
     public DefendSource(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
+        timeMicros = RobotController.getFPGATime();
         addRequirements(robot.getDriveSubsystem());
     }
 
@@ -39,13 +43,25 @@ public class DefendSource extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeAcceleration a = Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity());
+        FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
+        a = a.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
         a = a.plus(Tactics.avoidEdges(m_robot.getPose()));
         a = a.plus(Tactics.avoidSubwoofers(m_robot.getPose()));
         // it's ok to collide with robots
-        // m_tactics.steerAroundRobots();
-        // m_tactics.robotRepulsion();
-        work(m_robot.getPose());
+        a = a.plus(work(
+                m_robot.getPose(),
+                m_robot.getDefenderPosition(),
+                m_robot.getOpponentSourcePosition(),
+                m_robot.recentSightings()));
+
+        long nowMicros = RobotController.getFPGATime();
+        double dtSec = (double) (nowMicros - timeMicros) / 1000000;
+        timeMicros = nowMicros;
+
+        FieldRelativeVelocity v = m_robot.getVelocity();
+        FieldRelativeVelocity dv = a.integrate(dtSec);
+        v = v.plus(dv);
+        m_robot.getDriveSubsystem().drive(v);
     }
 
     /** Never finishes but might be interrupted. */
@@ -58,13 +74,17 @@ public class DefendSource extends Command {
      * If no robots are around, wait near the source. If there is a foe, stay
      * between it and the source. Avoid getting too close to the source.
      */
-    private static FieldRelativeAcceleration work(Pose2d pose) {
+    private static FieldRelativeAcceleration work(
+            Pose2d pose,
+            Pose2d defenderPosition,
+            Pose2d opponentSourcePosition,
+            NavigableMap<Double, RobotSighting> recentSightings) {
         FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
 
         Vector2 position = new Vector2(pose.getX(), pose.getY());
 
         // attract to the waiting spot
-        FieldRelativeDelta toWaitingSpot = FieldRelativeDelta.delta(pose, m_robot.getRobotBody().defenderPosition())
+        FieldRelativeDelta toWaitingSpot = FieldRelativeDelta.delta(pose, defenderPosition)
                 .limit(1, 1);
         a = a.plus(new FieldRelativeAcceleration(
                 toWaitingSpot.getX(),
@@ -72,7 +92,7 @@ public class DefendSource extends Command {
                 0).times(kWaitingAttraction));
 
         // repel from the corner, and don't chase opponents, if too close
-        FieldRelativeDelta toCorner = FieldRelativeDelta.delta(pose, m_robot.getRobotBody().opponentSourcePosition());
+        FieldRelativeDelta toCorner = FieldRelativeDelta.delta(pose, opponentSourcePosition);
         if (toCorner.getTranslation().getNorm() < 2.5) {
             a = a.plus(new FieldRelativeAcceleration(
                     toCorner.getX(),
@@ -87,7 +107,8 @@ public class DefendSource extends Command {
             return a;
         }
         // TODO: if there's an opponent nearby, stay between it and the corner.
-        NavigableMap<Double, RobotSighting> recentSightings = m_robot.recentSightings();
+        // NavigableMap<Double, RobotSighting> recentSightings =
+        // m_robot.recentSightings();
         for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
             RobotSighting mostRecentSighting = mostRecent.getValue();
             // don't try to defend friends
@@ -100,8 +121,7 @@ public class DefendSource extends Command {
                 // don't react to far-away obstacles
                 continue;
             }
-            double fieldDistance = m_robot.getRobotBody().defenderPosition().getTranslation()
-                    .getDistance(mostRecentPosition);
+            double fieldDistance = defenderPosition.getTranslation().getDistance(mostRecentPosition);
             if (fieldDistance > 3) {
                 // don't chase it too far
                 continue;
