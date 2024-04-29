@@ -14,4 +14,8 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return new Rotation2d(x, y);
     }
 
+    public FieldRelativeVelocity plus(FieldRelativeVelocity other) {
+        return new FieldRelativeVelocity(x + other.x, y + other.y, theta + other.theta);
+    }
+
 }
