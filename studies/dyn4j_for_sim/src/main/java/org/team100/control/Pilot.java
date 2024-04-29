@@ -1,11 +1,9 @@
 package org.team100.control;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+
 public interface Pilot {
-    double getLeftX();
-
-    double getRightY();
-
-    double getRightX();
+    FieldRelativeVelocity driveVelocity();
 
     boolean intake();
 
@@ -18,4 +16,6 @@ public interface Pilot {
     boolean amp();
 
     boolean rotateToShoot();
+
+    boolean driveToSpeaker();
 }

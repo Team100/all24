@@ -1,5 +1,7 @@
 package org.team100.control;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+
 import edu.wpi.first.wpilibj.XboxController;
 
 /** A human driver/operator */
@@ -7,18 +9,11 @@ public class ManualPilot implements Pilot {
     private final XboxController m_controller = new XboxController(0);
 
     @Override
-    public double getLeftX() {
-        return m_controller.getLeftX();
-    }
-
-    @Override
-    public double getRightY() {
-        return m_controller.getRightY();
-    }
-
-    @Override
-    public double getRightX() {
-        return m_controller.getRightX();
+    public FieldRelativeVelocity driveVelocity() {
+        return new FieldRelativeVelocity(
+                -m_controller.getRightY(), // axis 5
+                -m_controller.getRightX(), // axis 4
+                -m_controller.getLeftX()); // axis 0
     }
 
     @Override
@@ -51,4 +46,8 @@ public class ManualPilot implements Pilot {
         return m_controller.getRawButton(6);
     }
 
+    @Override
+    public boolean driveToSpeaker() {
+        return m_controller.getRawButton(7);
+    }
 }

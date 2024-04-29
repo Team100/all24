@@ -9,16 +9,15 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ScoreSpeaker extends Command {
+/** Drives to a good spot for shooting. */
+public class DriveToSpeaker extends Command {
     private static final int kSpeakerAttraction = 50;
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
-    private final Tactics m_tactics;
 
-    public ScoreSpeaker(Alliance alliance, RobotAssembly robot) {
+    public DriveToSpeaker(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
-        m_tactics = new Tactics(robot);
         addRequirements(robot.getDriveSubsystem());
     }
 
@@ -30,11 +29,11 @@ public class ScoreSpeaker extends Command {
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {
-        m_tactics.avoidObstacles();
-        m_tactics.avoidEdges();
-        m_tactics.avoidSubwoofers();
-        m_tactics.steerAroundRobots();
-        m_tactics.robotRepulsion();
+        Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity());
+        Tactics.avoidEdges(m_robot.getPose());
+        Tactics.avoidSubwoofers(m_robot.getPose());
+        Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings());
+        Tactics.robotRepulsion(m_robot.getPose(),  m_robot.recentSightings());
         goToGoal();
     }
 

@@ -15,12 +15,10 @@ public class Pass extends Command {
     private static final int kPassAttraction = 100;
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
-    private final Tactics m_tactics;
 
     public Pass(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
-        m_tactics = new Tactics(robot);
         addRequirements(robot.getDriveSubsystem());
     }
 
@@ -31,11 +29,11 @@ public class Pass extends Command {
 
     @Override
     public void execute() {
-        m_tactics.avoidObstacles();
-        m_tactics.avoidEdges();
-        m_tactics.avoidSubwoofers();
-        m_tactics.steerAroundRobots();
-        m_tactics.robotRepulsion();
+        Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity());
+        Tactics.avoidEdges(m_robot.getPose());
+        Tactics.avoidSubwoofers(m_robot.getPose());
+        Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings());
+        Tactics.robotRepulsion(m_robot.getPose(),  m_robot.recentSightings());
         goToGoal();
     }
 

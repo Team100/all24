@@ -7,7 +7,7 @@ import org.team100.commands.DefendSource;
 import org.team100.commands.Pass;
 import org.team100.commands.PickFromSource;
 import org.team100.commands.ScoreAmp;
-import org.team100.commands.ScoreSpeaker;
+import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.SourceDefault;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -47,11 +47,11 @@ public class Strategy2 {
     public void init() {
         if (m_player.isNPC()) {
             m_player.setState(m_blue ? 2 : 15, m_blue ? 4 : 3, 0, 0);
-            CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, m_player));
+            CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, m_player));
         }
         if (m_friend1.isNPC()) {
             m_friend1.setState(m_blue ? 1 : 15, m_blue ? 1 : 5, 0, 0);
-            CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, m_friend1));
+            CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, m_friend1));
         }
         if (m_friend2.isNPC()) {
             m_friend2.setState(m_blue ? 1 : 13, m_blue ? 4 : 7, 0, 0);
@@ -65,7 +65,7 @@ public class Strategy2 {
         if (!robot.isNPC())
             return;
         System.out.printf("on end %s %s\n", robot.getName(), command.getName());
-        if (command instanceof ScoreSpeaker) {
+        if (command instanceof DriveToSpeaker) {
             CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));
         } else if (command instanceof ScoreAmp) {
             CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));
@@ -74,7 +74,7 @@ public class Strategy2 {
         } else if (command instanceof PickFromSource) {
             // TODO: don't choose randomly, use a strategy and/or operator input
             if (random.nextBoolean()) {
-                CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, robot));
+                CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, robot));
             } else {
                 // CommandScheduler.getInstance().schedule(new ScoreAmp(m_alliance, robot));
                 CommandScheduler.getInstance().schedule(new Pass(m_alliance, robot));

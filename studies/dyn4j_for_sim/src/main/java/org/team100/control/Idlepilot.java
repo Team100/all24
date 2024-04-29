@@ -1,23 +1,15 @@
 package org.team100.control;
 
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+
 /**
- * Autopilot implements strategy.
+ * Pilot that does nothing.
  */
-public class Autopilot implements Pilot {
+public class Idlepilot implements Pilot {
 
     @Override
-    public double getLeftX() {
-        return 0;
-    }
-
-    @Override
-    public double getRightY() {
-        return 0;
-    }
-
-    @Override
-    public double getRightX() {
-        return 0;
+    public FieldRelativeVelocity driveVelocity() {
+        return new FieldRelativeVelocity(0, 0, 0);
     }
 
     @Override
@@ -47,6 +39,11 @@ public class Autopilot implements Pilot {
 
     @Override
     public boolean rotateToShoot() {
+        return false;
+    }
+
+    @Override
+    public  boolean driveToSpeaker() {
         return false;
     }
 

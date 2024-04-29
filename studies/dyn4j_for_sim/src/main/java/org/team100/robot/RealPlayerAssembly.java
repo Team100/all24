@@ -31,7 +31,8 @@ public class RealPlayerAssembly extends RobotAssembly {
         whileTrue(m_control::amp, Commands.parallel(
                 m_indexer.run(m_indexer::towardsShooter),
                 m_shooter.run(m_shooter::amp)));
-        whileTrue(m_control::rotateToShoot, m_drive.run(m_drive::rotateToShoot));
+        whileTrue(m_control::rotateToShoot,
+                m_drive.run(m_drive::rotateToShoot).finallyDo(x -> System.out.println("done " + x)));
     }
 
     @Override

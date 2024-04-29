@@ -5,7 +5,7 @@ import org.team100.commands.DefendSource;
 import org.team100.commands.Pass;
 import org.team100.commands.PickFromSource;
 import org.team100.commands.ScoreAmp;
-import org.team100.commands.ScoreSpeaker;
+import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.SourceDefault;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -44,7 +44,7 @@ public class Strategy {
     public void init() {
         if (m_scorer.isNPC()) {
             m_scorer.setState(m_blue ? 2 : 15, m_blue ? 4 : 3, 0, 0);
-            CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, m_scorer));
+            CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, m_scorer));
         }
         if (m_passer.isNPC()) {
             m_passer.setState(m_blue ? 1 : 15, m_blue ? 1 : 5, 0, 0);
@@ -64,10 +64,10 @@ public class Strategy {
         if (robot == m_scorer) {
             // scorer just goes back and forth from speaker to amp
             // TODO: count amplification events
-            if (command instanceof ScoreSpeaker) {
+            if (command instanceof DriveToSpeaker) {
                 CommandScheduler.getInstance().schedule(new ScoreAmp(m_alliance, robot));
             } else {
-                CommandScheduler.getInstance().schedule(new ScoreSpeaker(m_alliance, robot));
+                CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, robot));
             }
         } else if (robot == m_passer) {
             // passer goes back and forth from source to passing
