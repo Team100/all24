@@ -7,19 +7,51 @@ public interface Pilot {
      * In comp this is controller units [-1,1] but here we want the autopilot to use
      * field units, so the human uses field units too.
      */
-    FieldRelativeVelocity driveVelocity();
+    default FieldRelativeVelocity driveVelocity() {
+        return new FieldRelativeVelocity(0, 0, 0);
+    }
 
-    boolean intake();
+    default boolean intake() {
+        return false;
+    }
 
-    boolean outtake();
+    default boolean outtake() {
+        return false;
+    }
 
-    boolean shoot();
+    default boolean shoot() {
+        return false;
+    }
 
-    boolean lob();
+    default boolean lob() {
+        return false;
+    }
 
-    boolean amp();
+    default boolean amp() {
+        return false;
+    }
 
-    boolean rotateToShoot();
+    default boolean rotateToShoot() {
+        return false;
+    }
 
-    boolean driveToSpeaker();
+    default boolean driveToSpeaker() {
+        return false;
+    }
+
+    default boolean driveToAmp() {
+        return false;
+    }
+
+    default boolean driveToSource() {
+        return false;
+    }
+
+    default boolean driveToPass() {
+        return false;
+    }
+
+    default boolean shootCommand() {
+        return false;
+    }
 }

@@ -4,9 +4,9 @@ import java.util.Random;
 
 import org.team100.alliance.Alliance;
 import org.team100.commands.DefendSource;
-import org.team100.commands.Pass;
-import org.team100.commands.PickFromSource;
-import org.team100.commands.ScoreAmp;
+import org.team100.commands.DriveToPass;
+import org.team100.commands.DriveToSource;
+import org.team100.commands.DriveToAmp;
 import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.SourceDefault;
 import org.team100.robot.RobotAssembly;
@@ -66,18 +66,18 @@ public class Strategy2 {
             return;
         System.out.printf("on end %s %s\n", robot.getName(), command.getName());
         if (command instanceof DriveToSpeaker) {
-            CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));
-        } else if (command instanceof ScoreAmp) {
-            CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));
-        } else if (command instanceof Pass) {
-            CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));
-        } else if (command instanceof PickFromSource) {
+            CommandScheduler.getInstance().schedule(new DriveToSource(m_alliance, robot));
+        } else if (command instanceof DriveToAmp) {
+            CommandScheduler.getInstance().schedule(new DriveToSource(m_alliance, robot));
+        } else if (command instanceof DriveToPass) {
+            CommandScheduler.getInstance().schedule(new DriveToSource(m_alliance, robot));
+        } else if (command instanceof DriveToSource) {
             // TODO: don't choose randomly, use a strategy and/or operator input
             if (random.nextBoolean()) {
                 CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, robot));
             } else {
                 // CommandScheduler.getInstance().schedule(new ScoreAmp(m_alliance, robot));
-                CommandScheduler.getInstance().schedule(new Pass(m_alliance, robot));
+                CommandScheduler.getInstance().schedule(new DriveToPass(m_alliance, robot));
             }
         }
     }

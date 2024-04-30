@@ -41,11 +41,12 @@ public class Steal extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
+        if (m_alliance != null)
+            m_alliance.onEnd(m_robot, this);
     }
 
     // private void goToGoal() {
-    //     //
+    // //
     // }
 
 }

@@ -10,13 +10,19 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Drives to a good spot for shooting. */
+/**
+ * Drives to a good spot for shooting.
+ * 
+ * TODO: extra a "drive to X" command
+ */
 public class DriveToSpeaker extends Command {
     private static final int kAngularP = 10;
     private static final int kCartesianP = 50;
+    /** m_alliance may be null. */
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
 
+    /** alliance may be null. */
     public DriveToSpeaker(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
@@ -56,7 +62,8 @@ public class DriveToSpeaker extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
+        if (m_alliance != null)
+            m_alliance.onEnd(m_robot, this);
     }
 
     /** Proportional feedback with a limiter. */

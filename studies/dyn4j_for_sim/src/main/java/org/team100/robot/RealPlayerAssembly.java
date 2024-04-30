@@ -2,7 +2,12 @@ package org.team100.robot;
 
 import java.util.function.BooleanSupplier;
 
-import org.team100.commands.PlayerDefaultDrive;
+import org.team100.commands.DriveToAmp;
+import org.team100.commands.DriveToPass;
+import org.team100.commands.DriveToSource;
+import org.team100.commands.DriveToSpeaker;
+import org.team100.commands.PilotDrive;
+import org.team100.commands.ShootCommand;
 import org.team100.control.Pilot;
 import org.team100.sim.RobotBody;
 
@@ -19,7 +24,7 @@ public class RealPlayerAssembly extends RobotAssembly {
     public RealPlayerAssembly(Pilot pilot, RobotBody robotBody, Translation2d speakerPosition) {
         super(robotBody, speakerPosition);
         m_control = pilot;
-        m_drive.setDefaultCommand(new PlayerDefaultDrive(m_drive, m_control));
+        m_drive.setDefaultCommand(new PilotDrive(m_drive, m_control));
         whileTrue(m_control::intake, m_indexer.run(m_indexer::intake));
         whileTrue(m_control::outtake, m_indexer.run(m_indexer::outtake));
         whileTrue(m_control::shoot, Commands.parallel(
@@ -32,7 +37,23 @@ public class RealPlayerAssembly extends RobotAssembly {
                 m_indexer.run(m_indexer::towardsShooter),
                 m_shooter.run(m_shooter::amp)));
         whileTrue(m_control::rotateToShoot,
-                m_drive.run(m_drive::rotateToShoot).finallyDo(x -> System.out.println("done " + x)));
+                m_drive.run(m_drive::rotateToShoot)
+                        .finallyDo(x -> System.out.println("done " + x)));
+        whileTrue(m_control::driveToSpeaker,
+                new DriveToSpeaker(null, this)
+                        .finallyDo(x -> System.out.println("done " + x)));
+        whileTrue(m_control::driveToAmp,
+                new DriveToAmp(null, this)
+                        .finallyDo(x -> System.out.println("done " + x)));
+        whileTrue(m_control::driveToSource,
+                new DriveToSource(null, this)
+                        .finallyDo(x -> System.out.println("done " + x)));
+        whileTrue(m_control::driveToPass,
+                new DriveToPass(null, this)
+                        .finallyDo(x -> System.out.println("done " + x)));
+        whileTrue(m_control::shootCommand,
+                new ShootCommand(m_indexer, m_shooter)
+                        .finallyDo(x -> System.out.println("done " + x)));
     }
 
     @Override

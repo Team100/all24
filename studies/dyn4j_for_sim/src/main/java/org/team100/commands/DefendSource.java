@@ -55,7 +55,8 @@ public class DefendSource extends Command {
     /** Never finishes but might be interrupted. */
     @Override
     public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
+        if (m_alliance != null)
+            m_alliance.onEnd(m_robot, this);
     }
 
     /**

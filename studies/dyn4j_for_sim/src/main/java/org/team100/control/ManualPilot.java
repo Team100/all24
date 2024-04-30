@@ -52,4 +52,24 @@ public class ManualPilot implements Pilot {
     public boolean driveToSpeaker() {
         return m_controller.getRawButton(7);
     }
+
+    @Override
+    public boolean driveToAmp() {
+        return m_controller.getRawButton(8);
+    }
+
+    @Override
+    public boolean driveToSource() {
+        return m_controller.getRawButton(9);
+    }
+
+    @Override
+    public boolean driveToPass() {
+        return m_controller.getRawButton(10);
+    }
+
+    @Override
+    public boolean shootCommand() {
+        return m_controller.getRawButton(11);
+    }
 }

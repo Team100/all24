@@ -2,9 +2,9 @@ package org.team100.strategy;
 
 import org.team100.alliance.Alliance;
 import org.team100.commands.DefendSource;
-import org.team100.commands.Pass;
-import org.team100.commands.PickFromSource;
-import org.team100.commands.ScoreAmp;
+import org.team100.commands.DriveToPass;
+import org.team100.commands.DriveToSource;
+import org.team100.commands.DriveToAmp;
 import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.SourceDefault;
 import org.team100.robot.RobotAssembly;
@@ -48,7 +48,7 @@ public class Strategy {
         }
         if (m_passer.isNPC()) {
             m_passer.setState(m_blue ? 1 : 15, m_blue ? 1 : 5, 0, 0);
-            CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, m_passer));
+            CommandScheduler.getInstance().schedule(new DriveToSource(m_alliance, m_passer));
         }
         if (m_defender.isNPC()) {
             m_defender.setState(m_blue ? 1 : 13, m_blue ? 4 : 7, 0, 0);
@@ -65,16 +65,16 @@ public class Strategy {
             // scorer just goes back and forth from speaker to amp
             // TODO: count amplification events
             if (command instanceof DriveToSpeaker) {
-                CommandScheduler.getInstance().schedule(new ScoreAmp(m_alliance, robot));
+                CommandScheduler.getInstance().schedule(new DriveToAmp(m_alliance, robot));
             } else {
                 CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, robot));
             }
         } else if (robot == m_passer) {
             // passer goes back and forth from source to passing
-            if (command instanceof Pass) {
-                CommandScheduler.getInstance().schedule(new PickFromSource(m_alliance, robot));
+            if (command instanceof DriveToPass) {
+                CommandScheduler.getInstance().schedule(new DriveToSource(m_alliance, robot));
             } else {
-                CommandScheduler.getInstance().schedule(new Pass(m_alliance, robot));
+                CommandScheduler.getInstance().schedule(new DriveToPass(m_alliance, robot));
             }
         } else if (robot == m_defender) {
             // the defender command should never return, but if it does, just do it again.

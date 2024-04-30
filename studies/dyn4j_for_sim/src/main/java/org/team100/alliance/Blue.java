@@ -1,6 +1,8 @@
 package org.team100.alliance;
 
 import org.team100.control.ManualPilot;
+import org.team100.control.auto.SpeakerCycler;
+import org.team100.robot.PilotAssembly;
 import org.team100.robot.RealPlayerAssembly;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -34,7 +36,8 @@ public class Blue extends Alliance {
         world.addBody(playerBody);
 
         Friend blue1 = new Friend("blue 1", world);
-        friend1 = new RobotAssembly(blue1, kSpeaker);
+        // friend1 = new RobotAssembly(blue1, kSpeaker);
+        friend1 = new PilotAssembly(new SpeakerCycler(), blue1, kSpeaker);
         world.addBody(blue1);
 
         Friend blue2 = new Friend("blue 2", world);

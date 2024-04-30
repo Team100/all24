@@ -10,13 +10,16 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ScoreAmp extends Command {
+/**
+ * Drive to a passing spot.
+ */
+public class DriveToPass extends Command {
     private static final int kAngularP = 10;
     private static final int kCartesianP = 50;
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
 
-    public ScoreAmp(Alliance alliance, RobotAssembly robot) {
+    public DriveToPass(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
         addRequirements(robot.getDriveSubsystem());
@@ -24,7 +27,7 @@ public class ScoreAmp extends Command {
 
     @Override
     public String getName() {
-        return "Score Amp: " + m_robot.getName();
+        return "Pass: " + m_robot.getName();
     }
 
     @Override
@@ -42,31 +45,32 @@ public class ScoreAmp extends Command {
     @Override
     public boolean isFinished() {
         Pose2d pose = m_robot.getPose();
-        Pose2d goal = m_robot.ampPosition();
+        Pose2d goal = m_robot.passingPosition();
         FieldRelativeDelta t = FieldRelativeDelta.delta(pose, goal);
-        double translationError = t.getTranslation().getNorm();
-        double rotationError = t.getRotation().getRadians();
-        return translationError < 0.1 && Math.abs(rotationError) < 0.05;
+        return t.getTranslation().getNorm() < 0.5
+                && Math.abs(t.getRotation().getRadians()) < 0.1;
     }
 
     @Override
     public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
+        if (m_alliance != null)
+            m_alliance.onEnd(m_robot, this);
     }
 
     /** Proportional feedback with a limiter. */
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_robot.getPose();
-        Pose2d goal = m_robot.ampPosition();
+        Pose2d goal = m_robot.passingPosition();
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         final int maxError = 1;
         positionError = new Vector2(
-            MathUtil.clamp( positionError.x, -maxError, maxError),
-            MathUtil.clamp( positionError.y, -maxError, maxError));
+                MathUtil.clamp(positionError.x, -maxError, maxError),
+                MathUtil.clamp(positionError.y, -maxError, maxError));
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
         return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB);
     }
+
 }

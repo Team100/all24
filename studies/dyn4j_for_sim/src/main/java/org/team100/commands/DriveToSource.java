@@ -10,13 +10,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class PickFromSource extends Command {
+public class DriveToSource extends Command {
     private static final int kAngularP = 10;
     private static final int kCartesianP = 50;
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
 
-    public PickFromSource(Alliance alliance, RobotAssembly robot) {
+    public DriveToSource(Alliance alliance, RobotAssembly robot) {
         m_alliance = alliance;
         m_robot = robot;
         addRequirements(robot.getDriveSubsystem());
@@ -53,7 +53,8 @@ public class PickFromSource extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
+        if (m_alliance != null)
+            m_alliance.onEnd(m_robot, this);
     }
 
     private FieldRelativeVelocity goToGoal() {
@@ -63,8 +64,8 @@ public class PickFromSource extends Command {
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         final int maxError = 1;
         positionError = new Vector2(
-            MathUtil.clamp( positionError.x, -maxError, maxError),
-            MathUtil.clamp( positionError.y, -maxError, maxError));
+                MathUtil.clamp(positionError.x, -maxError, maxError),
+                MathUtil.clamp(positionError.y, -maxError, maxError));
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
