@@ -99,15 +99,4 @@ public class DriveSubsystem extends SubsystemBase {
     public Pose2d passingPosition() {
         return m_robotBody.passingPosition();
     }
-
-    // // TODO: move this to a command
-    // public void rotateToShoot() {
-    //     Pose2d pose = getPose();
-    //     double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
-    //     double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
-    //     FieldRelativeVelocity measurement = getVelocity();
-    //     double omega = error * 10;
-    //     drive(new FieldRelativeVelocity(measurement.x(), measurement.y(), omega));
-    // }
-
 }

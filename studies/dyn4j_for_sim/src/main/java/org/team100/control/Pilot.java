@@ -55,6 +55,10 @@ public interface Pilot {
         return false;
     }
 
+    default boolean defend() {
+        return false;
+    }
+
     void onEnd();
 
     /**

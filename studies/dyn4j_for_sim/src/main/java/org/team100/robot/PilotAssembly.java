@@ -2,20 +2,23 @@ package org.team100.robot;
 
 import java.util.function.BooleanSupplier;
 
+import org.team100.commands.AmpCommand;
+import org.team100.commands.DefendSource;
+import org.team100.commands.DriveToAmp;
+import org.team100.commands.DriveToPass;
 import org.team100.commands.DriveToSource;
 import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.Intake;
+import org.team100.commands.LobCommand;
 import org.team100.commands.PilotDrive;
 import org.team100.commands.RotateToShoot;
 import org.team100.commands.ShootCommand;
 import org.team100.control.Pilot;
-import org.team100.control.auto.Autopilot;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -35,10 +38,21 @@ public class PilotAssembly extends RobotAssembly {
                         .finallyDo(pilot::onEnd));
         // TODO: add drive-to-note
         whileTrue(pilot::driveToSource,
-                // new PrintCommand("asdf"));
                 Commands.deadline(
                         new Intake(m_indexer),
                         new DriveToSource(null, this))
+                        .finallyDo(pilot::onEnd));
+        whileTrue(pilot::driveToAmp,
+                new DriveToAmp(null, this)
+                        .andThen(new AmpCommand(m_indexer, m_shooter))
+                        .finallyDo(pilot::onEnd));
+        whileTrue(pilot::driveToPass,
+                new DriveToPass(null, this)
+                        .andThen(new LobCommand(m_indexer, m_shooter))
+                        .finallyDo(pilot::onEnd));
+        // defend never ends
+        whileTrue(pilot::defend,
+                new DefendSource(null, this)
                         .finallyDo(pilot::onEnd));
     }
 

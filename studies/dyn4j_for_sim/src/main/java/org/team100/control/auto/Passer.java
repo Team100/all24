@@ -7,14 +7,12 @@ import java.nio.charset.StandardCharsets;
 import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 
-/**
- * Cycles between source and speaker.
- */
-public class SpeakerCycler implements Autopilot {
+/** Drives between the source and the passing spot. */
+public class Passer implements Autopilot {
 
     private enum State {
         Initial,
-        ToSpeaker,
+        ToPass,
         ToSource
     }
 
@@ -26,15 +24,15 @@ public class SpeakerCycler implements Autopilot {
 
     private final StateMachine<State, Trigger> machine;
 
-    public SpeakerCycler() {
+    public Passer() {
         final StateMachineConfig<State, Trigger> config = new StateMachineConfig<>();
         config.configure(State.Initial)
                 .permit(Trigger.Begin, State.ToSource);
-        config.configure(State.ToSpeaker)
+        config.configure(State.ToPass)
                 .permit(Trigger.Done, State.ToSource)
                 .permit(Trigger.Reset, State.Initial);
         config.configure(State.ToSource)
-                .permit(Trigger.Done, State.ToSpeaker)
+                .permit(Trigger.Done, State.ToPass)
                 .permit(Trigger.Reset, State.Initial);
         try {
             ByteArrayOutputStream dotFile = new ByteArrayOutputStream();
@@ -61,8 +59,8 @@ public class SpeakerCycler implements Autopilot {
     }
 
     @Override
-    public boolean driveToSpeaker() {
-        return machine.isInState(State.ToSpeaker);
+    public boolean driveToPass() {
+        return machine.isInState(State.ToPass);
     }
 
     @Override
@@ -72,12 +70,13 @@ public class SpeakerCycler implements Autopilot {
 
     @Override
     public void onEnd() {
-        System.out.println("Speaker Cycler onEnd");
+        System.out.println("Passer onEnd");
         machine.fire(Trigger.Done);
     }
     
     @Override
     public void periodic() {
-        System.out.println("Speaker Cycler state: " + machine.getState());
+        System.out.println("Passer state: " + machine.getState());
     }
+
 }

@@ -8,13 +8,13 @@ import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 
 /**
- * Cycles between source and speaker.
+ * Cycles between source and amp.
  */
-public class SpeakerCycler implements Autopilot {
+public class AmpCycler implements Autopilot {
 
     private enum State {
         Initial,
-        ToSpeaker,
+        ToAmp,
         ToSource
     }
 
@@ -26,15 +26,15 @@ public class SpeakerCycler implements Autopilot {
 
     private final StateMachine<State, Trigger> machine;
 
-    public SpeakerCycler() {
+    public AmpCycler() {
         final StateMachineConfig<State, Trigger> config = new StateMachineConfig<>();
         config.configure(State.Initial)
                 .permit(Trigger.Begin, State.ToSource);
-        config.configure(State.ToSpeaker)
+        config.configure(State.ToAmp)
                 .permit(Trigger.Done, State.ToSource)
                 .permit(Trigger.Reset, State.Initial);
         config.configure(State.ToSource)
-                .permit(Trigger.Done, State.ToSpeaker)
+                .permit(Trigger.Done, State.ToAmp)
                 .permit(Trigger.Reset, State.Initial);
         try {
             ByteArrayOutputStream dotFile = new ByteArrayOutputStream();
@@ -61,8 +61,8 @@ public class SpeakerCycler implements Autopilot {
     }
 
     @Override
-    public boolean driveToSpeaker() {
-        return machine.isInState(State.ToSpeaker);
+    public boolean driveToAmp() {
+        return machine.isInState(State.ToAmp);
     }
 
     @Override
@@ -72,12 +72,12 @@ public class SpeakerCycler implements Autopilot {
 
     @Override
     public void onEnd() {
-        System.out.println("Speaker Cycler onEnd");
+        System.out.println("Amp Cycler onEnd");
         machine.fire(Trigger.Done);
     }
     
     @Override
     public void periodic() {
-        System.out.println("Speaker Cycler state: " + machine.getState());
+        System.out.println("Amp Cycler state: " + machine.getState());
     }
 }

@@ -10,10 +10,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** TODO: extra a "drive to X" command */
+/** TODO: extract a "drive to X" command */
 public class DriveToAmp extends Command {
     private static final int kAngularP = 10;
-    private static final int kCartesianP = 50;
+    // try a bit more P
+    private static final int kCartesianP = 75;
     private final Alliance m_alliance;
     private final RobotAssembly m_robot;
 
@@ -32,7 +33,8 @@ public class DriveToAmp extends Command {
     public void execute() {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
-        v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
+        // turn off edge repulsion for now
+        // v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
         v = v.plus(Tactics.avoidSubwoofers(m_robot.getPose()));
         v = v.plus(Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings()));
         v = v.plus(Tactics.robotRepulsion(m_robot.getPose(), m_robot.recentSightings()));

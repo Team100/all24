@@ -27,8 +27,7 @@ public class RealPlayerAssembly extends RobotAssembly {
         super(robotBody, speakerPosition);
         m_control = pilot;
         m_drive.setDefaultCommand(new PilotDrive(m_drive, m_control));
-        // whileTrue(m_control::intake,
-        // m_indexer.run(m_indexer::intake));
+
         whileTrue(m_control::intake,
                 new Intake(m_indexer)
                         .finallyDo(() -> System.out.println("done intaking")));

@@ -18,7 +18,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 /** Low level drive motion heuristics that can be used by any command. */
 public class Tactics {
     // this is 1/r
-    private static final int kRobotRepulsion = 50;
+    // try a little less repulsion for now
+    private static final int kRobotRepulsion = 25;
     // steering around robots
     private static final int kRobotSteer = 100;
     // coefficient for 1/r
