@@ -29,7 +29,6 @@ public class PlayerDefaultDrive extends Command {
     public void execute() {
         FieldRelativeVelocity v = m_control.driveVelocity();
         m_drive.drive(v);
-        // m_drive.apply(v.x() * kForce, v.y() * kForce, v.theta() * kTorque);
     }
 
 }

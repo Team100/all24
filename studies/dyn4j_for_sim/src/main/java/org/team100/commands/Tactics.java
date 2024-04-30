@@ -8,7 +8,6 @@ import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.field.FieldMap;
-import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Heuristics;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
@@ -34,25 +33,24 @@ public class Tactics {
     /**
      * Avoid the edges of the field.
      */
-    public static FieldRelativeAcceleration avoidEdges(Pose2d pose) {
-        FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
+    public static FieldRelativeVelocity avoidEdges(Pose2d pose) {
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         if (pose.getX() < 1)
-            a = a.plus(new FieldRelativeAcceleration(kWallRepulsion, 0, 0));
+            v = v.plus(new FieldRelativeVelocity(kWallRepulsion, 0, 0));
         if (pose.getX() > 15)
-            a = a.plus(new FieldRelativeAcceleration(-kWallRepulsion, 0, 0));
+            v = v.plus(new FieldRelativeVelocity(-kWallRepulsion, 0, 0));
         if (pose.getY() < 1)
-            a = a.plus(new FieldRelativeAcceleration(0, kWallRepulsion, 0));
+            v = v.plus(new FieldRelativeVelocity(0, kWallRepulsion, 0));
         if (pose.getY() > 7)
-            a = a.plus(new FieldRelativeAcceleration(0, -kWallRepulsion, 0));
-        return a;
+            v = v.plus(new FieldRelativeVelocity(0, -kWallRepulsion, 0));
+        return v;
     }
 
     /**
      * Avoid the subwoofers.
      */
-    public static FieldRelativeAcceleration avoidSubwoofers(Pose2d pose) {
-        FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
-
+    public static FieldRelativeVelocity avoidSubwoofers(Pose2d pose) {
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         for (Map.Entry<String, Pose2d> entry : FieldMap.subwoofers.entrySet()) {
             Translation2d target = entry.getValue().getTranslation();
             Translation2d robotRelativeToTarget = pose.getTranslation().minus(target);
@@ -60,18 +58,17 @@ public class Tactics {
             if (norm < 3) {
                 // force goes as 1/r.
                 Translation2d force = robotRelativeToTarget.times(kSubwooferRepulsion / (norm * norm));
-                // m_robot.apply(force.getX(), force.getY(), 0);
-                a = a.plus(new FieldRelativeAcceleration(force.getX(), force.getY(), 0));
+                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
             }
         }
-        return a;
+        return v;
     }
 
     /**
      * Avoid the stage posts.
      */
-    public static FieldRelativeAcceleration avoidObstacles(Pose2d myPosition, FieldRelativeVelocity velocity) {
-        FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
+    public static FieldRelativeVelocity avoidObstacles(Pose2d myPosition, FieldRelativeVelocity velocity) {
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         for (Pose2d pose : FieldMap.stagePosts.values()) {
             Translation2d obstacleLocation = pose.getTranslation();
             double distance = myPosition.getTranslation().getDistance(obstacleLocation);
@@ -84,26 +81,21 @@ public class Tactics {
             if (steer.getMagnitude() < 1e-3)
                 continue;
             Vector2 force = steer.product(kSteer);
-            // m_robot.apply(force.x, force.y, 0);
-            a = a.plus(new FieldRelativeAcceleration(force.x, force.y, 0));
+            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
         }
-        return a;
+        return v;
     }
 
     /**
      * Extrapolate current course and steer to void hitting robots in the future;
      * assumes they're not moving, which is a terrible assumption.
      */
-    public static FieldRelativeAcceleration steerAroundRobots(
+    public static FieldRelativeVelocity steerAroundRobots(
             Pose2d myPosition,
             FieldRelativeVelocity myVelocity,
             NavigableMap<Double, RobotSighting> recentSightings) {
-        FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
-
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
-        // sightings in reverse chrono order
-        // NavigableMap<Double, RobotSighting> recentSightings =
-        // m_robot.recentSightings();
         // look at entries in order of decreasing timestamp
         for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
             double mostRecentTime = mostRecent.getKey();
@@ -149,24 +141,19 @@ public class Tactics {
             if (steer.getMagnitude() < 1e-3)
                 continue;
             Vector2 force = steer.product(kRobotSteer);
-            // m_robot.apply(force.x, force.y, 0);
-            a = a.plus(new FieldRelativeAcceleration(force.x, force.y, 0));
+            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
 
         }
-        return a;
+        return v;
 
     }
 
     /** A simpler method for avoiding robots: 1/r force. */
-    public static FieldRelativeAcceleration robotRepulsion(Pose2d myPosition,
+    public static FieldRelativeVelocity robotRepulsion(Pose2d myPosition,
             NavigableMap<Double, RobotSighting> recentSightings) {
-        FieldRelativeAcceleration a = new FieldRelativeAcceleration(0, 0, 0);
-
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
-        // Pose2d myPosition = m_robot.getPose();
-        // sightings in reverse chrono order
-        // NavigableMap<Double, RobotSighting> recentSightings =
-        // m_robot.recentSightings();
+
         // look at entries in order of decreasing timestamp
         for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
             RobotSighting mostRecentSighting = mostRecent.getValue();
@@ -191,13 +178,11 @@ public class Tactics {
             if (norm < 3) {
                 // force goes as 1/r.
                 Translation2d force = robotRelativeToTarget.times(kRobotRepulsion / (norm * norm));
-                // m_robot.apply(force.getX(), force.getY(), 0);
-                a = a.plus(new FieldRelativeAcceleration(force.getX(), force.getY(), 0));
-
+                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
             }
 
         }
-        return a;
+        return v;
     }
 
     private Tactics() {

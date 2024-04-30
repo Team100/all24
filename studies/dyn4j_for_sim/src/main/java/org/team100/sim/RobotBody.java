@@ -36,7 +36,7 @@ public abstract class RobotBody extends Body100 {
         fixture.setFilter(this);
         setMass(MassType.NORMAL);
         // fiddled with damping until it seemed "right"
-        setAngularDamping(10);
+        setAngularDamping(2);
         setLinearDamping(2);
     }
 

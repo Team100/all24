@@ -6,14 +6,16 @@ import edu.wpi.first.wpilibj.XboxController;
 
 /** A human driver/operator */
 public class ManualPilot implements Pilot {
+    private static final double kMaxVelocity = 5;
+    private static final double kMaxOmega = 10;
     private final XboxController m_controller = new XboxController(0);
 
     @Override
     public FieldRelativeVelocity driveVelocity() {
         return new FieldRelativeVelocity(
-                -m_controller.getRightY(), // axis 5
-                -m_controller.getRightX(), // axis 4
-                -m_controller.getLeftX()); // axis 0
+                -m_controller.getRightY() * kMaxVelocity, // axis 5
+                -m_controller.getRightX() * kMaxVelocity, // axis 4
+                -m_controller.getLeftX() * kMaxOmega); // axis 0
     }
 
     @Override

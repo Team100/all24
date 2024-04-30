@@ -47,7 +47,6 @@ public class IndexerSubsystem extends SubsystemBase {
                 double distance = position.distance(notePosition);
                 if (distance > 0.3)
                     continue;
-                System.out.println("Intaking");
                 // it's underneath the robot
                 // TODO: intake from one side only
                 m_note = (Note) body;
@@ -89,7 +88,6 @@ public class IndexerSubsystem extends SubsystemBase {
         if (m_note == null) {
             return false;
         }
-        System.out.println("feed to shooter");
         m_robotBody.getWorld().removeJoint(m_joint);
         m_note.drop();
         m_assembly.m_indexerShooterHandoff = m_note;

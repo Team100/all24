@@ -1,7 +1,6 @@
 package org.team100.subsystems;
 
 import org.dyn4j.dynamics.Force;
-import org.dyn4j.dynamics.Torque;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -15,8 +14,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Contains the sim body. */
 public class DriveSubsystem extends SubsystemBase {
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
+    private static final double kMaxAccel = 10; // m/s/s
+    private static final double kMaxAlpha = 10; // rad/s/s
     private final RobotBody m_robotBody;
     private final Translation2d m_speakerPosition;
+    private final double massKg;
+    private final double inertia;
     private long timeMicros;
 
     /**
@@ -26,8 +31,9 @@ public class DriveSubsystem extends SubsystemBase {
     public DriveSubsystem(RobotBody robotBody, Translation2d speakerPosition) {
         m_robotBody = robotBody;
         m_speakerPosition = speakerPosition;
+        massKg = m_robotBody.getMass().getMass();
+        inertia = m_robotBody.getMass().getInertia();
         timeMicros = RobotController.getFPGATime();
-
     }
 
     @Override
@@ -52,20 +58,22 @@ public class DriveSubsystem extends SubsystemBase {
 
     // /** Apply force and torque. Multiple calls to this method add. */
     // private void apply(double x, double y, double theta) {
-    //     m_robotBody.applyForce(new Force(x, y));
-    //     m_robotBody.applyTorque(new Torque(theta));
+    // m_robotBody.applyForce(new Force(x, y));
+    // m_robotBody.applyTorque(new Torque(theta));
     // }
 
-    public void drive(FieldRelativeVelocity desired) {
+    public void drive(FieldRelativeVelocity setpoint) {
+        setpoint = setpoint.clamp(kMaxVelocity, kMaxOmega);
         long nowMicros = RobotController.getFPGATime();
         double dtSec = (double) (nowMicros - timeMicros) / 1000000;
         timeMicros = nowMicros;
-        FieldRelativeVelocity current = getVelocity();
-        FieldRelativeAcceleration a = FieldRelativeAcceleration.diff(current, desired, dtSec);
-        double massKg = m_robotBody.getMass().getMass();
-        double inertia = m_robotBody.getMass().getInertia();
-        m_robotBody.applyForce(new Force(a.x() / massKg, a.y() / massKg));
-        m_robotBody.applyTorque(a.theta() / inertia);
+        FieldRelativeVelocity measurement = getVelocity();
+        // this is a kind of feedback controller
+        FieldRelativeAcceleration accel = FieldRelativeAcceleration
+                .diff(measurement, setpoint, dtSec)
+                .clamp(kMaxAccel, kMaxAlpha);
+        m_robotBody.applyForce(new Force(massKg * accel.x(), massKg * accel.y()));
+        m_robotBody.applyTorque(inertia * accel.theta());
     }
 
     public Pose2d getPose() {
@@ -92,11 +100,14 @@ public class DriveSubsystem extends SubsystemBase {
         return m_robotBody.passingPosition();
     }
 
+    // TODO: move this to a command
     public void rotateToShoot() {
         Pose2d pose = getPose();
         double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
-        m_robotBody.applyTorque(new Torque(error * 100));
+        FieldRelativeVelocity measurement = getVelocity();
+        double omega = error * 10;
+        drive(new FieldRelativeVelocity(measurement.x(), measurement.y(), omega));
     }
 
 }
