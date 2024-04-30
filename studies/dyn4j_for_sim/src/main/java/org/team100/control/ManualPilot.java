@@ -72,4 +72,19 @@ public class ManualPilot implements Pilot {
     public boolean shootCommand() {
         return m_controller.getRawButton(11);
     }
+
+    @Override
+    public void onEnd() {
+        System.out.println("MANUAL PILOT END");
+    }
+
+    @Override
+    public void begin() {
+        System.out.println("MANUAL PILOT BEGIN");
+    }
+
+    @Override
+    public void reset() {
+        System.out.println("MANUAL PILOT RESET");
+    }
 }

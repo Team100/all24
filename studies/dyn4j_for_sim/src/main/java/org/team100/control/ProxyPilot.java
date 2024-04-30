@@ -52,8 +52,23 @@ public class ProxyPilot implements Pilot {
     }
 
     @Override
-    public  boolean driveToSpeaker() {
+    public boolean driveToSpeaker() {
         return m_pilot.driveToSpeaker();
+    }
+
+    @Override
+    public void onEnd() {
+        m_pilot.onEnd();
+    }
+
+    @Override
+    public void begin() {
+        m_pilot.begin();
+    }
+
+    @Override
+    public void reset() {
+        m_pilot.reset();
     }
 
 }

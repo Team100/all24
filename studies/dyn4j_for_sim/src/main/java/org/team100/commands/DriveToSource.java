@@ -29,6 +29,7 @@ public class DriveToSource extends Command {
 
     @Override
     public void execute() {
+        System.out.println("drive to source execute");
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
 
         v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
@@ -38,6 +39,7 @@ public class DriveToSource extends Command {
         v = v.plus(Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings()));
         v = v.plus(Tactics.robotRepulsion(m_robot.getPose(), m_robot.recentSightings()));
         v = v.plus(goToGoal());
+        System.out.println("v " + v);
         m_robot.getDriveSubsystem().drive(v);
     }
 
@@ -48,7 +50,10 @@ public class DriveToSource extends Command {
         FieldRelativeDelta t = FieldRelativeDelta.delta(pose, goal);
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
-        return translationError < 1 && Math.abs(rotationError) < 0.1;
+        double velocity = m_robot.getVelocity().norm();
+        return translationError < 0.5
+                && Math.abs(rotationError) < 0.75
+                && velocity < 0.05;
     }
 
     @Override

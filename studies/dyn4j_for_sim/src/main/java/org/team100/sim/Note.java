@@ -121,7 +121,10 @@ public class Note extends Body100 {
                 setFlying(false);
             }
         }
+    }
 
+    public boolean isFlying() {
+        return m_altitude > 0 || m_verticalVelocityM_s > 0;
     }
 
     public void carry() {
@@ -142,5 +145,10 @@ public class Note extends Body100 {
 
     public double getAltitude() {
         return m_altitude;
+    }
+
+    /** For shooting, we don't shoot from the floor. */
+    public void setAltitude(double altitude) {
+        m_altitude = altitude;
     }
 }

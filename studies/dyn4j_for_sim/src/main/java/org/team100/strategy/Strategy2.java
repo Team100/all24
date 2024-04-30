@@ -45,15 +45,15 @@ public class Strategy2 {
 
     /** Does not affect instances of RealPlayerAssembly. */
     public void init() {
-        if (m_player.isNPC()) {
+        if (m_player != null && m_player.isNPC()) {
             m_player.setState(m_blue ? 2 : 15, m_blue ? 4 : 3, 0, 0);
             CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, m_player));
         }
-        if (m_friend1.isNPC()) {
+        if (m_friend1 != null && m_friend1.isNPC()) {
             m_friend1.setState(m_blue ? 1 : 15, m_blue ? 1 : 5, 0, 0);
             CommandScheduler.getInstance().schedule(new DriveToSpeaker(m_alliance, m_friend1));
         }
-        if (m_friend2.isNPC()) {
+        if (m_friend2 != null && m_friend2.isNPC()) {
             m_friend2.setState(m_blue ? 1 : 13, m_blue ? 4 : 7, 0, 0);
             CommandScheduler.getInstance().schedule(new DefendSource(m_alliance, m_friend2));
         }

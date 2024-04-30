@@ -12,6 +12,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /** The shooter is used for shooting, lobbing, and amping. */
 public class ShooterSubsystem extends SubsystemBase {
 
+    /** Height of the shooter exit, measured from the floor. */
+    private static final double kShooterHeightM = 0.5;
+
     /** Real exit velocity 20 m/s * note mass 0.235 kg. */
     private static final double kShootImpulseNs = 4.7;
 
@@ -79,6 +82,7 @@ public class ShooterSubsystem extends SubsystemBase {
         Rotation3d rot3d = new Rotation3d(0, elevationRad, yawRad);
         Translation3d impulse3d = new Translation3d(impulseNs, rot3d);
         m_assembly.m_indexerShooterHandoff.applyImpulse(impulse3d);
+        m_assembly.m_indexerShooterHandoff.setAltitude(kShooterHeightM);
         m_assembly.m_indexerShooterHandoff = null;
     }
 

@@ -37,6 +37,7 @@ public class DriveToSpeaker extends Command {
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {
+        System.out.println("DriveToSpeaker execute");
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
         v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
@@ -57,7 +58,11 @@ public class DriveToSpeaker extends Command {
         FieldRelativeDelta t = FieldRelativeDelta.delta(pose, goal);
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
-        return translationError < 0.5 && Math.abs(rotationError) < 0.05;
+        double velocity = m_robot.getVelocity().norm();
+
+        return translationError < 0.5
+                && Math.abs(rotationError) < 0.05
+                && velocity < 0.05;
     }
 
     @Override

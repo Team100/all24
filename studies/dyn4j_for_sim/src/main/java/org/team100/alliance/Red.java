@@ -15,7 +15,7 @@ public class Red extends Alliance {
     private final RobotAssembly passer;
     private final RobotAssembly defender;
     private final Source source;
-    private final Strategy strategy;
+   // private final Strategy strategy;
 
     public Red(SimWorld world) {
         Foe scorerBody = new Foe("red scorer", world);
@@ -31,11 +31,11 @@ public class Red extends Alliance {
         world.addBody(red3);
 
         source = new Source(world, 1.0, 1.0);
-        strategy = new Strategy(this, scorer, passer, defender, source, false);
+       // strategy = new Strategy(this, scorer, passer, defender, source, false);
     }
 
     public void init() {
-        strategy.init();
+       // strategy.init();
     }
 
     public void periodic() {
@@ -44,6 +44,6 @@ public class Red extends Alliance {
 
     @Override
     public void onEnd(RobotAssembly robot, Command command) {
-        strategy.onEnd(robot, command);
+        //strategy.onEnd(robot, command);
     }
 }
