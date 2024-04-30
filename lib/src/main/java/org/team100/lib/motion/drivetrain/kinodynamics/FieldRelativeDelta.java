@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,10 +29,10 @@ public class FieldRelativeDelta {
     public FieldRelativeDelta limit(double cartesian, double rotation) {
         return new FieldRelativeDelta(
                 new Translation2d(
-                        Math.min(cartesian, m_translation.getX()),
-                        Math.min(cartesian, m_translation.getY())),
+                        MathUtil.clamp(m_translation.getX(), -cartesian, cartesian),
+                        MathUtil.clamp(m_translation.getY(), -cartesian, cartesian)),
                 new Rotation2d(
-                        Math.min(rotation, m_rotation.getRadians())));
+                        MathUtil.clamp(m_rotation.getRadians(), -rotation, rotation)));
     }
 
     public FieldRelativeDelta times(double scalar) {

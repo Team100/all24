@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -17,7 +18,21 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
     public FieldRelativeVelocity plus(FieldRelativeVelocity other) {
         return new FieldRelativeVelocity(x + other.x, y + other.y, theta + other.theta);
     }
+
     public FieldRelativeVelocity minus(FieldRelativeVelocity other) {
         return new FieldRelativeVelocity(x - other.x, y - other.y, theta - other.theta);
+    }
+
+    public FieldRelativeVelocity times(double scalar) {
+        return new FieldRelativeVelocity(x * scalar, y * scalar, theta * scalar);
+    }
+
+    public FieldRelativeVelocity clamp(double maxVelocity, double maxOmega) {
+        double norm = Math.hypot(x, y);
+        double ratio = 1.0;
+        if (norm > 1e-3 && norm > maxVelocity) {
+            ratio = maxVelocity / norm;
+        }
+        return new FieldRelativeVelocity(ratio * x, ratio * y, MathUtil.clamp(theta, -maxOmega, maxOmega));
     }
 }
