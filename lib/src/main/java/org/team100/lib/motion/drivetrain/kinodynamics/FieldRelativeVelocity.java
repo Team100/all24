@@ -35,4 +35,10 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         }
         return new FieldRelativeVelocity(ratio * x, ratio * y, MathUtil.clamp(theta, -maxOmega, maxOmega));
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s[x=%5.3f,y=%5.3f]", getClass().getSimpleName(), x, y);
+
+    }
 }
