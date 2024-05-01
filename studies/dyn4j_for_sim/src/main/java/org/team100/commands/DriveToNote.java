@@ -20,24 +20,39 @@ import edu.wpi.first.wpilibj2.command.Command;
  * This never finishes; run it with an Intake command as the deadline.
  */
 public class DriveToNote extends Command {
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
     private static final int kCartesianP = 50;
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DriveToNote(DriveSubsystem drive, CameraSubsystem camera) {
+    public DriveToNote(
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
+        if (m_debug)
+            System.out.printf("DriveToNote\n");
         // some notes might be near the edge, so turn off edge repulsion.
         FieldRelativeVelocity v = m_tactics.apply(false, true, false);
+        if (m_debug)
+            System.out.printf("tactics v %s\n", v);
         v = v.plus(goToGoal());
+        v = v.clamp(kMaxVelocity, kMaxOmega);
+        if (m_debug)
+            System.out.printf("final v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -54,7 +69,7 @@ public class DriveToNote extends Command {
         Translation2d closest = null;
         for (Entry<Double, NoteSighting> entry : notes.entrySet()) {
             NoteSighting sight = entry.getValue();
-            Translation2d translation = pose.getTranslation().minus(sight.position());
+            Translation2d translation = sight.position().minus(pose.getTranslation());
             double distance = translation.getNorm();
             if (distance < minDistance) {
                 minDistance = distance;
@@ -67,6 +82,10 @@ public class DriveToNote extends Command {
         }
         // found a target
         // TODO: something about rotation
+
+        if (m_debug)
+            System.out.printf("DriveToNote pose %s target %s\n",
+                    m_drive.getPose().getTranslation(), closest);
 
         Vector2 positionError = new Vector2(closest.getX(), closest.getY());
         final int maxError = 1;

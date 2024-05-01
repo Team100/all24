@@ -84,6 +84,10 @@ public class CameraSubsystem extends SubsystemBase {
         // look for nearby notes, brute force
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
             if (body instanceof Note) {
+                if (!((Note) body).isVisible()) {
+                    // ignore notes carried by other robots, or flying through the air.
+                    continue;
+                }
                 Vector2 notePosition = body.getWorldCenter();
                 double distance = position.distance(notePosition);
                 // can't see that far

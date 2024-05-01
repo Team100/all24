@@ -36,6 +36,7 @@ public class RobotContainer {
 
     public void teleopExit() {
         m_blue.reset();
+        m_red.reset();
     }
 
     public void periodic() {

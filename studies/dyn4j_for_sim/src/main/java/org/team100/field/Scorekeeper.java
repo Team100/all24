@@ -36,16 +36,23 @@ public class Scorekeeper
     private final Speaker m_redSpeaker;
     private final AmpPocket m_blueAmp;
     private final AmpPocket m_redAmp;
+    private final boolean m_debug;
     private final Set<Body100> m_doomed;
 
     private int m_blueScore;
     private int m_redScore;
 
-    public Scorekeeper(Speaker blue, Speaker red, AmpPocket blueAmp, AmpPocket redAmp) {
+    public Scorekeeper(
+            Speaker blue,
+            Speaker red,
+            AmpPocket blueAmp,
+            AmpPocket redAmp,
+            boolean debug) {
         m_blueSpeaker = blue;
         m_redSpeaker = red;
         m_blueAmp = blueAmp;
         m_redAmp = redAmp;
+        m_debug = debug;
         m_doomed = new HashSet<>();
     }
 
@@ -68,9 +75,10 @@ public class Scorekeeper
                 // don't double count, don't eject after scoring
                 return false;
             }
-            System.out.printf("sensor extent %s note extent %s\n",
-                    sensor.getVerticalExtent(),
-                    maybeNote.getVerticalExtent());
+            if (m_debug)
+                System.out.printf("sensor extent %s note extent %s\n",
+                        sensor.getVerticalExtent(),
+                        maybeNote.getVerticalExtent());
             if (!sensor.getVerticalExtent().contains(maybeNote.getVerticalExtent())) {
                 // bounce out if note is not completely contained by the sensor.
                 return true;
@@ -84,7 +92,8 @@ public class Scorekeeper
             n.scored = true;
             // scored notes leave the field
             m_doomed.add(n);
-            System.out.printf("center %s altitude %5.3f\n", n.getWorldCenter(), n.getAltitude());
+            if (m_debug)
+                System.out.printf("center %s altitude %5.3f\n", n.getWorldCenter(), n.getAltitude());
             handler.run();
             printScore();
             return false;

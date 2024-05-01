@@ -37,11 +37,11 @@ public class PilotAssembly extends RobotAssembly {
                 Commands.deadline(
                         new Intake(m_indexer),
                         Commands.sequence(
-                                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition()),
-                                new DriveToNote(m_drive, m_camera)))
+                                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), false),
+                                new DriveToNote(m_drive, m_camera, false)))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToAmp,
-                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition())
+                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), false)
                         .andThen(new AmpCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToPass,
@@ -51,7 +51,7 @@ public class PilotAssembly extends RobotAssembly {
         whileTrue(pilot::driveToNote,
                 Commands.deadline(
                         new Intake(m_indexer),
-                        new DriveToNote(m_drive, m_camera))
+                        new DriveToNote(m_drive, m_camera, false))
                         .finallyDo(pilot::onEnd));
         // defend never ends
         whileTrue(pilot::defend,

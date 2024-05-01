@@ -28,7 +28,8 @@ public class Source extends SubsystemBase {
         if (m_notes > 0) {
             m_world.addNote(
                     m_target.getX() + m_random.nextGaussian(0, kStdDev),
-                    m_target.getY() + m_random.nextGaussian(0, kStdDev));
+                    m_target.getY() + m_random.nextGaussian(0, kStdDev),
+                    false);
             m_notes--;
         }
     }

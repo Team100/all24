@@ -11,23 +11,39 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveToSource extends Command {
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
     private static final int kAngularP = 10;
     private static final int kCartesianP = 50;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
+    private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DriveToSource(DriveSubsystem drive, CameraSubsystem camera, Pose2d goal) {
+    public DriveToSource(
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            Pose2d goal,
+            boolean debug) {
         m_drive = drive;
         m_goal = goal;
+        m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
+        if (m_debug)
+            System.out.println("DriveToSource execute");
         FieldRelativeVelocity v = m_tactics.apply(false, true, false);
+        if (m_debug)
+            System.out.printf("tactics v %s\n", v);
         v = v.plus(goToGoal());
+        v = v.clamp(kMaxVelocity, kMaxOmega);
+        if (m_debug)
+            System.out.printf("final v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -45,7 +61,6 @@ public class DriveToSource extends Command {
 
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_drive.getPose();
-        
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         final int maxError = 1;

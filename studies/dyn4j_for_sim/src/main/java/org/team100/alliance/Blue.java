@@ -57,7 +57,7 @@ public class Blue implements Alliance {
         world.addBody(blue2);
 
         source = new Source(world, new Translation2d(15.5, 1.0));
-        source.setDefaultCommand(new SourceDefault(source, world, true));
+        source.setDefaultCommand(new SourceDefault(source, world, true, false));
     }
 
     @Override

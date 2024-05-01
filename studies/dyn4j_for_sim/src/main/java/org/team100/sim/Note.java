@@ -29,6 +29,9 @@ public class Note extends Body100 {
     private static final Range kCarriedRange = new Range(0.2, 0.25);
 
     private static int counter = 0;
+
+    private final boolean m_debug;
+
     /** Altitude measures the bottom of the note. */
     private double m_altitude;
     private double m_verticalVelocityM_s;
@@ -41,8 +44,9 @@ public class Note extends Body100 {
     public boolean scored = false;
 
     /** Don't forget to add the body as a step listener. */
-    public Note() {
+    public Note(boolean debug) {
         super("note " + counter++);
+        m_debug = debug;
         Circle geometry = Geometry.createCircle(kDiameter);
         // area is about 0.1 m^2. correct mass is 0.235 kg.
         // thus kg/m2 should be 2.35
@@ -55,6 +59,12 @@ public class Note extends Body100 {
         m_verticalVelocityM_s = 0;
         setFlying(false);
         setBullet(true);
+    }
+
+    /** Camera can see it */
+    public boolean isVisible() {
+        return !m_carried && !isFlying();
+
     }
 
     public void setFlying(boolean flying) {
@@ -110,7 +120,8 @@ public class Note extends Body100 {
 
         if (m_altitude > 0 || m_verticalVelocityM_s > 0) {
             Vector2 location = getWorldCenter();
-            System.out.printf("Flying %3s x %6.3f y %6.3f z %6.3f\n", m_id, location.x, location.y, m_altitude);
+            if (m_debug)
+                System.out.printf("Flying %3s x %6.3f y %6.3f z %6.3f\n", m_id, location.x, location.y, m_altitude);
             m_verticalVelocityM_s += step.getDeltaTime() * kGravityM_s2;
             // air drag and collisions
             double linear = postSpeed / preSpeed;

@@ -21,7 +21,6 @@ public class DriveSubsystem extends SubsystemBase {
     private final double inertia;
     private long timeMicros;
 
-
     public DriveSubsystem(RobotBody robotBody) {
         m_robotBody = robotBody;
         massKg = m_robotBody.getMass().getMass();
@@ -45,6 +44,15 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void drive(FieldRelativeVelocity setpoint) {
+        // please provide feasible inputs
+        if (setpoint.x() > kMaxVelocity) {
+            System.out.printf("x over max %5.3f\n", setpoint.x());
+            new Exception().printStackTrace();
+        }
+        if (setpoint.y() > kMaxVelocity) {
+            System.out.printf("y over max %5.3f\n", setpoint.y());
+            new Exception().printStackTrace();
+        }
         setpoint = setpoint.clamp(kMaxVelocity, kMaxOmega);
         long nowMicros = RobotController.getFPGATime();
         double dtSec = (double) (nowMicros - timeMicros) / 1000000;

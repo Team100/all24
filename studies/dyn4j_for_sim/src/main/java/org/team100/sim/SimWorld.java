@@ -138,7 +138,12 @@ public class SimWorld {
                         new Vector2(15.003, fieldY + boundaryThickness),
                         new Vector2(14.394, fieldY + boundaryThickness)));
         world.addBody(redAmp);
-        Scorekeeper scorekeeper = new Scorekeeper(blueSpeaker, redSpeaker, blueAmp, redAmp);
+        Scorekeeper scorekeeper = new Scorekeeper(
+                blueSpeaker,
+                redSpeaker,
+                blueAmp,
+                redAmp,
+                false);
         world.addCollisionListener(scorekeeper);
         world.addBoundsListener(scorekeeper);
         world.addStepListener(scorekeeper);
@@ -262,24 +267,24 @@ public class SimWorld {
     }
 
     private void setUpNotes() {
-        // these are just made to match the background image
-        addNote(2.890, 4.10);
-        addNote(2.890, 5.56);
-        addNote(2.890, 7.01);
+        // these locations match the background image, ~2 cm different from CAD.
+        addNote(2.890, 4.10, false);
+        addNote(2.890, 5.56, false);
+        addNote(2.890, 7.01, false);
 
-        addNote(8.275, 0.75);
-        addNote(8.275, 2.43);
-        addNote(8.275, 4.10);
-        addNote(8.275, 5.79);
-        addNote(8.275, 7.47);
+        addNote(8.275, 0.75, false);
+        addNote(8.275, 2.43, false);
+        addNote(8.275, 4.10, false);
+        addNote(8.275, 5.79, false);
+        addNote(8.275, 7.47, false);
 
-        addNote(13.657, 4.10);
-        addNote(13.657, 5.56);
-        addNote(13.657, 7.01);
+        addNote(13.657, 4.10, false);
+        addNote(13.657, 5.56, false);
+        addNote(13.657, 7.01, false);
     }
 
-    public void addNote(double x, double y) {
-        Note note = new Note();
+    public void addNote(double x, double y, boolean debug) {
+        Note note = new Note(debug);
         note.translate(x, y);
         world.addBody(note);
         world.addStepListener(note);

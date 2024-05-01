@@ -12,28 +12,37 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** TODO: extract a "drive to X" command */
 public class DriveToAmp extends Command {
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
     private static final int kAngularP = 10;
     private static final int kCartesianP = 75;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
+    private final boolean m_debug;
     private final Tactics m_tactics;
 
     public DriveToAmp(
             DriveSubsystem drive,
             CameraSubsystem camera,
-            Pose2d goal) {
+            Pose2d goal,
+            boolean debug) {
         m_drive = drive;
         m_goal = goal;
+        m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(false, true, true);
-        System.out.printf("Tactics v %s\n", v);
+        FieldRelativeVelocity v = m_tactics.apply(false, true, false);
+        if (m_debug)
+            System.out.printf("Tactics v %s\n", v);
         v = v.plus(goToGoal());
-        System.out.printf("Total v %s\n", v);
+        v = v.clamp(kMaxVelocity, kMaxOmega);
+        if (m_debug)
+            System.out.printf("Total v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -43,9 +52,13 @@ public class DriveToAmp extends Command {
         FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_goal);
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
-        System.out.printf("translation error %5.3f rotation error %5.3f\n",
-                translationError, rotationError);
-        return translationError < 0.1 && Math.abs(rotationError) < 0.05;
+        double velocity = m_drive.getVelocity().norm();
+        if (m_debug)
+            System.out.printf("translation error %5.3f rotation error %5.3f\n",
+                    translationError, rotationError);
+        return translationError < 0.1
+                && Math.abs(rotationError) < 0.05
+                && velocity < 0.05;
     }
 
     /** Proportional feedback with a limiter. */

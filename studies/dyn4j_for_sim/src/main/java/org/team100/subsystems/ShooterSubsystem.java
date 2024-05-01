@@ -33,6 +33,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
     private final Translation2d m_speakerPosition;
+    private final boolean m_debug;
     /** range (meters): pitch (radians) */
     private final InterpolatingDoubleTreeMap shooterMap;
 
@@ -45,16 +46,19 @@ public class ShooterSubsystem extends SubsystemBase {
     public ShooterSubsystem(
             RobotAssembly assembly,
             RobotBody robotBody,
-            Translation2d speakerPosition) {
+            Translation2d speakerPosition,
+            boolean debug) {
         m_assembly = assembly;
         m_robotBody = robotBody;
         m_speakerPosition = speakerPosition;
+        m_debug = debug;
         shooterMap = new InterpolatingDoubleTreeMap();
         populateShooterMap();
     }
 
     public void shoot() {
-        System.out.println("shoot");
+        if (m_debug)
+            System.out.println("shoot");
         double rangeM = m_robotBody.getPose().getTranslation().getDistance(m_speakerPosition);
         double elevationRad = shooterMap.get(rangeM);
         printShot(rangeM, elevationRad);
@@ -62,12 +66,14 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void lob() {
-        System.out.println("lob");
+        if (m_debug)
+            System.out.println("lob");
         shooter(kLobImpulseNs, kLobElevationRad);
     }
 
     public void amp() {
-        System.out.println("amp");
+        if (m_debug)
+            System.out.println("amp");
         shooter(kAmpImpulseNs, kAmpElevationRad);
     }
 
@@ -77,7 +83,8 @@ public class ShooterSubsystem extends SubsystemBase {
     private void printShot(double range, double elevationRad) {
         if (m_assembly.m_indexerShooterHandoff == null)
             return;
-        System.out.printf("shoot range %5.3f elevation %5.3f\n", range, elevationRad);
+        if (m_debug)
+            System.out.printf("shoot range %5.3f elevation %5.3f\n", range, elevationRad);
     }
 
     /**
@@ -86,10 +93,12 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     private void shooter(double impulseNs, double elevationRad) {
         if (m_assembly.m_indexerShooterHandoff == null) {
-            System.out.println("Shooter received no note!");
+            if (m_debug)
+                System.out.println("Shooter received no note!");
             return;
         }
-        System.out.println("shooting note " + m_assembly.m_indexerShooterHandoff.getUserData());
+        if (m_debug)
+            System.out.println("shooting note " + m_assembly.m_indexerShooterHandoff.getUserData());
         double yawRad = m_robotBody.getPose().getRotation().getRadians();
         Rotation3d rot3d = new Rotation3d(0, elevationRad, yawRad);
         Translation3d impulse3d = new Translation3d(impulseNs, rot3d);

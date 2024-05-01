@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  * TODO: this works considerably better if the shot is taken while moving
  */
 public class DriveToPass extends Command {
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
     private static final int kAngularP = 10;
     private static final int kCartesianP = 50;
     private final DriveSubsystem m_drive;
@@ -33,6 +36,7 @@ public class DriveToPass extends Command {
     public void execute() {
         FieldRelativeVelocity v = m_tactics.apply(true, true, false);
         v = v.plus(goToGoal());
+        v = v.clamp(kMaxVelocity, kMaxOmega);
         m_drive.drive(v);
     }
 

@@ -74,8 +74,9 @@ public class AmpCycler implements Autopilot {
     public void onEnd() {
         machine.fire(Trigger.Done);
     }
-    
+
     @Override
     public void periodic() {
+        //
     }
 }

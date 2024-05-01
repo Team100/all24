@@ -43,7 +43,7 @@ public class Red implements Alliance {
         world.addBody(red3);
 
         source = new Source(world, new Translation2d(1.0, 1.0));
-        source.setDefaultCommand(new SourceDefault(source, world, false));
+        source.setDefaultCommand(new SourceDefault(source, world, false, false));
     }
 
     @Override

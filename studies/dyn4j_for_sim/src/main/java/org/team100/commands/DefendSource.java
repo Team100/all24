@@ -20,6 +20,10 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Never finishes.
  */
 public class DefendSource extends Command {
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
+
     private static final int kDefensePushing = 50;
     private static final int kCornerRepulsion = -10;
     private static final int kWaitingAttraction = 1000;
@@ -42,6 +46,7 @@ public class DefendSource extends Command {
                 m_drive.getRobotBody().defenderPosition(),
                 m_drive.getRobotBody().opponentSourcePosition(),
                 m_camera.recentSightings()));
+        v = v.clamp(kMaxVelocity, kMaxOmega);
         m_drive.drive(v);
     }
 
