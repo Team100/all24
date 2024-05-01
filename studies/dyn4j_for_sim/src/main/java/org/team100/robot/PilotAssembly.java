@@ -1,7 +1,5 @@
 package org.team100.robot;
 
-import java.util.function.BooleanSupplier;
-
 import org.team100.commands.AmpCommand;
 import org.team100.commands.DefendSource;
 import org.team100.commands.DriveToAmp;
@@ -17,9 +15,7 @@ import org.team100.control.Pilot;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * An attempt to make an assembly that runs like the player one does, but with
@@ -32,7 +28,7 @@ public class PilotAssembly extends RobotAssembly {
         m_drive.setDefaultCommand(new PilotDrive(m_drive, pilot));
         // one way to do sequences is via Command.andThen().
         whileTrue(pilot::driveToSpeaker,
-                new DriveToSpeaker(this)
+                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition())
                         .andThen(new RotateToShoot(speakerPosition, m_drive))
                         .andThen(new ShootCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
@@ -40,27 +36,19 @@ public class PilotAssembly extends RobotAssembly {
         whileTrue(pilot::driveToSource,
                 Commands.deadline(
                         new Intake(m_indexer),
-                        new DriveToSource(this))
+                        new DriveToSource(m_drive, m_camera, m_drive.sourcePosition()))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToAmp,
-                new DriveToAmp(this)
+                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition())
                         .andThen(new AmpCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToPass,
-                new DriveToPass(this)
+                new DriveToPass(m_drive, m_camera, m_drive.passingPosition())
                         .andThen(new LobCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         // defend never ends
         whileTrue(pilot::defend,
-                new DefendSource(this)
+                new DefendSource(m_drive, m_camera)
                         .finallyDo(pilot::onEnd));
     }
-
-    ///////////////////////////////////////////
-
-    private void whileTrue(BooleanSupplier condition, Command command) {
-        // note that triggers detect edges, not states
-        new Trigger(condition).whileTrue(command);
-    }
-
 }

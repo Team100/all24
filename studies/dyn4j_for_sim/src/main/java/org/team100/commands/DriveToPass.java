@@ -3,7 +3,8 @@ package org.team100.commands;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.robot.RobotAssembly;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,37 +18,29 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToPass extends Command {
     private static final int kAngularP = 10;
     private static final int kCartesianP = 50;
-    private final RobotAssembly m_robot;
+    private final DriveSubsystem m_drive;
+    private final Pose2d m_goal;
+    private final Tactics m_tactics;
 
-    public DriveToPass(RobotAssembly robot) {
-        m_robot = robot;
-        addRequirements(robot.getDriveSubsystem());
-    }
-
-    @Override
-    public String getName() {
-        return "Pass: " + m_robot.getName();
+    public DriveToPass(DriveSubsystem drive, CameraSubsystem camera, Pose2d goal) {
+        m_drive = drive;
+        m_goal = goal;
+        m_tactics = new Tactics(drive, camera);
+        addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        // System.out.println("DriveToPass execute");
-        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-        v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
-        v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
-        v = v.plus(Tactics.avoidSubwoofers(m_robot.getPose()));
-        v = v.plus(Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings()));
-        v = v.plus(Tactics.robotRepulsion(m_robot.getPose(), m_robot.recentSightings()));
+        FieldRelativeVelocity v = m_tactics.apply(true, true);
         v = v.plus(goToGoal());
-        m_robot.getDriveSubsystem().drive(v);
+        m_drive.drive(v);
     }
 
     @Override
     public boolean isFinished() {
-        Pose2d pose = m_robot.getPose();
-        Pose2d goal = m_robot.passingPosition();
-        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, goal);
-        double velocity = m_robot.getVelocity().norm();
+        Pose2d pose = m_drive.getPose();
+        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_goal);
+        double velocity = m_drive.getVelocity().norm();
         return t.getTranslation().getNorm() < 0.5
                 && Math.abs(t.getRotation().getRadians()) < 0.1
                 && velocity < 0.1;
@@ -55,9 +48,8 @@ public class DriveToPass extends Command {
 
     /** Proportional feedback with a limiter. */
     private FieldRelativeVelocity goToGoal() {
-        Pose2d pose = m_robot.getPose();
-        Pose2d goal = m_robot.passingPosition();
-        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, goal);
+        Pose2d pose = m_drive.getPose();
+        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         final int maxError = 1;
         positionError = new Vector2(

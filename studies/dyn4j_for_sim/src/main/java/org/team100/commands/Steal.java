@@ -1,34 +1,27 @@
 package org.team100.commands;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.robot.RobotAssembly;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Drive towards the nearest note and take it. */
 public class Steal extends Command {
-    private final RobotAssembly m_robot;
+    private final DriveSubsystem m_drive;
+    private final Tactics m_tactics;
 
-    public Steal(RobotAssembly robot) {
-        m_robot = robot;
-        addRequirements(robot.getDriveSubsystem());
-    }
-
-    @Override
-    public String getName() {
-        return "Steal: " + m_robot.getName();
+    public Steal(DriveSubsystem drive, CameraSubsystem camera) {
+        m_drive = drive;
+        m_tactics = new Tactics(drive, camera);
+        addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-        v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
-        v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
-        v = v.plus(Tactics.avoidSubwoofers(m_robot.getPose()));
-        v = v.plus(Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings()));
-        v = v.plus(Tactics.robotRepulsion(m_robot.getPose(), m_robot.recentSightings()));
+        FieldRelativeVelocity v = m_tactics.apply(true, true);
         // a = a.plus(goToGoal());
-        m_robot.getDriveSubsystem().drive(v);
+        m_drive.drive(v);
     }
 
     @Override

@@ -21,7 +21,7 @@ public class Blue extends Alliance {
     /**
      * Use a real player robot instead of an NPC.
      */
-    private static final boolean kRealPlayer = false;
+    private static final boolean kRealPlayer = true;
     private static final Translation2d kSpeaker = new Translation2d(0, 5.548);
     private final RobotAssembly player;
     private final RobotAssembly friend1;

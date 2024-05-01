@@ -9,10 +9,14 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Stop and turn to the speaker. This should optimally happen as part of another
- * driving behavior.
+ * Stop and turn to the speaker.
+ * 
+ * TODO: turn while moving, correct for the motion.
  */
 public class RotateToShoot extends Command {
+    private static final double kAngleTolerance = 0.05;
+    private static final double kVelocityTolerance = 0.05;
+    private static final double kP = 10;
     private final Translation2d m_speakerPosition;
     private final DriveSubsystem m_drive;
 
@@ -27,8 +31,7 @@ public class RotateToShoot extends Command {
         Pose2d pose = m_drive.getPose();
         double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
-        FieldRelativeVelocity measurement = m_drive.getVelocity();
-        double omega = error * 10;
+        double omega = error * kP;
         m_drive.drive(new FieldRelativeVelocity(0, 0, omega));
     }
 
@@ -38,6 +41,6 @@ public class RotateToShoot extends Command {
         double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
         double velocity = m_drive.getVelocity().norm();
-        return error < 0.05 && velocity < 0.05;
+        return error < kAngleTolerance && velocity < kVelocityTolerance;
     }
 }

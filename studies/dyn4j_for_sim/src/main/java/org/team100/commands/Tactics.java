@@ -10,7 +10,9 @@ import org.dyn4j.geometry.Vector2;
 import org.team100.field.FieldMap;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.Heuristics;
+import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -30,6 +32,33 @@ public class Tactics {
     private static final int kSteer = 500;
     // targets appearing to move faster than this are probably false associations.
     private static final double kMaxTargetVelocity = 4;
+
+    private final DriveSubsystem m_drive;
+    private final CameraSubsystem m_camera;
+
+    public Tactics(DriveSubsystem drive, CameraSubsystem camera) {
+        m_drive = drive;
+        m_camera = camera;
+    }
+
+    /**
+     * @param avoidEdges some goals are near the edge, so turn this off.
+     */
+    public FieldRelativeVelocity apply(boolean avoidEdges, boolean avoidRobots) {
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
+        Pose2d pose = m_drive.getPose();
+        FieldRelativeVelocity velocity = m_drive.getVelocity();
+        v = v.plus(Tactics.avoidObstacles(pose, velocity));
+        if (avoidEdges)
+            v = v.plus(Tactics.avoidEdges(pose));
+        v = v.plus(Tactics.avoidSubwoofers(pose));
+        if (avoidRobots) {
+            NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
+            v = v.plus(Tactics.steerAroundRobots(pose, velocity, recentSightings));
+            v = v.plus(Tactics.robotRepulsion(pose, recentSightings));
+        }
+        return v;
+    }
 
     /**
      * Avoid the edges of the field.
@@ -185,9 +214,4 @@ public class Tactics {
         }
         return v;
     }
-
-    private Tactics() {
-        //
-    }
-
 }

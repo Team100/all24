@@ -6,8 +6,9 @@ import java.util.NavigableMap;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.robot.RobotAssembly;
+import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,31 +23,26 @@ public class DefendSource extends Command {
     private static final int kDefensePushing = 50;
     private static final int kCornerRepulsion = -10;
     private static final int kWaitingAttraction = 1000;
-    private final RobotAssembly m_robot;
+    private final DriveSubsystem m_drive;
+    private final CameraSubsystem m_camera;
+    private final Tactics m_tactics;
 
-    public DefendSource(RobotAssembly robot) {
-        m_robot = robot;
-        addRequirements(robot.getDriveSubsystem());
-    }
-
-    @Override
-    public String getName() {
-        return "Defend Source: " + m_robot.getName();
+    public DefendSource(DriveSubsystem drive, CameraSubsystem camera) {
+        m_drive = drive;
+        m_camera = camera;
+        m_tactics = new Tactics(drive, camera);
+        addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-        v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
-        v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
-        v = v.plus(Tactics.avoidSubwoofers(m_robot.getPose()));
-        // it's ok to collide with robots
+        FieldRelativeVelocity v = m_tactics.apply(true, false);
         v = v.plus(work(
-                m_robot.getPose(),
-                m_robot.getDefenderPosition(),
-                m_robot.getOpponentSourcePosition(),
-                m_robot.recentSightings()));
-        m_robot.getDriveSubsystem().drive(v);
+                m_drive.getPose(),
+                m_drive.getRobotBody().defenderPosition(),
+                m_drive.getRobotBody().opponentSourcePosition(),
+                m_camera.recentSightings()));
+        m_drive.drive(v);
     }
 
     /**

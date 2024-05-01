@@ -7,7 +7,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -18,26 +17,16 @@ public class DriveSubsystem extends SubsystemBase {
     private static final double kMaxAccel = 10; // m/s/s
     private static final double kMaxAlpha = 10; // rad/s/s
     private final RobotBody m_robotBody;
-    private final Translation2d m_speakerPosition;
     private final double massKg;
     private final double inertia;
     private long timeMicros;
 
-    /**
-     * @param robotBody
-     * @param speakerPosition to calculate range for the shooter map
-     */
-    public DriveSubsystem(RobotBody robotBody, Translation2d speakerPosition) {
+
+    public DriveSubsystem(RobotBody robotBody) {
         m_robotBody = robotBody;
-        m_speakerPosition = speakerPosition;
         massKg = m_robotBody.getMass().getMass();
         inertia = m_robotBody.getMass().getInertia();
         timeMicros = RobotController.getFPGATime();
-    }
-
-    @Override
-    public String getName() {
-        return m_robotBody.getName();
     }
 
     public RobotBody getRobotBody() {
