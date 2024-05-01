@@ -32,7 +32,7 @@ public class DriveToSpeaker extends Command {
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(true, true);
+        FieldRelativeVelocity v = m_tactics.apply(true, true, false);
         v = v.plus(goToGoal());
         m_drive.drive(v);
     }

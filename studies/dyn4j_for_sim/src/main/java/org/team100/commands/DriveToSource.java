@@ -26,7 +26,7 @@ public class DriveToSource extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(false, true);
+        FieldRelativeVelocity v = m_tactics.apply(false, true, false);
         v = v.plus(goToGoal());
         m_drive.drive(v);
     }

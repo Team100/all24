@@ -15,13 +15,12 @@ import org.team100.sim.Player;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 
-public class Blue extends Alliance {
+public class Blue implements Alliance {
     /**
      * Use a real player robot instead of an NPC.
      */
-    private static final boolean kRealPlayer = true;
+    private static final boolean kRealPlayer = false;
     private static final Translation2d kSpeaker = new Translation2d(0, 5.548);
     private final RobotAssembly player;
     private final RobotAssembly friend1;
@@ -61,36 +60,27 @@ public class Blue extends Alliance {
         source.setDefaultCommand(new SourceDefault(source));
     }
 
-    /**
-     * Set up locations.
-     * State machine to initial.
-     */
+    @Override
     public void reset() {
         ampCycler.reset();
         speakerCycler.reset();
         defender.reset();
-        // initial position
         player.setState(2, 4, 0, 0);
         friend1.setState(1, 1, 0, 0);
         friend2.setState(1, 4, 0, 0);
     }
 
-    /** State machine to first active state */
+    @Override
     public void begin() {
         ampCycler.begin();
         speakerCycler.begin();
         defender.begin();
     }
 
+    @Override
     public void periodic() {
         ampCycler.periodic();
         speakerCycler.periodic();
         defender.periodic();
     }
-
-    @Override
-    public void onEnd(RobotAssembly robot, Command command) {
-        //
-    }
-
 }

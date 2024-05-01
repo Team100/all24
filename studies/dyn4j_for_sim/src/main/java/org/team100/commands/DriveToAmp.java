@@ -30,8 +30,10 @@ public class DriveToAmp extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(false, true);
+        FieldRelativeVelocity v = m_tactics.apply(false, true, true);
+        System.out.printf("Tactics v %s\n", v);
         v = v.plus(goToGoal());
+        System.out.printf("Total v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -41,6 +43,8 @@ public class DriveToAmp extends Command {
         FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_goal);
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
+        System.out.printf("translation error %5.3f rotation error %5.3f\n",
+                translationError, rotationError);
         return translationError < 0.1 && Math.abs(rotationError) < 0.05;
     }
 

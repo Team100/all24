@@ -12,9 +12,8 @@ import org.team100.sim.Foe;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 
-public class Red extends Alliance {
+public class Red implements Alliance {
     private static final Translation2d kSpeaker = new Translation2d(16.541, 5.548);
     private final RobotAssembly scorer;
     private final RobotAssembly passer;
@@ -47,6 +46,7 @@ public class Red extends Alliance {
         source.setDefaultCommand(new SourceDefault(source));
     }
 
+    @Override
     public void reset() {
         scoreAlternator.reset();
         passCycler.reset();
@@ -56,20 +56,17 @@ public class Red extends Alliance {
         defender.setState(13, 7, 0, 0);
     }
 
+    @Override
     public void begin() {
         scoreAlternator.begin();
         passCycler.begin();
         defenseOnly.begin();
     }
 
+    @Override
     public void periodic() {
         scoreAlternator.periodic();
         passCycler.periodic();
         defenseOnly.periodic();
-    }
-
-    @Override
-    public void onEnd(RobotAssembly robot, Command command) {
-        //
     }
 }

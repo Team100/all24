@@ -36,7 +36,7 @@ public class DefendSource extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(true, false);
+        FieldRelativeVelocity v = m_tactics.apply(true, false, false);
         v = v.plus(work(
                 m_drive.getPose(),
                 m_drive.getRobotBody().defenderPosition(),

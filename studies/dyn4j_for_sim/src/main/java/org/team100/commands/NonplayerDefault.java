@@ -18,7 +18,7 @@ public class NonplayerDefault extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(true, true);
+        FieldRelativeVelocity v = m_tactics.apply(true, true, false);
         m_drive.drive(v);
     }
 }

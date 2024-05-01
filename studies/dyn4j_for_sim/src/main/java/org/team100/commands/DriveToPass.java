@@ -31,7 +31,7 @@ public class DriveToPass extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(true, true);
+        FieldRelativeVelocity v = m_tactics.apply(true, true, false);
         v = v.plus(goToGoal());
         m_drive.drive(v);
     }
