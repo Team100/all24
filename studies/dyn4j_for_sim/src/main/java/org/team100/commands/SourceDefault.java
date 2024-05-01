@@ -39,8 +39,10 @@ public class SourceDefault extends Command {
 
     @Override
     public void execute() {
-        if (nearFriend() && m_timer.advanceIfElapsed(kPeriodS)) {
+        // feed if there's a nearby friend, but not too fast
+        if (nearFriend() && m_timer.hasElapsed(kPeriodS)) {
             m_humanPlayer.feed();
+            m_timer.restart();
         }
     }
 
@@ -58,18 +60,24 @@ public class SourceDefault extends Command {
                 // look only at robots
                 continue;
             }
+            Vector2 robotPosition = body.getWorldCenter();
+            Translation2d robotTranslation = new Translation2d(robotPosition.x, robotPosition.y);
+            double distance = robotTranslation.getDistance(m_humanPlayer.getTarget());
+            if (distance > kMaxDistance) {// ignore distant robots
+                continue;
+            }
+
             if (m_isBlue && body instanceof Foe) {
                 // blue source does not feed red robots.
                 continue;
             }
             if (!m_isBlue && !(body instanceof Foe)) {
                 // red source does not feed blue robots
+                System.out.printf("ignoring %s\n", body);
                 continue;
             }
-            Vector2 robotPosition = body.getWorldCenter();
-            Translation2d robotTranslation = new Translation2d(robotPosition.x, robotPosition.y);
-            double distance = robotTranslation.getDistance(m_humanPlayer.getTarget());
-            return distance < kMaxDistance;
+
+            return true;
         }
         return false;
     }
