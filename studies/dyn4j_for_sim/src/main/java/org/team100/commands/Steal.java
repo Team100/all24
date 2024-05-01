@@ -1,46 +1,36 @@
 package org.team100.commands;
 
-import org.team100.robot.RobotSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Drive towards the nearest note and take it. */
 public class Steal extends Command {
-
-    private final Alliance m_alliance;
-    private final RobotSubsystem m_robot;
+    private final DriveSubsystem m_drive;
     private final Tactics m_tactics;
 
-    public Steal(Alliance alliance, RobotSubsystem robot) {
-        m_alliance = alliance;
-        m_robot = robot;
-        m_tactics = new Tactics(robot);
-        addRequirements(robot);
+    public Steal(DriveSubsystem drive, CameraSubsystem camera) {
+        m_drive = drive;
+        m_tactics = new Tactics(drive, camera);
+        addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        m_tactics.avoidObstacles();
-        m_tactics.avoidEdges();
-        m_tactics.avoidSubwoofers();
-        m_tactics.steerAroundRobots();
-        m_tactics.robotRepulsion();
-        goToGoal();
+        FieldRelativeVelocity v = m_tactics.apply(true, true);
+        // a = a.plus(goToGoal());
+        m_drive.drive(v);
     }
-
 
     @Override
     public boolean isFinished() {
         return false;
     }
 
-    @Override
-    public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
-    }
-
-    private void goToGoal() {
-        //
-    }
+    // private void goToGoal() {
+    // //
+    // }
 
 }

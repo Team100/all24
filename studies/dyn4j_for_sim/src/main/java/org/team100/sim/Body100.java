@@ -58,22 +58,24 @@ public abstract class Body100 extends Body implements StepListener<Body100>, Fil
         //
     }
 
-    /** Filter based on vertical extent. */
+    /**
+     * Filter based on vertical extent.
+     * Since the filters can be called in either order, there's just one filter for
+     * all the cases, so this is final.
+     */
     @Override
-    public boolean isAllowed(Filter filter) {
-        if (filter instanceof Body100) {
-            Body100 other = (Body100) filter;
-            Range thisExtent = getVerticalExtent();
-            Range otherExtent = other.getVerticalExtent();
-            return thisExtent.overlaps(otherExtent);
+    public final boolean isAllowed(Filter filter) {
+        if (!(filter instanceof Body100)) {
+            // this should never happen
+            return true;
         }
-        return true;
+        return getVerticalExtent().overlaps(((Body100) filter).getVerticalExtent());
     }
 
     /**
      * Vertical extent can vary (e.g. for notes), or be fixed (for everything else).
      */
-    protected abstract Range getVerticalExtent();
+    public abstract Range getVerticalExtent();
 
     @Override
     public String toString() {

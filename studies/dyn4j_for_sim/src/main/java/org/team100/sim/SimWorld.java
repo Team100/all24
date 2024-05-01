@@ -9,10 +9,10 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
+import org.team100.field.FieldMap;
+import org.team100.field.Scorekeeper;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.robot.FieldMap;
-import org.team100.robot.Scorekeeper;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,6 +21,17 @@ import edu.wpi.first.math.geometry.Translation2d;
  * In this world, the player and friends are blue, the foes are red.
  */
 public class SimWorld {
+    private static final double boundaryThickness = 1;
+    private static final double fieldX = 16.541;
+    private static final double fieldY = 8.211;
+    // this is the actual amp length.
+    // private static final double ampLength = 2.418;
+    // amp length only goes to (1mm short of) the pocket
+    private static final double ampLength = 1.535;
+    // this is just beyond the pocket
+    private static final double topWallLimit = 2.146;
+    private static final double ampHeight = 1.207;
+    private static final double allianceWallHeightM = 1.983;
     private static final String kField = "field";
     private static final Telemetry t = Telemetry.get();
 
@@ -37,7 +48,7 @@ public class SimWorld {
         setUpWalls();
         setUpStages();
         setUpNotes();
-        setUpSpeakers();
+        setUpSensors();
 
         // cache the obstacle locations since we use them all the time.
         obstacles = new ArrayList<>();
@@ -97,8 +108,8 @@ public class SimWorld {
         }
     }
 
-    /** Speakers are sensors. */
-    private void setUpSpeakers() {
+    /** Speakers and amp pockets are sensors. */
+    private void setUpSensors() {
         Speaker blueSpeaker = new Speaker("blue speaker",
                 Geometry.createPolygon(
                         new Vector2(0, 5.018),
@@ -113,7 +124,21 @@ public class SimWorld {
                         new Vector2(16.541, 6.075),
                         new Vector2(16.541, 5.018)));
         world.addBody(redSpeaker);
-        Scorekeeper scorekeeper = new Scorekeeper(blueSpeaker, redSpeaker);
+        AmpPocket blueAmp = new AmpPocket("blue amp pocket",
+                Geometry.createPolygon(
+                        new Vector2(1.536, fieldY),
+                        new Vector2(2.145, fieldY),
+                        new Vector2(2.145, fieldY + boundaryThickness),
+                        new Vector2(1.536, fieldY + boundaryThickness)));
+        world.addBody(blueAmp);
+        AmpPocket redAmp = new AmpPocket("red amp pocket",
+                Geometry.createPolygon(
+                        new Vector2(14.394, fieldY),
+                        new Vector2(15.003, fieldY),
+                        new Vector2(15.003, fieldY + boundaryThickness),
+                        new Vector2(14.394, fieldY + boundaryThickness)));
+        world.addBody(redAmp);
+        Scorekeeper scorekeeper = new Scorekeeper(blueSpeaker, redSpeaker, blueAmp, redAmp);
         world.addCollisionListener(scorekeeper);
         world.addBoundsListener(scorekeeper);
         world.addStepListener(scorekeeper);
@@ -123,9 +148,6 @@ public class SimWorld {
      * this uses simgui coordinates for blue
      */
     private void setUpWalls() {
-        final double boundaryThickness = 1;
-        final double fieldX = 16.541;
-        final double fieldY = 8.211;
         world.addBody(
                 new Wall("blue source",
                         Geometry.createTriangle(
@@ -170,7 +192,7 @@ public class SimWorld {
                                 new Vector2(0, fieldY),
                                 new Vector2(-boundaryThickness, fieldY),
                                 new Vector2(-boundaryThickness, 0)),
-                        1.983));
+                        allianceWallHeightM));
         world.addBody(
                 new Wall("red wall",
                         Geometry.createPolygon(
@@ -178,16 +200,14 @@ public class SimWorld {
                                 new Vector2(fieldX, 0),
                                 new Vector2(fieldX + boundaryThickness, 0),
                                 new Vector2(fieldX + boundaryThickness, fieldY)),
-                        1.983));
-        final double ampLength = 2.418;
-        final double ampHeight = 1.207;
+                        allianceWallHeightM));
         world.addBody(
                 new Wall("top wall",
                         Geometry.createPolygon(
-                                new Vector2(ampLength, fieldY),
-                                new Vector2(fieldX - ampLength, fieldY),
-                                new Vector2(fieldX - ampLength, fieldY + boundaryThickness),
-                                new Vector2(ampLength, fieldY + boundaryThickness)),
+                                new Vector2(topWallLimit, fieldY),
+                                new Vector2(fieldX - topWallLimit, fieldY),
+                                new Vector2(fieldX - topWallLimit, fieldY + boundaryThickness),
+                                new Vector2(topWallLimit, fieldY + boundaryThickness)),
                         0.508));
         world.addBody(
                 new Wall("bottom wall",
@@ -197,6 +217,8 @@ public class SimWorld {
                                 new Vector2(0, -boundaryThickness),
                                 new Vector2(fieldX, -boundaryThickness)),
                         0.508));
+        // this is a bit simplified: the "amp" wall extends from the corner to the amp
+        // scoring pocket.
         world.addBody(
                 new Wall("blue amp",
                         Geometry.createPolygon(
