@@ -109,7 +109,8 @@ public class Note extends Body100 {
         double postSpeed = getLinearVelocity().getMagnitude();
 
         if (m_altitude > 0 || m_verticalVelocityM_s > 0) {
-            System.out.printf("%s center %s extent %s\n", m_id, getWorldCenter(), getVerticalExtent());
+            Vector2 location = getWorldCenter();
+            System.out.printf("Flying %3s x %6.3f y %6.3f z %6.3f\n", m_id, location.x, location.y, m_altitude);
             m_verticalVelocityM_s += step.getDeltaTime() * kGravityM_s2;
             // air drag and collisions
             double linear = postSpeed / preSpeed;
