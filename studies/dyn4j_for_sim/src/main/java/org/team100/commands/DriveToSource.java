@@ -45,6 +45,7 @@ public class DriveToSource extends Command {
 
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_drive.getPose();
+        
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         final int maxError = 1;

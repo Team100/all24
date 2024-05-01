@@ -56,8 +56,8 @@ public class Blue implements Alliance {
         friend2.setState(1, 4, 0, 0); // initial position
         world.addBody(blue2);
 
-        source = new Source(world, 15.5, 1.0);
-        source.setDefaultCommand(new SourceDefault(source));
+        source = new Source(world, new Translation2d(15.5, 1.0));
+        source.setDefaultCommand(new SourceDefault(source, world, true));
     }
 
     @Override

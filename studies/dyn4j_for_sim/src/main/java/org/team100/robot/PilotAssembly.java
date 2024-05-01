@@ -3,6 +3,7 @@ package org.team100.robot;
 import org.team100.commands.AmpCommand;
 import org.team100.commands.DefendSource;
 import org.team100.commands.DriveToAmp;
+import org.team100.commands.DriveToNote;
 import org.team100.commands.DriveToPass;
 import org.team100.commands.DriveToSource;
 import org.team100.commands.DriveToSpeaker;
@@ -32,11 +33,12 @@ public class PilotAssembly extends RobotAssembly {
                         .andThen(new RotateToShoot(speakerPosition, m_drive))
                         .andThen(new ShootCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
-        // TODO: add drive-to-note
         whileTrue(pilot::driveToSource,
                 Commands.deadline(
                         new Intake(m_indexer),
-                        new DriveToSource(m_drive, m_camera, m_drive.sourcePosition()))
+                        Commands.sequence(
+                                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition()),
+                                new DriveToNote(m_drive, m_camera)))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToAmp,
                 new DriveToAmp(m_drive, m_camera, m_drive.ampPosition())
@@ -45,6 +47,11 @@ public class PilotAssembly extends RobotAssembly {
         whileTrue(pilot::driveToPass,
                 new DriveToPass(m_drive, m_camera, m_drive.passingPosition())
                         .andThen(new LobCommand(m_indexer, m_shooter))
+                        .finallyDo(pilot::onEnd));
+        whileTrue(pilot::driveToNote,
+                Commands.deadline(
+                        new Intake(m_indexer),
+                        new DriveToNote(m_drive, m_camera))
                         .finallyDo(pilot::onEnd));
         // defend never ends
         whileTrue(pilot::defend,

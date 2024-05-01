@@ -8,13 +8,13 @@ import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 
 /**
- * Scorer goes back and forth from speaker to amp
- * TODO: add drive-to-note to pick up and score.
+ * Scorer picks up nearby notes and scores them in the speaker and amp.
  */
 public class Scorer implements Autopilot {
 
     private enum State {
         Initial,
+        ToNote,
         ToSpeaker,
         ToAmp
     }
@@ -72,12 +72,18 @@ public class Scorer implements Autopilot {
     }
 
     @Override
+    public boolean driveToNote() {
+        return machine.isInState(State.ToNote);
+    }
+
+    @Override
     public void onEnd() {
         machine.fire(Trigger.Done);
     }
 
     @Override
     public void periodic() {
+        //
     }
 
 }

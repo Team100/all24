@@ -116,4 +116,8 @@ public class CameraSubsystem extends SubsystemBase {
     public NavigableMap<Double, RobotSighting> recentSightings() {
         return sightings.descendingMap();
     }
+
+    public NavigableMap<Double, NoteSighting> recentNoteSightings() {
+        return noteSightings.descendingMap();
+    }
 }

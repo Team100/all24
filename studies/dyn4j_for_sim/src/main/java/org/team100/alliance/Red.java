@@ -42,8 +42,8 @@ public class Red implements Alliance {
         defender.setState(13, 7, 0, 0);
         world.addBody(red3);
 
-        source = new Source(world, 1.0, 1.0);
-        source.setDefaultCommand(new SourceDefault(source));
+        source = new Source(world, new Translation2d(1.0, 1.0));
+        source.setDefaultCommand(new SourceDefault(source, world, false));
     }
 
     @Override
