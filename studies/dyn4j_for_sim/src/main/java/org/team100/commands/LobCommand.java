@@ -23,7 +23,7 @@ public class LobCommand extends Command {
      */
     @Override
     public void execute() {
-        System.out.println("LobCommand execute");
+        // System.out.println("LobCommand execute");
         // stash the note in the assembly handoff
         if (!m_indexer.towardsShooter()) {
             System.out.println("no note");
@@ -34,7 +34,8 @@ public class LobCommand extends Command {
         m_shooter.lob();
     }
 
-    /** This version finishes immediately, which is clearly wrong.
+    /**
+     * This version finishes immediately, which is clearly wrong.
      * TODO: add spinning, feeding delays.
      */
     @Override

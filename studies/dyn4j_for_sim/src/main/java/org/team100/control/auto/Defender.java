@@ -20,7 +20,6 @@ public class Defender implements Autopilot {
 
     @Override
     public void onEnd() {
-        System.out.println("Defender onEnd, this should never happen");
     }
 
 }

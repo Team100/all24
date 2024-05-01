@@ -23,7 +23,6 @@ public class ShootCommand extends Command {
      */
     @Override
     public void execute() {
-        System.out.println("ShootCommand execute");
         // stash the note in the assembly handoff
         if (!m_indexer.towardsShooter()) {
             System.out.println("no note");

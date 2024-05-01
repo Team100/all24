@@ -8,14 +8,15 @@ import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 
 /**
- * Cycles between source and amp.
+ * Scorer goes back and forth from speaker to amp
+ * TODO: add drive-to-note to pick up and score.
  */
-public class AmpCycler implements Autopilot {
+public class Scorer implements Autopilot {
 
     private enum State {
         Initial,
-        ToAmp,
-        ToSource
+        ToSpeaker,
+        ToAmp
     }
 
     private enum Trigger {
@@ -26,15 +27,15 @@ public class AmpCycler implements Autopilot {
 
     private final StateMachine<State, Trigger> machine;
 
-    public AmpCycler() {
+    public Scorer() {
         final StateMachineConfig<State, Trigger> config = new StateMachineConfig<>();
         config.configure(State.Initial)
-                .permit(Trigger.Begin, State.ToSource);
-        config.configure(State.ToAmp)
-                .permit(Trigger.Done, State.ToSource)
-                .permit(Trigger.Reset, State.Initial);
-        config.configure(State.ToSource)
+                .permit(Trigger.Begin, State.ToSpeaker);
+        config.configure(State.ToSpeaker)
                 .permit(Trigger.Done, State.ToAmp)
+                .permit(Trigger.Reset, State.Initial);
+        config.configure(State.ToAmp)
+                .permit(Trigger.Done, State.ToSpeaker)
                 .permit(Trigger.Reset, State.Initial);
         try {
             ByteArrayOutputStream dotFile = new ByteArrayOutputStream();
@@ -66,16 +67,17 @@ public class AmpCycler implements Autopilot {
     }
 
     @Override
-    public boolean driveToSource() {
-        return machine.isInState(State.ToSource);
+    public boolean driveToSpeaker() {
+        return machine.isInState(State.ToSpeaker);
     }
 
     @Override
     public void onEnd() {
         machine.fire(Trigger.Done);
     }
-    
+
     @Override
     public void periodic() {
     }
+
 }

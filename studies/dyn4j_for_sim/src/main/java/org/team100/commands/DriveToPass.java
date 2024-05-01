@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive to a passing spot.
+ * 
+ * TODO: this works considerably better if the shot is taken while moving
  */
 public class DriveToPass extends Command {
     private static final int kAngularP = 10;
@@ -32,6 +34,7 @@ public class DriveToPass extends Command {
 
     @Override
     public void execute() {
+        // System.out.println("DriveToPass execute");
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
         v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
@@ -47,8 +50,10 @@ public class DriveToPass extends Command {
         Pose2d pose = m_robot.getPose();
         Pose2d goal = m_robot.passingPosition();
         FieldRelativeDelta t = FieldRelativeDelta.delta(pose, goal);
+        double velocity = m_robot.getVelocity().norm();
         return t.getTranslation().getNorm() < 0.5
-                && Math.abs(t.getRotation().getRadians()) < 0.1;
+                && Math.abs(t.getRotation().getRadians()) < 0.1
+                && velocity < 0.1;
     }
 
     @Override

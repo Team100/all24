@@ -21,16 +21,15 @@ public class RobotContainer {
         SmartDashboard.putData(CommandScheduler.getInstance());
     }
 
-    // 
     public void robotInit() {
         m_blue.reset();
-        m_red.init();
+        m_red.reset();
         world.render();
     }
 
    public void teleopInit() {
         m_blue.begin();
-        m_red.init();
+        m_red.begin();
         world.render();
     }
 

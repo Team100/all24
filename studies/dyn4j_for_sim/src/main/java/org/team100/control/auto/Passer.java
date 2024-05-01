@@ -60,7 +60,9 @@ public class Passer implements Autopilot {
 
     @Override
     public boolean driveToPass() {
-        return machine.isInState(State.ToPass);
+        boolean passToPass = machine.isInState(State.ToPass);
+        // System.out.println("pass to pass " + passToPass);
+        return passToPass;
     }
 
     @Override
@@ -70,13 +72,12 @@ public class Passer implements Autopilot {
 
     @Override
     public void onEnd() {
-        System.out.println("Passer onEnd");
+        // System.out.println("Passer onend state: " + machine.getState());
         machine.fire(Trigger.Done);
     }
     
     @Override
     public void periodic() {
-        System.out.println("Passer state: " + machine.getState());
     }
 
 }

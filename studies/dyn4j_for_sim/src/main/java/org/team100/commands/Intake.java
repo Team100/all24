@@ -16,7 +16,6 @@ public class Intake extends Command {
 
     @Override
     public void execute() {
-        System.out.println("Intake execute");
         m_indexer.intake();
     }
 

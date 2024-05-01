@@ -90,7 +90,6 @@ public class AlternatingCycler implements Autopilot {
 
     @Override
     public void onEnd() {
-        System.out.println("Amp Cycler onEnd");
         if (machine.isInState(State.ToSource)) {
             if (ampNext) {
                 machine.fire(Trigger.Amp);
@@ -105,6 +104,5 @@ public class AlternatingCycler implements Autopilot {
 
     @Override
     public void periodic() {
-        System.out.println("Amp Cycler state: " + machine.getState());
     }
 }

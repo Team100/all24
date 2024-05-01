@@ -53,10 +53,6 @@ public class RobotAssembly {
         return m_drive;
     }
 
-    // private RobotBody getRobotBody() {
-    //     return m_drive.getRobotBody();
-    // }
-
     public String getName() {
         return m_drive.getName();
     }
@@ -68,10 +64,6 @@ public class RobotAssembly {
     public void setState(double x, double y, double vx, double vy) {
         m_drive.setState(x, y, vx, vy);
     }
-
-    // public void apply(double x, double y, double theta) {
-    // m_drive.apply(x, y, theta);
-    // }
 
     public Pose2d getPose() {
         return m_drive.getPose();

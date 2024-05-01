@@ -21,7 +21,7 @@ public class Tactics {
     // try a little less repulsion for now
     private static final int kRobotRepulsion = 25;
     // steering around robots
-    private static final int kRobotSteer = 100;
+    private static final int kRobotSteer = 50;
     // coefficient for 1/r
     private static final int kSubwooferRepulsion = 100;
     // constant within 1m

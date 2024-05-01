@@ -72,12 +72,10 @@ public class SpeakerCycler implements Autopilot {
 
     @Override
     public void onEnd() {
-        System.out.println("Speaker Cycler onEnd");
         machine.fire(Trigger.Done);
     }
     
     @Override
     public void periodic() {
-        System.out.println("Speaker Cycler state: " + machine.getState());
     }
 }

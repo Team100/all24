@@ -29,17 +29,15 @@ public class DriveToSource extends Command {
 
     @Override
     public void execute() {
-        System.out.println("drive to source execute");
+        // System.out.println("DriveToSource execute");
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-
         v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
-        // TODO: turn off edge repulsion?
-        v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
+        // Turn off edge repulsion for now.
+        // v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
         v = v.plus(Tactics.avoidSubwoofers(m_robot.getPose()));
         v = v.plus(Tactics.steerAroundRobots(m_robot.getPose(), m_robot.getVelocity(), m_robot.recentSightings()));
         v = v.plus(Tactics.robotRepulsion(m_robot.getPose(), m_robot.recentSightings()));
         v = v.plus(goToGoal());
-        System.out.println("v " + v);
         m_robot.getDriveSubsystem().drive(v);
     }
 

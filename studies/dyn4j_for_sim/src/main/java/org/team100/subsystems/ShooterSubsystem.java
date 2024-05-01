@@ -19,10 +19,10 @@ public class ShooterSubsystem extends SubsystemBase {
     private static final double kShootImpulseNs = 4.7;
 
     /** Enough to get about 3.5m high and travel about 6m. */
-    private static final double kLobImpulseNs = 3.0;
+    private static final double kLobImpulseNs = 2.6;
 
     /** This is a guess. */
-    private static final double kLobElevationRad = -1.0;
+    private static final double kLobElevationRad = -0.9;
 
     /** Just enough to reach the amp height. */
     private static final double kAmpImpulseNs = 1.2;
@@ -48,6 +48,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void shoot() {
+        System.out.println("shoot");
         double rangeM = m_robotBody.getPose().getTranslation().getDistance(m_speakerPosition);
         double elevationRad = shooterMap.get(rangeM);
         printShot(rangeM, elevationRad);
@@ -55,10 +56,12 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void lob() {
+        System.out.println("lob");
         shooter(kLobImpulseNs, kLobElevationRad);
     }
 
     public void amp() {
+        System.out.println("amp");
         shooter(kAmpImpulseNs, kAmpElevationRad);
     }
 
@@ -76,8 +79,11 @@ public class ShooterSubsystem extends SubsystemBase {
      * @param elevationRad from the "front", for amp, use >pi/2.
      */
     private void shooter(double impulseNs, double elevationRad) {
-        if (m_assembly.m_indexerShooterHandoff == null)
+        if (m_assembly.m_indexerShooterHandoff == null) {
+            System.out.println("Shooter received no note!");
             return;
+        }
+        System.out.println("shooting note " + m_assembly.m_indexerShooterHandoff.getUserData());
         double yawRad = m_robotBody.getPose().getRotation().getRadians();
         Rotation3d rot3d = new Rotation3d(0, elevationRad, yawRad);
         Translation3d impulse3d = new Translation3d(impulseNs, rot3d);

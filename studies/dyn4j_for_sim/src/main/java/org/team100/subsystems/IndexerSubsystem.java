@@ -31,7 +31,6 @@ public class IndexerSubsystem extends SubsystemBase {
 
     /** There's a note in the indexer */
     public boolean full() {
-        System.out.println("full: " + (m_note != null));
         return m_note != null;
     }
 
@@ -53,12 +52,13 @@ public class IndexerSubsystem extends SubsystemBase {
                 double distance = position.distance(notePosition);
                 if (distance > 0.3)
                     continue;
+
+                if (((Note) body).isFlying())
+                    continue;
+                    
                 // it's underneath the robot
                 // TODO: intake from one side only
                 m_note = (Note) body;
-
-                if (m_note.isFlying())
-                    continue;
 
                 // move the note to the center of the robot first
                 m_note.setTransform(m_robotBody.getTransform());

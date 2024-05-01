@@ -75,16 +75,13 @@ public class ManualPilot implements Pilot {
 
     @Override
     public void onEnd() {
-        System.out.println("MANUAL PILOT END");
     }
 
     @Override
     public void begin() {
-        System.out.println("MANUAL PILOT BEGIN");
     }
 
     @Override
     public void reset() {
-        System.out.println("MANUAL PILOT RESET");
     }
 }

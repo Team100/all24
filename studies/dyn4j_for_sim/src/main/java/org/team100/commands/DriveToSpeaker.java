@@ -37,7 +37,6 @@ public class DriveToSpeaker extends Command {
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {
-        System.out.println("DriveToSpeaker execute");
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         v = v.plus(Tactics.avoidObstacles(m_robot.getPose(), m_robot.getVelocity()));
         v = v.plus(Tactics.avoidEdges(m_robot.getPose()));
