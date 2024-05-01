@@ -5,13 +5,11 @@ import org.team100.control.Pilot;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
-import org.team100.control.auto.SpeakerCycler;
 import org.team100.robot.PilotAssembly;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
 import org.team100.sim.SimWorld;
-import org.team100.sim.Speaker;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;

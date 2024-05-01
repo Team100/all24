@@ -6,7 +6,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.RobotBody;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
@@ -55,12 +54,6 @@ public class DriveSubsystem extends SubsystemBase {
         m_robotBody.setAtRest(false);
         m_robotBody.setLinearVelocity(new Vector2(vx, vy));
     }
-
-    // /** Apply force and torque. Multiple calls to this method add. */
-    // private void apply(double x, double y, double theta) {
-    // m_robotBody.applyForce(new Force(x, y));
-    // m_robotBody.applyTorque(new Torque(theta));
-    // }
 
     public void drive(FieldRelativeVelocity setpoint) {
         setpoint = setpoint.clamp(kMaxVelocity, kMaxOmega);

@@ -32,7 +32,7 @@ public class PilotAssembly extends RobotAssembly {
         m_drive.setDefaultCommand(new PilotDrive(m_drive, pilot));
         // one way to do sequences is via Command.andThen().
         whileTrue(pilot::driveToSpeaker,
-                new DriveToSpeaker(null, this)
+                new DriveToSpeaker(this)
                         .andThen(new RotateToShoot(speakerPosition, m_drive))
                         .andThen(new ShootCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
@@ -40,19 +40,19 @@ public class PilotAssembly extends RobotAssembly {
         whileTrue(pilot::driveToSource,
                 Commands.deadline(
                         new Intake(m_indexer),
-                        new DriveToSource(null, this))
+                        new DriveToSource(this))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToAmp,
-                new DriveToAmp(null, this)
+                new DriveToAmp(this)
                         .andThen(new AmpCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToPass,
-                new DriveToPass(null, this)
+                new DriveToPass(this)
                         .andThen(new LobCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         // defend never ends
         whileTrue(pilot::defend,
-                new DefendSource(null, this)
+                new DefendSource(this)
                         .finallyDo(pilot::onEnd));
     }
 

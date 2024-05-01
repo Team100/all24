@@ -1,7 +1,6 @@
 package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.alliance.Alliance;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.robot.RobotAssembly;
@@ -15,11 +14,9 @@ public class DriveToAmp extends Command {
     private static final int kAngularP = 10;
     // try a bit more P
     private static final int kCartesianP = 75;
-    private final Alliance m_alliance;
     private final RobotAssembly m_robot;
 
-    public DriveToAmp(Alliance alliance, RobotAssembly robot) {
-        m_alliance = alliance;
+    public DriveToAmp(RobotAssembly robot) {
         m_robot = robot;
         addRequirements(robot.getDriveSubsystem());
     }
@@ -50,12 +47,6 @@ public class DriveToAmp extends Command {
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
         return translationError < 0.1 && Math.abs(rotationError) < 0.05;
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        if (m_alliance != null)
-            m_alliance.onEnd(m_robot, this);
     }
 
     /** Proportional feedback with a limiter. */

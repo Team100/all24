@@ -4,7 +4,6 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.alliance.Alliance;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.robot.RobotAssembly;
@@ -23,11 +22,9 @@ public class DefendSource extends Command {
     private static final int kDefensePushing = 50;
     private static final int kCornerRepulsion = -10;
     private static final int kWaitingAttraction = 1000;
-    private final Alliance m_alliance;
     private final RobotAssembly m_robot;
 
-    public DefendSource(Alliance alliance, RobotAssembly robot) {
-        m_alliance = alliance;
+    public DefendSource(RobotAssembly robot) {
         m_robot = robot;
         addRequirements(robot.getDriveSubsystem());
     }
@@ -50,13 +47,6 @@ public class DefendSource extends Command {
                 m_robot.getOpponentSourcePosition(),
                 m_robot.recentSightings()));
         m_robot.getDriveSubsystem().drive(v);
-    }
-
-    /** Never finishes but might be interrupted. */
-    @Override
-    public void end(boolean interrupted) {
-        if (m_alliance != null)
-            m_alliance.onEnd(m_robot, this);
     }
 
     /**
