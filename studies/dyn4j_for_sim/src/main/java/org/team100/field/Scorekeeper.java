@@ -1,5 +1,6 @@
 package org.team100.field;
 
+import java.util.Formatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,8 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
+import edu.wpi.first.wpilibj.Timer;
+
 /**
  * Uses a CollisionListener to catch the collision event between notes and
  * speakers, and prints the updated score.
@@ -32,12 +35,21 @@ public class Scorekeeper
         BoundsListener<Body100, BodyFixture>,
         StepListener<Body100> {
 
+    private static final String kReset = "\033[0m";
+    private static final String kBoldBlue = "\033[1;37;44m";
+    private static final String kBlue = "\033[0;37;44m";
+    private static final String kBoldRed = "\033[1;37;41m";
+    private static final String kRed = "\033[0;37;41m";
+    private static final String kAmped = "   Amplified!   ";
+    private static final String kBlank = "                ";
+
     private final Speaker m_blueSpeaker;
     private final Speaker m_redSpeaker;
     private final AmpPocket m_blueAmp;
     private final AmpPocket m_redAmp;
     private final boolean m_debug;
     private final Set<Body100> m_doomed;
+    private final Timer m_timer;
 
     private int m_blueScore;
     private int m_redScore;
@@ -54,6 +66,8 @@ public class Scorekeeper
         m_redAmp = redAmp;
         m_debug = debug;
         m_doomed = new HashSet<>();
+        m_timer = new Timer();
+        m_timer.start();
     }
 
     @Override
@@ -126,6 +140,105 @@ public class Scorekeeper
         System.out.printf("Blue %d Red %d\n", m_blueScore, m_redScore);
     }
 
+    // to alternate amping
+    private boolean amped = false;
+
+    /** Like the audience display */
+    public void newPrintScore() {
+        // to work out the format
+        double blueAmpTime = 7.5;
+        double redAmpTime = 10.0;
+        int fakeBlueScore = 63;
+        int fakeRedScore = 82;
+        double fakeMatchTimeSec = 82.532;
+        int minutes = (int) fakeMatchTimeSec / 60;
+        int seconds = (int) fakeMatchTimeSec % 60;
+        StringBuilder b = new StringBuilder();
+        Formatter f = new Formatter(b);
+        if (amped) {
+            b.append(kReset);
+            f.format(" %2.0f ", blueAmpTime);
+            b.append(kBoldBlue);
+            b.append(kAmped);
+        } else { // maintain alignment
+            b.append(kReset);
+            b.append("    "); // score placeholder
+            b.append(kBlank);
+        }
+        b.append(kBlue);
+        b.append(" Blue ");
+        b.append(kBoldBlue);
+        f.format(" %3d ", fakeBlueScore);
+        b.append(kReset);
+        f.format(" %2d:%02d ", minutes, seconds);
+        b.append(kBoldRed);
+        f.format(" %3d ", fakeRedScore);
+        b.append(kRed);
+        b.append(" Red  ");
+        if (amped) {
+            b.append(kBoldRed);
+            b.append(kAmped);
+            b.append(kReset);
+            f.format(" %2.0f ", redAmpTime);
+        }
+        b.append(kReset);
+        System.out.println(b.toString());
+        f.close();
+        amped ^= true;
+    }
+
+    /** Like the TBA summary, but with blue on the left. */
+    public void printResults() {
+        int ampPoint = 1;
+        int notAmpedSpeakerPoint = 2;
+        int ampedSpeakerPoint = 5;
+
+        int redAmps = 7;
+        int blueAmps = 7;
+        int redNotAmpedSpeakers = 2;
+        int redAmpedSpeakers = 10;
+        int blueNotAmpedSpeakers = 10;
+        int blueAmpedSpeakers = 4;
+
+        StringBuilder b = new StringBuilder();
+        Formatter f = new Formatter(b);
+
+        b.append(kBlue);
+        f.format("    %2d   ", blueAmps);
+        b.append(kReset);
+        b.append("   Teleop Amp Note Count   ");
+        b.append(kRed);
+        f.format("    %2d   ", redAmps);
+        b.append(kReset);
+        b.append("\n");
+
+        b.append(kBlue);
+        f.format(" %2d / %2d ", blueNotAmpedSpeakers, blueAmpedSpeakers);
+        b.append(kReset);
+        b.append(" Teleop Speaker Note Count ");
+        b.append(kRed);
+        f.format(" %2d / %2d ", redNotAmpedSpeakers, redAmpedSpeakers);
+        b.append(kReset);
+        b.append("\n");
+
+        int blueTotal = blueAmps * ampPoint
+                + blueNotAmpedSpeakers * notAmpedSpeakerPoint
+                + blueAmpedSpeakers * ampedSpeakerPoint;
+        int redTotal = redAmps * ampPoint
+                + redNotAmpedSpeakers * ampedSpeakerPoint
+                + redAmpedSpeakers * ampedSpeakerPoint;
+        b.append(kBoldBlue);
+        f.format("    %2d   ", blueTotal);
+        b.append(kReset);
+        b.append("     Teleop Note Points    ");
+        b.append(kBoldRed);
+        f.format("    %2d   ", redTotal);
+        b.append(kReset);
+
+        System.out.println(b.toString());
+        f.close();
+    }
+
     @Override
     public boolean collision(ManifoldCollisionData<Body100, BodyFixture> collision) {
         return true;
@@ -133,7 +246,12 @@ public class Scorekeeper
 
     @Override
     public void begin(TimeStep step, PhysicsWorld<Body100, ?> world) {
-        //
+        if (m_timer.advanceIfElapsed(1)){
+            // just for testing the format
+            newPrintScore();
+            printResults();
+
+        }
     }
 
     @Override

@@ -39,10 +39,28 @@ public class RobotContainer {
         m_red.reset();
     }
 
-    public void periodic() {
-        world.update();
-        world.render();
+    public void teleopPeriodic() {
+        // world.update();
+        // world.render();
         m_blue.periodic();
         m_red.periodic();
+    }
+
+    /** Sim is updated even when robots are disabled. */
+    public void robotPeriodic() {
+        world.update();
+        world.render();
+    }
+
+    public void autonomousInit() {
+        //
+    }
+
+    public void autonomousExit() {
+        //
+    }
+
+    public void autonomousPeriodic() {
+        //
     }
 }
