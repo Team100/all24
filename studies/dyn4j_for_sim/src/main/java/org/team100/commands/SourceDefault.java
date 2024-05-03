@@ -15,8 +15,16 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Dumps a note on the field once a second, if there are friends around.
  */
 public class SourceDefault extends Command {
-    /** Should be further than the DriveToSource tolerance. */
-    private static final double kMaxDistance = 4;
+    /**
+     * Deposit a note if there's a friendly robot closer than this.
+     * Should be further than the DriveToSource tolerance.
+     */
+    private static final double kMaxRobotDistance = 4;
+    /**
+     * Deposit a note if the existing ones are further than this from the usual
+     * spot.
+     */
+    private static final double kMaxNoteDistance = 1.5;
 
     private final Source m_humanPlayer;
     private final SimWorld m_world;
@@ -56,7 +64,7 @@ public class SourceDefault extends Command {
             Vector2 robotPosition = robot.getWorldCenter();
             Translation2d robotTranslation = new Translation2d(robotPosition.x, robotPosition.y);
             double distance = robotTranslation.getDistance(m_humanPlayer.getTarget());
-            if (distance > kMaxDistance) {// ignore distant robots
+            if (distance > kMaxRobotDistance) {// ignore distant robots
                 continue;
             }
 
@@ -74,7 +82,7 @@ public class SourceDefault extends Command {
             }
             // ignore friends carrying notes
             if (robot.carryingNote()) {
-                 if (m_debug)
+                if (m_debug)
                     System.out.printf(" ignoring carrying %s", robot);
                 continue;
             }
@@ -97,7 +105,7 @@ public class SourceDefault extends Command {
             Vector2 notePosition = note.getWorldCenter();
             Translation2d noteTranslation = new Translation2d(notePosition.x, notePosition.y);
             double distance = noteTranslation.getDistance(m_humanPlayer.getTarget());
-            if (distance > kMaxDistance) {// ignore distant notes
+            if (distance > kMaxNoteDistance) {// ignore distant notes
                 continue;
             }
             if (m_debug)

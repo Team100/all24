@@ -62,7 +62,7 @@ public class Tactics {
         if (avoidRobots) {
             NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
             v = v.plus(steerAroundRobots(pose, desired, recentSightings, debug));
-            v = v.plus(robotRepulsion(pose, recentSightings, debug));
+            v = v.plus(robotRepulsion(pose, desired, recentSightings, debug));
         }
         v = v.clamp(kMaxVelocity, kMaxOmega);
         return v;
@@ -251,9 +251,13 @@ public class Tactics {
 
     }
 
-    /** Avoid other robots. */
+    /**
+     * Avoid other robots.
+     * Doesn't do anything if we're already heading away from the target.
+     */
     public static FieldRelativeVelocity robotRepulsion(
             Pose2d myPosition,
+            FieldRelativeVelocity myVelocity,
             NavigableMap<Double, RobotSighting> recentSightings,
             boolean debug) {
         final double maxDistance = 3;
@@ -291,9 +295,12 @@ public class Tactics {
                     System.out.printf(" robotRepulsion target (%5.2f, %5.2f) range %5.2f F (%5.2f, %5.2f)",
                             target.getX(), target.getY(), norm, force.getX(), force.getY());
                 FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
-                if (debug)
-                    ForceViz.put("tactics", myPosition, robotRepel);
-                v = v.plus(robotRepel);
+                if (myVelocity.dot(robotRepel) < 0) {
+                    // don't bother repelling if we're heading away
+                    if (debug)
+                        ForceViz.put("tactics", myPosition, robotRepel);
+                    v = v.plus(robotRepel);
+                }
             }
 
         }

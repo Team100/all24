@@ -4,11 +4,6 @@
       "window": {
         "visible": false
       }
-    },
-    "RoboRIO": {
-      "window": {
-        "visible": true
-      }
     }
   },
   "NTProvider": {
@@ -19,11 +14,6 @@
       "/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Scheduler": {
-        "window": {
-          "visible": true
-        }
-      },
       "/field": {
         "Foe": {
           "arrowSize": 21,
@@ -156,5 +146,8 @@
   },
   "NetworkTables Info": {
     "visible": true
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

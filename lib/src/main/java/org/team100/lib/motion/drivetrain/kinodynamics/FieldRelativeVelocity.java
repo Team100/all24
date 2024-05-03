@@ -31,6 +31,11 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return new FieldRelativeVelocity(x * cartesian, y * cartesian, theta * angular);
     }
 
+    /** Dot product of translational part. */
+    public double dot(FieldRelativeVelocity other) {
+        return x * other.x + y * other.y;
+    }
+
     public FieldRelativeVelocity clamp(double maxVelocity, double maxOmega) {
         double norm = Math.hypot(x, y);
         double ratio = 1.0;
@@ -42,7 +47,6 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
 
     @Override
     public String toString() {
-        // return String.format("%s[x=%5.3f,y=%5.3f]", getClass().getSimpleName(), x, y);
         return String.format("(%5.2f, %5.2f)", x, y);
     }
 }

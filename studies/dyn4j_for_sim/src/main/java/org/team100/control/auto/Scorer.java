@@ -94,7 +94,7 @@ public class Scorer implements Autopilot {
 
     @Override
     public void periodic() {
-        //
+        // System.out.println(machine.getState());
     }
 
 }

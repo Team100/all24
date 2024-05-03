@@ -1,9 +1,7 @@
 package org.team100.sim;
 
-import java.util.List;
 
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;

@@ -30,8 +30,8 @@ public class PilotAssembly extends RobotAssembly {
         whileTrue(pilot::driveToSpeaker,
                 Commands.sequence(
                         new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), debug),
-                        new RotateToShoot(speakerPosition, m_drive),
-                        new ShootCommand(m_indexer, m_shooter))
+                        new RotateToShoot(speakerPosition, m_drive, debug),
+                        new ShootCommand(m_indexer, m_shooter, debug))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToSource,
                 Commands.deadline(

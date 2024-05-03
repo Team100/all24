@@ -42,7 +42,7 @@ public class RealPlayerAssembly extends RobotAssembly {
                         m_indexer.run(m_indexer::towardsShooter),
                         m_shooter.run(m_shooter::amp)));
         whileTrue(m_control::rotateToShoot,
-                new RotateToShoot(speakerPosition, m_drive)
+                new RotateToShoot(speakerPosition, m_drive, false)
                         .finallyDo(x -> System.out.println("done rotating" + x)));
         whileTrue(m_control::driveToSpeaker,
                 new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), false)
@@ -57,7 +57,7 @@ public class RealPlayerAssembly extends RobotAssembly {
                 new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), false)
                         .finallyDo(x -> System.out.println("done driving " + x)));
         whileTrue(m_control::shootCommand,
-                new ShootCommand(m_indexer, m_shooter)
+                new ShootCommand(m_indexer, m_shooter, false)
                         .finallyDo(x -> System.out.println("done shooting " + x)));
     }
 }
