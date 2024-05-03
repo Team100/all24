@@ -57,7 +57,7 @@ public class PilotAssembly extends RobotAssembly {
                         .finallyDo(pilot::onEnd));
         // defend never ends
         whileTrue(pilot::defend,
-                new DefendSource(m_drive, m_camera)
+                new DefendSource(m_drive, m_camera, debug)
                         .finallyDo(pilot::onEnd));
     }
 }

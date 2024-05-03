@@ -48,7 +48,8 @@ public class DriveToSpeaker extends Command {
         if (m_debug)
             System.out.print("DriveToSpeaker");
         FieldRelativeVelocity desired = goToGoal();
-        ForceViz.put("desired", m_drive.getPose(), desired);
+        if (m_debug)
+            ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired, true, true, m_debug);

@@ -23,7 +23,7 @@ public abstract class RobotBody extends Body100 {
     private final boolean m_debug;
 
     protected RobotBody(String id, SimWorld world, boolean debug) {
-        super(id);
+        super(id, debug);
         m_world = world;
         m_debug = debug;
 

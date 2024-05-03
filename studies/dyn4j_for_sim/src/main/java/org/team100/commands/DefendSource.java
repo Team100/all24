@@ -30,11 +30,13 @@ public class DefendSource extends Command {
     private static final int kWaitingAttraction = 5;
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DefendSource(DriveSubsystem drive, CameraSubsystem camera) {
+    public DefendSource(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);
     }
@@ -46,7 +48,8 @@ public class DefendSource extends Command {
                 m_drive.getRobotBody().defenderPosition(),
                 m_drive.getRobotBody().opponentSourcePosition(),
                 m_camera.recentSightings());
-        ForceViz.put("desired", m_drive.getPose(), desired);
+        if (m_debug)
+            ForceViz.put("desired", m_drive.getPose(), desired);
         FieldRelativeVelocity v = m_tactics.apply(desired, true, false, false);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);

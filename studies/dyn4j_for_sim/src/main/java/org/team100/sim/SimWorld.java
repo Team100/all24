@@ -22,7 +22,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * In this world, the player and friends are blue, the foes are red.
  */
 public class SimWorld {
-    /** for visualizing forces  */
+    /** for visualizing forces */
     private static final double kArrowDistance = 700;
     private static final double boundaryThickness = 1;
     private static final double fieldX = 16.541;
@@ -115,20 +115,24 @@ public class SimWorld {
                 Body100 body = world.getBody(i);
                 if (body.getClass() != type)
                     continue;
+
                 Vector2 positionM = body.getWorldCenter();
                 double angleDeg = body.getTransform().getRotation().toDegrees();
                 poses.add(positionM.x);
                 poses.add(positionM.y);
                 poses.add(angleDeg);
-                Vector2 force = body.getForce();
-                if (force.getMagnitude() > 10) {
-                    // System.out.printf("%s %s\n", body.getUserData(), force);
-                    double forceDirection = force.getDirection();
-                    double forceX = positionM.x - force.x / kArrowDistance;
-                    double forceY = positionM.y - force.y / kArrowDistance;
-                    forces.add(forceX);
-                    forces.add(forceY);
-                    forces.add(Math.toDegrees(forceDirection));
+                if (body.isDebug()) {
+                    // only show force for selected bodies
+                    Vector2 force = body.getForce();
+                    if (force.getMagnitude() > 10) {
+                        // System.out.printf("%s %s\n", body.getUserData(), force);
+                        double forceDirection = force.getDirection();
+                        double forceX = positionM.x - force.x / kArrowDistance;
+                        double forceY = positionM.y - force.y / kArrowDistance;
+                        forces.add(forceX);
+                        forces.add(forceY);
+                        forces.add(Math.toDegrees(forceDirection));
+                    }
                 }
             }
             t.log(Level.DEBUG, kField, type.getSimpleName(),

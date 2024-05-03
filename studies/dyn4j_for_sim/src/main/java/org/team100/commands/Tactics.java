@@ -83,7 +83,8 @@ public class Tactics {
             v = v.plus(new FieldRelativeVelocity(0, -kWallRepulsion, 0));
         if (debug)
             System.out.printf(" avoidEdges (%5.2f, %5.2f)", v.x(), v.y());
-        ForceViz.put("tactics", pose, v);
+        if (debug)
+            ForceViz.put("tactics", pose, v);
         return v;
     }
 
@@ -106,7 +107,8 @@ public class Tactics {
                 if (debug)
                     System.out.printf(" avoidSubwoofers (%5.2f, %5.2f)", force.getX(), force.getY());
                 FieldRelativeVelocity subwooferRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
-                ForceViz.put("tactics", pose, subwooferRepel);
+                if (debug)
+                    ForceViz.put("tactics", pose, subwooferRepel);
                 v = v.plus(subwooferRepel);
             }
         }
@@ -143,7 +145,8 @@ public class Tactics {
                         force.x,
                         force.y);
             FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x, force.y, 0);
-            ForceViz.put("tactics", pose, steering);
+            if (debug)
+                ForceViz.put("tactics", pose, steering);
             v = v.plus(steering);
         }
         return v;
@@ -168,7 +171,8 @@ public class Tactics {
                 if (debug)
                     System.out.printf(" obstacleRepulsion (%5.2f, %5.2f)", force.getX(), force.getY());
                 FieldRelativeVelocity repel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
-                ForceViz.put("tactics", pose, repel);
+                if (debug)
+                    ForceViz.put("tactics", pose, repel);
                 v = v.plus(repel);
             }
         }
@@ -238,7 +242,8 @@ public class Tactics {
                 System.out.printf(" steerAroundRobots target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
                         mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
             FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
-            ForceViz.put("tactics", myPosition, robotSteer);
+            if (debug)
+                ForceViz.put("tactics", myPosition, robotSteer);
             v = v.plus(robotSteer);
 
         }
@@ -286,7 +291,8 @@ public class Tactics {
                     System.out.printf(" robotRepulsion target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
                             target.getX(), target.getY(), force.getX(), force.getY());
                 FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
-                ForceViz.put("tactics", myPosition, robotRepel);
+                if (debug)
+                    ForceViz.put("tactics", myPosition, robotRepel);
                 v = v.plus(robotRepel);
             }
 

@@ -45,7 +45,7 @@ public class Note extends Body100 {
 
     /** Don't forget to add the body as a step listener. */
     public Note(boolean debug) {
-        super("note " + counter++);
+        super("note " + counter++, debug);
         m_debug = debug;
         Circle geometry = Geometry.createCircle(kDiameter);
         // area is about 0.1 m^2. correct mass is 0.235 kg.

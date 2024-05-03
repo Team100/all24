@@ -43,21 +43,21 @@ public class RealPlayerAssembly extends RobotAssembly {
                         m_shooter.run(m_shooter::amp)));
         whileTrue(m_control::rotateToShoot,
                 new RotateToShoot(speakerPosition, m_drive)
-                        .finallyDo(x -> System.out.println("done " + x)));
+                        .finallyDo(x -> System.out.println("done rotating" + x)));
         whileTrue(m_control::driveToSpeaker,
                 new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), false)
-                        .finallyDo(x -> System.out.println("done " + x)));
+                        .finallyDo(x -> System.out.println("done driving " + x)));
         whileTrue(m_control::driveToAmp,
                 new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), false)
-                        .finallyDo(x -> System.out.println("done " + x)));
+                        .finallyDo(x -> System.out.println("done driving " + x)));
         whileTrue(m_control::driveToSource,
                 new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), false)
-                        .finallyDo(x -> System.out.println("done " + x)));
+                        .finallyDo(x -> System.out.println("done driving " + x)));
         whileTrue(m_control::driveToPass,
                 new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), false)
-                        .finallyDo(x -> System.out.println("done " + x)));
+                        .finallyDo(x -> System.out.println("done driving " + x)));
         whileTrue(m_control::shootCommand,
                 new ShootCommand(m_indexer, m_shooter)
-                        .finallyDo(x -> System.out.println("done " + x)));
+                        .finallyDo(x -> System.out.println("done shooting " + x)));
     }
 }

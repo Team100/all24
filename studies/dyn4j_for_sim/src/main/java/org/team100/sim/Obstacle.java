@@ -12,7 +12,7 @@ public class Obstacle extends Body100 {
     private final Range m_vertical;
 
     public Obstacle(String id, Convex convex, double heightM) {
-        super(id);
+        super(id, false);
         m_vertical = new Range(0, heightM);
         // 0.5 friction is a guess
         // 0.5 restitution is a guess

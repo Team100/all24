@@ -6,6 +6,8 @@ import org.dyn4j.geometry.MassType;
 
 /**
  * Slot sensor
+ * 
+ * TODO: replace this with a more realistic geometry.
  */
 public class Speaker extends Body100 {
     // 1mm higher than the wall
@@ -13,7 +15,7 @@ public class Speaker extends Body100 {
     private final Range m_vertical = new Range(1.984, 2.2);
 
     public Speaker(String id, Convex convex) {
-        super(id);
+        super(id, false);
         BodyFixture fixture = addFixture(convex, 1.0, 0.5, 0.5);
         fixture.setFilter(this);
         fixture.setSensor(true);
