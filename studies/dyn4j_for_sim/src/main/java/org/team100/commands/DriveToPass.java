@@ -38,19 +38,19 @@ public class DriveToPass extends Command {
     @Override
     public void execute() {
         if (m_debug)
-            System.out.println("DriveToPass execute");
+            System.out.print("DriveToPass execute");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
-            System.out.printf("desired v %s\n", desired);
+            System.out.printf(" desired v %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired, true, true, m_debug);
         if (m_debug)
-            System.out.printf("tactics v %s\n", v);
+            System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf("final v %s\n", v);
+            System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -67,6 +67,10 @@ public class DriveToPass extends Command {
     /** Proportional feedback with a limiter. */
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_drive.getPose();
+        if (m_debug)
+            System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
+                    pose.getX(), pose.getY(), m_goal.getX(), m_goal.getY());
+
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());

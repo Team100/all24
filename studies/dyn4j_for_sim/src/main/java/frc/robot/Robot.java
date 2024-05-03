@@ -6,6 +6,7 @@ import org.team100.field.SimulatedFMS;
 import org.team100.robot.RobotContainer;
 import org.team100.sim.SimWorld;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -31,6 +32,7 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.robotPeriodic();
+        NetworkTableInstance.getDefault().flush();
     }
 
     @Override

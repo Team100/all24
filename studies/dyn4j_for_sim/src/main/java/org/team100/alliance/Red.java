@@ -30,13 +30,13 @@ public class Red implements Alliance {
         scorer.setState(15, 3, 0, 0);
         world.addBody(scorerBody);
 
-        Foe red2 = new Foe("red 2", world, false);
+        Foe red2 = new Foe("red passer", world, true);
         passCycler = new Passer();
-        passer = new PilotAssembly(passCycler, red2, kSpeaker, false);
+        passer = new PilotAssembly(passCycler, red2, kSpeaker, true);
         passer.setState(15, 5, 0, 0);
         world.addBody(red2);
 
-        Foe red3 = new Foe("red 3", world, false);
+        Foe red3 = new Foe("red defender", world, false);
         defenseOnly = new Defender();
         defender = new PilotAssembly(defenseOnly, red3, kSpeaker, false);
         defender.setState(13, 7, 0, 0);

@@ -49,14 +49,12 @@ public abstract class RobotBody extends Body100 {
         return m_id;
     }
 
-    /** TODO: Don't assume there's only one joint. */
-    public boolean carryingNote() {
-        List<Joint<Body100>> joints = getWorld().getJoints(this);
-        for (Joint<Body100> j : joints) {
-            if (m_debug) {
-                System.out.printf(" joint %s %s", j.getBody1(), j.getBody2());
-            }
-        }
+    /**
+     * The only joint used for a RobotBody is to a note in the indexer.
+     * 
+     * TODO: Don't assume there's only one joint.
+     */
+    public boolean carryingNote() {        
         return getWorld().getJointCount(this) > 0;
     }
 

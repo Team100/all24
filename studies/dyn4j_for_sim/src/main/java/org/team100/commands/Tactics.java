@@ -29,7 +29,7 @@ public class Tactics {
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
     private static final double kRobotRepulsion = 5;
-    private static final double kRobotSteer = 5;
+    private static final double kRobotSteer = 20;
     private static final double kSubwooferRepulsion = 5;
     private static final double kWallRepulsion = 5;
     private static final double kObstacleSteer = 40;
@@ -288,8 +288,8 @@ public class Tactics {
                 double scale = kRobotRepulsion * (1 / norm - 1 / maxDistance);
                 Translation2d force = normalized.times(scale);
                 if (debug)
-                    System.out.printf(" robotRepulsion target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
-                            target.getX(), target.getY(), force.getX(), force.getY());
+                    System.out.printf(" robotRepulsion target (%5.2f, %5.2f) range %5.2f F (%5.2f, %5.2f)",
+                            target.getX(), target.getY(), norm, force.getX(), force.getY());
                 FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
                 if (debug)
                     ForceViz.put("tactics", myPosition, robotRepel);

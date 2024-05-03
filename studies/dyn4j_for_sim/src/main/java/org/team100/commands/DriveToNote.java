@@ -51,15 +51,15 @@ public class DriveToNote extends Command {
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
-            System.out.printf(" desired v %s", desired);
+            System.out.printf(" desire %s", desired);
         // some notes might be near the edge, so turn off edge repulsion.
         FieldRelativeVelocity v = m_tactics.apply(desired, false, true, m_debug);
         if (m_debug)
-            System.out.printf(" tactics v %s", v);
+            System.out.printf(" tactic %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf(" final v %s\n", v);
+            System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
 
@@ -74,6 +74,7 @@ public class DriveToNote extends Command {
         NavigableMap<Double, NoteSighting> notes = m_camera.recentNoteSightings();
         double minDistance = Double.MAX_VALUE;
         Translation2d closest = null;
+        Translation2d target = null; // for debugging
         for (Entry<Double, NoteSighting> entry : notes.entrySet()) {
             NoteSighting sight = entry.getValue();
             Translation2d translation = sight.position().minus(pose.getTranslation());
@@ -83,6 +84,7 @@ public class DriveToNote extends Command {
             if (distance < minDistance) {
                 minDistance = distance;
                 closest = translation;
+                target = sight.position();
             }
         }
         if (closest == null) {
@@ -94,7 +96,7 @@ public class DriveToNote extends Command {
 
         if (m_debug)
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
-                    pose.getX(), pose.getY(), closest.getX(), closest.getY());
+                    pose.getX(), pose.getY(), target.getX(), target.getY());
 
         Vector2 positionError = new Vector2(closest.getX(), closest.getY());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
