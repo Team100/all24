@@ -24,11 +24,14 @@ import edu.wpi.first.math.geometry.Translation2d;
  * gravity or electrostatics in two dimensions.
  */
 public class Tactics {
-    private static final int kRobotRepulsion = 25;
-    private static final int kRobotSteer = 50;
-    private static final int kSubwooferRepulsion = 100;
-    private static final int kWallRepulsion = 50;
-    private static final int kSteer = 500;
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
+    private static final double kRobotRepulsion = 25;
+    private static final double kRobotSteer = 50;
+    private static final double kSubwooferRepulsion = 100;
+    private static final double kWallRepulsion = 50;
+    private static final double kSteer = 500;
     private static final double kMaxTargetVelocity = 4;
 
     private final DriveSubsystem m_drive;
@@ -55,6 +58,7 @@ public class Tactics {
             v = v.plus(Tactics.steerAroundRobots(pose, velocity, recentSightings, debug));
             v = v.plus(Tactics.robotRepulsion(pose, recentSightings, debug));
         }
+        v = v.clamp(kMaxVelocity, kMaxOmega);
         return v;
     }
 

@@ -75,9 +75,10 @@ public class Passer implements Autopilot {
         // System.out.println("Passer onend state: " + machine.getState());
         machine.fire(Trigger.Done);
     }
-    
+
     @Override
     public void periodic() {
+        // System.out.println("passer state" + machine.getState());
     }
 
 }

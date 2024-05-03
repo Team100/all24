@@ -19,8 +19,8 @@ public class DriveToSpeaker extends Command {
     // TODO: get these from kinodynamics
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
-    private static final int kAngularP = 10;
-    private static final int kCartesianP = 50;
+    private static final double kAngularP = 10;
+    private static final double kCartesianP = 10;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
     private final Tactics m_tactics;
@@ -52,9 +52,9 @@ public class DriveToSpeaker extends Command {
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
 
-        return translationError < 0.5
-                && Math.abs(rotationError) < 0.05
-                && velocity < 0.05;
+        return translationError < 0.25
+                && Math.abs(rotationError) < 0.025
+                && velocity < 0.025;
     }
 
     /** Proportional feedback with a limiter. */

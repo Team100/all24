@@ -51,9 +51,6 @@ public class Red implements Alliance {
         scoreAlternator.reset();
         passCycler.reset();
         defenseOnly.reset();
-        scorer.setState(15, 3, 0, 0);
-        passer.setState(15, 5, 0, 0);
-        defender.setState(13, 7, 0, 0);
     }
 
     @Override

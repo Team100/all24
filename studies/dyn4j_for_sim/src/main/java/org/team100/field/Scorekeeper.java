@@ -1,6 +1,5 @@
 package org.team100.field;
 
-import java.util.Formatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,19 +28,12 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * TODO: add amp scoring
  * TODO: add amplification
+ * TODO: add fouls
  */
 public class Scorekeeper
         implements CollisionListener<Body100, BodyFixture>,
         BoundsListener<Body100, BodyFixture>,
         StepListener<Body100> {
-
-    private static final String kReset = "\033[0m";
-    private static final String kBoldBlue = "\033[1;37;44m";
-    private static final String kBlue = "\033[0;37;44m";
-    private static final String kBoldRed = "\033[1;37;41m";
-    private static final String kRed = "\033[0;37;41m";
-    private static final String kAmped = "   Amplified!   ";
-    private static final String kBlank = "                ";
 
     private final Speaker m_blueSpeaker;
     private final Speaker m_redSpeaker;
@@ -51,20 +43,24 @@ public class Scorekeeper
     private final Set<Body100> m_doomed;
     private final Timer m_timer;
 
-    private int m_blueScore;
-    private int m_redScore;
+    private final Score m_blue;
+    private final Score m_red;
 
     public Scorekeeper(
             Speaker blue,
             Speaker red,
             AmpPocket blueAmp,
             AmpPocket redAmp,
-            boolean debug) {
+            boolean debug,
+            Score blueScore,
+            Score redScore) {
         m_blueSpeaker = blue;
         m_redSpeaker = red;
         m_blueAmp = blueAmp;
         m_redAmp = redAmp;
         m_debug = debug;
+        m_blue = blueScore;
+        m_red = redScore;
         m_doomed = new HashSet<>();
         m_timer = new Timer();
         m_timer.start();
@@ -84,8 +80,8 @@ public class Scorekeeper
             double maxSpeed) {
         if (maybeNote instanceof Note && maybeSpeaker == sensor) {
 
-            Note n = (Note) maybeNote;
-            if (n.scored) {
+            Note note = (Note) maybeNote;
+            if (note.scored) {
                 // don't double count, don't eject after scoring
                 return false;
             }
@@ -94,22 +90,27 @@ public class Scorekeeper
                         sensor.getVerticalExtent(),
                         maybeNote.getVerticalExtent());
             if (!sensor.getVerticalExtent().contains(maybeNote.getVerticalExtent())) {
+                if (m_debug) {
+                    System.out.println("sensor does not contain note");
+                }
                 // bounce out if note is not completely contained by the sensor.
                 return true;
             }
 
-            double speed = n.getLinearVelocity().getMagnitude();
+            double speed = note.getLinearVelocity().getMagnitude();
             if (speed > maxSpeed) {
+                if (m_debug) {
+                    System.out.println("Speed is higher than max");
+                }
                 // bounce out
                 return true;
             }
-            n.scored = true;
+            note.scored = true;
             // scored notes leave the field
-            m_doomed.add(n);
+            m_doomed.add(note);
             if (m_debug)
-                System.out.printf("center %s altitude %5.3f\n", n.getWorldCenter(), n.getAltitude());
+                System.out.printf("scored!  center %s altitude %5.3f\n", note.getWorldCenter(), note.getAltitude());
             handler.run();
-            printScore();
             return false;
         }
         return true;
@@ -130,113 +131,26 @@ public class Scorekeeper
         Body100 b1 = collision.getBody1();
         Body100 b2 = collision.getBody2();
 
-        return tryScore(b1, b2, m_redSpeaker, () -> m_redScore++, Double.MAX_VALUE)
-                && tryScore(b1, b2, m_blueSpeaker, () -> m_blueScore++, Double.MAX_VALUE)
-                && tryScore(b1, b2, m_redAmp, () -> m_redScore++, 0.4)
-                && tryScore(b1, b2, m_blueAmp, () -> m_blueScore++, 0.4);
+        // does not respect amplification.
+
+        return tryScore(b1, b2, m_redSpeaker, () -> m_red.TeleopSpeakerNoteCountNotAmplified++, Double.MAX_VALUE)
+                && tryScore(b1, b2, m_blueSpeaker, () -> m_blue.TeleopSpeakerNoteCountNotAmplified++, Double.MAX_VALUE)
+                && tryScore(b1, b2, m_redAmp, () -> m_red.TeleopAmpNoteCount++, 0.4)
+                && tryScore(b1, b2, m_blueAmp, () -> m_blue.TeleopAmpNoteCount++, 0.4);
+
+        // return tryScore(b1, b2, m_redSpeaker, () -> m_redScore++, Double.MAX_VALUE)
+        // && tryScore(b1, b2, m_blueSpeaker, () -> m_blueScore++, Double.MAX_VALUE)
+        // && tryScore(b1, b2, m_redAmp, () -> m_redScore++, 0.4)
+        // && tryScore(b1, b2, m_blueAmp, () -> m_blueScore++, 0.4);
+
     }
 
-    private void printScore() {
-        System.out.printf("Blue %d Red %d\n", m_blueScore, m_redScore);
+    public double redAmplified() {
+        return 5.0; // for testing
     }
 
-    // to alternate amping
-    private boolean amped = false;
-
-    /** Like the audience display */
-    public void newPrintScore() {
-        // to work out the format
-        double blueAmpTime = 7.5;
-        double redAmpTime = 10.0;
-        int fakeBlueScore = 63;
-        int fakeRedScore = 82;
-        double fakeMatchTimeSec = 82.532;
-        int minutes = (int) fakeMatchTimeSec / 60;
-        int seconds = (int) fakeMatchTimeSec % 60;
-        StringBuilder b = new StringBuilder();
-        Formatter f = new Formatter(b);
-        if (amped) {
-            b.append(kReset);
-            f.format(" %2.0f ", blueAmpTime);
-            b.append(kBoldBlue);
-            b.append(kAmped);
-        } else { // maintain alignment
-            b.append(kReset);
-            b.append("    "); // score placeholder
-            b.append(kBlank);
-        }
-        b.append(kBlue);
-        b.append(" Blue ");
-        b.append(kBoldBlue);
-        f.format(" %3d ", fakeBlueScore);
-        b.append(kReset);
-        f.format(" %2d:%02d ", minutes, seconds);
-        b.append(kBoldRed);
-        f.format(" %3d ", fakeRedScore);
-        b.append(kRed);
-        b.append(" Red  ");
-        if (amped) {
-            b.append(kBoldRed);
-            b.append(kAmped);
-            b.append(kReset);
-            f.format(" %2.0f ", redAmpTime);
-        }
-        b.append(kReset);
-        System.out.println(b.toString());
-        f.close();
-        amped ^= true;
-    }
-
-    /** Like the TBA summary, but with blue on the left. */
-    public void printResults() {
-        int ampPoint = 1;
-        int notAmpedSpeakerPoint = 2;
-        int ampedSpeakerPoint = 5;
-
-        int redAmps = 7;
-        int blueAmps = 7;
-        int redNotAmpedSpeakers = 2;
-        int redAmpedSpeakers = 10;
-        int blueNotAmpedSpeakers = 10;
-        int blueAmpedSpeakers = 4;
-
-        StringBuilder b = new StringBuilder();
-        Formatter f = new Formatter(b);
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueAmps);
-        b.append(kReset);
-        b.append("   Teleop Amp Note Count   ");
-        b.append(kRed);
-        f.format("    %2d   ", redAmps);
-        b.append(kReset);
-        b.append("\n");
-
-        b.append(kBlue);
-        f.format(" %2d / %2d ", blueNotAmpedSpeakers, blueAmpedSpeakers);
-        b.append(kReset);
-        b.append(" Teleop Speaker Note Count ");
-        b.append(kRed);
-        f.format(" %2d / %2d ", redNotAmpedSpeakers, redAmpedSpeakers);
-        b.append(kReset);
-        b.append("\n");
-
-        int blueTotal = blueAmps * ampPoint
-                + blueNotAmpedSpeakers * notAmpedSpeakerPoint
-                + blueAmpedSpeakers * ampedSpeakerPoint;
-        int redTotal = redAmps * ampPoint
-                + redNotAmpedSpeakers * ampedSpeakerPoint
-                + redAmpedSpeakers * ampedSpeakerPoint;
-        b.append(kBoldBlue);
-        f.format("    %2d   ", blueTotal);
-        b.append(kReset);
-        b.append("     Teleop Note Points    ");
-        b.append(kBoldRed);
-        f.format("    %2d   ", redTotal);
-        b.append(kReset);
-
-        System.out.println(b.toString());
-        f.close();
+    public double blueAmplified() {
+        return 0.0; // for testing
     }
 
     @Override
@@ -246,10 +160,10 @@ public class Scorekeeper
 
     @Override
     public void begin(TimeStep step, PhysicsWorld<Body100, ?> world) {
-        if (m_timer.advanceIfElapsed(1)){
+        if (m_timer.advanceIfElapsed(1)) {
             // just for testing the format
-            newPrintScore();
-            printResults();
+            // newPrintScore();
+            // printResults();
 
         }
     }
@@ -277,6 +191,9 @@ public class Scorekeeper
      */
     @Override
     public void outside(Body100 body) {
+        if (m_debug) {
+            System.out.println("outside");
+        }
         m_doomed.add(body);
     }
 

@@ -34,7 +34,7 @@ public class RobotAssembly {
     public RobotAssembly(RobotBody robotBody, Translation2d speakerPosition) {
         m_drive = new DriveSubsystem(robotBody);
         m_indexer = new IndexerSubsystem(this, robotBody);
-        m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition, false);
+        m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition, true);
         m_camera = new CameraSubsystem(robotBody);
     }
 

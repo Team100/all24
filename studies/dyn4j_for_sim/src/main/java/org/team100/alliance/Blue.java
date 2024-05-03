@@ -20,7 +20,7 @@ public class Blue implements Alliance {
     /**
      * Use a real player robot instead of an NPC.
      */
-    private static final boolean kRealPlayer = false;
+    private static final boolean kRealPlayer = true;
     private static final Translation2d kSpeaker = new Translation2d(0, 5.548);
     private final RobotAssembly player;
     private final RobotAssembly friend1;
@@ -65,9 +65,6 @@ public class Blue implements Alliance {
         ampCycler.reset();
         speakerCycler.reset();
         defender.reset();
-        player.setState(2, 4, 0, 0);
-        friend1.setState(1, 1, 0, 0);
-        friend2.setState(1, 4, 0, 0);
     }
 
     @Override

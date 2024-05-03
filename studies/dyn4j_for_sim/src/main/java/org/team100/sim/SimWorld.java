@@ -10,6 +10,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.team100.field.FieldMap;
+import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -35,11 +36,16 @@ public class SimWorld {
     private static final String kField = "field";
     private static final Telemetry t = Telemetry.get();
 
+    private final Score m_blue;
+    private final Score m_red;
     private final World<Body100> world;
+    private final Scorekeeper m_scorekeeper;
     // this is a copy of the obstacle translations since we use this all the time.
     private final List<Translation2d> obstacles;
 
-    public SimWorld() {
+    public SimWorld(Score blueScore, Score redScore) {
+        m_blue = blueScore;
+        m_red = redScore;
         world = new World<>();
         world.setGravity(PhysicsWorld.ZERO_GRAVITY);
         world.setValueMixer(new ValueMixer100());
@@ -48,7 +54,7 @@ public class SimWorld {
         setUpWalls();
         setUpStages();
         setUpNotes();
-        setUpSensors();
+        m_scorekeeper = setUpSensors();
 
         // cache the obstacle locations since we use them all the time.
         obstacles = new ArrayList<>();
@@ -109,7 +115,7 @@ public class SimWorld {
     }
 
     /** Speakers and amp pockets are sensors. */
-    private void setUpSensors() {
+    private Scorekeeper setUpSensors() {
         Speaker blueSpeaker = new Speaker("blue speaker",
                 Geometry.createPolygon(
                         new Vector2(0, 5.018),
@@ -143,10 +149,13 @@ public class SimWorld {
                 redSpeaker,
                 blueAmp,
                 redAmp,
-                false);
+                true,
+                m_blue,
+                m_red);
         world.addCollisionListener(scorekeeper);
         world.addBoundsListener(scorekeeper);
         world.addStepListener(scorekeeper);
+        return scorekeeper;
     }
 
     /**
@@ -284,10 +293,16 @@ public class SimWorld {
     }
 
     public void addNote(double x, double y, boolean debug) {
-        Note note = new Note(debug);
+        Note note = new Note(true);
+    
+        // Note note = new Note(debug);
         note.translate(x, y);
         world.addBody(note);
         world.addStepListener(note);
+    }
+
+    public Scorekeeper getScorekeeper() {
+        return m_scorekeeper;
     }
 
 }
