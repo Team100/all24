@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  * This never finishes; run it with an Intake command as the deadline.
  */
 public class DriveToNote extends Command {
+    /** Ignore notes further than this. Note the camera has a limit too. */
+    private static final int kMaxNoteDistance = 5;
     // TODO: get these from kinodynamics
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
@@ -43,7 +45,7 @@ public class DriveToNote extends Command {
     @Override
     public void execute() {
         if (m_debug)
-            System.out.print("DriveToNote execute");
+            System.out.print("DriveToNote");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             System.out.printf(" desired v %s", desired);
@@ -54,7 +56,7 @@ public class DriveToNote extends Command {
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf(" final v %s", v);
+            System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -73,6 +75,8 @@ public class DriveToNote extends Command {
             NoteSighting sight = entry.getValue();
             Translation2d translation = sight.position().minus(pose.getTranslation());
             double distance = translation.getNorm();
+            if (distance > kMaxNoteDistance)
+                continue;
             if (distance < minDistance) {
                 minDistance = distance;
                 closest = translation;
@@ -86,8 +90,8 @@ public class DriveToNote extends Command {
         // TODO: something about rotation
 
         if (m_debug)
-            System.out.printf("DriveToNote pose %s target %s\n",
-                    m_drive.getPose().getTranslation(), closest);
+            System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
+                    pose.getX(), pose.getY(), closest.getX(), closest.getY());
 
         Vector2 positionError = new Vector2(closest.getX(), closest.getY());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);

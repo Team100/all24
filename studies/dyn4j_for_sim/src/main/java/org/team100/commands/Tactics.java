@@ -117,7 +117,8 @@ public class Tactics {
             Pose2d myPosition,
             FieldRelativeVelocity velocity,
             boolean debug) {
-        final double maxDistance = 4;
+        // only look at obstacles less than 1 second away.
+        final double maxDistance = velocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         for (Pose2d pose : FieldMap.stagePosts.values()) {
             Translation2d obstacleLocation = pose.getTranslation();
@@ -133,7 +134,7 @@ public class Tactics {
                 continue;
             Vector2 force = steer.product(kObstacleSteer);
             if (debug)
-                System.out.printf(" avoidObstacles target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
+                System.out.printf(" steerAroundObstacles target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
                         obstacleLocation.getX(),
                         obstacleLocation.getY(),
                         force.x,
@@ -176,6 +177,8 @@ public class Tactics {
             FieldRelativeVelocity myVelocity,
             NavigableMap<Double, RobotSighting> recentSightings,
             boolean debug) {
+        // only look at robots less than 1 second away.
+        final double maxDistance = myVelocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
         // look at entries in order of decreasing timestamp
@@ -211,7 +214,7 @@ public class Tactics {
             nearby.add(mostRecentPosition);
 
             double distance = myPosition.getTranslation().getDistance(mostRecentPosition);
-            if (distance > 4) // don't react to far-away obstacles
+            if (distance > maxDistance) // don't react to far-away obstacles
                 continue;
 
             // treat the target as a fixed obstacle.

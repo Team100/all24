@@ -12,8 +12,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/** This is a subsystem in order to get periodic(). */
+/** Makes lists of robots and nearby notes it can see. */
 public class CameraSubsystem extends SubsystemBase {
+    /** Ignore note sightings further away than this. */
+    private static final int kMaxNoteDistance = 5;
+
     public static record RobotSighting(boolean friend, Translation2d position) {
     }
 
@@ -91,7 +94,7 @@ public class CameraSubsystem extends SubsystemBase {
                 Vector2 notePosition = body.getWorldCenter();
                 double distance = position.distance(notePosition);
                 // can't see that far
-                if (distance > 5)
+                if (distance > kMaxNoteDistance)
                     continue;
                 double now = Timer.getFPGATimestamp();
                 NoteSighting sighting = new NoteSighting(

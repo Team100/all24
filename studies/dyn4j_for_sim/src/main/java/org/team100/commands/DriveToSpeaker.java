@@ -13,9 +13,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 /**
  * Drives to a good spot for shooting.
  * 
+ * This command is very approximate about location.
+ * 
+ * It should be followed by RotateToShoot.
+ * 
  * TODO: extract a "drive to X" command
  */
 public class DriveToSpeaker extends Command {
+    private static final double kTranslationTolerance = 2;
+    private static final double kVelocityTolerance = 5;
+    private static final double kAngularTolerance = 2;
     // TODO: get these from kinodynamics
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
@@ -48,7 +55,7 @@ public class DriveToSpeaker extends Command {
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf(" final v %s", v);
+            System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -63,9 +70,9 @@ public class DriveToSpeaker extends Command {
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
 
-        return translationError < 0.25
-                && Math.abs(rotationError) < 0.025
-                && velocity < 0.025;
+        return translationError < kTranslationTolerance
+                && Math.abs(rotationError) < kAngularTolerance
+                && velocity < kVelocityTolerance;
     }
 
     /** Proportional feedback with a limiter. */

@@ -11,12 +11,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 /**
  * Stop and turn to the speaker.
  * 
- * TODO: turn while moving, correct for the motion.
+ * TODO: make a shoot-on-the-move command
  */
 public class RotateToShoot extends Command {
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
     private static final double kAngleTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
-    private static final double kP = 10;
+    private static final double kAngularP = 10;
+    private static final double kOmegaP = 10;
+    private static final double kVelocityP = 10;
     private final Translation2d m_speakerPosition;
     private final DriveSubsystem m_drive;
 
@@ -28,11 +33,16 @@ public class RotateToShoot extends Command {
 
     @Override
     public void execute() {
+        FieldRelativeVelocity goalVelocity = new FieldRelativeVelocity(0, 0, 0);
+        FieldRelativeVelocity velocityError = goalVelocity.minus(m_drive.getVelocity());
+        FieldRelativeVelocity velocityFeedback = velocityError.times(kVelocityP, kOmegaP);
+
         Pose2d pose = m_drive.getPose();
-        double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
-        double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
-        double omega = error * kP;
-        m_drive.drive(new FieldRelativeVelocity(0, 0, omega));
+        double goalAngle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
+        double angularError = MathUtil.angleModulus(goalAngle - pose.getRotation().getRadians());
+        FieldRelativeVelocity angularFeedback = new FieldRelativeVelocity(0, 0, angularError * kAngularP);
+
+        m_drive.drive(velocityFeedback.plus(angularFeedback).clamp(kMaxVelocity, kMaxOmega));
     }
 
     @Override

@@ -1,6 +1,9 @@
 package org.team100.sim;
 
+import java.util.List;
+
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
@@ -17,10 +20,12 @@ public abstract class RobotBody extends Body100 {
     private static final Range kVertical = new Range(0.1, 0.7);
 
     private final SimWorld m_world;
+    private final boolean m_debug;
 
-    protected RobotBody(String id, SimWorld world) {
+    protected RobotBody(String id, SimWorld world, boolean debug) {
         super(id);
         m_world = world;
+        m_debug = debug;
 
         // about 30 inches including bumpers == 24 inch frame
         // 100 kg/m2 implies about 120 lbs
@@ -42,6 +47,17 @@ public abstract class RobotBody extends Body100 {
 
     public String getName() {
         return m_id;
+    }
+
+    /** TODO: Don't assume there's only one joint. */
+    public boolean carryingNote() {
+        List<Joint<Body100>> joints = getWorld().getJoints(this);
+        for (Joint<Body100> j : joints) {
+            if (m_debug) {
+                System.out.printf(" joint %s %s", j.getBody1(), j.getBody2());
+            }
+        }
+        return getWorld().getJointCount(this) > 0;
     }
 
     public abstract boolean friend(RobotBody body);

@@ -27,6 +27,10 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return new FieldRelativeVelocity(x * scalar, y * scalar, theta * scalar);
     }
 
+    public FieldRelativeVelocity times(double cartesian, double angular) {
+        return new FieldRelativeVelocity(x * cartesian, y * cartesian, theta * angular);
+    }
+
     public FieldRelativeVelocity clamp(double maxVelocity, double maxOmega) {
         double norm = Math.hypot(x, y);
         double ratio = 1.0;

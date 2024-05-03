@@ -81,6 +81,14 @@ public class SimWorld {
         return world.removeJoint(joint);
     }
 
+    public int getJointCount(Body100 body) {
+        return getJoints(body).size();
+    }
+
+    public List<Joint<Body100>> getJoints(Body100 body) {
+        return world.getJoints(body);
+    }
+
     public void update() {
         // update the dyn4j sim
         world.update(0.02);
@@ -149,7 +157,7 @@ public class SimWorld {
                 redSpeaker,
                 blueAmp,
                 redAmp,
-                true,
+                false,
                 m_blue,
                 m_red);
         world.addCollisionListener(scorekeeper);

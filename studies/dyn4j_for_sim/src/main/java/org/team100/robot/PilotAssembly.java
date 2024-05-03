@@ -27,11 +27,11 @@ public class PilotAssembly extends RobotAssembly {
     public PilotAssembly(Pilot pilot, RobotBody robotBody, Translation2d speakerPosition, boolean debug) {
         super(robotBody, speakerPosition);
         m_drive.setDefaultCommand(new PilotDrive(m_drive, pilot));
-        // one way to do sequences is via Command.andThen().
         whileTrue(pilot::driveToSpeaker,
-                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), debug)
-                        .andThen(new RotateToShoot(speakerPosition, m_drive))
-                        .andThen(new ShootCommand(m_indexer, m_shooter))
+                Commands.sequence(
+                        new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), debug),
+                        new RotateToShoot(speakerPosition, m_drive),
+                        new ShootCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToSource,
                 Commands.deadline(
@@ -41,12 +41,14 @@ public class PilotAssembly extends RobotAssembly {
                                 new DriveToNote(m_drive, m_camera, debug)))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToAmp,
-                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), debug)
-                        .andThen(new AmpCommand(m_indexer, m_shooter))
+                Commands.sequence(
+                        new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), debug),
+                        new AmpCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToPass,
-                new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), debug)
-                        .andThen(new LobCommand(m_indexer, m_shooter))
+                Commands.sequence(
+                        new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), debug),
+                        new LobCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToNote,
                 Commands.deadline(

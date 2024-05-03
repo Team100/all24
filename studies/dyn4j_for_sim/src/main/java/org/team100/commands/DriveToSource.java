@@ -10,7 +10,17 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * This command should be followed by DriveToNote, so that the goal of this
+ * command can be very approximate.
+ */
 public class DriveToSource extends Command {
+    /** The intake works at high angles. */
+    private static final double kAngularTolerance = 0.75;
+    /** Velocity doesn't matter at all. */
+    private static final int kVelocityTolerance = 5;
+    /** Get close enough for the camera to see. */
+    private static final double kCartesianTolerance = 2.5;
     // TODO: get these from kinodynamics
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
@@ -60,9 +70,9 @@ public class DriveToSource extends Command {
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
-        return translationError < 0.5
-                && Math.abs(rotationError) < 0.75
-                && velocity < 0.05;
+        return translationError < kCartesianTolerance
+                && Math.abs(rotationError) < kAngularTolerance
+                && velocity < kVelocityTolerance;
     }
 
     private FieldRelativeVelocity goToGoal(Pose2d pose) {

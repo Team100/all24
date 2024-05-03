@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Dumps a note on the field once a second, if there are friends around.
  */
 public class SourceDefault extends Command {
-    private static final double kMaxDistance = 2;
+    /** Should be further than the DriveToSource tolerance. */
+    private static final double kMaxDistance = 4;
 
     private final Source m_humanPlayer;
     private final SimWorld m_world;
@@ -32,10 +33,14 @@ public class SourceDefault extends Command {
 
     @Override
     public void execute() {
+        if (m_debug)
+            System.out.print("SourceDefault");
         // feed if there's a nearby friend, but no nearby note
         if (nearFriend() && !nearNote()) {
             m_humanPlayer.feed();
         }
+        if (m_debug)
+            System.out.println();
     }
 
     /**
@@ -47,24 +52,32 @@ public class SourceDefault extends Command {
                 // look only at robots
                 continue;
             }
-            Vector2 robotPosition = body.getWorldCenter();
+            RobotBody robot = (RobotBody) body;
+            Vector2 robotPosition = robot.getWorldCenter();
             Translation2d robotTranslation = new Translation2d(robotPosition.x, robotPosition.y);
             double distance = robotTranslation.getDistance(m_humanPlayer.getTarget());
             if (distance > kMaxDistance) {// ignore distant robots
                 continue;
             }
 
-            if (m_isBlue && body instanceof Foe) {
+            if (m_isBlue && robot instanceof Foe) {
                 // blue source does not feed red robots.
+                if (m_debug)
+                    System.out.printf(" blue source ignoring red %s", robot);
                 continue;
             }
-            if (!m_isBlue && !(body instanceof Foe)) {
+            if (!m_isBlue && !(robot instanceof Foe)) {
                 // red source does not feed blue robots
                 if (m_debug)
-                    System.out.printf("ignoring %s\n", body);
+                    System.out.printf(" red source ignoring blue %s", robot);
                 continue;
             }
-
+            // ignore friends carrying notes
+            if (robot.carryingNote()) {
+                 if (m_debug)
+                    System.out.printf(" ignoring carrying %s", robot);
+                continue;
+            }
             return true;
         }
         return false;
@@ -77,12 +90,18 @@ public class SourceDefault extends Command {
                 // look only at notes
                 continue;
             }
-            Vector2 notePosition = body.getWorldCenter();
+            Note note = (Note) body;
+            if (!note.isVisible()) {
+                continue;
+            }
+            Vector2 notePosition = note.getWorldCenter();
             Translation2d noteTranslation = new Translation2d(notePosition.x, notePosition.y);
             double distance = noteTranslation.getDistance(m_humanPlayer.getTarget());
             if (distance > kMaxDistance) {// ignore distant notes
                 continue;
             }
+            if (m_debug)
+                System.out.printf(" there is a note %s", note);
             return true;
         }
         return false;

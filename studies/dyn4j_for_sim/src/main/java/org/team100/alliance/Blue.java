@@ -31,7 +31,7 @@ public class Blue implements Alliance {
     private final Pilot defender;
 
     public Blue(SimWorld world) {
-        Player playerBody = new Player(world);
+        Player playerBody = new Player(world, false);
         // might not be used below.
         ampCycler = new AmpCycler();
         if (kRealPlayer) {
@@ -44,13 +44,13 @@ public class Blue implements Alliance {
         player.setState(2, 4, 0, 0); // initial position
         world.addBody(playerBody);
 
-        Friend blue1 = new Friend("blue 1", world);
+        Friend blue1 = new Friend("blue 1", world, true);
         speakerCycler = new SpeakerCycler();
         friend1 = new PilotAssembly(speakerCycler, blue1, kSpeaker, true);
         friend1.setState(1, 1, 0, 0); // initial position
         world.addBody(blue1);
 
-        Friend blue2 = new Friend("blue 2", world);
+        Friend blue2 = new Friend("blue 2", world, false);
         defender = new Defender();
         friend2 = new PilotAssembly(defender, blue2, kSpeaker, false);
         friend2.setState(1, 4, 0, 0); // initial position

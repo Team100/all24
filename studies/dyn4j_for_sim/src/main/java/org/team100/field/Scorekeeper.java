@@ -17,8 +17,6 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
-import edu.wpi.first.wpilibj.Timer;
-
 /**
  * Uses a CollisionListener to catch the collision event between notes and
  * speakers, and prints the updated score.
@@ -41,7 +39,6 @@ public class Scorekeeper
     private final AmpPocket m_redAmp;
     private final boolean m_debug;
     private final Set<Body100> m_doomed;
-    private final Timer m_timer;
 
     private final Score m_blue;
     private final Score m_red;
@@ -62,8 +59,6 @@ public class Scorekeeper
         m_blue = blueScore;
         m_red = redScore;
         m_doomed = new HashSet<>();
-        m_timer = new Timer();
-        m_timer.start();
     }
 
     @Override
@@ -160,12 +155,7 @@ public class Scorekeeper
 
     @Override
     public void begin(TimeStep step, PhysicsWorld<Body100, ?> world) {
-        if (m_timer.advanceIfElapsed(1)) {
-            // just for testing the format
-            // newPrintScore();
-            // printResults();
-
-        }
+        //
     }
 
     @Override
