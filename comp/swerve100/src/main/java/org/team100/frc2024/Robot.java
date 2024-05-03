@@ -7,6 +7,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.telemetry.JvmLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
@@ -28,6 +29,7 @@ public class Robot extends TimedRobot implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name = Names.name(this);
     private RobotContainer m_robotContainer;
+    private JvmLogger m_jvmLogger;
 
     @Override
     public void robotInit() {
@@ -36,6 +38,8 @@ public class Robot extends TimedRobot implements Glassy {
         Util.printf("Identity: %s\n", Identity.instance.name());
         RobotController.setBrownoutVoltage(5.5);
         banner();
+
+        m_jvmLogger = new JvmLogger();
 
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
@@ -72,6 +76,10 @@ public class Robot extends TimedRobot implements Glassy {
         t.log(Level.DEBUG, m_name, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
         t.log(Level.DEBUG, m_name, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
         t.log(Level.DEBUG, m_name, "DriverStation FMSAttached", DriverStation.isFMSAttached());
+
+        m_jvmLogger.logGarbageCollectors();
+        m_jvmLogger.logMemoryPools();
+        m_jvmLogger.logMemoryUsage();
 
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");

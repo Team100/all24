@@ -20,7 +20,7 @@ public class Foe extends RobotBody {
     private static final Pose2d kAmpSpot = new Pose2d(14.7, 7.5, new Rotation2d(Math.PI / 2));
     /** Shoot from about 3 meters away */
     private static final Pose2d kShootingSpot = new Pose2d(13.5, 5.5, new Rotation2d());
-    static final Pose2d kPassingSpot = new Pose2d(6.5, 1, new Rotation2d(Math.PI / 4));
+    static final Pose2d kPassingSpot = new Pose2d(6.5, 1, new Rotation2d(0.65));
     static final Pose2d kDefendSpot = new Pose2d(13, 2, new Rotation2d(Math.PI));
 
     public Foe(String id, SimWorld world) {

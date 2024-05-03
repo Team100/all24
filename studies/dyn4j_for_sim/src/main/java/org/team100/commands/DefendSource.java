@@ -5,8 +5,10 @@ import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
-import org.team100.robot.RobotSubsystem;
-import org.team100.robot.RobotSubsystem.RobotSighting;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.CameraSubsystem.RobotSighting;
+import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,63 +23,65 @@ public class DefendSource extends Command {
     private static final int kDefensePushing = 50;
     private static final int kCornerRepulsion = -10;
     private static final int kWaitingAttraction = 1000;
-    private final Alliance m_alliance;
-    private final RobotSubsystem m_robot;
+    private final DriveSubsystem m_drive;
+    private final CameraSubsystem m_camera;
     private final Tactics m_tactics;
 
-    public DefendSource(Alliance alliance, RobotSubsystem robot) {
-        m_alliance = alliance;
-        m_robot = robot;
-        m_tactics = new Tactics(robot);
-        addRequirements(robot);
+    public DefendSource(DriveSubsystem drive, CameraSubsystem camera) {
+        m_drive = drive;
+        m_camera = camera;
+        m_tactics = new Tactics(drive, camera);
+        addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        m_tactics.avoidObstacles();
-        m_tactics.avoidEdges();
-        m_tactics.avoidSubwoofers();
-        // it's ok to collide with robots
-        // m_tactics.steerAroundRobots();
-        // m_tactics.robotRepulsion();
-        work();
-    }
-
-    /** Never finishes but might be interrupted. */
-    @Override
-    public void end(boolean interrupted) {
-        m_alliance.onEnd(m_robot, this);
+        FieldRelativeVelocity v = m_tactics.apply(true, false);
+        v = v.plus(work(
+                m_drive.getPose(),
+                m_drive.getRobotBody().defenderPosition(),
+                m_drive.getRobotBody().opponentSourcePosition(),
+                m_camera.recentSightings()));
+        m_drive.drive(v);
     }
 
     /**
      * If no robots are around, wait near the source. If there is a foe, stay
      * between it and the source. Avoid getting too close to the source.
      */
-    private void work() {
-        Pose2d pose = m_robot.getPose();
+    private static FieldRelativeVelocity work(
+            Pose2d pose,
+            Pose2d defenderPosition,
+            Pose2d opponentSourcePosition,
+            NavigableMap<Double, RobotSighting> recentSightings) {
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
+
         Vector2 position = new Vector2(pose.getX(), pose.getY());
 
         // attract to the waiting spot
-        FieldRelativeDelta toWaitingSpot = FieldRelativeDelta.delta(pose, m_robot.getRobotBody().defenderPosition())
+        FieldRelativeDelta toWaitingSpot = FieldRelativeDelta.delta(pose, defenderPosition)
                 .limit(1, 1);
-        m_robot.getRobotBody().applyForce(
-                new Vector2(toWaitingSpot.getX(), toWaitingSpot.getY()).product(kWaitingAttraction));
+        v = v.plus(new FieldRelativeVelocity(
+                toWaitingSpot.getX(),
+                toWaitingSpot.getY(),
+                0).times(kWaitingAttraction));
 
         // repel from the corner, and don't chase opponents, if too close
-        FieldRelativeDelta toCorner = FieldRelativeDelta.delta(pose, m_robot.getRobotBody().opponentSourcePosition());
+        FieldRelativeDelta toCorner = FieldRelativeDelta.delta(pose, opponentSourcePosition);
         if (toCorner.getTranslation().getNorm() < 2.5) {
-            m_robot.getRobotBody().applyForce(
-                    new Vector2(toCorner.getX(), toCorner.getY()).product(
-                            kCornerRepulsion
-                                    / (toCorner.getTranslation().getNorm() * toCorner.getTranslation().getNorm())));
-            return;
+            double magnitude = kCornerRepulsion
+                    / (toCorner.getTranslation().getNorm() * toCorner.getTranslation().getNorm());
+            v = v.plus(new FieldRelativeVelocity(
+                    toCorner.getX(),
+                    toCorner.getY(),
+                    0).times(magnitude));
+            return v;
         }
         // give up if too far
         if (toCorner.getTranslation().getNorm() > 4) {
-            return;
+            return v;
         }
         // TODO: if there's an opponent nearby, stay between it and the corner.
-        NavigableMap<Double, RobotSighting> recentSightings = m_robot.recentSightings();
         for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
             RobotSighting mostRecentSighting = mostRecent.getValue();
             // don't try to defend friends
@@ -90,8 +94,7 @@ public class DefendSource extends Command {
                 // don't react to far-away obstacles
                 continue;
             }
-            double fieldDistance = m_robot.getRobotBody().defenderPosition().getTranslation()
-                    .getDistance(mostRecentPosition);
+            double fieldDistance = defenderPosition.getTranslation().getDistance(mostRecentPosition);
             if (fieldDistance > 3) {
                 // don't chase it too far
                 continue;
@@ -100,10 +103,12 @@ public class DefendSource extends Command {
             // TODO: figure out which side to push on
             Vector2 toOpponent = position.to(
                     new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()));
-            m_robot.getRobotBody().applyForce(toOpponent.product(kDefensePushing / toOpponent.getMagnitudeSquared()));
+            Vector2 force = toOpponent.product(
+                    kDefensePushing / toOpponent.getMagnitudeSquared());
+            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
             break;
         }
-
+        return v;
     }
 
 }

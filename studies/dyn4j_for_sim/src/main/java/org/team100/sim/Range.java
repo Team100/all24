@@ -20,6 +20,10 @@ public class Range {
         return m_min <= other.m_max && m_max >= other.m_min;
     }
 
+    public boolean contains(Range other) {
+        return m_min <= other.m_min && m_max >= other.m_max;
+    }
+
     @Override
     public String toString() {
         return String.format("Range [%5.3f, %5.3f]", m_min, m_max);

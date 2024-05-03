@@ -21,13 +21,18 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        m_robotContainer.init();
+        m_robotContainer.robotInit();
     }
 
     @Override
     public void teleopInit() {
         // reset each time
-        m_robotContainer.init();
+        m_robotContainer.teleopInit();
+    }
+
+    @Override
+    public void teleopExit() {
+        m_robotContainer.teleopExit();
     }
 
     @Override

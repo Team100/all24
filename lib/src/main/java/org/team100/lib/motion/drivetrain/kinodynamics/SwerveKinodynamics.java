@@ -11,6 +11,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -357,7 +358,7 @@ public class SwerveKinodynamics implements Glassy {
     public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
             SwerveModuleState... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
-       Twist2d twist =  new Twist2d(
+        Twist2d twist = new Twist2d(
                 discreteSpeeds.vxMetersPerSecond * dt,
                 discreteSpeeds.vyMetersPerSecond * dt,
                 discreteSpeeds.omegaRadiansPerSecond * dt);
@@ -407,7 +408,7 @@ public class SwerveKinodynamics implements Glassy {
         double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
 
         if (xySpeed < 1e-12) {
-            return new ChassisSpeeds(0, 0, Math.min(speeds.omegaRadiansPerSecond, maxOmega));
+            return new ChassisSpeeds(0, 0, MathUtil.clamp(speeds.omegaRadiansPerSecond, -maxOmega, maxOmega));
         }
         if (Math.abs(speeds.omegaRadiansPerSecond) < 1e-12) {
             return new ChassisSpeeds(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);

@@ -97,13 +97,20 @@ public class Note extends Body100 {
      */
     @Override
     public void end(TimeStep step, PhysicsWorld<Body100, ?> world) {
-        // if the note is being carried, this doesn't do anything.
-        if (m_carried)
+        if (!world.containsBody(this)) {
+            // no point in working on notes that have been removed
             return;
+        }
+        if (m_carried) {
+            // if the note is being carried, it doesn't move vertically.
+            return;
+        }
 
         double postSpeed = getLinearVelocity().getMagnitude();
 
         if (m_altitude > 0 || m_verticalVelocityM_s > 0) {
+            Vector2 location = getWorldCenter();
+            System.out.printf("Flying %3s x %6.3f y %6.3f z %6.3f\n", m_id, location.x, location.y, m_altitude);
             m_verticalVelocityM_s += step.getDeltaTime() * kGravityM_s2;
             // air drag and collisions
             double linear = postSpeed / preSpeed;
@@ -115,7 +122,10 @@ public class Note extends Body100 {
                 setFlying(false);
             }
         }
+    }
 
+    public boolean isFlying() {
+        return m_altitude > 0 || m_verticalVelocityM_s > 0;
     }
 
     public void carry() {
@@ -128,9 +138,18 @@ public class Note extends Body100 {
     }
 
     @Override
-    protected Range getVerticalExtent() {
+    public Range getVerticalExtent() {
         if (m_carried)
             return kCarriedRange;
         return new Range(m_altitude, m_altitude + kHeight);
+    }
+
+    public double getAltitude() {
+        return m_altitude;
+    }
+
+    /** For shooting, we don't shoot from the floor. */
+    public void setAltitude(double altitude) {
+        m_altitude = altitude;
     }
 }

@@ -36,8 +36,12 @@ public abstract class RobotBody extends Body100 {
         fixture.setFilter(this);
         setMass(MassType.NORMAL);
         // fiddled with damping until it seemed "right"
-        setAngularDamping(10);
-        setLinearDamping(0.85);
+        setAngularDamping(2);
+        setLinearDamping(2);
+    }
+
+    public String getName() {
+        return m_id;
     }
 
     public abstract boolean friend(RobotBody body);
@@ -76,7 +80,7 @@ public abstract class RobotBody extends Body100 {
     }
 
     @Override
-    protected Range getVerticalExtent() {
+    public Range getVerticalExtent() {
         return kVertical;
     }
 

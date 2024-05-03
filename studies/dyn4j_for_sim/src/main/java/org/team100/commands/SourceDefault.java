@@ -5,6 +5,11 @@ import org.team100.robot.Source;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/**
+ * Dumps a note on the field once a second.
+ * 
+ * TODO: only do it if there are friends around.
+ */
 public class SourceDefault extends Command {
     /** How often to add a note. */
     private static final double kPeriodS = 1;

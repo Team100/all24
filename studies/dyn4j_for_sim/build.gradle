@@ -79,7 +79,10 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // for simulation, collision detection
     implementation 'org.dyn4j:dyn4j:4.2.0'
+    // for nonplayer state machines
+    implementation 'com.github.stateless4j:stateless4j:2.6.0'
 }
 
 test {
