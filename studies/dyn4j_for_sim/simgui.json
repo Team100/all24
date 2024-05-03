@@ -32,8 +32,13 @@
           "width": 0.75
         },
         "Force": {
-          "arrowSize": 38,
-          "arrowWeight": 1.0,
+          "arrowColor": [
+            255.0,
+            0.0,
+            214.73687744140625,
+            255.0
+          ],
+          "arrowSize": 29,
           "style": "Hidden"
         },
         "Friend": {
@@ -97,9 +102,29 @@
           "selectable": false
         },
         "bottom": 1476,
+        "desired": {
+          "arrowColor": [
+            0.36340954899787903,
+            0.9532163739204407,
+            0.04459491744637489,
+            255.0
+          ],
+          "arrowSize": 33,
+          "style": "Hidden"
+        },
         "height": 8.210550308227539,
         "left": 150,
         "right": 2961,
+        "tactics": {
+          "arrowColor": [
+            241.57896423339844,
+            255.0,
+            0.0,
+            255.0
+          ],
+          "arrowSize": 17,
+          "style": "Hidden"
+        },
         "top": 79,
         "width": 16.541748046875,
         "window": {

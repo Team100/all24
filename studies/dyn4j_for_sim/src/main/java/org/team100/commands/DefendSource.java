@@ -6,6 +6,7 @@ import java.util.NavigableMap;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -45,6 +46,7 @@ public class DefendSource extends Command {
                 m_drive.getRobotBody().defenderPosition(),
                 m_drive.getRobotBody().opponentSourcePosition(),
                 m_camera.recentSightings());
+        ForceViz.put("desired", m_drive.getPose(), desired);
         FieldRelativeVelocity v = m_tactics.apply(desired, true, false, false);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);

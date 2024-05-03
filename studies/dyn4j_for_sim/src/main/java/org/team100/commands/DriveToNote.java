@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
@@ -47,6 +48,7 @@ public class DriveToNote extends Command {
         if (m_debug)
             System.out.print("DriveToNote");
         FieldRelativeVelocity desired = goToGoal();
+        ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
         // some notes might be near the edge, so turn off edge repulsion.

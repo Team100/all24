@@ -44,7 +44,7 @@ public class Blue implements Alliance {
         player.setState(2, 4, 0, 0); // initial position
         world.addBody(playerBody);
 
-        Friend blue1 = new Friend("blue 1", world, true);
+        Friend blue1 = new Friend("blue 1", world, false);
         speakerCycler = new SpeakerCycler();
         friend1 = new PilotAssembly(speakerCycler, blue1, kSpeaker, true);
         friend1.setState(1, 1, 0, 0); // initial position

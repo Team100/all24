@@ -4,6 +4,7 @@ import org.team100.alliance.Alliance;
 import org.team100.alliance.Blue;
 import org.team100.alliance.Red;
 import org.team100.field.Scorekeeper;
+import org.team100.sim.ForceViz;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,6 +32,7 @@ public class RobotContainer {
         m_blue.reset();
         m_red.reset();
         m_world.render();
+        ForceViz.render();
     }
 
     public void teleopInit() {
@@ -55,6 +57,7 @@ public class RobotContainer {
     public void robotPeriodic() {
         m_world.update();
         m_world.render();
+        ForceViz.render();
     }
 
     public void autonomousInit() {

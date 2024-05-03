@@ -9,6 +9,7 @@ import java.util.NavigableMap;
 import org.dyn4j.geometry.Vector2;
 import org.team100.field.FieldMap;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.sim.ForceViz;
 import org.team100.sim.Heuristics;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
@@ -82,7 +83,7 @@ public class Tactics {
             v = v.plus(new FieldRelativeVelocity(0, -kWallRepulsion, 0));
         if (debug)
             System.out.printf(" avoidEdges (%5.2f, %5.2f)", v.x(), v.y());
-
+        ForceViz.put("tactics", pose, v);
         return v;
     }
 
@@ -104,7 +105,9 @@ public class Tactics {
                 Translation2d force = normalized.times(scale);
                 if (debug)
                     System.out.printf(" avoidSubwoofers (%5.2f, %5.2f)", force.getX(), force.getY());
-                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
+                FieldRelativeVelocity subwooferRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
+                ForceViz.put("tactics", pose, subwooferRepel);
+                v = v.plus(subwooferRepel);
             }
         }
         return v;
@@ -139,7 +142,9 @@ public class Tactics {
                         obstacleLocation.getY(),
                         force.x,
                         force.y);
-            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
+            FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x, force.y, 0);
+            ForceViz.put("tactics", pose, steering);
+            v = v.plus(steering);
         }
         return v;
     }
@@ -162,7 +167,9 @@ public class Tactics {
                 Translation2d force = normalized.times(scale);
                 if (debug)
                     System.out.printf(" obstacleRepulsion (%5.2f, %5.2f)", force.getX(), force.getY());
-                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
+                FieldRelativeVelocity repel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
+                ForceViz.put("tactics", pose, repel);
+                v = v.plus(repel);
             }
         }
         return v;
@@ -230,7 +237,9 @@ public class Tactics {
             if (debug)
                 System.out.printf(" steerAroundRobots target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
                         mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
-            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
+            FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
+            ForceViz.put("tactics", myPosition, robotSteer);
+            v = v.plus(robotSteer);
 
         }
         return v;
@@ -274,9 +283,11 @@ public class Tactics {
                 double scale = kRobotRepulsion * (1 / norm - 1 / maxDistance);
                 Translation2d force = normalized.times(scale);
                 if (debug)
-                    System.out.printf(" robotRepulsion target (%5.2f, %5.2f) F (%5.2f, %5.2f)", 
-                    target.getX(), target.getY(), force.getX(), force.getY());
-                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
+                    System.out.printf(" robotRepulsion target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
+                            target.getX(), target.getY(), force.getX(), force.getY());
+                FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
+                ForceViz.put("tactics", myPosition, robotRepel);
+                v = v.plus(robotRepel);
             }
 
         }

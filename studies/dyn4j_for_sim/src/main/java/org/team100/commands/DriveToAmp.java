@@ -3,6 +3,7 @@ package org.team100.commands;
 import org.dyn4j.geometry.Vector2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 
@@ -39,6 +40,7 @@ public class DriveToAmp extends Command {
         if (m_debug)
             System.out.println("DriveToAmp");
         FieldRelativeVelocity desired = goToGoal();
+        ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired, false, true, m_debug);
