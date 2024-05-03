@@ -17,6 +17,8 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
+import edu.wpi.first.wpilibj.Timer;
+
 /**
  * Uses a CollisionListener to catch the collision event between notes and
  * speakers, and prints the updated score.
@@ -42,6 +44,11 @@ public class Scorekeeper
 
     private final Score m_blue;
     private final Score m_red;
+
+    private Double m_blueAmpTime = null;
+    private Double m_redAmpTime = null;
+    private int m_blueAmplifiedCount = 0;
+    private int m_redAmplifiedCount = 0;
 
     public Scorekeeper(
             Speaker blue,
@@ -128,24 +135,71 @@ public class Scorekeeper
 
         // does not respect amplification.
 
-        return tryScore(b1, b2, m_redSpeaker, () -> m_red.TeleopSpeakerNoteCountNotAmplified++, Double.MAX_VALUE)
-                && tryScore(b1, b2, m_blueSpeaker, () -> m_blue.TeleopSpeakerNoteCountNotAmplified++, Double.MAX_VALUE)
-                && tryScore(b1, b2, m_redAmp, () -> m_red.TeleopAmpNoteCount++, 0.4)
-                && tryScore(b1, b2, m_blueAmp, () -> m_blue.TeleopAmpNoteCount++, 0.4);
+        return tryScore(b1, b2, m_redSpeaker, this::scoreRedSpeaker, Double.MAX_VALUE)
+                && tryScore(b1, b2, m_blueSpeaker, this::scoreBlueSpeaker, Double.MAX_VALUE)
+                && tryScore(b1, b2, m_redAmp, this::scoreRedAmp, 0.4)
+                && tryScore(b1, b2, m_blueAmp, this::scoreBlueAmp, 0.4);
+    }
 
-        // return tryScore(b1, b2, m_redSpeaker, () -> m_redScore++, Double.MAX_VALUE)
-        // && tryScore(b1, b2, m_blueSpeaker, () -> m_blueScore++, Double.MAX_VALUE)
-        // && tryScore(b1, b2, m_redAmp, () -> m_redScore++, 0.4)
-        // && tryScore(b1, b2, m_blueAmp, () -> m_blueScore++, 0.4);
+    private void scoreBlueAmp() {
+        m_blue.TeleopAmpNoteCount++;
+        if (m_blue.TeleopAmpNoteCount - m_blueAmplifiedCount >= 2) {
+            // time to amplify
+            m_blueAmpTime = Timer.getFPGATimestamp();
+            m_blueAmplifiedCount = m_blue.TeleopAmpNoteCount;
+        }
+    }
 
+    private void scoreRedAmp() {
+        m_red.TeleopAmpNoteCount++;
+        if (m_red.TeleopAmpNoteCount - m_redAmplifiedCount >= 2) {
+            // time to amplify
+            m_redAmpTime = Timer.getFPGATimestamp();
+            m_redAmplifiedCount = m_red.TeleopAmpNoteCount;
+        }
+    }
+
+    private void scoreBlueSpeaker() {
+        if (m_blueAmpTime != null) {
+            // amplified
+            m_blue.TeleopSpeakerNoteCountAmplified++;
+        } else {
+            m_blue.TeleopSpeakerNoteCountNotAmplified++;
+        }
+    }
+
+    private void scoreRedSpeaker() {
+        if (m_redAmpTime != null) {
+            // amplified
+            m_red.TeleopSpeakerNoteCountAmplified++;
+        } else {
+            m_red.TeleopSpeakerNoteCountNotAmplified++;
+        }
     }
 
     public double redAmplified() {
-        return 5.0; // for testing
+        if (m_redAmpTime == null)
+            return 0;
+        double elapsedTime = Timer.getFPGATimestamp() - m_redAmpTime;
+        double timeRemaining = 10 - elapsedTime;
+        if (timeRemaining < 0) {
+            m_redAmpTime = null;
+            return 0;
+        }
+        return timeRemaining;
     }
 
     public double blueAmplified() {
-        return 0.0; // for testing
+        if (m_blueAmpTime == null)
+            return 0;
+        double elapsedTime = Timer.getFPGATimestamp() - m_blueAmpTime;
+        double timeRemaining = 10 - elapsedTime;
+        if (timeRemaining < 0) {
+            m_blueAmpTime = null;
+            return 0;
+        }
+        return timeRemaining;
+
     }
 
     @Override

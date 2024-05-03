@@ -37,10 +37,6 @@ public class ScoreDisplay {
         m_scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
-    // to alternate amping, to see what it looks like
-    // TODO: remove
-    private boolean amped = false;
-
     public void start() {
         m_scheduler.scheduleAtFixedRate(this::periodic, 0, 1, TimeUnit.SECONDS);
     }
@@ -67,7 +63,7 @@ public class ScoreDisplay {
             int seconds = (int) matchTimeSec % 60;
             StringBuilder b = new StringBuilder();
             Formatter f = new Formatter(b);
-            if (amped) {
+            if (m_scorekeeper.blueAmplified() > 0) {
                 b.append(kReset);
                 f.format(" %2.0f ", m_scorekeeper.blueAmplified());
                 b.append(kBoldBlue);
@@ -87,7 +83,7 @@ public class ScoreDisplay {
             f.format(" %3d ", m_red.TotalScore());
             b.append(kRed);
             b.append(" Red  ");
-            if (amped) {
+            if (m_scorekeeper.redAmplified() > 0) {
                 b.append(kBoldRed);
                 b.append(kAmped);
                 b.append(kReset);
@@ -96,27 +92,28 @@ public class ScoreDisplay {
             b.append(kReset);
             System.out.println(b.toString());
             f.close();
-            amped ^= true;
         } catch (Throwable e) {
             e.printStackTrace();
         }
     }
 
-    /** Like The Blue Alliance, but with blue on the left. */
+    /** Like The Blue Alliance, but with blue on the left.
+     * TODO: add auton and endgame sections
+    */
     public void finalScore() {
-        int ampPoint = 1;
-        int notAmpedSpeakerPoint = 2;
-        int ampedSpeakerPoint = 5;
+        final int ampPoint = 1;
+        final int notAmpedSpeakerPoint = 2;
+        final int ampedSpeakerPoint = 5;
 
-        int redAmps = 7;
-        int blueAmps = 7;
-        int redNotAmpedSpeakers = 2;
-        int redAmpedSpeakers = 10;
-        int blueNotAmpedSpeakers = 10;
-        int blueAmpedSpeakers = 4;
+        final int blueAmps = m_blue.TeleopAmpNoteCount;
+        final int redAmps = m_red.TeleopAmpNoteCount;
+        final int blueNotAmpedSpeakers = m_blue.TeleopSpeakerNoteCountNotAmplified;
+        final int blueAmpedSpeakers = m_blue.TeleopSpeakerNoteCountAmplified;
+        final int redNotAmpedSpeakers = m_red.TeleopSpeakerNoteCountNotAmplified;
+        final int redAmpedSpeakers = m_red.TeleopSpeakerNoteCountAmplified;
 
-        StringBuilder b = new StringBuilder();
-        Formatter f = new Formatter(b);
+        final StringBuilder b = new StringBuilder();
+        final Formatter f = new Formatter(b);
 
         b.append(kBlue);
         f.format("    %2d   ", blueAmps);
@@ -136,10 +133,10 @@ public class ScoreDisplay {
         b.append(kReset);
         b.append("\n");
 
-        int blueTotal = blueAmps * ampPoint
+        final int blueTotal = blueAmps * ampPoint
                 + blueNotAmpedSpeakers * notAmpedSpeakerPoint
                 + blueAmpedSpeakers * ampedSpeakerPoint;
-        int redTotal = redAmps * ampPoint
+        final int redTotal = redAmps * ampPoint
                 + redNotAmpedSpeakers * ampedSpeakerPoint
                 + redAmpedSpeakers * ampedSpeakerPoint;
         b.append(kBoldBlue);
