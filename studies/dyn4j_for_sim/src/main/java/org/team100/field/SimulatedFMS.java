@@ -5,8 +5,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.MatchType;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.CallbackStore;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 
 /**
@@ -17,11 +18,14 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
  */
 public class SimulatedFMS {
     private final ScheduledExecutorService m_scheduler;
+    protected final CallbackStore m_terminate;
     private double m_time;
     private boolean m_finished;
 
     public SimulatedFMS() {
         m_scheduler = Executors.newSingleThreadScheduledExecutor();
+        // turn on "test" mode to terminate the match.
+        m_terminate = DriverStationSim.registerTestCallback((name, value) -> finish(), false);
         m_time = 0;
         m_finished = false;
     }
@@ -66,6 +70,7 @@ public class SimulatedFMS {
 
     private void init() {
         DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+        DriverStationSim.setDsAttached(true);
         DriverStationSim.setEventName("Simulation");
         DriverStationSim.setFmsAttached(true);
         DriverStationSim.setMatchNumber(1);
@@ -112,7 +117,10 @@ public class SimulatedFMS {
     }
 
     private void finish() {
+        System.out.println("FINISHED!");
         m_finished = true;
+        DriverStationSim.setFmsAttached(false);
+        m_scheduler.shutdownNow();
     }
 
 }

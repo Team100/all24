@@ -22,6 +22,8 @@ import edu.wpi.first.math.geometry.Translation2d;
  * In this world, the player and friends are blue, the foes are red.
  */
 public class SimWorld {
+    /** for visualizing forces  */
+    private static final double kArrowDistance = 700;
     private static final double boundaryThickness = 1;
     private static final double fieldX = 16.541;
     private static final double fieldY = 8.211;
@@ -104,6 +106,8 @@ public class SimWorld {
 
     /** Show the bodies on the field2d widget */
     public void render() {
+        // all the forces are the same type: render them with triangles only.
+        List<Double> forces = new ArrayList<>();
         // each type is its own array for the field2d widget :-(
         for (Class<?> type : Body100.types()) {
             List<Double> poses = new ArrayList<>();
@@ -116,10 +120,22 @@ public class SimWorld {
                 poses.add(positionM.x);
                 poses.add(positionM.y);
                 poses.add(angleDeg);
+                Vector2 force = body.getForce();
+                if (force.getMagnitude() > 10) {
+                    // System.out.printf("%s %s\n", body.getUserData(), force);
+                    double forceDirection = force.getDirection();
+                    double forceX = positionM.x - force.x / kArrowDistance;
+                    double forceY = positionM.y - force.y / kArrowDistance;
+                    forces.add(forceX);
+                    forces.add(forceY);
+                    forces.add(Math.toDegrees(forceDirection));
+                }
             }
             t.log(Level.DEBUG, kField, type.getSimpleName(),
                     poses.toArray(new Double[0]));
         }
+        t.log(Level.DEBUG, kField, "Force",
+                forces.toArray(new Double[0]));
     }
 
     /** Speakers and amp pockets are sensors. */

@@ -4,6 +4,11 @@
       "window": {
         "visible": false
       }
+    },
+    "RoboRIO": {
+      "window": {
+        "visible": true
+      }
     }
   },
   "NTProvider": {
@@ -26,6 +31,11 @@
           "weight": 8.0,
           "width": 0.75
         },
+        "Force": {
+          "arrowSize": 38,
+          "arrowWeight": 1.0,
+          "style": "Hidden"
+        },
         "Friend": {
           "arrowSize": 21,
           "color": [
@@ -47,6 +57,7 @@
             255.0
           ],
           "length": 0.30000001192092896,
+          "style": "Box/Image",
           "weight": 5.0,
           "width": 0.30000001192092896
         },
@@ -59,6 +70,7 @@
             255.0
           ],
           "length": 0.30000001192092896,
+          "style": "Box/Image",
           "weight": 8.0,
           "width": 0.30000001192092896
         },
