@@ -15,7 +15,7 @@ public class DriveToSource extends Command {
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
     private static final int kAngularP = 10;
-    private static final int kCartesianP = 50;
+    private static final int kCartesianP = 5;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
     private final boolean m_debug;
@@ -36,14 +36,20 @@ public class DriveToSource extends Command {
     @Override
     public void execute() {
         if (m_debug)
-            System.out.println("DriveToSource execute");
-        FieldRelativeVelocity v = m_tactics.apply(false, true, false);
+            System.out.print("DriveToSource");
+        Pose2d pose = m_drive.getPose();
         if (m_debug)
-            System.out.printf("tactics v %s\n", v);
-        v = v.plus(goToGoal());
+            System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
+        FieldRelativeVelocity desired = goToGoal(pose);
+        if (m_debug)
+            System.out.printf(" desired v %s", desired);
+        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, m_debug);
+        if (m_debug)
+            System.out.printf(" tactics v %s", v);
+        v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf("final v %s\n", v);
+            System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
 
@@ -59,18 +65,14 @@ public class DriveToSource extends Command {
                 && velocity < 0.05;
     }
 
-    private FieldRelativeVelocity goToGoal() {
-        Pose2d pose = m_drive.getPose();
+    private FieldRelativeVelocity goToGoal(Pose2d pose) {
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
-        final int maxError = 1;
-        positionError = new Vector2(
-                MathUtil.clamp(positionError.x, -maxError, maxError),
-                MathUtil.clamp(positionError.y, -maxError, maxError));
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB);
+        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB)
+                .clamp(kMaxVelocity, kMaxOmega);
     }
 
 }

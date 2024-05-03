@@ -26,19 +26,19 @@ public class Red implements Alliance {
     public Red(SimWorld world) {
         Foe scorerBody = new Foe("red scorer", world);
         scoreAlternator = new Scorer();
-        scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker);
+        scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker, false);
         scorer.setState(15, 3, 0, 0);
         world.addBody(scorerBody);
 
         Foe red2 = new Foe("red 2", world);
         passCycler = new Passer();
-        passer = new PilotAssembly(passCycler, red2, kSpeaker);
+        passer = new PilotAssembly(passCycler, red2, kSpeaker, false);
         passer.setState(15, 5, 0, 0);
         world.addBody(red2);
 
         Foe red3 = new Foe("red 3", world);
         defenseOnly = new Defender();
-        defender = new PilotAssembly(defenseOnly, red3, kSpeaker);
+        defender = new PilotAssembly(defenseOnly, red3, kSpeaker, false);
         defender.setState(13, 7, 0, 0);
         world.addBody(red3);
 

@@ -45,7 +45,7 @@ public class RealPlayerAssembly extends RobotAssembly {
                 new RotateToShoot(speakerPosition, m_drive)
                         .finallyDo(x -> System.out.println("done " + x)));
         whileTrue(m_control::driveToSpeaker,
-                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition())
+                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), false)
                         .finallyDo(x -> System.out.println("done " + x)));
         whileTrue(m_control::driveToAmp,
                 new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), false)
@@ -54,7 +54,7 @@ public class RealPlayerAssembly extends RobotAssembly {
                 new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), false)
                         .finallyDo(x -> System.out.println("done " + x)));
         whileTrue(m_control::driveToPass,
-                new DriveToPass(m_drive, m_camera, m_drive.passingPosition())
+                new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), false)
                         .finallyDo(x -> System.out.println("done " + x)));
         whileTrue(m_control::shootCommand,
                 new ShootCommand(m_indexer, m_shooter)

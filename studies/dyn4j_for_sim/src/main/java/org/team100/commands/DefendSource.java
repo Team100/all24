@@ -24,9 +24,9 @@ public class DefendSource extends Command {
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
 
-    private static final int kDefensePushing = 50;
-    private static final int kCornerRepulsion = -10;
-    private static final int kWaitingAttraction = 1000;
+    private static final int kDefensePushing = 5;
+    private static final int kCornerRepulsion = -5;
+    private static final int kWaitingAttraction = 5;
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final Tactics m_tactics;
@@ -40,12 +40,13 @@ public class DefendSource extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(true, false, false);
-        v = v.plus(work(
+        FieldRelativeVelocity desired = work(
                 m_drive.getPose(),
                 m_drive.getRobotBody().defenderPosition(),
                 m_drive.getRobotBody().opponentSourcePosition(),
-                m_camera.recentSightings()));
+                m_camera.recentSightings());
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, false);
+        v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         m_drive.drive(v);
     }

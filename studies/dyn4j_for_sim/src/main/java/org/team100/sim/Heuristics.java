@@ -6,6 +6,7 @@ public class Heuristics {
 
     /**
      * Return a force vector.
+     * maximum "force" magnitude is equal to the min distance specified.
      * TODO: use wpilib types
      */
     public static Vector2 steerToAvoid(

@@ -9,7 +9,6 @@ import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,7 +22,7 @@ public class DriveToNote extends Command {
     // TODO: get these from kinodynamics
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
-    private static final int kCartesianP = 50;
+    private static final int kCartesianP = 5;
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
@@ -44,15 +43,18 @@ public class DriveToNote extends Command {
     @Override
     public void execute() {
         if (m_debug)
-            System.out.printf("DriveToNote\n");
-        // some notes might be near the edge, so turn off edge repulsion.
-        FieldRelativeVelocity v = m_tactics.apply(false, true, false);
+            System.out.print("DriveToNote execute");
+        FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
-            System.out.printf("tactics v %s\n", v);
-        v = v.plus(goToGoal());
+            System.out.printf(" desired v %s", desired);
+        // some notes might be near the edge, so turn off edge repulsion.
+        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, m_debug);
+        if (m_debug)
+            System.out.printf(" tactics v %s", v);
+        v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf("final v %s\n", v);
+            System.out.printf(" final v %s", v);
         m_drive.drive(v);
     }
 
@@ -88,12 +90,8 @@ public class DriveToNote extends Command {
                     m_drive.getPose().getTranslation(), closest);
 
         Vector2 positionError = new Vector2(closest.getX(), closest.getY());
-        final int maxError = 1;
-        positionError = new Vector2(
-                MathUtil.clamp(positionError.x, -maxError, maxError),
-                MathUtil.clamp(positionError.y, -maxError, maxError));
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, 0);
+        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, 0).clamp(kMaxVelocity, kMaxOmega);
     }
 
 }

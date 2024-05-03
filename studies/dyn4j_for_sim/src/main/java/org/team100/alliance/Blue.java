@@ -39,20 +39,20 @@ public class Blue implements Alliance {
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(new ManualPilot(), playerBody, kSpeaker);
         } else {
-            player = new PilotAssembly(ampCycler, playerBody, kSpeaker);
+            player = new PilotAssembly(ampCycler, playerBody, kSpeaker, false);
         }
         player.setState(2, 4, 0, 0); // initial position
         world.addBody(playerBody);
 
         Friend blue1 = new Friend("blue 1", world);
         speakerCycler = new SpeakerCycler();
-        friend1 = new PilotAssembly(speakerCycler, blue1, kSpeaker);
+        friend1 = new PilotAssembly(speakerCycler, blue1, kSpeaker, true);
         friend1.setState(1, 1, 0, 0); // initial position
         world.addBody(blue1);
 
         Friend blue2 = new Friend("blue 2", world);
         defender = new Defender();
-        friend2 = new PilotAssembly(defender, blue2, kSpeaker);
+        friend2 = new PilotAssembly(defender, blue2, kSpeaker, false);
         friend2.setState(1, 4, 0, 0); // initial position
         world.addBody(blue2);
 

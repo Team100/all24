@@ -24,12 +24,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
  */
 public class PilotAssembly extends RobotAssembly {
 
-    public PilotAssembly(Pilot pilot, RobotBody robotBody, Translation2d speakerPosition) {
+    public PilotAssembly(Pilot pilot, RobotBody robotBody, Translation2d speakerPosition, boolean debug) {
         super(robotBody, speakerPosition);
         m_drive.setDefaultCommand(new PilotDrive(m_drive, pilot));
         // one way to do sequences is via Command.andThen().
         whileTrue(pilot::driveToSpeaker,
-                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition())
+                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), debug)
                         .andThen(new RotateToShoot(speakerPosition, m_drive))
                         .andThen(new ShootCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
@@ -37,21 +37,21 @@ public class PilotAssembly extends RobotAssembly {
                 Commands.deadline(
                         new Intake(m_indexer),
                         Commands.sequence(
-                                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), false),
-                                new DriveToNote(m_drive, m_camera, false)))
+                                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), debug),
+                                new DriveToNote(m_drive, m_camera, debug)))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToAmp,
-                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), false)
+                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), debug)
                         .andThen(new AmpCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToPass,
-                new DriveToPass(m_drive, m_camera, m_drive.passingPosition())
+                new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), debug)
                         .andThen(new LobCommand(m_indexer, m_shooter))
                         .finallyDo(pilot::onEnd));
         whileTrue(pilot::driveToNote,
                 Commands.deadline(
                         new Intake(m_indexer),
-                        new DriveToNote(m_drive, m_camera, false))
+                        new DriveToNote(m_drive, m_camera, debug))
                         .finallyDo(pilot::onEnd));
         // defend never ends
         whileTrue(pilot::defend,

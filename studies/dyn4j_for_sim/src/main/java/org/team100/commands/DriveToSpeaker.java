@@ -20,14 +20,16 @@ public class DriveToSpeaker extends Command {
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
     private static final double kAngularP = 10;
-    private static final double kCartesianP = 10;
+    private static final double kCartesianP = 5;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
+    private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DriveToSpeaker(DriveSubsystem drive, CameraSubsystem camera, Pose2d goal) {
+    public DriveToSpeaker(DriveSubsystem drive, CameraSubsystem camera, Pose2d goal, boolean debug) {
         m_drive = drive;
         m_goal = goal;
+        m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);
     }
@@ -35,9 +37,18 @@ public class DriveToSpeaker extends Command {
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(true, true, false);
-        v = v.plus(goToGoal());
+        if (m_debug)
+            System.out.print("DriveToSpeaker");
+        FieldRelativeVelocity desired = goToGoal();
+        if (m_debug)
+            System.out.printf(" desired v %s", desired);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, m_debug);
+        if (m_debug)
+            System.out.printf(" tactics v %s", v);
+        v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
+        if (m_debug)
+            System.out.printf(" final v %s", v);
         m_drive.drive(v);
     }
 
@@ -62,14 +73,10 @@ public class DriveToSpeaker extends Command {
         Pose2d pose = m_drive.getPose();
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
-        final int maxError = 1;
-        positionError = new Vector2(
-                MathUtil.clamp(positionError.x, -maxError, maxError),
-                MathUtil.clamp(positionError.y, -maxError, maxError));
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB);
+        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB).clamp(kMaxVelocity, kMaxOmega);
     }
 
 }

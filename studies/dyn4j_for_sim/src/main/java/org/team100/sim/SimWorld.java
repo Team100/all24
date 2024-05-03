@@ -293,9 +293,7 @@ public class SimWorld {
     }
 
     public void addNote(double x, double y, boolean debug) {
-        Note note = new Note(true);
-    
-        // Note note = new Note(debug);
+        Note note = new Note(debug);
         note.translate(x, y);
         world.addBody(note);
         world.addStepListener(note);
