@@ -1,5 +1,6 @@
 package org.team100.sim;
 
+
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
@@ -17,10 +18,12 @@ public abstract class RobotBody extends Body100 {
     private static final Range kVertical = new Range(0.1, 0.7);
 
     private final SimWorld m_world;
+    private final boolean m_debug;
 
-    protected RobotBody(String id, SimWorld world) {
-        super(id);
+    protected RobotBody(String id, SimWorld world, boolean debug) {
+        super(id, debug);
         m_world = world;
+        m_debug = debug;
 
         // about 30 inches including bumpers == 24 inch frame
         // 100 kg/m2 implies about 120 lbs
@@ -42,6 +45,15 @@ public abstract class RobotBody extends Body100 {
 
     public String getName() {
         return m_id;
+    }
+
+    /**
+     * The only joint used for a RobotBody is to a note in the indexer.
+     * 
+     * TODO: Don't assume there's only one joint.
+     */
+    public boolean carryingNote() {        
+        return getWorld().getJointCount(this) > 0;
     }
 
     public abstract boolean friend(RobotBody body);

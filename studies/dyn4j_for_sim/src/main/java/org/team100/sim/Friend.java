@@ -21,8 +21,8 @@ public class Friend extends RobotBody {
     static final Pose2d kPassingSpot = new Pose2d(9.5, 1, new Rotation2d(3 * Math.PI / 4));
     static final Pose2d kDefendSpot = new Pose2d(3.5, 2, new Rotation2d());
 
-    public Friend(String id, SimWorld world) {
-        super(id, world);
+    public Friend(String id, SimWorld world,  boolean debug) {
+        super(id, world, debug);
     }
 
     @Override

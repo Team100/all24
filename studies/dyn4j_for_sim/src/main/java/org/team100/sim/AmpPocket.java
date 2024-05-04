@@ -16,7 +16,7 @@ public class AmpPocket extends Body100 {
     private final Range m_vertical = new Range(0.660, 1.118);
 
     public AmpPocket(String id, Convex convex) {
-        super(id);
+        super(id, false);
         BodyFixture fixture = addFixture(convex, 1.0, 0.5, 0.5);
         fixture.setFilter(this);
         setMass(MassType.INFINITE);

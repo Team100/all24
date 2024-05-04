@@ -9,6 +9,7 @@ import java.util.NavigableMap;
 import org.dyn4j.geometry.Vector2;
 import org.team100.field.FieldMap;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.sim.ForceViz;
 import org.team100.sim.Heuristics;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
@@ -17,20 +18,22 @@ import org.team100.subsystems.DriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
-/** Low level drive motion heuristics that can be used by any command. */
+/**
+ * Low level drive motion heuristics that can be used by any command.
+ * 
+ * Pointwise repulsive forces are inversely proportional to distance, like
+ * gravity or electrostatics in two dimensions.
+ */
 public class Tactics {
-    // this is 1/r
-    // try a little less repulsion for now
-    private static final int kRobotRepulsion = 25;
-    // steering around robots
-    private static final int kRobotSteer = 50;
-    // coefficient for 1/r
-    private static final int kSubwooferRepulsion = 100;
-    // constant within 1m
-    private static final int kWallRepulsion = 50;
-    // steering around obstacles
-    private static final int kSteer = 500;
-    // targets appearing to move faster than this are probably false associations.
+    // TODO: get these from kinodynamics
+    private static final double kMaxVelocity = 5; // m/s
+    private static final double kMaxOmega = 10; // rad/s
+    private static final double kRobotRepulsion = 5;
+    private static final double kRobotSteer = 20;
+    private static final double kSubwooferRepulsion = 5;
+    private static final double kWallRepulsion = 5;
+    private static final double kObstacleSteer = 40;
+    private static final double kObstacleRepulsion = 10;
     private static final double kMaxTargetVelocity = 4;
 
     private final DriveSubsystem m_drive;
@@ -42,28 +45,41 @@ public class Tactics {
     }
 
     /**
-     * @param avoidEdges some goals are near the edge, so turn this off.
+     * Output is clamped to feasible v and omega.
+     * 
+     * @param avoidObstacles defenders don't care about obstacles
+     * @param avoidEdges     some goals are near the edge, so turn this off.
+     * @param avoidRobots    defenders don't care about robots
      */
-    public FieldRelativeVelocity apply(boolean avoidEdges, boolean avoidRobots) {
+    public FieldRelativeVelocity apply(
+            FieldRelativeVelocity desired,
+            boolean avoidObstacles,
+            boolean avoidEdges,
+            boolean avoidRobots,
+            boolean debug) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         Pose2d pose = m_drive.getPose();
-        FieldRelativeVelocity velocity = m_drive.getVelocity();
-        v = v.plus(Tactics.avoidObstacles(pose, velocity));
+        // FieldRelativeVelocity velocity = m_drive.getVelocity();
+        if (avoidObstacles) {
+            v = v.plus(steerAroundObstacles(pose, desired, debug));
+            v = v.plus(obstacleRepulsion(pose, debug));
+        }
         if (avoidEdges)
-            v = v.plus(Tactics.avoidEdges(pose));
-        v = v.plus(Tactics.avoidSubwoofers(pose));
+            v = v.plus(avoidEdges(pose, debug));
+        v = v.plus(avoidSubwoofers(pose, debug));
         if (avoidRobots) {
             NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
-            v = v.plus(Tactics.steerAroundRobots(pose, velocity, recentSightings));
-            v = v.plus(Tactics.robotRepulsion(pose, recentSightings));
+            v = v.plus(steerAroundRobots(pose, desired, recentSightings, debug));
+            v = v.plus(robotRepulsion(pose, desired, recentSightings, debug));
         }
+        v = v.clamp(kMaxVelocity, kMaxOmega);
         return v;
     }
 
     /**
      * Avoid the edges of the field.
      */
-    public static FieldRelativeVelocity avoidEdges(Pose2d pose) {
+    public static FieldRelativeVelocity avoidEdges(Pose2d pose, boolean debug) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         if (pose.getX() < 1)
             v = v.plus(new FieldRelativeVelocity(kWallRepulsion, 0, 0));
@@ -73,45 +89,100 @@ public class Tactics {
             v = v.plus(new FieldRelativeVelocity(0, kWallRepulsion, 0));
         if (pose.getY() > 7)
             v = v.plus(new FieldRelativeVelocity(0, -kWallRepulsion, 0));
+        if (debug)
+            System.out.printf(" avoidEdges (%5.2f, %5.2f)", v.x(), v.y());
+        if (debug)
+            ForceViz.put("tactics", pose, v);
         return v;
     }
 
     /**
      * Avoid the subwoofers.
      */
-    public static FieldRelativeVelocity avoidSubwoofers(Pose2d pose) {
+    public static FieldRelativeVelocity avoidSubwoofers(Pose2d pose, boolean debug) {
+        final double maxDistance = 3;
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         for (Map.Entry<String, Pose2d> entry : FieldMap.subwoofers.entrySet()) {
             Translation2d target = entry.getValue().getTranslation();
             Translation2d robotRelativeToTarget = pose.getTranslation().minus(target);
             double norm = robotRelativeToTarget.getNorm();
-            if (norm < 3) {
-                // force goes as 1/r.
-                Translation2d force = robotRelativeToTarget.times(kSubwooferRepulsion / (norm * norm));
-                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
+            if (norm < maxDistance) {
+                // unit vector in the direction of the force
+                Translation2d normalized = robotRelativeToTarget.div(norm);
+                // scale the force so that it's zero at the maximum distance, i.e. C0 smooth.
+                double scale = kSubwooferRepulsion * (1 / norm - 1 / maxDistance);
+                Translation2d force = normalized.times(scale);
+                if (debug)
+                    System.out.printf(" avoidSubwoofers (%5.2f, %5.2f)", force.getX(), force.getY());
+                FieldRelativeVelocity subwooferRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
+                if (debug)
+                    ForceViz.put("tactics", pose, subwooferRepel);
+                v = v.plus(subwooferRepel);
             }
         }
         return v;
     }
 
     /**
-     * Avoid the stage posts.
+     * Steer to avoid the stage posts.
      */
-    public static FieldRelativeVelocity avoidObstacles(Pose2d myPosition, FieldRelativeVelocity velocity) {
+    public static FieldRelativeVelocity steerAroundObstacles(
+            Pose2d myPosition,
+            FieldRelativeVelocity velocity,
+            boolean debug) {
+        // only look at obstacles less than 1 second away.
+        final double maxDistance = velocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         for (Pose2d pose : FieldMap.stagePosts.values()) {
             Translation2d obstacleLocation = pose.getTranslation();
             double distance = myPosition.getTranslation().getDistance(obstacleLocation);
-            if (distance > 4) // ignore far-away obstacles
+            if (distance > maxDistance) // ignore far-away obstacles
                 continue;
             Vector2 steer = Heuristics.steerToAvoid(
                     new Vector2(myPosition.getX(), myPosition.getY()),
                     new Vector2(velocity.x(), velocity.y()),
-                    new Vector2(obstacleLocation.getX(), obstacleLocation.getY()), 1);
+                    new Vector2(obstacleLocation.getX(), obstacleLocation.getY()),
+                    1.0);
             if (steer.getMagnitude() < 1e-3)
                 continue;
-            Vector2 force = steer.product(kSteer);
-            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
+            Vector2 force = steer.product(kObstacleSteer);
+            if (debug)
+                System.out.printf(" steerAroundObstacles target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
+                        obstacleLocation.getX(),
+                        obstacleLocation.getY(),
+                        force.x,
+                        force.y);
+            FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x, force.y, 0);
+            if (debug)
+                ForceViz.put("tactics", pose, steering);
+            v = v.plus(steering);
+        }
+        return v;
+    }
+
+    /** Avoid obstacles. */
+    public static FieldRelativeVelocity obstacleRepulsion(Pose2d myPosition, boolean debug) {
+        final double maxDistance = 1.5;
+        FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
+        for (Pose2d pose : FieldMap.stagePosts.values()) {
+            Translation2d target = pose.getTranslation();
+            Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(target);
+            double norm = robotRelativeToTarget.getNorm();
+            if (norm < maxDistance) {
+                // unit vector in the direction of the force
+                Translation2d normalized = robotRelativeToTarget.div(norm);
+                // scale the force so that it's zero at the maximum distance, i.e. C0 smooth.
+                // the minimum distance is something like 0.75, so
+                // the maximum force is (1.3-0.3) = 0.6 * k
+                double scale = kObstacleRepulsion * (1 / norm - 1 / maxDistance);
+                Translation2d force = normalized.times(scale);
+                if (debug)
+                    System.out.printf(" obstacleRepulsion (%5.2f, %5.2f)", force.getX(), force.getY());
+                FieldRelativeVelocity repel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
+                if (debug)
+                    ForceViz.put("tactics", pose, repel);
+                v = v.plus(repel);
+            }
         }
         return v;
     }
@@ -123,7 +194,10 @@ public class Tactics {
     public static FieldRelativeVelocity steerAroundRobots(
             Pose2d myPosition,
             FieldRelativeVelocity myVelocity,
-            NavigableMap<Double, RobotSighting> recentSightings) {
+            NavigableMap<Double, RobotSighting> recentSightings,
+            boolean debug) {
+        // only look at robots less than 1 second away.
+        final double maxDistance = myVelocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
         // look at entries in order of decreasing timestamp
@@ -159,28 +233,42 @@ public class Tactics {
             nearby.add(mostRecentPosition);
 
             double distance = myPosition.getTranslation().getDistance(mostRecentPosition);
-            if (distance > 4) // don't react to far-away obstacles
+            if (distance > maxDistance) // don't react to far-away obstacles
                 continue;
 
             // treat the target as a fixed obstacle.
             Vector2 steer = Heuristics.steerToAvoid(
                     new Vector2(myPosition.getX(), myPosition.getY()),
                     new Vector2(myVelocity.x(), myVelocity.y()),
-                    new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()), 1);
+                    new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()),
+                    1.0);
 
             if (steer.getMagnitude() < 1e-3)
                 continue;
             Vector2 force = steer.product(kRobotSteer);
-            v = v.plus(new FieldRelativeVelocity(force.x, force.y, 0));
+            if (debug)
+                System.out.printf(" steerAroundRobots target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
+                        mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
+            FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
+            if (debug)
+                ForceViz.put("tactics", myPosition, robotSteer);
+            v = v.plus(robotSteer);
 
         }
         return v;
 
     }
 
-    /** A simpler method for avoiding robots: 1/r force. */
-    public static FieldRelativeVelocity robotRepulsion(Pose2d myPosition,
-            NavigableMap<Double, RobotSighting> recentSightings) {
+    /**
+     * Avoid other robots.
+     * Doesn't do anything if we're already heading away from the target.
+     */
+    public static FieldRelativeVelocity robotRepulsion(
+            Pose2d myPosition,
+            FieldRelativeVelocity myVelocity,
+            NavigableMap<Double, RobotSighting> recentSightings,
+            boolean debug) {
+        final double maxDistance = 3;
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
 
@@ -196,19 +284,31 @@ public class Tactics {
                 }
             }
             nearby.add(mostRecentPosition);
-
             double distance = myPosition.getTranslation().getDistance(mostRecentPosition);
             if (distance > 4) // don't react to far-away obstacles
                 continue;
 
             Translation2d target = mostRecent.getValue().position();
-
             Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(target);
             double norm = robotRelativeToTarget.getNorm();
-            if (norm < 3) {
-                // force goes as 1/r.
-                Translation2d force = robotRelativeToTarget.times(kRobotRepulsion / (norm * norm));
-                v = v.plus(new FieldRelativeVelocity(force.getX(), force.getY(), 0));
+            if (norm < maxDistance) {
+                // unit vector in the direction of the force
+                Translation2d normalized = robotRelativeToTarget.div(norm);
+                // scale the force so that it's zero at the maximum distance, i.e. C0 smooth.
+                // the minimum distance is something like 0.75 or 1, so
+                // the maximum force is (1.3-0.3) = 1 * k
+                double scale = kRobotRepulsion * (1 / norm - 1 / maxDistance);
+                Translation2d force = normalized.times(scale);
+                if (debug)
+                    System.out.printf(" robotRepulsion target (%5.2f, %5.2f) range %5.2f F (%5.2f, %5.2f)",
+                            target.getX(), target.getY(), norm, force.getX(), force.getY());
+                FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
+                if (myVelocity.dot(robotRepel) < 0) {
+                    // don't bother repelling if we're heading away
+                    if (debug)
+                        ForceViz.put("tactics", myPosition, robotRepel);
+                    v = v.plus(robotRepel);
+                }
             }
 
         }

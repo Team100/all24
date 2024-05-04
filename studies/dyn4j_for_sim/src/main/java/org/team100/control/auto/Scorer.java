@@ -8,13 +8,17 @@ import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 
 /**
- * Scorer goes back and forth from speaker to amp
- * TODO: add drive-to-note to pick up and score.
+ * Scorer picks up nearby notes and scores them in the speaker and amp,
+ * alternately.
+ * 
+ * TODO: pay attention to alliance strategy, amplification state, etc.
  */
 public class Scorer implements Autopilot {
 
     private enum State {
         Initial,
+        ToNoteForSpeaker,
+        ToNoteForAmp,
         ToSpeaker,
         ToAmp
     }
@@ -30,12 +34,18 @@ public class Scorer implements Autopilot {
     public Scorer() {
         final StateMachineConfig<State, Trigger> config = new StateMachineConfig<>();
         config.configure(State.Initial)
-                .permit(Trigger.Begin, State.ToSpeaker);
+                .permit(Trigger.Begin, State.ToNoteForSpeaker);
+        config.configure(State.ToNoteForSpeaker)
+                .permit(Trigger.Done, State.ToSpeaker)
+                .permit(Trigger.Reset, State.Initial);
         config.configure(State.ToSpeaker)
+                .permit(Trigger.Done, State.ToNoteForAmp)
+                .permit(Trigger.Reset, State.Initial);
+        config.configure(State.ToNoteForAmp)
                 .permit(Trigger.Done, State.ToAmp)
                 .permit(Trigger.Reset, State.Initial);
         config.configure(State.ToAmp)
-                .permit(Trigger.Done, State.ToSpeaker)
+                .permit(Trigger.Done, State.ToNoteForSpeaker)
                 .permit(Trigger.Reset, State.Initial);
         try {
             ByteArrayOutputStream dotFile = new ByteArrayOutputStream();
@@ -72,12 +82,19 @@ public class Scorer implements Autopilot {
     }
 
     @Override
+    public boolean driveToNote() {
+        return machine.isInState(State.ToNoteForSpeaker)
+                || machine.isInState(State.ToNoteForAmp);
+    }
+
+    @Override
     public void onEnd() {
         machine.fire(Trigger.Done);
     }
 
     @Override
     public void periodic() {
+        // System.out.println(machine.getState());
     }
 
 }

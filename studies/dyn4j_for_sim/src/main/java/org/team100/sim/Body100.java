@@ -13,6 +13,7 @@ import org.dyn4j.world.listener.StepListener;
 public abstract class Body100 extends Body implements StepListener<Body100>, Filter {
 
     protected final String m_id;
+    private final boolean m_debug;
 
     /**
      * This is the list of types that will be rendered.
@@ -31,10 +32,11 @@ public abstract class Body100 extends Body implements StepListener<Body100>, Fil
 
     private static final Set<String> ids = new HashSet<>();
 
-    protected Body100(String id) {
+    protected Body100(String id, boolean debug) {
         if (ids.contains(id))
             throw new IllegalArgumentException("duplicate id: " + id);
         m_id = id;
+        m_debug = debug;
         setUserData(id);
     }
 
@@ -80,6 +82,10 @@ public abstract class Body100 extends Body implements StepListener<Body100>, Fil
     @Override
     public String toString() {
         return String.format("Body100 [%s]", m_id);
+    }
+
+    public boolean isDebug() {
+        return m_debug;
     }
 
 }

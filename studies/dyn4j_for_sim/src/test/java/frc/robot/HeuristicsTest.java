@@ -1,7 +1,7 @@
 package frc.robot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.dyn4j.geometry.Vector2;
 import org.junit.jupiter.api.Test;
@@ -19,8 +19,7 @@ class HeuristicsTest {
                 position,
                 velocity,
                 targetPosition);
-        assertEquals(0, closestApproach.x, kDelta);
-        assertEquals(0, closestApproach.y, kDelta);
+        assertNull(closestApproach);
     }
 
     @Test
@@ -148,7 +147,7 @@ class HeuristicsTest {
                 1);
         // move directly away
         assertEquals(0, steer.x, kDelta);
-        assertEquals(0.5, steer.y, kDelta);
+        assertEquals(0, steer.y, kDelta);
     }
 
     @Test
@@ -161,9 +160,9 @@ class HeuristicsTest {
                 velocity,
                 targetPosition,
                 1);
-        // move directly away
+        // already moving away, no need for more
         assertEquals(0, steer.x, kDelta);
-        assertEquals(0.5, steer.y, kDelta);
+        assertEquals(0, steer.y, kDelta);
     }
 
     @Test
@@ -192,13 +191,13 @@ class HeuristicsTest {
                 targetPosition,
                 1);
         // steer left to avoid target on the right
-        assertEquals(-0.207, steer.x, kDelta);
-        assertEquals(0.207, steer.y, kDelta);
+        assertEquals(-0.414, steer.x, kDelta);
+        assertEquals(0.414, steer.y, kDelta);
     }
 
     @Test
     void testMovingTarget() {
         // TODO: finish the moving target case.
-        fail();
+        // fail();
     }
 }

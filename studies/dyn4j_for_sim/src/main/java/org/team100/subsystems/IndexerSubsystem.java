@@ -50,7 +50,7 @@ public class IndexerSubsystem extends SubsystemBase {
             if (body instanceof Note) {
                 Vector2 notePosition = body.getWorldCenter();
                 double distance = position.distance(notePosition);
-                if (distance > 0.3)
+                if (distance > 0.5)
                     continue;
 
                 if (((Note) body).isFlying())
