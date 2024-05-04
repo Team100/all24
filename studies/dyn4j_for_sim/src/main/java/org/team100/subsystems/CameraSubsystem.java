@@ -15,7 +15,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /** Makes lists of robots and nearby notes it can see. */
 public class CameraSubsystem extends SubsystemBase {
     /** Ignore note sightings further away than this. */
-    private static final int kMaxNoteDistance = 5;
+    private static final double kMaxNoteDistance = 5;
+    /** Ignore robot sightings further away than this. */
+    private static final double kMaxRobotDistance = 5;
 
     public static record RobotSighting(boolean friend, Translation2d position) {
     }
@@ -26,7 +28,7 @@ public class CameraSubsystem extends SubsystemBase {
     /**
      * how old can sightings be and still be trusted?
      */
-    private static final double kLookbackSec = 0.1;
+    private static final double kLookbackSec = 0.2;
 
     /**
      * Some recent sightings from the camera system, used for robot avoidance and
@@ -62,6 +64,8 @@ public class CameraSubsystem extends SubsystemBase {
      * thread safe), it's here.
      */
     private void lookForRobots() {
+        Vector2 position = m_robotBody.getWorldCenter();
+
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
             if (body == m_robotBody) {
                 // skip ourselves
@@ -73,6 +77,10 @@ public class CameraSubsystem extends SubsystemBase {
             }
             RobotBody robotBody = (RobotBody) body;
             Vector2 targetPosition = robotBody.getWorldCenter();
+            double distance = position.distance(targetPosition);
+            // can't see that far
+            if (distance > kMaxRobotDistance)
+                continue;
             boolean friend = robotBody.friend(m_robotBody);
             addSighting(friend, targetPosition);
         }

@@ -55,14 +55,14 @@ public class DriveToSource extends Command {
         if (m_debug)
             ForceViz.put("desired", pose, desired);
         if (m_debug)
-            System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, m_debug);
+            System.out.printf(" desired %s", desired);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
         if (m_debug)
-            System.out.printf(" tactics v %s", v);
+            System.out.printf(" tactics %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
         if (m_debug)
-            System.out.printf(" final v %s\n", v);
+            System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
 

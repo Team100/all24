@@ -47,15 +47,23 @@ public class Tactics {
     /**
      * Output is clamped to feasible v and omega.
      * 
-     * @param avoidEdges some goals are near the edge, so turn this off.
+     * @param avoidObstacles defenders don't care about obstacles
+     * @param avoidEdges     some goals are near the edge, so turn this off.
+     * @param avoidRobots    defenders don't care about robots
      */
-    public FieldRelativeVelocity apply(FieldRelativeVelocity desired, boolean avoidEdges, boolean avoidRobots,
+    public FieldRelativeVelocity apply(
+            FieldRelativeVelocity desired,
+            boolean avoidObstacles,
+            boolean avoidEdges,
+            boolean avoidRobots,
             boolean debug) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         Pose2d pose = m_drive.getPose();
         // FieldRelativeVelocity velocity = m_drive.getVelocity();
-        v = v.plus(steerAroundObstacles(pose, desired, debug));
-        v = v.plus(obstacleRepulsion(pose, debug));
+        if (avoidObstacles) {
+            v = v.plus(steerAroundObstacles(pose, desired, debug));
+            v = v.plus(obstacleRepulsion(pose, debug));
+        }
         if (avoidEdges)
             v = v.plus(avoidEdges(pose, debug));
         v = v.plus(avoidSubwoofers(pose, debug));

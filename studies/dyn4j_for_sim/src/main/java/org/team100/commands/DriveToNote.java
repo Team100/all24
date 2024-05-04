@@ -53,7 +53,7 @@ public class DriveToNote extends Command {
         if (m_debug)
             System.out.printf(" desire %s", desired);
         // some notes might be near the edge, so turn off edge repulsion.
-        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
         if (m_debug)
             System.out.printf(" tactic %s", v);
         v = v.plus(desired);

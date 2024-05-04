@@ -44,7 +44,7 @@ public class DriveToPass extends Command {
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug);
         if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);

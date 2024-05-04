@@ -137,7 +137,7 @@ public class ScoreDisplay {
                 + blueNotAmpedSpeakers * notAmpedSpeakerPoint
                 + blueAmpedSpeakers * ampedSpeakerPoint;
         final int redTotal = redAmps * ampPoint
-                + redNotAmpedSpeakers * ampedSpeakerPoint
+                + redNotAmpedSpeakers * notAmpedSpeakerPoint
                 + redAmpedSpeakers * ampedSpeakerPoint;
         b.append(kBoldBlue);
         f.format("    %2d   ", blueTotal);

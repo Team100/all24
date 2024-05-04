@@ -24,9 +24,9 @@ public class Red implements Alliance {
     private final Pilot defenseOnly;
 
     public Red(SimWorld world) {
-        Foe scorerBody = new Foe("red scorer", world, true);
+        Foe scorerBody = new Foe("red scorer", world, false);
         scoreAlternator = new Scorer();
-        scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker, true);
+        scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker, false);
         scorer.setState(15, 3, 0, 0);
         world.addBody(scorerBody);
 
@@ -36,9 +36,9 @@ public class Red implements Alliance {
         passer.setState(15, 5, 0, 0);
         world.addBody(red2);
 
-        Foe red3 = new Foe("red defender", world, false);
+        Foe red3 = new Foe("red defender", world, true);
         defenseOnly = new Defender();
-        defender = new PilotAssembly(defenseOnly, red3, kSpeaker, false);
+        defender = new PilotAssembly(defenseOnly, red3, kSpeaker, true);
         defender.setState(13, 7, 0, 0);
         world.addBody(red3);
 
