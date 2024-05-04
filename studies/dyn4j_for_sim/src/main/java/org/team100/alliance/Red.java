@@ -24,15 +24,15 @@ public class Red implements Alliance {
     private final Pilot defenseOnly;
 
     public Red(SimWorld world) {
-        Foe scorerBody = new Foe("red scorer", world, false);
+        Foe scorerBody = new Foe("red scorer", world, true);
         scoreAlternator = new Scorer();
-        scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker, false);
+        scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker, true);
         scorer.setState(15, 3, 0, 0);
         world.addBody(scorerBody);
 
-        Foe red2 = new Foe("red passer", world, false);
+        Foe red2 = new Foe("red passer", world, true);
         passCycler = new Passer();
-        passer = new PilotAssembly(passCycler, red2, kSpeaker, false);
+        passer = new PilotAssembly(passCycler, red2, kSpeaker, true);
         passer.setState(15, 5, 0, 0);
         world.addBody(red2);
 

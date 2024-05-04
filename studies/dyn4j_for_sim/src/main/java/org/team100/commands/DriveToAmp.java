@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -37,19 +38,19 @@ public class DriveToAmp extends Command {
 
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.println("DriveToAmp");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
-        if (m_debug)
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug&& Debug.print());
+        if (m_debug && Debug.print())
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" total v %s", v);
         m_drive.drive(v);
     }
@@ -61,7 +62,7 @@ public class DriveToAmp extends Command {
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf("translation error %5.2f rotation error %5.2f\n",
                     translationError, rotationError);
         return translationError < 0.1

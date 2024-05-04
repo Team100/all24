@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -37,19 +38,19 @@ public class DriveToPass extends Command {
 
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.print("DriveToPass execute");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug);
-        if (m_debug)
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug&& Debug.print());
+        if (m_debug && Debug.print())
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
@@ -67,7 +68,7 @@ public class DriveToPass extends Command {
     /** Proportional feedback with a limiter. */
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_drive.getPose();
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
                     pose.getX(), pose.getY(), m_goal.getX(), m_goal.getY());
 

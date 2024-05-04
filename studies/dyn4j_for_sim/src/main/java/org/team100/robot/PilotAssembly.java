@@ -24,7 +24,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
  */
 public class PilotAssembly extends RobotAssembly {
 
-    public PilotAssembly(Pilot pilot, RobotBody robotBody, Translation2d speakerPosition, boolean debug) {
+    public PilotAssembly(
+            Pilot pilot,
+            RobotBody robotBody,
+            Translation2d speakerPosition,
+            boolean debug) {
         super(robotBody, speakerPosition);
         m_drive.setDefaultCommand(new PilotDrive(m_drive, pilot));
         whileTrue(pilot::driveToSpeaker,
@@ -56,8 +60,9 @@ public class PilotAssembly extends RobotAssembly {
                         new DriveToNote(m_drive, m_camera, debug))
                         .finallyDo(pilot::onEnd));
         // defend never ends
+        // note low defense skill level to try to balance the game
         whileTrue(pilot::defend,
-                new DefendSource(m_drive, m_camera, debug)
+                new DefendSource(0.1, m_drive, m_camera, debug)
                         .finallyDo(pilot::onEnd));
     }
 }

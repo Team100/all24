@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -21,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Never finishes.
  */
 public class DefendSource extends Command {
+    // this is quite low, to try to make the game more balanced: up to 8 works well
+    private static final int kDistanceFromSource = 4;
     // TODO: get these from kinodynamics
     private static final double kMaxVelocity = 5; // m/s
     private static final double kMaxOmega = 10; // rad/s
@@ -34,12 +37,24 @@ public class DefendSource extends Command {
     /** try very hard stay between the opponent and the corner */
     private static final double kCorner = 50;
 
+    /**
+     * it is easy for good defense to shut down the game completely; this discounts
+     * the defense quickness.
+     */
+    private final double m_skill;
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DefendSource(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
+    private int m_pinCounter = 0;
+
+    public DefendSource(
+            double skill,
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
+        m_skill = skill;
         m_drive = drive;
         m_camera = camera;
         m_debug = debug;
@@ -49,12 +64,13 @@ public class DefendSource extends Command {
 
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.print("Defend");
         Pose2d pose = m_drive.getPose();
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
         FieldRelativeVelocity desired = work(
+                m_skill,
                 pose,
                 m_drive.getRobotBody().defenderPosition(),
                 m_drive.getRobotBody().opponentSourcePosition(),
@@ -62,14 +78,14 @@ public class DefendSource extends Command {
                 m_debug);
         if (m_debug)
             ForceViz.put("desired", pose, desired);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false, m_debug);
-        if (m_debug)
+        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false, m_debug && Debug.print());
+        if (m_debug && Debug.print())
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
@@ -78,7 +94,8 @@ public class DefendSource extends Command {
      * If no robots are around, wait near the source. If there is a foe, stay
      * between it and the source. Avoid getting too close to the source.
      */
-    private static FieldRelativeVelocity work(
+    private FieldRelativeVelocity work(
+            double m_skill,
             Pose2d pose,
             Pose2d defenderPosition,
             Pose2d opponentSourcePosition,
@@ -95,21 +112,21 @@ public class DefendSource extends Command {
                 toWaitingSpot.getX(),
                 toWaitingSpot.getY(),
                 0).times(kWaitingAttraction);
-        if (debug)
+        if (debug && Debug.print())
             System.out.printf(" waiting %s", waiting);
         v = v.plus(waiting);
 
         // repel from the corner (1/r), and don't chase opponents, if too close
         // (to avoid fouling)
         FieldRelativeDelta toCorner = FieldRelativeDelta.delta(pose, opponentSourcePosition);
-        if (toCorner.getTranslation().getNorm() < 1.5) {
-            double magnitude = kCornerRepulsion
+        if (toCorner.getTranslation().getNorm() < 2.0) {
+            double magnitude = m_skill * kCornerRepulsion
                     / (toCorner.getTranslation().getNorm() * toCorner.getTranslation().getNorm());
             FieldRelativeVelocity repel = new FieldRelativeVelocity(
                     toCorner.getX(),
                     toCorner.getY(),
                     0).times(magnitude);
-            if (debug)
+            if (debug && Debug.print())
                 System.out.printf(" repel %s", repel);
             // v = v.plus(repel);
             v = repel;
@@ -135,20 +152,31 @@ public class DefendSource extends Command {
                 // don't react to far-away obstacles
                 continue;
             }
+
+            // avoid pinning penalties
+            if (distanceFromMe < 2) {
+                m_pinCounter++;
+                if (m_pinCounter > 150)
+                    m_pinCounter = 0;
+                if (m_pinCounter > 100)
+                    return v;
+
+            }
+
             double distanceFromSource = opponentSourcePosition.getTranslation().getDistance(foe);
-            if (distanceFromSource > 8) {
+            if (distanceFromSource > kDistanceFromSource) {
                 // don't chase it too far
                 continue;
             }
-            if (debug)
+            if (debug && Debug.print())
                 System.out.printf(" foe (%5.2f, %5.2f)", foe.getX(), foe.getY());
             // drive towards the opponent
             Vector2 toOpponent = myPosition.to(
                     new Vector2(foe.getX(), foe.getY()));
             Vector2 force = toOpponent.product(
-                    kDefensePushing / toOpponent.getMagnitudeSquared());
+                    m_skill * kDefensePushing / toOpponent.getMagnitudeSquared());
             FieldRelativeVelocity push = new FieldRelativeVelocity(force.x, force.y, 0);
-            if (debug)
+            if (debug && Debug.print())
                 System.out.printf(" push %s", push);
             // v = v.plus(push);
             v = push;
@@ -158,8 +186,10 @@ public class DefendSource extends Command {
             Translation2d sourceToMe = pose.getTranslation().minus(opponentSourcePosition.getTranslation());
             sourceToMe = sourceToMe.div(sourceToMe.getNorm());
             Translation2d toFoe = sourceToFoe.minus(sourceToMe);
-            FieldRelativeVelocity corner = new FieldRelativeVelocity(toFoe.getX() * kCorner, toFoe.getY() * kCorner, 0);
-            if (debug)
+            FieldRelativeVelocity corner = new FieldRelativeVelocity(
+                    toFoe.getX() * m_skill * kCorner,
+                    toFoe.getY() * m_skill * kCorner, 0);
+            if (debug && Debug.print())
                 System.out.printf(" corner %s", corner);
             v = v.plus(corner);
 

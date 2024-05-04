@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -46,22 +47,22 @@ public class DriveToSource extends Command {
 
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.print("DriveToSource");
         Pose2d pose = m_drive.getPose();
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
         FieldRelativeVelocity desired = goToGoal(pose);
         if (m_debug)
             ForceViz.put("desired", pose, desired);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
-        if (m_debug)
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug&& Debug.print());
+        if (m_debug && Debug.print())
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }

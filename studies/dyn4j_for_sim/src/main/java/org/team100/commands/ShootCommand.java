@@ -1,5 +1,6 @@
 package org.team100.commands;
 
+import org.team100.Debug;
 import org.team100.subsystems.IndexerSubsystem;
 import org.team100.subsystems.ShooterSubsystem;
 
@@ -25,7 +26,7 @@ public class ShootCommand extends Command {
      */
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.print("ShootCommand\n");
         // stash the note in the assembly handoff
         if (!m_indexer.towardsShooter()) {

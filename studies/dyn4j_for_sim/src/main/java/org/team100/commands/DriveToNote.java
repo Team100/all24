@@ -4,6 +4,7 @@ import java.util.NavigableMap;
 import java.util.Map.Entry;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
@@ -45,20 +46,20 @@ public class DriveToNote extends Command {
 
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.print("DriveToNote");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" desire %s", desired);
         // some notes might be near the edge, so turn off edge repulsion.
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
-        if (m_debug)
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug&& Debug.print());
+        if (m_debug && Debug.print())
             System.out.printf(" tactic %s", v);
         v = v.plus(desired);
         v = v.clamp(kMaxVelocity, kMaxOmega);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
@@ -94,7 +95,7 @@ public class DriveToNote extends Command {
         // found a target
         // TODO: something about rotation
 
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
                     pose.getX(), pose.getY(), target.getX(), target.getY());
 

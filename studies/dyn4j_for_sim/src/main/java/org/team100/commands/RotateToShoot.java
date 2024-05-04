@@ -1,5 +1,6 @@
 package org.team100.commands;
 
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.subsystems.DriveSubsystem;
 
@@ -35,23 +36,23 @@ public class RotateToShoot extends Command {
 
     @Override
     public void execute() {
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.print("RotateToShoot");
         FieldRelativeVelocity goalVelocity = new FieldRelativeVelocity(0, 0, 0);
         FieldRelativeVelocity velocityError = goalVelocity.minus(m_drive.getVelocity());
         FieldRelativeVelocity velocityFeedback = velocityError.times(kVelocityP, kOmegaP);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" v_FB %s", velocityFeedback);
 
         Pose2d pose = m_drive.getPose();
         double goalAngle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double angularError = MathUtil.angleModulus(goalAngle - pose.getRotation().getRadians());
         FieldRelativeVelocity angularFeedback = new FieldRelativeVelocity(0, 0, angularError * kAngularP);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" a_FB %s", angularFeedback);
 
         FieldRelativeVelocity v = velocityFeedback.plus(angularFeedback).clamp(kMaxVelocity, kMaxOmega);
-        if (m_debug)
+        if (m_debug && Debug.print())
             System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
