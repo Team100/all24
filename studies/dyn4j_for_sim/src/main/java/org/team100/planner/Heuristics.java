@@ -1,4 +1,4 @@
-package org.team100.sim;
+package org.team100.planner;
 
 import org.dyn4j.geometry.Vector2;
 

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.dyn4j.geometry.Vector2;
 import org.junit.jupiter.api.Test;
-import org.team100.sim.Heuristics;
+import org.team100.planner.Heuristics;
 
 class HeuristicsTest {
     private static final double kDelta = 0.001;
