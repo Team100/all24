@@ -2,6 +2,7 @@ package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -14,9 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** TODO: extract a "drive to X" command */
 public class DriveToAmp extends Command {
-    // TODO: get these from kinodynamics
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
     private static final int kAngularP = 10;
     private static final int kCartesianP = 5;
     private final DriveSubsystem m_drive;
@@ -45,11 +43,11 @@ public class DriveToAmp extends Command {
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug && Debug.print())
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug&& Debug.print());
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug && Debug.print());
         if (m_debug && Debug.print())
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
-        v = v.clamp(kMaxVelocity, kMaxOmega);
+        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         if (m_debug && Debug.print())
             System.out.printf(" total v %s", v);
         m_drive.drive(v);
@@ -78,6 +76,7 @@ public class DriveToAmp extends Command {
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB).clamp(kMaxVelocity, kMaxOmega);
+        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB)
+                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
     }
 }

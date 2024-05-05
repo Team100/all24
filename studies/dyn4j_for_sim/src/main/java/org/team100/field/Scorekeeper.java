@@ -26,8 +26,6 @@ import edu.wpi.first.wpilibj.Timer;
  * Removes bodies that leave the field -- this happens in the "end" step
  * listener method to avoid mutating the world at the wrong time.
  * 
- * TODO: add amp scoring
- * TODO: add amplification
  * TODO: add fouls
  */
 public class Scorekeeper
