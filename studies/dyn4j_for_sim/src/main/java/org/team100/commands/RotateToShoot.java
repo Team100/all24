@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import org.team100.Debug;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.subsystems.DriveSubsystem;
 
@@ -15,9 +16,6 @@ import edu.wpi.first.wpilibj2.command.Command;
  * TODO: make a shoot-on-the-move command
  */
 public class RotateToShoot extends Command {
-    // TODO: get these from kinodynamics
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
     private static final double kAngleTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
     private static final double kAngularP = 10;
@@ -51,7 +49,8 @@ public class RotateToShoot extends Command {
         if (m_debug && Debug.print())
             System.out.printf(" a_FB %s", angularFeedback);
 
-        FieldRelativeVelocity v = velocityFeedback.plus(angularFeedback).clamp(kMaxVelocity, kMaxOmega);
+        FieldRelativeVelocity v = velocityFeedback.plus(angularFeedback)
+                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         if (m_debug && Debug.print())
             System.out.printf(" final v %s\n", v);
         m_drive.drive(v);

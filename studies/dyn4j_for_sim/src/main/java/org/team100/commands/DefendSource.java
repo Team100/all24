@@ -5,6 +5,7 @@ import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -24,9 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DefendSource extends Command {
     // this is quite low, to try to make the game more balanced: up to 8 works well
     private static final int kDistanceFromSource = 4;
-    // TODO: get these from kinodynamics
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
 
     /** push towards the opponent */
     private static final double kDefensePushing = 5;
@@ -84,7 +82,7 @@ public class DefendSource extends Command {
         if (m_debug && Debug.print())
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
-        v = v.clamp(kMaxVelocity, kMaxOmega);
+        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);

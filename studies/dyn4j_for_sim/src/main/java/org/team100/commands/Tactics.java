@@ -8,6 +8,7 @@ import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.field.FieldMap;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.sim.Heuristics;
@@ -25,9 +26,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  * gravity or electrostatics in two dimensions.
  */
 public class Tactics {
-    // TODO: get these from kinodynamics
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
     private static final double kRobotRepulsion = 5;
     private static final double kRobotSteer = 20;
     private static final double kSubwooferRepulsion = 5;
@@ -72,7 +70,7 @@ public class Tactics {
             v = v.plus(steerAroundRobots(pose, desired, recentSightings, debug));
             v = v.plus(robotRepulsion(pose, desired, recentSightings, debug));
         }
-        v = v.clamp(kMaxVelocity, kMaxOmega);
+        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         return v;
     }
 

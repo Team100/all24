@@ -58,8 +58,7 @@ class HeuristicsTest {
                 velocity,
                 targetPosition);
         // target is behind, closest approach is where we are now
-        assertEquals(0, closestApproach.x, kDelta);
-        assertEquals(0, closestApproach.y, kDelta);
+        assertNull(closestApproach);
     }
 
     @Test

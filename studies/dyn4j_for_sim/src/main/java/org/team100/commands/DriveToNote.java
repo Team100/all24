@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
@@ -23,9 +24,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToNote extends Command {
     /** Ignore notes further than this. Note the camera has a limit too. */
     private static final int kMaxNoteDistance = 5;
-    // TODO: get these from kinodynamics
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
     private static final int kCartesianP = 5;
 
     private final DriveSubsystem m_drive;
@@ -54,11 +52,11 @@ public class DriveToNote extends Command {
         if (m_debug && Debug.print())
             System.out.printf(" desire %s", desired);
         // some notes might be near the edge, so turn off edge repulsion.
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug&& Debug.print());
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug && Debug.print());
         if (m_debug && Debug.print())
             System.out.printf(" tactic %s", v);
         v = v.plus(desired);
-        v = v.clamp(kMaxVelocity, kMaxOmega);
+        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
@@ -101,7 +99,8 @@ public class DriveToNote extends Command {
 
         Vector2 positionError = new Vector2(closest.getX(), closest.getY());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, 0).clamp(kMaxVelocity, kMaxOmega);
+        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, 0)
+                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
     }
 
 }

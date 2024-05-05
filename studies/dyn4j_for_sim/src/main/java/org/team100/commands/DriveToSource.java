@@ -2,6 +2,7 @@ package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -23,9 +24,6 @@ public class DriveToSource extends Command {
     private static final int kVelocityTolerance = 5;
     /** Get close enough for the camera to see. */
     private static final double kCartesianTolerance = 2.5;
-    // TODO: get these from kinodynamics
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
     private static final int kAngularP = 10;
     private static final int kCartesianP = 5;
     private final DriveSubsystem m_drive;
@@ -61,7 +59,7 @@ public class DriveToSource extends Command {
         if (m_debug && Debug.print())
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
-        v = v.clamp(kMaxVelocity, kMaxOmega);
+        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
@@ -86,7 +84,7 @@ public class DriveToSource extends Command {
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
         return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB)
-                .clamp(kMaxVelocity, kMaxOmega);
+                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
     }
 
 }
