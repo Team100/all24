@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * 
  * Friends should have human-readable names.
  * 
- * TODO: add two kinds of scoring
  * TODO: coordinate "lanes" among alliance-mates
  * TODO: spin away if close to an opponent
  */

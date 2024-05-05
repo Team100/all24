@@ -204,9 +204,8 @@ public class SimWorld {
                                 new Vector2(16.541, 1.1),
                                 new Vector2(14.7, 0)),
                         1.695));
-        // TODO: something about the subwoofer vertical shape
-        // extends way past the boundary so that notes won't get stuck between the wall
-        // and subwoofer.
+        // Subwoofer extends way past the boundary so that notes won't get stuck between
+        // the wall and subwoofer.
         world.addBody(
                 new Wall("blue subwoofer",
                         Geometry.createPolygon(
@@ -279,7 +278,6 @@ public class SimWorld {
                         ampHeight));
 
         // TODO: add amp wall
-        // TODO: add scoring sensors
     }
 
     private void setUpStages() {
@@ -290,7 +288,6 @@ public class SimWorld {
             Pose2d pose = post.getValue();
             addPost(name, pose.getX(), pose.getY(), pose.getRotation().getRadians());
         }
-        // TODO: add stage body
     }
 
     private void addPost(String id, double x, double y, double rad) {

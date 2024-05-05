@@ -135,8 +135,6 @@ public class DefendSource extends Command {
             System.out.print(" too far");
             return v;
         }
-        //
-        // TODO: if there's an opponent nearby, stay between it and the corner.
         for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
             RobotSighting mostRecentSighting = mostRecent.getValue();
             // don't try to defend friends
