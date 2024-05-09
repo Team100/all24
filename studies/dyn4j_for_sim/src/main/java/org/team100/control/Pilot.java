@@ -51,6 +51,10 @@ public interface Pilot {
         return false;
     }
 
+    default boolean driveToNote() {
+        return false;
+    }
+
     default boolean shootCommand() {
         return false;
     }

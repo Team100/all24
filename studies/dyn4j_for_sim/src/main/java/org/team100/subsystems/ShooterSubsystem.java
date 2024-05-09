@@ -33,6 +33,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
     private final Translation2d m_speakerPosition;
+    private final boolean m_debug;
     /** range (meters): pitch (radians) */
     private final InterpolatingDoubleTreeMap shooterMap;
 
@@ -45,16 +46,19 @@ public class ShooterSubsystem extends SubsystemBase {
     public ShooterSubsystem(
             RobotAssembly assembly,
             RobotBody robotBody,
-            Translation2d speakerPosition) {
+            Translation2d speakerPosition,
+            boolean debug) {
         m_assembly = assembly;
         m_robotBody = robotBody;
         m_speakerPosition = speakerPosition;
+        m_debug = debug;
         shooterMap = new InterpolatingDoubleTreeMap();
         populateShooterMap();
     }
 
     public void shoot() {
-        System.out.println("shoot");
+        if (m_debug)
+            System.out.println("shoot");
         double rangeM = m_robotBody.getPose().getTranslation().getDistance(m_speakerPosition);
         double elevationRad = shooterMap.get(rangeM);
         printShot(rangeM, elevationRad);
@@ -62,12 +66,14 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void lob() {
-        System.out.println("lob");
+        if (m_debug)
+            System.out.println("lob");
         shooter(kLobImpulseNs, kLobElevationRad);
     }
 
     public void amp() {
-        System.out.println("amp");
+        if (m_debug)
+            System.out.println("amp");
         shooter(kAmpImpulseNs, kAmpElevationRad);
     }
 
@@ -77,7 +83,9 @@ public class ShooterSubsystem extends SubsystemBase {
     private void printShot(double range, double elevationRad) {
         if (m_assembly.m_indexerShooterHandoff == null)
             return;
-        System.out.printf("shoot range %5.3f elevation %5.3f\n", range, elevationRad);
+        if (m_debug)
+            System.out.printf("shoot %s range %5.3f elevation %5.3f\n",
+                    m_assembly.m_indexerShooterHandoff, range, elevationRad);
     }
 
     /**
@@ -86,10 +94,12 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     private void shooter(double impulseNs, double elevationRad) {
         if (m_assembly.m_indexerShooterHandoff == null) {
-            System.out.println("Shooter received no note!");
+            if (m_debug)
+                System.out.println("Shooter received no note!");
             return;
         }
-        System.out.println("shooting note " + m_assembly.m_indexerShooterHandoff.getUserData());
+        if (m_debug)
+            System.out.println("shooting note " + m_assembly.m_indexerShooterHandoff.getUserData());
         double yawRad = m_robotBody.getPose().getRotation().getRadians();
         Rotation3d rot3d = new Rotation3d(0, elevationRad, yawRad);
         Translation3d impulse3d = new Translation3d(impulseNs, rot3d);
@@ -104,20 +114,21 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     private void populateShooterMap() {
         shooterMap.put(0.0, -1.571); // pi/2
-        shooterMap.put(0.5, -1.400);
-        shooterMap.put(1.0, -1.240); // 1.29 is min feasible range
-        shooterMap.put(1.5, -1.070);
-        shooterMap.put(2.0, -0.930);
-        shooterMap.put(2.5, -0.800);
-        shooterMap.put(3.0, -0.700);
-        shooterMap.put(3.5, -0.640);
-        shooterMap.put(4.0, -0.590);
-        shooterMap.put(4.5, -0.540);
-        shooterMap.put(5.0, -0.500);
-        shooterMap.put(5.5, -0.460);
-        shooterMap.put(6.0, -0.435);
-        shooterMap.put(6.5, -0.415);
-        shooterMap.put(7.0, -0.400); // beyond max feasible range
+        shooterMap.put(0.5, -1.390);
+        shooterMap.put(1.0, -1.220); // 1.29 is min feasible range
+        shooterMap.put(1.5, -1.050);
+        shooterMap.put(2.0, -0.880);
+        shooterMap.put(2.5, -0.720);
+        shooterMap.put(3.0, -0.600);
+        shooterMap.put(3.5, -0.520);
+        shooterMap.put(4.0, -0.460);
+        shooterMap.put(4.5, -0.420);
+        shooterMap.put(5.0, -0.400);
+        shooterMap.put(5.5, -0.380);
+        shooterMap.put(6.0, -0.360);
+        shooterMap.put(6.5, -0.350);
+        shooterMap.put(7.0, -0.340);
+        shooterMap.put(7.5, -0.330); // beyond max feasible range
     }
 
 }

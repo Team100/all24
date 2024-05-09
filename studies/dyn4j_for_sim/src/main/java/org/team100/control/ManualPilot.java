@@ -1,21 +1,20 @@
 package org.team100.control;
 
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.wpilibj.XboxController;
 
 /** A human driver/operator */
 public class ManualPilot implements Pilot {
-    private static final double kMaxVelocity = 5;
-    private static final double kMaxOmega = 10;
     private final XboxController m_controller = new XboxController(0);
 
     @Override
     public FieldRelativeVelocity driveVelocity() {
         return new FieldRelativeVelocity(
-                -m_controller.getRightY() * kMaxVelocity, // axis 5
-                -m_controller.getRightX() * kMaxVelocity, // axis 4
-                -m_controller.getLeftX() * kMaxOmega); // axis 0
+                -m_controller.getRightY() * Kinodynamics.kMaxVelocity, // axis 5
+                -m_controller.getRightX() * Kinodynamics.kMaxVelocity, // axis 4
+                -m_controller.getLeftX() * Kinodynamics.kMaxOmega); // axis 0
     }
 
     @Override
@@ -75,13 +74,16 @@ public class ManualPilot implements Pilot {
 
     @Override
     public void onEnd() {
+        //
     }
 
     @Override
     public void begin() {
+        //
     }
 
     @Override
     public void reset() {
+        //
     }
 }

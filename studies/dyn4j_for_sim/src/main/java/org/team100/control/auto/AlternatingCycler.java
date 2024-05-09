@@ -104,5 +104,6 @@ public class AlternatingCycler implements Autopilot {
 
     @Override
     public void periodic() {
+        //
     }
 }
