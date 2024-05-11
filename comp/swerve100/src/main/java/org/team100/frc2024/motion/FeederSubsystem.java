@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion;
 
+import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry;
@@ -16,8 +17,8 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final PWM feedRoller;
-
-    public FeederSubsystem() {
+    private final SensorInterface m_sensors;
+    public FeederSubsystem(SensorInterface sensors) {
         m_name = Names.name(this);
         switch (Identity.instance) {
             case COMP_BOT:
@@ -27,6 +28,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
             default:
                 feedRoller = new PWM(3);
         }
+        m_sensors = sensors;
     }
 
     public void starve() {
@@ -39,6 +41,12 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
     public void intake() {
         feedRoller.setSpeed(0.5);
+    }
+
+    public void intakeSmart() {
+        if (m_sensors.getFeederSensor()) {
+            feedRoller.setSpeed(0.5);
+        }
     }
 
     public void outtake() {

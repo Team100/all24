@@ -28,7 +28,7 @@ public class RunIntakeAndAmpFeeder extends Command {
 
     @Override
     public void execute() {
-        m_feeder.intake();
+        m_feeder.intakeSmart();
         m_intake.intakeSmart();
         m_ampFeeder.intake();
     }
