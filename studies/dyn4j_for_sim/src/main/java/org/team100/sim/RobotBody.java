@@ -1,5 +1,6 @@
 package org.team100.sim;
 
+
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
@@ -18,8 +19,8 @@ public abstract class RobotBody extends Body100 {
 
     private final SimWorld m_world;
 
-    protected RobotBody(String id, SimWorld world) {
-        super(id);
+    protected RobotBody(String id, SimWorld world, boolean debug) {
+        super(id, debug);
         m_world = world;
 
         // about 30 inches including bumpers == 24 inch frame
@@ -42,6 +43,13 @@ public abstract class RobotBody extends Body100 {
 
     public String getName() {
         return m_id;
+    }
+
+    /**
+     * The only joint used for a RobotBody is to a note in the indexer.
+     */
+    public boolean carryingNote() {        
+        return getWorld().getJointCount(this) > 0;
     }
 
     public abstract boolean friend(RobotBody body);

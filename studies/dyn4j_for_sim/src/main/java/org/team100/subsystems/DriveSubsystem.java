@@ -2,6 +2,7 @@ package org.team100.subsystems;
 
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Vector2;
+import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.RobotBody;
@@ -12,15 +13,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Contains the sim body. */
 public class DriveSubsystem extends SubsystemBase {
-    private static final double kMaxVelocity = 5; // m/s
-    private static final double kMaxOmega = 10; // rad/s
     private static final double kMaxAccel = 10; // m/s/s
     private static final double kMaxAlpha = 10; // rad/s/s
     private final RobotBody m_robotBody;
     private final double massKg;
     private final double inertia;
     private long timeMicros;
-
 
     public DriveSubsystem(RobotBody robotBody) {
         m_robotBody = robotBody;
@@ -45,7 +43,16 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void drive(FieldRelativeVelocity setpoint) {
-        setpoint = setpoint.clamp(kMaxVelocity, kMaxOmega);
+        // please provide feasible inputs
+        if (setpoint.x() > Kinodynamics.kMaxVelocity) {
+            System.out.printf("x over max %5.3f\n", setpoint.x());
+            new Exception().printStackTrace();
+        }
+        if (setpoint.y() > Kinodynamics.kMaxVelocity) {
+            System.out.printf("y over max %5.3f\n", setpoint.y());
+            new Exception().printStackTrace();
+        }
+        setpoint = setpoint.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
         long nowMicros = RobotController.getFPGATime();
         double dtSec = (double) (nowMicros - timeMicros) / 1000000;
         timeMicros = nowMicros;

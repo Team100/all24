@@ -12,8 +12,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/** This is a subsystem in order to get periodic(). */
+/** Makes lists of robots and nearby notes it can see. */
 public class CameraSubsystem extends SubsystemBase {
+    /** Ignore note sightings further away than this. */
+    private static final double kMaxNoteDistance = 5;
+    /** Ignore robot sightings further away than this. */
+    private static final double kMaxRobotDistance = 5;
+
     public static record RobotSighting(boolean friend, Translation2d position) {
     }
 
@@ -23,7 +28,7 @@ public class CameraSubsystem extends SubsystemBase {
     /**
      * how old can sightings be and still be trusted?
      */
-    private static final double kLookbackSec = 0.1;
+    private static final double kLookbackSec = 0.2;
 
     /**
      * Some recent sightings from the camera system, used for robot avoidance and
@@ -59,6 +64,8 @@ public class CameraSubsystem extends SubsystemBase {
      * thread safe), it's here.
      */
     private void lookForRobots() {
+        Vector2 position = m_robotBody.getWorldCenter();
+
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
             if (body == m_robotBody) {
                 // skip ourselves
@@ -70,6 +77,10 @@ public class CameraSubsystem extends SubsystemBase {
             }
             RobotBody robotBody = (RobotBody) body;
             Vector2 targetPosition = robotBody.getWorldCenter();
+            double distance = position.distance(targetPosition);
+            // can't see that far
+            if (distance > kMaxRobotDistance)
+                continue;
             boolean friend = robotBody.friend(m_robotBody);
             addSighting(friend, targetPosition);
         }
@@ -84,10 +95,14 @@ public class CameraSubsystem extends SubsystemBase {
         // look for nearby notes, brute force
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
             if (body instanceof Note) {
+                if (!((Note) body).isVisible()) {
+                    // ignore notes carried by other robots, or flying through the air.
+                    continue;
+                }
                 Vector2 notePosition = body.getWorldCenter();
                 double distance = position.distance(notePosition);
                 // can't see that far
-                if (distance > 5)
+                if (distance > kMaxNoteDistance)
                     continue;
                 double now = Timer.getFPGATimestamp();
                 NoteSighting sighting = new NoteSighting(
@@ -115,5 +130,9 @@ public class CameraSubsystem extends SubsystemBase {
 
     public NavigableMap<Double, RobotSighting> recentSightings() {
         return sightings.descendingMap();
+    }
+
+    public NavigableMap<Double, NoteSighting> recentNoteSightings() {
+        return noteSightings.descendingMap();
     }
 }

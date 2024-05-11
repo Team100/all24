@@ -17,6 +17,8 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
+import edu.wpi.first.wpilibj.Timer;
+
 /**
  * Uses a CollisionListener to catch the collision event between notes and
  * speakers, and prints the updated score.
@@ -24,8 +26,7 @@ import org.team100.sim.Speaker;
  * Removes bodies that leave the field -- this happens in the "end" step
  * listener method to avoid mutating the world at the wrong time.
  * 
- * TODO: add amp scoring
- * TODO: add amplification
+ * TODO: add fouls
  */
 public class Scorekeeper
         implements CollisionListener<Body100, BodyFixture>,
@@ -36,16 +37,32 @@ public class Scorekeeper
     private final Speaker m_redSpeaker;
     private final AmpPocket m_blueAmp;
     private final AmpPocket m_redAmp;
+    private final boolean m_debug;
     private final Set<Body100> m_doomed;
 
-    private int m_blueScore;
-    private int m_redScore;
+    private final Score m_blue;
+    private final Score m_red;
 
-    public Scorekeeper(Speaker blue, Speaker red, AmpPocket blueAmp, AmpPocket redAmp) {
+    private Double m_blueAmpTime = null;
+    private Double m_redAmpTime = null;
+    private int m_blueAmplifiedCount = 0;
+    private int m_redAmplifiedCount = 0;
+
+    public Scorekeeper(
+            Speaker blue,
+            Speaker red,
+            AmpPocket blueAmp,
+            AmpPocket redAmp,
+            boolean debug,
+            Score blueScore,
+            Score redScore) {
         m_blueSpeaker = blue;
         m_redSpeaker = red;
         m_blueAmp = blueAmp;
         m_redAmp = redAmp;
+        m_debug = debug;
+        m_blue = blueScore;
+        m_red = redScore;
         m_doomed = new HashSet<>();
     }
 
@@ -63,30 +80,37 @@ public class Scorekeeper
             double maxSpeed) {
         if (maybeNote instanceof Note && maybeSpeaker == sensor) {
 
-            Note n = (Note) maybeNote;
-            if (n.scored) {
+            Note note = (Note) maybeNote;
+            if (note.scored) {
                 // don't double count, don't eject after scoring
                 return false;
             }
-            System.out.printf("sensor extent %s note extent %s\n",
-                    sensor.getVerticalExtent(),
-                    maybeNote.getVerticalExtent());
+            if (m_debug)
+                System.out.printf("sensor extent %s note extent %s\n",
+                        sensor.getVerticalExtent(),
+                        maybeNote.getVerticalExtent());
             if (!sensor.getVerticalExtent().contains(maybeNote.getVerticalExtent())) {
+                if (m_debug) {
+                    System.out.println("sensor does not contain note");
+                }
                 // bounce out if note is not completely contained by the sensor.
                 return true;
             }
 
-            double speed = n.getLinearVelocity().getMagnitude();
+            double speed = note.getLinearVelocity().getMagnitude();
             if (speed > maxSpeed) {
+                if (m_debug) {
+                    System.out.println("Speed is higher than max");
+                }
                 // bounce out
                 return true;
             }
-            n.scored = true;
+            note.scored = true;
             // scored notes leave the field
-            m_doomed.add(n);
-            System.out.printf("center %s altitude %5.3f\n", n.getWorldCenter(), n.getAltitude());
+            m_doomed.add(note);
+            if (m_debug)
+                System.out.printf("scored!  center %s altitude %5.3f\n", note.getWorldCenter(), note.getAltitude());
             handler.run();
-            printScore();
             return false;
         }
         return true;
@@ -107,14 +131,73 @@ public class Scorekeeper
         Body100 b1 = collision.getBody1();
         Body100 b2 = collision.getBody2();
 
-        return tryScore(b1, b2, m_redSpeaker, () -> m_redScore++, Double.MAX_VALUE)
-                && tryScore(b1, b2, m_blueSpeaker, () -> m_blueScore++, Double.MAX_VALUE)
-                && tryScore(b1, b2, m_redAmp, () -> m_redScore++, 0.4)
-                && tryScore(b1, b2, m_blueAmp, () -> m_blueScore++, 0.4);
+        // does not respect amplification.
+
+        return tryScore(b1, b2, m_redSpeaker, this::scoreRedSpeaker, Double.MAX_VALUE)
+                && tryScore(b1, b2, m_blueSpeaker, this::scoreBlueSpeaker, Double.MAX_VALUE)
+                && tryScore(b1, b2, m_redAmp, this::scoreRedAmp, 0.4)
+                && tryScore(b1, b2, m_blueAmp, this::scoreBlueAmp, 0.4);
     }
 
-    private void printScore() {
-        System.out.printf("Blue %d Red %d\n", m_blueScore, m_redScore);
+    private void scoreBlueAmp() {
+        m_blue.TeleopAmpNoteCount++;
+        if (m_blue.TeleopAmpNoteCount - m_blueAmplifiedCount >= 2) {
+            // time to amplify
+            m_blueAmpTime = Timer.getFPGATimestamp();
+            m_blueAmplifiedCount = m_blue.TeleopAmpNoteCount;
+        }
+    }
+
+    private void scoreRedAmp() {
+        m_red.TeleopAmpNoteCount++;
+        if (m_red.TeleopAmpNoteCount - m_redAmplifiedCount >= 2) {
+            // time to amplify
+            m_redAmpTime = Timer.getFPGATimestamp();
+            m_redAmplifiedCount = m_red.TeleopAmpNoteCount;
+        }
+    }
+
+    private void scoreBlueSpeaker() {
+        if (m_blueAmpTime != null) {
+            // amplified
+            m_blue.TeleopSpeakerNoteCountAmplified++;
+        } else {
+            m_blue.TeleopSpeakerNoteCountNotAmplified++;
+        }
+    }
+
+    private void scoreRedSpeaker() {
+        if (m_redAmpTime != null) {
+            // amplified
+            m_red.TeleopSpeakerNoteCountAmplified++;
+        } else {
+            m_red.TeleopSpeakerNoteCountNotAmplified++;
+        }
+    }
+
+    public double redAmplified() {
+        if (m_redAmpTime == null)
+            return 0;
+        double elapsedTime = Timer.getFPGATimestamp() - m_redAmpTime;
+        double timeRemaining = 10 - elapsedTime;
+        if (timeRemaining < 0) {
+            m_redAmpTime = null;
+            return 0;
+        }
+        return timeRemaining;
+    }
+
+    public double blueAmplified() {
+        if (m_blueAmpTime == null)
+            return 0;
+        double elapsedTime = Timer.getFPGATimestamp() - m_blueAmpTime;
+        double timeRemaining = 10 - elapsedTime;
+        if (timeRemaining < 0) {
+            m_blueAmpTime = null;
+            return 0;
+        }
+        return timeRemaining;
+
     }
 
     @Override
@@ -150,6 +233,9 @@ public class Scorekeeper
      */
     @Override
     public void outside(Body100 body) {
+        if (m_debug) {
+            System.out.println("outside");
+        }
         m_doomed.add(body);
     }
 
