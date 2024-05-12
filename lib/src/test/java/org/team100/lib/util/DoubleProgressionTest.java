@@ -19,7 +19,7 @@ class DoubleProgressionTest {
 
     @Test
     void testFromClosedInterval() {
-        DoubleProgression p =  DoubleProgression.fromClosedInterval(1, 2, 9);
+        DoubleProgression p = DoubleProgression.fromClosedInterval(1, 2, 9);
         assertEquals(9, p.size());
         assertEquals(1.5, p.get(4), kDelta);
     }
