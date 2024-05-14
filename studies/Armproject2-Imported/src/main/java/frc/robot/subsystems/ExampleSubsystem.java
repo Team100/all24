@@ -137,12 +137,12 @@ public class ExampleSubsystem extends SubsystemBase {
 
   public Command setCartesian(Translation2d point) {
     ArmAngles angles = m_kinematics.inverse(point);
-    double lowerServoTheta = (angles.th1 + Math.PI/2) / (Math.PI);
-    double upperServoTheta = angles.th2 / (Math.PI);
+    double lowerServoTheta = (9*(angles.th1 + Math.PI/2) / (10*Math.PI)) + 0.05;
+    double upperServoTheta = angles.th2 / Math.PI;
     return run(
         () -> {
-          m_upperArm.set(upperServoTheta);
-          m_lowerArm.set(lowerServoTheta);
+          m_upperArm.set(0.05);
+          m_lowerArm.set(0.5);
           /* one-time action goes here */
         });
   }
