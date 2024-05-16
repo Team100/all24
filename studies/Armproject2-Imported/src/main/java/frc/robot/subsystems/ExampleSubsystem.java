@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -137,12 +138,23 @@ public class ExampleSubsystem extends SubsystemBase {
 
   public Command setCartesian(Translation2d point) {
     ArmAngles angles = m_kinematics.inverse(point);
+    double th2 = Math.PI - angles.th2;
+    double th1 = Math.PI - angles.th1;
+    double theta2 = th2 - th1;
+    double newtheta = MathUtil.angleModulus(theta2);
+    if (newtheta>0) {
+      throw new UnsupportedOperationException("This is outside the range of this arm. Ha Ha.");
+    }
     double lowerServoTheta = (9*(angles.th1 + Math.PI/2) / (10*Math.PI)) + 0.05;
-    double upperServoTheta = angles.th2 / Math.PI;
+    double upperServoTheta = (-1*newtheta / Math.PI) + 0.03;
     return run(
         () -> {
-          m_upperArm.set(0.05);
-          m_lowerArm.set(0.5);
+          System.out.println(angles);
+          System.out.println(upperServoTheta);
+          System.out.println("Upper Arm: " +th2);
+          System.out.println("Lower Arm: " +th1);
+          m_upperArm.set(upperServoTheta);
+          m_lowerArm.set(lowerServoTheta);
           /* one-time action goes here */
         });
   }

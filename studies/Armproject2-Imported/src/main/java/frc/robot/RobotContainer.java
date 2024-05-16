@@ -34,8 +34,8 @@ public class RobotContainer {
     configureBindings();
   }
   public void robotPeriodic() {
-    System.out.println("Lower arm" + m_exampleSubsystem.getEncoder(Servos.LOWER_ARM));
-    System.out.println("Upper arm" + m_exampleSubsystem.getEncoder(Servos.UPPER_ARM));
+   // System.out.println("Lower arm" + m_exampleSubsystem.getEncoder(Servos.LOWER_ARM));
+   // System.out.println("Upper arm" + m_exampleSubsystem.getEncoder(Servos.UPPER_ARM));
   }
   private final CommandXboxController m_operatorController =
       new CommandXboxController(OperatorConstants.nDriverControllerPort);
@@ -73,7 +73,7 @@ public class RobotContainer {
     m_operatorController.rightBumper().whileTrue(m_exampleSubsystem.HisMethodCommand(0.01));
     m_operatorController.leftBumper().whileTrue(m_exampleSubsystem.HisMethodCommand(-0.01));
     m_operatorController.povDown().whileTrue(m_exampleSubsystem.BestMethodCommand());
-    m_driverController.x().whileTrue(m_exampleSubsystem.setCartesian(new Translation2d(0.2,0.2)));
+    m_driverController.x().whileTrue(m_exampleSubsystem.setCartesian(new Translation2d(0,0.3)));
   }
 
   /**
