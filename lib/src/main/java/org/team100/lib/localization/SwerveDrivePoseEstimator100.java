@@ -193,7 +193,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         new SwerveState(newPose, sample.m_state.velocity(), sample.m_state.acceleration()),
                         sample.m_gyroAngle,
                         sample.m_wheelPositions));
-
         // Step 7: Replay odometry inputs between sample time and latest recorded sample
         // to update the pose buffer and correct odometry.
         // note exclusive tailmap, don't need to reprocess the entry we just put there.

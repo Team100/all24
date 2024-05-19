@@ -46,6 +46,7 @@ import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
+import org.team100.lib.localization.CameraUpdater;
 import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
@@ -91,7 +92,7 @@ public class RobotContainer implements Glassy {
     private final SelfTestRunner m_selfTest;
     private final Shooter m_shooter;
     private final String m_name;
-
+    private final CameraUpdater cameraUpdater;
     final SwerveDriveSubsystem m_drive;
     final AmpFeeder m_ampFeeder;
     final AmpPivot m_ampPivot;
@@ -151,8 +152,9 @@ public class RobotContainer implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
+        cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
 
-        final FeederSubsystem m_feeder = new FeederSubsystem();
+        final FeederSubsystem m_feeder = new FeederSubsystem(m_sensors);
 
         final Intake m_intake = new Intake(m_sensors);
 
@@ -392,6 +394,9 @@ public class RobotContainer implements Glassy {
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
+    public void beforeCommandCycle() {
+        // ModeSelector.selectMode(operatorControl::pov);
+    }
     public void onTeleop() {
         m_shooter.reset();
     }
@@ -423,6 +428,10 @@ public class RobotContainer implements Glassy {
         if (m_auton == null)
             return;
         m_auton.schedule();
+    }
+
+    public void periodic() {
+        cameraUpdater.update();
     }
 
     public void cancelAuton() {

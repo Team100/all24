@@ -11,6 +11,9 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * 
  * Imposes a maximum acceleration ("saturation") and slips a little below that,
  * proportional to acceleration.
+ * 
+ * Here's a link to the documentation
+ * https://docs.google.com/document/d/1a-yI4T2AifRgIW3QJcWiV6-kvuVHfvHLoRkeGFjYLiI/edit
  */
 public class Tire {
     // use these in tests

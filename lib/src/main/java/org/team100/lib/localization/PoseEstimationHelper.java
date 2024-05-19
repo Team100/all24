@@ -150,6 +150,19 @@ public class PoseEstimationHelper {
         return applyCameraOffset(cameraInFieldCoords, cameraInRobotCoords);
     }
 
+    public static Transform3d getTransformFromRobotPose(
+            Transform3d cameraInRobotCoords,
+            Pose2d robotPose,
+            Pose3d tagInFieldCoords) {
+        Pose3d cameraInFieldCords = unapplyCameraOffsetCamera(new Pose3d(robotPose), cameraInRobotCoords);
+        Transform3d tagInCameraCords = untoFieldCoordinates(
+                cameraInFieldCords,
+                tagInFieldCoords);
+        Translation3d tagTranslationInCameraCoords = tagInCameraCords.getTranslation();
+        Rotation3d rotationToTagInCameraCoords = tagInCameraCords.getRotation();
+        return translationToBlipTransform3d(tagTranslationInCameraCoords, rotationToTagInCameraCoords);
+    }
+
     /**
      * Calculate robot pose.
      * 
@@ -246,6 +259,10 @@ public class PoseEstimationHelper {
         return GeometryUtil.zForwardToXForward(b.getPose().getTranslation());
     }
 
+    static Transform3d translationToBlipTransform3d(Translation3d b, Rotation3d w) {
+        return new Transform3d(GeometryUtil.xForwardToZForward(b), GeometryUtil.xForwardToZForward(w));
+    }
+
     /**
      * Extract the rotation from the "z forward" blip and return the same rotation
      * expressed in our usual "x forward" NWU coordinates. Package-private for
@@ -279,6 +296,11 @@ public class PoseEstimationHelper {
         return tagInFieldCords.transformBy(cameraInTagCords);
     }
 
+    static Transform3d untoFieldCoordinates(Pose3d cameraInFieldCoords, Pose3d tagInFieldCords) {
+        Transform3d cameraInTagCords = cameraInFieldCoords.minus(tagInFieldCords);
+        return cameraInTagCords.inverse();
+    }
+
     /**
      * Given the camera in field frame and camera in robot frame, return the robot
      * in field frame. Package-private for testing.
@@ -286,6 +308,10 @@ public class PoseEstimationHelper {
     static Pose3d applyCameraOffset(Pose3d cameraInFieldCoords, Transform3d cameraInRobotCoords) {
         Transform3d robotInCameraCoords = cameraInRobotCoords.inverse();
         return cameraInFieldCoords.transformBy(robotInCameraCoords);
+    }
+
+    static Pose3d unapplyCameraOffsetCamera(Pose3d robotPose, Transform3d cameraInRobotCoords) {
+        return robotPose.transformBy(cameraInRobotCoords);
     }
 
     /**

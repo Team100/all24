@@ -1,14 +1,14 @@
 package org.team100.lib.commands;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.io.StringWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry;
@@ -20,35 +20,33 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Executes the command in a separate thread, using a java executor.
  * Calculates dt.
  * 
  * The glass name leaf is always the implementing class name.
  */
 public abstract class Command100 extends Command implements Glassy {
-    // TODO: allow subclasses to specify the period they want.
+    private static final Telemetry t = Telemetry.get();
     private static final int kExecutePeriodMilliS = 5;
 
-    private static final Telemetry t = Telemetry.get();
+    private final boolean kThreaded = false;
 
     private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
             new MaxPriorityThreads());
-
     protected final String m_name;
+
     private double prevTime;
     private Future<?> m_task;
 
+
     protected Command100() {
-        m_name = Names.append(getGlassName(), this);
+        m_name = Names.append(Command100.class.getSimpleName(), this);
     }
 
     public void initialize100() {
         //
     }
 
-    /**
-     * @param dt duration since the previous call.
-     */
+    /** @param dt duration since the previous call. */
     public abstract void execute100(double dt);
 
     public void end100(boolean interrupted) {
@@ -64,21 +62,30 @@ public abstract class Command100 extends Command implements Glassy {
             Util.warn("TEST MODE: skipping scheduler.");
             return;
         }
-        m_task = m_scheduler.scheduleAtFixedRate(new CrashWrapper(), 0, kExecutePeriodMilliS, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public final void execute() {
-        // command100 execute does nothing, the scheduler does the work.
-        if (m_scheduler.isShutdown()) {
-            throw new IllegalStateException(
-                    "Tests should not call Command.execute(), use Command100.execute100() instead.");
+        if (kThreaded) {
+            m_task = m_scheduler.scheduleAtFixedRate(new CrashWrapper(), 0, kExecutePeriodMilliS, TimeUnit.MILLISECONDS);
         }
     }
 
     @Override
-    public final void end(boolean interrupted) {
-        // "false" -> don't interrupt the thread
+    public final void execute() {
+        if (kThreaded) {
+            return;
+        }
+        t.log(Level.DEBUG, m_name, "command state", "execute");
+        double now = Timer.getFPGATimestamp();
+        double dt = now - prevTime;
+        t.log(Level.DEBUG, m_name, "dt", dt);
+        prevTime = now;
+        execute100(dt);
+        if (m_scheduler.isShutdown()) {
+            Util.warn("TEST MODE: skipping scheduler.");
+            return;
+        }
+    }
+
+    @Override
+    public void end(boolean interrupted) {
         if (m_task != null)
             m_task.cancel(false);
         end100(interrupted);

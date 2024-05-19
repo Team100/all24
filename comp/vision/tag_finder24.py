@@ -8,12 +8,11 @@ import pprint
 
 from enum import Enum
 
-import cv2
 import sys
+import cv2
 import libcamera
 import numpy as np
 import ntcore
-
 import robotpy_apriltag
 
 from cscore import CameraServer
@@ -47,7 +46,6 @@ class Camera(Enum):
     @classmethod
     def _missing_(cls, value):
         return Camera.UNKNOWN
-
 
 class TagFinder:
     def __init__(self, serial, width, height, model):
@@ -87,11 +85,11 @@ class TagFinder:
             k1 = -0.003
             k2 = 0.04
         # TODO get these real distortion values
-        elif model == "imx296":
-            fx = 660
-            fy = 660
-            cx = 728
-            cy = 544
+        elif self.model == "imx296":
+            fx = 1680
+            fy = 1680
+            cx = int(1456/2)
+            cy = int(1088/2)
             k1 = 0
             k2 = 0
         else:
@@ -102,8 +100,8 @@ class TagFinder:
         p1 = 0
         p2 = 0
 
-        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
-        self.dist = np.array([[k1, k2, p1, p2]])
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], np.float32)
+        self.dist = np.array([[k1, k2, p1, p2]], np.float32)
         self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
             robotpy_apriltag.AprilTagPoseEstimator.Config(
                 tag_size,
@@ -117,6 +115,23 @@ class TagFinder:
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def analyze(self, request):
+        potentialTags = self.estimatedTagPose.get()
+        potentialArray = []
+        z = []
+        for Blip24s in potentialTags:
+            translation = Blip24s.pose.translation()
+            if (translation.Z() < 0):
+                continue
+            rvec = np.zeros((3, 1), np.float32) 
+            tvec = np.zeros((3, 1), np.float32) 
+            object_points = np.array([translation.X(), translation.Y(),translation.Z()],np.float32)
+            (point2D, _) = cv2.projectPoints(object_points,rvec,tvec,self.mtx,self.dist)
+            if (point2D[0][0][0] > 0 and point2D[0][0][0] < 1456 and point2D[0][0][1] > 0 and point2D[0][0][1] < 1088):
+                # print(Blip24s.id)
+                # print(object_points)
+                # print(point2D[0][0])
+                z.append(translation.Z())
+                potentialArray.append(point2D[0][0])
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -134,15 +149,15 @@ class TagFinder:
         # TODO: probably remove this
         serial = getserial()
         identity = Camera(serial)
-        if identity == Camera.SHOOTER:
-            img = img[62:554, : self.width]
-        else:        
-            img = img[: self.height, : self.width]
+        if (len(potentialArray) == 1):
+            offset = 100/z[0]
+            if (potentialArray[0][1]-offset > 0 and potentialArray[0][0]-offset > 0 and potentialArray[0][0]+offset < self.width and potentialArray[0][1]+offset < self.height):
+                img = img[int(potentialArray[0][1]-offset) : int(potentialArray[0][1]+offset), int(potentialArray[0][0]-offset):int(potentialArray[0][0]+offset)]
 
         img = cv2.undistort(img, self.mtx, self.dist)
 
         result = self.at_detector.detect(img)
-
+        
         blips = []
         for result_item in result:
             if result_item.getHamming() > 0:
@@ -218,11 +233,13 @@ class TagFinder:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
+    def accept(self, estimatedTagPose):
+        print("ay" + str(estimatedTagPose.readQueue()))
+
     def initialize_nt(self):
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
-
         # roboRio address. windows machines can impersonate this for simulation.
         self.inst.setServer("10.1.0.2")
 
@@ -236,11 +253,16 @@ class TagFinder:
         self.inst.getStructTopic("bugfix", Blip24).publish().set(
             Blip24(0, Transform3d())
         )
-
         # blip array topic
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/blips", Blip24
         ).publish()
+
+        self.estimatedTagPose = self.inst.getStructArrayTopic(
+            topic_name + "/estimatedTagPose", Blip24
+        ).subscribe([],ntcore.PubSubOptions())
+        
+
 
 
 def getserial():
@@ -337,6 +359,7 @@ def main():
     output = TagFinder(serial, width, height, model)
 
     camera.start()
+    # output.startListening()
     try:
         while True:
             # the most recent completed frame, from the recent past

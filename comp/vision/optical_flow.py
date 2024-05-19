@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import cv2
 import time
@@ -9,7 +10,6 @@ import ntcore as nt
 
 from wpimath.geometry import Translation2d
 from picamera2 import Picamera2
-import sys
 import libcamera
 
 
@@ -42,12 +42,12 @@ class MouseVision:
         self.fps = 0
         self.lk_params = dict(
             winSize=(15, 15),
-            maxLevel=2,
+            maxLevel=10,
             criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
         )
 
         self.feature_params = dict(
-            maxCorners=20, qualityLevel=0.3, minDistance=10, blockSize=7
+            maxCorners=20, qualityLevel=0.4 , minDistance=10, blockSize=7
         )
 
         self.trajectory_len = 2
@@ -121,7 +121,7 @@ class MouseVision:
     def analyze(self, request):
         img_yuv = request.make_array("lores")
         frame = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
-        # frame = cv2.resize(frame, (552,408))
+        # frame = cv2.resize(frame, (368,544))
         # this  makes a view, very fast (150 ns)
         # start time to calculate FPS
         start = time.time()
@@ -176,7 +176,7 @@ class MouseVision:
                 "track count: %d" % len(self.trajectories),
                 (20, 50),
                 cv2.FONT_HERSHEY_PLAIN,
-                1,
+                0.5,
                 (0, 255, 0),
                 2,
             )
@@ -225,10 +225,11 @@ class MouseVision:
             f"{self.fps:.2f} FPS",
             (20, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
-            1,
+            0.4,
             (0, 255, 0),
             2,
         )
+        # output = cv2.resize(img, (self.width,self.height))
         self.output_stream.putFrame(img)
 
 
@@ -266,14 +267,13 @@ def main():
         height = 616
     elif model == "imx296":
         print("GS Camera")
-        # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1456  # slightly larger than the detector, to match stride
-        fullheight = 1088
+        fullwidth = 64  # slightly larger than the detector, to match stride
+        fullheight = 64
         # medium detection resolution, compromise speed vs range
-        width = 273
-        height = 204
+        width = 64    
+        height = 64    
     else:
-        print("UNKNOWN CAMERA: " + model)
+        print(  "UNKNOWN CAMERA: " + model)
         fullwidth = 100
         fullheight = 100
         width = 100
@@ -298,18 +298,18 @@ def main():
             "AnalogueGain": 8.0,
             # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
             # 3/23/24, reduced to 2ms, even less blur.
-            "ExposureTime": 1000,
+            "ExposureTime": 4000,
             # limit auto: go as fast as possible but no slower than 30fps
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
             "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-            "ScalerCrop": (
-                int((fullwidth - width) / 2),
-                int((fullheight - height) / 2),
-                width,
-                height,
-            ),
+            # "ScalerCrop": (
+            #     int((fullwidth - width) / 2),
+            #     int((fullheight - height) / 2),
+            #     width,
+            #     height,
+            # ),
         },
     )
 
