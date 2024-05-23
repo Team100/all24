@@ -73,7 +73,7 @@ public class RobotContainer {
     m_operatorController.rightBumper().whileTrue(m_exampleSubsystem.HisMethodCommand(0.01));
     m_operatorController.leftBumper().whileTrue(m_exampleSubsystem.HisMethodCommand(-0.01));
     m_operatorController.povDown().whileTrue(m_exampleSubsystem.BestMethodCommand());
-    m_driverController.x().whileTrue(m_exampleSubsystem.setCartesian(new Translation2d(0,0.3)));
+    m_driverController.x().whileTrue(m_exampleSubsystem.setCartesian(new Translation2d(-0.1,0.1)));
   }
 
   /**
