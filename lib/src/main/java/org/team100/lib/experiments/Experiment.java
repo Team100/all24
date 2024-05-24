@@ -71,5 +71,9 @@ public enum Experiment {
     /**
      * Use executor service for asyncs
      */
-    UseExecutorAsync
+    UseExecutorAsync,
+    /**
+     * Use Java executor for Command100.
+     */
+    UseCommandExecutor
 }
