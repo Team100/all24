@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DrivePursuitControllerTest {
@@ -44,16 +45,14 @@ class DrivePursuitControllerTest {
                 GeometryUtil.fromDegrees(180));
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
-        
+
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
-
-
 
         // note there are static constraints in here.
         TrajectoryPlanner planner = new TrajectoryPlanner();
         double start_vel = 0;
         double end_vel = 0;
-                Trajectory100 trajectory = planner.generateTrajectory(
+        Trajectory100 trajectory = planner.generateTrajectory(
                 false,
                 waypoints,
                 headings,
@@ -77,7 +76,7 @@ class DrivePursuitControllerTest {
         // based on the trajectory itself.
 
         {
-         
+
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new ChassisSpeeds());
@@ -89,7 +88,7 @@ class DrivePursuitControllerTest {
         }
 
         {
-           
+
             Pose2d current_state = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0,
                     current_state,
@@ -107,15 +106,13 @@ class DrivePursuitControllerTest {
             assertEquals(3.74, path_setpoint.velocityM_S(), 0.01);
             assertEquals(2, path_setpoint.acceleration(), 0.001);
 
-            Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
-            Translation2d translational_error = error.getTranslation();
-            assertEquals(0, translational_error.getX(), 0.05);
-            assertEquals(0, translational_error.getY(), 0.05);
-            Rotation2d heading_error = error.getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.05);
+            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(current_state, path_setpoint);
+            assertEquals(0, errorTwist.dx, 0.05);
+            assertEquals(0, errorTwist.dy, 0.05);
+            assertEquals(0, errorTwist.dtheta, 0.05);
         }
         {
-           
+
             Pose2d current_state = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0,
                     current_state,
@@ -131,12 +128,10 @@ class DrivePursuitControllerTest {
             assertEquals(3.821, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0.002, path_setpoint.acceleration(), 0.001);
 
-            Pose2d error = DriveMotionControllerUtil.getError(current_state, path_setpoint);
-            Translation2d translational_error = error.getTranslation();
-            assertEquals(0, translational_error.getX(), 0.05);
-            assertEquals(0, translational_error.getY(), 0.01);
-            Rotation2d heading_error = error.getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.01);
+            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(current_state, path_setpoint);
+            assertEquals(0, errorTwist.dx, 0.05);
+            assertEquals(0, errorTwist.dy, 0.01);
+            assertEquals(0, errorTwist.dtheta, 0.01);
         }
     }
 

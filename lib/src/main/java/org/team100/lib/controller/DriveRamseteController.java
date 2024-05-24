@@ -105,14 +105,14 @@ public class DriveRamseteController implements DriveMotionController {
         // course_to_goal = course_to_field * field_to_goal
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
-        Pose2d mError = DriveMotionControllerUtil.getError(measurement, setpoint);
-        t.log(Level.TRACE, m_name, "error", mError);
+        Twist2d mErrorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, setpoint);
+        t.log(Level.TRACE, m_name, "error", mErrorTwist);
 
         // Rotate error to be aligned to current course.
         // Error is in robot (heading) frame. Need to rotate it to be in course frame.
         // course_to_error = robot_to_course.inverse() * robot_to_error
-        Translation2d linear_error_course_relative = GeometryUtil
-                .transformBy(GeometryUtil.fromRotation(robot_to_course), mError).getTranslation();
+        Translation2d linear_error_course_relative = GeometryUtil.fromRotation(
+                robot_to_course).exp(mErrorTwist).getTranslation();
 
         // Compute time-varying gain parameter.
         final double k = 2.0 * kZeta * Math.sqrt(
@@ -128,7 +128,7 @@ public class DriveRamseteController implements DriveMotionController {
                 + goal_linear_velocity * kBeta * sin_x_over_x * linear_error_course_relative.getY();
 
         double heading_rate = goal_linear_velocity * setpoint.state().getHeadingRate()
-                + kThetaKp * mError.getRotation().getRadians();
+                + kThetaKp * mErrorTwist.dtheta;
 
         // Create a course-relative Twist2d.
         Twist2d adjusted_course_relative_velocity = new Twist2d(adjusted_linear_velocity, 0.0,
@@ -175,6 +175,4 @@ public class DriveRamseteController implements DriveMotionController {
     public String getGlassName() {
         return "DriveRamseteController";
     }
-
-    
 }
