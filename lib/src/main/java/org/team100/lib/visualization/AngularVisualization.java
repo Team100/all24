@@ -21,7 +21,7 @@ public class AngularVisualization {
 
     public static void make(String name, Positioning subsystem) {
         AngularVisualization v = new AngularVisualization(name, subsystem);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1, "AngularVisualization" + name);
     }
 
     private AngularVisualization(String name, Positioning subsystem) {

@@ -119,7 +119,7 @@ public class Telemetry {
 
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
-        AsyncFactory.get().addPeriodic(this::updateLevel, 1);
+        AsyncFactory.get().addPeriodic(this::updateLevel, 1, "Telemetry");
         DataLogManager.start();
     }
 

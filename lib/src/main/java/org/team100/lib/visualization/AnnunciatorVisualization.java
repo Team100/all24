@@ -22,7 +22,7 @@ public class AnnunciatorVisualization {
 
     public static void make(Annunciator annunciator) {
         AnnunciatorVisualization v = new AnnunciatorVisualization(annunciator);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1, "AnnunciatorVisualization");
     }
 
     private AnnunciatorVisualization(Annunciator annunciator) {

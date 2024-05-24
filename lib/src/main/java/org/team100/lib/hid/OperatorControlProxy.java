@@ -21,7 +21,7 @@ public class OperatorControlProxy implements OperatorControl {
 
     public OperatorControlProxy() {
         refresh();
-        AsyncFactory.get().addPeriodic(this::refresh, kFreq);
+        AsyncFactory.get().addPeriodic(this::refresh, kFreq, "OperatorControlProxy");
     }
 
     public void refresh() {

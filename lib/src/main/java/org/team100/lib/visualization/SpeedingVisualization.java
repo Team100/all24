@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
  * Visualization for 1-dof velocity.
  */
 public class SpeedingVisualization {
-
     private static final double kScale = 10.0;
     private final Speeding m_subsystem;
     private final Mechanism2d m_sideView;
@@ -22,7 +21,7 @@ public class SpeedingVisualization {
 
     public static void make(String name, Speeding subsystem) {
         SpeedingVisualization v = new SpeedingVisualization(name, subsystem);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1, "SpeedingVisualization" + name);
     }
 
     private SpeedingVisualization(String name, Speeding subsystem) {

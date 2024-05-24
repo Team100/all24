@@ -39,6 +39,8 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -397,6 +399,7 @@ public class RobotContainer implements Glassy {
     public void beforeCommandCycle() {
         // ModeSelector.selectMode(operatorControl::pov);
     }
+
     public void onTeleop() {
         m_shooter.reset();
     }
@@ -431,7 +434,8 @@ public class RobotContainer implements Glassy {
     }
 
     public void periodic() {
-        cameraUpdater.update();
+        if (Experiments.instance.enabled(Experiment.UseCameraUpdater))
+            cameraUpdater.update();
     }
 
     public void cancelAuton() {

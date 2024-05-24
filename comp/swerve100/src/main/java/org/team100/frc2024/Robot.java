@@ -57,6 +57,10 @@ public class Robot extends TimedRobot implements Glassy {
         m_robotContainer.onInit();
 
         DataLogManager.start();
+
+        // This reduces the allocated heap size, not just the used heap size, which 
+        // means more-frequent and smaller subsequent GC's.
+        System.gc();
     }
 
     @Override

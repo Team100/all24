@@ -25,7 +25,7 @@ public class ArmVisualization {
 
     public static void make(ArmSubsystem armSubsystem) {
         ArmVisualization v = new ArmVisualization(armSubsystem);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1, "ArmVisualization" + armSubsystem.getName());
     }
 
     private ArmVisualization(ArmSubsystem armSubsystem) {
