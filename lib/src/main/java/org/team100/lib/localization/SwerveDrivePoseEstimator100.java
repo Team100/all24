@@ -1,6 +1,5 @@
 package org.team100.lib.localization;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,14 +11,12 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
-import org.team100.lib.persistent_parameter.ParameterFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.SlipperyTireUtil;
-import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -47,17 +44,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final int m_numModules;
-    private final SwerveDriveKinematics100 m_kinematics;
+    private final SwerveKinodynamics m_kinodynamics;
     private final Matrix<N3, N1> m_q;
     private final Matrix<N3, N3> m_visionK;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
-
-    // for now, default tire.
-
-    public ParameterFactory f = new ParameterFactory(new HashMap<>());
-
-    Tire tire = new Tire(f);
-    SlipperyTireUtil u = new SlipperyTireUtil(tire);
+    private final SlipperyTireUtil m_tireUtil;
     /**
      * maintained in resetPosition().
      */
@@ -65,7 +56,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     /**
      *
-     * @param kinematics               A correctly-configured kinematics object for
+     * @param kinodynamics             A correctly-configured kinodynamics object
+     *                                 for
      *                                 your drivetrain.
      * @param gyroAngle                The current gyro angle.
      * @param modulePositions          The current distance and rotation
@@ -83,7 +75,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      *                                 the vision pose measurement less.
      */
     public SwerveDrivePoseEstimator100(
-            SwerveDriveKinematics100 kinematics,
+            SwerveKinodynamics kinodynamics,
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
@@ -91,16 +83,16 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         m_name = Names.name(this);
-
         m_numModules = modulePositions.length;
-        m_kinematics = kinematics;
+        m_kinodynamics = kinodynamics;
+        m_tireUtil = new SlipperyTireUtil(m_kinodynamics.getTire());
         m_q = new Matrix<>(Nat.N3(), Nat.N1());
         m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
         m_poseBuffer = new TimeInterpolatableBuffer100<>(
                 kBufferDuration,
                 timestampSeconds,
                 new InterpolationRecord(
-                        m_kinematics,
+                        m_kinodynamics.getKinematics(),
                         new SwerveState(
                                 initialPoseMeters,
                                 new FieldRelativeVelocity(0, 0, 0),
@@ -189,7 +181,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_poseBuffer.put(
                 timestampSeconds,
                 new InterpolationRecord(
-                        m_kinematics,
+                        m_kinodynamics.getKinematics(),
                         new SwerveState(newPose, sample.m_state.velocity(), sample.m_state.acceleration()),
                         sample.m_gyroAngle,
                         sample.m_wheelPositions));
@@ -218,7 +210,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_poseBuffer.reset(
                 timestampSeconds,
                 new InterpolationRecord(
-                        m_kinematics,
+                        m_kinodynamics.getKinematics(),
                         new SwerveState(
                                 pose,
                                 new FieldRelativeVelocity(0, 0, 0),
@@ -298,15 +290,15 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             t.log(Level.DEBUG, m_name, "t0", t0);
             earlierPose = earlierEntry.getValue().m_state;
             Vector2d[] corners = SlipperyTireUtil.cornerDeltas(
-                    m_kinematics,
+                    m_kinodynamics.getKinematics(),
                     earlierPose.pose(),
                     previousPose.pose());
             t.log(Level.DEBUG, m_name, "delta0", modulePositionDelta[0]);
-            modulePositionDelta = u.adjust(corners, t0, modulePositionDelta, t1);
+            modulePositionDelta = m_tireUtil.adjust(corners, t0, modulePositionDelta, t1);
             t.log(Level.DEBUG, m_name, "delta1", modulePositionDelta[0]);
         }
 
-        Twist2d twist = m_kinematics.toTwist2d(modulePositionDelta);
+        Twist2d twist = m_kinodynamics.getKinematics().toTwist2d(modulePositionDelta);
 
         // replace the twist dtheta with one derived from the current pose
         // pose angle based on the gyro (which is more accurate)
@@ -338,7 +330,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         m_poseBuffer.put(
                 currentTimeS,
-                new InterpolationRecord(m_kinematics, swerveState, gyroAngle, wheelPositions.copy()));
+                new InterpolationRecord(m_kinodynamics.getKinematics(), swerveState, gyroAngle, wheelPositions.copy()));
 
         return swerveState;
     }

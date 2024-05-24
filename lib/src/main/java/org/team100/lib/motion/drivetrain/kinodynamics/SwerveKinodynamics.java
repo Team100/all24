@@ -10,6 +10,7 @@ import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
@@ -55,6 +56,7 @@ public class SwerveKinodynamics implements Glassy {
     private double m_MaxDriveDecelerationM_S2;
     private double m_MaxSteeringVelocityRad_S;
     private double m_maxSteeringAccelerationRad_S2;
+    private Tire m_tire;
 
     // calculated
     private double m_maxAngleSpeedRad_S;
@@ -83,7 +85,8 @@ public class SwerveKinodynamics implements Glassy {
             double track,
             double wheelbase,
             double frontoffset,
-            double vcg) {
+            double vcg,
+            Tire tire) {
         if (track < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -94,6 +97,7 @@ public class SwerveKinodynamics implements Glassy {
         m_wheelbase = wheelbase;
         m_frontoffset = frontoffset;
         m_vcg = vcg;
+        m_tire = tire;
         // distance from center to wheel
         m_radius = Math.hypot(track / 2, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, frontoffset);
@@ -143,7 +147,8 @@ public class SwerveKinodynamics implements Glassy {
             double backtrack,
             double wheelbase,
             double frontoffset,
-            double vcg) {
+            double vcg,
+            Tire tire) {
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -154,6 +159,7 @@ public class SwerveKinodynamics implements Glassy {
         m_wheelbase = wheelbase;
         m_frontoffset = frontoffset;
         m_vcg = vcg;
+        m_tire = tire;
         // distance from center to wheel
         m_radius = Math.hypot((fronttrack + backtrack) / 4, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, m_frontoffset);
@@ -386,7 +392,7 @@ public class SwerveKinodynamics implements Glassy {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         return new SwerveDrivePoseEstimator100(
-                m_kinematics,
+                this,
                 gyroAngle,
                 modulePositions,
                 initialPoseMeters,
@@ -490,6 +496,14 @@ public class SwerveKinodynamics implements Glassy {
                 ratio * maxV * Math.cos(xyAngle),
                 ratio * maxV * Math.sin(xyAngle),
                 speeds.theta());
+    }
+
+    public Tire getTire() {
+        return m_tire;
+    }
+
+    public SwerveDriveKinematics100 getKinematics() {
+        return m_kinematics;
     }
 
     @Override

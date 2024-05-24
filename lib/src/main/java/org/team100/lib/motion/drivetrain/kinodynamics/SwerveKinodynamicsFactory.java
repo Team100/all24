@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
 /**
@@ -40,15 +41,16 @@ public class SwerveKinodynamicsFactory {
                         0.44, // back wheelbase m
                         0.491, // wheelbase m
                         0.29,
-                        0.1); // vcg m (guess)
+                        0.1,
+                        Tire.noslip()); // vcg m (guess)
             case SWERVE_TWO:
-                return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.380, 0.445, .2225, 0.3);
+                return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.380, 0.445, .2225, 0.3, Tire.noslip());
             case SWERVE_ONE:
-                return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.449, 0.464, .232, 0.3);
+                return new SwerveKinodynamics(4, 2, 2, 13, 20 * Math.PI, 0.449, 0.464, .232, 0.3, Tire.noslip());
             case BLANK:
                 // this is used for tests and simulation; if you change it you should fix all
                 // the broken tests.
-                return new SwerveKinodynamics(4, 4, 4, 13, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
+                return new SwerveKinodynamics(4, 4, 4, 13, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.noslip());
             case BETA_BOT:
                 // these numbers were extracted from module mode acceleration
                 // runs as shown in this spreadsheet
@@ -65,7 +67,7 @@ public class SwerveKinodynamicsFactory {
                 // TODO: exponential setpoint generator to better match reality.
 
                 if (USE_OLD_LIMITS) {
-                    return new SwerveKinodynamics(5, 5, 7, 13, 20 * Math.PI, 0.4826, 0.4826, .2413, 0.3);
+                    return new SwerveKinodynamics(5, 5, 7, 13, 20 * Math.PI, 0.4826, 0.4826, .2413, 0.3, Tire.noslip());
                 }
                 return new SwerveKinodynamics(
                         5, // max vel m/s
@@ -77,10 +79,10 @@ public class SwerveKinodynamicsFactory {
                         0.44, // back wheelbase m
                         0.491, // wheelbase m
                         0.29,
-                        0.1); // vcg m (guess)
+                        0.1, Tire.noslip()); // vcg m (guess)
             default:
                 Util.warn("Using default kinodynamics");
-                return new SwerveKinodynamics(5, 5, 5, 13, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
+                return new SwerveKinodynamics(5, 5, 5, 13, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.noslip());
         }
     }
 
@@ -91,38 +93,46 @@ public class SwerveKinodynamicsFactory {
      * you're wanting to allow for steering delay.
      */
     public static SwerveKinodynamics forTest() {
-        return new SwerveKinodynamics(1, 1, 1, 20 * Math.PI, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
+        return new SwerveKinodynamics(1, 1, 1, 20 * Math.PI, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.noslip());
+    }
+
+    public static SwerveKinodynamics forTestWithSlip() {
+        return new SwerveKinodynamics(1, 1, 1, 20 * Math.PI, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.defaultTire());
     }
 
     public static SwerveKinodynamics forTest2() {
-        return new SwerveKinodynamics(2, 1, 1, 1, 20 * Math.PI, 0.5, 0.5, .25, 0.6);
+        return new SwerveKinodynamics(2, 1, 1, 1, 20 * Math.PI, 0.5, 0.5, .25, 0.6, Tire.noslip());
+    }
+
+    public static SwerveKinodynamics forWPITest() {
+        return new SwerveKinodynamics(1,1,1,1,1,2,2,1,1,Tire.noslip());
     }
     //////////////////////////////////////////
     //
     // below are specific test cases. try to minimize their number
 
     public static SwerveKinodynamics highDecelAndCapsize() {
-        return new SwerveKinodynamics(5, 2, 300, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.001); // 1mm vcg
+        return new SwerveKinodynamics(5, 2, 300, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.001, Tire.noslip()); // 1mm vcg
     }
 
     public static SwerveKinodynamics decelCase() {
-        return new SwerveKinodynamics(1, 1, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
+        return new SwerveKinodynamics(1, 1, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.noslip());
     }
 
     public static SwerveKinodynamics highCapsize() {
-        return new SwerveKinodynamics(5, 10, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.1);
+        return new SwerveKinodynamics(5, 10, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.1, Tire.noslip());
     }
 
     public static SwerveKinodynamics lowCapsize() {
-        return new SwerveKinodynamics(5, 10, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 2); // 2m vcg
+        return new SwerveKinodynamics(5, 10, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 2, Tire.noslip()); // 2m vcg
     }
 
     public static SwerveKinodynamics limiting() {
-        return new SwerveKinodynamics(5, 10, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
+        return new SwerveKinodynamics(5, 10, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.noslip());
     }
 
     public static SwerveKinodynamics highAccelLowDecel() {
-        return new SwerveKinodynamics(4, 1, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.3);
+        return new SwerveKinodynamics(4, 1, 10, 5, 20 * Math.PI, 0.5, 0.5, .25, 0.3, Tire.noslip());
     }
 
     private SwerveKinodynamicsFactory() {
