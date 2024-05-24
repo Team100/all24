@@ -23,7 +23,7 @@ public class SimpleVisualization {
 
     public static void make(String name, Positioning subsystem) {
         SimpleVisualization v = new SimpleVisualization(name, subsystem);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1, "SimpleVisualization" + name);
     }
 
     private SimpleVisualization(String name, Positioning subsystem) {

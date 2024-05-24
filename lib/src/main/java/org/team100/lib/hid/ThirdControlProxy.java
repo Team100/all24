@@ -21,7 +21,7 @@ public class ThirdControlProxy implements ThirdControl {
 
     public ThirdControlProxy() {
         refresh();
-        AsyncFactory.get().addPeriodic(this::refresh, kFreq);
+        AsyncFactory.get().addPeriodic(this::refresh, kFreq, "ThirdControlProxy");
     }
 
     public void refresh() {

@@ -14,15 +14,15 @@ import org.team100.lib.util.Util;
 /**
  * Runs low-priority, timing-insensitive stuff asynchronously.
  * 
- * Instead of a WPILib Notifier, this uses a java executor, in order to set the
- * thread priority really low and avoid the notifier interrupt.
+ * Instead of a WPILib Notifier, this uses a java executor with a single thread,
+ * in order to set the thread priority really low and avoid the notifier interrupt.
  */
 public class ExecutorAsync implements Async {
     private final ScheduledExecutorService m_scheduler;
 
     /** Run in t sec and every t sec thereafter. */
     @Override
-    public void addPeriodic(Runnable runnable, double periodS) {
+    public void addPeriodic(Runnable runnable, double periodS, String name) {
         long periodMS = (long) (periodS * 1000);
         m_scheduler.scheduleAtFixedRate(
                 new CrashWrapper(runnable), periodMS, periodMS, TimeUnit.MILLISECONDS);

@@ -5,7 +5,12 @@ import java.util.List;
 
 import edu.wpi.first.wpilibj.Notifier;
 
-/** Support async periodic execution with a notifier. */
+/**
+ * Support async periodic execution with a notifier thread per task.
+ * 
+ * Note using a thread per task can result in a lot of threads, which might not
+ * be great.
+ */
 public class NotifierAsync implements Async {
     private final List<Notifier> m_notifiers;
 
@@ -14,8 +19,9 @@ public class NotifierAsync implements Async {
     }
 
     @Override
-    public void addPeriodic(Runnable runnable, double periodS) {
+    public void addPeriodic(Runnable runnable, double periodS, String name) {
         Notifier n = new Notifier(runnable);
+        n.setName(name);
         n.startPeriodic(periodS);
         m_notifiers.add(n);
     }

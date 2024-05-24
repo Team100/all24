@@ -38,7 +38,7 @@ public class SingleNavXGyro implements Gyro100 {
         }
 
         m_gyro1.zeroYaw();
-        AsyncFactory.get().addPeriodic(this::logStuff, 1);
+        AsyncFactory.get().addPeriodic(this::logStuff, 1, "SingleNavXGyro");
     }
 
     /**
