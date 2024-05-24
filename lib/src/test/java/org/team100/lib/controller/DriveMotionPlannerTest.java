@@ -18,7 +18,6 @@ import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryGenerator100;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryUtil100;
@@ -60,7 +59,7 @@ class DriveMotionPlannerTest {
         Assertions.assertFalse(traj.isEmpty());
         Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
 
-        Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(false, new PathDistanceSampler(traj), 2,
+        Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(new PathDistanceSampler(traj), 2,
                 Arrays.asList(), start_vel, end_vel, max_vel, max_accel);
 
         DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
@@ -91,9 +90,7 @@ class DriveMotionPlannerTest {
     @Test
     void testAllTrajectories() {
         DrivePIDFController controller = new DrivePIDFController(false, 2.4, 2.4);
-        TrajectoryPlanner tPlanner = new TrajectoryPlanner();
-        TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
-        generator.generateTrajectories();
+        TrajectoryGenerator100 generator = new TrajectoryGenerator100();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 
         for (var traj : trajectories) {

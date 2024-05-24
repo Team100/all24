@@ -12,7 +12,6 @@ public class TimingUtil {
     private static final double kEpsilon = 1e-6;
 
     public static Trajectory100 timeParameterizeTrajectory(
-            boolean reverse,
             final PathDistanceSampler distance_view,
             double step_size,
             final List<TimingConstraint> constraints,
@@ -26,7 +25,7 @@ public class TimingUtil {
             for (int i = 0; i < num_states; ++i) {
                 states.add(distance_view.sample(Math.min(i * step_size, distance_view.getMaxDistance())).state());
             }
-            return timeParameterizeTrajectory(reverse, states, constraints, start_velocity, end_velocity,
+            return timeParameterizeTrajectory(states, constraints, start_velocity, end_velocity,
                     max_velocity, max_abs_acceleration);
         } catch (TimingException e) {
             Util.warn("Timing exception");
@@ -35,7 +34,6 @@ public class TimingUtil {
     }
 
     private static Trajectory100 timeParameterizeTrajectory(
-            boolean reverse,
             final List<Pose2dWithMotion> states,
             final List<TimingConstraint> constraints,
             double start_velocity,
@@ -44,7 +42,6 @@ public class TimingUtil {
             double max_abs_acceleration) throws TimingException {
 
         List<ConstrainedState> constraint_states = forwardPass(
-                reverse,
                 states,
                 constraints,
                 start_velocity,
@@ -52,17 +49,13 @@ public class TimingUtil {
                 max_abs_acceleration);
 
         backwardsPass(
-                reverse,
                 states,
                 constraints,
                 end_velocity,
                 max_abs_acceleration,
                 constraint_states);
 
-        return integrate(
-                reverse,
-                states,
-                constraint_states);
+        return integrate(states, constraint_states);
     }
 
     /**
@@ -77,7 +70,6 @@ public class TimingUtil {
      * acceleration during the backward pass (by slowing down the predecessor).
      */
     private static List<ConstrainedState> forwardPass(
-            boolean reverse,
             final List<Pose2dWithMotion> states,
             final List<TimingConstraint> constraints,
             double start_velocity,
@@ -98,19 +90,19 @@ public class TimingUtil {
             ConstrainedState constraint_state = new ConstrainedState();
             constraint_states.add(constraint_state);
             constraint_state.state = p;
-            forwardWork(reverse, constraints, max_velocity, max_abs_acceleration, predecessor, constraint_state);
+            forwardWork(constraints, max_velocity, max_abs_acceleration, predecessor, constraint_state);
             predecessor = constraint_state;
         }
         return constraint_states;
     }
 
     private static void forwardWork(
-            boolean reverse,
             final List<TimingConstraint> constraints,
             double max_velocity,
             double max_abs_acceleration,
             ConstrainedState predecessor,
             ConstrainedState constraint_state) throws TimingException {
+
         // constant-twist path length between states
         final double ds = constraint_state.state.distance(predecessor.state);
 
@@ -138,7 +130,7 @@ public class TimingUtil {
 
             clampVelocity(constraints, constraint_state);
 
-            clampAccel(reverse, constraints, constraint_state);
+            clampAccel(constraints, constraint_state);
 
             if (ds < kEpsilon) {
                 return;
@@ -180,13 +172,11 @@ public class TimingUtil {
      * Backwards pass
      */
     private static void backwardsPass(
-            boolean reverse,
             final List<Pose2dWithMotion> states,
             final List<TimingConstraint> constraints,
             double end_velocity,
             double max_abs_acceleration,
             List<ConstrainedState> constraint_states) throws TimingException {
-
         // "successor" comes before in the backwards walk. start with the last state.
         ConstrainedState successor = new ConstrainedState();
         successor.state = states.get(states.size() - 1);
@@ -198,13 +188,12 @@ public class TimingUtil {
         // work backwards through the states list
         for (int i = states.size() - 1; i >= 0; --i) {
             ConstrainedState constraint_state = constraint_states.get(i);
-            backwardsWork(reverse, constraints, successor, constraint_state);
+            backwardsWork(constraints, successor, constraint_state);
             successor = constraint_state;
         }
     }
 
     private static void backwardsWork(
-            boolean reverse,
             final List<TimingConstraint> constraints,
             ConstrainedState successor,
             ConstrainedState constraint_state) throws TimingException {
@@ -226,7 +215,7 @@ public class TimingUtil {
                 throw new TimingException();
             }
 
-            clampAccel(reverse, constraints, constraint_state);
+            clampAccel(constraints, constraint_state);
 
             if (ds > kEpsilon) {
                 return;
@@ -279,19 +268,17 @@ public class TimingUtil {
     /**
      * Clamp constraint state accelerations to the constraints.
      */
-    private static void clampAccel(
-            boolean reverse,
-            List<TimingConstraint> constraints,
-            ConstrainedState constraint_state) throws TimingException {
-
+    private static void clampAccel(List<TimingConstraint> constraints, ConstrainedState constraint_state)
+            throws TimingException {
         for (final TimingConstraint constraint : constraints) {
-            final TimingConstraint.MinMaxAcceleration min_max_accel = constraint.getMinMaxAcceleration(
-                    constraint_state.state,
-                    (reverse ? -1.0 : 1.0) * constraint_state.max_velocity);
-            constraint_state.min_acceleration = Math.max(constraint_state.min_acceleration,
-                    reverse ? -min_max_accel.getMaxAccel() : min_max_accel.getMinAccel());
-            constraint_state.max_acceleration = Math.min(constraint_state.max_acceleration,
-                    reverse ? -min_max_accel.getMinAccel() : min_max_accel.getMaxAccel());
+            final TimingConstraint.MinMaxAcceleration min_max_accel = constraint
+                    .getMinMaxAcceleration(constraint_state.state, constraint_state.max_velocity);
+            constraint_state.min_acceleration = Math.max(
+                    constraint_state.min_acceleration,
+                    min_max_accel.getMinAccel());
+            constraint_state.max_acceleration = Math.min(
+                    constraint_state.max_acceleration,
+                    min_max_accel.getMaxAccel());
         }
         if (constraint_state.min_acceleration > constraint_state.max_acceleration) {
             throw new TimingException();
@@ -302,7 +289,6 @@ public class TimingUtil {
      * Integrate the constrained states forward in time to obtain the TimedStates.
      */
     private static Trajectory100 integrate(
-            boolean reverse,
             final List<Pose2dWithMotion> states,
             List<ConstrainedState> constraint_states) throws TimingException {
         List<TimedPose> timed_states = new ArrayList<>(states.size());
@@ -316,7 +302,7 @@ public class TimingUtil {
             final double accel = (constrained_state.max_velocity * constrained_state.max_velocity - v * v) / (2.0 * ds);
             double dt = 0.0;
             if (i > 0) {
-                timed_states.get(i - 1).set_acceleration(reverse ? -accel : accel);
+                timed_states.get(i - 1).set_acceleration(accel);
                 dt = calculateDt(v, constrained_state, ds, accel);
             }
             t += dt;
@@ -327,7 +313,7 @@ public class TimingUtil {
             v = constrained_state.max_velocity;
             s = constrained_state.distance;
             timed_states.add(
-                    new TimedPose(constrained_state.state, t, reverse ? -v : v, reverse ? -accel : accel));
+                    new TimedPose(constrained_state.state, t, v, accel));
         }
         return new Trajectory100(timed_states);
     }
@@ -358,7 +344,6 @@ public class TimingUtil {
     }
 
     public static class TimingException extends Exception {
-
     }
 
     private TimingUtil() {

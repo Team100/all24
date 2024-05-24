@@ -39,7 +39,8 @@ public class Pose2dWithMotion {
      * Additionally, this means dtheta is in radians-per-distance if there is
      * translation, or radians-per-radian otherwise.
      * 
-     * TODO: eliminate the use of Twist2d here, make a specific type for this concept.
+     * TODO: eliminate the use of Twist2d here, make a specific type for this
+     * concept.
      */
     private final Twist2d m_fieldRelativeMotionDirection;
 
@@ -64,11 +65,10 @@ public class Pose2dWithMotion {
 
     /**
      * 
-     * @param pose                         Represents the location and HEADING of
+     * @param pose                         Represents the location and heading of
      *                                     the robot
-     * @param fieldRelativeMotionDirection Represents the COURSE of the robot dtheta
-     *                                     is
-     *                                     rad/meter
+     * @param fieldRelativeMotionDirection Represents the change in location and
+     *                                     heading, per meter traveled.
      * @param curvatureRad_M
      * @param dCurvatureDsRad_M2
      */
@@ -85,22 +85,6 @@ public class Pose2dWithMotion {
 
     public final Pose2d getPose() {
         return m_pose;
-    }
-
-    public Pose2dWithMotion mirror() {
-        return new Pose2dWithMotion(
-                GeometryUtil.mirror(getPose()),
-                GeometryUtil.mirror(m_fieldRelativeMotionDirection),
-                -getCurvature(),
-                -getDCurvatureDs());
-    }
-
-    public Pose2dWithMotion flip() {
-        return new Pose2dWithMotion(
-                GeometryUtil.flip(getPose()),
-                GeometryUtil.flip(m_fieldRelativeMotionDirection),
-                -getCurvature(),
-                getDCurvatureDs());
     }
 
     /** Radians per meter. */

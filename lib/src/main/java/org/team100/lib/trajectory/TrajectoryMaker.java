@@ -14,14 +14,9 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
  * Utility class to produce trajectories.
  */
 public class TrajectoryMaker {
-
-    final TrajectoryPlanner m_planner;
     final List<TimingConstraint> m_constraints;
 
-    public TrajectoryMaker(
-            TrajectoryPlanner planner,
-            List<TimingConstraint> constraints) {
-        m_planner = planner;
+    public TrajectoryMaker(List<TimingConstraint> constraints) {
         m_constraints = constraints;
     }
 
@@ -62,14 +57,15 @@ public class TrajectoryMaker {
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
         try {
-            return m_planner.generateTrajectory(
-                    false,
+            return TrajectoryPlanner.generateTrajectory(
                     List.of(
                             new Pose2d(currentTranslation, angleToGoal),
                             new Pose2d(goalTranslation, angleToGoal)),
                     List.of(new Rotation2d(), new Rotation2d()),
                     m_constraints,
-                    10, // guess
+                    0.0,
+                    0.0,
+                    10,
                     10);// guess
         } catch (TrajectoryGenerationException e) {
             return null;

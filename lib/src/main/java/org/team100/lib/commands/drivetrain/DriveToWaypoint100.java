@@ -34,7 +34,6 @@ public class DriveToWaypoint100 extends Command100 {
 
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
-    private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
 
@@ -46,13 +45,11 @@ public class DriveToWaypoint100 extends Command100 {
     public DriveToWaypoint100(
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
             DriveMotionController controller,
             List<TimingConstraint> constraints,
             double timeBuffer) {
         m_goal = goal;
         m_swerve = drivetrain;
-        m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
         m_timeBuffer = timeBuffer;
@@ -74,16 +71,14 @@ public class DriveToWaypoint100 extends Command100 {
                 start.getRotation(),
                 end.getRotation());
 
-        Trajectory100 trajectory = m_planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        m_constraints,
-                        startVelocity,
-                        endVelocity,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                startVelocity,
+                endVelocity,
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
         m_trajectory = trajectory;
 
         TrajectoryVisualization.setViz(trajectory);

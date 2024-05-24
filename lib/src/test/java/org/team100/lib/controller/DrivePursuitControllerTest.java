@@ -48,12 +48,9 @@ class DrivePursuitControllerTest {
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
 
-        // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         double start_vel = 0;
         double end_vel = 0;
-        Trajectory100 trajectory = planner.generateTrajectory(
-                false,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
                 waypoints,
                 headings,
                 constraints,
@@ -138,7 +135,6 @@ class DrivePursuitControllerTest {
     @Test
     void testPreviewDt() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -158,16 +154,14 @@ class DrivePursuitControllerTest {
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
 
-        Trajectory100 trajectory = planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        constraints,
-                        startVelocity,
-                        endVelocity,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                constraints,
+                startVelocity,
+                endVelocity,
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 
@@ -191,7 +185,6 @@ class DrivePursuitControllerTest {
     @Test
     void testNearPreviewDt() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -211,16 +204,14 @@ class DrivePursuitControllerTest {
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
 
-        Trajectory100 trajectory = planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        constraints,
-                        startVelocity,
-                        endVelocity,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                constraints,
+                startVelocity,
+                endVelocity,
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 

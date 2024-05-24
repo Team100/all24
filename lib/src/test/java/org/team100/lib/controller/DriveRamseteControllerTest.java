@@ -45,14 +45,9 @@ class DriveRamseteControllerTest {
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
 
-        // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         double start_vel = 0;
         double end_vel = 0;
-
-        // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory100 trajectory = planner.generateTrajectory(
-                false,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
                 waypoints,
                 headings,
                 constraints,

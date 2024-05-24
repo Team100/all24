@@ -9,7 +9,6 @@ import org.team100.lib.commands.drivetrain.DriveWithWaypoints;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,7 +18,6 @@ public class Amp extends SequentialCommandGroup {
     public Amp(
             Supplier<Pose2d> poseSupplier,
             SwerveDriveSubsystem m_swerve,
-            TrajectoryPlanner planner,
             DriveMotionController controller,
             SwerveKinodynamics limits) {
 
@@ -30,7 +28,7 @@ public class Amp extends SequentialCommandGroup {
 
         addCommands(
                 // new DriveWithWaypoints(m_swerve, planner, controller, limits, waypoint)
-                new DriveWithWaypoints(m_swerve, planner, controller, limits,
+                new DriveWithWaypoints(m_swerve, controller, limits,
                         () -> AmpUtil.getShortestTrajecNew(m_swerve))
 
         // new DriveWithTrajectory(m_swerve, planner, controller, limits,

@@ -69,7 +69,6 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.VecBuilder;
@@ -197,10 +196,8 @@ public class RobotContainer implements Glassy {
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
-        TrajectoryPlanner planner = new TrajectoryPlanner();
-
         whileTrue(driverControl::driveWithFancyTrajec,
-                new FancyTrajectory(m_drive, planner, constraints));
+                new FancyTrajectory(m_drive, constraints));
 
         // 254 PID follower
         DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF();
@@ -323,7 +320,6 @@ public class RobotContainer implements Glassy {
 
         AutoMaker m_AutoMaker = new AutoMaker(
                 m_drive,
-                planner,
                 drivePID,
                 0,
                 m_feeder,
