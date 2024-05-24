@@ -63,5 +63,9 @@ public enum Experiment {
     /**
      * Include sag limiter in setpoint generator
      */
-    LimitBatterySag
+    LimitBatterySag,
+    /**
+     * Use slippery tire model
+     */
+    SlipperyTires
 }

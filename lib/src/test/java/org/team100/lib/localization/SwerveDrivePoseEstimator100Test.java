@@ -10,6 +10,8 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
@@ -124,6 +126,7 @@ class SwerveDrivePoseEstimator100Test {
         // out of order odometry?
         // use a reasonable max accel.
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTestWithSlip();
+        Experiments.instance.testOverride(Experiment.SlipperyTires, true);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,

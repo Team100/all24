@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
@@ -282,7 +284,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         SwerveState earlierPose = null;
         double t0 = 0;
-        if (consistentPair.size() > 1) {
+        if (Experiments.instance.enabled(Experiment.SlipperyTires) && consistentPair.size() > 1) {
             // get an earlier pose in order to adjust the corner velocities
             Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
 
