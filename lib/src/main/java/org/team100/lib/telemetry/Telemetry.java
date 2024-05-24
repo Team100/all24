@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.geometry.Vector2d;
@@ -19,7 +20,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
-import org.team100.lib.util.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -119,7 +119,7 @@ public class Telemetry {
 
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
-        Async.runner.addPeriodic(this::updateLevel, 1);
+        AsyncFactory.get().addPeriodic(this::updateLevel, 1);
         DataLogManager.start();
     }
 

@@ -67,5 +67,9 @@ public enum Experiment {
     /**
      * Use slippery tire model
      */
-    SlipperyTires
+    SlipperyTires,
+    /**
+     * Use executor service for asyncs
+     */
+    UseExecutorAsync
 }

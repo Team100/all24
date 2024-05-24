@@ -1,9 +1,9 @@
 package org.team100.lib.visualization;
 
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModule100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelChooser;
-import org.team100.lib.util.Async;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -23,7 +23,7 @@ public class SwerveModuleVisualization {
 
     public static void make(SwerveModule100 module) {
         SwerveModuleVisualization v = new SwerveModuleVisualization(module);
-        Async.runner.addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1);
     }
 
     private SwerveModuleVisualization(SwerveModule100 module) {

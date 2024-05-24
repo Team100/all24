@@ -1,4 +1,4 @@
-package org.team100.lib.util;
+package org.team100.lib.async;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -9,25 +9,26 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.team100.lib.util.Util;
+
 /**
  * Runs low-priority, timing-insensitive stuff asynchronously.
  * 
  * Instead of a WPILib Notifier, this uses a java executor, in order to set the
  * thread priority really low and avoid the notifier interrupt.
  */
-public class Async {
-    public static final Async runner = new Async();
-
+public class ExecutorAsync implements Async {
     private final ScheduledExecutorService m_scheduler;
 
     /** Run in t sec and every t sec thereafter. */
+    @Override
     public void addPeriodic(Runnable runnable, double periodS) {
         long periodMS = (long) (periodS * 1000);
         m_scheduler.scheduleAtFixedRate(
                 new CrashWrapper(runnable), periodMS, periodMS, TimeUnit.MILLISECONDS);
     }
 
-    private Async() {
+    ExecutorAsync() {
         m_scheduler = Executors.newSingleThreadScheduledExecutor(
                 new MinPriorityThreads());
     }
