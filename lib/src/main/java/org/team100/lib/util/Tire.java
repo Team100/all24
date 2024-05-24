@@ -1,8 +1,6 @@
 package org.team100.lib.util;
 
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.persistent_parameter.Parameter;
-import org.team100.lib.persistent_parameter.ParameterFactory;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -26,14 +24,21 @@ public class Tire {
 
     private final Telemetry t = Telemetry.get();
 
-    private final Parameter m_saturationM_s_s;
-    private final Parameter m_slipAtSaturation0_1;
+    private final double m_saturationM_s_s;
+    private final double m_slipAtSaturation0_1;
 
-    public Tire(ParameterFactory parameters) {
-        m_saturationM_s_s = parameters.mutable(kSaturationLabel, kDefaultSaturationM_s_s);
-        // override the preference for now.
-        m_saturationM_s_s.set(kDefaultSaturationM_s_s);
-        m_slipAtSaturation0_1 = parameters.mutable(kSlipLabel, kDefaultSlipAtSaturation0_1);
+    /** for testing */
+    Tire(double saturationM_s_s, double slip0_1) {
+        m_saturationM_s_s = saturationM_s_s;
+        m_slipAtSaturation0_1 = slip0_1;
+    }
+
+    public static Tire noslip() {
+        return new Tire(Double.MAX_VALUE, 0.0);
+    }
+
+    public static Tire defaultTire() {
+        return new Tire(kDefaultSaturationM_s_s, kDefaultSlipAtSaturation0_1);
     }
 
     /**
@@ -84,7 +89,7 @@ public class Tire {
      * Fraction of saturation accel.
      */
     double fraction(Vector2d desiredAccelM_s_s) {
-        return desiredAccelM_s_s.norm() / m_saturationM_s_s.get();
+        return desiredAccelM_s_s.norm() / m_saturationM_s_s;
     }
 
     /**
@@ -99,7 +104,7 @@ public class Tire {
      * </pre>
      */
     double scale(double fraction) {
-        double slip = m_slipAtSaturation0_1.get() * Math.min(1.0, Math.max(0.0, fraction));
+        double slip = m_slipAtSaturation0_1 * Math.min(1.0, Math.max(0.0, fraction));
         return 1 - slip;
     }
 
@@ -110,7 +115,7 @@ public class Tire {
     /** The given acceleration, limited by saturation. */
     Vector2d limit(Vector2d scaledAccelM_s_s) {
         double normM_s_s = scaledAccelM_s_s.norm();
-        double saturationM_s_s = m_saturationM_s_s.get();
+        double saturationM_s_s = m_saturationM_s_s;
         if (normM_s_s <= saturationM_s_s) {
             t.log(Level.DEBUG, "tire", "limit M_s_s", scaledAccelM_s_s);
             return scaledAccelM_s_s;

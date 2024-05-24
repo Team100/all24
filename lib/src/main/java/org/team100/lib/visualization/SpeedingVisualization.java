@@ -1,7 +1,7 @@
 package org.team100.lib.visualization;
 
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.motion.simple.Speeding;
-import org.team100.lib.util.Async;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -22,7 +22,7 @@ public class SpeedingVisualization {
 
     public static void make(String name, Speeding subsystem) {
         SpeedingVisualization v = new SpeedingVisualization(name, subsystem);
-        Async.runner.addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1);
     }
 
     private SpeedingVisualization(String name, Speeding subsystem) {

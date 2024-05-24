@@ -2,12 +2,9 @@ package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.persistent_parameter.ParameterFactory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -268,11 +265,7 @@ class SlipperyTireUtilTest {
                 new SwerveModulePosition(0.02, new Rotation2d()),
                 new SwerveModulePosition(0.02, new Rotation2d())
         };
-        ParameterFactory f = new ParameterFactory(new HashMap<>());
-        Tire t = new Tire(f);
-        f.mutable(
-                Tire.kSaturationLabel, 0).set(10);
-
+        Tire t = new Tire(10.0, 0.1);
         SlipperyTireUtil u = new SlipperyTireUtil(t);
         SwerveModulePosition[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
         // we wanted to go 1 m/s but this is 50m/s/s of accel
@@ -298,9 +291,8 @@ class SlipperyTireUtilTest {
                 new SwerveModulePosition(0, new Rotation2d()),
                 new SwerveModulePosition(0, new Rotation2d())
         };
-        ParameterFactory f = new ParameterFactory(new HashMap<>());
 
-        Tire t = new Tire(f);
+        Tire t = new Tire(10.0, 0.1);
         SlipperyTireUtil u = new SlipperyTireUtil(t);
         SwerveModulePosition[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
         // as above we are trying for 50 m/s/s but we get 10.

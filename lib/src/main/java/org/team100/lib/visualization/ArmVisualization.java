@@ -1,8 +1,8 @@
 package org.team100.lib.visualization;
 
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.util.Async;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -25,7 +25,7 @@ public class ArmVisualization {
 
     public static void make(ArmSubsystem armSubsystem) {
         ArmVisualization v = new ArmVisualization(armSubsystem);
-        Async.runner.addPeriodic(v::viz, 0.1);
+        AsyncFactory.get().addPeriodic(v::viz, 0.1);
     }
 
     private ArmVisualization(ArmSubsystem armSubsystem) {

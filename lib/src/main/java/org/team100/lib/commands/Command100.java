@@ -11,6 +11,8 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
@@ -28,15 +30,12 @@ public abstract class Command100 extends Command implements Glassy {
     private static final Telemetry t = Telemetry.get();
     private static final int kExecutePeriodMilliS = 5;
 
-    private final boolean kThreaded = false;
-
     private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
             new MaxPriorityThreads());
     protected final String m_name;
 
     private double prevTime;
     private Future<?> m_task;
-
 
     protected Command100() {
         m_name = Names.append(Command100.class.getSimpleName(), this);
@@ -58,18 +57,19 @@ public abstract class Command100 extends Command implements Glassy {
         t.log(Level.DEBUG, m_name, "command state", "initialize");
         prevTime = Timer.getFPGATimestamp();
         initialize100();
-        if (m_scheduler.isShutdown()) {
-            Util.warn("TEST MODE: skipping scheduler.");
-            return;
-        }
-        if (kThreaded) {
-            m_task = m_scheduler.scheduleAtFixedRate(new CrashWrapper(), 0, kExecutePeriodMilliS, TimeUnit.MILLISECONDS);
+        if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
+            if (m_scheduler.isShutdown()) {
+                Util.warn("TEST MODE: skipping scheduler.");
+                return;
+            }
+            m_task = m_scheduler.scheduleAtFixedRate(new CrashWrapper(), 0, kExecutePeriodMilliS,
+                    TimeUnit.MILLISECONDS);
         }
     }
 
     @Override
     public final void execute() {
-        if (kThreaded) {
+        if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
             return;
         }
         t.log(Level.DEBUG, m_name, "command state", "execute");
@@ -78,10 +78,6 @@ public abstract class Command100 extends Command implements Glassy {
         t.log(Level.DEBUG, m_name, "dt", dt);
         prevTime = now;
         execute100(dt);
-        if (m_scheduler.isShutdown()) {
-            Util.warn("TEST MODE: skipping scheduler.");
-            return;
-        }
     }
 
     @Override

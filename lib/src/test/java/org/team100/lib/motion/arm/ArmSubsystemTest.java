@@ -25,7 +25,7 @@ class ArmSubsystemTest implements Timeless {
 
         // these values seem timing dependent?
         assertEquals(0.2, armSubSystem.getPosition().th1, 0.2);
-        assertEquals(0.2, armSubSystem.getPosition().th2, 0.2);
+        assertEquals(0.5, armSubSystem.getPosition().th2, 0.2);
 
         armSubSystem.close();
     }

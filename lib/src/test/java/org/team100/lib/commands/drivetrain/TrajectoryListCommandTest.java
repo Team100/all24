@@ -16,13 +16,11 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.persistent_parameter.Parameter;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.trajectory.TrajectoryPlanner;
-import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -34,6 +32,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     private static final double kDtS = 0.02;
 
     TrajectoryPlanner planner = new TrajectoryPlanner();
+    // default for testing is no wheel slip
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
@@ -46,35 +45,27 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
 
     @Test
     void testSimple() {
-        // no wheel slip
-        Parameter saturation = fixture.poseEstimator.f.mutable(Tire.kSaturationLabel, 10);
-        try {
-            saturation.set(Double.MAX_VALUE);
+        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
+        HolonomicDriveController3 control = new HolonomicDriveController3();
+        TrajectoryListCommand c = new TrajectoryListCommand(
+                fixture.drive,
+                control,
+                x -> List.of(maker.line(x)));
+        TrajectoryListCommand.shutDownForTest();
+        c.initialize();
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
+        c.execute100(0);
+        assertFalse(c.isFinished());
+        // the trajectory takes a little over 2s
+        for (double t = 0; t < 2.02; t += kDtS) {
+            stepTime(kDtS);
+            c.execute100(kDtS);
+            fixture.drive.periodic(); // for updateOdometry
 
-            Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-            HolonomicDriveController3 control = new HolonomicDriveController3();
-            TrajectoryListCommand c = new TrajectoryListCommand(
-                    fixture.drive,
-                    control,
-                    x -> List.of(maker.line(x)));
-            TrajectoryListCommand.shutDownForTest();
-            c.initialize();
-            assertEquals(0, fixture.drive.getPose().getX(), kDelta);
-            c.execute100(0);
-            assertFalse(c.isFinished());
-            // the trajectory takes a little over 2s
-            for (double t = 0; t < 2.02; t += kDtS) {
-                stepTime(kDtS);
-                c.execute100(kDtS);
-                fixture.drive.periodic(); // for updateOdometry
-
-            }
-            // at goal; wide tolerance due to test timing
-            assertTrue(c.isFinished());
-            assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
-        } finally {
-            saturation.reset();
         }
+        // at goal; wide tolerance due to test timing
+        assertTrue(c.isFinished());
+        assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
     }
 
     /**
