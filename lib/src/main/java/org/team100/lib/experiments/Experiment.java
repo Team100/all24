@@ -75,5 +75,9 @@ public enum Experiment {
     /**
      * Use Java executor for Command100.
      */
-    UseCommandExecutor
+    UseCommandExecutor,
+    /**
+     * Periodically publish all tag poses to all cameras
+     */
+    UseCameraUpdater
 }
