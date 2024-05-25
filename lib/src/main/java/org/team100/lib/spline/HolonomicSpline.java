@@ -15,6 +15,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 /**
  * Holonomic spline.
  * 
+ * Internally this is three one-dimensional splines (x, y, heading), with
+ * respect to a parameter [0,1].
+ * 
  * If you don't care about rotation, just pass zero.
  * 
  * Note that some nonholonomic spline consumers assume that dx carries all the
@@ -33,8 +36,10 @@ public class HolonomicSpline {
     private final Rotation2d r0;
 
     /**
-     * @param p0 The starting pose of the spline
-     * @param p1 The ending pose of the spline
+     * @param p0 The starting point and direction of the spline
+     * @param p1 The ending point and direction of the spline
+     * @param r0 The starting heading
+     * @param r1 The ending heading
      */
     public HolonomicSpline(Pose2d p0, Pose2d p1, Rotation2d r0, Rotation2d r1) {
 
@@ -99,8 +104,7 @@ public class HolonomicSpline {
 
     /**
      * Finds the optimal second derivative values for a set of splines to reduce the
-     * sum of the change in curvature
-     * squared over the path
+     * sum of the change in curvature squared over the path
      *
      * @param splines the list of splines to optimize
      * @return the final sumDCurvature2
@@ -134,14 +138,15 @@ public class HolonomicSpline {
     }
 
     /**
-     * Return a new spline that is a copy of this one, but with adjustments to
+     * Return a new spline that is a copy of this one, but with substitute
      * second derivatives.
      */
-    private HolonomicSpline adjustSecondDerivatives(double ddx0_adjustment, double ddx1_adjustment,
-            double ddy0_adjustment, double ddy1_adjustment) {
+    private HolonomicSpline adjustSecondDerivatives(
+            double ddx0_sub, double ddx1_sub,
+            double ddy0_sub, double ddy1_sub) {
         return new HolonomicSpline(
-                x.addCoefs(new Spline1d(0, 0, 0, 0, ddx0_adjustment, ddx1_adjustment)),
-                y.addCoefs(new Spline1d(0, 0, 0, 0, ddy0_adjustment, ddy1_adjustment)),
+                x.addCoefs(new Spline1d(0, 0, 0, 0, ddx0_sub, ddx1_sub)),
+                y.addCoefs(new Spline1d(0, 0, 0, 0, ddy0_sub, ddy1_sub)),
                 theta,
                 r0);
     }

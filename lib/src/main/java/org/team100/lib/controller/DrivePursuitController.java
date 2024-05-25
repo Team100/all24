@@ -69,7 +69,7 @@ public class DrivePursuitController implements DriveMotionController {
     }
 
     @Override
-    public void setTrajectory(final TrajectoryTimeIterator trajectory) {
+    public void setTrajectory(TrajectoryTimeIterator trajectory) {
         m_iter = trajectory;
         useMinSpeed = true;
 

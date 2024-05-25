@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
+import org.team100.lib.path.PathPoint;
 import org.team100.lib.path.PathSamplePoint;
 import org.team100.lib.spline.HolonomicSpline;
 import org.team100.lib.spline.SplineGenerator;
@@ -19,6 +20,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 class TrajectoryUtilTest {
+    private static final double kDelta = 0.01;
+
     @Test
     void testEmpty() {
         List<HolonomicSpline> splines = new ArrayList<>();
@@ -33,7 +36,7 @@ class TrajectoryUtilTest {
     void testSimple() {
         // spline is in the x direction, no curvature.
         HolonomicSpline spline = new HolonomicSpline(
-            new Pose2d(),
+                new Pose2d(),
                 new Pose2d(1, 0, new Rotation2d()),
                 new Rotation2d(), new Rotation2d()) {
 
@@ -103,5 +106,59 @@ class TrajectoryUtilTest {
             assertEquals(0, pose2d.getY(), 0.001);
             assertEquals(0, pose2d.getRotation().getRadians(), 0.001);
         }
+    }
+
+    @Test
+    void testStationary() {
+        List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
+        List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
+        Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                waypoints, headings, 0.01, 0.01, 0.1);
+
+        assertEquals(2, path.length());
+        PathPoint p = path.getPoint(0);
+        assertEquals(0, p.state().getPose().getX(), kDelta);
+        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(0, p.state().getHeadingRate(), kDelta);
+        p = path.getPoint(1);
+        assertEquals(0, p.state().getPose().getX(), kDelta);
+        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(0, p.state().getHeadingRate(), kDelta);
+    }
+
+    @Test
+    void testLinear() {
+        List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d(1, 0, new Rotation2d()));
+        List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
+        Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                waypoints, headings, 0.01, 0.01, 0.1);
+
+        assertEquals(2, path.length());
+        PathPoint p = path.getPoint(0);
+        assertEquals(0, p.state().getPose().getX(), kDelta);
+        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(0, p.state().getHeadingRate(), kDelta);
+        p = path.getPoint(1);
+        assertEquals(1, p.state().getPose().getX(), kDelta);
+        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(0, p.state().getHeadingRate(), kDelta);
+    }
+
+    @Test
+    void testRotation() {
+        List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
+        List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d(1));
+        Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                waypoints, headings, 0.01, 0.01, 0.1);
+
+        assertEquals(2, path.length());
+        PathPoint p = path.getPoint(0);
+        assertEquals(0, p.state().getPose().getX(), kDelta);
+        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(0, p.state().getHeadingRate(), kDelta);
+        p = path.getPoint(1);
+        assertEquals(0, p.state().getPose().getX(), kDelta);
+        assertEquals(1, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(0, p.state().getHeadingRate(), kDelta);
     }
 }

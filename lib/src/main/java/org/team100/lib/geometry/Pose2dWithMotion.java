@@ -69,8 +69,10 @@ public class Pose2dWithMotion {
      *                                     the robot
      * @param fieldRelativeMotionDirection Represents the change in location and
      *                                     heading, per meter traveled.
-     * @param curvatureRad_M
-     * @param dCurvatureDsRad_M2
+     * @param curvatureRad_M               Represents the change in course per meter
+     *                                     traveled.
+     * @param dCurvatureDsRad_M2           Represents the acceleration in course per
+     *                                     meter traveled squared.
      */
     public Pose2dWithMotion(
             Pose2d pose,
