@@ -14,6 +14,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
+import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 import org.team100.lib.trajectory.Trajectory100;
 
@@ -53,6 +54,28 @@ public class TimingUtilTest {
                 end_vel,
                 max_vel,
                 max_acc);
+        System.out.println("traj " + timed_traj.length());
+        checkTrajectory(timed_traj, constraints, start_vel, end_vel, max_vel, max_acc);
+        return timed_traj;
+    }
+
+    public Trajectory100 buildAndCheckTrajectory(
+            final PathIndexSampler dist_view,
+            double step_size,
+            List<TimingConstraint> constraints,
+            double start_vel,
+            double end_vel,
+            double max_vel,
+            double max_acc) {
+        Trajectory100 timed_traj = TimingUtil.timeParameterizeTrajectory(
+                dist_view,
+                step_size,
+                constraints,
+                start_vel,
+                end_vel,
+                max_vel,
+                max_acc);
+        System.out.println("traj " + timed_traj.length());
         checkTrajectory(timed_traj, constraints, start_vel, end_vel, max_vel, max_acc);
         return timed_traj;
     }
@@ -101,15 +124,46 @@ public class TimingUtilTest {
         Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
                 1.0,
                 new ArrayList<TimingConstraint>(), 0.0, 0.0, 20.0, 5.0);
+        assertEquals(66, timed_traj.length());
         assertNotNull(timed_traj);
 
         // Trapezoidal profile.
         timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint>(), 0.0, 0.0,
                 10.0, 5.0);
+        assertEquals(66, timed_traj.length());
 
         // Trapezoidal profile with start and end velocities.
         timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint>(), 5.0, 2.0,
                 10.0, 5.0);
+        assertEquals(66, timed_traj.length());
+
+    }
+
+    @Test
+    void testNoConstraintsIndexed() {
+        Path100 traj = new Path100(kWaypoints);
+        PathIndexSampler dist_view = new PathIndexSampler(traj);
+
+        // Triangle profile.
+        Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
+                0.0465, // to make 66 below
+                new ArrayList<TimingConstraint>(), 0.0, 0.0, 20.0, 5.0);
+        assertNotNull(timed_traj);
+        assertEquals(66, timed_traj.length());
+
+        // Trapezoidal profile.
+        timed_traj = buildAndCheckTrajectory(dist_view,
+                0.0465, // to make 66 below
+                new ArrayList<TimingConstraint>(), 0.0, 0.0, 10.0, 5.0);
+        assertEquals(66, timed_traj.length());
+
+        // Trapezoidal profile with start and end velocities.
+        timed_traj = buildAndCheckTrajectory(dist_view,
+                0.0465, // to make 66 below
+                new ArrayList<TimingConstraint>(),
+                5.0, 2.0, 10.0, 5.0);
+        assertEquals(66, timed_traj.length());
+
     }
 
     @Test
@@ -142,9 +196,63 @@ public class TimingUtilTest {
     }
 
     @Test
+    void testConditionalVelocityConstraintIndex() {
+        Path100 traj = new Path100(kWaypoints);
+        PathIndexSampler dist_view = new PathIndexSampler(traj);
+
+        class ConditionalTimingConstraint implements TimingConstraint {
+            @Override
+            public double getMaxVelocity(Pose2dWithMotion state) {
+                if (state.getTranslation().getX() >= 24.0) {
+                    return 5.0;
+                } else {
+                    return Double.POSITIVE_INFINITY;
+                }
+            }
+
+            @Override
+            public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state,
+                    double velocity) {
+                return new TimingConstraint.MinMaxAcceleration(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            }
+        }
+
+        // Trapezoidal profile.
+        Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
+                1.0,
+                Arrays.asList(new ConditionalTimingConstraint()), 0.0, 0.0, 10.0, 5.0);
+        assertNotNull(timed_traj);
+    }
+
+    @Test
     void testConditionalAccelerationConstraint() {
         Path100 traj = new Path100(kWaypoints);
         PathDistanceSampler dist_view = new PathDistanceSampler(traj);
+
+        class ConditionalTimingConstraint implements TimingConstraint {
+            @Override
+            public double getMaxVelocity(Pose2dWithMotion state) {
+                return Double.POSITIVE_INFINITY;
+            }
+
+            @Override
+            public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state,
+                    double velocity) {
+                return new TimingConstraint.MinMaxAcceleration(-10.0, 10.0 / velocity);
+            }
+        }
+
+        // Trapezoidal profile.
+        Trajectory100 timed_traj = buildAndCheckTrajectory(dist_view,
+                1.0,
+                Arrays.asList(new ConditionalTimingConstraint()), 0.0, 0.0, 10.0, 5.0);
+        assertNotNull(timed_traj);
+    }
+
+    @Test
+    void testConditionalAccelerationConstraintIndex() {
+        Path100 traj = new Path100(kWaypoints);
+        PathIndexSampler dist_view = new PathIndexSampler(traj);
 
         class ConditionalTimingConstraint implements TimingConstraint {
             @Override

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.PathDistanceSampler;
+import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.util.Util;
 
@@ -32,6 +33,30 @@ public class TimingUtil {
             return new Trajectory100();
         }
     }
+
+    public static Trajectory100 timeParameterizeTrajectory(
+        final PathIndexSampler distance_view,
+        double step_size,
+        final List<TimingConstraint> constraints,
+        double start_velocity,
+        double end_velocity,
+        double max_velocity,
+        double max_abs_acceleration) {
+    System.out.println("ASDF+=======================");
+    try {
+        final int num_states = (int) Math.ceil(distance_view.getMaxIndex() / step_size + 1);
+        System.out.println("states " + num_states);
+        List<Pose2dWithMotion> states = new ArrayList<>(num_states);
+        for (int i = 0; i < num_states; ++i) {
+            states.add(distance_view.sample(Math.min(i * step_size, distance_view.getMaxIndex())).state());
+        }
+        return timeParameterizeTrajectory(states, constraints, start_velocity, end_velocity,
+                max_velocity, max_abs_acceleration);
+    } catch (TimingException e) {
+        Util.warn("Timing exception");
+        return new Trajectory100();
+    }
+}
 
     private static Trajectory100 timeParameterizeTrajectory(
             final List<Pose2dWithMotion> states,
