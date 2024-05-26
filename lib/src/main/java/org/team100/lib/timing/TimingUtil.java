@@ -6,81 +6,90 @@ import java.util.List;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
+import org.team100.lib.timing.TimingConstraint.NonNegativeDouble;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.util.Util;
 
+/**
+ * Distance is always positive.
+ * Velocity is always positive.
+ * Max accel is positive.
+ * Min accel is negative.
+ */
 public class TimingUtil {
     private static final double kEpsilon = 1e-6;
 
-    public static Trajectory100 timeParameterizeTrajectory(
-            final PathDistanceSampler distance_view,
-            double step_size,
-            final List<TimingConstraint> constraints,
-            double start_velocity,
-            double end_velocity,
-            double max_velocity,
-            double max_abs_acceleration) {
+    private final List<TimingConstraint> m_constraints;
+    private final double m_velocityLimit;
+    private final double m_absAccelerationLimit;
+
+    public TimingUtil(
+            List<TimingConstraint> constraints,
+            double velocityLimit,
+            double absAccelerationLimit) {
+        m_constraints = constraints;
+        m_velocityLimit = velocityLimit;
+        m_absAccelerationLimit = absAccelerationLimit;
+    }
+
+    /**
+     * sample the path evenly by distance, and then assign times to each sample.
+     */
+    public Trajectory100 timeParameterizeTrajectory(
+            PathDistanceSampler sampler,
+            double step,
+            double start_vel,
+            double end_vel) {
         try {
-            final int num_states = (int) Math.ceil(distance_view.getMaxDistance() / step_size + 1);
-            List<Pose2dWithMotion> states = new ArrayList<>(num_states);
+            double maxDistance = sampler.getMaxDistance();
+            int num_states = (int) Math.ceil(maxDistance / step + 1);
+            List<Pose2dWithMotion> samples = new ArrayList<>(num_states);
             for (int i = 0; i < num_states; ++i) {
-                states.add(distance_view.sample(Math.min(i * step_size, distance_view.getMaxDistance())).state());
+                samples.add(sampler.sample(Math.min(i * step, maxDistance)).state());
             }
-            return timeParameterizeTrajectory(states, constraints, start_velocity, end_velocity,
-                    max_velocity, max_abs_acceleration);
+            return timeParameterizeTrajectory(samples, start_vel, end_vel);
         } catch (TimingException e) {
             Util.warn("Timing exception");
             return new Trajectory100();
         }
     }
 
-    public static Trajectory100 timeParameterizeTrajectory(
-        final PathIndexSampler distance_view,
-        double step_size,
-        final List<TimingConstraint> constraints,
-        double start_velocity,
-        double end_velocity,
-        double max_velocity,
-        double max_abs_acceleration) {
-    System.out.println("ASDF+=======================");
-    try {
-        final int num_states = (int) Math.ceil(distance_view.getMaxIndex() / step_size + 1);
-        System.out.println("states " + num_states);
-        List<Pose2dWithMotion> states = new ArrayList<>(num_states);
-        for (int i = 0; i < num_states; ++i) {
-            states.add(distance_view.sample(Math.min(i * step_size, distance_view.getMaxIndex())).state());
+    /**
+     * sample the path evenly by index, and then assign times to each sample.
+     */
+    public Trajectory100 timeParameterizeTrajectory(
+            PathIndexSampler sampler,
+            double step,
+            double start_vel,
+            double end_vel) {
+        try {
+            double maxIndex = sampler.getMaxIndex();
+            int num_states = (int) Math.ceil(maxIndex / step + 1);
+            System.out.println("states " + num_states);
+            List<Pose2dWithMotion> samples = new ArrayList<>(num_states);
+            for (int i = 0; i < num_states; ++i) {
+                samples.add(sampler.sample(Math.min(i * step, maxIndex)).state());
+            }
+            return timeParameterizeTrajectory(samples, start_vel, end_vel);
+        } catch (TimingException e) {
+            e.printStackTrace();
+            Util.warn("Timing exception");
+            return new Trajectory100();
         }
-        return timeParameterizeTrajectory(states, constraints, start_velocity, end_velocity,
-                max_velocity, max_abs_acceleration);
-    } catch (TimingException e) {
-        Util.warn("Timing exception");
-        return new Trajectory100();
     }
-}
 
-    private static Trajectory100 timeParameterizeTrajectory(
-            final List<Pose2dWithMotion> states,
-            final List<TimingConstraint> constraints,
-            double start_velocity,
-            double end_velocity,
-            double max_velocity,
-            double max_abs_acceleration) throws TimingException {
-
-        List<ConstrainedState> constraint_states = forwardPass(
-                states,
-                constraints,
-                start_velocity,
-                max_velocity,
-                max_abs_acceleration);
-
-        backwardsPass(
-                states,
-                constraints,
-                end_velocity,
-                max_abs_acceleration,
-                constraint_states);
-
-        return integrate(states, constraint_states);
+    /**
+     * input is some set of samples (could be evenly sampled or not), output is
+     * these same samples with time.
+     */
+    private Trajectory100 timeParameterizeTrajectory(
+            List<Pose2dWithMotion> samples,
+            double start_vel,
+            double end_vel) throws TimingException {
+        List<ConstrainedState> constrainedStates = forwardPass(samples, start_vel);
+        Pose2dWithMotion lastState = samples.get(samples.size() - 1);
+        backwardsPass(lastState, end_vel, constrainedStates);
+        return integrate(constrainedStates);
     }
 
     /**
@@ -94,283 +103,276 @@ public class TimingUtil {
      * end velocity to the state's maximum allowed velocity and will repair the
      * acceleration during the backward pass (by slowing down the predecessor).
      */
-    private static List<ConstrainedState> forwardPass(
-            final List<Pose2dWithMotion> states,
-            final List<TimingConstraint> constraints,
-            double start_velocity,
-            double max_velocity,
-            double max_abs_acceleration) throws TimingException {
-
-        List<ConstrainedState> constraint_states = new ArrayList<>(states.size());
-
+    private List<ConstrainedState> forwardPass(List<Pose2dWithMotion> samples, double start_vel) {
         ConstrainedState predecessor = new ConstrainedState();
-        predecessor.state = states.get(0);
+        predecessor.state = samples.get(0);
         predecessor.distance = 0.0;
-        predecessor.max_velocity = start_velocity;
-        predecessor.min_acceleration = -max_abs_acceleration;
-        predecessor.max_acceleration = max_abs_acceleration;
+        predecessor.vel = start_vel;
+        predecessor.min_acceleration = -m_absAccelerationLimit;
+        predecessor.max_acceleration = m_absAccelerationLimit;
 
-        // work forward through the state list
-        for (Pose2dWithMotion p : states) {
-            ConstrainedState constraint_state = new ConstrainedState();
-            constraint_states.add(constraint_state);
-            constraint_state.state = p;
-            forwardWork(constraints, max_velocity, max_abs_acceleration, predecessor, constraint_state);
-            predecessor = constraint_state;
+        // work forward through the samples
+        List<ConstrainedState> constrainedStates = new ArrayList<>(samples.size());
+        for (Pose2dWithMotion sample : samples) {
+            ConstrainedState constrainedState = new ConstrainedState();
+            constrainedStates.add(constrainedState);
+            constrainedState.state = sample;
+            forwardWork(predecessor, constrainedState);
+            predecessor = constrainedState;
         }
-        return constraint_states;
+        return constrainedStates;
     }
 
-    private static void forwardWork(
-            final List<TimingConstraint> constraints,
-            double max_velocity,
-            double max_abs_acceleration,
-            ConstrainedState predecessor,
-            ConstrainedState constraint_state) throws TimingException {
-
+    private void forwardWork(ConstrainedState s0, ConstrainedState s1) {
         // constant-twist path length between states
-        final double ds = constraint_state.state.distance(predecessor.state);
+        // note this is zero for turn-in-place.
+        double ds = s1.state.distance(s0.state);
+        if (ds < 0) {
+            // must be positive if we're walking forwards.
+            throw new IllegalStateException();
+        }
 
         // total path distance so far
-        constraint_state.distance = ds + predecessor.distance;
+        s1.distance = ds + s0.distance;
 
         // We may need to iterate to find the maximum end velocity and common
         // acceleration, since acceleration limits may be a function of velocity.
         while (true) {
-            // Enforce global max velocity and max reachable velocity by global acceleration
-            // limit.
-            // vf = sqrt(vi^2 + 2*a*d)
-            constraint_state.max_velocity = Math.min(max_velocity,
-                    Math.sqrt(predecessor.max_velocity * predecessor.max_velocity
-                            + 2.0 * predecessor.max_acceleration * ds));
-            if (Double.isNaN(constraint_state.max_velocity)) {
-                throw new TimingException();
-            }
-            // Enforce global max absolute acceleration.
-            constraint_state.min_acceleration = -max_abs_acceleration;
-            constraint_state.max_acceleration = max_abs_acceleration;
+            // first try the previous state accel to get the new state velocity
+            double v1 = v1(s0.vel, s0.max_acceleration, ds);
+            s1.vel = Math.min(m_velocityLimit, v1);
 
-            // At this point, the state is full constructed, but no constraints have been
-            // applied aside from predecessor state max accel.
+            // also use max accels for the new state accels
+            s1.min_acceleration = -m_absAccelerationLimit;
+            s1.max_acceleration = m_absAccelerationLimit;
 
-            clampVelocity(constraints, constraint_state);
+            // reduce velocity according to constraints
+            s1.clampVelocity(m_constraints);
 
-            clampAccel(constraints, constraint_state);
+            // reduce accel according to constraints
+            s1.clampAccel(m_constraints);
 
-            if (ds < kEpsilon) {
+            // motionless
+            if (Math.abs(ds) < kEpsilon) {
                 return;
             }
-            // If the max acceleration for this constraint state is more conservative than
-            // what we had applied, we need to reduce the max accel at the predecessor state
-            // and try again. Doing a search would be better.
-            final double actual_acceleration = getActual_acceleration(predecessor, constraint_state, ds);
-            if (constraint_state.max_acceleration < actual_acceleration - kEpsilon) {
-                predecessor.max_acceleration = constraint_state.max_acceleration;
-            } else {
-                if (actual_acceleration > predecessor.min_acceleration + kEpsilon) {
-                    predecessor.max_acceleration = actual_acceleration;
-                }
-                // If actual acceleration is less than predecessor min accel, we will repair
-                // during the backward pass.
-                return;
-            }
-        }
-    }
 
-    /**
-     * Clamp state velocity to constraints.
-     */
-    private static void clampVelocity(
-            final List<TimingConstraint> constraints,
-            ConstrainedState constraint_state) throws TimingException {
-        for (final TimingConstraint constraint : constraints) {
-            constraint_state.max_velocity = Math.min(constraint_state.max_velocity,
-                    constraint.getMaxVelocity(constraint_state.state));
-        }
-        if (constraint_state.max_velocity < 0.0) {
-            // This should never happen if constraints are well-behaved.
-            throw new TimingException();
+            double accel = accel(s0.vel, s1.vel, ds);
+            if (accel > s1.max_acceleration + kEpsilon) {
+                // implied accel is too high because v1 is too high, perhaps because
+                // a0 was too high, try again with the (lower) constrained value
+                s0.max_acceleration = s1.max_acceleration;
+                continue;
+            }
+            if (accel > s0.min_acceleration + kEpsilon) {
+                // set the previous state accel to whatever the constrained velocity implies
+                s0.max_acceleration = accel;
+            }
+            return;
         }
     }
 
     /**
      * Backwards pass
      */
-    private static void backwardsPass(
-            final List<Pose2dWithMotion> states,
-            final List<TimingConstraint> constraints,
+    private void backwardsPass(
+            Pose2dWithMotion lastState,
             double end_velocity,
-            double max_abs_acceleration,
-            List<ConstrainedState> constraint_states) throws TimingException {
+            List<ConstrainedState> constrainedStates) {
         // "successor" comes before in the backwards walk. start with the last state.
         ConstrainedState successor = new ConstrainedState();
-        successor.state = states.get(states.size() - 1);
-        successor.distance = constraint_states.get(states.size() - 1).distance;
-        successor.max_velocity = end_velocity;
-        successor.min_acceleration = -max_abs_acceleration;
-        successor.max_acceleration = max_abs_acceleration;
+        successor.state = lastState;
+        successor.distance = constrainedStates.get(constrainedStates.size() - 1).distance;
+        successor.vel = end_velocity;
+        successor.min_acceleration = -m_absAccelerationLimit;
+        successor.max_acceleration = m_absAccelerationLimit;
 
         // work backwards through the states list
-        for (int i = states.size() - 1; i >= 0; --i) {
-            ConstrainedState constraint_state = constraint_states.get(i);
-            backwardsWork(constraints, successor, constraint_state);
-            successor = constraint_state;
+        for (int i = constrainedStates.size() - 1; i >= 0; --i) {
+            ConstrainedState constrainedState = constrainedStates.get(i);
+            backwardsWork(constrainedState, successor);
+            successor = constrainedState;
         }
     }
 
-    private static void backwardsWork(
-            final List<TimingConstraint> constraints,
-            ConstrainedState successor,
-            ConstrainedState constraint_state) throws TimingException {
-        // distance from this state to the successor, as a negative number.
-        final double ds = constraint_state.distance - successor.distance;
+    /** s0 is earlier, s1 is "successor", we're walking backwards. */
+    private void backwardsWork(ConstrainedState s0, ConstrainedState s1) {
+        // backwards (negative) distance from successor to initial state.
+        double ds = s0.distance - s1.distance;
+        if (ds > 0) {
+            // must be negative if we're walking backwards.
+            throw new IllegalStateException();
+        }
 
         while (true) {
-            // Enforce reverse max reachable velocity limit.
-            // vf = sqrt(vi^2 + 2*a*d), where vi = successor.
-            // entrance velocity can't be more than the accel implies
-            final double new_max_velocity = Math.sqrt(successor.max_velocity * successor.max_velocity
-                    + 2.0 * successor.min_acceleration * ds);
-            if (new_max_velocity >= constraint_state.max_velocity) {
+            // s0 velocity can't be more than the accel implies
+            // so this is actually an estimate for v0
+            // min a is negative, ds is negative, so v0 is faster than v1
+            double v0 = v1(s1.vel, s1.min_acceleration, ds);
+
+            if (s0.vel <= v0) {
+                // s0 v is slower than implied v0, which means
+                // that actual accel is larger than the min, so we're fine
                 // No new limits to impose.
                 return;
             }
-            constraint_state.max_velocity = new_max_velocity;
-            if (Double.isNaN(constraint_state.max_velocity)) {
-                throw new TimingException();
-            }
+            // s0 v is too fast, turn it down to obey v1 min accel.
+            s0.vel = v0;
 
-            clampAccel(constraints, constraint_state);
+            s0.clampAccel(m_constraints);
 
-            if (ds > kEpsilon) {
+            // motionless
+            if (Math.abs(ds) < kEpsilon) {
                 return;
             }
-            // If the min acceleration for this constraint state is more conservative than
-            // what we have applied, we need to reduce the min accel and try again. Doing a
-            // search would be better.
-            // accel based on state velocities:
-            final double actual_acceleration = getActual_acceleration(successor, constraint_state, ds);
 
-            if (constraint_state.min_acceleration > actual_acceleration + kEpsilon) {
-                // state accel is too low
-                successor.min_acceleration = constraint_state.min_acceleration;
-            } else {
-                successor.min_acceleration = actual_acceleration;
-                return;
+            // implied accel using the constrained v0
+            double accel = accel(s1.vel, s0.vel, ds);
+            if (accel < s0.min_acceleration - kEpsilon) {
+                // accel is too low which implies that s1 accel is too low, try again
+                s1.min_acceleration = s0.min_acceleration;
+                continue;
             }
-        }
-    }
-
-    /**
-     * This calculates acceleration based on the change in velocity and the change
-     * in distance, as follows:
-     * 
-     * a = dv/dt
-     * v = ds/dt => dt = ds/v
-     * 
-     * substituting dt:
-     * 
-     * a = v dv/ds
-     * 
-     * a = v (v0-v1)/ds
-     * 
-     * average v is (v0+v1)/2, so
-     * 
-     * a = (v0+v1)(v0-v1)/2ds
-     * 
-     * or
-     * 
-     * (v0^2 - v1^2)/2ds
-     */
-    private static double getActual_acceleration(
-            ConstrainedState successor,
-            ConstrainedState constraint_state,
-            final double ds) {
-        return (constraint_state.max_velocity * constraint_state.max_velocity
-                - successor.max_velocity * successor.max_velocity) / (2.0 * ds);
-    }
-
-    /**
-     * Clamp constraint state accelerations to the constraints.
-     */
-    private static void clampAccel(List<TimingConstraint> constraints, ConstrainedState constraint_state)
-            throws TimingException {
-        for (final TimingConstraint constraint : constraints) {
-            final TimingConstraint.MinMaxAcceleration min_max_accel = constraint
-                    .getMinMaxAcceleration(constraint_state.state, constraint_state.max_velocity);
-            constraint_state.min_acceleration = Math.max(
-                    constraint_state.min_acceleration,
-                    min_max_accel.getMinAccel());
-            constraint_state.max_acceleration = Math.min(
-                    constraint_state.max_acceleration,
-                    min_max_accel.getMaxAccel());
-        }
-        if (constraint_state.min_acceleration > constraint_state.max_acceleration) {
-            throw new TimingException();
+            // set final accel to the implied value
+            s1.min_acceleration = accel;
+            return;
         }
     }
 
     /**
      * Integrate the constrained states forward in time to obtain the TimedStates.
+     * 
+     * last state accel is always zero, which might be wrong.
      */
-    private static Trajectory100 integrate(
-            final List<Pose2dWithMotion> states,
-            List<ConstrainedState> constraint_states) throws TimingException {
-        List<TimedPose> timed_states = new ArrayList<>(states.size());
-        double t = 0.0; // time along path
-        double s = 0.0; // distance along path
-        double v = 0.0;
+    private static Trajectory100 integrate(List<ConstrainedState> states) throws TimingException {
+        List<TimedPose> poses = new ArrayList<>(states.size());
+        double time = 0.0; // time along path
+        double distance = 0.0; // distance along path
+        double v0 = 0.0;
         for (int i = 0; i < states.size(); ++i) {
-            final ConstrainedState constrained_state = constraint_states.get(i);
-            // Advance t.
-            final double ds = constrained_state.distance - s;
-            final double accel = (constrained_state.max_velocity * constrained_state.max_velocity - v * v) / (2.0 * ds);
+            ConstrainedState state = states.get(i);
+            double ds = state.distance - distance;
+            double v1 = state.vel;
             double dt = 0.0;
             if (i > 0) {
-                timed_states.get(i - 1).set_acceleration(accel);
-                dt = calculateDt(v, constrained_state, ds, accel);
+                double prevAccel = accel(v0, v1, ds);
+                poses.get(i - 1).set_acceleration(prevAccel);
+                dt = dt(v0, v1, ds, prevAccel);
             }
-            t += dt;
-            if (Double.isNaN(t) || Double.isInfinite(t)) {
+            time += dt;
+            if (Double.isNaN(time) || Double.isInfinite(time)) {
                 throw new TimingException();
             }
-
-            v = constrained_state.max_velocity;
-            s = constrained_state.distance;
-            timed_states.add(
-                    new TimedPose(constrained_state.state, t, v, accel));
+            poses.add(new TimedPose(state.state, time, v1, 0));
+            v0 = v1;
+            distance = state.distance;
         }
-        return new Trajectory100(timed_states);
+        return new Trajectory100(poses);
     }
 
-    private static double calculateDt(double v, final ConstrainedState constrained_state, final double ds,
-            final double accel) throws TimingException {
+    private static double dt(
+            double v0,
+            double v1,
+            double ds,
+            double accel) throws TimingException {
         if (Math.abs(accel) > kEpsilon) {
-            return (constrained_state.max_velocity - v) / accel;
-        } else if (Math.abs(v) > kEpsilon) {
-            return ds / v;
-        } else {
-            throw new TimingException();
+            return (v1 - v0) / accel;
         }
+        if (Math.abs(v0) > kEpsilon) {
+            return ds / v0;
+        }
+        throw new TimingException();
     }
 
-    protected static class ConstrainedState {
+    /**
+     * Return final velocity, v1, given initial velocity, v0, and acceleration over
+     * distance ds.
+     * 
+     * v1 = sqrt(v0^2 + 2ads)
+     * 
+     * note a can be negative.
+     * 
+     * note ds can be negative, which implies backwards time
+     */
+    static double v1(double v0, double a, double ds) {
+        /*
+         * a = dv/dt
+         * v = ds/dt
+         * dt = ds/v
+         * a = v dv/ds
+         * a = v (v1-v0)/ds
+         * v = (v0+v1)/2
+         * a = (v0+v1)(v1-v0)/2ds
+         * a = (v1^2 - v0^2)/2ds
+         * 2*a*ds = v1^2 - v0^2
+         * v1 = sqrt(v0^2 + 2*a*ds)
+         */
+        return Math.sqrt(v0 * v0 + 2.0 * a * ds);
+    }
+
+    /**
+     * Return acceleration implied by the change in velocity (v0 to v1)
+     * over the distance, ds.
+     * 
+     * a = (v1^2 - v0^2) / 2ds
+     * 
+     * note ds can be negative, which implies negative time.
+     */
+    static double accel(double v0, double v1, double ds) {
+        /*
+         * a = dv/dt
+         * v = ds/dt
+         * dt = ds/v
+         * a = v dv/ds
+         * a = v (v1-v0)/ds
+         * v = (v0+v1)/2
+         * a = (v0+v1)(v1-v0)/2ds
+         * a = (v1^2 - v0^2)/2ds
+         */
+        return (v1 * v1 - v0 * v0) / (2.0 * ds);
+    }
+
+    static class ConstrainedState {
         public Pose2dWithMotion state;
         public double distance;
-        public double max_velocity;
+        public double vel;
         public double min_acceleration;
         public double max_acceleration;
 
+        /**
+         * Clamp state velocity to constraints.
+         */
+        public void clampVelocity(List<TimingConstraint> constraints) {
+            for (TimingConstraint constraint : constraints) {
+                NonNegativeDouble constraintVel = constraint.getMaxVelocity(state);
+                vel = Math.min(vel, constraintVel.getValue());
+            }
+        }
+
+        /**
+         * Clamp constraint state accelerations to the constraints.
+         */
+        public void clampAccel(List<TimingConstraint> constraints) {
+            for (TimingConstraint constraint : constraints) {
+                TimingConstraint.MinMaxAcceleration min_max_accel = constraint
+                        .getMinMaxAcceleration(state, vel);
+                min_acceleration = Math.max(
+                        min_acceleration,
+                        min_max_accel.getMinAccel());
+                max_acceleration = Math.min(
+                        max_acceleration,
+                        min_max_accel.getMaxAccel());
+            }
+
+        }
+
         @Override
         public String toString() {
-            return state.toString() + ", distance: " + distance + ", max_velocity: " + max_velocity + ", " +
+            return state.toString() + ", distance: " + distance + ", vel: " + vel + ", " +
                     "min_acceleration: " + min_acceleration + ", max_acceleration: " + max_acceleration;
         }
     }
 
     public static class TimingException extends Exception {
-    }
-
-    private TimingUtil() {
     }
 }

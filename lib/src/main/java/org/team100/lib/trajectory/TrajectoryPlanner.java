@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
+import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
 
@@ -31,15 +32,15 @@ public class TrajectoryPlanner {
         Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
                 waypoints, headings, kMaxDx, kMaxDy, kMaxDTheta);
         // Generate the timed trajectory.
-        PathDistanceSampler distance_view = new PathDistanceSampler(path);
-        return TimingUtil.timeParameterizeTrajectory(
-                distance_view,
+        // TODO: get rid of distance sampler
+        var view = new PathDistanceSampler(path);
+        // var view = new PathIndexSampler(path);
+        TimingUtil u = new TimingUtil(constraints, max_vel, max_accel);
+        return u.timeParameterizeTrajectory(
+                view,
                 kMaxDx,
-                constraints,
                 start_vel,
-                end_vel,
-                max_vel,
-                max_accel);
+                end_vel);
     }
 
     private TrajectoryPlanner() {

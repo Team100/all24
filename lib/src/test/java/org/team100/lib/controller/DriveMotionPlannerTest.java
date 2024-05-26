@@ -12,7 +12,6 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
-import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
@@ -59,8 +58,16 @@ class DriveMotionPlannerTest {
         Assertions.assertFalse(traj.isEmpty());
         Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
 
-        Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(new PathDistanceSampler(traj), 2,
-                Arrays.asList(), start_vel, end_vel, max_vel, max_accel);
+        // var view = new PathDistanceSampler(traj);
+        // var stepSize = 2;
+        var view = new PathIndexSampler(traj);
+        var stepSize = 0.1;
+        TimingUtil u = new TimingUtil(Arrays.asList(), max_vel, max_accel);
+        Trajectory100 timed_trajectory = u.timeParameterizeTrajectory(
+                view,
+                stepSize,
+                start_vel,
+                end_vel);
 
         DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
