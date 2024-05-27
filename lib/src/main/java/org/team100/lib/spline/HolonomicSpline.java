@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -58,11 +59,11 @@ public class HolonomicSpline {
         double ddy0 = 0;
         double ddy1 = 0;
 
-        this.x = new Spline1d(x0, x1, dx0, dx1, ddx0, ddx1);
-        this.y = new Spline1d(y0, y1, dy0, dy1, ddy0, ddy1);
+        this.x = Spline1d.newSpline1d(x0, x1, dx0, dx1, ddx0, ddx1);
+        this.y = Spline1d.newSpline1d(y0, y1, dy0, dy1, ddy0, ddy1);
         this.r0 = r0;
         double delta = r0.unaryMinus().rotateBy(r1).getRadians();
-        theta = new Spline1d(0.0, delta, 0, 0, 0, 0);
+        theta = Spline1d.newSpline1d(0.0, delta, 0, 0, 0, 0);
     }
 
     private HolonomicSpline(
@@ -120,6 +121,7 @@ public class HolonomicSpline {
             prev = current;
             count++;
         }
+        Util.warn("Spline optimization failed");
         return prev;
     }
 
@@ -145,8 +147,8 @@ public class HolonomicSpline {
             double ddx0_sub, double ddx1_sub,
             double ddy0_sub, double ddy1_sub) {
         return new HolonomicSpline(
-                x.addCoefs(new Spline1d(0, 0, 0, 0, ddx0_sub, ddx1_sub)),
-                y.addCoefs(new Spline1d(0, 0, 0, 0, ddy0_sub, ddy1_sub)),
+                x.addCoefs(Spline1d.newSpline1d(0, 0, 0, 0, ddx0_sub, ddx1_sub)),
+                y.addCoefs(Spline1d.newSpline1d(0, 0, 0, 0, ddy0_sub, ddy1_sub)),
                 theta,
                 r0);
     }
@@ -250,6 +252,8 @@ public class HolonomicSpline {
 
     private double dCurvature2(double t) {
         double dx2dy2 = (dx(t) * dx(t) + dy(t) * dy(t));
+        if (dx2dy2 == 0)
+            throw new IllegalArgumentException();
         double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2
                 - 3 * (dx(t) * ddy(t) - ddx(t) * dy(t)) * (dx(t) * ddx(t) + dy(t) * ddy(t));
         return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
@@ -275,6 +279,8 @@ public class HolonomicSpline {
         for (HolonomicSpline s : splines) {
             sum += s.sumDCurvature2();
         }
+        if (Double.isNaN(sum))
+            throw new IllegalArgumentException();
         return sum;
     }
 
@@ -300,6 +306,8 @@ public class HolonomicSpline {
         double magnitude = getControlPoints(splines, controlPoints);
 
         magnitude = Math.sqrt(magnitude);
+        if (Double.isNaN(magnitude))
+            throw new IllegalArgumentException();
 
         // minimize along the direction of the gradient
         // first calculate 3 points along the direction of the gradient

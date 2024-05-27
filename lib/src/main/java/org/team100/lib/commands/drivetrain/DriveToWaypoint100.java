@@ -99,6 +99,8 @@ public class DriveToWaypoint100 extends Command100 {
         Pose2d currentPose = m_swerve.getPose();
         ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
+        if (output == null)
+            return;
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);

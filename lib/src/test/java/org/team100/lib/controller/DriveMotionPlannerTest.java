@@ -1,18 +1,19 @@
 package org.team100.lib.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
-import org.team100.lib.path.PathIndexSampler;
+import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
@@ -48,20 +49,15 @@ class DriveMotionPlannerTest {
         double max_accel = 100;
 
         Path100 traj = new Path100();
-        Assertions.assertTrue(traj.isEmpty());
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMaxIndex(), 0.2);
-        Assertions.assertEquals(0, traj.length());
+        assertTrue(traj.isEmpty());
+        assertEquals(0, traj.length());
 
         // Set states at construction time.
         traj = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(waypoints, headings, 2, 0.25, 0.1);
-        Assertions.assertFalse(traj.isEmpty());
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
+        assertFalse(traj.isEmpty());
 
-        // var view = new PathDistanceSampler(traj);
-        // var stepSize = 2;
-        var view = new PathIndexSampler(traj);
-        var stepSize = 0.1;
+        var view = new PathDistanceSampler(traj);
+        var stepSize = 2;
         TimingUtil u = new TimingUtil(Arrays.asList(), max_vel, max_accel);
         Trajectory100 timed_trajectory = u.timeParameterizeTrajectory(
                 view,
@@ -89,9 +85,9 @@ class DriveMotionPlannerTest {
             pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
             time += mDt;
         }
-        Assertions.assertEquals(196, pose.getTranslation().getX(), 0.2);
-        Assertions.assertEquals(13, pose.getTranslation().getY(), 0.1);
-        Assertions.assertEquals(0, pose.getRotation().getDegrees(), 1.0);
+        assertEquals(196, pose.getTranslation().getX(), 0.2);
+        assertEquals(13, pose.getTranslation().getY(), 0.1);
+        assertEquals(0, pose.getRotation().getDegrees(), 1.0);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package org.team100.lib.trajectory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class TrajectoryPlannerTest {
     private static final double kDelta = 0.01;
 
+    /**
+     * Stationary trajectories do not work.
+     */
     @Test
     void testStationary() {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
@@ -23,13 +27,11 @@ class TrajectoryPlannerTest {
         double end_vel = 0;
         double max_vel = 1;
         double max_accel = 1;
-        Trajectory100 t = TrajectoryPlanner.generateTrajectory(waypoints, headings, constraints, start_vel, end_vel,
+
+        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
+                waypoints, headings, constraints, start_vel, end_vel,
                 max_vel, max_accel);
-        assertEquals(1, t.m_points.size());
-        TrajectoryPoint p = t.getPoint(0);
-        assertEquals(0, p.state().velocityM_S(), kDelta);
-        assertEquals(0, p.state().state().getPose().getX(), kDelta);
-        assertEquals(0, p.state().state().getHeadingRate(), kDelta);
+        assertTrue(t.isEmpty());
     }
 
     @Test
@@ -49,6 +51,9 @@ class TrajectoryPlannerTest {
         assertEquals(0, p.state().state().getHeadingRate(), kDelta);
     }
 
+    /**
+     * Pure rotation does not work.
+     */
     @Test
     void testRotation() {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
@@ -58,13 +63,10 @@ class TrajectoryPlannerTest {
         double end_vel = 0;
         double max_vel = 1;
         double max_accel = 1;
-        Trajectory100 t = TrajectoryPlanner.generateTrajectory(waypoints, headings, constraints, start_vel, end_vel,
+        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
+                waypoints, headings, constraints, start_vel, end_vel,
                 max_vel, max_accel);
-        // This is bad
-        assertEquals(1, t.m_points.size());
-        TrajectoryPoint p = t.getPoint(0);
-        assertEquals(0, p.state().state().getPose().getX(), kDelta);
-        assertEquals(0, p.state().state().getHeadingRate(), kDelta);
+        assertTrue(t.isEmpty());
     }
 
 }

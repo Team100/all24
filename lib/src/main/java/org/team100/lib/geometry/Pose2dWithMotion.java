@@ -34,13 +34,10 @@ public class Pose2dWithMotion {
      * turn-in-place motion)
      *
      * b) the angle formed by them, which is the direction of translation (in the
-     * same coordinate frame as pose_).
+     * same coordinate frame as pose).
      *
      * Additionally, this means dtheta is in radians-per-distance if there is
      * translation, or radians-per-radian otherwise.
-     * 
-     * TODO: eliminate the use of Twist2d here, make a specific type for this
-     * concept.
      */
     private final Twist2d m_fieldRelativeMotionDirection;
 

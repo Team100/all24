@@ -1,6 +1,7 @@
 package org.team100.lib.trajectory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,22 +109,17 @@ class TrajectoryUtilTest {
         }
     }
 
+    /**
+     * Stationary paths don't work.
+     */
     @Test
     void testStationary() {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
-        Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
-                waypoints, headings, 0.01, 0.01, 0.1);
+        assertThrows(IllegalArgumentException.class,
+                () -> TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                        waypoints, headings, 0.01, 0.01, 0.1));
 
-        assertEquals(2, path.length());
-        PathPoint p = path.getPoint(0);
-        assertEquals(0, p.state().getPose().getX(), kDelta);
-        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
-        assertEquals(0, p.state().getHeadingRate(), kDelta);
-        p = path.getPoint(1);
-        assertEquals(0, p.state().getPose().getX(), kDelta);
-        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
-        assertEquals(0, p.state().getHeadingRate(), kDelta);
     }
 
     @Test
@@ -144,21 +140,80 @@ class TrajectoryUtilTest {
         assertEquals(0, p.state().getHeadingRate(), kDelta);
     }
 
+    /**
+     * Stationary pure-rotation paths don't work.
+     */
     @Test
     void testRotation() {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d(1));
+        assertThrows(IllegalArgumentException.class,
+                () -> TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                        waypoints, headings, 0.01, 0.01, 0.1));
+    }
+
+    /** Preserves the tangent at the corner and so makes a little "S" */
+    @Test
+    void testCorner() {
+        List<Pose2d> waypoints = List.of(
+                new Pose2d(0, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d()),
+                new Pose2d(1, 1, new Rotation2d(Math.PI / 2)));
+        List<Rotation2d> headings = List.of(
+                new Rotation2d(),
+                new Rotation2d(),
+                new Rotation2d());
         Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
                 waypoints, headings, 0.01, 0.01, 0.1);
 
-        assertEquals(2, path.length());
+        assertEquals(9, path.length());
         PathPoint p = path.getPoint(0);
         assertEquals(0, p.state().getPose().getX(), kDelta);
         assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
         assertEquals(0, p.state().getHeadingRate(), kDelta);
         p = path.getPoint(1);
-        assertEquals(0, p.state().getPose().getX(), kDelta);
-        assertEquals(1, p.state().getPose().getRotation().getRadians(), kDelta);
+        assertEquals(1, p.state().getPose().getX(), kDelta);
+        assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
         assertEquals(0, p.state().getHeadingRate(), kDelta);
+    }
+
+    /**
+     * Paths with corners don't work.
+     */
+    @Test
+    void testActualCorner() {
+        List<Pose2d> waypoints = List.of(
+                new Pose2d(0, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d(Math.PI / 2)),
+                new Pose2d(1, 1, new Rotation2d(Math.PI / 2)));
+        List<Rotation2d> headings = List.of(
+                new Rotation2d(),
+                new Rotation2d(),
+                new Rotation2d(),
+                new Rotation2d());
+        assertThrows(IllegalArgumentException.class,
+                () -> TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                        waypoints, headings, 0.01, 0.01, 0.1));
+    }
+
+    /**
+     * Partially-stationary paths don't work.
+     */
+    @Test
+    void testComposite() {
+        List<Pose2d> waypoints = List.of(
+                new Pose2d(0, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d()),
+                new Pose2d(1, 0, new Rotation2d()),
+                new Pose2d(2, 0, new Rotation2d()));
+        List<Rotation2d> headings = List.of(
+                new Rotation2d(),
+                new Rotation2d(),
+                new Rotation2d(1),
+                new Rotation2d(1));
+        assertThrows(IllegalArgumentException.class,
+                () -> TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                        waypoints, headings, 0.01, 0.01, 0.1));
     }
 }

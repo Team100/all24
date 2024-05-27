@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
 
@@ -28,19 +27,22 @@ public class TrajectoryPlanner {
             double end_vel,
             double max_vel,
             double max_accel) {
-        // Create a path from splines.
-        Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
-                waypoints, headings, kMaxDx, kMaxDy, kMaxDTheta);
-        // Generate the timed trajectory.
-        // TODO: get rid of distance sampler
-        var view = new PathDistanceSampler(path);
-        // var view = new PathIndexSampler(path);
-        TimingUtil u = new TimingUtil(constraints, max_vel, max_accel);
-        return u.timeParameterizeTrajectory(
-                view,
-                kMaxDx,
-                start_vel,
-                end_vel);
+        try {
+            // Create a path from splines.
+            Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                    waypoints, headings, kMaxDx, kMaxDy, kMaxDTheta);
+            // Generate the timed trajectory.
+            var view = new PathDistanceSampler(path);
+            TimingUtil u = new TimingUtil(constraints, max_vel, max_accel);
+            return u.timeParameterizeTrajectory(
+                    view,
+                    kMaxDx,
+                    start_vel,
+                    end_vel);
+        } catch (IllegalArgumentException e) {
+            // catches various kinds of malformed input, returns a no-op.
+            return new Trajectory100();
+        }
     }
 
     private TrajectoryPlanner() {

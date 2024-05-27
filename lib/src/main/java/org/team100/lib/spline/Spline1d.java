@@ -7,45 +7,70 @@ package org.team100.lib.spline;
  */
 public class Spline1d {
     /** crackle */
-    double a;
+    private final double a;
     /** snap */
-    double b;
+    private final double b;
     /** jerk */
-    double c;
+    private final double c;
     /** acceleration */
-    double d;
+    private final double d;
     /** velocity */
-    double e;
+    private final double e;
     /** position */
-    double f;
+    private final double f;
 
- public Spline1d(double x0, double x1, double dx0, double dx1, double ddx0, double ddx1) {
-     a = -6 * x0 - 3 * dx0 - 0.5 * ddx0 + 0.5 * ddx1 - 3 * dx1 + 6 * x1;
-     b = 15 * x0 + 8 * dx0 + 1.5 * ddx0 - ddx1 + 7 * dx1 - 15 * x1;
-     c = -10 * x0 - 6 * dx0 - 1.5 * ddx0 + 0.5 * ddx1 - 4 * dx1 + 10 * x1;
-     d = 0.5 * ddx0;
-     e = dx0;
-     f = x0;
- }
+    private Spline1d(double a, double b, double c, double d, double e, double f) {
+        if (Double.isNaN(a))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(b))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(c))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(d))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(e))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(f))
+            throw new IllegalArgumentException();
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.e = e;
+        this.f = f;
+    }
 
- public Spline1d(Spline1d other) {
-     a = other.a;
-     b = other.b;
-     c = other.c;
-     d = other.d;
-     e = other.e;
-     f = other.f;
- }
+    public static Spline1d newSpline1d(double x0, double x1, double dx0, double dx1, double ddx0, double ddx1) {
+        if (Double.isNaN(x0))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(x1))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(dx0))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(dx1))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(ddx0))
+            throw new IllegalArgumentException();
+        if (Double.isNaN(ddx1))
+            throw new IllegalArgumentException();
+
+        double a = -6 * x0 - 3 * dx0 - 0.5 * ddx0 + 0.5 * ddx1 - 3 * dx1 + 6 * x1;
+        double b = 15 * x0 + 8 * dx0 + 1.5 * ddx0 - ddx1 + 7 * dx1 - 15 * x1;
+        double c = -10 * x0 - 6 * dx0 - 1.5 * ddx0 + 0.5 * ddx1 - 4 * dx1 + 10 * x1;
+        double d = 0.5 * ddx0;
+        double e = dx0;
+        double f = x0;
+        return new Spline1d(a, b, c, d, e, f);
+    }
 
     Spline1d addCoefs(Spline1d other) {
-        Spline1d ret = new Spline1d(this);
-        ret.a += other.a;
-        ret.b += other.b;
-        ret.c += other.c;
-        ret.d += other.d;
-        ret.e += other.e;
-        ret.f += other.f;
-        return ret;
+        double aa = a + other.a;
+        double bb = b + other.b;
+        double cc = c + other.c;
+        double dd = d + other.d;
+        double ee = e + other.e;
+        double ff = f + other.f;
+        return new Spline1d(aa, bb, cc, dd, ee, ff);
     }
 
     /**

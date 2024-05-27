@@ -11,40 +11,33 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.timing.TimingUtil.TimingException;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 class PathDistanceSamplerTest {
     public static final double kDelta = 0.001;
 
+    /**
+     * Note that many of the results here are "wrong" because the waypoints aren't
+     * correctly specified.
+     */
     @Test
     void test() throws TimingException {
-        // TODO: inline this
-        List<Rotation2d> headings = Arrays.asList(
-                GeometryUtil.fromDegrees(0),
-                GeometryUtil.fromDegrees(30),
-                GeometryUtil.fromDegrees(60),
-                GeometryUtil.fromDegrees(60),
-                GeometryUtil.fromDegrees(180));
-
-        // TODO: seems like the motion isn't heeded?
-        // why use it then?
         List<Pose2dWithMotion> waypoints = Arrays.asList(
                 new Pose2dWithMotion(
-                        new Pose2d(new Translation2d(0.0, 0.0), headings.get(0)),
+                        new Pose2d(new Translation2d(0.0, 0.0), GeometryUtil.fromDegrees(0)),
                         new Twist2d(1, 0, 0.1), 0, 0),
                 new Pose2dWithMotion(
-                        new Pose2d(new Translation2d(24.0, 0.0), headings.get(1)),
+                        new Pose2d(new Translation2d(24.0, 0.0), GeometryUtil.fromDegrees(30)),
                         new Twist2d(1, 0, 0.1), 0, 0),
                 new Pose2dWithMotion(
-                        new Pose2d(new Translation2d(36.0, 0.0), headings.get(2)),
+                        new Pose2d(new Translation2d(36.0, 0.0), GeometryUtil.fromDegrees(60)),
                         new Twist2d(0, 1, 1e6), 0, 0),
                 new Pose2dWithMotion(
-                        new Pose2d(new Translation2d(36.0, 24.0), headings.get(3)),
+                        new Pose2d(new Translation2d(36.0, 24.0), GeometryUtil.fromDegrees(60)),
                         new Twist2d(1, 0, 0.1), 0, 0),
                 new Pose2dWithMotion(
-                        new Pose2d(new Translation2d(60.0, 24.0), headings.get(4)),
+                        new Pose2d(new Translation2d(60.0, 24.0), GeometryUtil.fromDegrees(180)),
                         new Twist2d(1, 0, 0.1), 0, 0));
 
         // Create the reference trajectory (straight line motion between waypoints).
@@ -84,15 +77,12 @@ class PathDistanceSamplerTest {
         Pose2dWithMotion sample5 = sampler.sample(48).state();
         assertEquals(36, sample5.getPose().getX(), kDelta);
         assertEquals(11.585, sample5.getPose().getY(), kDelta);
-        // TODO: this is completely wrong, should be 90.
-        // it's wrong even without rotation.
         assertEquals(46.978, sample5.getCourse().get().getDegrees(), kDelta);
         assertEquals(60, sample5.getHeading().getDegrees(), kDelta);
 
         Pose2dWithMotion sample6 = sampler.sample(60).state();
         assertEquals(36, sample6.getPose().getX(), kDelta);
         assertEquals(23.585, sample6.getPose().getY(), kDelta);
-        // TODO: this is wrong
         assertEquals(1.006, sample6.getCourse().get().getDegrees(), kDelta);
         assertEquals(60, sample6.getHeading().getDegrees(), kDelta);
 

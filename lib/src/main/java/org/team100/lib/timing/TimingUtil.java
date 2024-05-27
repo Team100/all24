@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.timing.TimingConstraint.NonNegativeDouble;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.util.Util;
@@ -42,33 +41,12 @@ public class TimingUtil {
             double end_vel) {
         try {
             double maxDistance = sampler.getMaxDistance();
+            if (maxDistance == 0)
+                throw new IllegalArgumentException();
             int num_states = (int) Math.ceil(maxDistance / step + 1);
             List<Pose2dWithMotion> samples = new ArrayList<>(num_states);
             for (int i = 0; i < num_states; ++i) {
                 samples.add(sampler.sample(Math.min(i * step, maxDistance)).state());
-            }
-            return timeParameterizeTrajectory(samples, start_vel, end_vel);
-        } catch (TimingException e) {
-            Util.warn("Timing exception");
-            return new Trajectory100();
-        }
-    }
-
-    /**
-     * sample the path evenly by index, and then assign times to each sample.
-     */
-    public Trajectory100 timeParameterizeTrajectory(
-            PathIndexSampler sampler,
-            double step,
-            double start_vel,
-            double end_vel) {
-        try {
-            double maxIndex = sampler.getMaxIndex();
-            int num_states = (int) Math.ceil(maxIndex / step + 1);
-            System.out.println("states " + num_states);
-            List<Pose2dWithMotion> samples = new ArrayList<>(num_states);
-            for (int i = 0; i < num_states; ++i) {
-                samples.add(sampler.sample(Math.min(i * step, maxIndex)).state());
             }
             return timeParameterizeTrajectory(samples, start_vel, end_vel);
         } catch (TimingException e) {
@@ -104,9 +82,7 @@ public class TimingUtil {
      * acceleration during the backward pass (by slowing down the predecessor).
      */
     private List<ConstrainedState> forwardPass(List<Pose2dWithMotion> samples, double start_vel) {
-        ConstrainedState predecessor = new ConstrainedState();
-        predecessor.state = samples.get(0);
-        predecessor.distance = 0.0;
+        ConstrainedState predecessor = new ConstrainedState(samples.get(0), 0);
         predecessor.vel = start_vel;
         predecessor.min_acceleration = -m_absAccelerationLimit;
         predecessor.max_acceleration = m_absAccelerationLimit;
@@ -114,9 +90,9 @@ public class TimingUtil {
         // work forward through the samples
         List<ConstrainedState> constrainedStates = new ArrayList<>(samples.size());
         for (Pose2dWithMotion sample : samples) {
-            ConstrainedState constrainedState = new ConstrainedState();
+            double ds = sample.distance(predecessor.state);
+            ConstrainedState constrainedState = new ConstrainedState(sample, ds + predecessor.distance);
             constrainedStates.add(constrainedState);
-            constrainedState.state = sample;
             forwardWork(predecessor, constrainedState);
             predecessor = constrainedState;
         }
@@ -127,13 +103,6 @@ public class TimingUtil {
         // constant-twist path length between states
         // note this is zero for turn-in-place.
         double ds = s1.state.distance(s0.state);
-        if (ds < 0) {
-            // must be positive if we're walking forwards.
-            throw new IllegalStateException();
-        }
-
-        // total path distance so far
-        s1.distance = ds + s0.distance;
 
         // We may need to iterate to find the maximum end velocity and common
         // acceleration, since acceleration limits may be a function of velocity.
@@ -180,9 +149,8 @@ public class TimingUtil {
             double end_velocity,
             List<ConstrainedState> constrainedStates) {
         // "successor" comes before in the backwards walk. start with the last state.
-        ConstrainedState successor = new ConstrainedState();
-        successor.state = lastState;
-        successor.distance = constrainedStates.get(constrainedStates.size() - 1).distance;
+        ConstrainedState endState = constrainedStates.get(constrainedStates.size() - 1);
+        ConstrainedState successor = new ConstrainedState(lastState, endState.distance);
         successor.vel = end_velocity;
         successor.min_acceleration = -m_absAccelerationLimit;
         successor.max_acceleration = m_absAccelerationLimit;
@@ -333,11 +301,17 @@ public class TimingUtil {
     }
 
     static class ConstrainedState {
-        public Pose2dWithMotion state;
-        public double distance;
+        public final Pose2dWithMotion state;
+        /** Cumulative distance along the path */
+        public final double distance;
         public double vel;
         public double min_acceleration;
         public double max_acceleration;
+
+        public ConstrainedState(Pose2dWithMotion state, double distance) {
+            this.state = state;
+            this.distance = distance;
+        }
 
         /**
          * Clamp state velocity to constraints.

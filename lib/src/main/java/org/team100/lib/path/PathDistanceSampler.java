@@ -3,10 +3,7 @@ package org.team100.lib.path;
 import org.team100.lib.timing.TimingUtil;
 
 /**
- * Allows sampling a path by distance along it.
- * 
- * TODO: remove this class, use the index sampler instead.
- * this doesn't work correctly for holonomic paths (e.g. "rotate in place")
+ * Samples a path by distance along it.
  */
 public class PathDistanceSampler {
     private final Path100 m_path;
