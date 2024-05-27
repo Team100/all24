@@ -16,19 +16,21 @@ public class VelocityLimitRegionConstraint implements TimingConstraint {
             Translation2d min_corner,
             Translation2d max_corner,
             double velocity_limit) {
+        if (velocity_limit < 0)
+            throw new IllegalArgumentException();
         m_min = min_corner;
         m_max = max_corner;
         m_limit = velocity_limit;
     }
 
     @Override
-    public double getMaxVelocity(Pose2dWithMotion state) {
+    public NonNegativeDouble getMaxVelocity(Pose2dWithMotion state) {
         final Translation2d translation = state.getTranslation();
         if (translation.getX() <= m_max.getX() && translation.getX() >= m_min.getX() &&
                 translation.getY() <= m_max.getY() && translation.getY() >= m_min.getY()) {
-            return m_limit;
+            return new NonNegativeDouble(m_limit);
         }
-        return Double.POSITIVE_INFINITY;
+        return new NonNegativeDouble(Double.POSITIVE_INFINITY);
     }
 
     @Override

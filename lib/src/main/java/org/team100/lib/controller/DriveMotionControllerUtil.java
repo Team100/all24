@@ -137,15 +137,6 @@ public class DriveMotionControllerUtil {
     }
 
     /**
-     * Returns robot-relative position error
-     * 
-     * TODO: remove this method, use the twist version instead.
-     */
-    static Pose2d getError(Pose2d measurement, TimedPose setpoint) {
-        return GeometryUtil.transformBy(GeometryUtil.inverse(measurement), setpoint.state().getPose());
-    }
-
-    /**
      * Returns robot-relative twist representing the position error
      */
     static Twist2d getErrorTwist(Pose2d measurement, TimedPose setpoint) {

@@ -33,18 +33,16 @@ public class DriveWithWaypoints extends Command100 {
     private static final double end_vel = 0;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> constraints;
     private final Supplier<List<Pose2d>> m_goal;
 
-    public DriveWithWaypoints(SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
+    public DriveWithWaypoints(
+            SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             SwerveKinodynamics limits,
             Supplier<List<Pose2d>> goal) {
         m_swerve = drivetrain;
-        m_planner = planner;
         m_controller = controller;
         constraints = new TimingConstraintFactory(limits).allGood();
         m_goal = goal;
@@ -64,16 +62,14 @@ public class DriveWithWaypoints extends Command100 {
 
         newWaypointM = getWaypointsList(newWaypointM);
 
-        Trajectory100 trajectory = m_planner
-                .generateTrajectory(
-                        false,
-                        newWaypointM,
-                        headings,
-                        constraints,
-                        start_vel,
-                        end_vel,
-                        max_vel,
-                        max_acc);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                newWaypointM,
+                headings,
+                constraints,
+                start_vel,
+                end_vel,
+                max_vel,
+                max_acc);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));

@@ -34,8 +34,8 @@ public class DriveWithTrajectory extends Command100 {
     private final DriveMotionController m_controller;
     private final Trajectory100 trajectory;
 
-    public DriveWithTrajectory(SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
+    public DriveWithTrajectory(
+            SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             SwerveKinodynamics limits,
             String fileName) {
@@ -49,16 +49,14 @@ public class DriveWithTrajectory extends Command100 {
         List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
         List<Rotation2d> headings = trajectoryList.getRotationArray();
 
-        trajectory = planner
-                .generateTrajectory(
-                        false,
-                        poses,
-                        headings,
-                        constraints,
-                        kStartVel,
-                        kEndVel,
-                        kMaxVel,
-                        kMaxAcc);
+        trajectory = TrajectoryPlanner.generateTrajectory(
+                poses,
+                headings,
+                constraints,
+                kStartVel,
+                kEndVel,
+                kMaxVel,
+                kMaxAcc);
 
         addRequirements(m_swerve);
     }

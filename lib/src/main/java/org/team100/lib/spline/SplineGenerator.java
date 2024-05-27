@@ -20,7 +20,7 @@ public class SplineGenerator {
      * @return list of Pose2dWithCurvature that approximates the original spline
      */
     public static List<Pose2dWithMotion> parameterizeSpline(
-        HolonomicSpline s,
+            HolonomicSpline s,
             double maxDx,
             double maxDy,
             double maxDTheta,
@@ -54,7 +54,7 @@ public class SplineGenerator {
     }
 
     private static void getSegmentArc(
-        HolonomicSpline s,
+            HolonomicSpline s,
             List<Pose2dWithMotion> rv,
             double t0,
             double t1,

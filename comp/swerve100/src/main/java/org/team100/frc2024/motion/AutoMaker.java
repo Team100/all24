@@ -40,7 +40,6 @@ public class AutoMaker {
     private static final double kMaxAccelM_S_S = 2;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final SensorInterface m_sensors;
     private final List<TimingConstraint> m_constraints;
@@ -59,7 +58,6 @@ public class AutoMaker {
 
     public AutoMaker(
             SwerveDriveSubsystem swerve,
-            TrajectoryPlanner planner,
             DriveMotionController controller,
             double shooterScale,
             FeederSubsystem feeder,
@@ -70,7 +68,6 @@ public class AutoMaker {
             List<TimingConstraint> constraints) {
         m_notePosition24ArrayListener = notePosition24ArrayListener;
         m_swerve = swerve;
-        m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
         kShooterScale = shooterScale;
@@ -289,8 +286,13 @@ public class AutoMaker {
                 startPose.getRotation(),
                 betweenHeading,
                 endPose.getRotation());
-
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -324,8 +326,13 @@ public class AutoMaker {
                 betweenHeading,
                 betweenHeading,
                 endPose.getRotation());
-
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                maxVel,
                 maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.goodPIDF());
     }
@@ -334,7 +341,7 @@ public class AutoMaker {
         Pose2d endPose = getPose(alliance, note);
         Rotation2d endRotation = new Rotation2d(Math.PI / 2);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
-        return new DriveToWithAutoStart(m_swerve, endWaypoint, endPose.getRotation(), m_planner, m_controller,
+        return new DriveToWithAutoStart(m_swerve, endWaypoint, endPose.getRotation(), m_controller,
                 m_constraints);
     }
 
@@ -345,7 +352,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 new Rotation2d(Math.PI),
                 new Rotation2d(Math.PI));
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -357,7 +370,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 Rotation2d.fromDegrees(0),
                 Rotation2d.fromDegrees(0));
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -369,7 +388,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 new Rotation2d(Math.PI),
                 new Rotation2d(Math.PI));
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -381,7 +406,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 new Rotation2d(Math.PI),
                 new Rotation2d());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -393,7 +424,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 new Rotation2d(),
                 new Rotation2d(Math.PI));
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -417,8 +454,14 @@ public class AutoMaker {
                 startPose.getRotation(),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-                2, 2); // kNote
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                2,
+                2); // kNote
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.stageBase());
     }
 
@@ -445,9 +488,14 @@ public class AutoMaker {
                 startPose.getRotation(),
                 endPose.getRotation(),
                 endPose.getRotation());
-
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-                4, 2);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                4,
+                2);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
 
@@ -471,8 +519,14 @@ public class AutoMaker {
                 startPose.getRotation(),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-                2, 2);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                2,
+                2);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
 
@@ -496,8 +550,14 @@ public class AutoMaker {
                 startPose.getRotation(),
                 heading,
                 heading);
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-                2, 2);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                2,
+                2);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
 
@@ -521,8 +581,14 @@ public class AutoMaker {
                 new Rotation2d(begHeading),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-                2, 2);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                2,
+                2);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
 
@@ -541,7 +607,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                maxVel,
                 maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.straightPIDF());
     }
@@ -559,7 +631,13 @@ public class AutoMaker {
                 endWaypoint);
         List<Rotation2d> headings = List.of(begHeading,
                 endHeading);
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                maxVel,
                 maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.straightPIDF());
     }
@@ -578,7 +656,13 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, maxVel,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                maxVel,
                 maxAcc);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF());
     }
@@ -602,9 +686,14 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
                 endPose.getRotation());
-
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints,
-                4, 3);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                4,
+                3);
         return new TrajectoryCommand100(
                 m_swerve,
                 trajectory,
@@ -631,8 +720,14 @@ public class AutoMaker {
         List<Rotation2d> headings = List.of(
                 startHeading,
                 endHeading);
-
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, 4, 2);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                4,
+                2);
         return new TrajectoryCommand100(m_swerve, trajectory, DriveMotionControllerFactory.newNewPIDF());
     }
 
@@ -660,7 +755,13 @@ public class AutoMaker {
                 startPose.getRotation(),
                 betweenPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         return new TrajectoryCommand100(m_swerve, trajectory, m_controller);
     }
@@ -682,7 +783,7 @@ public class AutoMaker {
     }
 
     public DriveToWaypoint100 driveToStraight(Alliance alliance, FieldPoint point) {
-        return new DriveToWaypoint100(getPose(alliance, point), m_swerve, m_planner, m_controller, m_constraints, 1);
+        return new DriveToWaypoint100(getPose(alliance, point), m_swerve, m_controller, m_constraints, 1);
     }
 
     public SequentialCommandGroup eightNoteAuto(Alliance alliance) {

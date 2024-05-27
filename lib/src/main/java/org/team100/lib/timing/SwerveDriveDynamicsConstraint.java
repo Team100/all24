@@ -33,7 +33,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
      * speed allowed (m/s) that maintains the target spatial heading rate.
      */
     @Override
-    public double getMaxVelocity(Pose2dWithMotion state) {
+    public NonNegativeDouble getMaxVelocity(Pose2dWithMotion state) {
         // First check instantaneous velocity and compute a limit based on drive
         // velocity.
         Optional<Rotation2d> course = state.getCourse();
@@ -55,7 +55,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         for (var module : module_states) {
             max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocityM_S() / Math.abs(module.speedMetersPerSecond));
         }
-        return max_vel;
+        return new NonNegativeDouble(max_vel);
     }
 
     /**

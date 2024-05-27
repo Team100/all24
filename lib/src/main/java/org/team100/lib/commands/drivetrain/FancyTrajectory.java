@@ -34,16 +34,11 @@ public class FancyTrajectory extends Command100 {
 
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
-    private final TrajectoryPlanner m_planner;
     private final List<TimingConstraint> m_constraints;
 
-    public FancyTrajectory(
-            SwerveDriveSubsystem robotDrive,
-            TrajectoryPlanner planner,
-            List<TimingConstraint> constraints) {
+    public FancyTrajectory(SwerveDriveSubsystem robotDrive, List<TimingConstraint> constraints) {
         m_robotDrive = robotDrive;
         m_controller = DriveMotionControllerFactory.fancyPIDF();
-        m_planner = planner;
         m_constraints = constraints;
         addRequirements(m_robotDrive);
     }
@@ -57,12 +52,10 @@ public class FancyTrajectory extends Command100 {
         List<Rotation2d> headings = List.of(
                 GeometryUtil.fromDegrees(0),
                 GeometryUtil.fromDegrees(0));
-        
+
         double start_vel = 0;
         double end_vel = 0;
-        // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory100 trajectory = m_planner.generateTrajectory(
-                false,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
                 waypointsM,
                 headings,
                 m_constraints,

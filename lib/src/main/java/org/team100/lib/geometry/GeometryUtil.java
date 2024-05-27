@@ -31,7 +31,6 @@ public class GeometryUtil {
     public static final PoseWithCurvature kPose2dWithCurvatureIdentity = new PoseWithCurvature();
     public static final Twist2d kTwist2dIdentity = new Twist2d(0.0, 0.0, 0.0);
     public static final Rotation3d kRotation3Zero = new Rotation3d();
-    public static final Transform2d kFlip = new Transform2d(kTranslation2dIdentity, kRotation180);
 
     private GeometryUtil() {
     }
@@ -205,26 +204,6 @@ public class GeometryUtil {
         } else {
             return Optional.empty();
         }
-    }
-
-    public static Twist2d mirror(Twist2d t) {
-        return new Twist2d(t.dx, -t.dy, -t.dtheta);
-    }
-
-    public static Twist2d flip(Twist2d t) {
-        return new Twist2d(-t.dx, -t.dy, -t.dtheta);
-    }
-
-    public static Pose2d flip(Pose2d p) {
-        return p.transformBy(kFlip);
-    }
-
-    public static Pose2d mirror(Pose2d p) {
-        return new Pose2d(
-                new Translation2d(
-                        p.getTranslation().getX(),
-                        -p.getTranslation().getY()),
-                p.getRotation().unaryMinus());
     }
 
     public static boolean isZero(ChassisSpeeds x) {

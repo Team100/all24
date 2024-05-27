@@ -6,9 +6,23 @@ public interface TimingConstraint {
     /**
      * Maximum allowed velocity m/s.
      */
-    double getMaxVelocity(Pose2dWithMotion state);
+    NonNegativeDouble getMaxVelocity(Pose2dWithMotion state);
 
-    /** 
+    class NonNegativeDouble {
+        private final double m_value;
+
+        public NonNegativeDouble(double value) {
+            if (value < 0)
+                throw new IllegalArgumentException();
+            m_value = value;
+        }
+
+        public double getValue() {
+            return m_value;
+        }
+    }
+
+    /**
      * Minimum and maximum allowed acceleration m/s^2.
      */
     MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocityM_S);
@@ -23,18 +37,27 @@ public interface TimingConstraint {
             this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
 
+        /**
+         * @param minAccel negative
+         * @param maxAccel positive
+         */
         public MinMaxAcceleration(double minAccel, double maxAccel) {
-            if (getMinAccel() > getMaxAccel()) {
+            if (minAccel > 0) {
+                throw new IllegalArgumentException();
+            }
+            if (maxAccel < 0) {
                 throw new IllegalArgumentException();
             }
             m_minAccel = minAccel;
             m_maxAccel = maxAccel;
         }
 
+        /** Always negative (or zero). */
         public double getMinAccel() {
             return m_minAccel;
         }
 
+        /** Always positive (or zero). */
         public double getMaxAccel() {
             return m_maxAccel;
         }

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,6 +15,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 /**
  * Holonomic spline.
+ * 
+ * Internally this is three one-dimensional splines (x, y, heading), with
+ * respect to a parameter [0,1].
  * 
  * If you don't care about rotation, just pass zero.
  * 
@@ -33,8 +37,10 @@ public class HolonomicSpline {
     private final Rotation2d r0;
 
     /**
-     * @param p0 The starting pose of the spline
-     * @param p1 The ending pose of the spline
+     * @param p0 The starting point and direction of the spline
+     * @param p1 The ending point and direction of the spline
+     * @param r0 The starting heading
+     * @param r1 The ending heading
      */
     public HolonomicSpline(Pose2d p0, Pose2d p1, Rotation2d r0, Rotation2d r1) {
 
@@ -53,11 +59,11 @@ public class HolonomicSpline {
         double ddy0 = 0;
         double ddy1 = 0;
 
-        this.x = new Spline1d(x0, x1, dx0, dx1, ddx0, ddx1);
-        this.y = new Spline1d(y0, y1, dy0, dy1, ddy0, ddy1);
+        this.x = Spline1d.newSpline1d(x0, x1, dx0, dx1, ddx0, ddx1);
+        this.y = Spline1d.newSpline1d(y0, y1, dy0, dy1, ddy0, ddy1);
         this.r0 = r0;
         double delta = r0.unaryMinus().rotateBy(r1).getRadians();
-        theta = new Spline1d(0.0, delta, 0, 0, 0, 0);
+        theta = Spline1d.newSpline1d(0.0, delta, 0, 0, 0, 0);
     }
 
     private HolonomicSpline(
@@ -99,8 +105,7 @@ public class HolonomicSpline {
 
     /**
      * Finds the optimal second derivative values for a set of splines to reduce the
-     * sum of the change in curvature
-     * squared over the path
+     * sum of the change in curvature squared over the path
      *
      * @param splines the list of splines to optimize
      * @return the final sumDCurvature2
@@ -116,6 +121,7 @@ public class HolonomicSpline {
             prev = current;
             count++;
         }
+        Util.warn("Spline optimization failed");
         return prev;
     }
 
@@ -134,14 +140,15 @@ public class HolonomicSpline {
     }
 
     /**
-     * Return a new spline that is a copy of this one, but with adjustments to
+     * Return a new spline that is a copy of this one, but with substitute
      * second derivatives.
      */
-    private HolonomicSpline adjustSecondDerivatives(double ddx0_adjustment, double ddx1_adjustment,
-            double ddy0_adjustment, double ddy1_adjustment) {
+    private HolonomicSpline adjustSecondDerivatives(
+            double ddx0_sub, double ddx1_sub,
+            double ddy0_sub, double ddy1_sub) {
         return new HolonomicSpline(
-                x.addCoefs(new Spline1d(0, 0, 0, 0, ddx0_adjustment, ddx1_adjustment)),
-                y.addCoefs(new Spline1d(0, 0, 0, 0, ddy0_adjustment, ddy1_adjustment)),
+                x.addCoefs(Spline1d.newSpline1d(0, 0, 0, 0, ddx0_sub, ddx1_sub)),
+                y.addCoefs(Spline1d.newSpline1d(0, 0, 0, 0, ddy0_sub, ddy1_sub)),
                 theta,
                 r0);
     }
@@ -245,6 +252,8 @@ public class HolonomicSpline {
 
     private double dCurvature2(double t) {
         double dx2dy2 = (dx(t) * dx(t) + dy(t) * dy(t));
+        if (dx2dy2 == 0)
+            throw new IllegalArgumentException();
         double num = (dx(t) * dddy(t) - dddx(t) * dy(t)) * dx2dy2
                 - 3 * (dx(t) * ddy(t) - ddx(t) * dy(t)) * (dx(t) * ddx(t) + dy(t) * ddy(t));
         return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
@@ -270,6 +279,8 @@ public class HolonomicSpline {
         for (HolonomicSpline s : splines) {
             sum += s.sumDCurvature2();
         }
+        if (Double.isNaN(sum))
+            throw new IllegalArgumentException();
         return sum;
     }
 
@@ -295,6 +306,8 @@ public class HolonomicSpline {
         double magnitude = getControlPoints(splines, controlPoints);
 
         magnitude = Math.sqrt(magnitude);
+        if (Double.isNaN(magnitude))
+            throw new IllegalArgumentException();
 
         // minimize along the direction of the gradient
         // first calculate 3 points along the direction of the gradient

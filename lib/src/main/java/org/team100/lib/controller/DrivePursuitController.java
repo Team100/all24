@@ -19,6 +19,7 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -68,7 +69,7 @@ public class DrivePursuitController implements DriveMotionController {
     }
 
     @Override
-    public void setTrajectory(final TrajectoryTimeIterator trajectory) {
+    public void setTrajectory(TrajectoryTimeIterator trajectory) {
         m_iter = trajectory;
         useMinSpeed = true;
 
@@ -182,22 +183,22 @@ public class DrivePursuitController implements DriveMotionController {
         final Translation2d steeringVector = new Translation2d(
                 steeringDirection.getCos() * normalizedSpeed,
                 steeringDirection.getSin() * normalizedSpeed);
-        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+                
+        ChassisSpeeds u_FF = new ChassisSpeeds(
                 steeringVector.getX() * m_limits.getMaxDriveVelocityM_S(),
                 steeringVector.getY() * m_limits.getMaxDriveVelocityM_S(),
                 0.0);
+        t.log(Level.TRACE, m_name, "pursuit FF", u_FF);
 
-        t.log(Level.TRACE, m_name, "pursuit speeds", chassisSpeeds);
+        Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, mSetpoint);
+        t.log(Level.TRACE, m_name, "pursuit error", errorTwist);
+        ChassisSpeeds u_FB = new ChassisSpeeds(
+                kPositionkP * errorTwist.dx,
+                kPositionkP * errorTwist.dy,
+                kThetakP * errorTwist.dtheta);
+        t.log(Level.TRACE, m_name, "pursuit FB", u_FB);
 
-        Pose2d mError = DriveMotionControllerUtil.getError(measurement, mSetpoint);
-        t.log(Level.TRACE, m_name, "error", mError);
-
-        chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond
-                + kPositionkP * mError.getTranslation().getX();
-        chassisSpeeds.vyMetersPerSecond = chassisSpeeds.vyMetersPerSecond
-                + kPositionkP * mError.getTranslation().getY();
-        chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond
-                + (kThetakP * mError.getRotation().getRadians());
+        ChassisSpeeds chassisSpeeds = u_FF.plus(u_FB);
 
         DriveUtil.checkSpeeds(chassisSpeeds);
 

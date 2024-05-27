@@ -26,7 +26,6 @@ class TrajectoryTimeIteratorTest {
     void testPreviewAndAdvance() {
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -46,16 +45,14 @@ class TrajectoryTimeIteratorTest {
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
 
-        Trajectory100 trajectory = planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        constraints,
-                        startVelocity,
-                        endVelocity,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                constraints,
+                startVelocity,
+                endVelocity,
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 

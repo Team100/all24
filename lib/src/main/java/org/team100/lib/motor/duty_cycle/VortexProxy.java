@@ -42,19 +42,16 @@ public class VortexProxy implements Motor100<Distance100> {
 
     @Override
     public void setVelocity(double velocity, double accel) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
     }
 
     @Override
     public void setVelocity(double velocity, double accel, double torque) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
     }
 
     @Override
     public double getTorque() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
     }
 

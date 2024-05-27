@@ -20,7 +20,6 @@ import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -31,12 +30,11 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
 
-    TrajectoryPlanner planner = new TrajectoryPlanner();
     // default for testing is no wheel slip
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
-    TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
+    TrajectoryMaker maker = new TrajectoryMaker(constraints);
 
     @BeforeEach
     void nolog() {

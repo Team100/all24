@@ -1,24 +1,23 @@
 package org.team100.lib.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
-import org.team100.lib.path.PathIndexSampler;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryGenerator100;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.trajectory.TrajectoryUtil100;
@@ -50,18 +49,21 @@ class DriveMotionPlannerTest {
         double max_accel = 100;
 
         Path100 traj = new Path100();
-        Assertions.assertTrue(traj.isEmpty());
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMaxIndex(), 0.2);
-        Assertions.assertEquals(0, traj.length());
+        assertTrue(traj.isEmpty());
+        assertEquals(0, traj.length());
 
         // Set states at construction time.
         traj = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(waypoints, headings, 2, 0.25, 0.1);
-        Assertions.assertFalse(traj.isEmpty());
-        Assertions.assertEquals(0.0, new PathIndexSampler(traj).getMinIndex(), 0.2);
+        assertFalse(traj.isEmpty());
 
-        Trajectory100 timed_trajectory = TimingUtil.timeParameterizeTrajectory(false, new PathDistanceSampler(traj), 2,
-                Arrays.asList(), start_vel, end_vel, max_vel, max_accel);
+        var view = new PathDistanceSampler(traj);
+        var stepSize = 2;
+        TimingUtil u = new TimingUtil(Arrays.asList(), max_vel, max_accel);
+        Trajectory100 timed_trajectory = u.timeParameterizeTrajectory(
+                view,
+                stepSize,
+                start_vel,
+                end_vel);
 
         DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
@@ -83,17 +85,15 @@ class DriveMotionPlannerTest {
             pose = GeometryUtil.transformBy(pose, GeometryUtil.kPoseZero.exp(twist));
             time += mDt;
         }
-        Assertions.assertEquals(196, pose.getTranslation().getX(), 0.2);
-        Assertions.assertEquals(13, pose.getTranslation().getY(), 0.1);
-        Assertions.assertEquals(0, pose.getRotation().getDegrees(), 1.0);
+        assertEquals(196, pose.getTranslation().getX(), 0.2);
+        assertEquals(13, pose.getTranslation().getY(), 0.1);
+        assertEquals(0, pose.getRotation().getDegrees(), 1.0);
     }
 
     @Test
     void testAllTrajectories() {
         DrivePIDFController controller = new DrivePIDFController(false, 2.4, 2.4);
-        TrajectoryPlanner tPlanner = new TrajectoryPlanner();
-        TrajectoryGenerator100 generator = new TrajectoryGenerator100(tPlanner);
-        generator.generateTrajectories();
+        TrajectoryGenerator100 generator = new TrajectoryGenerator100();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 
         for (var traj : trajectories) {

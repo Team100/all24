@@ -37,7 +37,6 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
 
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
-    private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
     private final double kShooterScale;
@@ -45,13 +44,11 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     public DriveToAdjacentWithShooterAngle(
             SwerveDriveSubsystem swerve,
             Translation2d goalTranslation,
-            TrajectoryPlanner planner,
             DriveMotionController controller,
             List<TimingConstraint> constraints,
             double shooterScale) {
         m_swerve = swerve;
         m_goalTranslation = goalTranslation;
-        m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
         kShooterScale = shooterScale;
@@ -72,13 +69,19 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
         Rotation2d endRotation = endHeading.plus(new Rotation2d(Math.PI));
         Translation2d offset = new Translation2d(-.5 * endRotation.getCos(), -.5 *
                 endRotation.getSin());
-        // Translation2d offset = new Translation2d();
         Pose2d endWaypoint = new Pose2d(m_goalTranslation.plus(offset), endRotation);
         List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
-        List<Rotation2d> headings = List.of(ShooterUtil.getRobotRotationToSpeaker(optionalAlliance.get(),
-                startPose.getTranslation(), kShooterScale),
+        List<Rotation2d> headings = List.of(
+                ShooterUtil.getRobotRotationToSpeaker(
+                        optionalAlliance.get(), startPose.getTranslation(), kShooterScale),
                 endHeading);
-        Trajectory100 trajectory = m_planner.generateTrajectory(false, waypointsM, headings, m_constraints, kMaxVelM_S,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
                 kMaxAccelM_S_S);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
