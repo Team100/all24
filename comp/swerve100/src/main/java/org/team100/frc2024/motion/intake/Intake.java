@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion.intake;
 
 import org.team100.frc2024.SensorInterface;
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -44,7 +44,7 @@ public class Intake extends SubsystemBase implements Glassy {
                         true,
                         20,
                         rollerParameter,
-                        new FeedforwardConstants(0.122, 0, 0.1, 0.065),
+                        Feedforward100.makeNeo(),
                         new PIDConstants(0.0001, 0, 0));
                 break;
             case BLANK:

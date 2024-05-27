@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.Drive;
@@ -40,14 +40,14 @@ public class AMSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics,
             PIDConstants pidConstants,
-            FeedforwardConstants feedforwardConstants) {
+            Feedforward100 ff) {
 
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
                 driveMotorCanId,
                 pidConstants,
-                feedforwardConstants);
+                ff);
 
         PositionServoInterface<Angle100> turningServo = turningServo(
                 name + "/Turning",
@@ -63,7 +63,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             double currentLimit,
             int driveMotorCanId,
             PIDConstants pidConstants,
-            FeedforwardConstants feedforwardConstants) {
+            Feedforward100 ff) {
         MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
                 driveMotorCanId,
@@ -72,7 +72,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 kDriveReduction,
                 kWheelDiameterM,
                 pidConstants,
-                feedforwardConstants);
+                ff);
         return new OutboardVelocityServo<>(
                 name,
                 driveMotor,

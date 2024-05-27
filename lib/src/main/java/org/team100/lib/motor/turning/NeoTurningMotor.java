@@ -1,6 +1,6 @@
 package org.team100.lib.motor.turning;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
@@ -35,31 +35,12 @@ public class NeoTurningMotor implements Motor100<Angle100> {
 
     private final RelativeEncoder m_encoder;
 
-    private final double staticFrictionFFVolts;
     /**
      * This is surely wrong.
      */
     private final double m_gearRatio;
 
-    /**
-     * Friction feedforward in volts, for when the mechanism is moving.
-     * 
-     * This is a guess. Calibrate it before using it.
-     */
-    private final double dynamicFrictionFFVolts;
-
-    /**
-     * Velocity feedforward in units of volts per motor revolution per second, or
-     * volt-seconds per revolution.
-     * 
-     * This is a guess. Calibrate it before using it.
-     */
-    private final double velocityFFVoltS_Rev;
-
-    /**
-     * Placeholder for accel feedforward.
-     */
-    private final double accelFFVoltS2_M;
+    private final Feedforward100 m_ff;
 
     /**
      * Proportional feedback coefficient for the controller.
@@ -79,7 +60,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
      * @param motorPhase
      * @param currentLimit
      * @param gearRatio
-     * @param lowLevelFeedforwardConstants using VOLTS VOLTS VOLTS
+     * @param ff using VOLTS VOLTS VOLTS
      * @param lowLevelVelocityConstants
      */
     public NeoTurningMotor(String name,
@@ -87,21 +68,15 @@ public class NeoTurningMotor implements Motor100<Angle100> {
             MotorPhase motorPhase,
             int currentLimit,
             double gearRatio,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
-        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
-        accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
-        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
-        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
+        m_ff = ff;
+
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
         m_gearRatio = gearRatio;
 
-        if (motorPhase == MotorPhase.FORWARD) {
-            m_motor.setInverted(false);
-        } else {
-            m_motor.setInverted(true);
-        }
+        m_motor.setInverted(motorPhase == MotorPhase.REVERSE);
 
         require(m_motor.setSmartCurrentLimit(currentLimit));
 
@@ -152,9 +127,9 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         double motorRevs_M = motorRevs_S * 60;
         double motorRad_S2 = m_gearRatio * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
-        double velocityFF = velocityFFVolts(motorRevs_S);
-        double frictionFF = frictionFFVolts(m_encoder.getVelocity() / 60, motorRevs_S);
-        double accelFF = accelFFVolts(motorRevs_S2);
+        double velocityFF = m_ff.velocityFFVolts(motorRevs_S);
+        double frictionFF = m_ff.frictionFFVolts(m_encoder.getVelocity() / 60, motorRevs_S);
+        double accelFF = m_ff.accelFFVolts(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
         m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
@@ -174,9 +149,9 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         double motorRad_S2 = m_gearRatio * accelRad_S2;
         double motorRevs_S2 = motorRad_S2 / (2 * Math.PI);
 
-        double velocityFFVolts = velocityFFVolts(motorRevs_S);
-        double frictionFFVolts = frictionFFVolts(m_encoder.getVelocity() / 60, motorRevs_S);
-        double accelFFVolts = accelFFVolts(motorRevs_S2);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRevs_S);
+        double frictionFFVolts = m_ff.frictionFFVolts(m_encoder.getVelocity() / 60, motorRevs_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRevs_S2);
 
         double torqueFFAmps = torqueNm / kTNm_amp;
         double torqueFFVolts = torqueFFAmps * kROhms;
@@ -224,31 +199,6 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     }
 
     /////////////////////////////////////////////////////////////////
-
-    /**
-     * Frictional feedforward in volts
-     */
-    private double frictionFFVolts(double currentMotorRev_S, double desiredMotorRev_S) {
-        double direction = Math.signum(desiredMotorRev_S);
-        if (currentMotorRev_S < 0.5) {
-            return staticFrictionFFVolts * direction;
-        }
-        return dynamicFrictionFFVolts * direction;
-    }
-
-    /**
-     * Velocity feedforward in volts
-     */
-    private double velocityFFVolts(double motorRev_S) {
-        return velocityFFVoltS_Rev * motorRev_S;
-    }
-
-    /**
-     * Acceleration feedforward in volts
-     */
-    private double accelFFVolts(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S;
-    }
 
     private void setP(double p) {
         m_pidController.setP(p);

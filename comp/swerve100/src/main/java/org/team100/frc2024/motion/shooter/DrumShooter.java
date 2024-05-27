@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion.shooter;
 
 import org.team100.frc2024.motion.GravityServo;
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -76,7 +76,7 @@ public class DrumShooter extends Shooter {
                         1,
                         0.1,
                         new PIDConstants(0.3, 0, 0), // 0.4
-                        new FeedforwardConstants(0.11, 0, 0, 0.9));
+                        Feedforward100.makeShooterFalcon6());
 
                 leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftMotor);
 
@@ -88,7 +88,7 @@ public class DrumShooter extends Shooter {
                         1,
                         0.1,
                         new PIDConstants(0.3, 0, 0), // 0.4
-                        new FeedforwardConstants(0.11, 0, 0, 0.9));
+                        Feedforward100.makeShooterFalcon6());
 
                 rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
 
@@ -183,8 +183,7 @@ public class DrumShooter extends Shooter {
     }
 
     public double getPivotPosition() {
-        Double rawPosition = pivotServo.getRawPosition();
-        return rawPosition;
+        return pivotServo.getRawPosition();
     }
 
     public void setPivotPosition(double angleRad) {

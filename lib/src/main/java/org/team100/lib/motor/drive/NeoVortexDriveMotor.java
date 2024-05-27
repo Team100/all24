@@ -1,6 +1,6 @@
 package org.team100.lib.motor.drive;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
@@ -35,27 +35,8 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
 
     private final RelativeEncoder m_encoder;
 
-    private final double staticFrictionFFVolts;
+    private final Feedforward100 m_ff;
 
-    /**
-     * Friction feedforward in volts, for when the mechanism is moving.
-     * 
-     * This is a guess. Calibrate it before using it.
-     */
-    private final double dynamicFrictionFFVolts;
-
-    /**
-     * Velocity feedforward in units of volts per motor revolution per second, or
-     * volt-seconds per revolution.
-     * 
-     * This is a guess. Calibrate it before using it.
-     */
-    private final double velocityFFVoltS_Rev;
-
-    /**
-     * Placeholder for accel feedforward.
-     */
-    private final double accelFFVoltS2_M;
     private final Telemetry t = Telemetry.get();
     private final SparkPIDController m_pidController;
     private final CANSparkFlex m_motor;
@@ -71,7 +52,7 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
      * @param currentLimit
      * @param gearRatio
      * @param wheelDiameter
-     * @param lowLevelFeedforwardConstants using VOLTS VOLTS VOLTS
+     * @param ff using VOLTS VOLTS VOLTS
      * @param lowLevelVelocityConstants
      */
     public NeoVortexDriveMotor(
@@ -81,14 +62,11 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
             int currentLimit,
             double gearRatio,
             double wheelDiameter,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         require(m_motor.restoreFactoryDefaults());
-        accelFFVoltS2_M = lowLevelFeedforwardConstants.getkA();
-        velocityFFVoltS_Rev = lowLevelFeedforwardConstants.getkV();
-        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
-        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
+        m_ff = ff;
         m_motor.setInverted(!motorPhase);
         require(m_motor.setSmartCurrentLimit(currentLimit));
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
@@ -143,9 +121,9 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         double wheelRev_S2 = accelM_S2 / (m_wheelDiameter * Math.PI);
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
-        double velocityFFVolts = velocityFFVolts(motorRev_S);
-        double frictionFFVolts = frictionFFVolts(m_encoder.getVelocity() / 60, motorRev_S);
-        double accelFFVolts = accelFFVolts(motorRev_S2);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double frictionFFVolts = m_ff.frictionFFVolts(m_encoder.getVelocity() / 60, motorRev_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
         double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
         m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
@@ -166,9 +144,9 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
         double wheelRev_S2 = accelM_S2 / (m_wheelDiameter * Math.PI);
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
-        double velocityFFVolts = velocityFFVolts(motorRev_S);
-        double frictionFFVolts = frictionFFVolts(m_encoder.getVelocity() / 60, motorRev_S);
-        double accelFFVolts = accelFFVolts(motorRev_S2);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double frictionFFVolts = m_ff.frictionFFVolts(m_encoder.getVelocity() / 60, motorRev_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
 
         double torqueFFAmps = torqueNm / kTNm_amp;
         double torqueFFVolts = torqueFFAmps * kROhms;
@@ -225,31 +203,6 @@ public class NeoVortexDriveMotor implements Motor100<Distance100> {
     }
 
     /////////////////////////////////////////////////////////////////
-
-    /**
-     * Frictional feedforward in VOLTS
-     */
-    private double frictionFFVolts(double currentMotorRev_S, double desiredMotorRev_S) {
-        double direction = Math.signum(desiredMotorRev_S);
-        if (currentMotorRev_S < 0.5) {
-            return staticFrictionFFVolts * direction;
-        }
-        return dynamicFrictionFFVolts * direction;
-    }
-
-    /**
-     * Velocity feedforward in VOLTS
-     */
-    private double velocityFFVolts(double motorRev_S) {
-        return velocityFFVoltS_Rev * motorRev_S;
-    }
-
-    /**
-     * Acceleration feedforward VOLTS
-     */
-    private double accelFFVolts(double accelM_S_S) {
-        return accelFFVoltS2_M * accelM_S_S;
-    }
 
     private void setP(double p) {
         m_pidController.setP(p);

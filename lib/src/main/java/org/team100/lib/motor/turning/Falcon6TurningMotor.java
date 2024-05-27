@@ -1,6 +1,6 @@
 package org.team100.lib.motor.turning;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
@@ -42,32 +42,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     private static final double kCurrentLimit = 10;
 
-    /**
-     * The speed, below which, static friction applies, in motor revolutions per
-     * second.
-     */
-    private static final double staticFrictionSpeedLimitRev_S = 3.5;
+    private final Feedforward100 m_ff;
 
-    /**
-     * Friction feedforward in volts, for when the mechanism is stopped, or nearly
-     * so.
-     */
-    private final double staticFrictionFFVolts;
-
-    /**
-     * Friction feedforward in volts, for when the mechanism is moving.
-     */
-    private final double dynamicFrictionFFVolts;
-
-    /**
-     * Velocity feedforward in volts per rev per second
-     */
-    private final double velocityFFVolts_Rev_S;
-
-    /**
-     * Accel feedforward in amps
-     */
-    private final double accelFFVolts_Rev_S_S;
     private final Telemetry t = Telemetry.get();
     private final TalonFX m_motor;
     private final double m_gearRatio;
@@ -79,11 +55,9 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
             MotorPhase motorPhase,
             double kGearRatio,
             PIDConstants lowLevelVelocityConstants,
-            FeedforwardConstants lowLevelFeedforwardConstants) {
-        velocityFFVolts_Rev_S = lowLevelFeedforwardConstants.getkV();
-        accelFFVolts_Rev_S_S = lowLevelFeedforwardConstants.getkA();
-        dynamicFrictionFFVolts = lowLevelFeedforwardConstants.getkDS();
-        staticFrictionFFVolts = lowLevelFeedforwardConstants.getkSS();
+            Feedforward100 ff) {
+        m_ff = ff;
+
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
 
@@ -146,9 +120,9 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
         double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
-        double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
-        double velocityFFVolts = velocityFFVolts(motorRev_S);
-        double accelFFVolts = accelFFVolts(accelRad_S_S);
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
 
         double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts;
 
@@ -175,9 +149,9 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
 
         double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
-        double frictionFFVolts = frictionFFVolts(currentMotorRev_S, motorRev_S);
-        double velocityFFVolts = velocityFFVolts(motorRev_S);
-        double accelFFVolts = accelFFVolts(accelRad_S_S);
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
 
         double torqueFFAmps = torqueNm / kTNm_amp;
         double torqueFFVolts = torqueFFAmps * kROhms;
@@ -223,24 +197,4 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     //////////////////////////////////////////////////////////////////
 
-    /** Velocity feedforward in volts */
-    private double velocityFFVolts(double desiredMotorRev_S) {
-        return velocityFFVolts_Rev_S * desiredMotorRev_S;
-    }
-
-    /** Frictional feedforward in volts */
-    private double frictionFFVolts(double currentMotorRev_S, double desiredMotorRev_S) {
-        double direction = Math.signum(desiredMotorRev_S);
-        if (currentMotorRev_S < staticFrictionSpeedLimitRev_S) {
-            return staticFrictionFFVolts * direction;
-        }
-        return dynamicFrictionFFVolts * direction;
-    }
-
-    /**
-     * Acceleration feedforward in volts
-     */
-    private double accelFFVolts(double accelRad_S_S) {
-        return accelFFVolts_Rev_S_S * accelRad_S_S;
-    }
 }

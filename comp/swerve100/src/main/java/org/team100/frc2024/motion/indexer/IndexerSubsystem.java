@@ -1,6 +1,6 @@
 package org.team100.frc2024.motion.indexer;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
@@ -36,7 +36,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
     private final String m_name;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final PIDConstants m_velocityConstants;
-    private final FeedforwardConstants m_lowLevelFeedforwardConstants;
+    private final Feedforward100 m_lowLevelFeedforwardConstants;
 
     DigitalInput beamBreak1;
     // DigitalInput beamBreak2;
@@ -44,7 +44,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
     public IndexerSubsystem(int driveID) {
         m_name = Names.name(this);
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
-        m_lowLevelFeedforwardConstants = new FeedforwardConstants(0.122,0,0.1,0.065);
+        m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
             12.0,
