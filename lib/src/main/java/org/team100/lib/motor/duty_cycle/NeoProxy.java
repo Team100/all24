@@ -1,6 +1,7 @@
 package org.team100.lib.motor.duty_cycle;
 
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.Rev100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -29,8 +30,8 @@ public class NeoProxy implements Motor100<Distance100> {
             int currentLimit) {
         m_name = Names.append(name, this);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
+        Rev100.currentConfig(m_motor, currentLimit);
         m_motor.setIdleMode(brakeMode ? IdleMode.kBrake : IdleMode.kCoast);
-        m_motor.setSmartCurrentLimit(currentLimit);
     }
 
     private void set(double speed) {

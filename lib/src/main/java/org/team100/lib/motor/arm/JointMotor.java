@@ -1,12 +1,12 @@
 package org.team100.lib.motor.arm;
 
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.Rev100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
-import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
@@ -33,11 +33,11 @@ public class JointMotor implements Motor100<Angle100> {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
-        m_motor.restoreFactoryDefaults();
+        Rev100.baseConfig(m_motor);
+        Rev100.motorConfig(m_motor);
+        Rev100.currentConfig(m_motor, currentLimit);
 
-        m_motor.setSmartCurrentLimit(currentLimit);
-        m_motor.setSecondaryCurrentLimit(currentLimit);
-        m_motor.setIdleMode(IdleMode.kBrake);
+
 
         // reduce total velocity measurement delay
         m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);

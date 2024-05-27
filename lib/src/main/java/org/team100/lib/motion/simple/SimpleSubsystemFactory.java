@@ -7,6 +7,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
@@ -46,8 +47,9 @@ public class SimpleSubsystemFactory {
         MotorWithEncoder100<Distance100> motor = new Falcon6DriveMotor(
                 "simple/drive",
                 1,
-                true,
+                MotorPhase.FORWARD,
                 10,
+                20,
                 1,
                 1,
                 pidConstants,

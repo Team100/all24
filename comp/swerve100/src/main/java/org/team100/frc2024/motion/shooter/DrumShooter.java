@@ -10,6 +10,7 @@ import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
@@ -46,7 +47,7 @@ public class DrumShooter extends Shooter {
     private final VelocityServo<Distance100> rightRoller;
     private final GravityServo pivotServo;
 
-    public DrumShooter(int leftID, int rightID, int pivotID, int currentLimit) {
+    public DrumShooter(int leftID, int rightID, int pivotID, double supplyLimit, double statorLimit) {
         m_name = Names.name(this);
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(
@@ -71,8 +72,9 @@ public class DrumShooter extends Shooter {
                 MotorWithEncoder100<Distance100> leftMotor = new Falcon6DriveMotor(
                         m_name + "/Left",
                         leftID,
-                        false,
-                        currentLimit,
+                        MotorPhase.REVERSE,
+                        supplyLimit,
+                        statorLimit,
                         1,
                         0.1,
                         new PIDConstants(0.3, 0, 0), // 0.4
@@ -83,8 +85,9 @@ public class DrumShooter extends Shooter {
                 MotorWithEncoder100<Distance100> rightMotor = new Falcon6DriveMotor(
                         m_name + "/Right",
                         rightID,
-                        true,
-                        currentLimit,
+                        MotorPhase.FORWARD,
+                        supplyLimit,
+                        statorLimit,
                         1,
                         0.1,
                         new PIDConstants(0.3, 0, 0), // 0.4

@@ -2,23 +2,19 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
+import org.team100.lib.motor.Phoenix100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 
 /**
  * PHOENIX 6 VERSION
@@ -54,55 +50,27 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     public Falcon6DriveMotor(
             String name,
             int canId,
-            boolean motorPhase,
-            double currentLimit,
+            MotorPhase motorPhase,
+            double supplyLimit,
+            double statorLimit,
             double kDriveReduction,
             double wheelDiameter,
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
-        m_ff = ff;
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
+        m_ff = ff;
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
         m_distancePerTurn = wheelDiameter * Math.PI / kDriveReduction;
-
         m_motor = new TalonFX(canId);
 
         TalonFXConfigurator talonFXConfigurator = m_motor.getConfigurator();
-
-        TalonFXConfiguration conf = new TalonFXConfiguration();
-        talonFXConfigurator.apply(conf);
-
-        MotorOutputConfigs motorConfigs = new MotorOutputConfigs();
-        motorConfigs.NeutralMode = NeutralModeValue.Brake;
-
-        // Avoid draining the battery too much.
-        CurrentLimitsConfigs currentConfigs = new CurrentLimitsConfigs();
-        currentConfigs.SupplyCurrentLimit = currentLimit;
-        currentConfigs.SupplyCurrentLimitEnable = true;
-        talonFXConfigurator.apply(currentConfigs);
-
-        if (motorPhase) {
-            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
-        } else {
-            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
-        }
-
-        talonFXConfigurator.apply(motorConfigs);
-
-        m_motor.getVelocity().setUpdateFrequency(50);
-
-        // set slot 0 gains
-        var slot0Configs = new Slot0Configs();
-        slot0Configs.kV = 0.0;
-        slot0Configs.kP = lowLevelVelocityConstants.getP();
-        slot0Configs.kI = lowLevelVelocityConstants.getI();
-        slot0Configs.kD = lowLevelVelocityConstants.getD();
-
-        // apply gains, 50 ms total timeout
-        // TODO: look at status code
-        m_motor.getConfigurator().apply(slot0Configs, 0.050);
+        Phoenix100.baseConfig(talonFXConfigurator);
+        Phoenix100.motorConfig(talonFXConfigurator, motorPhase);
+        Phoenix100.currentConfig(talonFXConfigurator, supplyLimit, statorLimit);
+        Phoenix100.pidConfig(talonFXConfigurator, lowLevelVelocityConstants);
+        Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
 
         m_name = Names.append(name, this);
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
@@ -114,7 +82,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
     @Override
     public void setDutyCycle(double output) {
         DutyCycleOut d = new DutyCycleOut(output);
-        m_motor.setControl(d);
+        Phoenix100.warn(() -> m_motor.setControl(d));
         t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
     }
 
@@ -138,7 +106,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         VelocityVoltage v = new VelocityVoltage(motorRev_S);
         v.FeedForward = kFFVolts;
         v.Acceleration = motorRev_S2;
-        m_motor.setControl(v);
+        Phoenix100.warn(() -> m_motor.setControl(v));
 
         t.log(Level.TRACE, m_name, "module input (RPS)", wheelRev_S);
         t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
@@ -176,7 +144,7 @@ public class Falcon6DriveMotor implements MotorWithEncoder100<Distance100> {
         VelocityVoltage v = new VelocityVoltage(motorRev_S);
         v.FeedForward = kFFVolts;
         v.Acceleration = motorRev_S2;
-        m_motor.setControl(v);
+        Phoenix100.warn(() -> m_motor.setControl(v));
 
         t.log(Level.TRACE, m_name, "module input (RPS)", wheelRev_S);
         t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);

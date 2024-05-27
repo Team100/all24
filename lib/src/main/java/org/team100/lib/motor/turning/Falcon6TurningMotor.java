@@ -4,22 +4,17 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.Phoenix100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 
 /**
  * PHOENIX 6 VERSION
@@ -40,7 +35,8 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
      */
     private static final double kTNm_amp = 0.019;
 
-    private static final double kCurrentLimit = 10;
+    private static final double kSupplyLimit = 10;
+    private static final double kStatorLimit = 20;
 
     private final Feedforward100 m_ff;
 
@@ -56,47 +52,18 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
             double kGearRatio,
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
-        m_ff = ff;
-
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
-
+        m_ff = ff;
         m_motor = new TalonFX(canId);
+        m_gearRatio = kGearRatio;
 
         TalonFXConfigurator talonFXConfigurator = m_motor.getConfigurator();
-
-        TalonFXConfiguration conf = new TalonFXConfiguration();
-        talonFXConfigurator.apply(conf);
-
-        MotorOutputConfigs motorConfigs = new MotorOutputConfigs();
-        motorConfigs.NeutralMode = NeutralModeValue.Brake;
-
-        m_gearRatio = kGearRatio;
-        // the serve module steering gear is inverted
-        if (motorPhase == MotorPhase.FORWARD) {
-            motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
-        } else {
-            motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
-        }
-
-        talonFXConfigurator.apply(motorConfigs);
-
-        // Avoid draining the battery too much.
-        CurrentLimitsConfigs currentConfigs = new CurrentLimitsConfigs();
-        currentConfigs.SupplyCurrentLimit = kCurrentLimit;
-        currentConfigs.SupplyCurrentLimitEnable = true;
-        talonFXConfigurator.apply(currentConfigs);
-
-        m_motor.getVelocity().setUpdateFrequency(50);
-
-        // set slot 0 gains
-        Slot0Configs slot0Configs = new Slot0Configs();
-        slot0Configs.kV = 0;
-        slot0Configs.kP = lowLevelVelocityConstants.getP();
-        slot0Configs.kI = lowLevelVelocityConstants.getI();
-        slot0Configs.kD = lowLevelVelocityConstants.getD();
-        // apply gains, 50 ms total timeout
-        m_motor.getConfigurator().apply(slot0Configs, 0.050);
+        Phoenix100.baseConfig(talonFXConfigurator);
+        Phoenix100.motorConfig(talonFXConfigurator, motorPhase);
+        Phoenix100.currentConfig(talonFXConfigurator, kSupplyLimit, kStatorLimit);
+        Phoenix100.pidConfig(talonFXConfigurator, lowLevelVelocityConstants);
+        Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
 
         m_name = Names.append(name, this);
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
@@ -105,7 +72,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
     @Override
     public void setDutyCycle(double output) {
         DutyCycleOut d = new DutyCycleOut(output);
-        m_motor.setControl(d);
+        Phoenix100.warn(() -> m_motor.setControl(d));
         t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
         log();
     }
@@ -129,7 +96,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         VelocityVoltage v = new VelocityVoltage(motorRev_S);
         v.FeedForward = kFFVolts;
         v.Acceleration = motorRev_S2;
-        m_motor.setControl(v);
+        Phoenix100.warn(() -> m_motor.setControl(v));
 
         t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
@@ -161,7 +128,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         VelocityVoltage v = new VelocityVoltage(motorRev_S);
         v.FeedForward = kFFVolts;
         v.Acceleration = motorRev_S2;
-        m_motor.setControl(v);
+        Phoenix100.warn(() -> m_motor.setControl(v));
 
         t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);

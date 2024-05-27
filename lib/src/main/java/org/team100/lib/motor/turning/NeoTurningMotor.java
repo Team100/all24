@@ -4,6 +4,7 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.Rev100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
@@ -13,7 +14,6 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
@@ -53,54 +53,34 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     private final CANSparkMax m_motor;
     private final String m_name;
 
-    /**
-     * 
-     * @param name
-     * @param canId
-     * @param motorPhase
-     * @param currentLimit
-     * @param gearRatio
-     * @param ff using VOLTS VOLTS VOLTS
-     * @param lowLevelVelocityConstants
-     */
     public NeoTurningMotor(String name,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
             double gearRatio,
             Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
+            PIDConstants pid) {
+        m_gearRatio = gearRatio;
         m_ff = ff;
 
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
-        require(m_motor.restoreFactoryDefaults());
-        m_gearRatio = gearRatio;
+        Rev100.baseConfig(m_motor);
+        Rev100.motorConfig(m_motor);
+        Rev100.currentConfig(m_motor, currentLimit);
 
         m_motor.setInverted(motorPhase == MotorPhase.REVERSE);
-
-        require(m_motor.setSmartCurrentLimit(currentLimit));
-
-        m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
+        Rev100.crash(() -> m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20));
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
-        require(m_pidController.setPositionPIDWrappingEnabled(true));
-
-        setP(lowLevelVelocityConstants.getP());
-        setI(lowLevelVelocityConstants.getI());
-        setD(lowLevelVelocityConstants.getD());
-        setIZone(lowLevelVelocityConstants.getIZone());
-
-        require(m_pidController.setFF(0));
-        require(m_pidController.setOutputRange(-1, 1));
+        Rev100.pidConfig(m_pidController, pid);
 
         m_name = Names.append(name, this);
 
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
-
-        t.register(Level.TRACE, m_name, "P", lowLevelVelocityConstants.getP(), this::setP);
-        t.register(Level.TRACE, m_name, "I", lowLevelVelocityConstants.getI(), this::setI);
-        t.register(Level.TRACE, m_name, "D", lowLevelVelocityConstants.getD(), this::setD);
-        t.register(Level.TRACE, m_name, "IZone", lowLevelVelocityConstants.getIZone(), this::setIZone);
+        t.register(Level.TRACE, m_name, "P", pid.getP(), this::setP);
+        t.register(Level.TRACE, m_name, "I", pid.getI(), this::setI);
+        t.register(Level.TRACE, m_name, "D", pid.getD(), this::setD);
+        t.register(Level.TRACE, m_name, "IZone", pid.getIZone(), this::setIZone);
     }
 
     @Override
@@ -132,7 +112,8 @@ public class NeoTurningMotor implements Motor100<Angle100> {
         double accelFF = m_ff.accelFFVolts(motorRevs_S2);
         double kFF = frictionFF + velocityFF + accelFF;
 
-        m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
+        Rev100.warn(
+                () -> m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
 
         t.log(Level.TRACE, m_name, "friction feedforward [-1,1]", frictionFF);
         t.log(Level.TRACE, m_name, "velocity feedforward [-1,1]", velocityFF);
@@ -158,7 +139,8 @@ public class NeoTurningMotor implements Motor100<Angle100> {
 
         double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
 
-        m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage);
+        Rev100.warn(
+                () -> m_pidController.setReference(motorRevs_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
 
         t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
         t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
@@ -174,7 +156,7 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     }
 
     public void resetPosition() {
-        m_encoder.setPosition(0);
+        Rev100.warn(() -> m_encoder.setPosition(0));
     }
 
     @Override
@@ -201,23 +183,18 @@ public class NeoTurningMotor implements Motor100<Angle100> {
     /////////////////////////////////////////////////////////////////
 
     private void setP(double p) {
-        m_pidController.setP(p);
+        Rev100.warn(() -> m_pidController.setP(p));
     }
 
     private void setI(double i) {
-        m_pidController.setI(i);
+        Rev100.warn(() -> m_pidController.setI(i));
     }
 
     private void setD(double d) {
-        m_pidController.setD(d);
+        Rev100.warn(() -> m_pidController.setD(d));
     }
 
     private void setIZone(double iz) {
-        m_pidController.setIZone(iz);
-    }
-
-    private void require(REVLibError responseCode) {
-        if (responseCode != REVLibError.kOk)
-            throw new IllegalStateException("NeoTurningMotor received response code " + responseCode.name());
+        Rev100.warn(() -> m_pidController.setIZone(iz));
     }
 }

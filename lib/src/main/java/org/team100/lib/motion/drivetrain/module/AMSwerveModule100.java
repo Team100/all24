@@ -9,6 +9,7 @@ import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.TurningMotorController100;
@@ -34,6 +35,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
     public static AMSwerveModule100 get(
             String name,
             double currentLimit,
+            double statorLimit,
             int driveMotorCanId,
             int turningMotorChannel,
             int turningEncoderChannel,
@@ -45,6 +47,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
+                statorLimit,
                 driveMotorCanId,
                 pidConstants,
                 ff);
@@ -61,14 +64,16 @@ public class AMSwerveModule100 extends SwerveModule100 {
 
     private static VelocityServo<Distance100> driveServo(String name,
             double currentLimit,
+            double statorLimit,
             int driveMotorCanId,
             PIDConstants pidConstants,
             Feedforward100 ff) {
         MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
                 driveMotorCanId,
-                true,
+                MotorPhase.FORWARD,
                 currentLimit,
+                statorLimit,
                 kDriveReduction,
                 kWheelDiameterM,
                 pidConstants,

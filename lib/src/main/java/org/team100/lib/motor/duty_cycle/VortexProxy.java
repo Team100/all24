@@ -1,6 +1,7 @@
 package org.team100.lib.motor.duty_cycle;
 
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.Rev100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -25,7 +26,7 @@ public class VortexProxy implements Motor100<Distance100> {
         m_name = Names.append(name, this);
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         m_motor.setInverted(inverted);
-        m_motor.setSmartCurrentLimit(currentLimit);
+        Rev100.currentConfig(m_motor, currentLimit);
         m_encoder = m_motor.getEncoder();
     }
 

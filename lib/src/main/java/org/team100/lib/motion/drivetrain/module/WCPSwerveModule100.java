@@ -56,6 +56,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     public static WCPSwerveModule100 get(
             String name,
             double currentLimit,
+            double statorLimit,
             int driveMotorCanId,
             DriveRatio ratio,
             Class<? extends Encoder100<Angle100>> encoderClass,
@@ -73,6 +74,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
                 currentLimit,
+                statorLimit,
                 driveMotorCanId,
                 ratio,
                 drivePidConstants,
@@ -97,6 +99,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static VelocityServo<Distance100> driveServo(
             String name,
             double currentLimit,
+            double statorLimit,
             int driveMotorCanId,
             DriveRatio ratio,
             PIDConstants pidConstants,
@@ -105,8 +108,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
                 name,
                 driveMotorCanId,
-                true,
+                MotorPhase.FORWARD,
                 currentLimit,
+                statorLimit,
                 ratio.m_ratio,
                 kWheelDiameterM,
                 pidConstants,
