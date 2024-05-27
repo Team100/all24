@@ -223,16 +223,12 @@ public class RobotContainer implements Glassy {
         // hold the amp up while holding the button
         whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(m_ampPivot, 1.8));
 
-        // TODO: what does this actually do?
-        whileTrue(operatorControl::pivotToDownPosition, new Ramp(m_shooter, m_drive));
-
         whileTrue(operatorControl::feedToAmp, new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
 
         whileTrue(operatorControl::rezero, new TestShoot(m_shooter));
 
         whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
 
-        // TODO: finish the "lob" command.
         whileTrue(operatorControl::never, new Lob(m_shooter, m_intake));
 
         ///////////////////////////
