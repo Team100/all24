@@ -30,6 +30,7 @@ class Blip24:
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
+
     # TODO get correct serial numbers for Delta
     A = "10000000caeaae82"  # "BETA FRONT"
     # B = "1000000013c9c96c"  # "BETA BACK"
@@ -47,28 +48,88 @@ class Camera(Enum):
     def _missing_(cls, value):
         return Camera.UNKNOWN
 
-class TagFinder:
-    def __init__(self, serial, width, height, model):
-        self.frame_time = time.time()
-        # the cpu serial number
-        self.serial = serial
-        self.width = width
-        self.height = height
-        self.model = model
 
-        # for the driver view
-        scale = 0.25
-        self.view_width = int(width * scale)
-        self.view_height = int(height * scale)
+class CameraData:
+    def __init__(self, id):
+        self.camera = Picamera2(id)
+        model = self.camera.camera_properties["Model"]
+        print("\nMODEL " + model)
 
-        self.initialize_nt()
+        if model == "imx708_wide":
+            print("V3 Wide Camera")
+            # full frame is 4608x2592; this is 2x2
+            fullwidth = 2304
+            fullheight = 1296
+            # medium detection resolution, compromise speed vs range
+            self.width = 1152
+            self.height = 648
+        elif model == "imx219":
+            print("V2 Camera")
+            # full frame, 2x2, to set the detector mode to widest angle possible
+            fullwidth = 1664  # slightly larger than the detector, to match stride
+            fullheight = 1232
+            # medium detection resolution, compromise speed vs range
+            self.width = 832
+            self.height = 616
+        elif model == "imx296":
+            print("GS Camera")
+            # full frame, 2x2, to set the detector mode to widest angle possible
+            fullwidth = 1472  # slightly larger than the detector, to match stride
+            fullheight = 1088
+            # medium detection resolution, compromise speed vs range
+            self.width = 1472
+            self.height = 1088
+        else:
+            print("UNKNOWN CAMERA: " + model)
+            fullwidth = 100
+            fullheight = 100
+            self.width = 100
+            self.height = 100
 
-        self.at_detector = robotpy_apriltag.AprilTagDetector()
-        self.at_detector.addFamily("tag36h11")
-        
-        # from testing on 3/22/24, k1 and k2 only
-        
-        if self.model == "imx708_wide":
+        camera_config = self.camera.create_still_configuration(
+            # 2 buffers => low latency (32-48 ms), low fps (15-20)
+            # 5 buffers => mid latency (40-55 ms), high fps (22-28)
+            # 3 buffers => high latency (50-70 ms), mid fps (20-23)
+            # robot goes at 50 fps, so roughly a frame every other loop
+            # fps doesn't matter much, so minimize latency
+            buffer_count=2,
+            main={
+                "format": "YUV420",
+                "size": (fullwidth, fullheight),
+            },
+            lores={"format": "YUV420", "size": (self.width, self.height)},
+            controls={
+                # these manual controls are useful sometimes but turn them off for now
+                # because auto mode seems fine
+                # fast shutter means more gain
+                # "AnalogueGain": 8.0,
+                # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
+                # 3/23/24, reduced to 2ms, even less blur.
+                "ExposureTime": 3000,
+                "AnalogueGain": 8,
+                # "AeEnable": True,
+                # limit auto: go as fast as possible but no slower than 30fps
+                # without a duration limit, we slow down in the dark, which is fine
+                # "FrameDurationLimits": (5000, 33333),  # 41 fps
+                # noise reduction takes time, don't need it.
+                "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+                # "ScalerCrop":(0,0,width/2,height/2),
+            },
+        )
+        print("SENSOR MODES AVAILABLE")
+        pprint.pprint(self.camera.sensor_modes)
+        # if identity == Camera.FRONT:
+        #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+
+        print("\nREQUESTED CONFIG")
+        print(camera_config)
+        self.camera.align_configuration(camera_config)
+        print("\nALIGNED CONFIG")
+        print(camera_config)
+        self.camera.configure(camera_config)
+        print("\nCONTROLS")
+        print(self.camera.camera_controls)
+        if model == "imx708_wide":
             print("V3 WIDE CAMERA")
             fx = 498
             fy = 498
@@ -76,7 +137,7 @@ class TagFinder:
             cy = 316
             k1 = 0.01
             k2 = -0.0365
-        elif self.model == "imx219":
+        elif model == "imx219":
             print("V2 CAMERA (NOT WIDE ANGLE)")
             fx = 660
             fy = 660
@@ -85,23 +146,22 @@ class TagFinder:
             k1 = -0.003
             k2 = 0.04
         # TODO get these real distortion values
-        elif self.model == "imx296":
+        elif model == "imx296":
             fx = 1680
             fy = 1680
-            cx = int(1456/2)
-            cy = int(1088/2)
+            cx = 728
+            cy = 544
             k1 = 0
             k2 = 0
         else:
             print("UNKNOWN CAMERA MODEL")
             sys.exit()
-
-        tag_size = 0.1651  # tagsize 6.5 inches
+        tag_size = 0.1651
         p1 = 0
         p2 = 0
-
-        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], np.float32)
-        self.dist = np.array([[k1, k2, p1, p2]], np.float32)
+        self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+        self.dist = np.array([[k1, k2, p1, p2]])
+        self.output_stream = CameraServer.putVideo(str(id), self.width, self.height)
         self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
             robotpy_apriltag.AprilTagPoseEstimator.Config(
                 tag_size,
@@ -111,22 +171,46 @@ class TagFinder:
                 cy,
             )
         )
+        self.camera.start()
+        self.frame_time = time.time()
 
-        self.output_stream = CameraServer.putVideo("Processed", width, height)
+    def setFPSPublisher(self, FPSPublisher):
+        self.FPSPublisher = FPSPublisher
 
-    def analyze(self, request):
+    def setLatencyPublisher(self, LatencyPublisher):
+        self.LatencyPublisher = LatencyPublisher
+
+class TagFinder:
+    def __init__(self, serial, camList):
+        # the cpu serial number
+        self.serial = serial
+        self.initialize_nt(camList)
+        self.blips = []
+        self.at_detector = robotpy_apriltag.AprilTagDetector()
+        self.at_detector.addFamily("tag36h11")
+
+    def analyze(self, request, camera):
         potentialTags = self.estimatedTagPose.get()
         potentialArray = []
         z = []
         for Blip24s in potentialTags:
             translation = Blip24s.pose.translation()
-            if (translation.Z() < 0):
+            if translation.Z() < 0:
                 continue
-            rvec = np.zeros((3, 1), np.float32) 
-            tvec = np.zeros((3, 1), np.float32) 
-            object_points = np.array([translation.X(), translation.Y(),translation.Z()],np.float32)
-            (point2D, _) = cv2.projectPoints(object_points,rvec,tvec,self.mtx,self.dist)
-            if (point2D[0][0][0] > 0 and point2D[0][0][0] < 1456 and point2D[0][0][1] > 0 and point2D[0][0][1] < 1088):
+            rvec = np.zeros((3, 1), np.float32)
+            tvec = np.zeros((3, 1), np.float32)
+            object_points = np.array(
+                [translation.X(), translation.Y(), translation.Z()], np.float32
+            )
+            (point2D, _) = cv2.projectPoints(
+                object_points, rvec, tvec, camera.mtx, camera.dist
+            )
+            if (
+                point2D[0][0][0] > 0
+                and point2D[0][0][0] < 1456
+                and point2D[0][0][1] > 0
+                and point2D[0][0][1] < 1088
+            ):
                 # print(Blip24s.id)
                 # print(object_points)
                 # print(point2D[0][0])
@@ -135,54 +219,62 @@ class TagFinder:
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
-        y_len = self.width * self.height
+        y_len = camera.width * camera.height
 
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
         img = np.frombuffer(buffer, dtype=np.uint8, count=y_len)
 
         # this  makes a view, very fast (150 ns)
-        img = img.reshape((self.height, self.width))
+        img = img.reshape((camera.height, camera.width))
         # TODO: crop regions that never have targets
         # this also makes a view, very fast (150 ns)
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
         # for now use the full frame
-        # TODO: probably remove this
-        serial = getserial()
-        identity = Camera(serial)
-        if (len(potentialArray) == 1):
-            offset = 100/z[0]
-            if (potentialArray[0][1]-offset > 0 and potentialArray[0][0]-offset > 0 and potentialArray[0][0]+offset < self.width and potentialArray[0][1]+offset < self.height):
-                img = img[int(potentialArray[0][1]-offset) : int(potentialArray[0][1]+offset), int(potentialArray[0][0]-offset):int(potentialArray[0][0]+offset)]
+        if len(potentialArray) == 1:
+            offset = 100 / z[0]
+            if (
+                potentialArray[0][1] - offset > 0
+                and potentialArray[0][0] - offset > 0
+                and potentialArray[0][0] + offset < camera.width
+                and potentialArray[0][1] + offset < camera.height
+            ):
+                img = img[
+                    int(potentialArray[0][1] - offset) : int(
+                        potentialArray[0][1] + offset
+                    ),
+                    int(potentialArray[0][0] - offset) : int(
+                        potentialArray[0][0] + offset
+                    ),
+                ]
 
-        img = cv2.undistort(img, self.mtx, self.dist)
+        img = cv2.undistort(img, camera.mtx, camera.dist)
 
         result = self.at_detector.detect(img)
-        
-        blips = []
+
         for result_item in result:
             if result_item.getHamming() > 0:
                 continue
-            pose = self.estimator.estimate(result_item)
-            blips.append(Blip24(result_item.getId(), pose))
+            pose = camera.estimator.estimate(result_item)
+            self.blips.append(Blip24(result_item.getId(), pose))
             # TODO: turn this off for prod
             self.draw_result(img, result_item, pose)
 
         # compute time since last frame
         current_time = time.time()
-        total_et = current_time - self.frame_time
-        self.frame_time = current_time
+        total_et = current_time - camera.frame_time
+        camera.frame_time = current_time
 
         fps = 1 / total_et
 
-        self.vision_nt_struct.set(blips)
-        self.vision_fps.set(fps)
+        camera.fps = fps
+        camera.FPSPublisher.set(fps)
 
         # sensor timestamp is the boottime when the first byte was received from the sensor
         sensor_timestamp = metadata["SensorTimestamp"]
         # include all the work above in the latency
         system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
         time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
-        self.vision_latency.set(time_delta_ms)
+        camera.LatencyPublisher.set(time_delta_ms)
 
         # must flush!  otherwise 100ms update rate.
         self.inst.flush()
@@ -200,8 +292,8 @@ class TagFinder:
 
         # for now put big images
         # TODO: turn this off for prod!!
-        img_output = cv2.resize(img, (416,308)) 
-        self.output_stream.putFrame(img_output)
+        img_output = cv2.resize(img, (416, 308))
+        camera.output_stream.putFrame(img_output)
 
     def draw_result(self, image, result_item, pose: Transform3d):
         color = (255, 255, 255)
@@ -236,7 +328,7 @@ class TagFinder:
     def accept(self, estimatedTagPose):
         print("ay" + str(estimatedTagPose.readQueue()))
 
-    def initialize_nt(self):
+    def initialize_nt(self, camList):
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
@@ -244,10 +336,13 @@ class TagFinder:
         self.inst.setServer("10.1.0.2")
 
         topic_name = "vision/" + self.serial
-        self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
-        self.vision_latency = self.inst.getDoubleTopic(
-            topic_name + "/latency"
-        ).publish()
+        for camera in camList:
+            camera.setFPSPublisher(
+                self.inst.getDoubleTopic(topic_name + "/fps").publish()
+            )
+            camera.setLatencyPublisher(
+                self.inst.getDoubleTopic(topic_name + "/latency").publish()
+            )
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Blip24).publish().set(
@@ -260,9 +355,7 @@ class TagFinder:
 
         self.estimatedTagPose = self.inst.getStructArrayTopic(
             topic_name + "/estimatedTagPose", Blip24
-        ).subscribe([],ntcore.PubSubOptions())
-        
-
+        ).subscribe([], ntcore.PubSubOptions())
 
 
 def getserial():
@@ -274,103 +367,29 @@ def getserial():
 
 
 def main():
-
-    camera = Picamera2()
-
-    model = camera.camera_properties["Model"]
-    print("\nMODEL " + model)
-
-    if model == "imx708_wide":
-        print("V3 Wide Camera")
-        # full frame is 4608x2592; this is 2x2
-        fullwidth = 2304
-        fullheight = 1296
-        # medium detection resolution, compromise speed vs range
-        width = 1152
-        height = 648
-    elif model == "imx219":
-        print("V2 Camera")
-        # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1664  # slightly larger than the detector, to match stride
-        fullheight = 1232
-        # medium detection resolution, compromise speed vs range
-        width = 832
-        height = 616
-    elif model == "imx296":
-        print("GS Camera")
-        # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1472   # slightly larger than the detector, to match stride
-        fullheight = 1088
-        # medium detection resolution, compromise speed vs range
-        width = 1472
-        height = 1088
-    else:
-        print("UNKNOWN CAMERA: " + model)
-        fullwidth = 100
-        fullheight = 100
-        width = 100
-        height = 100
-
-    camera_config = camera.create_still_configuration(
-        # 2 buffers => low latency (32-48 ms), low fps (15-20)
-        # 5 buffers => mid latency (40-55 ms), high fps (22-28)
-        # 3 buffers => high latency (50-70 ms), mid fps (20-23)
-        # robot goes at 50 fps, so roughly a frame every other loop
-        # fps doesn't matter much, so minimize latency
-        buffer_count=2,
-        main={
-            "format": "YUV420",
-            "size": (fullwidth, fullheight),
-        },
-        lores={"format": "YUV420", "size": (width, height)},
-        controls={
-            # these manual controls are useful sometimes but turn them off for now
-            # because auto mode seems fine
-            # fast shutter means more gain
-            # "AnalogueGain": 8.0,
-            # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-            # 3/23/24, reduced to 2ms, even less blur.
-            "ExposureTime": 3000,
-            "AnalogueGain": 8,
-            # limit auto: go as fast as possible but no slower than 30fps
-            # without a duration limit, we slow down in the dark, which is fine
-            # "FrameDurationLimits": (5000, 33333),  # 41 fps
-            # noise reduction takes time, don't need it.
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-            # "ScalerCrop":(0,0,width/2,height/2),
-        },
-    )
-    print("SENSOR MODES AVAILABLE")
-    pprint.pprint(camera.sensor_modes)
+    print("main")
+    print(Picamera2.global_camera_info())
+    camList = []
+    if len(Picamera2.global_camera_info()) == 0:
+        print("NO CAMERAS DETECTED, PLEASE TURN OFF PI AND CHECK CAMERA PORT(S)")
+    for cameraData in Picamera2.global_camera_info():
+        camera = CameraData(cameraData["Num"])
+        camList.append(camera)
     serial = getserial()
-    identity = Camera(serial)
-    # if identity == Camera.FRONT:
-    #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
-
-    print("\nREQUESTED CONFIG")
-    print(camera_config)
-    camera.align_configuration(camera_config)
-    print("\nALIGNED CONFIG")
-    print(camera_config)
-    camera.configure(camera_config)
-    print("\nCONTROLS")
-    print(camera.camera_controls)
     print(serial)
-    output = TagFinder(serial, width, height, model)
-
-    camera.start()
+    output = TagFinder(serial, camList)
     # output.startListening()
     try:
         while True:
-            # the most recent completed frame, from the recent past
-            request = camera.capture_request()
-            try:
-                output.analyze(request)
-            finally:
-                # the frame is owned by the camera so remember to release it
-                request.release()
+            for camera in camList:
+                request = camera.camera.capture_request()
+                try:
+                    output.analyze(request, camera)
+                finally:
+                    request.release()
+            output.vision_nt_struct.set(output.blips)
+            output.blips = []
     finally:
-        camera.stop()
-
-
+        for camera in camList:
+            camera.camera.stop()
 main()
