@@ -2,29 +2,16 @@ package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.persistent_parameter.Parameter;
-import org.team100.lib.persistent_parameter.ParameterFactory;
 
 class TireTest {
     private static final double kDelta = 0.001;
-    private final ParameterFactory factory;
-    private final Tire tire;
-
-    TireTest() {
-        factory = new ParameterFactory(new HashMap<>());
-        tire = new Tire(factory);
-        // override the preference to make the test independent.
-        factory.mutable(
-                Tire.kSaturationLabel, 0).set(10);
-    }
 
     @Test
     void testDesiredAccel() {
         // motionless
+        Tire tire = new Tire(10, 0.1);
         Vector2d actual = tire.desiredAccelM_s_s(new Vector2d(0, 0), new Vector2d(0, 0), 0.02);
         assertEquals(0, actual.getX(), kDelta);
         assertEquals(0, actual.getY(), kDelta);
@@ -45,6 +32,7 @@ class TireTest {
     @Test
     void testFraction() {
         Vector2d accel = new Vector2d(1, 0);
+        Tire tire = new Tire(10, 0.1);
         assertEquals(0.1, tire.fraction(accel), kDelta);
         accel = new Vector2d(5, 0);
         assertEquals(0.5, tire.fraction(accel), kDelta);
@@ -54,6 +42,7 @@ class TireTest {
 
     @Test
     void testScale() {
+        Tire tire = new Tire(10, 0.1);
         assertEquals(1.000, tire.scale(-1.00), kDelta);
         assertEquals(1.000, tire.scale(0.00), kDelta);
         assertEquals(0.975, tire.scale(0.25), kDelta);
@@ -68,6 +57,7 @@ class TireTest {
 
     @Test
     void testScaledAccel() {
+        Tire tire = new Tire(10, 0.1);
         Vector2d scaledAccel = tire.scaledAccelM_s_s(new Vector2d(1.0, 0), 1.0);
         assertEquals(1.0, scaledAccel.getX(), kDelta);
         assertEquals(0, scaledAccel.getY(), kDelta);
@@ -78,6 +68,7 @@ class TireTest {
 
     @Test
     void testLimit() {
+        Tire tire = new Tire(10, 0.1);
         Vector2d limitedAccel = tire.limit(new Vector2d(10, 0));
         assertEquals(10, limitedAccel.getX(), kDelta);
         assertEquals(0, limitedAccel.getY(), kDelta);
@@ -101,6 +92,7 @@ class TireTest {
 
     @Test
     void testMotionless() {
+        Tire tire = new Tire(10, 0.1);
         Vector2d actual = tire.actual(
                 new Vector2d(0, 0), new Vector2d(0, 0), 0.02);
         assertEquals(0, actual.getX(), kDelta);
@@ -110,6 +102,7 @@ class TireTest {
     @Test
     void testParallel() {
         // wheel wants to go the same speed as the corner
+        Tire tire = new Tire(10, 0.1);
         Vector2d actual = tire.actual(
                 new Vector2d(1, 0), new Vector2d(1, 0), 0.02);
         assertEquals(1, actual.getX(), kDelta);
@@ -119,6 +112,7 @@ class TireTest {
     @Test
     void testNear() {
         // wheel wants to speed up a little, slips a little
+        Tire tire = new Tire(10, 0.1);
         Vector2d actual = tire.actual(
                 new Vector2d(1, 0), new Vector2d(1.005, 0), 0.02);
         assertEquals(1.004875, actual.getX(), kDelta);
@@ -128,6 +122,7 @@ class TireTest {
     @Test
     void testMed() {
         // wheel wants to speed up a lot (0.5 m/s/s)
+        Tire tire = new Tire(10, 0.1);
         Vector2d desired = tire.desiredAccelM_s_s(new Vector2d(1.0, 0), new Vector2d(1.01, 0), 0.02);
         assertEquals(0.5, desired.getX(), kDelta);
         assertEquals(0, desired.getY(), kDelta);
@@ -141,6 +136,7 @@ class TireTest {
     @Test
     void testSaturation() {
         // wheel is saturated, max dv is 0.02 * saturation (10) -> 0.2.
+        Tire tire = new Tire(10, 0.1);
         Vector2d actual = tire.actual(
                 new Vector2d(1, 0), new Vector2d(5.0, 0), 0.02);
         assertEquals(1.2, actual.getX(), kDelta);
@@ -150,6 +146,7 @@ class TireTest {
     @Test
     void testSaturation2() {
         // wheel is saturated in a different direction
+        Tire tire = new Tire(10, 0.1);
         Vector2d actual = tire.actual(
                 new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
         assertEquals(0.961, actual.getX(), kDelta);
@@ -158,38 +155,18 @@ class TireTest {
 
     @Test
     void testNoSlipInfiniteSaturation() {
-        ParameterFactory factory2 = new ParameterFactory(new HashMap<>());
-        Tire tire2 = new Tire(factory2);
-        Parameter saturation = factory2.mutable(Tire.kSaturationLabel, 10);
-        // saturation.reset();
-        Parameter slip = factory2.mutable(Tire.kSlipLabel, 0.1);
-        // the defaults work
-        assertEquals(10, saturation.get(), kDelta);
-        assertEquals(0.1, slip.get(), kDelta);
-
-        // override the defaults
-        try {
-            saturation.set(Double.MAX_VALUE);
-            slip.set(0.0);
-            // check that the overrides work
-            assertEquals(Double.MAX_VALUE, saturation.get(), kDelta);
-            assertEquals(0.0, slip.get(), kDelta);
-
-            // try the saturated2 case. here we want to stop the x motion and start some y
-            // motion,
-            // all in 0.02s so these are high accelerations.
-            Vector2d actual = tire2.actual(new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
-            // the tire sticks!
-            assertEquals(0.0, actual.getX(), kDelta);
-            assertEquals(5.0, actual.getY(), kDelta);
-        } finally {
-            saturation.reset();
-            slip.reset();
-        }
+        // try the saturated2 case. here we want to stop the x motion and start some y
+        // motion, all in 0.02s so these are high accelerations.
+        Tire tire2 = new Tire(Double.MAX_VALUE, 0.0);
+        Vector2d actual = tire2.actual(new Vector2d(1, 0), new Vector2d(0, 5.0), 0.02);
+        // the tire sticks!
+        assertEquals(0.0, actual.getX(), kDelta);
+        assertEquals(5.0, actual.getY(), kDelta);
     }
 
     @Test
     void testApply() {
+        Tire tire = new Tire(10, 0.1);
         Vector2d result = tire.apply(new Vector2d(0, 0), new Vector2d(0, 0), 0.02);
         assertEquals(0, result.getX(), kDelta);
         assertEquals(0, result.getY(), kDelta);

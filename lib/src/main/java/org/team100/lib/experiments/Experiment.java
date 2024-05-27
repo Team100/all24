@@ -63,5 +63,21 @@ public enum Experiment {
     /**
      * Include sag limiter in setpoint generator
      */
-    LimitBatterySag
+    LimitBatterySag,
+    /**
+     * Use slippery tire model
+     */
+    SlipperyTires,
+    /**
+     * Use executor service for asyncs
+     */
+    UseExecutorAsync,
+    /**
+     * Use Java executor for Command100.
+     */
+    UseCommandExecutor,
+    /**
+     * Periodically publish all tag poses to all cameras
+     */
+    UseCameraUpdater
 }

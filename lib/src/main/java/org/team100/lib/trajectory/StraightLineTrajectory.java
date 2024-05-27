@@ -44,20 +44,19 @@ public class StraightLineTrajectory {
         Rotation2d angleToGoal = translationToGoal.getAngle();
 
         try {
-            return m_maker.m_planner.generateTrajectory(
-                    false,
+            return TrajectoryPlanner.generateTrajectory(
                     List.of(
-                        new Pose2d(
-                            currentTranslation, 
-                            currentSpeed.angle()),
-                        new Pose2d(
-                            goalTranslation, 
-                            angleToGoal)),
+                            new Pose2d(
+                                    currentTranslation,
+                                    currentSpeed.angle()),
+                            new Pose2d(
+                                    goalTranslation,
+                                    angleToGoal)),
                     List.of(new Rotation2d(), new Rotation2d()),
                     m_maker.m_constraints,
                     currentSpeed.norm(),
                     0,
-                    1,  // guess
+                    1, // guess
                     1); // guess
         } catch (TrajectoryGenerationException e) {
             Util.warn("Trajectory Generation Exception");

@@ -34,22 +34,18 @@ public class DriveToWithAutoStart extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;
-    private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
-
 
     public DriveToWithAutoStart(
             SwerveDriveSubsystem swerve,
             Pose2d goalWaypoint,
             Rotation2d goalHeading,
-            TrajectoryPlanner planner,
             DriveMotionController controller,
             List<TimingConstraint> constraints) {
         m_swerve = swerve;
         m_goalWaypoint = goalWaypoint;
         m_goalHeading = goalHeading;
-        m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
         addRequirements(m_swerve);
@@ -61,8 +57,7 @@ public class DriveToWithAutoStart extends Command100 {
         Translation2d startTranslation = new Translation2d();
         Translation2d endTranslation = m_goalWaypoint.getTranslation();
         Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
-        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(),
-                angleToGoal);
+        Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), angleToGoal);
 
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
@@ -70,15 +65,14 @@ public class DriveToWithAutoStart extends Command100 {
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
                 m_goalHeading);
-
-        Trajectory100 trajectory = m_planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        m_constraints,
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                0.0,
+                0.0,
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
 
         if (trajectory.length() == 0) {
             end(false);

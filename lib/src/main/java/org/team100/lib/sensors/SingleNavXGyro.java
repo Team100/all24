@@ -1,8 +1,8 @@
 package org.team100.lib.sensors;
 
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Async;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
@@ -38,7 +38,7 @@ public class SingleNavXGyro implements Gyro100 {
         }
 
         m_gyro1.zeroYaw();
-        Async.runner.addPeriodic(this::logStuff, 1);
+        AsyncFactory.get().addPeriodic(this::logStuff, 1, "SingleNavXGyro");
     }
 
     /**

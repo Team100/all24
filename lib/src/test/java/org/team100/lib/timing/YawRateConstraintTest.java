@@ -23,7 +23,7 @@ class YawRateConstraintTest {
                 new Pose2d(), new Twist2d(0, 0, 1), 0, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(Double.MAX_VALUE, c.getMaxVelocity(p), kDelta);
+        assertEquals(Double.MAX_VALUE, c.getMaxVelocity(p).getValue(), kDelta);
     }
 
     @Test
@@ -37,7 +37,7 @@ class YawRateConstraintTest {
                 0, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(2.828, c.getMaxVelocity(p), kDelta);
+        assertEquals(2.828, c.getMaxVelocity(p).getValue(), kDelta);
     }
 
     @Test
@@ -50,7 +50,7 @@ class YawRateConstraintTest {
                 0, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(5.656, c.getMaxVelocity(p), kDelta);
+        assertEquals(5.656, c.getMaxVelocity(p).getValue(), kDelta);
     }
 
 }

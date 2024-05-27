@@ -1,6 +1,6 @@
 package org.team100.lib.hid;
 
-import org.team100.lib.util.Async;
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,7 +21,7 @@ public class ThirdControlProxy implements ThirdControl {
 
     public ThirdControlProxy() {
         refresh();
-        Async.runner.addPeriodic(this::refresh, kFreq);
+        AsyncFactory.get().addPeriodic(this::refresh, kFreq, "ThirdControlProxy");
     }
 
     public void refresh() {

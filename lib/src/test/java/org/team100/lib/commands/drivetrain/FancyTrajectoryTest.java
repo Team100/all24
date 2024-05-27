@@ -11,17 +11,15 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 
 class FancyTrajectoryTest extends Fixtured {
     @Test
     void testSimple() {
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
 
-        FancyTrajectory command = new FancyTrajectory(drive, planner, constraints);
+        FancyTrajectory command = new FancyTrajectory(drive, constraints);
         FancyTrajectory.shutDownForTest();
         command.initialize();
         command.execute100(0.02);

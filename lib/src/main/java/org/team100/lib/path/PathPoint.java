@@ -11,7 +11,7 @@ public class PathPoint {
     private final Pose2dWithMotion m_state;
     private final int m_index;
 
-    public PathPoint(final Pose2dWithMotion state, int index) {
+    public PathPoint(Pose2dWithMotion state, int index) {
         m_state = state;
         m_index = index;
     }

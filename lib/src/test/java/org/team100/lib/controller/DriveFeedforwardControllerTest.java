@@ -19,6 +19,7 @@ import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveFeedforwardControllerTest {
@@ -40,19 +41,15 @@ class DriveFeedforwardControllerTest {
                 GeometryUtil.fromDegrees(180));
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
-        
+
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
 
-
-
         // note there are static constraints in here.
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         double start_vel = 0;
         double end_vel = 0;
 
         // there's a bug in here; it doesn't use the constraints, nor the voltage.
-        Trajectory100 trajectory = planner.generateTrajectory(
-                false,
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
                 waypoints,
                 headings,
                 constraints,
@@ -73,7 +70,7 @@ class DriveFeedforwardControllerTest {
         // based on the trajectory itself.
 
         {
-          
+
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new ChassisSpeeds());
@@ -81,7 +78,7 @@ class DriveFeedforwardControllerTest {
         }
 
         {
-            
+
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new ChassisSpeeds());
             // remember, facing +90, moving -90, so this should be like -1
@@ -96,15 +93,13 @@ class DriveFeedforwardControllerTest {
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
 
-            Pose2d error = DriveMotionControllerUtil.getError(measurement, path_setpoint);
-            Translation2d translational_error = error.getTranslation();
-            assertEquals(0, translational_error.getX(), 0.05);
-            assertEquals(0, translational_error.getY(), 0.05);
-            Rotation2d heading_error = error.getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.05);
+            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, path_setpoint);
+            assertEquals(0, errorTwist.dx, 0.05);
+            assertEquals(0, errorTwist.dy, 0.05);
+            assertEquals(0, errorTwist.dtheta, 0.05);
         }
         {
-            
+
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new ChassisSpeeds());
             verify(-0.96, -0.05, 0.18, output);
@@ -117,12 +112,10 @@ class DriveFeedforwardControllerTest {
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
 
-            Pose2d error = DriveMotionControllerUtil.getError(measurement, path_setpoint);
-            Translation2d translational_error = error.getTranslation();
-            assertEquals(0, translational_error.getX(), 0.01);
-            assertEquals(0, translational_error.getY(), 0.01);
-            Rotation2d heading_error = error.getRotation();
-            assertEquals(0, heading_error.getRadians(), 0.01);
+            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, path_setpoint);
+            assertEquals(0, errorTwist.dx, 0.01);
+            assertEquals(0, errorTwist.dy, 0.01);
+            assertEquals(0, errorTwist.dtheta, 0.01);
         }
     }
 

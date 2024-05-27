@@ -25,8 +25,8 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
     }
 
     @Override
-    public double getMaxVelocity(final Pose2dWithMotion state) {
-        return Math.sqrt(Math.abs(mMaxCentripetalAccel / state.getCurvature()));
+    public NonNegativeDouble getMaxVelocity(final Pose2dWithMotion state) {
+        return new NonNegativeDouble(Math.sqrt(Math.abs(mMaxCentripetalAccel / state.getCurvature())));
     }
 
     /**

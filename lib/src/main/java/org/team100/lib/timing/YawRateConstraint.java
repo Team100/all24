@@ -32,16 +32,16 @@ public class YawRateConstraint implements TimingConstraint {
     }
 
     @Override
-    public double getMaxVelocity(Pose2dWithMotion state) {
+    public NonNegativeDouble getMaxVelocity(Pose2dWithMotion state) {
         Optional<Rotation2d> course = state.getCourse();
         if (course.isEmpty()) {
             // This is turn in place.
-            return Double.MAX_VALUE;
+            return new NonNegativeDouble(Double.MAX_VALUE);
         } else {
             // Heading rate in rad/m
             final double heading_rate = state.getHeadingRate();
             // rad/s / rad/m => m/s.
-            return m_maxOmegaRad_S / Math.abs(heading_rate);
+            return new NonNegativeDouble(m_maxOmegaRad_S / Math.abs(heading_rate));
         }
     }
 

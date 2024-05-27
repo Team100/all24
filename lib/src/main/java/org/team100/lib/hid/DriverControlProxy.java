@@ -1,6 +1,6 @@
 package org.team100.lib.hid;
 
-import org.team100.lib.util.Async;
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,7 +22,7 @@ public class DriverControlProxy implements DriverControl {
 
     public DriverControlProxy() {
         refresh();
-        Async.runner.addPeriodic(this::refresh, kFreq);
+        AsyncFactory.get().addPeriodic(this::refresh, kFreq, "DriverControlProxy");
     }
 
 

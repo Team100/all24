@@ -25,7 +25,7 @@ private static final double kCentripetalScale = 1.0;
                 new Pose2d(), new Twist2d(0, 0, 0), 1, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(2.857, c.getMaxVelocity(p), kDelta);
+        assertEquals(2.857, c.getMaxVelocity(p).getValue(), kDelta);
     }
 
         @Test
@@ -39,7 +39,7 @@ private static final double kCentripetalScale = 1.0;
                 new Pose2d(), new Twist2d(0, 0, 0), 1, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(2.021, c.getMaxVelocity(p), kDelta);
+        assertEquals(2.021, c.getMaxVelocity(p).getValue(), kDelta);
     }
     
 }

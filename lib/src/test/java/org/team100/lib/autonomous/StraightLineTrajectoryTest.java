@@ -17,16 +17,14 @@ import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryMaker;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
 class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
-    TrajectoryPlanner planner = new TrajectoryPlanner();
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
-    TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
+    TrajectoryMaker maker = new TrajectoryMaker(constraints);
 
     @Test
     void testRestToRest() {

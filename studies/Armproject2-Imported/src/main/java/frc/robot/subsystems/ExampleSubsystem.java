@@ -138,12 +138,19 @@ public class ExampleSubsystem extends SubsystemBase {
 
   public Command setCartesian(Translation2d point) {
     ArmAngles angles = m_kinematics.inverse(point);
-    double th2 = Math.PI - angles.th2;
-    double th1 = Math.PI - angles.th1;
-    double theta2 = th2 - th1;
-    double newtheta = MathUtil.angleModulus(theta2);
-    if (newtheta>0) {
-      throw new UnsupportedOperationException("This is outside the range of this arm. Ha Ha.");
+    double angle1 = angles.th1;
+    double angle2 = angles.th2;
+    if (angles.th1 < (Math.PI / 4)) {
+      angle1 = Math.abs(angles.th1) + (Math.PI / 2);
+    }
+    if (angles.th2 < (Math.PI / 4)) {
+      angle2 = Math.abs(angles.th2) - (Math.PI / 2);
+    }
+    double theta2 = angle2 - angle1;
+    if (theta2 > 0) {
+      angle2 = Math.PI - angles.th2;
+      angle1 = Math.PI - angles.th1;
+      theta2 = angle2 - angle1;
     }
     double lowerServoTheta = (9*(angles.th1 + Math.PI/2) / (10*Math.PI)) + 0.05;
     double upperServoTheta = (-1*newtheta / Math.PI) + 0.03;
@@ -151,8 +158,11 @@ public class ExampleSubsystem extends SubsystemBase {
         () -> {
           System.out.println(angles);
           System.out.println(upperServoTheta);
-          System.out.println("Upper Arm: " +th2);
-          System.out.println("Lower Arm: " +th1);
+          System.out.println("Theta 2: " + th2);
+          System.out.println("Theta 1: " + th1);
+          System.out.println("New Theta: " + newtheta);
+          System.out.println("Angle 1: " + angles.th1);
+          System.out.println("Angle 2: " + angles.th2);
           m_upperArm.set(upperServoTheta);
           m_lowerArm.set(lowerServoTheta);
           /* one-time action goes here */

@@ -1,4 +1,4 @@
-package org.team100.lib.util;
+package org.team100.lib.async;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -9,7 +9,7 @@ class AsyncTest {
 
     @Test
     void testSimple() throws InterruptedException {
-        Async.runner.addPeriodic(() -> counter += 1, 0.1);
+        AsyncFactory.get().addPeriodic(() -> counter += 1, 0.1, "test");
         Thread.sleep(1000); // 1 sec
         assertEquals(9, counter, 1);
     }

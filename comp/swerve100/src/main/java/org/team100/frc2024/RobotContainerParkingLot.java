@@ -37,7 +37,6 @@ import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
-import org.team100.lib.trajectory.TrajectoryPlanner;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
@@ -129,7 +128,6 @@ public class RobotContainerParkingLot {
 
         // field center, roughly, facing to the left.
         Pose2d goal = new Pose2d(1.877866, 7.749999, GeometryUtil.kRotation90);
-        TrajectoryPlanner planner = new TrajectoryPlanner();
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         // 254 PID follower
@@ -138,7 +136,6 @@ public class RobotContainerParkingLot {
                 new DriveToWaypoint100(
                         goal,
                         m_drive,
-                        planner,
                         drivePID,
                         constraints,
                         1));
@@ -153,7 +150,6 @@ public class RobotContainerParkingLot {
                 new DriveToWaypoint100(
                         goal,
                         m_drive,
-                        planner,
                         driveFF,
                         constraints,
                         1));
@@ -167,7 +163,6 @@ public class RobotContainerParkingLot {
                 new DriveToWaypoint100(
                         goal,
                         m_drive,
-                        planner,
                         drivePP,
                         constraints,
                         1));
@@ -177,7 +172,6 @@ public class RobotContainerParkingLot {
                         goal,
                         new FieldRelativeVelocity(2, 0, 0),
                         m_drive,
-                        planner,
                         drivePP,
                         constraints));
 
@@ -190,7 +184,6 @@ public class RobotContainerParkingLot {
                 new DriveToWaypoint100(
                         goal,
                         m_drive,
-                        planner,
                         driveRam,
                         constraints,
                         1));
@@ -199,7 +192,7 @@ public class RobotContainerParkingLot {
 
         // calibration
 
-        TrajectoryMaker maker = new TrajectoryMaker(planner, constraints);
+        TrajectoryMaker maker = new TrajectoryMaker(constraints);
 
         // make a one-meter line
         whileTrue(driverControl::never,

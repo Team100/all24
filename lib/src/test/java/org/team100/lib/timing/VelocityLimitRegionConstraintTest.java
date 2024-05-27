@@ -24,7 +24,7 @@ class VelocityLimitRegionConstraintTest {
                 0, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(Double.POSITIVE_INFINITY, c.getMaxVelocity(p), kDelta);
+        assertEquals(Double.POSITIVE_INFINITY, c.getMaxVelocity(p).getValue(), kDelta);
     }
 
     @Test
@@ -38,7 +38,7 @@ class VelocityLimitRegionConstraintTest {
                 0, 0);
         assertEquals(Double.NEGATIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMinAccel(), kDelta);
         assertEquals(Double.POSITIVE_INFINITY, c.getMinMaxAcceleration(p, 0).getMaxAccel(), kDelta);
-        assertEquals(1, c.getMaxVelocity(p), kDelta);
+        assertEquals(1, c.getMaxVelocity(p).getValue(), kDelta);
     }
 
 }

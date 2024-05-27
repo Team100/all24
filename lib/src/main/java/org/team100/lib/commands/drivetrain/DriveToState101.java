@@ -35,7 +35,6 @@ public class DriveToState101 extends Command100 {
     private final Pose2d m_goal;
     private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
-    private final TrajectoryPlanner m_planner;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
 
@@ -43,13 +42,11 @@ public class DriveToState101 extends Command100 {
             Pose2d goal,
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,
-            TrajectoryPlanner planner,
             DriveMotionController controller,
             List<TimingConstraint> constraints) {
         m_goal = goal;
         m_endVelocity = endVelocity;
         m_swerve = drivetrain;
-        m_planner = planner;
         m_controller = controller;
         m_constraints = constraints;
         addRequirements(m_swerve);
@@ -69,16 +66,14 @@ public class DriveToState101 extends Command100 {
         List<Rotation2d> headings = List.of(
                 m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
-        Trajectory100 trajectory = m_planner
-                .generateTrajectory(
-                        false,
-                        waypointsM,
-                        headings,
-                        m_constraints,
-                        Math.hypot(startVelocity.x(), startVelocity.y()),
-                        Math.hypot(m_endVelocity.x(), m_endVelocity.y()),
-                        kMaxVelM_S,
-                        kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+                waypointsM,
+                headings,
+                m_constraints,
+                Math.hypot(startVelocity.x(), startVelocity.y()),
+                Math.hypot(m_endVelocity.x(), m_endVelocity.y()),
+                kMaxVelM_S,
+                kMaxAccelM_S_S);
 
         if (trajectory.length() == 0) {
             cancel();

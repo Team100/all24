@@ -9,9 +9,6 @@ import java.util.function.BooleanSupplier;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.ExperimentChooser;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,8 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Experiments implements Glassy {
     public static final Experiments instance = new Experiments(Identity.instance);
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
@@ -51,11 +46,9 @@ public class Experiments implements Glassy {
     private final Map<Experiment, Boolean> m_testOverrides;
 
     private Experiments(Identity identity) {
-        m_name = Names.name(this);
         m_experiments = EnumSet.copyOf(globalExperiments);
         m_experiments.addAll(experimentsByIdentity.getOrDefault(identity, EnumSet.noneOf(Experiment.class)));
         m_overrides = new EnumMap<>(Experiment.class);
-        log();
         m_testOverrides = new EnumMap<>(Experiment.class);
         for (Experiment e : Experiment.values()) {
             SendableChooser<BooleanSupplier> override = ExperimentChooser.get(e.name());
@@ -80,7 +73,6 @@ public class Experiments implements Glassy {
         if (m_testOverrides.containsKey(experiment)) {
             return m_testOverrides.get(experiment);
         }
-        log();
         return m_overrides.get(experiment).getSelected().getAsBoolean();
     }
 
@@ -100,16 +92,4 @@ public class Experiments implements Glassy {
     private String off(Experiment e) {
         return e.name() + " OFF";
     }
-
-    private void log() {
-        // the enabled experiments are only logged here for analysis, not control.
-        t.log(Level.DEBUG, m_name, "enabled",
-                () -> m_overrides.entrySet()
-                        .stream()
-                        .filter(e -> e.getValue().getSelected().getAsBoolean())
-                        .map(Map.Entry::getKey)
-                        .map(Experiment::name)
-                        .toArray(String[]::new));
-    }
-
 }
