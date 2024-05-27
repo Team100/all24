@@ -39,7 +39,7 @@ public class ServoFactory {
     public static LimitedVelocityServo<Distance100> limitedNeoVelocityServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
             Feedforward100 ff,
@@ -183,7 +183,7 @@ public class ServoFactory {
     public static PositionServoInterface<Distance100> neoDistanceServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
             PIDController controller,
@@ -221,7 +221,7 @@ public class ServoFactory {
     public static PositionServo<Distance100> neoVortexDistanceServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
             PIDController controller,

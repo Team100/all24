@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.REVLibError;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 public class Rev100 {
 
@@ -30,8 +31,14 @@ public class Rev100 {
         crash(motor::restoreFactoryDefaults);
     }
 
-    public static void motorConfig(CANSparkBase motor) {
-        crash(() -> motor.setIdleMode(IdleMode.kBrake));
+    public static void motorConfig(CANSparkBase motor, IdleMode idleMode, MotorPhase phase, int velocityMeasurementPeriod) {
+        crash(() -> motor.setIdleMode(idleMode));
+        motor.setInverted(phase == MotorPhase.REVERSE);
+        // velocity is in the Status1 frame
+        // position is in the Status2 frame.
+        // https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces
+        crash(() -> motor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, velocityMeasurementPeriod));
+        crash(() -> motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, velocityMeasurementPeriod));
     }
 
     public static void currentConfig(CANSparkBase motor, int currentLimit) {

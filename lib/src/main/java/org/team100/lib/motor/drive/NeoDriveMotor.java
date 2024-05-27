@@ -3,6 +3,7 @@ package org.team100.lib.motor.drive;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -10,8 +11,8 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
@@ -45,28 +46,24 @@ public class NeoDriveMotor implements Motor100<Distance100> {
     public NeoDriveMotor(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             double gearRatio,
             double wheelDiameter,
             Feedforward100 ff,
             PIDConstants pid) {
+        m_name = Names.append(name, this);
         m_gearRatio = gearRatio;
         m_wheelDiameter = wheelDiameter;
         m_ff = ff;
 
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
-        Rev100.motorConfig(m_motor);
+        Rev100.motorConfig(m_motor, IdleMode.kBrake, motorPhase, 20);
         Rev100.currentConfig(m_motor, currentLimit);
-
-        m_motor.setInverted(!motorPhase);
-        Rev100.crash(() -> m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20));
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
-
-        m_name = Names.append(name, this);
 
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
         t.register(Level.TRACE, m_name, "P", pid.getP(), this::setP);

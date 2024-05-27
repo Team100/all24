@@ -12,6 +12,8 @@ import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import com.revrobotics.CANSparkBase.IdleMode;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -35,7 +37,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         switch (Identity.instance) {
             case COMP_BOT:
                 ampAngleServo = new GravityServo(
-                        new NeoProxy(m_name, 2, false, 30),
+                        new NeoProxy(m_name, 2, IdleMode.kCoast, 30),
                         m_name,
                         m_params,
                         new PIDController(0.8, 0, 0),

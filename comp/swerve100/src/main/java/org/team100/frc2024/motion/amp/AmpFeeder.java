@@ -8,6 +8,8 @@ import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
+import com.revrobotics.CANSparkBase.IdleMode;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -21,7 +23,7 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
         m_name = Names.name(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                ampDrive = new NeoProxy(m_name, 33, true, 40);
+                ampDrive = new NeoProxy(m_name, 33, IdleMode.kBrake, 40);
                 break;
             default:
                 // For testing and simulation

@@ -11,9 +11,9 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
@@ -60,27 +60,19 @@ public class NeoVortexTurningMotor implements Motor100<Angle100> {
             double gearRatio,
             Feedforward100 ff,
             PIDConstants pid) {
+        m_name = Names.append(name, this);
         m_gearRatio = gearRatio;
         m_ff = ff;
 
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
-        Rev100.motorConfig(m_motor);
+        Rev100.motorConfig(m_motor, IdleMode.kBrake, motorPhase, 20);
         Rev100.currentConfig(m_motor, currentLimit);
-
-        m_motor.setInverted(motorPhase != MotorPhase.FORWARD);
-
-
-
-        m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
 
-        m_name = Names.append(name, this);
-
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
-
         t.register(Level.TRACE, m_name, "P", pid.getP(), this::setP);
         t.register(Level.TRACE, m_name, "I", pid.getI(), this::setI);
         t.register(Level.TRACE, m_name, "D", pid.getD(), this::setD);

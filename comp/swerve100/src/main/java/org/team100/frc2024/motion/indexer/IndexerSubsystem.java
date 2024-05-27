@@ -8,6 +8,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.simple.Speeding;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.visualization.SpeedingVisualization;
@@ -62,7 +63,7 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_name,
                         driveID,
-                        true,
+                        MotorPhase.FORWARD,
                         kCurrentLimit,
                         params,
                         m_lowLevelFeedforwardConstants,

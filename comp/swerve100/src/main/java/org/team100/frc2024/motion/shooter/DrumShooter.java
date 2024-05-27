@@ -22,6 +22,8 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.visualization.SpeedingVisualization;
 
+import com.revrobotics.CANSparkBase.IdleMode;
+
 import edu.wpi.first.math.controller.PIDController;
 
 /**
@@ -96,7 +98,7 @@ public class DrumShooter extends Shooter {
                 rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
 
                 pivotServo = new GravityServo(
-                        new NeoProxy(m_name, pivotID, false, 40),
+                        new NeoProxy(m_name, pivotID, IdleMode.kCoast, 40),
                         m_name + "/Pivot",
                         pivotParams,
                         pivotController,
