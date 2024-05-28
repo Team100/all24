@@ -95,33 +95,11 @@ public class Falcon6DriveMotor extends Falcon6Motor<Distance100> {
     @Override
     public void setVelocity(double outputM_S, double accelM_S_S, double torqueNm) {
         double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
+        t.log(Level.TRACE, m_name, "module input (RPS)", wheelRev_S);
         double wheelRev_S2 = accelM_S_S / (m_wheelDiameter * Math.PI);
         double motorRev_S = wheelRev_S * m_gearRatio;
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;
-        double currentMotorRev_S = getVelocityRev_S();
-
-        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
-        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
-        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
-
-        double torqueFFAmps = torqueNm / kTNm_amp;
-        double torqueFFVolts = torqueFFAmps * kROhms;
-
-        double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
-
-        VelocityVoltage v = new VelocityVoltage(motorRev_S);
-        v.FeedForward = kFFVolts;
-        v.Acceleration = motorRev_S2;
-        Phoenix100.warn(() -> m_motor.setControl(v));
-
-        t.log(Level.TRACE, m_name, "module input (RPS)", wheelRev_S);
-        t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
-        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
-        log();
-
+        setMotorVelocity(motorRev_S, motorRev_S2, torqueNm);
     }
 
     /**

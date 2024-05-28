@@ -10,6 +10,7 @@ import org.team100.lib.util.Names;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEncoder100<T> {
@@ -45,6 +46,32 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
         DutyCycleOut d = new DutyCycleOut(output);
         Phoenix100.warn(() -> m_motor.setControl(d));
         t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
+        log();
+    }
+
+    /** Set motor directly */
+    public void setMotorVelocity(double motorRev_S, double motorRev_S2, double torqueNm) {
+        double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
+
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
+
+        double torqueFFAmps = torqueNm / kTNm_amp();
+        double torqueFFVolts = torqueFFAmps * kROhms();
+
+        double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
+
+        VelocityVoltage v = new VelocityVoltage(motorRev_S);
+        v.FeedForward = kFFVolts;
+        v.Acceleration = motorRev_S2;
+        Phoenix100.warn(() -> m_motor.setControl(v));
+
+        t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         log();
     }
 
