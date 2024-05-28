@@ -119,8 +119,6 @@ public class SwerveUtil {
      * Find the desired dv. Project it on to the previous v: if the projection is
      * positive, we're accelerating, so use the accel limit to find the maximum
      * allowed dv for the supplied dt. Otherwise use the decel limit.
-     * 
-     * TODO: use the available accel for the given velocity, not the max.
      */
     public static double getMaxVelStep(
             SwerveKinodynamics m_limits,
@@ -129,9 +127,35 @@ public class SwerveUtil {
             double desired_vx,
             double desired_vy,
             double kDtSec) {
-        if (isAccel(prev_vx, prev_vy, desired_vx, desired_vy))
-            return kDtSec * m_limits.getMaxDriveAccelerationM_S2();
-        return kDtSec * m_limits.getMaxDriveDecelerationM_S2();
+        return kDtSec * getAccelLimit(
+                m_limits,
+                prev_vx,
+                prev_vy,
+                desired_vx,
+                desired_vy);
+    }
+
+    /**
+     * At low speed, accel is limited by the current limiters.
+     * At high speed, accel is limited by back EMF.
+     * Deceleration limits are different: back EMF is helping in that case.
+     */
+    public static double getAccelLimit(
+            SwerveKinodynamics m_limits,
+            double prev_vx,
+            double prev_vy,
+            double desired_vx,
+            double desired_vy) {
+        if (isAccel(prev_vx, prev_vy, desired_vx, desired_vy)) {
+            double speedM_S = Math.hypot(prev_vx, prev_vy);
+            double speedFraction = Math100.limit(
+                    speedM_S / m_limits.getMaxDriveVelocityM_S(), 0, 1);
+            double backEmfLimit = 1 - speedFraction;
+            double backEmfLimitedAcceleration = backEmfLimit * m_limits.getStallAccelerationM_S2();
+            double currentLimitedAcceleration = m_limits.getMaxDriveAccelerationM_S2();
+            return Math.min(backEmfLimitedAcceleration, currentLimitedAcceleration);
+        }
+        return m_limits.getMaxDriveDecelerationM_S2();
     }
 
     /**

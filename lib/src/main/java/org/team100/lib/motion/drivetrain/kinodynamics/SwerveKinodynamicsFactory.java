@@ -43,6 +43,7 @@ public class SwerveKinodynamicsFactory {
             case SWERVE_TWO:
                 return new SwerveKinodynamics(
                         4, // vel m/s
+                        10, // stall m/s/s
                         2, // accel m/s/s
                         2, // decel m/s/s
                         13, // steering rate rad/s
@@ -55,6 +56,7 @@ public class SwerveKinodynamicsFactory {
             case SWERVE_ONE:
                 return new SwerveKinodynamics(
                         4, // vel m/s
+                        10, // stall m/s/s
                         2, // accel m/s/s
                         2, // decel m/s/s
                         13, // steering rate rad/s
@@ -69,6 +71,7 @@ public class SwerveKinodynamicsFactory {
                 // the broken tests.
                 return new SwerveKinodynamics(
                         4, // vel m/s
+                        10, // stall m/s/s
                         4, // accel m/s/s
                         4, // decel m/s/s
                         13, // steering rate rad/s
@@ -91,7 +94,6 @@ public class SwerveKinodynamicsFactory {
                 // misconfigured so i reduced them accordingly.
                 // also i observed the steering speed and reduced it a bit.
                 // the beta bot has very low VCG.
-                // TODO: exponential setpoint generator to better match reality.
                 return new SwerveKinodynamics(
                         5, // max vel m/s
                         20, // max accel m/s/s
@@ -108,6 +110,7 @@ public class SwerveKinodynamicsFactory {
                 Util.warn("Using default kinodynamics");
                 return new SwerveKinodynamics(
                         5, // vel m/s
+                        20, // stall m/s/s
                         5, // accel m/s/s
                         5, // decel m/s/s
                         13, // steering rate rad/s
@@ -129,6 +132,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics forTest() {
         return new SwerveKinodynamics(
                 1, // vel m/s
+                10, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
                 20 * Math.PI,
@@ -143,6 +147,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics forTestWithSlip() {
         return new SwerveKinodynamics(
                 1, // vel m/s
+                10, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
                 20 * Math.PI, // steering rate rad/s
@@ -157,6 +162,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics forTest2() {
         return new SwerveKinodynamics(
                 2, // vel m/s
+                5, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
                 1, // steering rate rad/s
@@ -171,6 +177,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics forWPITest() {
         return new SwerveKinodynamics(
                 1, // vel m/s
+                5, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
                 1, // steering rate rad/s
@@ -188,6 +195,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics highDecelAndCapsize() {
         return new SwerveKinodynamics(
                 5, // vel m/s
+                10, // stall m/s/s
                 2, // accel m/s/s
                 300, // decel m/s/s
                 5, // steering rate rad/s
@@ -202,6 +210,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics decelCase() {
         return new SwerveKinodynamics(
                 1, // vel m/s
+                10, // stall m/s/s
                 1, // accel m/s/s
                 10, // decel m/s/s
                 5, // steering rate rad/s
@@ -216,6 +225,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics highCapsize() {
         return new SwerveKinodynamics(
                 5, // vel m/s
+                20, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
                 5, // steering rate rad/s
@@ -230,6 +240,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics lowCapsize() {
         return new SwerveKinodynamics(
                 5, // vel m/s
+                20, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
                 5, // steering rate rad/s
@@ -244,6 +255,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics limiting() {
         return new SwerveKinodynamics(
                 5, // vel m/s
+                30, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
                 5, // steering rate rad/s
@@ -259,6 +271,7 @@ public class SwerveKinodynamicsFactory {
     public static SwerveKinodynamics lowAccelHighDecel() {
         return new SwerveKinodynamics(
                 4, // vel m/s
+                10, // stall m/s/s
                 1, // accel m/s/s
                 10, // decel m/s/s
                 5, // steering rate rad/s

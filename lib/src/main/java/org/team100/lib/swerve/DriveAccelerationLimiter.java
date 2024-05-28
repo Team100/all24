@@ -30,7 +30,6 @@ public class DriveAccelerationLimiter implements Glassy {
             double[] desired_vy,
             double kDtSec) {
         double min_s = 1.0;
-        // Enforce drive wheel acceleration limits.
         for (int i = 0; i < prev_vx.length; ++i) {
             double max_vel_step = SwerveUtil.getMaxVelStep(
                     m_limits,
@@ -41,6 +40,8 @@ public class DriveAccelerationLimiter implements Glassy {
                     kDtSec);
             t.log(Level.DEBUG, m_name, "max_vel_step", max_vel_step);
 
+            // reduces the size of the search space if min_s is already constrained (by
+            // earlier modules)
             double vx_min_s = Math100.interpolate(prev_vx[i], desired_vx[i], min_s);
             double vy_min_s = Math100.interpolate(prev_vy[i], desired_vy[i], min_s);
 
