@@ -5,6 +5,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
 import org.team100.lib.motor.duty_cycle.VortexProxy;
@@ -28,11 +29,19 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m_name = Names.name(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                VortexProxy vp1 = new VortexProxy(m_name + "/left", leftClimberID, true, kCurrentLimit);
-                e1 = new VortexEncoder( vp1);
+                VortexProxy vp1 = new VortexProxy(
+                        m_name + "/left",
+                        leftClimberID,
+                        MotorPhase.FORWARD,
+                        kCurrentLimit);
+                e1 = new VortexEncoder(vp1);
                 v1 = vp1;
-                VortexProxy vp2 = new VortexProxy(m_name + "/right", rightClimberID, false, kCurrentLimit);
-                e2 = new VortexEncoder( vp2);
+                VortexProxy vp2 = new VortexProxy(
+                        m_name + "/right",
+                        rightClimberID,
+                        MotorPhase.REVERSE,
+                        kCurrentLimit);
+                e2 = new VortexEncoder(vp2);
                 v2 = vp2;
                 break;
             default:

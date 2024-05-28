@@ -10,7 +10,7 @@ class DrumShooterTest implements Timeless2024 {
 
     @Test
     void testAngle() {
-        DrumShooter s = new DrumShooter(0, 0, 0, 0);
+        DrumShooter s = new DrumShooter(0, 0, 0, 0, 0);
         for (int i = 0; i < 50; ++i) {
             s.setAngle(1.0);
             stepTime(0.02);
@@ -20,7 +20,7 @@ class DrumShooterTest implements Timeless2024 {
 
     @Test
     void testRollers() {
-        DrumShooter s = new DrumShooter(0, 0, 0, 0);
+        DrumShooter s = new DrumShooter(0, 0, 0, 0, 0);
         // 0.5 sec to spin up
         for (int i = 0; i <= 25; ++i) {
             s.forward();

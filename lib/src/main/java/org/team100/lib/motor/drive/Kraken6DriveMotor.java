@@ -2,13 +2,13 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.FalconTorqueModel;
+import org.team100.lib.motor.KrakenTorqueModel;
 import org.team100.lib.motor.MotorPhase;
 
-/** Falcon 500 using Phoenix 6. */
-public class Falcon6DriveMotor extends Talon6DriveMotor implements FalconTorqueModel {
+/** Kraken using Phoenix 6. */
+public class Kraken6DriveMotor extends Talon6DriveMotor implements KrakenTorqueModel {
 
-    public Falcon6DriveMotor(
+    public Kraken6DriveMotor(
             String name,
             int canId,
             MotorPhase motorPhase,

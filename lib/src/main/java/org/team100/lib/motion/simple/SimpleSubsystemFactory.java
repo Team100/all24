@@ -1,12 +1,13 @@
 package org.team100.lib.motion.simple;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
@@ -18,6 +19,9 @@ import edu.wpi.first.math.controller.PIDController;
 
 /**
  * Produce a real or simulated subsystem depending on identity.
+ * 
+ * This is indended to be an example for new 1-dof mechanisms; start by making a
+ * copy of this class.
  */
 public class SimpleSubsystemFactory {
     private final Profile100 profile;
@@ -38,17 +42,18 @@ public class SimpleSubsystemFactory {
     }
 
     private SimpleSubsystem getDefault() {
-        FeedforwardConstants FeedforwardConstants = new FeedforwardConstants();
+        Feedforward100 ff = Feedforward100.makeSimple();
         PIDConstants pidConstants = new PIDConstants(1);
         MotorWithEncoder100<Distance100> motor = new Falcon6DriveMotor(
                 "simple/drive",
                 1,
-                true,
+                MotorPhase.FORWARD,
                 10,
+                20,
                 1,
                 1,
                 pidConstants,
-                FeedforwardConstants);
+                ff);
 
         PIDController positionController = new PIDController(1, 0, 0);
 
