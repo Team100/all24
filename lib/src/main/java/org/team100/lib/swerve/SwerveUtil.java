@@ -119,10 +119,11 @@ public class SwerveUtil {
     }
 
     /**
-     * Compares magnitudes of the current and final state.
-     * For transitions that involve both speed and angle changes,
-     * the correct velocity profile often involves slowing and then
-     * speeding up, but this method doesn't capture that.
+     * Find the desired dv. Project it on to the previous v: if the projection is
+     * positive, we're accelerating, so use the accel limit to find the maximum
+     * allowed dv for the supplied dt. Otherwise use the decel limit.
+     * 
+     * TODO: use the available accel for the given velocity, not the max.
      */
     public static double getMaxVelStep(
             SwerveKinodynamics m_limits,
@@ -131,34 +132,8 @@ public class SwerveUtil {
             double desired_vx_i,
             double desired_vy_i,
             double kDtSec) {
-        boolean isAccel = getIsAccel(prev_vx_i, prev_vy_i, desired_vx_i, desired_vy_i);
 
-        return isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
-                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
-    }
-
-    static boolean getIsAccel(
-            double prev_vx_i,
-            double prev_vy_i,
-            double desired_vx_i,
-            double desired_vy_i) {
-        double prevV = Math.hypot(prev_vx_i, prev_vy_i);
-        double desiredV = Math.hypot(desired_vx_i, desired_vy_i);
-        return desiredV >= prevV;
-    }
-
-    /**
-     * This method projects the line onto the prev state.
-     */
-    public static double getMaxVelStep2(
-            SwerveKinodynamics m_limits,
-            double prev_vx_i,
-            double prev_vy_i,
-            double desired_vx_i,
-            double desired_vy_i,
-            double kDtSec) {
-
-        boolean isAccel = getIsAccel2(
+        boolean isAccel = isAccel(
                 prev_vx_i,
                 prev_vy_i,
                 desired_vx_i,
@@ -168,7 +143,14 @@ public class SwerveUtil {
                 : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
     }
 
-    static boolean getIsAccel2(
+    /**
+     * Find the desired dv. Project it on to the previous v: if the projection is
+     * positive, we're accelerating, otherwise decelerating.
+     * 
+     * This correctly captures sharp turns as decelerations; simply comparing the
+     * magnitudes of initial and final velocities is not correct.
+     */
+    static boolean isAccel(
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,

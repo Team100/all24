@@ -74,6 +74,8 @@ public class SwerveKinodynamics implements Glassy {
      * @param maxSteeringAcceleration module steering axis accel rad/s^2
      * @param track                   meters
      * @param wheelbase               meters
+     * @param frontoffset             distance from front wheels to center of mass,
+     *                                meters
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(

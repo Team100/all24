@@ -39,7 +39,7 @@ public class DriveAccelerationLimiter implements Glassy {
                 break;
             }
 
-            double max_vel_step = SwerveUtil.getMaxVelStep2(
+            double max_vel_step = SwerveUtil.getMaxVelStep(
                     m_limits,
                     prev_vx[i],
                     prev_vy[i],

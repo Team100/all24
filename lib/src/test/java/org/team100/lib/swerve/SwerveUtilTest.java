@@ -128,36 +128,28 @@ class SwerveUtilTest {
     }
 
     @Test
-    void testGetMaxVelStep() {
-        // large difference in accel and decel so we can see it
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.highAccelLowDecel();
-        // say this is the start of the path from (1,0) to (0,1),
-        boolean isAccel = SwerveUtil.getIsAccel(1, 0, 0, 1);
-        assertTrue(isAccel);
-        double step = SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02);
-        // currently it thinks this is accel because the velocities are the same
-        assertEquals(0.02, step, kDelta);
+    void testGetIsAccel() {
+        // decelerating
+        assertFalse(SwerveUtil.isAccel(1, 0, 0, 1));
+        // accelerating
+        assertTrue(SwerveUtil.isAccel(0.5, 0.5, 0, 1));
     }
 
     @Test
-    void testGetMaxVelStep2() {
-        // large difference in accel and decel so we can see it
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.highAccelLowDecel();
-        // say this is the start of the path from (1,0) to (0,1),
-        boolean isAccel = SwerveUtil.getIsAccel2(1, 0, 0, 1);
-        assertFalse(isAccel);
-        double step = SwerveUtil.getMaxVelStep2(l, 1, 0, 0, 1, 0.02);
-        // this is actually decelerating
-        assertEquals(0.2, step, kDelta);
-
-        // the accel case works too
-                 isAccel = SwerveUtil.getIsAccel2(0.5, 0.5, 0, 1);
-        assertTrue(isAccel);
-         step = SwerveUtil.getMaxVelStep2(l, 0.5, 0.5, 0, 1, 0.02);
-        // this is actually decelerating
-        assertEquals(0.02, step, kDelta);
-
+    void testGetMaxVelStep() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.lowAccelHighDecel();
+        // decelerating
+        assertEquals(0.2, SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02), kDelta);
+        // acccelerating
+        assertEquals(0.02, SwerveUtil.getMaxVelStep(l, 0.5, 0.5, 0, 1, 0.02), kDelta);
     }
 
+    @Test
+    void testGetMaxVelStepWithVelocityDependentAccel() {
+        // available acceleration is not always the max.
+        // a motor without current limiting has a straight declining torque curve
+        // a motor with current limiting has a constant torque curve for awhile
+        // hm, how to get the motor model in here?
+    }
 
 }
