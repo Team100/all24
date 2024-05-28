@@ -2,19 +2,13 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Phoenix100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 
-import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
 
 /**
  * PHOENIX 6 VERSION
@@ -23,27 +17,35 @@ import com.ctre.phoenix6.hardware.TalonFX;
  * 
  * See {@link FalconDriveMotor} for configuration details.
  */
-public class Falcon6TurningMotor implements Motor100<Angle100> {
+public class Falcon6TurningMotor extends Falcon6Motor<Angle100> {
     /**
      * Motor resistance, Kraken. Falcon is 0.03.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
      */
     private static final double kROhms = 0.025;
+
+    @Override
+    protected double kROhms() {
+        // kraken
+        return 0.025;
+    }
+
     /**
      * Motor torque constant, Kraken. Falcon is 0.018.
      * https://store.ctr-electronics.com/content/datasheet/Motor%20Performance%20Analysis%20Report.pdf
      */
     private static final double kTNm_amp = 0.019;
 
+    @Override
+    protected double kTNm_amp() {
+        // kraken
+        return 0.019;
+    }
+
     private static final double kSupplyLimit = 10;
     private static final double kStatorLimit = 20;
 
-    private final Feedforward100 m_ff;
-
-    private final Telemetry t = Telemetry.get();
-    private final TalonFX m_motor;
     private final double m_gearRatio;
-    private final String m_name;
 
     public Falcon6TurningMotor(
             String name,
@@ -52,34 +54,13 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
             double kGearRatio,
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_ff = ff;
-        m_motor = new TalonFX(canId);
+        super(name, canId, motorPhase, kSupplyLimit, kStatorLimit, lowLevelVelocityConstants, ff);
+
         m_gearRatio = kGearRatio;
 
-        TalonFXConfigurator talonFXConfigurator = m_motor.getConfigurator();
-        Phoenix100.baseConfig(talonFXConfigurator);
-        Phoenix100.motorConfig(talonFXConfigurator, motorPhase);
-        Phoenix100.currentConfig(talonFXConfigurator, kSupplyLimit, kStatorLimit);
-        Phoenix100.pidConfig(talonFXConfigurator, lowLevelVelocityConstants);
-        Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
-
-        m_name = Names.append(name, this);
-        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
     }
 
-    @Override
-    public void setDutyCycle(double output) {
-        DutyCycleOut d = new DutyCycleOut(output);
-        Phoenix100.warn(() -> m_motor.setControl(d));
-        t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
-        log();
-    }
-
-    /**
-     * Supports accel feedforward.
-     */
+ 
     public void setVelocity(double outputRad_S, double accelRad_S_S) {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double wheelRev_S2 = accelRad_S_S / (2 * Math.PI);
@@ -106,9 +87,7 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
 
     }
 
-    /**
-     * Supports accel feedforward.
-     */
+ 
     public void setVelocity(double outputRad_S, double accelRad_S_S, double torqueNm) {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double wheelRev_S2 = accelRad_S_S / (2 * Math.PI);
@@ -138,30 +117,26 @@ public class Falcon6TurningMotor implements Motor100<Angle100> {
         log();
     }
 
+
+
+    /** Position in rad */
     @Override
-    public double getTorque() {
-        StatusSignal<Double> statorCurrentAmpsStatus = m_motor.getTorqueCurrent();
-        double statorCurrentAmps = statorCurrentAmpsStatus.getValueAsDouble();
-        return statorCurrentAmps * kTNm_amp;
+    public Double getPosition() {
+        double positionRev = m_motor.getPosition().getValueAsDouble();
+        double positionRad = positionRev * 2 * Math.PI;
+        t.log(Level.TRACE, m_name, "position (rev)", positionRev);
+        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        return positionRad;
     }
 
+    /** Velocity in rad/sec */
     @Override
-    public void stop() {
-        m_motor.stopMotor();
+    public double getRate() {
+        double velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        double velocityRad_S = velocityRev_S * 2 * Math.PI;
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
+        t.log(Level.DEBUG, m_name, "velocity (rad_s)", velocityRad_S);
+        return velocityRad_S;
     }
-
-    @Override
-    public void close() {
-        m_motor.close();
-    }
-
-    public void log() {
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_motor.getVelocity().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "output [-1,1]", m_motor.getDutyCycle().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "error (rev_s)", m_motor.getClosedLoopError().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
-    }
-
-    //////////////////////////////////////////////////////////////////
 
 }

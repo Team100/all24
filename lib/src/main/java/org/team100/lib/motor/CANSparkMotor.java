@@ -16,7 +16,7 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T> {
     protected final Telemetry t = Telemetry.get();
-    protected final String m_name;
+    private final String m_name;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;
     protected final RelativeEncoder m_encoder;
