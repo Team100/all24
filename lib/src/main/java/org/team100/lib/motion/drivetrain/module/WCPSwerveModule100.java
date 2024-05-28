@@ -14,7 +14,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.MotorWithEncoder100;
-import org.team100.lib.motor.drive.Falcon6DriveMotor;
+import org.team100.lib.motor.drive.Kraken6DriveMotor;
 import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.units.Angle100;
@@ -105,7 +105,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             PIDConstants pidConstants,
             Feedforward100 ff) {
                 
-        MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
+        MotorWithEncoder100<Distance100> driveMotor = new Kraken6DriveMotor(
                 name,
                 driveMotorCanId,
                 MotorPhase.FORWARD,

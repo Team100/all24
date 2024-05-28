@@ -13,7 +13,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEncoder100<T> {
+public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEncoder100<T>, TorqueModel {
     protected final Telemetry t = Telemetry.get();
     protected final String m_name;
     protected final TalonFX m_motor;
@@ -38,7 +38,6 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
         Phoenix100.pidConfig(talonFXConfigurator, lowLevelVelocityConstants);
         Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
-
     }
 
     @Override
@@ -49,7 +48,7 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
         log();
     }
 
-    /** Set motor directly */
+    /** Set motor speed/voltage directly. */
     public void setMotorVelocity(double motorRev_S, double motorRev_S2, double torqueNm) {
         double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
 
@@ -113,17 +112,4 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
         t.log(Level.TRACE, m_name, "stator current (A)", m_motor.getStatorCurrent().getValueAsDouble());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
     }
-
-    /**
-     * Motor resistance in ohms, used to calculate voltage from desired torque
-     * current.
-     */
-    protected abstract double kROhms();
-
-    /**
-     * Motor torque constant, kT, in Nm per amp, used to calculate current from
-     * desired torque.
-     */
-    protected abstract double kTNm_amp();
-
 }
