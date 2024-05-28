@@ -315,6 +315,8 @@ public class SwerveKinodynamics implements Glassy {
     /**
      * Inverse kinematics, chassis speeds => module states.
      * 
+     * The resulting state speeds are always positive.
+     * 
      * This version does **DISCRETIZATION** to correct for swerve veering.
      * 
      * It also does extra veering correction proportional to rotation rate and
@@ -339,6 +341,9 @@ public class SwerveKinodynamics implements Glassy {
         return m_kinematics.toSwerveModuleStates(descretized);
     }
 
+    /**
+     * The resulting state speeds are always positive. 
+     */
     public SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
         return m_kinematics.toSwerveModuleStates(speeds);
     }
@@ -363,7 +368,9 @@ public class SwerveKinodynamics implements Glassy {
      * 
      * Does not take Tires into account.
      */
-    public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
+    public ChassisSpeeds toChassisSpeedsWithDiscretization(
+            double gyroRateRad_S,
+            double dt,
             SwerveModuleState... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
         Twist2d twist = new Twist2d(

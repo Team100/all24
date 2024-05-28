@@ -112,6 +112,8 @@ public class SwerveDriveKinematics100 {
     /**
      * INVERSE: chassis speeds -> module states
      * 
+     * The resulting module state speeds are always positive.
+     * 
      * Does not take Tires into account.
      */
     public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
@@ -291,7 +293,11 @@ public class SwerveDriveKinematics100 {
         return mods;
     }
 
-    /** [v cos; v sin; ... ] (2n x 1) -> states[] */
+    /**
+     * [v cos; v sin; ... ] (2n x 1) -> states[]
+     * 
+     * The resulting module speed is always positive.
+     */
     private SwerveModuleState[] statesFromVector(SimpleMatrix moduleStatesMatrix) {
         SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
@@ -304,6 +310,9 @@ public class SwerveDriveKinematics100 {
         return moduleStates;
     }
 
+    /**
+     * The resulting distance is always positive.
+     */
     private SwerveModulePosition[] deltasFromVector(SimpleMatrix moduleDeltaVector) {
         SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[m_numModules];
         for (int i = 0; i < m_numModules; i++) {

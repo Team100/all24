@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj.RobotController;
 public class AsymSwerveSetpointGenerator implements Glassy {
     // turns greater than this will flip
     // this used to be pi/2, which resulted in "square corner" paths
-    private static final double flipLimit = 3 * Math.PI / 4;
+    private static final double flipLimitRad = 3 * Math.PI / 4;
 
     private final SwerveKinodynamics m_limits;
 
@@ -69,6 +69,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             SwerveSetpoint prevSetpoint,
             ChassisSpeeds desiredState,
             double kDtSec) {
+        // the desired module state speeds are always positive.
         SwerveModuleState[] desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
                 desiredState);
         desiredState = desaturate(desiredState, desiredModuleStates);
@@ -76,25 +77,16 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         boolean need_to_steer = SwerveUtil.makeStop(desiredState, desiredModuleStates, prevModuleStates);
 
         // For each module, compute local Vx and Vy vectors.
-        double[] prev_vx = new double[prevModuleStates.length];
-        double[] prev_vy = new double[prevModuleStates.length];
-        Rotation2d[] prev_heading = new Rotation2d[prevModuleStates.length];
+        double[] prev_vx = computeVx(prevModuleStates);
+        double[] prev_vy = computeVy(prevModuleStates);
+        Rotation2d[] prev_heading = computeHeading(prevModuleStates);
 
-        double[] desired_vx = new double[prevModuleStates.length];
-        double[] desired_vy = new double[prevModuleStates.length];
-        Rotation2d[] desired_heading = new Rotation2d[prevModuleStates.length];
+        double[] desired_vx = computeVx(desiredModuleStates);
+        double[] desired_vy = computeVy(desiredModuleStates);
+        Rotation2d[] desired_heading = computeHeading(desiredModuleStates);
 
-        boolean all_modules_should_flip = maybeFlip(
-                desiredModuleStates,
-                prevModuleStates,
-                prev_vx,
-                prev_vy,
-                prev_heading,
-                desired_vx,
-                desired_vy,
-                desired_heading);
-
-        if (all_modules_should_flip
+        boolean shouldStopAndReverse = shouldStopAndReverse(prev_heading, desired_heading);
+        if (shouldStopAndReverse
                 && !GeometryUtil.isZero(prevSetpoint.getChassisSpeeds())
                 && !GeometryUtil.isZero(desiredState)) {
             // It will (likely) be faster to stop the robot, rotate the modules in place to
@@ -172,45 +164,49 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     ///////////////////////////////////////////////////////
 
+    private double[] computeVx(SwerveModuleState[] states) {
+        double[] vx = new double[states.length];
+        for (int i = 0; i < states.length; ++i) {
+            vx[i] = states[i].angle.getCos() * states[i].speedMetersPerSecond;
+        }
+        return vx;
+    }
+
+    private double[] computeVy(SwerveModuleState[] states) {
+        double[] vy = new double[states.length];
+        for (int i = 0; i < states.length; ++i) {
+            vy[i] = states[i].angle.getSin() * states[i].speedMetersPerSecond;
+        }
+        return vy;
+    }
+
+    /**
+     * Which way each module is actually going, taking speed polarity into account.
+     */
+    private Rotation2d[] computeHeading(SwerveModuleState[] states) {
+        Rotation2d[] heading = new Rotation2d[states.length];
+        for (int i = 0; i < states.length; ++i) {
+            heading[i] = states[i].angle;
+            if (states[i].speedMetersPerSecond < 0.0) {
+                heading[i] = GeometryUtil.flip(heading[i]);
+            }
+        }
+        return heading;
+    }
+
     /**
      * If we want to go back the way we came, it might be faster to stop
      * and then reverse. This is certainly true for near-180 degree turns, but
      * it's definitely not true for near-90 degree turns.
      */
-    private boolean maybeFlip(
-            SwerveModuleState[] desiredModuleStates,
-            SwerveModuleState[] prevModuleStates,
-            double[] prev_vx,
-            double[] prev_vy,
-            Rotation2d[] prev_heading,
-            double[] desired_vx,
-            double[] desired_vy,
-            Rotation2d[] desired_heading) {
-        boolean all_modules_should_flip = true;
-        for (int i = 0; i < prevModuleStates.length; ++i) {
-            prev_vx[i] = prevModuleStates[i].angle.getCos() * prevModuleStates[i].speedMetersPerSecond;
-            prev_vy[i] = prevModuleStates[i].angle.getSin() * prevModuleStates[i].speedMetersPerSecond;
-            prev_heading[i] = prevModuleStates[i].angle;
-            if (prevModuleStates[i].speedMetersPerSecond < 0.0) {
-                prev_heading[i] = GeometryUtil.flip(prev_heading[i]);
-            }
-
-            desired_vx[i] = desiredModuleStates[i].angle.getCos() * desiredModuleStates[i].speedMetersPerSecond;
-            desired_vy[i] = desiredModuleStates[i].angle.getSin() * desiredModuleStates[i].speedMetersPerSecond;
-            desired_heading[i] = desiredModuleStates[i].angle;
-
-            if (desiredModuleStates[i].speedMetersPerSecond < 0.0) {
-                desired_heading[i] = GeometryUtil.flip(desired_heading[i]);
-            }
-            if (all_modules_should_flip) {
-                double required_rotation_rad = Math
-                        .abs(prev_heading[i].unaryMinus().rotateBy(desired_heading[i]).getRadians());
-                if (required_rotation_rad < flipLimit) {
-                    all_modules_should_flip = false;
-                }
+    private boolean shouldStopAndReverse(Rotation2d[] prev_heading, Rotation2d[] desired_heading) {
+        for (int i = 0; i < prev_heading.length; ++i) {
+            Rotation2d diff = desired_heading[i].minus(prev_heading[i]);
+            if (Math.abs(diff.getRadians()) < flipLimitRad) {
+                return false;
             }
         }
-        return all_modules_should_flip;
+        return true;
     }
 
     /**
@@ -245,11 +241,13 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 min_s,
                 kDtSec);
 
+        // the speeds in these states are always positive.
         SwerveModuleState[] retStates = m_limits.toSwerveModuleStates(
                 retSpeeds,
                 retSpeeds.omegaRadiansPerSecond,
                 kDtSec);
 
+        // these speeds might be flipped.
         flipIfRequired(prevModuleStates, overrideSteering, retStates);
         return new SwerveSetpoint(retSpeeds, retStates);
     }
