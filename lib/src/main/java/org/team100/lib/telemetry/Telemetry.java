@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -173,6 +174,13 @@ public class Telemetry {
             t.setRetained(true);
             return t.publish();
         }, DoublePublisher.class).set(val);
+    }
+
+    // using a supplier here is faster in the non-logging case.
+    public void log(Level level, String root, String leaf, DoubleSupplier val) {
+        if (!m_level.admit(level))
+            return;
+        log(level, root, leaf, val.getAsDouble());
     }
 
     public void log(Level level, String root, String leaf, float val) {

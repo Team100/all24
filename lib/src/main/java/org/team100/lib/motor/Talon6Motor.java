@@ -1,5 +1,7 @@
 package org.team100.lib.motor;
 
+import java.util.function.DoubleSupplier;
+
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.telemetry.Telemetry;
@@ -7,19 +9,31 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
 import org.team100.lib.util.Names;
 
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEncoder100<T>, TorqueModel {
+/**
+ * Superclass for TalonFX motors.
+ */
+public abstract class Talon6Motor<T extends Measure100> implements MotorWithEncoder100<T>, TorqueModel {
     protected final Telemetry t = Telemetry.get();
     protected final String m_name;
-    protected final TalonFX m_motor;
-    protected final Feedforward100 m_ff;
+    private final TalonFX m_motor;
+    private final Feedforward100 m_ff;
 
-    protected Falcon6Motor(
+    // caching these status signals saves a lookup
+    protected final DoubleSupplier m_position;
+    protected final DoubleSupplier m_velocity;
+    protected final DoubleSupplier m_dutyCycle;
+    protected final DoubleSupplier m_error;
+    protected final DoubleSupplier m_supply;
+    protected final DoubleSupplier m_stator;
+    protected final DoubleSupplier m_temp;
+    protected final DoubleSupplier m_torque;
+
+    protected Talon6Motor(
             String name,
             int canId,
             MotorPhase motorPhase,
@@ -36,7 +50,19 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
         Phoenix100.motorConfig(talonFXConfigurator, motorPhase);
         Phoenix100.currentConfig(talonFXConfigurator, supplyLimit, statorLimit);
         Phoenix100.pidConfig(talonFXConfigurator, lowLevelVelocityConstants);
+
+        Phoenix100.crash(() -> m_motor.getPosition().setUpdateFrequency(50));
         Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
+        Phoenix100.crash(() -> m_motor.getTorqueCurrent().setUpdateFrequency(50));
+
+        m_position = () -> m_motor.getPosition().refresh().getValueAsDouble();
+        m_velocity = () -> m_motor.getVelocity().refresh().getValueAsDouble();
+        m_dutyCycle = () -> m_motor.getDutyCycle().refresh().getValueAsDouble();
+        m_error = () -> m_motor.getClosedLoopError().refresh().getValueAsDouble();
+        m_supply = () -> m_motor.getSupplyCurrent().refresh().getValueAsDouble();
+        m_stator = () -> m_motor.getStatorCurrent().refresh().getValueAsDouble();
+        m_temp = () -> m_motor.getDeviceTemp().refresh().getValueAsDouble();
+        m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
     }
 
@@ -50,7 +76,7 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
 
     /** Set motor speed/voltage directly. */
     public void setMotorVelocity(double motorRev_S, double motorRev_S2, double torqueNm) {
-        double currentMotorRev_S = m_motor.getVelocity().getValueAsDouble();
+        double currentMotorRev_S = m_velocity.getAsDouble();
 
         double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
@@ -76,10 +102,11 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
 
     @Override
     public double getTorque() {
-        // TODO: latency compensation
-        StatusSignal<Double> statorCurrentAmpsStatus = m_motor.getTorqueCurrent();
-        double statorCurrentAmps = statorCurrentAmpsStatus.getValueAsDouble();
-        return statorCurrentAmps * kTNm_amp();
+        // I looked into latency compensation of this signal but it doesn't seem
+        // possible. latency compensation requires a signal and its time derivative,
+        // e.g. position and velocity, or yaw and angular velocity. There doesn't seem
+        // to be such a thing for current.
+        return m_torque.getAsDouble() * kTNm_amp();
     }
 
     @Override
@@ -105,11 +132,12 @@ public abstract class Falcon6Motor<T extends Measure100> implements MotorWithEnc
     }
 
     protected void log() {
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_motor.getVelocity().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "output [-1,1]", m_motor.getDutyCycle().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "error (rev_s)", m_motor.getClosedLoopError().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "supply current (A)", m_motor.getSupplyCurrent().getValueAsDouble());
-        t.log(Level.TRACE, m_name, "stator current (A)", m_motor.getStatorCurrent().getValueAsDouble());
-        t.log(Level.DEBUG, m_name, "temperature (C)", m_motor.getDeviceTemp().getValueAsDouble());
+        // suppliers here are never touched in the non-logging case.
+        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocity);
+        t.log(Level.TRACE, m_name, "output [-1,1]", m_dutyCycle);
+        t.log(Level.TRACE, m_name, "error (rev_s)", m_error);
+        t.log(Level.TRACE, m_name, "supply current (A)", m_supply);
+        t.log(Level.TRACE, m_name, "stator current (A)", m_stator);
+        t.log(Level.DEBUG, m_name, "temperature (C)", m_temp);
     }
 }

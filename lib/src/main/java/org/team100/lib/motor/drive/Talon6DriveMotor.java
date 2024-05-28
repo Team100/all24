@@ -2,7 +2,7 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.Falcon6Motor;
+import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -14,7 +14,7 @@ import org.team100.lib.units.Distance100;
  * 
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
-public abstract class Talon6DriveMotor extends Falcon6Motor<Distance100> {
+public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
 
     private final double m_gearRatio;
     private final double m_wheelDiameter;
@@ -51,11 +51,10 @@ public abstract class Talon6DriveMotor extends Falcon6Motor<Distance100> {
         setMotorVelocity(motorRev_S, motorRev_S2, torqueNm);
     }
 
-
     /** Position in meters */
     @Override
     public Double getPosition() {
-        double positionRev = m_motor.getPosition().getValueAsDouble();
+        double positionRev = m_position.getAsDouble();
         double positionM = positionRev * m_distancePerTurn;
         t.log(Level.TRACE, m_name, "position (rev)", positionRev);
         t.log(Level.DEBUG, m_name, "position (m)", positionM);
@@ -65,7 +64,7 @@ public abstract class Talon6DriveMotor extends Falcon6Motor<Distance100> {
     /** Velocity in meters/sec */
     @Override
     public double getRate() {
-        double velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        double velocityRev_S = m_velocity.getAsDouble();
         double velocityM_S = velocityRev_S * m_distancePerTurn;
         t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
         t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);

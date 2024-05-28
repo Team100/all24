@@ -2,7 +2,7 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.Falcon6Motor;
+import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
@@ -10,7 +10,7 @@ import org.team100.lib.units.Angle100;
 /**
  * Swerve steering motor using Talon FX and Phoenix 6.
  */
-public abstract class Talon6TurningMotor extends Falcon6Motor<Angle100> {
+public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
 
     private static final double kSupplyLimit = 10;
     private static final double kStatorLimit = 20;
@@ -43,7 +43,7 @@ public abstract class Talon6TurningMotor extends Falcon6Motor<Angle100> {
     /** Position in rad */
     @Override
     public Double getPosition() {
-        double positionRev = m_motor.getPosition().getValueAsDouble();
+        double positionRev = m_position.getAsDouble();
         double positionRad = positionRev * 2 * Math.PI;
         t.log(Level.TRACE, m_name, "position (rev)", positionRev);
         t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
@@ -53,7 +53,7 @@ public abstract class Talon6TurningMotor extends Falcon6Motor<Angle100> {
     /** Velocity in rad/sec */
     @Override
     public double getRate() {
-        double velocityRev_S = m_motor.getVelocity().getValueAsDouble();
+        double velocityRev_S = m_velocity.getAsDouble();
         double velocityRad_S = velocityRev_S * 2 * Math.PI;
         t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
         t.log(Level.DEBUG, m_name, "velocity (rad_s)", velocityRad_S);
