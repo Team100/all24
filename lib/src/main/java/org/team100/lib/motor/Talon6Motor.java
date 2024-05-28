@@ -17,7 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor<T extends Measure100> implements MotorWithEncoder100<T>, TorqueModel {
+public abstract class Talon6Motor<T extends Measure100> implements MotorWithEncoder100<T> {
     protected final Telemetry t = Telemetry.get();
     protected final String m_name;
     private final TalonFX m_motor;
@@ -32,6 +32,10 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
     protected final DoubleSupplier m_stator;
     protected final DoubleSupplier m_temp;
     protected final DoubleSupplier m_torque;
+
+    // caching the control requests saves allocation
+    private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0);
+    private final DutyCycleOut m_dutyCycleOut = new DutyCycleOut(0);
 
     protected Talon6Motor(
             String name,
@@ -68,8 +72,8 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
 
     @Override
     public void setDutyCycle(double output) {
-        DutyCycleOut d = new DutyCycleOut(output);
-        Phoenix100.warn(() -> m_motor.setControl(d));
+        Phoenix100.warn(() -> m_motor.setControl(m_dutyCycleOut
+                .withOutput(output)));
         t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
         log();
     }
@@ -87,10 +91,9 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
 
         double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
 
-        VelocityVoltage v = new VelocityVoltage(motorRev_S);
-        v.FeedForward = kFFVolts;
-        v.Acceleration = motorRev_S2;
-        Phoenix100.warn(() -> m_motor.setControl(v));
+        Phoenix100.warn(() -> m_motor.setControl(m_velocityVoltage
+                .withVelocity(motorRev_S)
+                .withFeedForward(kFFVolts)));
 
         t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
         t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
@@ -100,8 +103,7 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
         log();
     }
 
-    @Override
-    public double getTorque() {
+    public double getMotorTorque() {
         // I looked into latency compensation of this signal but it doesn't seem
         // possible. latency compensation requires a signal and its time derivative,
         // e.g. position and velocity, or yaw and angular velocity. There doesn't seem

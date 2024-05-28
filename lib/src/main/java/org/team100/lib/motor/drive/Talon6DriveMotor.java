@@ -17,7 +17,7 @@ import org.team100.lib.units.Distance100;
 public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
 
     private final double m_gearRatio;
-    private final double m_wheelDiameter;
+    private final double m_wheelDiameterM;
     private final double m_distancePerTurn;
 
     protected Talon6DriveMotor(
@@ -32,23 +32,27 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
             Feedforward100 ff) {
         super(name, canId, motorPhase, supplyLimit, statorLimit, pid, ff);
         m_gearRatio = gearRatio;
-        m_wheelDiameter = wheelDiameter;
+        m_wheelDiameterM = wheelDiameter;
         m_distancePerTurn = wheelDiameter * Math.PI / gearRatio;
     }
 
     @Override
-    public void setVelocity(double outputM_S, double accelM_S_S) {
-        setVelocity(outputM_S, accelM_S_S, 0);
+    public void setVelocity(double outputM_S, double accelM_S_S, double outputTorqueN) {
+        double wheelRev_S = outputM_S / (m_wheelDiameterM * Math.PI);
+        t.log(Level.TRACE, m_name, "module input (RPS)", wheelRev_S);
+        double motorRev_S = wheelRev_S * m_gearRatio;
+        double wheelRev_S2 = accelM_S_S / (m_wheelDiameterM * Math.PI);
+        double motorRev_S2 = wheelRev_S2 * m_gearRatio;
+        double wheelTorqueNm = outputTorqueN * m_wheelDiameterM / 2;
+        double motorTorqueNm = wheelTorqueNm / m_gearRatio;
+        setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
     }
 
     @Override
-    public void setVelocity(double outputM_S, double accelM_S_S, double torqueNm) {
-        double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
-        t.log(Level.TRACE, m_name, "module input (RPS)", wheelRev_S);
-        double motorRev_S = wheelRev_S * m_gearRatio;
-        double wheelRev_S2 = accelM_S_S / (m_wheelDiameter * Math.PI);
-        double motorRev_S2 = wheelRev_S2 * m_gearRatio;
-        setMotorVelocity(motorRev_S, motorRev_S2, torqueNm);
+    public double getTorque() {
+        double motorTorqueNm = getMotorTorque();
+        double wheelTorqueNm = motorTorqueNm * m_gearRatio;
+        return wheelTorqueNm * 2 / m_wheelDiameterM;
     }
 
     /** Position in meters */

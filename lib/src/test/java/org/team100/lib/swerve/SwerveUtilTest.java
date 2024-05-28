@@ -11,40 +11,58 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 class SwerveUtilTest {
     private static final double kDelta = 0.001;
 
+        @Test
+    void testFindDriveMaxS0() {
+        double x_0 = 0;
+        double y_0 = 0;
+        double x_1 = 1;
+        double y_1 = 0;
+        double max_deviation = 0.02;
+        int max_iterations = 1000;
+
+        // since f0 = f1, there's nothing to do.
+        double s = SwerveUtil.findDriveMaxS(
+                x_0, y_0,
+                x_1, y_1,
+                max_deviation, max_iterations);
+
+        assertEquals(0.02, s, kDelta);
+        // this is an impossible steering solution, but the steering
+        // checker should catch that.
+    }
+
     @Test
     void testFindDriveMaxS() {
         double x_0 = -1;
         double y_0 = 0;
-        double f_0 = 1; // abs speed
         double x_1 = 1;
         double y_1 = 0;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
         // since f0 = f1, there's nothing to do.
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         assertEquals(1, s, kDelta);
+        // this is an impossible steering solution, but the steering
+        // checker should catch that.
     }
 
     @Test
     void testFindDriveMaxS2() {
         double x_0 = 1;
         double y_0 = 0;
-        double f_0 = 1; // abs speed
         double x_1 = 0;
         double y_1 = 1;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         // since f0 = f1, the drive solution is to maintain speed.
@@ -58,17 +76,14 @@ class SwerveUtilTest {
     void testFindDriveMaxS3() {
         double x_0 = 0.5;
         double y_0 = 0;
-        double f_0 = 0.5;
         double x_1 = 1;
         double y_1 = 0;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
-        // since f0 = f1, there's nothing to do.
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         // max_deviation should apply here, 0.1 deviation is 20% of the way from 0.5 to
@@ -80,17 +95,14 @@ class SwerveUtilTest {
     void testFindDriveMaxS4() {
         double x_0 = 0;
         double y_0 = 0.5;
-        double f_0 = 0.5;
         double x_1 = 1;
         double y_1 = 0;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
-        // since f0 = f1, there's nothing to do.
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         // the max deviation applies to the hypot so this looks for the
@@ -128,36 +140,34 @@ class SwerveUtilTest {
     }
 
     @Test
-    void testGetMaxVelStep() {
-        // large difference in accel and decel so we can see it
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.highAccelLowDecel();
-        // say this is the start of the path from (1,0) to (0,1),
-        boolean isAccel = SwerveUtil.getIsAccel(1, 0, 0, 1);
-        assertTrue(isAccel);
-        double step = SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02);
-        // currently it thinks this is accel because the velocities are the same
-        assertEquals(0.02, step, kDelta);
+    void testGetIsAccel() {
+        // decelerating
+        assertFalse(SwerveUtil.isAccel(1, 0, 0, 1));
+        // accelerating
+        assertTrue(SwerveUtil.isAccel(0.5, 0.5, 0, 1));
     }
 
     @Test
-    void testGetMaxVelStep2() {
-        // large difference in accel and decel so we can see it
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.highAccelLowDecel();
-        // say this is the start of the path from (1,0) to (0,1),
-        boolean isAccel = SwerveUtil.getIsAccel2(1, 0, 0, 1);
-        assertFalse(isAccel);
-        double step = SwerveUtil.getMaxVelStep2(l, 1, 0, 0, 1, 0.02);
-        // this is actually decelerating
-        assertEquals(0.2, step, kDelta);
-
-        // the accel case works too
-                 isAccel = SwerveUtil.getIsAccel2(0.5, 0.5, 0, 1);
-        assertTrue(isAccel);
-         step = SwerveUtil.getMaxVelStep2(l, 0.5, 0.5, 0, 1, 0.02);
-        // this is actually decelerating
-        assertEquals(0.02, step, kDelta);
-
+    void testGetMaxVelStep() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.lowAccelHighDecel();
+        // decelerating
+        assertEquals(0.2, SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02), kDelta);
+        // acccelerating
+        assertEquals(0.02, SwerveUtil.getMaxVelStep(l, 0.5, 0.5, 0, 1, 0.02), kDelta);
     }
 
+    @Test
+    void testGetMaxVelStepConstrained() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
+        assertEquals(0.02, SwerveUtil.getMaxVelStep(l, 0, 0, 1, 0, 0.02), kDelta);
+    }
+
+    @Test
+    void testGetMaxVelStepWithVelocityDependentAccel() {
+        // available acceleration is not always the max.
+        // a motor without current limiting has a straight declining torque curve
+        // a motor with current limiting has a constant torque curve for awhile
+        // hm, how to get the motor model in here?
+    }
 
 }

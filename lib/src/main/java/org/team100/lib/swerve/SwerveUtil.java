@@ -6,6 +6,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Math100;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -17,12 +18,11 @@ public class SwerveUtil {
      * reverse drive direction).
      *
      * @param prevToGoal The rotation from the previous state to the goal state
-     *                   (i.e. prev.inverse().rotateBy(goal)).
      * @return True if the shortest path to achieve this rotation involves flipping
      *         the drive direction.
      */
-    public static boolean flipHeading(Rotation2d prevToGoal) {
-        return Math.abs(prevToGoal.getRadians()) > Math.PI / 2.0;
+    public static boolean shouldFlip(Rotation2d prevToGoal) {
+        return Math.abs(MathUtil.angleModulus(prevToGoal.getRadians())) > Math.PI / 2.0;
     }
 
     public static double unwrapAngle(double ref, double angle) {
@@ -77,18 +77,16 @@ public class SwerveUtil {
                 max_iterations);
     }
 
-    /**
-     * f is speed: hypot(x,y)
-     */
     public static double findDriveMaxS(
             double x_0,
             double y_0,
-            double f_0,
             double x_1,
             double y_1,
-            double f_1,
             double max_vel_step,
             int max_iterations) {
+        double f_0 = Math.hypot(x_0, y_0);
+        double f_1 = Math.hypot(x_1, y_1);
+
         double diff = f_1 - f_0;
 
         if (Math.abs(diff) <= max_vel_step) {
@@ -103,72 +101,71 @@ public class SwerveUtil {
      * DesiredState is a complete stop. In this case, module angle is
      * arbitrary, so just use the previous angle.
      */
-    public static boolean makeStop(
+    public static boolean desiredIsStopped(
             ChassisSpeeds desiredState,
             SwerveModuleState[] desiredModuleStates,
             SwerveModuleState[] prevModuleStates) {
-        boolean need_to_steer = true;
         if (GeometryUtil.isZero(desiredState)) {
-            need_to_steer = false;
             for (int i = 0; i < prevModuleStates.length; ++i) {
                 desiredModuleStates[i].angle = prevModuleStates[i].angle;
                 desiredModuleStates[i].speedMetersPerSecond = 0.0;
             }
+            return true;
         }
-        return need_to_steer;
+        return false;
     }
 
     /**
-     * Compares magnitudes of the current and final state.
-     * For transitions that involve both speed and angle changes,
-     * the correct velocity profile often involves slowing and then
-     * speeding up, but this method doesn't capture that.
+     * Find the desired dv. Project it on to the previous v: if the projection is
+     * positive, we're accelerating, so use the accel limit to find the maximum
+     * allowed dv for the supplied dt. Otherwise use the decel limit.
      */
     public static double getMaxVelStep(
             SwerveKinodynamics m_limits,
-            double prev_vx_i,
-            double prev_vy_i,
-            double desired_vx_i,
-            double desired_vy_i,
+            double prev_vx,
+            double prev_vy,
+            double desired_vx,
+            double desired_vy,
             double kDtSec) {
-        boolean isAccel = getIsAccel(prev_vx_i, prev_vy_i, desired_vx_i, desired_vy_i);
-
-        return isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
-                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
-    }
-
-    static boolean getIsAccel(
-            double prev_vx_i,
-            double prev_vy_i,
-            double desired_vx_i,
-            double desired_vy_i) {
-        double prevV = Math.hypot(prev_vx_i, prev_vy_i);
-        double desiredV = Math.hypot(desired_vx_i, desired_vy_i);
-        return desiredV >= prevV;
+        return kDtSec * getAccelLimit(
+                m_limits,
+                prev_vx,
+                prev_vy,
+                desired_vx,
+                desired_vy);
     }
 
     /**
-     * This method projects the line onto the prev state.
+     * At low speed, accel is limited by the current limiters.
+     * At high speed, accel is limited by back EMF.
+     * Deceleration limits are different: back EMF is helping in that case.
      */
-    public static double getMaxVelStep2(
+    public static double getAccelLimit(
             SwerveKinodynamics m_limits,
-            double prev_vx_i,
-            double prev_vy_i,
-            double desired_vx_i,
-            double desired_vy_i,
-            double kDtSec) {
-
-        boolean isAccel = getIsAccel2(
-                prev_vx_i,
-                prev_vy_i,
-                desired_vx_i,
-                desired_vy_i);
-
-        return isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
-                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
+            double prev_vx,
+            double prev_vy,
+            double desired_vx,
+            double desired_vy) {
+        if (isAccel(prev_vx, prev_vy, desired_vx, desired_vy)) {
+            double speedM_S = Math.hypot(prev_vx, prev_vy);
+            double speedFraction = Math100.limit(
+                    speedM_S / m_limits.getMaxDriveVelocityM_S(), 0, 1);
+            double backEmfLimit = 1 - speedFraction;
+            double backEmfLimitedAcceleration = backEmfLimit * m_limits.getStallAccelerationM_S2();
+            double currentLimitedAcceleration = m_limits.getMaxDriveAccelerationM_S2();
+            return Math.min(backEmfLimitedAcceleration, currentLimitedAcceleration);
+        }
+        return m_limits.getMaxDriveDecelerationM_S2();
     }
 
-    static boolean getIsAccel2(
+    /**
+     * Find the desired dv. Project it on to the previous v: if the projection is
+     * positive, we're accelerating, otherwise decelerating.
+     * 
+     * This correctly captures sharp turns as decelerations; simply comparing the
+     * magnitudes of initial and final velocities is not correct.
+     */
+    static boolean isAccel(
             double prev_vx_i,
             double prev_vy_i,
             double desired_vx_i,

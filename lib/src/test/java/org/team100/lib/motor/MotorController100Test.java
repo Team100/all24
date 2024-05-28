@@ -13,9 +13,9 @@ class MotorController100Test {
     void testTurning() {
         MockMotorController mc = new MockMotorController();
         TurningMotorController100 m = new TurningMotorController100("foo", mc, 2);
-        m.setVelocity(0, 0);
+        m.setVelocity(0, 0, 0);
         assertEquals(0, mc.speed, kDelta);
-        m.setVelocity(1, 0);
+        m.setVelocity(1, 0, 0);
         assertEquals(0.0032, mc.speed, kDelta);
     }
 
@@ -23,9 +23,9 @@ class MotorController100Test {
     void testSimple() {
         MockMotorController mc = new MockMotorController();
         DriveMotorController100 m = new DriveMotorController100("foo", mc, 2, 0.1);
-        m.setVelocity(0, 0);
+        m.setVelocity(0, 0, 0);
         assertEquals(0, mc.speed, kDelta);
-        m.setVelocity(1, 0);
+        m.setVelocity(1, 0, 0);
         assertEquals(0.064, mc.speed, kDelta);
     }
 }

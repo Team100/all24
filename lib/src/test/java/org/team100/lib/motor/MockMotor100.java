@@ -1,8 +1,9 @@
 package org.team100.lib.motor;
 
+import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.units.Measure100;
 
-public class MockMotor100<T extends Measure100> implements Motor100<T> {
+public class MockMotor100<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
     public double output = 0;
     public double velocity = 0;
 
@@ -17,16 +18,7 @@ public class MockMotor100<T extends Measure100> implements Motor100<T> {
     }
 
     /**
-     * @param accel ignored
-     */
-    @Override
-    public void setVelocity(double velocity, double accel) {
-        this.velocity = velocity;
-    }
-
-    /**
-     * @param accel  ignored
-     * @param torque ignored
+     * Velocity only.
      */
     @Override
     public void setVelocity(double velocity, double accel, double torque) {

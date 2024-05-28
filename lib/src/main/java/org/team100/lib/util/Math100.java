@@ -14,8 +14,6 @@ public class Math100 {
     // we just don't need very precise answers.
     private static final double kRootTolerance = 0.0001;
 
-
-    
     /**
      * Returns the real solutions to the quadratic ax^2 + bx + c.
      */
@@ -54,7 +52,15 @@ public class Math100 {
     }
 
     public static double interpolate(double a, double b, double x) {
+        if (x == 0)
+            return a;
+        if (x == 1)
+            return b;
         x = limit(x, 0.0, 1.0);
+        if (x < 1e-12)
+            return a;
+        if (x > (1 - 1e-12))
+            return b;
         return a + (b - a) * x;
     }
 

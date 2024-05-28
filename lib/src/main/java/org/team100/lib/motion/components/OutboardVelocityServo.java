@@ -50,7 +50,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
         if (Double.isNaN(setpoint))
             throw new IllegalArgumentException("setpoint is NaN");
         m_setpoint = setpoint;
-        m_motor.setVelocity(setpoint, accel(setpoint));
+        m_motor.setVelocity(setpoint, accel(setpoint), 0);
         t.log(Level.TRACE, m_name, "Desired setpoint", setpoint);
     }
 
