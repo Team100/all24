@@ -1,5 +1,6 @@
 package org.team100.lib.motor;
 
+import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
@@ -14,7 +15,7 @@ import edu.wpi.first.math.MathUtil;
  * 
  * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
-public class SimulatedMotor<T extends Measure100> implements Motor100<T> {
+public class SimulatedMotor<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final double m_freeSpeed;

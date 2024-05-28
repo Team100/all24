@@ -2,8 +2,8 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.KrakenTorqueModel;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.model.KrakenTorqueModel;
 
 /** Kraken using Phoenix 6. */
 public class Kraken6DriveMotor extends Talon6DriveMotor implements KrakenTorqueModel {

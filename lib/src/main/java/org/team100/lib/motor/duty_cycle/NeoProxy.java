@@ -3,6 +3,7 @@ package org.team100.lib.motor.duty_cycle;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
+import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -18,7 +19,7 @@ import com.revrobotics.CANSparkMax;
  * 
  * This makes the code that uses it easier to test.
  */
-public class NeoProxy implements Motor100<Distance100> {
+public class NeoProxy implements Motor100<Distance100>, NeoTorqueModel {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
 

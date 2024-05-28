@@ -1,7 +1,11 @@
-package org.team100.lib.motor;
+package org.team100.lib.motor.model;
 
 /**
  * Motor constants used for torque calculations.
+ * 
+ * Child interfaces should implement defaults representing specific motors.
+ * 
+ * These child interfaces should be used as mix-ins for specific motor classes.
  */
 public interface TorqueModel {
     /**

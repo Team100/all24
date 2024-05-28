@@ -1,6 +1,7 @@
 package org.team100.lib.motor.drive;
 
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -11,7 +12,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 /**
  * Calibrated distance motor using any MotorController.
  */
-public class DriveMotorController100 implements Motor100<Distance100> {
+public class DriveMotorController100 implements Motor100<Distance100>, GenericTorqueModel {
     /**
      * Very much not calibrated. Say 100 rev/s max so 0.01?
      */

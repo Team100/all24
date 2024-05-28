@@ -3,6 +3,7 @@ package org.team100.lib.motor.arm;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
+import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
@@ -17,7 +18,7 @@ import com.revrobotics.CANSparkMax;
  * 
  * Velocity is feedforward only.
  */
-public class JointMotor implements Motor100<Angle100> {
+public class JointMotor implements Motor100<Angle100>, NeoTorqueModel{
     /** Very much not calibrated. */
     private static final double kV = 0.1;
     /** @see https://motors.vex.com/ */

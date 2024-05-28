@@ -3,6 +3,7 @@ package org.team100.lib.motor.duty_cycle;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
+import org.team100.lib.motor.model.NeoVortexTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -14,7 +15,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
 /** Very simple wrapper around SparkFlex for testing. */
-public class VortexProxy implements Motor100<Distance100> {
+public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final CANSparkFlex m_motor;

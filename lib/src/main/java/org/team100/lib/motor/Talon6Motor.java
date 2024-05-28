@@ -17,7 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor<T extends Measure100> implements MotorWithEncoder100<T>, TorqueModel {
+public abstract class Talon6Motor<T extends Measure100> implements MotorWithEncoder100<T> {
     protected final Telemetry t = Telemetry.get();
     protected final String m_name;
     private final TalonFX m_motor;
