@@ -13,13 +13,13 @@ import com.revrobotics.CANSparkMax;
 public class NeoDriveMotor extends CANSparkDriveMotor {
 
     @Override
-    double kROhms() {
+    protected double kROhms() {
         // @see https://www.revrobotics.com/rev-21-1650/
         return 0.114;
     }
 
     @Override
-    double kTNm_amp() {
+    protected double kTNm_amp() {
         // @see https://www.revrobotics.com/rev-21-1650/
         return 0.028;
     }

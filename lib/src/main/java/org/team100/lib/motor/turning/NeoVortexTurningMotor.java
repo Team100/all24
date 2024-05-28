@@ -25,13 +25,13 @@ public class NeoVortexTurningMotor extends CANSparkTurningMotor {
     }
 
     @Override
-    double kROhms() {
+    protected double kROhms() {
         // @see https://www.revrobotics.com/rev-21-1652/
         return 0.057;
     }
 
     @Override
-    double kTNm_amp() {
+    protected double kTNm_amp() {
         // @see https://www.revrobotics.com/rev-21-1652/
         return 0.017;
     }

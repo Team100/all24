@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkMax;
  * Swerve steering motor using REV Neo.
  */
 public class NeoTurningMotor extends CANSparkTurningMotor {
-
     public NeoTurningMotor(
             String name,
             int canId,
@@ -25,13 +24,13 @@ public class NeoTurningMotor extends CANSparkTurningMotor {
     }
 
     @Override
-    double kROhms() {
+    protected double kROhms() {
         // @see https://www.revrobotics.com/rev-21-1650/
         return 0.114;
     }
 
     @Override
-    double kTNm_amp() {
+    protected double kTNm_amp() {
         // @see https://www.revrobotics.com/rev-21-1650/
         return 0.028;
     }
