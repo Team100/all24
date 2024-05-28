@@ -10,6 +10,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -34,7 +35,6 @@ public class SteeringRateLimiter implements Glassy {
     public double enforceSteeringLimit(
             SwerveModuleState[] desiredModuleStates,
             SwerveModuleState[] prevModuleStates,
-            boolean need_to_steer,
             double[] prev_vx,
             double[] prev_vy,
             Rotation2d[] prev_heading,
@@ -43,32 +43,28 @@ public class SteeringRateLimiter implements Glassy {
             Rotation2d[] desired_heading,
             List<Optional<Rotation2d>> overrideSteering,
             double kDtSec) {
-        double min_s = 1.0;
 
+        double min_s = 1.0;
         final double max_theta_step = kDtSec * m_limits.getMaxSteeringVelocityRad_S();
         for (int i = 0; i < prevModuleStates.length; ++i) {
-            if (!need_to_steer) {
-                overrideSteering.add(Optional.of(prevModuleStates[i].angle));
-                continue;
-            }
             overrideSteering.add(Optional.empty());
             if (Math.abs(prevModuleStates[i].speedMetersPerSecond - 0.0) <= 1e-12) {
                 // If module is stopped, we know that we will need to move straight to the final
-                // steering angle, so limit based
-                // purely on rotation in place.
+                // steering angle, so limit based purely on rotation in place.
+
                 if (Math.abs(desiredModuleStates[i].speedMetersPerSecond - 0.0) <= 1e-12) {
-                    // Goal angle doesn't matter. Just leave module at its current angle.
+                    // Both previous and desired states are stopped.
+                    // Just leave module at its current angle.
                     overrideSteering.set(i, Optional.of(prevModuleStates[i].angle));
                     continue;
                 }
 
-                Rotation2d necessaryRotation = prevModuleStates[i].angle.unaryMinus().rotateBy(
-                        desiredModuleStates[i].angle);
-                if (SwerveUtil.flipHeading(necessaryRotation)) {
+                Rotation2d necessaryRotation = desiredModuleStates[i].angle.minus(prevModuleStates[i].angle);
+                if (SwerveUtil.shouldFlip(necessaryRotation)) {
                     necessaryRotation = necessaryRotation.rotateBy(GeometryUtil.kRotation180);
                 }
-                // getRadians() bounds to +/- Pi.
-                final double numStepsNeeded = Math.abs(necessaryRotation.getRadians()) / max_theta_step;
+                double rotationRad = MathUtil.angleModulus(necessaryRotation.getRadians());
+                final double numStepsNeeded = Math.abs(rotationRad) / max_theta_step;
 
                 if (numStepsNeeded <= 1.0) {
                     // Steer directly to goal angle.
@@ -78,7 +74,7 @@ public class SteeringRateLimiter implements Glassy {
                 } else {
                     // Adjust steering by max_theta_step.
                     overrideSteering.set(i, Optional.of(prevModuleStates[i].angle.rotateBy(
-                            Rotation2d.fromRadians(Math.signum(necessaryRotation.getRadians()) * max_theta_step))));
+                            Rotation2d.fromRadians(Math.signum(rotationRad) * max_theta_step))));
                     min_s = 0.0;
                     continue;
                 }
@@ -107,7 +103,5 @@ public class SteeringRateLimiter implements Glassy {
     public String getGlassName() {
         return "SteeringRateLimiter";
     }
-
-    
 
 }

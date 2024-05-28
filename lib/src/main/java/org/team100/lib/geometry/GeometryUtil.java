@@ -130,7 +130,7 @@ public class GeometryUtil {
     }
 
     public static Rotation2d flip(Rotation2d a) {
-        return new Rotation2d(a.getRadians() + Math.PI);
+        return new Rotation2d(MathUtil.angleModulus(a.getRadians() + Math.PI));
     }
 
     public static double distance(Rotation2d a, final Rotation2d other) {

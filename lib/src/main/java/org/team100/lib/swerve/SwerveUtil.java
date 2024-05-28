@@ -6,6 +6,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Math100;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -17,12 +18,11 @@ public class SwerveUtil {
      * reverse drive direction).
      *
      * @param prevToGoal The rotation from the previous state to the goal state
-     *                   (i.e. prev.inverse().rotateBy(goal)).
      * @return True if the shortest path to achieve this rotation involves flipping
      *         the drive direction.
      */
-    public static boolean flipHeading(Rotation2d prevToGoal) {
-        return Math.abs(prevToGoal.getRadians()) > Math.PI / 2.0;
+    public static boolean shouldFlip(Rotation2d prevToGoal) {
+        return Math.abs(MathUtil.angleModulus(prevToGoal.getRadians())) > Math.PI / 2.0;
     }
 
     public static double unwrapAngle(double ref, double angle) {
@@ -77,18 +77,16 @@ public class SwerveUtil {
                 max_iterations);
     }
 
-    /**
-     * f is speed: hypot(x,y)
-     */
     public static double findDriveMaxS(
             double x_0,
             double y_0,
-            double f_0,
             double x_1,
             double y_1,
-            double f_1,
             double max_vel_step,
             int max_iterations) {
+        double f_0 = Math.hypot(x_0, y_0);
+        double f_1 = Math.hypot(x_1, y_1);
+
         double diff = f_1 - f_0;
 
         if (Math.abs(diff) <= max_vel_step) {
@@ -103,19 +101,18 @@ public class SwerveUtil {
      * DesiredState is a complete stop. In this case, module angle is
      * arbitrary, so just use the previous angle.
      */
-    public static boolean makeStop(
+    public static boolean desiredIsStopped(
             ChassisSpeeds desiredState,
             SwerveModuleState[] desiredModuleStates,
             SwerveModuleState[] prevModuleStates) {
-        boolean need_to_steer = true;
         if (GeometryUtil.isZero(desiredState)) {
-            need_to_steer = false;
             for (int i = 0; i < prevModuleStates.length; ++i) {
                 desiredModuleStates[i].angle = prevModuleStates[i].angle;
                 desiredModuleStates[i].speedMetersPerSecond = 0.0;
             }
+            return true;
         }
-        return need_to_steer;
+        return false;
     }
 
     /**
@@ -127,20 +124,14 @@ public class SwerveUtil {
      */
     public static double getMaxVelStep(
             SwerveKinodynamics m_limits,
-            double prev_vx_i,
-            double prev_vy_i,
-            double desired_vx_i,
-            double desired_vy_i,
+            double prev_vx,
+            double prev_vy,
+            double desired_vx,
+            double desired_vy,
             double kDtSec) {
-
-        boolean isAccel = isAccel(
-                prev_vx_i,
-                prev_vy_i,
-                desired_vx_i,
-                desired_vy_i);
-
-        return isAccel ? kDtSec * m_limits.getMaxDriveAccelerationM_S2()
-                : kDtSec * m_limits.getMaxDriveDecelerationM_S2();
+        if (isAccel(prev_vx, prev_vy, desired_vx, desired_vy))
+            return kDtSec * m_limits.getMaxDriveAccelerationM_S2();
+        return kDtSec * m_limits.getMaxDriveDecelerationM_S2();
     }
 
     /**

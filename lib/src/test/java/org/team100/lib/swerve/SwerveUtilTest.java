@@ -11,40 +11,58 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 class SwerveUtilTest {
     private static final double kDelta = 0.001;
 
+        @Test
+    void testFindDriveMaxS0() {
+        double x_0 = 0;
+        double y_0 = 0;
+        double x_1 = 1;
+        double y_1 = 0;
+        double max_deviation = 0.02;
+        int max_iterations = 1000;
+
+        // since f0 = f1, there's nothing to do.
+        double s = SwerveUtil.findDriveMaxS(
+                x_0, y_0,
+                x_1, y_1,
+                max_deviation, max_iterations);
+
+        assertEquals(0.02, s, kDelta);
+        // this is an impossible steering solution, but the steering
+        // checker should catch that.
+    }
+
     @Test
     void testFindDriveMaxS() {
         double x_0 = -1;
         double y_0 = 0;
-        double f_0 = 1; // abs speed
         double x_1 = 1;
         double y_1 = 0;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
         // since f0 = f1, there's nothing to do.
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         assertEquals(1, s, kDelta);
+        // this is an impossible steering solution, but the steering
+        // checker should catch that.
     }
 
     @Test
     void testFindDriveMaxS2() {
         double x_0 = 1;
         double y_0 = 0;
-        double f_0 = 1; // abs speed
         double x_1 = 0;
         double y_1 = 1;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         // since f0 = f1, the drive solution is to maintain speed.
@@ -58,17 +76,14 @@ class SwerveUtilTest {
     void testFindDriveMaxS3() {
         double x_0 = 0.5;
         double y_0 = 0;
-        double f_0 = 0.5;
         double x_1 = 1;
         double y_1 = 0;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
-        // since f0 = f1, there's nothing to do.
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         // max_deviation should apply here, 0.1 deviation is 20% of the way from 0.5 to
@@ -80,17 +95,14 @@ class SwerveUtilTest {
     void testFindDriveMaxS4() {
         double x_0 = 0;
         double y_0 = 0.5;
-        double f_0 = 0.5;
         double x_1 = 1;
         double y_1 = 0;
-        double f_1 = 1;
         double max_deviation = 0.1;
         int max_iterations = 1000;
 
-        // since f0 = f1, there's nothing to do.
         double s = SwerveUtil.findDriveMaxS(
-                x_0, y_0, f_0,
-                x_1, y_1, f_1,
+                x_0, y_0,
+                x_1, y_1,
                 max_deviation, max_iterations);
 
         // the max deviation applies to the hypot so this looks for the
@@ -142,6 +154,12 @@ class SwerveUtilTest {
         assertEquals(0.2, SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02), kDelta);
         // acccelerating
         assertEquals(0.02, SwerveUtil.getMaxVelStep(l, 0.5, 0.5, 0, 1, 0.02), kDelta);
+    }
+
+    @Test
+    void testGetMaxVelStepConstrained() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
+        assertEquals(0.02, SwerveUtil.getMaxVelStep(l, 0, 0, 1, 0, 0.02), kDelta);
     }
 
     @Test
