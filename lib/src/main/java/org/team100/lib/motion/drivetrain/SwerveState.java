@@ -11,7 +11,6 @@ import org.team100.lib.timing.TimedPose;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory.State;
 
 /**
  * Describes the state of a holonomic drive in three dimensions,
@@ -77,32 +76,9 @@ public class SwerveState {
     }
 
     /**
-     * turn a wpi trajectory state into a swervestate.
-     * 
-     * does not account for centripetal acceleration.
-     */
-    public static SwerveState fromState(State desiredState, Rotation2d desiredRot) {
-        double xx = desiredState.poseMeters.getX();
-        double yx = desiredState.poseMeters.getY();
-        double thetax = desiredRot.getRadians();
-
-        double xv = desiredState.velocityMetersPerSecond * desiredState.poseMeters.getRotation().getCos();
-        double yv = desiredState.velocityMetersPerSecond * desiredState.poseMeters.getRotation().getSin();
-
-        // TODO: account for centripetal acceleration
-        double xa = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getCos();
-        double ya = desiredState.accelerationMetersPerSecondSq * desiredState.poseMeters.getRotation().getSin();
-
-        return new SwerveState(
-                new State100(xx, xv, xa),
-                new State100(yx, yv, ya),
-                new State100(thetax, 0, 0));
-    }
-
-    /**
      * Transform timed pose into swerve state.
      * 
-     * does not account for centripetal acceleration.
+     * Correctly accounts for centripetal acceleration.
      */
     public static SwerveState fromTimedPose(TimedPose timedPose) {
         double xx = timedPose.state().getPose().getX();
@@ -116,15 +92,20 @@ public class SwerveState {
         double yv = motion_direction.getSin() * velocityM_s;
         double thetav = timedPose.state().getHeadingRate() * velocityM_s;
 
-        // TODO: account for centripetal acceleration
         double accelM_s_s = timedPose.acceleration();
         double xa = motion_direction.getCos() * accelM_s_s;
         double ya = motion_direction.getSin() * accelM_s_s;
         double thetaa = timedPose.state().getHeadingRate() * accelM_s_s;
 
+        // centripetal accel = v^2/r = v^2 * curvature
+        double curvRad_M = timedPose.state().getCurvature();
+        double centripetalAccelM_s_s = velocityM_s * velocityM_s * curvRad_M;
+        double xCa = -1.0 * motion_direction.getSin() * centripetalAccelM_s_s;
+        double yCa = motion_direction.getCos() * centripetalAccelM_s_s;
+
         return new SwerveState(
-                new State100(xx, xv, xa),
-                new State100(yx, yv, ya),
+                new State100(xx, xv, xa + xCa),
+                new State100(yx, yv, ya + yCa),
                 new State100(thetax, thetav, thetaa));
     }
 

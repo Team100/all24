@@ -53,7 +53,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * it, but so that it's not in the prod robot execution path at all.
  */
 public class RobotContainerParkingLot {
+    // for background on drive current limits:
+    // https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/talonfx/improving-performance-with-current-limits.html
+    // https://www.chiefdelphi.com/t/the-brushless-era-needs-sensible-default-current-limits/461056/51
     private static final double kDriveCurrentLimit = 60;
+    private static final double kDriveStatorLimit = 120;
 
     private final SwerveModuleCollection m_modules;
     final HeadingInterface m_heading;
@@ -71,7 +75,7 @@ public class RobotContainerParkingLot {
         driverControl = new DriverControlProxy();
         operatorControl = new OperatorControlProxy();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, kDriveStatorLimit, swerveKinodynamics);
         m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
@@ -222,10 +226,8 @@ public class RobotContainerParkingLot {
         whileTrue(driverControl::circle, m_drawCircle);
     }
 
-        private void whileTrue(BooleanSupplier condition, Command command) {
+    private void whileTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).whileTrue(command);
     }
-
-
 
 }

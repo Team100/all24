@@ -1,16 +1,12 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.trajectory.StraightLineTrajectory;
-import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
@@ -19,17 +15,6 @@ import edu.wpi.first.wpilibj2.command.WrapperCommand;
  */
 public class CommandMaker {
 
-    /**
-     * A command to follow a straight line from the current pose to the goal pose.
-     */
-    public static Command line(
-            Pose2d goal,
-            SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController3 controller,
-            TrajectoryMaker tmaker) {
-        StraightLineTrajectory maker = new StraightLineTrajectory(tmaker);
-        return new DriveToWaypoint3(goal, drivetrain, maker, controller);
-    }
 
     /**
      * Try the new Choreo library.

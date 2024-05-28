@@ -2,12 +2,12 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.FalconTorqueModel;
+import org.team100.lib.motor.KrakenTorqueModel;
 import org.team100.lib.motor.MotorPhase;
 
-public class Falcon6TurningMotor extends Talon6TurningMotor implements FalconTorqueModel {
+public class Kraken6TurningMotor extends Talon6TurningMotor implements KrakenTorqueModel {
 
-    public Falcon6TurningMotor(
+    protected Kraken6TurningMotor(
             String name,
             int canId,
             MotorPhase motorPhase,

@@ -95,10 +95,6 @@ public class TimedPose {
         if (!stateEqual) {
             return false;
         }
-        boolean timeEqual = Math.abs(getTimeS() - ts.getTimeS()) <= 1e-12;
-        if (!timeEqual) {
-            return false;
-        }
-        return true;
+        return Math.abs(getTimeS() - ts.getTimeS()) <= 1e-12;
     }
 }

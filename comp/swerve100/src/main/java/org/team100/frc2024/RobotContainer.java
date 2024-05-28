@@ -86,7 +86,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * don't need right now, cut and paste it into {@link RobotContainerParkingLot}.
  */
 public class RobotContainer implements Glassy {
+    // for background on drive current limits:
+    // https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/talonfx/improving-performance-with-current-limits.html
+    // https://www.chiefdelphi.com/t/the-brushless-era-needs-sensible-default-current-limits/461056/51
     private static final double kDriveCurrentLimit = 50;
+    private static final double kDriveStatorLimit = 100;
 
     private final SwerveModuleCollection m_modules;
     private final Command m_auton;
@@ -115,7 +119,7 @@ public class RobotContainer implements Glassy {
                 m_sensors = new MockSensors();
         }
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, swerveKinodynamics);
+        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, kDriveStatorLimit, swerveKinodynamics);
 
         final HeadingInterface m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
 
@@ -159,7 +163,7 @@ public class RobotContainer implements Glassy {
 
         final Intake m_intake = new Intake(m_sensors);
 
-        m_shooter = new DrumShooter(3, 13, 27, 58);
+        m_shooter = new DrumShooter(3, 13, 27, 58, 100);
 
         ///////////////////////////
         //
@@ -223,16 +227,12 @@ public class RobotContainer implements Glassy {
         // hold the amp up while holding the button
         whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(m_ampPivot, 1.8));
 
-        // TODO: what does this actually do?
-        whileTrue(operatorControl::pivotToDownPosition, new Ramp(m_shooter, m_drive));
-
         whileTrue(operatorControl::feedToAmp, new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
 
         whileTrue(operatorControl::rezero, new TestShoot(m_shooter));
 
         whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
 
-        // TODO: finish the "lob" command.
         whileTrue(operatorControl::never, new Lob(m_shooter, m_intake));
 
         ///////////////////////////

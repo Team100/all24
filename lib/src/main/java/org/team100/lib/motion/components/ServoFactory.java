@@ -1,6 +1,6 @@
 package org.team100.lib.motion.components;
 
-import org.team100.lib.config.FeedforwardConstants;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.Encoder100;
@@ -39,10 +39,10 @@ public class ServoFactory {
     public static LimitedVelocityServo<Distance100> limitedNeoVelocityServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
@@ -51,7 +51,7 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelFeedforwardConstants,
+                ff,
                 lowLevelVelocityConstants);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
@@ -94,7 +94,7 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDConstants controller,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
@@ -102,7 +102,7 @@ public class ServoFactory {
                 motorPhase,
                 currentLimit,
                 param.gearRatio(),
-                lowLevelFeedforwardConstants,
+                ff,
                 lowLevelVelocityConstants);
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
@@ -130,7 +130,7 @@ public class ServoFactory {
             int currentLimit,
             SysParam param,
             PIDController controller,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         NeoVortexTurningMotor motor = new NeoVortexTurningMotor(
                 name,
@@ -138,7 +138,7 @@ public class ServoFactory {
                 motorPhase,
                 currentLimit,
                 param.gearRatio(),
-                lowLevelFeedforwardConstants,
+                ff,
                 lowLevelVelocityConstants);
         NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(
                 name,
@@ -183,11 +183,11 @@ public class ServoFactory {
     public static PositionServoInterface<Distance100> neoDistanceServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
             PIDController controller,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
@@ -196,7 +196,7 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelFeedforwardConstants,
+                ff,
                 lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
@@ -216,16 +216,16 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      * 
-     * @param lowLevelFeedforwardConstants in VOLTS VOLTS VOLTS
+     * @param ff in VOLTS VOLTS VOLTS
      */
     public static PositionServo<Distance100> neoVortexDistanceServo(
             String name,
             int canId,
-            boolean motorPhase,
+            MotorPhase motorPhase,
             int currentLimit,
             SysParam param,
             PIDController controller,
-            FeedforwardConstants lowLevelFeedforwardConstants,
+            Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         NeoVortexDriveMotor motor = new NeoVortexDriveMotor(
                 name,
@@ -234,7 +234,7 @@ public class ServoFactory {
                 currentLimit,
                 param.gearRatio(),
                 param.wheelDiameter(),
-                lowLevelFeedforwardConstants,
+                ff,
                 lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
                 name,
