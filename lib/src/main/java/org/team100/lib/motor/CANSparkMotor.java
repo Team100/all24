@@ -57,8 +57,7 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
         m_motor.stopMotor();
     }
 
-    @Override
-    public double getTorque() {
+    public double getMotorTorque() {
         return m_motor.getOutputCurrent() * kTNm_amp();
     }
 

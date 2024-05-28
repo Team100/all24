@@ -27,17 +27,19 @@ public abstract class CANSparkTurningMotor extends CANSparkMotor<Angle100> {
     }
 
     @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2) {
-        setVelocity(outputRad_S, accelRad_S2, 0);
-    }
-
-    @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
+    public void setVelocity(double outputRad_S, double accelRad_S2, double outputTorqueNm) {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double motorRev_S = outputRev_S * m_gearRatio;
         double outputRev_S2 = accelRad_S2 / (2 * Math.PI);
         double motorRev_S2 = outputRev_S2 * m_gearRatio;
-        setMotorVelocity(motorRev_S, motorRev_S2, torqueNm);
+        double motorTorqueNm = outputTorqueNm / m_gearRatio;
+        setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
+    }
+
+    @Override
+    public double getTorque() {
+        double motorTorqueNm = getMotorTorque();
+        return motorTorqueNm * m_gearRatio;
     }
 
 }

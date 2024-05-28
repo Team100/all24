@@ -145,10 +145,10 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     }
 
     /**
-     * Supports accel feedforward.
+     * ignores torque feedforward
      */
     @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2) {
+    public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double motorRev_S = outputRev_S * m_gearRatio;
         double motorRev_100ms = motorRev_S / 10;
@@ -162,14 +162,6 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
 
         m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
         log();
-    }
-
-    /**
-     * ignores torque feedforward
-     */
-    @Override
-    public void setVelocity(double velocity, double accel, double torque) {
-        setVelocity(torque, accel);
     }
 
     @Override

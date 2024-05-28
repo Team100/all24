@@ -46,11 +46,6 @@ public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel 
     }
 
     @Override
-    public void setVelocity(double velocity, double accel) {
-        throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
-    }
-
-    @Override
     public void setVelocity(double velocity, double accel, double torque) {
         throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
     }

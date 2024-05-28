@@ -49,28 +49,15 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
     }
 
     /**
-     * Velocity is just kV feedforward and that's all.
-     * 
-     * @param outputM_S times kV
-     * @param accelM_S2 ignored
+     * Velocity kV only.
      */
     @Override
-    public void setVelocity(double outputM_S, double accelM_S2) {
+    public void setVelocity(double outputM_S, double accelM_S2, double torqueN) {
         double wheelRev_S = outputM_S / (m_wheelDiameter * Math.PI);
         double motorRev_S = wheelRev_S * m_gearRatio;
         double motorDutyCycle = motorRev_S * velocityFFDutyCycle_Rev_S;
         m_motor.set(motorDutyCycle);
         t.log(Level.TRACE, m_name, "duty cycle", motorDutyCycle);
-    }
-
-    /**
-     * @param outputM_S times kv
-     * @param accelM_S2 ignored
-     * @param torque    ignored
-     */
-    @Override
-    public void setVelocity(double outputM_S, double accelM_S2, double torque) {
-        setVelocity(outputM_S, accelM_S2);
     }
 
     @Override

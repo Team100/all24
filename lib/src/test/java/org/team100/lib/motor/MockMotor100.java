@@ -18,16 +18,7 @@ public class MockMotor100<T extends Measure100> implements Motor100<T>, GenericT
     }
 
     /**
-     * @param accel ignored
-     */
-    @Override
-    public void setVelocity(double velocity, double accel) {
-        this.velocity = velocity;
-    }
-
-    /**
-     * @param accel  ignored
-     * @param torque ignored
+     * Velocity only.
      */
     @Override
     public void setVelocity(double velocity, double accel, double torque) {

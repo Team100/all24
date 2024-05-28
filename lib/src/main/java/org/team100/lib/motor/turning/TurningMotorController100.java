@@ -47,27 +47,14 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     }
 
     /**
-     * Velocity is just kV feedforward and that's all.
-     * 
-     * @param outputRad_S times kV
-     * @param accelRad_S2 ignored
+     * Velocity kV only.
      */
     @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2) {
+    public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
         double motorRad_S = outputRad_S * m_gearRatio;
         double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
         m_motor.set(motorDutyCycle);
         t.log(Level.TRACE, m_name, "duty cycle", motorDutyCycle);
-    }
-
-    /**
-     * @param outputRad_S times kv
-     * @param accelRad_S2 ignored
-     * @param torque      ignored
-     */
-    @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2, double torque) {
-        setVelocity(outputRad_S, accelRad_S2);
     }
 
     @Override

@@ -17,12 +17,12 @@ import com.revrobotics.CANSparkMax;
  * Arm motor from 2023.
  * 
  * Velocity is feedforward only.
+ * 
+ * Note the absence of gear ratio; this should be added before using this class.
  */
-public class JointMotor implements Motor100<Angle100>, NeoTorqueModel{
+public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     /** Very much not calibrated. */
     private static final double kV = 0.1;
-    /** @see https://motors.vex.com/ */
-    private static final double kTNm_amp = 0.02;
     private final Telemetry t = Telemetry.get();
     private final CANSparkMax m_motor;
     private final String m_name;
@@ -39,7 +39,7 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel{
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, MotorPhase.FORWARD, 10);
         Rev100.currentConfig(m_motor, currentLimit);
-        
+
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
     }
 
@@ -49,31 +49,16 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel{
     }
 
     /**
-     * Velocity is just kV feedforward and that's all.
-     * 
-     * @param velocity used with kV to get duty cycle
-     * @param accel    ignored
+     * Velocity kV only.
      */
     @Override
-    public void setVelocity(double velocity, double accel) {
-        m_motor.set(kV * velocity);
-    }
-
-    /**
-     * Velocity is just kV feedforward and that's all.
-     * 
-     * @param velocity used with kV to get duty cycle
-     * @param accel    ignored
-     * @param torque   ignored
-     */
-    @Override
-    public void setVelocity(double velocity, double accel, double torque) {
+    public void setVelocity(double velocity, double accel, double torqueNm) {
         m_motor.set(kV * velocity);
     }
 
     @Override
     public double getTorque() {
-        return kTNm_amp * m_motor.getOutputCurrent();
+        return kTNm_amp() * m_motor.getOutputCurrent();
     }
 
     @Override
