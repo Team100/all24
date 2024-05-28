@@ -54,6 +54,7 @@ class CameraData:
         self.camera = Picamera2(id)
         model = self.camera.camera_properties["Model"]
         print("\nMODEL " + model)
+        self.id = id
 
         if model == "imx708_wide":
             print("V3 Wide Camera")
@@ -338,10 +339,10 @@ class TagFinder:
         topic_name = "vision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/fps").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/fps").publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/latency").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/latency").publish()
             )
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
