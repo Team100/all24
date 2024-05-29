@@ -64,7 +64,7 @@ public class DriveManually extends Command100 {
         // the real previous setpoint is.
         // Note this is not necessarily "at rest," because we might start driving
         // manually while the robot is moving.
-        ChassisSpeeds currentSpeeds = m_drive.speeds(0.02);
+        ChassisSpeeds currentSpeeds = m_drive.getState().chassisSpeeds();
         SwerveModuleState[] currentStates = m_drive.moduleStates();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);

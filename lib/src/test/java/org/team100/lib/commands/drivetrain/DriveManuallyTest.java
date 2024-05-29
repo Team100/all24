@@ -13,8 +13,11 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
+import org.team100.lib.testing.Timeless;
 
-class DriveManuallyTest extends Fixtured {
+import edu.wpi.first.wpilibj.simulation.SimHooks;
+
+class DriveManuallyTest extends Fixtured implements Timeless {
     String desiredMode = null;
     DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);
 
@@ -43,8 +46,9 @@ class DriveManuallyTest extends Fixtured {
         desiredMode = "MODULE_STATE";
         command.execute100(0.02);
 
-        robotDrive.periodic();
-        assertEquals(1, robotDrive.speeds(0.02).vxMetersPerSecond, 0.001);
+        robotDrive.periodic100(0.02);
+        SimHooks.stepTiming(0.02);
+        assertEquals(1, robotDrive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
 
         desiredMode = "ROBOT_RELATIVE_CHASSIS_SPEED";
         command.execute100(0.02);

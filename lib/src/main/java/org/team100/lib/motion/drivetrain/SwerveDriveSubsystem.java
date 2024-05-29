@@ -92,14 +92,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
     }
 
-    /**
-     * The robot-relative speed implied by the module states.
-     * 
-     * @param dt for discretization
-     */
-    public ChassisSpeeds speeds(double dt) {
-        return m_swerveLocal.speeds(m_heading.getHeadingRateNWU(), dt);
-    }
 
     /** @return current measurements */
     public SwerveModuleState[] moduleStates() {

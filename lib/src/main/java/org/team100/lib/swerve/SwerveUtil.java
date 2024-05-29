@@ -139,6 +139,8 @@ public class SwerveUtil {
      * At low speed, accel is limited by the current limiters.
      * At high speed, accel is limited by back EMF.
      * Deceleration limits are different: back EMF is helping in that case.
+     * 
+     * @see SwerveDriveDynamicsConstraint.getMinMaxAcceleration().
      */
     public static double getAccelLimit(
             SwerveKinodynamics m_limits,
@@ -148,14 +150,17 @@ public class SwerveUtil {
             double desired_vy) {
         if (isAccel(prev_vx, prev_vy, desired_vx, desired_vy)) {
             double speedM_S = Math.hypot(prev_vx, prev_vy);
-            double speedFraction = Math100.limit(
-                    speedM_S / m_limits.getMaxDriveVelocityM_S(), 0, 1);
-            double backEmfLimit = 1 - speedFraction;
-            double backEmfLimitedAcceleration = backEmfLimit * m_limits.getStallAccelerationM_S2();
-            double currentLimitedAcceleration = m_limits.getMaxDriveAccelerationM_S2();
-            return Math.min(backEmfLimitedAcceleration, currentLimitedAcceleration);
+            return minAccel(m_limits, speedM_S);
         }
         return m_limits.getMaxDriveDecelerationM_S2();
+    }
+
+    public static double minAccel(SwerveKinodynamics m_limits, double velocity) {
+        double speedFraction = Math100.limit(velocity / m_limits.getMaxDriveVelocityM_S(), 0, 1);
+        double backEmfLimit = 1 - speedFraction;
+        double backEmfLimitedAcceleration = backEmfLimit * m_limits.getStallAccelerationM_S2();
+        double currentLimitedAcceleration = m_limits.getMaxDriveAccelerationM_S2();
+        return Math.min(backEmfLimitedAcceleration, currentLimitedAcceleration);
     }
 
     /**

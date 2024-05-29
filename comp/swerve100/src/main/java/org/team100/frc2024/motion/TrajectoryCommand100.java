@@ -50,7 +50,7 @@ public class TrajectoryCommand100 extends Command100 {
     public void execute100(double dt) {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getPose();
-        ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.speeds(dt);
+        ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentRobotRelativeSpeed);
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);

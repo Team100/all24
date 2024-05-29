@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * A simulated gyro that uses drivetrain odometry.
  * 
- * TODO: add the Tire model here.
+ * Does not use the tire model.
  */
 public class SimulatedHeading implements HeadingInterface {
     private double m_heading = 0;
@@ -31,7 +31,6 @@ public class SimulatedHeading implements HeadingInterface {
         SwerveModuleState[] states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
-        // TODO: use the Tire model
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
         double now = Timer.getFPGATimestamp();
         double dt = now - m_time;
@@ -45,7 +44,6 @@ public class SimulatedHeading implements HeadingInterface {
         SwerveModuleState[] states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
-        // TODO: use the Tire model
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
         return speeds.omegaRadiansPerSecond;
     }

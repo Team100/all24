@@ -24,9 +24,9 @@ class FancyTrajectoryTest extends Fixtured {
         command.initialize();
         command.execute100(0.02);
 
-        assertEquals(0, drive.speeds(0.02).vxMetersPerSecond, 0.001);
-        assertEquals(0, drive.speeds(0.02).vyMetersPerSecond, 0.001);
-        assertEquals(0, drive.speeds(0.02).omegaRadiansPerSecond, 0.001);
+        assertEquals(0, drive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
+        assertEquals(0, drive.getState().chassisSpeeds().vyMetersPerSecond, 0.001);
+        assertEquals(0, drive.getState().chassisSpeeds().omegaRadiansPerSecond, 0.001);
 
         command.end(false);
     }
