@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.swerve.SwerveUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -59,12 +60,16 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     }
 
     /**
-     * Simply provide the configured drive acceleration limits.
+     * Provide current-limited and back-emf-limited acceleration limits.
+     * 
+     * Decel is unaffected by back EMF.
+     * 
+     * @see SwerveUtil.getAccelLimit()
      */
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
         return new MinMaxAcceleration(
                 -m_limits.getMaxDriveDecelerationM_S2(),
-                m_limits.getMaxDriveAccelerationM_S2());
+                SwerveUtil.minAccel(m_limits, velocity));
     }
 }

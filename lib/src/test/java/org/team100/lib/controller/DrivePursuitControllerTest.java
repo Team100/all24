@@ -93,15 +93,16 @@ class DrivePursuitControllerTest {
             // remember, facing +90, moving -90, so this should be like -1
             // turning slowly to the left
             // i think pure pursuit might ignore omega
-            verify(-3.96, -0.43, 0, output);
+            verify(-3.75, -0.43, 0, output);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
             assertEquals(1.69, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(1.87, path_setpoint.getTimeS(), 0.05);
-            assertEquals(3.74, path_setpoint.velocityM_S(), 0.01);
-            assertEquals(2, path_setpoint.acceleration(), 0.001);
+            assertEquals(3.60, path_setpoint.velocityM_S(), 0.01);
+            // accel is back-emf limited here.
+            assertEquals(0.988, path_setpoint.acceleration(), 0.001);
 
             Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(current_state, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.05);
@@ -119,7 +120,7 @@ class DrivePursuitControllerTest {
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
-            assertEquals(-7.10, path_setpoint.state().getPose().getY(), 0.01);
+            assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
             assertEquals(2.88, path_setpoint.getTimeS(), 0.05);
             assertEquals(3.821, path_setpoint.velocityM_S(), 0.001);
