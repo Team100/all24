@@ -53,11 +53,6 @@ public class ScoreDisplay {
     /** Like the audience display on the bottom of the screen. */
     public void duringMatch() {
         try {
-            // to work out the format
-            // double blueAmpTime = 7.5;
-            // double redAmpTime = 10.0;
-            // int fakeBlueScore = 63;
-            // int fakeRedScore = 82;
             double matchTimeSec = m_fms.getMatchTime();
             int minutes = (int) matchTimeSec / 60;
             int seconds = (int) matchTimeSec % 60;
@@ -97,13 +92,21 @@ public class ScoreDisplay {
         }
     }
 
-    /** Like The Blue Alliance, but with blue on the left.
-     * TODO: add auton and endgame sections
-    */
+    /**
+     * Like The Blue Alliance, but with blue on the left.
+     * TODO: add endgame section
+     */
     public void finalScore() {
         final int ampPoint = 1;
         final int notAmpedSpeakerPoint = 2;
         final int ampedSpeakerPoint = 5;
+
+        final int blueAutoLeave = 0;
+        final int redAutoLeave = 0;
+        final int blueAutoAmps = m_blue.AutoAmpNoteCount;
+        final int redAutoAmps = m_red.AutoAmpNoteCount;
+        final int blueAutoSpeakers = m_blue.AutoSpeakerNoteCount;
+        final int redAutoSpeakers = m_red.AutoSpeakerNoteCount;
 
         final int blueAmps = m_blue.TeleopAmpNoteCount;
         final int redAmps = m_red.TeleopAmpNoteCount;
@@ -116,9 +119,67 @@ public class ScoreDisplay {
         final Formatter f = new Formatter(b);
 
         b.append(kBlue);
+        f.format("    %2d   ", blueAutoLeave);
+        b.append(kReset);
+        b.append("         Auto Leave        ");
+        // .......012345678901234509876543210        
+        b.append(kRed);
+        f.format("    %2d   ", redAutoLeave);
+        b.append(kReset);
+        b.append("\n");
+
+        b.append(kBlue);
+        f.format("    %2d   ", blueAutoAmps);
+        b.append(kReset);
+        b.append("    Auto Amp Note Count    ");
+        // .......012345678901234509876543210
+        b.append(kRed);
+        f.format("    %2d   ", redAutoAmps);
+        b.append(kReset);
+        b.append("\n");
+
+        b.append(kBlue);
+        f.format("    %2d   ", blueAutoSpeakers);
+        b.append(kReset);
+        b.append("  Auto Speaker Note Count  ");
+        // .......012345678901234509876543210
+        b.append(kRed);
+        f.format("    %2d   ", redAutoSpeakers);
+        b.append(kReset);
+        b.append("\n");
+
+        final int blueAutoNotePoints = blueAutoAmps * 2 + blueAutoSpeakers * 5;
+
+        final int redAutoNotePoints = redAutoAmps * 2 + redAutoSpeakers * 5;
+
+        b.append(kBlue);
+        f.format("    %2d   ", blueAutoNotePoints);
+        b.append(kReset);
+        b.append("      Auto Note Points     ");
+        // .......012345678901234509876543210
+        b.append(kRed);
+        f.format("    %2d   ", redAutoNotePoints);
+        b.append(kReset);
+        b.append("\n");
+
+        final int blueTotalAuto = blueAutoLeave + blueAutoNotePoints;
+        final int redTotalAuto = redAutoLeave + redAutoNotePoints;
+
+        b.append(kBlue);
+        f.format("    %2d   ", blueTotalAuto);
+        b.append(kReset);
+        b.append("         Total Auto        ");
+        // .......012345678901234509876543210
+        b.append(kRed);
+        f.format("    %2d   ", redTotalAuto);
+        b.append(kReset);
+        b.append("\n");
+
+        b.append(kBlue);
         f.format("    %2d   ", blueAmps);
         b.append(kReset);
         b.append("   Teleop Amp Note Count   ");
+        // .......012345678901234509876543210
         b.append(kRed);
         f.format("    %2d   ", redAmps);
         b.append(kReset);
@@ -128,24 +189,53 @@ public class ScoreDisplay {
         f.format(" %2d / %2d ", blueNotAmpedSpeakers, blueAmpedSpeakers);
         b.append(kReset);
         b.append(" Teleop Speaker Note Count ");
+        // .......012345678901234509876543210
         b.append(kRed);
         f.format(" %2d / %2d ", redNotAmpedSpeakers, redAmpedSpeakers);
         b.append(kReset);
         b.append("\n");
 
-        final int blueTotal = blueAmps * ampPoint
+        final int blueTeleopTotal = blueAmps * ampPoint
                 + blueNotAmpedSpeakers * notAmpedSpeakerPoint
                 + blueAmpedSpeakers * ampedSpeakerPoint;
-        final int redTotal = redAmps * ampPoint
+        final int redTeleopTotal = redAmps * ampPoint
                 + redNotAmpedSpeakers * notAmpedSpeakerPoint
                 + redAmpedSpeakers * ampedSpeakerPoint;
         b.append(kBoldBlue);
-        f.format("    %2d   ", blueTotal);
+        f.format("    %2d   ", blueTeleopTotal);
         b.append(kReset);
         b.append("     Teleop Note Points    ");
+        // .......012345678901234509876543210
         b.append(kBoldRed);
-        f.format("    %2d   ", redTotal);
+        f.format("    %2d   ", redTeleopTotal);
         b.append(kReset);
+        b.append("\n");
+
+        final int blueTotalTeleop = blueTeleopTotal;
+        final int redTotalTeleop = redTeleopTotal;
+
+        b.append(kBoldBlue);
+        f.format("    %2d   ", blueTotalTeleop);
+        b.append(kReset);
+        b.append("        Total Teleop       ");
+        // .......012345678901234509876543210
+        b.append(kBoldRed);
+        f.format("    %2d   ", redTotalTeleop);
+        b.append(kReset);
+        b.append("\n");
+
+        final int blueTotalScore = blueTotalAuto + blueTotalTeleop;
+        final int redTotalScore = redTotalAuto + redTotalTeleop;
+
+        b.append(kBoldBlue);
+        f.format("    %2d   ", blueTotalScore);
+        b.append(kReset);
+        b.append("        Total Score        ");
+        // .......012345678901234509876543210
+        b.append(kBoldRed);
+        f.format("    %2d   ", redTotalScore);
+        b.append(kReset);
+        b.append("\n");
 
         System.out.println(b.toString());
         f.close();

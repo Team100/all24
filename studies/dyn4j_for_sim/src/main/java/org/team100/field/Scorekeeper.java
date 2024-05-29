@@ -18,6 +18,7 @@ import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 
 /**
  * Uses a CollisionListener to catch the collision event between notes and
@@ -116,7 +117,10 @@ public class Scorekeeper
         return true;
     }
 
-    /** Return true if the score is rejected (i.e. it's a "collision" so a bounce out). */
+    /**
+     * Return true if the score is rejected (i.e. it's a "collision" so a bounce
+     * out).
+     */
     private boolean tryScore(
             Body100 b1,
             Body100 b2,
@@ -144,38 +148,54 @@ public class Scorekeeper
     }
 
     private void scoreBlueAmp() {
-        m_blue.TeleopAmpNoteCount++;
-        if (m_blue.TeleopAmpNoteCount - m_blueAmplifiedCount >= 2) {
-            // time to amplify
-            m_blueAmpTime = Timer.getFPGATimestamp();
-            m_blueAmplifiedCount = m_blue.TeleopAmpNoteCount;
+        if (DriverStationSim.getAutonomous()) {
+            m_blue.AutoAmpNoteCount++;
+        } else {
+            m_blue.TeleopAmpNoteCount++;
+            if (m_blue.TeleopAmpNoteCount - m_blueAmplifiedCount >= 2) {
+                // time to amplify
+                m_blueAmpTime = Timer.getFPGATimestamp();
+                m_blueAmplifiedCount = m_blue.TeleopAmpNoteCount;
+            }
         }
     }
 
     private void scoreRedAmp() {
-        m_red.TeleopAmpNoteCount++;
-        if (m_red.TeleopAmpNoteCount - m_redAmplifiedCount >= 2) {
-            // time to amplify
-            m_redAmpTime = Timer.getFPGATimestamp();
-            m_redAmplifiedCount = m_red.TeleopAmpNoteCount;
+        if (DriverStationSim.getAutonomous()) {
+            m_red.AutoAmpNoteCount++;
+        } else {
+            m_red.TeleopAmpNoteCount++;
+            if (m_red.TeleopAmpNoteCount - m_redAmplifiedCount >= 2) {
+                // time to amplify
+                m_redAmpTime = Timer.getFPGATimestamp();
+                m_redAmplifiedCount = m_red.TeleopAmpNoteCount;
+            }
         }
     }
 
     private void scoreBlueSpeaker() {
-        if (m_blueAmpTime != null) {
-            // amplified
-            m_blue.TeleopSpeakerNoteCountAmplified++;
+        if (DriverStationSim.getAutonomous()) {
+            m_blue.AutoSpeakerNoteCount++;
         } else {
-            m_blue.TeleopSpeakerNoteCountNotAmplified++;
+            if (m_blueAmpTime != null) {
+                // amplified
+                m_blue.TeleopSpeakerNoteCountAmplified++;
+            } else {
+                m_blue.TeleopSpeakerNoteCountNotAmplified++;
+            }
         }
     }
 
     private void scoreRedSpeaker() {
-        if (m_redAmpTime != null) {
-            // amplified
-            m_red.TeleopSpeakerNoteCountAmplified++;
+        if (DriverStationSim.getAutonomous()) {
+            m_red.AutoSpeakerNoteCount++;
         } else {
-            m_red.TeleopSpeakerNoteCountNotAmplified++;
+            if (m_redAmpTime != null) {
+                // amplified
+                m_red.TeleopSpeakerNoteCountAmplified++;
+            } else {
+                m_red.TeleopSpeakerNoteCountNotAmplified++;
+            }
         }
     }
 
