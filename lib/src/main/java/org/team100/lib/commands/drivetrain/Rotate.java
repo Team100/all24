@@ -82,7 +82,7 @@ public class Rotate extends Command100 {
     }
 
     private void resetRefTheta(double dt) {
-        ChassisSpeeds initialSpeeds = m_robotDrive.speeds(dt);
+        ChassisSpeeds initialSpeeds = m_robotDrive.getState().chassisSpeeds();
         refTheta = new State100(
                 m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
