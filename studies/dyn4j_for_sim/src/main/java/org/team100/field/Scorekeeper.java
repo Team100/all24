@@ -71,7 +71,7 @@ public class Scorekeeper
         return true;
     }
 
-    /** Return true if the score is rejected (i.e. bounce out) */
+    /** Return true if the score is rejected (i.e. collision i.e. bounce out) */
     private boolean score(
             Body100 maybeNote,
             Body100 maybeSpeaker,
@@ -116,10 +116,16 @@ public class Scorekeeper
         return true;
     }
 
-    /** Return true if the score is rejected (i.e. bounce out). */
-    private boolean tryScore(Body100 b1, Body100 b2, Body100 sensor, Runnable handler, double maxSpeed) {
+    /** Return true if the score is rejected (i.e. it's a "collision" so a bounce out). */
+    private boolean tryScore(
+            Body100 b1,
+            Body100 b2,
+            Body100 sensor,
+            Runnable handler,
+            double maxSpeed) {
         // false is success so if either one succeeds, we have success.
-        return score(b1, b2, sensor, handler, maxSpeed) && score(b2, b1, sensor, handler, maxSpeed);
+        return score(b1, b2, sensor, handler, maxSpeed)
+                && score(b2, b1, sensor, handler, maxSpeed);
     }
 
     /**
@@ -130,8 +136,6 @@ public class Scorekeeper
     public boolean collision(NarrowphaseCollisionData<Body100, BodyFixture> collision) {
         Body100 b1 = collision.getBody1();
         Body100 b2 = collision.getBody2();
-
-        // does not respect amplification.
 
         return tryScore(b1, b2, m_redSpeaker, this::scoreRedSpeaker, Double.MAX_VALUE)
                 && tryScore(b1, b2, m_blueSpeaker, this::scoreBlueSpeaker, Double.MAX_VALUE)

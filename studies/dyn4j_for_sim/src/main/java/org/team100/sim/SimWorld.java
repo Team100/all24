@@ -37,6 +37,7 @@ public class SimWorld {
     private static final double ampLength = 1.535;
     // this is just beyond the pocket
     private static final double topWallLimit = 2.146;
+    // the "amp" wall is mostly the grating which is actually slightly shorter
     private static final double ampHeight = 1.207;
     static final double allianceWallHeightM = 1.983;
     private static final String kField = "field";
@@ -162,12 +163,13 @@ public class SimWorld {
                         new Vector2(16.541, 6.075),
                         new Vector2(16.541, 5.018)));
         world.addBody(redSpeaker);
+        // amp pocket is 61 cm wide.
         AmpPocket blueAmp = new AmpPocket("blue amp pocket",
                 Geometry.createPolygon(
-                        new Vector2(1.536, fieldY),
+                        new Vector2(ampLength + 0.001, fieldY),
                         new Vector2(2.145, fieldY),
                         new Vector2(2.145, fieldY + boundaryThickness),
-                        new Vector2(1.536, fieldY + boundaryThickness)));
+                        new Vector2(ampLength + 0.001, fieldY + boundaryThickness)));
         world.addBody(blueAmp);
         AmpPocket redAmp = new AmpPocket("red amp pocket",
                 Geometry.createPolygon(
@@ -194,6 +196,8 @@ public class SimWorld {
      * this uses simgui coordinates for blue
      */
     private void setUpWalls() {
+        // the height is to the top of the source, the panel where the apriltags are
+        // mounted.
         world.addBody(
                 new Wall("blue source",
                         Geometry.createTriangle(
@@ -230,7 +234,7 @@ public class SimWorld {
                                 new Vector2(15.6, 6.062),
                                 new Vector2(15.6, 5.019)),
                         0, 0.213));
-                        
+
         // the speaker fronts are walls that extend pretty far out into the field.
         // the extent is to avoid notes getting stuck anywhere.
         // lower edge according to the cad is 2.106m from the floor, and the upper
@@ -283,7 +287,7 @@ public class SimWorld {
                                 new Vector2(fieldX, -boundaryThickness)),
                         0, 0.508));
         // this is a bit simplified: the "amp" wall extends from the corner to the amp
-        // scoring pocket.
+        // scoring pocket, it's mostly the grating.
         world.addBody(
                 new Wall("blue amp",
                         Geometry.createPolygon(
@@ -300,8 +304,6 @@ public class SimWorld {
                                 new Vector2(fieldX, fieldY + boundaryThickness),
                                 new Vector2(fieldX - ampLength, fieldY + boundaryThickness)),
                         0, ampHeight));
-
-        // TODO: add amp wall
     }
 
     private void setUpStages() {
@@ -312,13 +314,30 @@ public class SimWorld {
             Pose2d pose = post.getValue();
             addPost(name, pose.getX(), pose.getY(), pose.getRotation().getRadians());
         }
+        // these are the stage bodies, the triangular prisms in the middle.
+        // they exist so you can't lob through them.
+        world.addBody(
+                new Obstacle("red stage body",
+                        Geometry.createTriangle(
+                                new Vector2(4.035, 4.109),
+                                new Vector2(5.289, 3.385),
+                                new Vector2(5.289, 4.832)),
+                        0.711, 2.072));
+        world.addBody(
+                new Obstacle("blue stage body",
+                        Geometry.createTriangle(
+                                new Vector2(12.512, 4.109),
+                                new Vector2(11.259, 4.832),
+                                new Vector2(11.259, 3.385)),
+                        0.711, 2.072));
+
     }
 
     private void addPost(String id, double x, double y, double rad) {
         Body100 post = new Obstacle(
                 id,
                 Geometry.createSquare(0.3),
-                1.878);
+                0, 1.878);
         post.rotate(rad);
         post.translate(x, y);
         world.addBody(post);
