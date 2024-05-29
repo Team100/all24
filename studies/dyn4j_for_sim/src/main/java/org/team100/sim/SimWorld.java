@@ -20,6 +20,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * In this world, the player and friends are blue, the foes are red.
+ * 
+ * Measurements come from the Onshape CAD
+ * 
+ * @see https://cad.onshape.com/documents/dcbe49ce579f6342435bc298/w/b93673f5b2ec9c9bdcfec487/e/6ecb2d6b7590f4d1c820d5e3
  */
 public class SimWorld {
     /** for visualizing forces */
@@ -34,7 +38,7 @@ public class SimWorld {
     // this is just beyond the pocket
     private static final double topWallLimit = 2.146;
     private static final double ampHeight = 1.207;
-    private static final double allianceWallHeightM = 1.983;
+    static final double allianceWallHeightM = 1.983;
     private static final String kField = "field";
     private static final Telemetry t = Telemetry.get();
 
@@ -196,14 +200,14 @@ public class SimWorld {
                                 new Vector2(0, 0),
                                 new Vector2(1.84, 0),
                                 new Vector2(0, 1.1)),
-                        1.695));
+                        0, 1.695));
         world.addBody(
                 new Wall("red source",
                         Geometry.createTriangle(
                                 new Vector2(16.541, 0),
                                 new Vector2(16.541, 1.1),
                                 new Vector2(14.7, 0)),
-                        1.695));
+                        0, 1.695));
         // Subwoofer extends way past the boundary so that notes won't get stuck between
         // the wall and subwoofer.
         world.addBody(
@@ -215,7 +219,7 @@ public class SimWorld {
                                 new Vector2(0.914, 6.062),
                                 new Vector2(0, 6.597),
                                 new Vector2(-3, 6.597)),
-                        0.213));
+                        0, 0.213));
         world.addBody(
                 new Wall("red subwoofer",
                         Geometry.createPolygon(
@@ -225,7 +229,27 @@ public class SimWorld {
                                 new Vector2(16.541, 6.597),
                                 new Vector2(15.6, 6.062),
                                 new Vector2(15.6, 5.019)),
-                        0.213));
+                        0, 0.213));
+                        
+        // the speaker fronts are walls that extend pretty far out into the field.
+        // the extent is to avoid notes getting stuck anywhere.
+        // lower edge according to the cad is 2.106m from the floor, and the upper
+        // edge is quite high, modeling the top cover of the speaker.
+        world.addBody(new Wall("blue speaker front",
+                Geometry.createPolygon(
+                        new Vector2(3, 5.018),
+                        new Vector2(3, 6.075),
+                        new Vector2(0, 6.075),
+                        new Vector2(0, 5.018)),
+                2.106, 4));
+        world.addBody(new Wall("red speaker front",
+                Geometry.createPolygon(
+                        new Vector2(16.541, 5.018),
+                        new Vector2(16.541, 6.075),
+                        new Vector2(13.541, 6.075),
+                        new Vector2(13.541, 5.018)),
+                2.106, 4));
+
         world.addBody(
                 new Wall("blue wall",
                         Geometry.createPolygon(
@@ -233,7 +257,7 @@ public class SimWorld {
                                 new Vector2(0, fieldY),
                                 new Vector2(-boundaryThickness, fieldY),
                                 new Vector2(-boundaryThickness, 0)),
-                        allianceWallHeightM));
+                        0, allianceWallHeightM));
         world.addBody(
                 new Wall("red wall",
                         Geometry.createPolygon(
@@ -241,7 +265,7 @@ public class SimWorld {
                                 new Vector2(fieldX, 0),
                                 new Vector2(fieldX + boundaryThickness, 0),
                                 new Vector2(fieldX + boundaryThickness, fieldY)),
-                        allianceWallHeightM));
+                        0, allianceWallHeightM));
         world.addBody(
                 new Wall("top wall",
                         Geometry.createPolygon(
@@ -249,7 +273,7 @@ public class SimWorld {
                                 new Vector2(fieldX - topWallLimit, fieldY),
                                 new Vector2(fieldX - topWallLimit, fieldY + boundaryThickness),
                                 new Vector2(topWallLimit, fieldY + boundaryThickness)),
-                        0.508));
+                        0, 0.508));
         world.addBody(
                 new Wall("bottom wall",
                         Geometry.createPolygon(
@@ -257,7 +281,7 @@ public class SimWorld {
                                 new Vector2(0, 0),
                                 new Vector2(0, -boundaryThickness),
                                 new Vector2(fieldX, -boundaryThickness)),
-                        0.508));
+                        0, 0.508));
         // this is a bit simplified: the "amp" wall extends from the corner to the amp
         // scoring pocket.
         world.addBody(
@@ -267,7 +291,7 @@ public class SimWorld {
                                 new Vector2(ampLength, fieldY),
                                 new Vector2(ampLength, fieldY + boundaryThickness),
                                 new Vector2(0, fieldY + boundaryThickness)),
-                        ampHeight));
+                        0, ampHeight));
         world.addBody(
                 new Wall("red amp",
                         Geometry.createPolygon(
@@ -275,7 +299,7 @@ public class SimWorld {
                                 new Vector2(fieldX, fieldY),
                                 new Vector2(fieldX, fieldY + boundaryThickness),
                                 new Vector2(fieldX - ampLength, fieldY + boundaryThickness)),
-                        ampHeight));
+                        0, ampHeight));
 
         // TODO: add amp wall
     }
