@@ -92,6 +92,35 @@ public class ScoreDisplay {
         }
     }
 
+    private static void print(StringBuilder b, String name, int blue, int red) {
+        print(b, name, String.format("    %2d   ", blue), String.format("    %2d   ", red));
+    }
+
+    private static void print(StringBuilder b, String name, int blue1, int blue2, int red1, int red2) {
+        print(b, name, String.format(" %2d / %2d ", blue1, blue2), String.format(" %2d / %2d ", red1, red2));
+    }
+
+    private static void print(StringBuilder b, String name, String blue, String red) {
+        int nameLength = name.length();
+        final int totalLength = 27;
+        int initialPad = (totalLength - nameLength) / 2;
+        int finalPad = totalLength - nameLength - initialPad;
+        b.append(kBlue);
+        b.append(blue);
+        b.append(kReset);
+        for (int i = 0; i < initialPad; ++i) {
+            b.append(" ");
+        }
+        b.append(name);
+        for (int i = 0; i < finalPad; ++i) {
+            b.append(" ");
+        }
+        b.append(kRed);
+        b.append(red);
+        b.append(kReset);
+        b.append("\n");
+    }
+
     /**
      * Like The Blue Alliance, but with blue on the left.
      * TODO: add endgame section
@@ -115,85 +144,10 @@ public class ScoreDisplay {
         final int redNotAmpedSpeakers = m_red.TeleopSpeakerNoteCountNotAmplified;
         final int redAmpedSpeakers = m_red.TeleopSpeakerNoteCountAmplified;
 
-        final StringBuilder b = new StringBuilder();
-        final Formatter f = new Formatter(b);
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueAutoLeave);
-        b.append(kReset);
-        b.append("         Auto Leave        ");
-        // .......012345678901234509876543210        
-        b.append(kRed);
-        f.format("    %2d   ", redAutoLeave);
-        b.append(kReset);
-        b.append("\n");
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueAutoAmps);
-        b.append(kReset);
-        b.append("    Auto Amp Note Count    ");
-        // .......012345678901234509876543210
-        b.append(kRed);
-        f.format("    %2d   ", redAutoAmps);
-        b.append(kReset);
-        b.append("\n");
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueAutoSpeakers);
-        b.append(kReset);
-        b.append("  Auto Speaker Note Count  ");
-        // .......012345678901234509876543210
-        b.append(kRed);
-        f.format("    %2d   ", redAutoSpeakers);
-        b.append(kReset);
-        b.append("\n");
-
         final int blueAutoNotePoints = blueAutoAmps * 2 + blueAutoSpeakers * 5;
-
         final int redAutoNotePoints = redAutoAmps * 2 + redAutoSpeakers * 5;
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueAutoNotePoints);
-        b.append(kReset);
-        b.append("      Auto Note Points     ");
-        // .......012345678901234509876543210
-        b.append(kRed);
-        f.format("    %2d   ", redAutoNotePoints);
-        b.append(kReset);
-        b.append("\n");
-
         final int blueTotalAuto = blueAutoLeave + blueAutoNotePoints;
         final int redTotalAuto = redAutoLeave + redAutoNotePoints;
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueTotalAuto);
-        b.append(kReset);
-        b.append("         Total Auto        ");
-        // .......012345678901234509876543210
-        b.append(kRed);
-        f.format("    %2d   ", redTotalAuto);
-        b.append(kReset);
-        b.append("\n");
-
-        b.append(kBlue);
-        f.format("    %2d   ", blueAmps);
-        b.append(kReset);
-        b.append("   Teleop Amp Note Count   ");
-        // .......012345678901234509876543210
-        b.append(kRed);
-        f.format("    %2d   ", redAmps);
-        b.append(kReset);
-        b.append("\n");
-
-        b.append(kBlue);
-        f.format(" %2d / %2d ", blueNotAmpedSpeakers, blueAmpedSpeakers);
-        b.append(kReset);
-        b.append(" Teleop Speaker Note Count ");
-        // .......012345678901234509876543210
-        b.append(kRed);
-        f.format(" %2d / %2d ", redNotAmpedSpeakers, redAmpedSpeakers);
-        b.append(kReset);
-        b.append("\n");
 
         final int blueTeleopTotal = blueAmps * ampPoint
                 + blueNotAmpedSpeakers * notAmpedSpeakerPoint
@@ -201,45 +155,39 @@ public class ScoreDisplay {
         final int redTeleopTotal = redAmps * ampPoint
                 + redNotAmpedSpeakers * notAmpedSpeakerPoint
                 + redAmpedSpeakers * ampedSpeakerPoint;
-        b.append(kBoldBlue);
-        f.format("    %2d   ", blueTeleopTotal);
-        b.append(kReset);
-        b.append("     Teleop Note Points    ");
-        // .......012345678901234509876543210
-        b.append(kBoldRed);
-        f.format("    %2d   ", redTeleopTotal);
-        b.append(kReset);
-        b.append("\n");
 
         final int blueTotalTeleop = blueTeleopTotal;
         final int redTotalTeleop = redTeleopTotal;
 
-        b.append(kBoldBlue);
-        f.format("    %2d   ", blueTotalTeleop);
-        b.append(kReset);
-        b.append("        Total Teleop       ");
-        // .......012345678901234509876543210
-        b.append(kBoldRed);
-        f.format("    %2d   ", redTotalTeleop);
-        b.append(kReset);
-        b.append("\n");
-
         final int blueTotalScore = blueTotalAuto + blueTotalTeleop;
         final int redTotalScore = redTotalAuto + redTotalTeleop;
 
-        b.append(kBoldBlue);
-        f.format("    %2d   ", blueTotalScore);
-        b.append(kReset);
-        b.append("        Total Score        ");
-        // .......012345678901234509876543210
-        b.append(kBoldRed);
-        f.format("    %2d   ", redTotalScore);
-        b.append(kReset);
-        b.append("\n");
+        final StringBuilder b = new StringBuilder();
+
+        print(b, "Auto Leave", blueAutoLeave, redAutoLeave);
+        print(b, "Auto Amp Note Count", blueAutoAmps, redAutoAmps);
+        print(b, "Auto Speaker Note Count", blueAutoSpeakers, redAutoSpeakers);
+        print(b, "Auto Note Points", blueAutoNotePoints, redAutoNotePoints);
+        print(b, "Total Auto", blueTotalAuto, redTotalAuto);
+        print(b, "Teleop Amp Note Count", blueAmps, redAmps);
+        print(b, "Teleop Speaker Note Count", blueNotAmpedSpeakers, blueAmpedSpeakers, redNotAmpedSpeakers,
+                redAmpedSpeakers);
+        print(b, "Teleop Note Points", blueTeleopTotal, redTeleopTotal);
+        print(b, "Robot 1 Endgame", 0, 0);
+        print(b, "Robot 2 Endgame", 0, 0);
+        print(b, "Robot 3 Endgame", 0, 0);
+        print(b, "Harmony Points", 0, 0);
+        print(b, "Trap Points", 0, 0);
+        print(b, "Total Teleop", blueTotalTeleop, redTotalTeleop);
+        print(b, "Coopertition Criteria Met", 0, 0);
+        print(b, "Melody Bonus", 0, 0);
+        print(b, "Ensemble Bonus", 0, 0);
+        print(b, "Fouls / Tech Fouls", 0, 0, 0, 0);
+        print(b, "Adjustments", 0, 0);
+        print(b, "Total Score", blueTotalScore, redTotalScore);
+        print(b, "Ranking Points", 0, 0);
 
         System.out.println(b.toString());
-        f.close();
-
     }
 
 }
