@@ -2,8 +2,8 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.FalconTorqueModel;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.model.FalconTorqueModel;
 
 public class Falcon6TurningMotor extends Talon6TurningMotor implements FalconTorqueModel {
 

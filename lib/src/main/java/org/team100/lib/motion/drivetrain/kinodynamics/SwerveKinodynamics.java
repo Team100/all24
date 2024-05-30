@@ -52,6 +52,7 @@ public class SwerveKinodynamics implements Glassy {
 
     // configured inputs
     private double m_MaxDriveVelocityM_S;
+    private double m_StallAccelerationM_S2;
     private double m_MaxDriveAccelerationM_S2;
     private double m_MaxDriveDecelerationM_S2;
     private double m_MaxSteeringVelocityRad_S;
@@ -67,6 +68,8 @@ public class SwerveKinodynamics implements Glassy {
      * Use the factory
      * 
      * @param maxDriveVelocity        module drive speed m/s
+     * @param stallAcceleration       acceleration at stall, used to compute
+     *                                back-EMF-limited acceleration at higher RPMs
      * @param maxDriveAcceleration    module drive accel m/s^2
      * @param maxDriveDeceleration    module drive decel m/s^2. Should be higher
      *                                than accel limit, this is a positive number.
@@ -74,10 +77,13 @@ public class SwerveKinodynamics implements Glassy {
      * @param maxSteeringAcceleration module steering axis accel rad/s^2
      * @param track                   meters
      * @param wheelbase               meters
+     * @param frontoffset             distance from front wheels to center of mass,
+     *                                meters
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
             double maxDriveVelocity,
+            double stallAcceleration,
             double maxDriveAcceleration,
             double maxDriveDeceleration,
             double maxSteeringVelocity,
@@ -106,6 +112,7 @@ public class SwerveKinodynamics implements Glassy {
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
 
         setMaxDriveVelocityM_S(maxDriveVelocity);
+        setStallAccelerationM_S2(stallAcceleration);
         setMaxDriveAccelerationM_S2(maxDriveAcceleration);
         setMaxDriveDecelerationM_S2(maxDriveDeceleration);
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
@@ -113,6 +120,8 @@ public class SwerveKinodynamics implements Glassy {
 
         t.register(Level.TRACE, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
                 this::setMaxDriveVelocityM_S);
+        t.register(Level.TRACE, Names.name(this), "stall accel m_s2", m_StallAccelerationM_S2,
+                this::setStallAccelerationM_S2);
         t.register(Level.TRACE, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
                 this::setMaxDriveAccelerationM_S2);
         t.register(Level.TRACE, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
@@ -127,6 +136,8 @@ public class SwerveKinodynamics implements Glassy {
      * Use the factory
      * 
      * @param maxDriveVelocity        module drive speed m/s
+     * @param stallAcceleration       acceleration at stall, used to compute
+     *                                back-EMF-limited acceleration at higher RPMs
      * @param maxDriveAcceleration    module drive accel m/s^2
      * @param maxDriveDeceleration    module drive decel m/s^2. Should be higher
      *                                than accel limit, this is a positive number.
@@ -139,6 +150,7 @@ public class SwerveKinodynamics implements Glassy {
      */
     SwerveKinodynamics(
             double maxDriveVelocity,
+            double stallAcceleration,
             double maxDriveAcceleration,
             double maxDriveDeceleration,
             double maxSteeringVelocity,
@@ -168,6 +180,7 @@ public class SwerveKinodynamics implements Glassy {
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
 
         setMaxDriveVelocityM_S(maxDriveVelocity);
+        setStallAccelerationM_S2(stallAcceleration);
         setMaxDriveAccelerationM_S2(maxDriveAcceleration);
         setMaxDriveDecelerationM_S2(maxDriveDeceleration);
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
@@ -175,6 +188,8 @@ public class SwerveKinodynamics implements Glassy {
 
         t.register(Level.TRACE, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
                 this::setMaxDriveVelocityM_S);
+        t.register(Level.TRACE, Names.name(this), "stall accel m_s2", m_StallAccelerationM_S2,
+                this::setStallAccelerationM_S2);
         t.register(Level.TRACE, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
                 this::setMaxDriveAccelerationM_S2);
         t.register(Level.TRACE, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
@@ -188,6 +203,10 @@ public class SwerveKinodynamics implements Glassy {
     private void setMaxDriveVelocityM_S(double maxDriveVelocityM_S) {
         m_MaxDriveVelocityM_S = maxDriveVelocityM_S;
         setAngleSpeed();
+    }
+
+    private void setStallAccelerationM_S2(double stallAccelerationM_S2) {
+        m_StallAccelerationM_S2 = stallAccelerationM_S2;
     }
 
     private void setMaxDriveAccelerationM_S2(double maxDriveAccelerationM_S2) {
@@ -235,6 +254,14 @@ public class SwerveKinodynamics implements Glassy {
     /** Cruise speed, m/s. */
     public double getMaxDriveVelocityM_S() {
         return m_MaxDriveVelocityM_S;
+    }
+
+    /**
+     * Acceleration at stall, without current limiting. Used to compute
+     * back-EMF-limited torque available at higher RPMs.
+     */
+    public double getStallAccelerationM_S2() {
+        return m_StallAccelerationM_S2;
     }
 
     /** Motor-torque-limited acceleration rate, m/s^2 */
@@ -313,6 +340,8 @@ public class SwerveKinodynamics implements Glassy {
     /**
      * Inverse kinematics, chassis speeds => module states.
      * 
+     * The resulting state speeds are always positive.
+     * 
      * This version does **DISCRETIZATION** to correct for swerve veering.
      * 
      * It also does extra veering correction proportional to rotation rate and
@@ -337,6 +366,9 @@ public class SwerveKinodynamics implements Glassy {
         return m_kinematics.toSwerveModuleStates(descretized);
     }
 
+    /**
+     * The resulting state speeds are always positive.
+     */
     public SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
         return m_kinematics.toSwerveModuleStates(speeds);
     }
@@ -361,7 +393,9 @@ public class SwerveKinodynamics implements Glassy {
      * 
      * Does not take Tires into account.
      */
-    public ChassisSpeeds toChassisSpeedsWithDiscretization(double gyroRateRad_S, double dt,
+    public ChassisSpeeds toChassisSpeedsWithDiscretization(
+            double gyroRateRad_S,
+            double dt,
             SwerveModuleState... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
         Twist2d twist = new Twist2d(

@@ -98,7 +98,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         double u_TOTAL = u_FB + u_FF;
         u_TOTAL = MathUtil.clamp(u_TOTAL, -m_maxVel, m_maxVel);
 
-        m_motor.setVelocity(u_TOTAL, accel(u_TOTAL));
+        m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), 0);
         t.log(Level.DEBUG, m_name, "Desired velocity setpoint", u_TOTAL);
 
         m_controller.setIntegratorRange(0, 0.1);
@@ -201,7 +201,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
     /** Direct velocity control for testing */
     @Override
     public void setVelocity(double velocity) {
-        m_motor.setVelocity(velocity, accel(velocity));
+        m_motor.setVelocity(velocity, accel(velocity), 0);
         t.log(Level.DEBUG, m_name, "Desired velocity setpoint", velocity);
     }
 

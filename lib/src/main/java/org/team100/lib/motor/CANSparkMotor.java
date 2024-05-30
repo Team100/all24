@@ -57,8 +57,7 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
         m_motor.stopMotor();
     }
 
-    @Override
-    public double getTorque() {
+    public double getMotorTorque() {
         return m_motor.getOutputCurrent() * kTNm_amp();
     }
 
@@ -123,18 +122,6 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
         t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
         t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());
     }
-
-    /**
-     * Motor resistance in ohms, used to calculate voltage from desired torque
-     * current.
-     */
-    protected abstract double kROhms();
-
-    /**
-     * Motor torque constant, kT, in Nm per amp, used to calculate current from
-     * desired torque.
-     */
-    protected abstract double kTNm_amp();
 
     private void setP(double p) {
         Rev100.warn(() -> m_pidController.setP(p));

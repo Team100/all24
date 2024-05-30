@@ -11,6 +11,7 @@ import org.team100.lib.timing.TimedPose;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * Describes the state of a holonomic drive in three dimensions,
@@ -57,6 +58,12 @@ public class SwerveState {
 
     public FieldRelativeVelocity velocity() {
         return new FieldRelativeVelocity(m_x.v(), m_y.v(), m_theta.v());
+    }
+
+    /** Robot-relative speeds */
+    public ChassisSpeeds chassisSpeeds() {
+        return ChassisSpeeds.fromFieldRelativeSpeeds(
+                m_x.v(), m_y.v(), m_theta.v(), new Rotation2d(m_theta.x()));
     }
 
     public FieldRelativeAcceleration acceleration() {

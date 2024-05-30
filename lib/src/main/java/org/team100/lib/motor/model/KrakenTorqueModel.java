@@ -1,4 +1,4 @@
-package org.team100.lib.motor;
+package org.team100.lib.motor.model;
 
 /**
  * Constants for Kraken.

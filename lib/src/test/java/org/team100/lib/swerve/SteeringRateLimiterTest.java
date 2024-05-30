@@ -28,7 +28,6 @@ class SteeringRateLimiterTest {
         SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
         };
-        boolean need_to_steer = true;
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
         Rotation2d[] prev_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
@@ -38,7 +37,7 @@ class SteeringRateLimiterTest {
         List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
 
         double s = c.enforceSteeringLimit(desiredModuleStates,
-                prevModuleStates, need_to_steer, prev_vx,
+                prevModuleStates, prev_vx,
                 prev_vy, prev_heading, desired_vx, desired_vy,
                 desired_heading, overrideSteering, 0.02);
 
@@ -56,7 +55,6 @@ class SteeringRateLimiterTest {
         SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
         };
-        boolean need_to_steer = true;
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
         Rotation2d[] prev_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
@@ -66,7 +64,7 @@ class SteeringRateLimiterTest {
         List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
 
         double s = c.enforceSteeringLimit(desiredModuleStates,
-                prevModuleStates, need_to_steer, prev_vx,
+                prevModuleStates, prev_vx,
                 prev_vy, prev_heading, desired_vx, desired_vy,
                 desired_heading, overrideSteering, 0.02);
 

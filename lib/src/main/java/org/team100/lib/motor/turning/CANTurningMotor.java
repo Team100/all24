@@ -1,6 +1,7 @@
 package org.team100.lib.motor.turning;
 
 import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
@@ -36,7 +37,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Given the issues with feedback, this controller should rely mostly on
  * feedforward.
  */
-public class CANTurningMotor implements Motor100<Angle100> {
+public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     /**
      * There is a planetary gearbox between the motor and the steering gear, and the
      * final is 48/40.
@@ -144,10 +145,10 @@ public class CANTurningMotor implements Motor100<Angle100> {
     }
 
     /**
-     * Supports accel feedforward.
+     * ignores torque feedforward
      */
     @Override
-    public void setVelocity(double outputRad_S, double accelRad_S2) {
+    public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
         double outputRev_S = outputRad_S / (2 * Math.PI);
         double motorRev_S = outputRev_S * m_gearRatio;
         double motorRev_100ms = motorRev_S / 10;
@@ -161,14 +162,6 @@ public class CANTurningMotor implements Motor100<Angle100> {
 
         m_motor.set(ControlMode.Velocity, motorTick_100ms, DemandType.ArbitraryFeedForward, kFF);
         log();
-    }
-
-    /**
-     * ignores torque feedforward
-     */
-    @Override
-    public void setVelocity(double velocity, double accel, double torque) {
-        setVelocity(torque, accel);
     }
 
     @Override

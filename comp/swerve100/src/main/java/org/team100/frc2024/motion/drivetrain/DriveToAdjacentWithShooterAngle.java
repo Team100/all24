@@ -92,7 +92,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getPose();
-        ChassisSpeeds currentSpeed = m_swerve.speeds(dt);
+        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         t.log(Level.DEBUG, m_name, "chassis speeds", output);

@@ -14,10 +14,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * https://docs.google.com/document/d/1a-yI4T2AifRgIW3QJcWiV6-kvuVHfvHLoRkeGFjYLiI/edit
  */
 public class Tire {
-    // use these in tests
-    public static final String kSaturationLabel = "TireSaturation (m_s_s)";
-    static final String kSlipLabel = "TireSlipAtSaturation (0-1)";
-    // this is surely too low
     // TODO: measure for different wheel/floors; Colson on tile will be much lower.
     private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
