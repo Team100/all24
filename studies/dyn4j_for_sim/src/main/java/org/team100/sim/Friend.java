@@ -12,6 +12,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * TODO: spin away if close to an opponent
  */
 public class Friend extends RobotBody {
+    /**
+     * Intake is on the back, robot usually comes from behind, so source pick
+     * rotation target is 180, i.e. arrive in reverse.
+     */
     static final Pose2d kSource = new Pose2d(15.5, 2, new Rotation2d(Math.PI));
     /** This is the robot center when facing the amp */
     static final Pose2d kAmpSpot = new Pose2d(1.840, 7.5, new Rotation2d(-Math.PI / 2));
@@ -20,7 +24,7 @@ public class Friend extends RobotBody {
     static final Pose2d kPassingSpot = new Pose2d(9.5, 1, new Rotation2d(3 * Math.PI / 4));
     static final Pose2d kDefendSpot = new Pose2d(3.5, 2, new Rotation2d());
 
-    public Friend(String id, SimWorld world,  boolean debug) {
+    public Friend(String id, SimWorld world, boolean debug) {
         super(id, world, debug);
     }
 

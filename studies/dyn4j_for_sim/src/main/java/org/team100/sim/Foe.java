@@ -12,8 +12,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * TODO: spin away if close to an opponent
  */
 public class Foe extends RobotBody {
-    /** Spot for source pick */
-    static final Pose2d kSource = new Pose2d(1, 2, new Rotation2d(Math.PI));
+    /**
+     * Intake is on the back, robot usually comes from ahead, so source pick
+     * rotation is 0, i.e. arrive in reverse.
+     */
+    static final Pose2d kSource = new Pose2d(1, 2, new Rotation2d());
     /** This is the robot center when facing the amp */
     private static final Pose2d kAmpSpot = new Pose2d(14.7, 7.5, new Rotation2d(-Math.PI / 2));
     /** Shoot from about 3 meters away */

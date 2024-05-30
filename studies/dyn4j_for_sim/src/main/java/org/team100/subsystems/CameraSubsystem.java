@@ -128,10 +128,16 @@ public class CameraSubsystem extends SubsystemBase {
         noteSightings.keySet().removeAll(noteSightings.headMap(now - kLookbackSec).keySet());
     }
 
+    /**
+     * Key is timestamp in seconds.
+     */
     public NavigableMap<Double, RobotSighting> recentSightings() {
         return sightings.descendingMap();
     }
 
+    /**
+     * Key is timestamp in seconds.
+     */
     public NavigableMap<Double, NoteSighting> recentNoteSightings() {
         return noteSightings.descendingMap();
     }
