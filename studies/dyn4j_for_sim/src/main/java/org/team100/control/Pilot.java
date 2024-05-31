@@ -2,6 +2,9 @@ package org.team100.control;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
+/**
+ * The Pilot is the interface for manual or autonomous control.
+ */
 public interface Pilot {
     /**
      * In comp this is controller units [-1,1] but here we want the autopilot to use
