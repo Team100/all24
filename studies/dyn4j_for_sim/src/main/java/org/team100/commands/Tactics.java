@@ -1,5 +1,6 @@
 package org.team100.commands;
 
+import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.planner.AvoidEdges;
@@ -65,6 +66,10 @@ public class Tactics {
             v = v.plus(m_robotRepulsion.apply(desired, debug));
         }
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+
+        if (debug && Debug.print())
+            System.out.printf(" tactic %s", v);
+
         return v;
     }
 
