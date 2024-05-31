@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 /**
  * Drive to the nearest note, turning so that the intake side arrives first.
  * 
- * If the robot is against the wall, the turn has trouble. TODO: fix that
- * 
  * If the robot is between two notes, it switches between them and makes no
  * progress. TODO: fix that.
  * 
@@ -58,27 +56,92 @@ public class DriveToNote extends Command {
     public void execute() {
         if (m_debug && Debug.print())
             System.out.print("DriveToNote");
-        FieldRelativeVelocity desired = goToGoal();
+
+        // where are we with respect to the goal?
+
+        // TODO: use a future estimated pose to account for current velocity
+
+        Pose2d pose = m_drive.getPose();
+
+        goToGoal(pose);
+
+    }
+
+    /**
+     * add tactics and drive.
+     * if the robot needs to rotate, it might be too close to the edge to do
+     * so turn on repulsion in the needs-to-rotate condition.
+     * 
+     * @param desired
+     * @param avoidEdges
+     */
+    private void finish(FieldRelativeVelocity desired, boolean avoidEdges) {
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug && Debug.print())
             System.out.printf(" desire %s", desired);
-        // some notes might be near the edge, so turn off edge repulsion.
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug && Debug.print());
-        if (m_debug && Debug.print())
-            System.out.printf(" tactic %s", v);
+
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true, m_debug && Debug.print());
+
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+
         if (m_debug && Debug.print())
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
 
     /**
+     * Go to the closest note, irrespective of the age of the sighting (since notes
+     * don't move and sightings are all pretty new)
+     */
+    private void goToGoal(Pose2d pose) {
+
+        NoteSighting closestSighting = findClosestNote(pose);
+        if (closestSighting == null) {
+            // no nearby note, no need to move
+            finish(new FieldRelativeVelocity(0, 0, 0), false);
+            return;
+        }
+
+        // found a note
+
+        Translation2d targetFieldRelative = closestSighting.position();
+        if (m_debug && Debug.print())
+            System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
+                    pose.getX(), pose.getY(), targetFieldRelative.getX(), targetFieldRelative.getY());
+
+        Translation2d robotToTargetFieldRelative = targetFieldRelative.minus(pose.getTranslation());
+        Rotation2d robotToTargetAngleFieldRelative = robotToTargetFieldRelative.getAngle();
+        // intake is on the back
+        Rotation2d intakeAngleFieldRelative = GeometryUtil.flip(pose.getRotation());
+        double angleError = MathUtil.angleModulus(
+                robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
+
+        Translation2d positionError = robotToTargetFieldRelative;
+
+        boolean aligned = aligned(angleError);
+
+        Translation2d cartesianU_FB = getCartesianU_FB(
+                robotToTargetFieldRelative,
+                aligned,
+                positionError);
+
+        double angleU_FB = angleError * kRotationP;
+
+        // we also want to turn the intake towards the note
+        FieldRelativeVelocity desired = new FieldRelativeVelocity(cartesianU_FB.getX(), cartesianU_FB.getY(), angleU_FB)
+                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+
+        // need to turn? avoid the edges.
+        finish(desired, !aligned);
+    }
+
+    /**
      * TODO: remember and prefer the previous fixation, unless some new sighting is
      * much better.
      */
-    NoteSighting findClosestNote(Pose2d pose) {
+    private NoteSighting findClosestNote(Pose2d pose) {
         // This map of notes is ordered by sighting age, not distance, so we need to
         // look at all of them.
         NavigableMap<Double, NoteSighting> notes = m_camera.recentNoteSightings();
@@ -99,60 +162,25 @@ public class DriveToNote extends Command {
         return closestSighting;
     }
 
-    /**
-     * Go to the closest note, irrespective of the age of the sighting (since notes
-     * don't move and sightings are all pretty new)
-     */
-    private FieldRelativeVelocity goToGoal() {
-        // TODO: use a future estimated pose to account for current velocity
-        Pose2d pose = m_drive.getPose();
-
-        NoteSighting closestSighting = findClosestNote(pose);
-        if (closestSighting == null) {
-            // no nearby note, no need to move
-            return new FieldRelativeVelocity(0, 0, 0);
-        }
-
-        // found a note
-
-        Translation2d targetFieldRelative = closestSighting.position();
-        if (m_debug && Debug.print())
-            System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
-                    pose.getX(), pose.getY(), targetFieldRelative.getX(), targetFieldRelative.getY());
-
-        Translation2d robotToTargetFieldRelative = targetFieldRelative.minus(pose.getTranslation());
-        Rotation2d robotToTargetAngleFieldRelative = robotToTargetFieldRelative.getAngle();
-        // intake is on the back
-        Rotation2d intakeAngleFieldRelative = GeometryUtil.flip(pose.getRotation());
-        double angleError = MathUtil.angleModulus(
-                robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
-
-        Translation2d positionError = robotToTargetFieldRelative;
-
-        Translation2d cartesianU_FB = getCartesianU_FB(robotToTargetFieldRelative, angleError, positionError);
-
-        double angleU_FB = angleError * kRotationP;
-
-        // we also want to turn the intake towards the note
-        return new FieldRelativeVelocity(cartesianU_FB.getX(), cartesianU_FB.getY(), angleU_FB)
-                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+    private boolean aligned(double angleError) {
+        return Math.abs(angleError) < kAdmittanceRad;
     }
 
     /** Go to the note if aligned, If not, go 1m away. */
     private Translation2d getCartesianU_FB(
             Translation2d robotToTargetFieldRelative,
-            double angleError,
+            boolean aligned,
             Translation2d positionError) {
-        if (Math.abs(angleError) < kAdmittanceRad) {
+        if (aligned) {
             // aligned, go to the center
             return positionError.times(kCartesianP);
-        } else {
-            // not aligned, go to 1m away
-            double distance = robotToTargetFieldRelative.getNorm();
-            double targetDistance = distance - kPickRadius;
-            Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
-            return targetTranslation.times(kCartesianP);
         }
+        // not aligned, go to 1m away
+        double distance = robotToTargetFieldRelative.getNorm();
+        double targetDistance = distance - kPickRadius;
+        Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
+        return targetTranslation.times(kCartesianP);
+
     }
 
 }
