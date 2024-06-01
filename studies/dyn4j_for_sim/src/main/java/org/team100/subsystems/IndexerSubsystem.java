@@ -8,10 +8,16 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Manages the note and joint. */
 public class IndexerSubsystem extends SubsystemBase {
+    /**
+     * Intake admittance half-angle.
+     * TODO: use this in the command.
+     */
+    private static final double kAdmittanceRad = 0.1;
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
 
@@ -47,26 +53,50 @@ public class IndexerSubsystem extends SubsystemBase {
         Vector2 position = m_robotBody.getWorldCenter();
 
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
-            if (body instanceof Note) {
-                Vector2 notePosition = body.getWorldCenter();
-                double distance = position.distance(notePosition);
-                if (distance > 0.5)
-                    continue;
-
-                if (((Note) body).isFlying())
-                    continue;
-                    
-                // it's underneath the robot
-                // TODO: intake from one side only
-                m_note = (Note) body;
-
-                // move the note to the center of the robot first
-                m_note.setTransform(m_robotBody.getTransform());
-                m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
-                m_robotBody.getWorld().addJoint(m_joint);
-                m_note.carry();
-                return true;
+            if (!(body instanceof Note)) {
+                // pick only notes
+                continue;
             }
+            Note note = (Note) body;
+
+            Vector2 notePosition = note.getWorldCenter();
+            Vector2 toNote = notePosition.difference(position);
+
+            double angleToNote = toNote.getDirection();
+            double intakeAngle = m_robotBody.getRotationAngle() + Math.PI;
+
+            double angleError = MathUtil.angleModulus(angleToNote - intakeAngle);
+            if (Math.abs(angleError) >= kAdmittanceRad) {
+                // misaligned
+                continue;
+            }
+
+            double distance = toNote.getMagnitude();
+            if (distance > 0.5) {
+                // ignore far-away notes
+                continue;
+            }
+
+            if (note.isFlying()) {
+                // do not pick from mid-air
+                continue;
+            }
+
+            // to pick, the note needs to be on the correct side
+
+            // ... and the robot needs to be moving towards it.
+
+            // it's underneath the robot
+            // TODO: intake from one side only
+            m_note = note;
+
+            // move the note to the center of the robot first
+            m_note.setTransform(m_robotBody.getTransform());
+            m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
+            m_robotBody.getWorld().addJoint(m_joint);
+            m_note.carry();
+            return true;
+
         }
         return false;
     }

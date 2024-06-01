@@ -80,6 +80,10 @@ public abstract class RobotBody extends Body100 {
                 new Rotation2d(angle));
     }
 
+    public double getRotationAngle() {
+        return transform.getRotationAngle();
+    }
+
     public FieldRelativeVelocity getVelocity() {
         return new FieldRelativeVelocity(
                 linearVelocity.x,
