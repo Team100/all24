@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
+import org.team100.subsystems.IndexerSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 
 import edu.wpi.first.math.MathUtil;
@@ -31,8 +32,6 @@ public class DriveToNote extends Command {
     private static final double kMaxNoteDistance = 5;
     private static final double kCartesianP = 5;
     private static final double kRotationP = 5;
-    /** Intake admittance half-angle. */
-    private static final double kAdmittanceRad = 0.1;
     /** Go this far from the note until rotated correctly. */
     private static final double kPickRadius = 1;
 
@@ -118,14 +117,11 @@ public class DriveToNote extends Command {
         double angleError = MathUtil.angleModulus(
                 robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
 
-        Translation2d positionError = robotToTargetFieldRelative;
-
         boolean aligned = aligned(angleError);
 
         Translation2d cartesianU_FB = getCartesianU_FB(
                 robotToTargetFieldRelative,
-                aligned,
-                positionError);
+                aligned);
 
         double angleU_FB = angleError * kRotationP;
 
@@ -163,24 +159,23 @@ public class DriveToNote extends Command {
     }
 
     private boolean aligned(double angleError) {
-        return Math.abs(angleError) < kAdmittanceRad;
+        return Math.abs(angleError) < IndexerSubsystem.kAdmittanceRad;
     }
 
-    /** Go to the note if aligned, If not, go 1m away. */
-    private Translation2d getCartesianU_FB(
-            Translation2d robotToTargetFieldRelative,
-            boolean aligned,
-            Translation2d positionError) {
-        if (aligned) {
-            // aligned, go to the center
-            return positionError.times(kCartesianP);
-        }
-        // not aligned, go to 1m away
+    /** Go to the note if aligned. If not, or if we missed, go 1m away. */
+    private Translation2d getCartesianU_FB(Translation2d robotToTargetFieldRelative, boolean aligned) {
         double distance = robotToTargetFieldRelative.getNorm();
-        double targetDistance = distance - kPickRadius;
-        Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
-        return targetTranslation.times(kCartesianP);
+        if (distance < IndexerSubsystem.kMinPickDistanceM || !aligned) {
+            // target distance is lower than the tangent point: we ran the note
+            // over without picking it, so back up.
+            // also back up if not aligned.
+            double targetDistance = distance - kPickRadius;
+            Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
+            return targetTranslation.times(kCartesianP);
+        }
 
+        // aligned, drive over the note
+        return robotToTargetFieldRelative.times(kCartesianP);
     }
 
 }

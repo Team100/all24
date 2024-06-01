@@ -13,11 +13,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Manages the note and joint. */
 public class IndexerSubsystem extends SubsystemBase {
+    public static final double kMinPickDistanceM = 0.437;
     /**
-     * Intake admittance half-angle.
-     * TODO: use this in the command.
+     * Intake velocity admittance: need to drive over the note.
      */
-    private static final double kAdmittanceRad = 0.1;
+    private static final double kVelocityAdmittanceRad = Math.PI / 4;
+    /**
+     * Intake admittance half-angle: need to approach from the intake side.
+     */
+    public static final double kAdmittanceRad = 0.2;
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
 
@@ -59,35 +63,38 @@ public class IndexerSubsystem extends SubsystemBase {
             }
             Note note = (Note) body;
 
+            if (note.isFlying()) {
+                // do not pick from mid-air.
+                continue;
+            }
+
             Vector2 notePosition = note.getWorldCenter();
             Vector2 toNote = notePosition.difference(position);
+            double distance = toNote.getMagnitude();
+            if (distance < kMinPickDistanceM || distance > 0.488) {
+                // distance must be within an inch or so of the intake touching the note edge.
+                // robot size is 0.75, note size is 0.175.
+                // so the tangent distance is about (0.75/2+0.175/2) = 0.4625.
+                // so a reasonable range is 0.437-0.488
+                continue;
+            }
 
             double angleToNote = toNote.getDirection();
             double intakeAngle = m_robotBody.getRotationAngle() + Math.PI;
-
             double angleError = MathUtil.angleModulus(angleToNote - intakeAngle);
             if (Math.abs(angleError) >= kAdmittanceRad) {
-                // misaligned
+                // to pick, the note needs to aligned to the correct side.
                 continue;
             }
 
-            double distance = toNote.getMagnitude();
-            if (distance > 0.5) {
-                // ignore far-away notes
+            Vector2 robotVelocity = m_robotBody.getLinearVelocity();
+            double velocityAngle = toNote.getAngleBetween(robotVelocity);
+            if (Math.abs(velocityAngle) > kVelocityAdmittanceRad) {
+                // to pick, the robot needs to be moving towards it.
                 continue;
             }
 
-            if (note.isFlying()) {
-                // do not pick from mid-air
-                continue;
-            }
-
-            // to pick, the note needs to be on the correct side
-
-            // ... and the robot needs to be moving towards it.
-
-            // it's underneath the robot
-            // TODO: intake from one side only
+            // successful pick.
             m_note = note;
 
             // move the note to the center of the robot first
