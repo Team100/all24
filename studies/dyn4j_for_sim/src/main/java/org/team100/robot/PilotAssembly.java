@@ -31,7 +31,7 @@ public class PilotAssembly extends RobotAssembly {
             RobotBody robotBody,
             Translation2d speakerPosition,
             boolean debug) {
-        super(pilotFn, robotBody, speakerPosition);
+        super(pilotFn, robotBody, speakerPosition, debug);
 
         m_drive.setDefaultCommand(new PilotDrive(m_drive, m_pilot));
 

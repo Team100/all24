@@ -22,8 +22,9 @@ public class RealPlayerAssembly extends RobotAssembly {
     public RealPlayerAssembly(
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
-            Translation2d speakerPosition) {
-        super(pilotFn, robotBody, speakerPosition);
+            Translation2d speakerPosition,
+            boolean debug) {
+        super(pilotFn, robotBody, speakerPosition, debug);
 
         m_drive.setDefaultCommand(new PilotDrive(m_drive, m_pilot));
 

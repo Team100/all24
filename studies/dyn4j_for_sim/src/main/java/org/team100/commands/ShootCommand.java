@@ -37,13 +37,4 @@ public class ShootCommand extends Command {
         // take the note from the handoff
         m_shooter.shoot();
     }
-
-    /**
-     * This version finishes immediately, which is clearly wrong.
-     * TODO: add spinning, feeding delays.
-     */
-    @Override
-    public boolean isFinished() {
-        return true;
-    }
 }

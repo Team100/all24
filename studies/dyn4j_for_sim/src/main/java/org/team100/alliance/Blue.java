@@ -31,14 +31,16 @@ public class Blue implements Alliance {
             player = new RealPlayerAssembly(
                     x -> new ManualPilot(),
                     new Player(world, false),
-                    kSpeaker);
+                    kSpeaker,
+                    false);
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
         } else {
             player = new PilotAssembly(
                     x -> new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
                     new Player(world, false),
-                    kSpeaker, false);
+                    kSpeaker,
+                    false);
         }
         player.setState(2, 4, 0, 0); // initial position
 

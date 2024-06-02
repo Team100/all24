@@ -37,10 +37,11 @@ public abstract class RobotAssembly {
     protected RobotAssembly(
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
-            Translation2d speakerPosition) {
+            Translation2d speakerPosition,
+            boolean debug) {
         m_drive = new DriveSubsystem(robotBody);
         m_indexer = new IndexerSubsystem(this, robotBody);
-        m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition, false);
+        m_shooter = new ShooterSubsystem(this, robotBody, speakerPosition, debug);
         m_camera = new CameraSubsystem(robotBody);
         // must come after the initializations above.
         m_pilot = pilotFn.apply(this);
