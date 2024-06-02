@@ -3,8 +3,8 @@ package org.team100.alliance;
 import org.team100.commands.SourceDefault;
 import org.team100.control.Pilot;
 import org.team100.control.auto.Defender;
-import org.team100.control.auto.Passer;
-import org.team100.control.auto.Scorer;
+import org.team100.control.auto.PasserWithoutStateless;
+import org.team100.control.auto.ScorerWithoutStateless;
 import org.team100.robot.PilotAssembly;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -25,13 +25,15 @@ public class Red implements Alliance {
 
     public Red(SimWorld world) {
         Foe scorerBody = new Foe("red scorer", world, true);
-        scoreAlternator = new Scorer();
+        // scoreAlternator = new Scorer();
+        scoreAlternator = new ScorerWithoutStateless();
         scorer = new PilotAssembly(scoreAlternator, scorerBody, kSpeaker, true);
         scorer.setState(15, 3, 0, 0);
         world.addBody(scorerBody);
 
         Foe red2 = new Foe("red passer", world, true);
-        passCycler = new Passer();
+        // passCycler = new Passer();
+        passCycler = new PasserWithoutStateless();
         passer = new PilotAssembly(passCycler, red2, kSpeaker, true);
         passer.setState(15, 5, 0, 0);
         world.addBody(red2);

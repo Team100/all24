@@ -3,9 +3,9 @@ package org.team100.alliance;
 import org.team100.commands.SourceDefault;
 import org.team100.control.ManualPilot;
 import org.team100.control.Pilot;
-import org.team100.control.auto.AmpCycler;
+import org.team100.control.auto.AmpCyclerWithoutStateless;
 import org.team100.control.auto.Defender;
-import org.team100.control.auto.SpeakerCycler;
+import org.team100.control.auto.SpeakerCyclerWithoutStateless;
 import org.team100.robot.PilotAssembly;
 import org.team100.robot.RealPlayerAssembly;
 import org.team100.robot.RobotAssembly;
@@ -33,7 +33,8 @@ public class Blue implements Alliance {
     public Blue(SimWorld world) {
         Player playerBody = new Player(world, true);
         // might not be used below.
-        ampCycler = new AmpCycler();
+        // ampCycler = new AmpCycler();
+        ampCycler = new AmpCyclerWithoutStateless();
         if (kRealPlayer) {
             player = new RealPlayerAssembly(new ManualPilot(), playerBody, kSpeaker);
             // use the pilot assembly with manual control, to test the buttons.
@@ -45,7 +46,8 @@ public class Blue implements Alliance {
         world.addBody(playerBody);
 
         Friend blue1 = new Friend("blue 1", world, true);
-        speakerCycler = new SpeakerCycler();
+        // speakerCycler = new SpeakerCycler();
+        speakerCycler = new SpeakerCyclerWithoutStateless();
         friend1 = new PilotAssembly(speakerCycler, blue1, kSpeaker, true);
         friend1.setState(1, 1, 0, 0); // initial position
         world.addBody(blue1);

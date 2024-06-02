@@ -71,7 +71,7 @@ public interface Pilot {
     /**
      * The controller states here are monitored with triggers, which notice
      * **EDGES** so we need to start with everything off, and wait until the trigger
-     * is litening.
+     * is listening.
      */
     void begin();
 
