@@ -2,6 +2,7 @@ package org.team100.sim;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * Friends try to pick from the source and score in the amp corner.
@@ -23,6 +24,8 @@ public class Friend extends RobotBody {
     static final Pose2d kShootingSpot = new Pose2d(3.0, 5.5, new Rotation2d(Math.PI));
     static final Pose2d kPassingSpot = new Pose2d(9.5, 1, new Rotation2d(3 * Math.PI / 4));
     static final Pose2d kDefendSpot = new Pose2d(3.5, 2, new Rotation2d());
+    /** Center of the speaker: the target to shoot at. */
+    static final Translation2d kSpeaker = new Translation2d(0, 5.548);
 
     /** Note: adds this to the world. */
     public Friend(String id, SimWorld world, boolean debug) {
@@ -65,4 +68,10 @@ public class Friend extends RobotBody {
     public Pose2d passingPosition() {
         return kPassingSpot;
     }
+
+    @Override
+    public Translation2d speakerPosition() {
+        return kSpeaker;
+    }
+
 }

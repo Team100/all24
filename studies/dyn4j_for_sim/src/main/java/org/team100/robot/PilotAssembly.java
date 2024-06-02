@@ -17,7 +17,6 @@ import org.team100.commands.ShootCommand;
 import org.team100.control.Pilot;
 import org.team100.sim.RobotBody;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
@@ -29,9 +28,8 @@ public class PilotAssembly extends RobotAssembly {
     public PilotAssembly(
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
-            Translation2d speakerPosition,
             boolean debug) {
-        super(pilotFn, robotBody, speakerPosition, debug);
+        super(pilotFn, robotBody, debug);
 
         m_drive.setDefaultCommand(new PilotDrive(m_drive, m_pilot));
 
@@ -39,18 +37,18 @@ public class PilotAssembly extends RobotAssembly {
                 new Intake(m_indexer));
         whileTrue(m_pilot::driveToSpeaker,
                 Commands.sequence(
-                        new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), debug),
-                        new RotateToShoot(speakerPosition, m_drive, debug),
+                        new DriveToSpeaker(m_drive, m_camera, debug),
+                        new RotateToShoot(m_drive, debug),
                         new ShootCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::driveToSource,
-                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), debug));
+                new DriveToSource(m_drive, m_camera, debug));
         whileTrue(m_pilot::driveToAmp,
                 Commands.sequence(
-                        new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), debug),
+                        new DriveToAmp(m_drive, m_camera, debug),
                         new AmpCommand(m_indexer, m_shooter)));
         whileTrue(m_pilot::driveToPass,
                 Commands.sequence(
-                        new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), debug),
+                        new DriveToPass(m_drive, m_camera, debug),
                         new LobCommand(m_indexer, m_shooter)));
         whileTrue(m_pilot::driveToNote,
                 new DriveToNote(m_drive, m_camera, debug));

@@ -34,10 +34,9 @@ public class DriveToSource extends Command {
     public DriveToSource(
             DriveSubsystem drive,
             CameraSubsystem camera,
-            Pose2d goal,
             boolean debug) {
         m_drive = drive;
-        m_goal = goal;
+        m_goal = m_drive.sourcePosition();
         m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);

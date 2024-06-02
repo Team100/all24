@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 public abstract class RobotBody extends Body100 {
     /** All robots are squares about 30 inches on a side. */
@@ -67,6 +68,8 @@ public abstract class RobotBody extends Body100 {
     public abstract Pose2d defenderPosition();
 
     public abstract Pose2d passingPosition();
+
+    public abstract Translation2d speakerPosition();
 
     public SimWorld getWorld() {
         return m_world;

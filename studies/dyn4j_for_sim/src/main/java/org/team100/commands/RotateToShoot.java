@@ -25,8 +25,8 @@ public class RotateToShoot extends Command {
     private final DriveSubsystem m_drive;
     private final boolean m_debug;
 
-    public RotateToShoot(Translation2d speakerPosition, DriveSubsystem drive, boolean debug) {
-        m_speakerPosition = speakerPosition;
+    public RotateToShoot(DriveSubsystem drive, boolean debug) {
+        m_speakerPosition = drive.speakerPosition();
         m_drive = drive;
         m_debug = debug;
         addRequirements(drive);

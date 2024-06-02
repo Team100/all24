@@ -1,6 +1,7 @@
 package org.team100.sim;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * Controls apply force and torque.
@@ -46,5 +47,10 @@ public class Player extends RobotBody {
     @Override
     public Pose2d passingPosition() {
         return Friend.kPassingSpot;
+    }
+
+    @Override
+    public Translation2d speakerPosition() {
+        return Friend.kSpeaker;
     }
 }

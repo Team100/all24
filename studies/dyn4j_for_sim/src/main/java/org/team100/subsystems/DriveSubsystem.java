@@ -8,6 +8,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -87,5 +88,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     public Pose2d passingPosition() {
         return m_robotBody.passingPosition();
+    }
+
+    public Translation2d speakerPosition() {
+        return m_robotBody.speakerPosition();
     }
 }

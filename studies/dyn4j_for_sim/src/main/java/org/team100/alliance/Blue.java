@@ -20,7 +20,6 @@ public class Blue implements Alliance {
      * Use a real player robot instead of an NPC.
      */
     private static final boolean kRealPlayer = false;
-    private static final Translation2d kSpeaker = new Translation2d(0, 5.548);
     private final RobotAssembly player;
     private final RobotAssembly friend1;
     private final RobotAssembly friend2;
@@ -31,7 +30,6 @@ public class Blue implements Alliance {
             player = new RealPlayerAssembly(
                     x -> new ManualPilot(),
                     new Player(world, false),
-                    kSpeaker,
                     false);
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
@@ -39,7 +37,6 @@ public class Blue implements Alliance {
             player = new PilotAssembly(
                     x -> new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
                     new Player(world, false),
-                    kSpeaker,
                     false);
         }
         player.setState(2, 4, 0, 0); // initial position
@@ -47,14 +44,12 @@ public class Blue implements Alliance {
         friend1 = new PilotAssembly(
                 x -> new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
                 new Friend("blue 1", world, false),
-                kSpeaker,
                 false);
         friend1.setState(1, 1, 0, 0); // initial position
 
         friend2 = new PilotAssembly(
                 x -> new Defender(),
                 new Friend("blue 2", world, false),
-                kSpeaker,
                 false);
         friend2.setState(1, 4, 0, 0); // initial position
 

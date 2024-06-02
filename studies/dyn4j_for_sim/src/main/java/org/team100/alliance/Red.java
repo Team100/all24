@@ -13,7 +13,6 @@ import org.team100.sim.SimWorld;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class Red implements Alliance {
-    private static final Translation2d kSpeaker = new Translation2d(16.541, 5.548);
     private final RobotAssembly scorer;
     private final RobotAssembly passer;
     private final RobotAssembly defender;
@@ -23,21 +22,18 @@ public class Red implements Alliance {
         scorer = new PilotAssembly(
                 x -> new Scorer(x.getDrive(), x.getCamera(), x.getIndexer()),
                 new Foe("red scorer", world, false),
-                kSpeaker,
                 false);
         scorer.setState(15, 3, 0, 0);
 
         passer = new PilotAssembly(
                 x -> new Passer(x.getDrive(), x.getCamera(), x.getIndexer()),
                 new Foe("red passer", world, false),
-                kSpeaker,
                 false);
         passer.setState(15, 5, 0, 0);
 
         defender = new PilotAssembly(
                 x -> new Defender(),
                 new Foe("red defender", world, false),
-                kSpeaker,
                 false);
         defender.setState(13, 7, 0, 0);
 
