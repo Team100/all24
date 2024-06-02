@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Stay between opponents and their source.
  * 
  * Never finishes.
+ * 
+ * note low defense skill level to try to balance the game
  */
 public class DefendSource extends Command {
     // this is quite low, to try to make the game more balanced: up to 8 works well

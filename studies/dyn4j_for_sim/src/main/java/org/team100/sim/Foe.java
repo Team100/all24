@@ -24,6 +24,7 @@ public class Foe extends RobotBody {
     static final Pose2d kPassingSpot = new Pose2d(6.5, 1, new Rotation2d(0.65));
     static final Pose2d kDefendSpot = new Pose2d(13, 2, new Rotation2d(Math.PI));
 
+    /** Note: adds this to the world. */
     public Foe(String id, SimWorld world, boolean debug) {
         super(id, world, debug);
     }

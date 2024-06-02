@@ -1,5 +1,6 @@
 package org.team100.subsystems;
 
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -8,6 +9,7 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -57,6 +59,45 @@ public class CameraSubsystem extends SubsystemBase {
         lookForNotes();
         trimSightings();
     }
+
+   
+    public NoteSighting findClosestNote(Pose2d pose) {
+        // This map of notes is ordered by sighting age, not distance, so we need to
+        // look at all of them.
+        NavigableMap<Double, NoteSighting> notes = recentNoteSightings();
+        double minDistance = Double.MAX_VALUE;
+        NoteSighting closestSighting = null;
+        for (Entry<Double, NoteSighting> entry : notes.entrySet()) {
+            NoteSighting sight = entry.getValue();
+            double distance = sight.position().getDistance(pose.getTranslation());
+            if (distance > kMaxNoteDistance) {
+                // ignore far-away notes
+                continue;
+            }
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestSighting = sight;
+            }
+        }
+        return closestSighting;
+    }
+
+
+    /**
+     * Key is timestamp in seconds.
+     */
+    public NavigableMap<Double, RobotSighting> recentSightings() {
+        return sightings.descendingMap();
+    }
+
+    /**
+     * Key is timestamp in seconds.
+     */
+    public NavigableMap<Double, NoteSighting> recentNoteSightings() {
+        return noteSightings.descendingMap();
+    }
+
+    //////////////////////////////////////////////////////////////////
 
     /**
      * In reality, each robot would get camera updates asynchronously (and
@@ -128,17 +169,4 @@ public class CameraSubsystem extends SubsystemBase {
         noteSightings.keySet().removeAll(noteSightings.headMap(now - kLookbackSec).keySet());
     }
 
-    /**
-     * Key is timestamp in seconds.
-     */
-    public NavigableMap<Double, RobotSighting> recentSightings() {
-        return sightings.descendingMap();
-    }
-
-    /**
-     * Key is timestamp in seconds.
-     */
-    public NavigableMap<Double, NoteSighting> recentNoteSightings() {
-        return noteSightings.descendingMap();
-    }
 }

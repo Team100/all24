@@ -73,11 +73,6 @@ public class ManualPilot implements Pilot {
     }
 
     @Override
-    public void onEnd() {
-        //
-    }
-
-    @Override
     public void begin() {
         //
     }

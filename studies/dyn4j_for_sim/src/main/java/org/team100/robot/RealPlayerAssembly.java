@@ -1,5 +1,7 @@
 package org.team100.robot;
 
+import java.util.function.Function;
+
 import org.team100.commands.DriveToAmp;
 import org.team100.commands.DriveToPass;
 import org.team100.commands.DriveToSource;
@@ -17,47 +19,41 @@ import edu.wpi.first.wpilibj2.command.Commands;
 /** This robot is controlled by a human. */
 public class RealPlayerAssembly extends RobotAssembly {
 
-    private final Pilot m_control;
+    public RealPlayerAssembly(
+            Function<RobotAssembly, Pilot> pilotFn,
+            RobotBody robotBody,
+            Translation2d speakerPosition) {
+        super(pilotFn, robotBody, speakerPosition);
 
-    public RealPlayerAssembly(Pilot pilot, RobotBody robotBody, Translation2d speakerPosition) {
-        super(robotBody, speakerPosition);
-        m_control = pilot;
-        m_drive.setDefaultCommand(new PilotDrive(m_drive, m_control));
+        m_drive.setDefaultCommand(new PilotDrive(m_drive, m_pilot));
 
-        whileTrue(m_control::intake,
-                new Intake(m_indexer)
-                        .finallyDo(() -> System.out.println("done intaking")));
-        whileTrue(m_control::outtake,
+        whileTrue(m_pilot::intake,
+                new Intake(m_indexer));
+        whileTrue(m_pilot::outtake,
                 m_indexer.run(m_indexer::outtake));
-        whileTrue(m_control::shoot,
+        whileTrue(m_pilot::shoot,
                 Commands.parallel(
                         m_indexer.run(m_indexer::towardsShooter),
                         m_shooter.run(m_shooter::shoot)));
-        whileTrue(m_control::lob,
+        whileTrue(m_pilot::lob,
                 Commands.parallel(
                         m_indexer.run(m_indexer::towardsShooter),
                         m_shooter.run(m_shooter::lob)));
-        whileTrue(m_control::amp,
+        whileTrue(m_pilot::amp,
                 Commands.parallel(
                         m_indexer.run(m_indexer::towardsShooter),
                         m_shooter.run(m_shooter::amp)));
-        whileTrue(m_control::rotateToShoot,
-                new RotateToShoot(speakerPosition, m_drive, false)
-                        .finallyDo(x -> System.out.println("done rotating" + x)));
-        whileTrue(m_control::driveToSpeaker,
-                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), false)
-                        .finallyDo(x -> System.out.println("done driving " + x)));
-        whileTrue(m_control::driveToAmp,
-                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), false)
-                        .finallyDo(x -> System.out.println("done driving " + x)));
-        whileTrue(m_control::driveToSource,
-                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), false)
-                        .finallyDo(x -> System.out.println("done driving " + x)));
-        whileTrue(m_control::driveToPass,
-                new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), false)
-                        .finallyDo(x -> System.out.println("done driving " + x)));
-        whileTrue(m_control::shootCommand,
-                new ShootCommand(m_indexer, m_shooter, false)
-                        .finallyDo(x -> System.out.println("done shooting " + x)));
+        whileTrue(m_pilot::rotateToShoot,
+                new RotateToShoot(speakerPosition, m_drive, false));
+        whileTrue(m_pilot::driveToSpeaker,
+                new DriveToSpeaker(m_drive, m_camera, m_drive.shootingPosition(), false));
+        whileTrue(m_pilot::driveToAmp,
+                new DriveToAmp(m_drive, m_camera, m_drive.ampPosition(), false));
+        whileTrue(m_pilot::driveToSource,
+                new DriveToSource(m_drive, m_camera, m_drive.sourcePosition(), false));
+        whileTrue(m_pilot::driveToPass,
+                new DriveToPass(m_drive, m_camera, m_drive.passingPosition(), false));
+        whileTrue(m_pilot::shootCommand,
+                new ShootCommand(m_indexer, m_shooter, false));
     }
 }

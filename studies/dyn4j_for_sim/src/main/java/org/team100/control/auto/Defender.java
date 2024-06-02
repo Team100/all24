@@ -17,9 +17,4 @@ public class Defender implements Autopilot {
     public void reset() {
         enabled = false;
     }
-
-    @Override
-    public void onEnd() {
-    }
-
 }

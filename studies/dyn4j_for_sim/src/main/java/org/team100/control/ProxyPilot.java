@@ -57,11 +57,6 @@ public class ProxyPilot implements Pilot {
     }
 
     @Override
-    public void onEnd() {
-        m_pilot.onEnd();
-    }
-
-    @Override
     public void begin() {
         m_pilot.begin();
     }
@@ -70,5 +65,4 @@ public class ProxyPilot implements Pilot {
     public void reset() {
         m_pilot.reset();
     }
-
 }

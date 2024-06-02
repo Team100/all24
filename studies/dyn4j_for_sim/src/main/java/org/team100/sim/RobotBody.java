@@ -19,6 +19,7 @@ public abstract class RobotBody extends Body100 {
 
     private final SimWorld m_world;
 
+    /** Note: adds this to the world. */
     protected RobotBody(String id, SimWorld world, boolean debug) {
         super(id, debug);
         m_world = world;
@@ -39,6 +40,7 @@ public abstract class RobotBody extends Body100 {
         // fiddled with damping until it seemed "right"
         setAngularDamping(2);
         setLinearDamping(2);
+        m_world.addBody(this);
     }
 
     public String getName() {

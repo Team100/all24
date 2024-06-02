@@ -66,8 +66,6 @@ public interface Pilot {
         return false;
     }
 
-    void onEnd();
-
     /**
      * The controller states here are monitored with triggers, which notice
      * **EDGES** so we need to start with everything off, and wait until the trigger
@@ -79,6 +77,6 @@ public interface Pilot {
     void reset();
 
     default void periodic() {
-        
+
     }
 }

@@ -1,17 +1,14 @@
 package org.team100.commands;
 
-import java.util.NavigableMap;
-import java.util.Map.Entry;
-
 import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
-import org.team100.subsystems.CameraSubsystem.NoteSighting;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,8 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
  * This never finishes; run it with an Intake command as the deadline.
  */
 public class DriveToNote extends Command {
-    /** Ignore notes further than this. Note the camera has a limit too. */
-    private static final double kMaxNoteDistance = 5;
     private static final double kCartesianP = 5;
     private static final double kRotationP = 5;
     /** Go this far from the note until rotated correctly. */
@@ -63,7 +58,6 @@ public class DriveToNote extends Command {
         Pose2d pose = m_drive.getPose();
 
         goToGoal(pose);
-
     }
 
     /**
@@ -95,8 +89,11 @@ public class DriveToNote extends Command {
      * don't move and sightings are all pretty new)
      */
     private void goToGoal(Pose2d pose) {
-
-        NoteSighting closestSighting = findClosestNote(pose);
+     
+     // TODO: remember and prefer the previous fixation, unless some new sighting is
+     // much better.
+     
+        NoteSighting closestSighting = m_camera.findClosestNote(pose);
         if (closestSighting == null) {
             // no nearby note, no need to move
             finish(new FieldRelativeVelocity(0, 0, 0), false);
@@ -133,30 +130,7 @@ public class DriveToNote extends Command {
         finish(desired, !aligned);
     }
 
-    /**
-     * TODO: remember and prefer the previous fixation, unless some new sighting is
-     * much better.
-     */
-    private NoteSighting findClosestNote(Pose2d pose) {
-        // This map of notes is ordered by sighting age, not distance, so we need to
-        // look at all of them.
-        NavigableMap<Double, NoteSighting> notes = m_camera.recentNoteSightings();
-        double minDistance = Double.MAX_VALUE;
-        NoteSighting closestSighting = null;
-        for (Entry<Double, NoteSighting> entry : notes.entrySet()) {
-            NoteSighting sight = entry.getValue();
-            double distance = sight.position().getDistance(pose.getTranslation());
-            if (distance > kMaxNoteDistance) {
-                // ignore far-away notes
-                continue;
-            }
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestSighting = sight;
-            }
-        }
-        return closestSighting;
-    }
+
 
     private boolean aligned(double angleError) {
         return Math.abs(angleError) < IndexerSubsystem.kAdmittanceRad;

@@ -70,11 +70,6 @@ public class SemiAutoPilot implements Pilot {
     }
 
     @Override
-    public void onEnd() {
-        m_pilot.onEnd();
-    }
-
-    @Override
     public void begin() {
         m_pilot.begin();
     }
@@ -83,6 +78,4 @@ public class SemiAutoPilot implements Pilot {
     public void reset() {
         m_pilot.reset();
     }
-
-
 }

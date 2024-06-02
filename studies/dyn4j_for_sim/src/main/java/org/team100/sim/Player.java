@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  */
 public class Player extends RobotBody {
 
+    /** Note: adds this to the world. */
     public Player(SimWorld world, boolean debug) {
         super("player", world, debug);
     }

@@ -37,7 +37,7 @@ public class DriveToAmp extends Command {
     @Override
     public void execute() {
         if (m_debug && Debug.print())
-            System.out.println("DriveToAmp");
+            System.out.print("DriveToAmp");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
