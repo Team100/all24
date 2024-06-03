@@ -1,5 +1,6 @@
 package org.team100.control.auto;
 
+import org.team100.control.Pilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -14,7 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * TODO: add alliance input for choosing
  * TODO: notice the amplified mode
  */
-public class AlternatingCycler implements Autopilot {
+public class AlternatingCycler implements Pilot {
     /** Ignore sightings further away than this. */
     private static final double kMaxNoteDistance = 8.0;
 

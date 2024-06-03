@@ -1,6 +1,8 @@
 package org.team100.control.auto;
 
-public class Defender implements Autopilot {
+import org.team100.control.Pilot;
+
+public class Defender implements Pilot {
     private boolean enabled = false;
 
     @Override

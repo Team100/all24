@@ -1,5 +1,6 @@
 package org.team100.control.auto;
 
+import org.team100.control.Pilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -12,7 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * Pick up nearby notes and score them.
  * TODO: dedupe with speaker cycler.
  */
-public class Scorer implements Autopilot {
+public class Scorer implements Pilot {
     /** Ignore sightings further away than this. */
     private static final double kMaxNoteDistance = 8.0;
 

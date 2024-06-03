@@ -1,5 +1,6 @@
 package org.team100.control.auto;
 
+import org.team100.control.Pilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -18,7 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * Since this observes a subsystem, it needs to be constructed after the
  * subsystem is constructed.
  */
-public class SpeakerCycler implements Autopilot {
+public class SpeakerCycler implements Pilot {
     /** Ignore sightings further away than this. */
     private static final double kMaxNoteDistance = 8.0;
 
