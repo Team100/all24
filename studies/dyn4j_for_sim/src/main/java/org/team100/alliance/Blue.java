@@ -5,8 +5,6 @@ import org.team100.control.ManualPilot;
 import org.team100.control.auto.AmpCycler;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.SpeakerCycler;
-import org.team100.robot.PilotAssembly;
-import org.team100.robot.RealPlayerAssembly;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Friend;
@@ -27,27 +25,27 @@ public class Blue implements Alliance {
 
     public Blue(SimWorld world) {
         if (kRealPlayer) {
-            player = new RealPlayerAssembly(
+            player = new RobotAssembly(
                     x -> new ManualPilot(),
                     new Player(world, false),
                     false);
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
         } else {
-            player = new PilotAssembly(
+            player = new RobotAssembly(
                     x -> new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
                     new Player(world, false),
                     false);
         }
         player.setState(2, 4, 0, 0); // initial position
 
-        friend1 = new PilotAssembly(
+        friend1 = new RobotAssembly(
                 x -> new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
                 new Friend("blue 1", world, false),
                 false);
         friend1.setState(1, 1, 0, 0); // initial position
 
-        friend2 = new PilotAssembly(
+        friend2 = new RobotAssembly(
                 x -> new Defender(),
                 new Friend("blue 2", world, false),
                 false);

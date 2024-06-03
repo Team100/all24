@@ -53,7 +53,7 @@ public class SpeakerCycler implements Autopilot {
 
     // drive to the speaker if there's a note in the indexer.
     @Override
-    public boolean driveToSpeaker() {
+    public boolean scoreSpeaker() {
         return m_enabled && m_indexer.full();
     }
 

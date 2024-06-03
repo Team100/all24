@@ -70,12 +70,12 @@ public class AlternatingCycler implements Autopilot {
      * TODO: do the sequence here?
      */
     @Override
-    public boolean driveToAmp() {
+    public boolean scoreAmp() {
         return m_enabled && m_state == State.ToAmp && m_indexer.full();
     }
 
     @Override
-    public boolean driveToSpeaker() {
+    public boolean scoreSpeaker() {
         return m_enabled && m_state == State.ToSpeaker && m_indexer.full();
     }
 

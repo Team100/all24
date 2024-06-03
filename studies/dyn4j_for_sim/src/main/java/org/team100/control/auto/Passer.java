@@ -45,7 +45,7 @@ public class Passer implements Autopilot {
     }
 
     @Override
-    public boolean driveToPass() {
+    public boolean pass() {
         return m_enabled && m_indexer.full();
     }
 

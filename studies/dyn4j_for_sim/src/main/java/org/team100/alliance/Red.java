@@ -4,7 +4,6 @@ import org.team100.commands.SourceDefault;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
-import org.team100.robot.PilotAssembly;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
@@ -19,19 +18,19 @@ public class Red implements Alliance {
     private final Source source;
 
     public Red(SimWorld world) {
-        scorer = new PilotAssembly(
+        scorer = new RobotAssembly(
                 x -> new Scorer(x.getDrive(), x.getCamera(), x.getIndexer()),
                 new Foe("red scorer", world, false),
                 false);
         scorer.setState(15, 3, 0, 0);
 
-        passer = new PilotAssembly(
+        passer = new RobotAssembly(
                 x -> new Passer(x.getDrive(), x.getCamera(), x.getIndexer()),
                 new Foe("red passer", world, false),
                 false);
         passer.setState(15, 5, 0, 0);
 
-        defender = new PilotAssembly(
+        defender = new RobotAssembly(
                 x -> new Defender(),
                 new Foe("red defender", world, false),
                 false);

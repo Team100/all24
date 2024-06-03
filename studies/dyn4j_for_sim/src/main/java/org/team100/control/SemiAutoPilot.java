@@ -65,8 +65,8 @@ public class SemiAutoPilot implements Pilot {
     }
 
     @Override
-    public boolean driveToSpeaker() {
-        return m_pilot.driveToSpeaker();
+    public boolean scoreSpeaker() {
+        return m_pilot.scoreSpeaker();
     }
 
     @Override

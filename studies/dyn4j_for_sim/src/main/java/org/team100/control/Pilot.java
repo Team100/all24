@@ -14,6 +14,7 @@ public interface Pilot {
         return new FieldRelativeVelocity(0, 0, 0);
     }
 
+    /** Run the intake until a note is in the indexer. */
     default boolean intake() {
         return false;
     }
@@ -38,11 +39,13 @@ public interface Pilot {
         return false;
     }
 
-    default boolean driveToSpeaker() {
+    /** Drive to the speaker with a note and shoot it. */
+    default boolean scoreSpeaker() {
         return false;
     }
 
-    default boolean driveToAmp() {
+    /** Drive to the amp with a note and score it. */
+    default boolean scoreAmp() {
         return false;
     }
 
@@ -50,7 +53,8 @@ public interface Pilot {
         return false;
     }
 
-    default boolean driveToPass() {
+    /** Drive to the passing spot with a note and lob it. */
+    default boolean pass() {
         return false;
     }
 

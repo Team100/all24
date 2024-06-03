@@ -60,7 +60,6 @@ public class CameraSubsystem extends SubsystemBase {
         trimSightings();
     }
 
-   
     public NoteSighting findClosestNote(Pose2d pose) {
         // This map of notes is ordered by sighting age, not distance, so we need to
         // look at all of them.
@@ -81,7 +80,6 @@ public class CameraSubsystem extends SubsystemBase {
         }
         return closestSighting;
     }
-
 
     /**
      * Key is timestamp in seconds.
@@ -135,21 +133,23 @@ public class CameraSubsystem extends SubsystemBase {
         Vector2 position = m_robotBody.getWorldCenter();
         // look for nearby notes, brute force
         for (Body100 body : m_robotBody.getWorld().getBodies()) {
-            if (body instanceof Note) {
-                if (!((Note) body).isVisible()) {
-                    // ignore notes carried by other robots, or flying through the air.
-                    continue;
-                }
-                Vector2 notePosition = body.getWorldCenter();
-                double distance = position.distance(notePosition);
-                // can't see that far
-                if (distance > kMaxNoteDistance)
-                    continue;
-                double now = Timer.getFPGATimestamp();
-                NoteSighting sighting = new NoteSighting(
-                        new Translation2d(notePosition.x, notePosition.y));
-                noteSightings.put(now, sighting);
+            if (!(body instanceof Note))
+                continue;
+            Note note = (Note) body;
+
+            if (!note.isVisible()) {
+                // ignore notes carried by other robots, or flying through the air.
+                continue;
             }
+            Vector2 notePosition = note.getWorldCenter();
+            double distance = position.distance(notePosition);
+            // can't see that far
+            if (distance > kMaxNoteDistance)
+                continue;
+            double now = Timer.getFPGATimestamp();
+            NoteSighting sighting = new NoteSighting(
+                    new Translation2d(notePosition.x, notePosition.y));
+            noteSightings.put(now, sighting);
         }
     }
 

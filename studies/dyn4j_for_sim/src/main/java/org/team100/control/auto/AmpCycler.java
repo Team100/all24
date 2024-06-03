@@ -46,7 +46,7 @@ public class AmpCycler implements Autopilot {
     }
 
     @Override
-    public boolean driveToAmp() {
+    public boolean scoreAmp() {
         return m_enabled && m_indexer.full();
     }
 

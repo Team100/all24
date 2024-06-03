@@ -16,16 +16,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 /**
  * Drives to a good spot for shooting.
  * 
- * This command is very approximate about location.
+ * This command uses loose tolerance since the exact position doesn't matter;
+ * the actual range is used for the shooter angle.
  * 
- * It should be followed by RotateToShoot.
+ * RotateToShoot should be used to rotate to the correct angle given the actual
+ * location, and come to a complete stop.
  * 
  * TODO: extract a "drive to X" command
  */
 public class DriveToSpeaker extends Command {
-    private static final double kTranslationTolerance = 2;
-    private static final double kVelocityTolerance = 5;
-    private static final double kAngularTolerance = 2;
+    private static final double kTranslationTolerance = 0.75;
+    private static final double kVelocityTolerance = 1;
+    private static final double kAngularTolerance = 0.25;
     private static final double kAngularP = 10;
     private static final double kCartesianP = 5;
     private final DriveSubsystem m_drive;
