@@ -70,6 +70,11 @@ public interface Pilot {
         return false;
     }
 
+    /** Which note to drive to.  Zero means "closest one". */
+    default int goalNote() {
+        return 0;
+    }
+
     /**
      * The controller states here are monitored with triggers, which notice
      * **EDGES** so we need to start with everything off, and wait until the trigger

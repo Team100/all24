@@ -17,8 +17,8 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 
 /**
  * Uses a CollisionListener to catch the collision event between notes and
@@ -148,7 +148,7 @@ public class Scorekeeper
     }
 
     private void scoreBlueAmp() {
-        if (DriverStationSim.getAutonomous()) {
+        if (DriverStation.isAutonomous()) {
             m_blue.AutoAmpNoteCount++;
         } else {
             m_blue.TeleopAmpNoteCount++;
@@ -161,7 +161,7 @@ public class Scorekeeper
     }
 
     private void scoreRedAmp() {
-        if (DriverStationSim.getAutonomous()) {
+        if (DriverStation.isAutonomous()) {
             m_red.AutoAmpNoteCount++;
         } else {
             m_red.TeleopAmpNoteCount++;
@@ -174,7 +174,7 @@ public class Scorekeeper
     }
 
     private void scoreBlueSpeaker() {
-        if (DriverStationSim.getAutonomous()) {
+        if (DriverStation.isAutonomous()) {
             m_blue.AutoSpeakerNoteCount++;
         } else {
             if (m_blueAmpTime != null) {
@@ -187,7 +187,7 @@ public class Scorekeeper
     }
 
     private void scoreRedSpeaker() {
-        if (DriverStationSim.getAutonomous()) {
+        if (DriverStation.isAutonomous()) {
             m_red.AutoSpeakerNoteCount++;
         } else {
             if (m_redAmpTime != null) {

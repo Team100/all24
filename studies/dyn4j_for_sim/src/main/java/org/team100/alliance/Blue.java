@@ -1,7 +1,9 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
+import org.team100.control.Idlepilot;
 import org.team100.control.ManualPilot;
+import org.team100.control.SelectorPilot;
 import org.team100.control.auto.AmpCycler;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.SpeakerCycler;
@@ -26,27 +28,35 @@ public class Blue implements Alliance {
     public Blue(SimWorld world) {
         if (kRealPlayer) {
             player = new RobotAssembly(
-                    x -> new ManualPilot(),
+                    x -> SelectorPilot.autonSelector(
+                            new Idlepilot(),
+                            new ManualPilot()),
                     new Player(world, false),
                     false);
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
         } else {
             player = new RobotAssembly(
-                    x -> new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
+                    x -> SelectorPilot.autonSelector(
+                            new Idlepilot(),
+                            new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
                     new Player(world, false),
                     false);
         }
         player.setState(2, 4, 0, 0); // initial position
 
         friend1 = new RobotAssembly(
-                x -> new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer()),
+                x -> SelectorPilot.autonSelector(
+                        new Idlepilot(),
+                        new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Friend("blue 1", world, false),
                 false);
         friend1.setState(1, 1, 0, 0); // initial position
 
         friend2 = new RobotAssembly(
-                x -> new Defender(),
+                x -> SelectorPilot.autonSelector(
+                        new Idlepilot(),
+                        new Defender()),
                 new Friend("blue 2", world, false),
                 false);
         friend2.setState(1, 4, 0, 0); // initial position

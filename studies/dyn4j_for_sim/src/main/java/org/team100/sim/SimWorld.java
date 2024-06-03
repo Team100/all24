@@ -12,6 +12,7 @@ import org.dyn4j.world.World;
 import org.team100.field.FieldMap;
 import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
+import org.team100.field.StagedNote;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -344,20 +345,10 @@ public class SimWorld {
     }
 
     private void setUpNotes() {
-        // these locations match the background image, ~2 cm different from CAD.
-        addNote(2.890, 4.10, false);
-        addNote(2.890, 5.56, false);
-        addNote(2.890, 7.01, false);
-
-        addNote(8.275, 0.75, false);
-        addNote(8.275, 2.43, false);
-        addNote(8.275, 4.10, false);
-        addNote(8.275, 5.79, false);
-        addNote(8.275, 7.47, false);
-
-        addNote(13.657, 4.10, false);
-        addNote(13.657, 5.56, false);
-        addNote(13.657, 7.01, false);
+        for (StagedNote n : StagedNote.values()) {
+            Translation2d loc = n.getLocation();
+            addNote(loc.getX(), loc.getY(), false);
+        }
     }
 
     public void addNote(double x, double y, boolean debug) {

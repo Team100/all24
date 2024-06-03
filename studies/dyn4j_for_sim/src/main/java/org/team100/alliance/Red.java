@@ -1,6 +1,8 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
+import org.team100.control.Idlepilot;
+import org.team100.control.SelectorPilot;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
@@ -19,19 +21,25 @@ public class Red implements Alliance {
 
     public Red(SimWorld world) {
         scorer = new RobotAssembly(
-                x -> new Scorer(x.getDrive(), x.getCamera(), x.getIndexer()),
+                x -> SelectorPilot.autonSelector(
+                        new Idlepilot(),
+                        new Scorer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red scorer", world, false),
                 false);
         scorer.setState(15, 3, 0, 0);
 
         passer = new RobotAssembly(
-                x -> new Passer(x.getDrive(), x.getCamera(), x.getIndexer()),
+                x -> SelectorPilot.autonSelector(
+                        new Idlepilot(),
+                        new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, false),
                 false);
         passer.setState(15, 5, 0, 0);
 
         defender = new RobotAssembly(
-                x -> new Defender(),
+                x -> SelectorPilot.autonSelector(
+                        new Idlepilot(),
+                        new Defender()),
                 new Foe("red defender", world, false),
                 false);
         defender.setState(13, 7, 0, 0);
