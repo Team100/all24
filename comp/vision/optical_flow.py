@@ -41,27 +41,27 @@ class CameraData:
         if model == "imx708_wide":
             print("V3 Wide Camera")
             # full frame is 4608x2592; this is 2x2
-            fullwidth = 2304
-            fullheight = 1296
+            fullwidth = 64
+            fullheight = 64
             # medium detection resolution, compromise speed vs range
-            self.width = 1152
-            self.height = 648
+            self.width = 64
+            self.height = 64
         elif model == "imx219":
             print("V2 Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1664  # slightly larger than the detector, to match stride
-            fullheight = 1232
+            fullwidth = 64  # slightly larger than the detector, to match stride
+            fullheight = 64
             # medium detection resolution, compromise speed vs range
-            self.width = 832
-            self.height = 616
+            self.width = 64
+            self.height = 64
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1456   # slightly larger than the detector, to match stride
-            fullheight = 1088
+            fullwidth = 64   # slightly larger than the detector, to match stride
+            fullheight = 64
             # medium detection resolution, compromise speed vs range
-            self.width = 1456
-            self.height = 1088
+            self.width = 64
+            self.height = 64
         else:
             print("UNKNOWN CAMERA: " + model)
             fullwidth = 100
@@ -85,6 +85,7 @@ class CameraData:
                 # "AwbEnable": False,
                 # "AeEnable": False,
                 "ExposureTime": 40000,
+                # "ScalerCrop": (int((fullwidth - self.width)/2),int((fullheight - self.height)/2),self.width,self.height)
                 # "AnalogueGain": 1.0
             },
         )
@@ -176,10 +177,10 @@ class MouseVision:
         topic_name = "mouseVision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/fps").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name +  "/" + camera.id + "/latency").publish()
+                self.inst.getDoubleTopic(topic_name +  "/" + str(camera.id) + "/latency").publish()
             )
 
         self.vision_nt_struct = self.inst.getStructTopic(
@@ -188,21 +189,18 @@ class MouseVision:
 
     def analyze(self, request, camera):
         img_yuv = request.make_array("lores")
-        frame = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
+        frame = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2GRAY)
         # frame = cv2.resize(frame, (368,544))
         # this  makes a view, very fast (150 ns)
         # start time to calculate FPS
-        start = time.time()
         metadata = request.get_metadata()
         sensor_timestamp = metadata["SensorTimestamp"]
         system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
         time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
         camera.LatencyPublisher.set(time_delta_ms)
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        img = frame.copy()
         # Calculate optical flow for a sparse feature set using thje iterative Lucas-Kanade Method
         if len(camera.trajectories) > 0:
-            img0, img1 = camera.prev_gray, frame_gray
+            img0, img1 = camera.prev_gray, frame
             p0 = np.float32(
                 [trajectory[-1] for trajectory in camera.trajectories]
             ).reshape(-1, 1, 2)
@@ -228,19 +226,19 @@ class MouseVision:
                     del trajectory[0]
                 new_trajectories.append(trajectory)
                 # Newest detected point
-                cv2.circle(img, (int(x), int(y)), 2, (0, 0, 255), -1)
+                cv2.circle(frame, (int(x), int(y)), 2, (0, 0, 255), -1)
 
             camera.trajectories = new_trajectories
 
             # Draw all the trajectories
             cv2.polylines(
-                img,
+                frame,
                 [np.int32(trajectory) for trajectory in camera.trajectories],
                 False,
                 (0, 255, 0),
             )
             cv2.putText(
-                img,
+                frame,
                 "track count: %d" % len(camera.trajectories),
                 (20, 50),
                 cv2.FONT_HERSHEY_PLAIN,
@@ -264,7 +262,7 @@ class MouseVision:
                 self.translations.append([averageY,averageX])
         # Update interval - When to update and detect new features
         if camera.frame_idx % self.detect_interval == 0:
-            mask = np.zeros_like(frame_gray)
+            mask = np.zeros_like(frame)
             mask[:] = 255
 
             # Lastest point in latest trajectory
@@ -272,17 +270,15 @@ class MouseVision:
                 cv2.circle(mask, (x, y), 5, 0, -1)
 
             # Detect the good features to track
-            p = cv2.goodFeaturesToTrack(frame_gray, mask=mask, **self.feature_params)
+            p = cv2.goodFeaturesToTrack(frame, mask=mask, **self.feature_params)
             if p is not None:
                 # If good features can be tracked - add that to the trajectories
                 for x, y in np.float32(p).reshape(-1, 2):
                     camera.trajectories.append([(x, y)])
 
         camera.frame_idx += 1
-        camera.prev_gray = frame_gray
+        camera.prev_gray = frame
 
-        # End time
-        end = time.time()
         # calculate the FPS for current frame detection
         current_time = time.time()
         total_et = current_time - camera.frame_time
@@ -294,16 +290,16 @@ class MouseVision:
         camera.FPSPublisher.set(fps)
         # Show Results
         cv2.putText(
-            img,
+            frame,
             f"{camera.fps:.2f} FPS",
             (20, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.4,
-            (0, 255, 0),
+            (255, 255, 255),
             2,
         )
         # output = cv2.resize(img, (self.width,self.height))
-        camera.output_stream.putFrame(img)
+        camera.output_stream.putFrame(frame)
 
 
 def getserial():
