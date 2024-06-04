@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /** Proxy auton during autonomous period, otherwise teleop. */
@@ -95,6 +96,16 @@ public class SelectorPilot implements Pilot {
     }
 
     @Override
+    public boolean driveToStaged() {
+        return select(Pilot::driveToStaged);
+    }
+
+    @Override
+    public Pose2d shootingLocation() {
+        return select(Pilot::shootingLocation);
+    }
+
+    @Override
     public int goalNote() {
         return select(Pilot::goalNote);
     }
@@ -122,7 +133,7 @@ public class SelectorPilot implements Pilot {
         }
     }
 
-    private void select(Consumer<Pilot>fn) {
+    private void select(Consumer<Pilot> fn) {
         if (m_selector.getAsBoolean()) {
             fn.accept(m_true);
         } else {

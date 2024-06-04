@@ -26,6 +26,7 @@ public class SpeakerCycler implements Pilot {
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
+    private final Pose2d m_shooting;
 
     private boolean m_enabled = false;
 
@@ -33,13 +34,15 @@ public class SpeakerCycler implements Pilot {
     public SpeakerCycler(
             DriveSubsystem drive,
             CameraSubsystem camera,
-            IndexerSubsystem indexer) {
+            IndexerSubsystem indexer,
+            Pose2d shooting) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
         Arg.nonnull(indexer);
         m_drive = drive;
         m_camera = camera;
         m_indexer = indexer;
+        m_shooting = shooting;
     }
 
     // drive to the speaker if there's a note in the indexer.
@@ -64,6 +67,11 @@ public class SpeakerCycler implements Pilot {
     @Override
     public boolean driveToNote() {
         return m_enabled && noteNearby() && !m_indexer.full();
+    }
+
+    @Override
+    public Pose2d shootingLocation() {
+        return m_shooting;
     }
 
     @Override

@@ -2,6 +2,8 @@ package org.team100.control;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
+import edu.wpi.first.math.geometry.Pose2d;
+
 /**
  * The Pilot is the interface for manual or autonomous control.
  */
@@ -72,6 +74,10 @@ public interface Pilot {
 
     default boolean driveToStaged() {
         return false;
+    }
+
+    default Pose2d shootingLocation() {
+        return new Pose2d();
     }
 
     /**

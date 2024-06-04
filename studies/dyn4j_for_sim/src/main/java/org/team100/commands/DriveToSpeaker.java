@@ -2,6 +2,7 @@ package org.team100.commands;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
+import org.team100.control.Pilot;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -30,14 +31,17 @@ public class DriveToSpeaker extends Command {
     private static final double kAngularTolerance = 0.25;
     private static final double kAngularP = 10;
     private static final double kCartesianP = 5;
+    private final Pilot m_pilot;
     private final DriveSubsystem m_drive;
-    private final Pose2d m_goal;
     private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DriveToSpeaker(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
+    public DriveToSpeaker(Pilot pilot,
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
+        m_pilot = pilot;
         m_drive = drive;
-        m_goal = m_drive.shootingPosition();
         m_debug = debug;
         m_tactics = new Tactics(drive, camera);
         addRequirements(drive);
@@ -69,7 +73,7 @@ public class DriveToSpeaker extends Command {
     @Override
     public boolean isFinished() {
         Pose2d pose = m_drive.getPose();
-        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_goal);
+        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_pilot.shootingLocation());
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
@@ -82,7 +86,7 @@ public class DriveToSpeaker extends Command {
     /** Proportional feedback with a limiter. */
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_drive.getPose();
-        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
+        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_pilot.shootingLocation());
         Vector2 positionError = new Vector2(transform.getX(), transform.getY());
         double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
         Vector2 cartesianU_FB = positionError.product(kCartesianP);

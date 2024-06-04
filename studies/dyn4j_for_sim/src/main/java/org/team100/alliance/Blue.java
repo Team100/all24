@@ -13,6 +13,8 @@ import org.team100.sim.Friend;
 import org.team100.sim.Player;
 import org.team100.sim.SimWorld;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class Blue implements Alliance {
@@ -30,7 +32,9 @@ public class Blue implements Alliance {
         if (kRealPlayer) {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
-                            new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 1, 2, 3),
+                            new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                    new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)),
+                                    1, 2, 3),
                             new ManualPilot()),
                     new Player(world, false),
                     false);
@@ -39,7 +43,9 @@ public class Blue implements Alliance {
         } else {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
-                            new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 3, 2, 1),
+                            new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                    new Pose2d(3.0, 7.0, new Rotation2d(Math.PI)),
+                                    3, 2, 1),
                             new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
                     new Player(world, false),
                     false);
@@ -49,8 +55,11 @@ public class Blue implements Alliance {
         // far 3
         friend1 = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 8, 7, 6),
-                        new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)),
+                                8, 7, 6),
+                        new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)))),
                 new Friend("blue 1", world, false),
                 false);
         friend1.setState(2, 5.5, 0, 0); // initial position
@@ -58,7 +67,9 @@ public class Blue implements Alliance {
         // complement 2
         friend2 = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 4, 5),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(3.0, 3.0, new Rotation2d(Math.PI)),
+                                4, 5),
                         new Defender()),
                 new Friend("blue 2", world, false),
                 false);

@@ -78,7 +78,7 @@ public class RobotAssembly {
                 new GoToStaged(m_pilot, m_drive, m_camera, debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
-                        new DriveToSpeaker(m_drive, m_camera, debug),
+                        new DriveToSpeaker(m_pilot, m_drive, m_camera, debug),
                         new RotateToShoot(m_drive, debug),
                         new ShootCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::scoreAmp,

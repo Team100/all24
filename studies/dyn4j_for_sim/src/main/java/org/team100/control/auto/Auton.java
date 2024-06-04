@@ -17,6 +17,7 @@ public class Auton implements Pilot {
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
+    private final Pose2d m_shooting;
     private final Integer[] m_notes;
     private final Counter m_counter;
 
@@ -26,6 +27,7 @@ public class Auton implements Pilot {
             DriveSubsystem drive,
             CameraSubsystem camera,
             IndexerSubsystem indexer,
+            Pose2d shooting,
             Integer... notes) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
@@ -35,6 +37,7 @@ public class Auton implements Pilot {
         m_camera = camera;
         m_indexer = indexer;
         m_notes = notes;
+        m_shooting = shooting;
         m_counter = new Counter(m_indexer::full);
     }
 
@@ -57,9 +60,15 @@ public class Auton implements Pilot {
     }
 
     // if we have one, go score it.
+    // there needs to be room for multiple scorers
     @Override
     public boolean scoreSpeaker() {
         return m_enabled && m_indexer.full();
+    }
+
+    @Override
+    public Pose2d shootingLocation() {
+        return m_shooting;
     }
 
     @Override

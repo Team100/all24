@@ -11,6 +11,8 @@ import org.team100.robot.Source;
 import org.team100.sim.Foe;
 import org.team100.sim.SimWorld;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class Red implements Alliance {
@@ -23,8 +25,11 @@ public class Red implements Alliance {
         // near 3
         scorer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 11, 10, 9),
-                        new Scorer(x.getDrive(), x.getCamera(), x.getIndexer())),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(14, 7, new Rotation2d()),
+                                11, 10, 9),
+                        new Scorer(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(13.5, 5.5, new Rotation2d()))),
                 new Foe("red scorer", world, false),
                 false);
         scorer.setState(14, 7, 0, 0);
@@ -32,7 +37,9 @@ public class Red implements Alliance {
         // far 3
         passer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 8, 7, 6),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(14, 5.5, new Rotation2d()),
+                                8, 7, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, false),
                 false);
@@ -41,7 +48,9 @@ public class Red implements Alliance {
         // complement 2
         defender = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 4, 5),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                                new Pose2d(14, 3, new Rotation2d()),
+                                4, 5),
                         new Defender()),
                 new Foe("red defender", world, false),
                 false);
