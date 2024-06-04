@@ -70,7 +70,15 @@ public interface Pilot {
         return false;
     }
 
-    /** Which note to drive to.  Zero means "closest one". */
+    default boolean driveToStaged() {
+        return false;
+    }
+
+    /**
+     * The ID of the note to drive to. Zero means "closest one". This is an int
+     * instead of the StagedNote enum because it's more like a controller, i.e. four
+     * button channels.
+     */
     default int goalNote() {
         return 0;
     }

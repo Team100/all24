@@ -1,22 +1,73 @@
 package org.team100.control.auto;
 
 import org.team100.control.Pilot;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.CameraSubsystem.NoteSighting;
+import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
 import org.team100.util.Arg;
+import org.team100.util.Counter;
+
+import edu.wpi.first.math.geometry.Pose2d;
 
 /** Fetch a note, shoot it into the speaker, repeat. */
 public class Auton implements Pilot {
+    private static final double kMaxNoteDistance = 8.0;
 
+    private final DriveSubsystem m_drive;
+    private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
-    private final Integer[] notes;
+    private final Integer[] m_notes;
+    private final Counter m_counter;
 
     private boolean m_enabled = false;
 
-    public Auton(IndexerSubsystem indexer, Integer... note) {
+    public Auton(
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            IndexerSubsystem indexer,
+            Integer... notes) {
+        Arg.nonnull(drive);
+        Arg.nonnull(camera);
         Arg.nonnull(indexer);
-        Arg.nonempty(note);
-        notes = note;
+        Arg.nonempty(notes);
+        m_drive = drive;
+        m_camera = camera;
         m_indexer = indexer;
+        m_notes = notes;
+        m_counter = new Counter(m_indexer::full);
+    }
+
+    // first go to the right place
+    @Override
+    public boolean driveToStaged() {
+        return m_enabled && !noteNearby() && !m_indexer.full();
+    }
+
+    // once we see a note, go to it ...
+    @Override
+    public boolean driveToNote() {
+        return m_enabled && noteNearby() && !m_indexer.full();
+    }
+
+    // ... and intake it
+    @Override
+    public boolean intake() {
+        return m_enabled && noteNearby() && !m_indexer.full();
+    }
+
+    // if we have one, go score it.
+    @Override
+    public boolean scoreSpeaker() {
+        return m_enabled && m_indexer.full();
+    }
+
+    @Override
+    public int goalNote() {
+        // there is no goal note if we already have one
+        if (m_indexer.full())
+            return 0;
+        return m_notes[m_counter.getAsInt()];
     }
 
     @Override
@@ -27,16 +78,18 @@ public class Auton implements Pilot {
     @Override
     public void reset() {
         m_enabled = false;
+        m_counter.reset();
     }
 
-    @Override
-    public boolean scoreSpeaker() {
-        return m_enabled && m_indexer.full();
-    }
+    ///////////////////////////////////////////////////////////////////
 
-    @Override
-    public int goalNote() {
-        return notes[0];
+    private boolean noteNearby() {
+        Pose2d pose = m_drive.getPose();
+        NoteSighting closestSighting = m_camera.findClosestNote(pose);
+        if (closestSighting == null) {
+            return false;
+        }
+        return closestSighting.position().getDistance(pose.getTranslation()) <= kMaxNoteDistance;
     }
 
 }

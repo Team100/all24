@@ -42,16 +42,6 @@ public class SpeakerCycler implements Pilot {
         m_indexer = indexer;
     }
 
-    @Override
-    public void begin() {
-        m_enabled = true;
-    }
-
-    @Override
-    public void reset() {
-        m_enabled = false;
-    }
-
     // drive to the speaker if there's a note in the indexer.
     @Override
     public boolean scoreSpeaker() {
@@ -77,8 +67,13 @@ public class SpeakerCycler implements Pilot {
     }
 
     @Override
-    public void periodic() {
-        //
+    public void begin() {
+        m_enabled = true;
+    }
+
+    @Override
+    public void reset() {
+        m_enabled = false;
     }
 
     ///////////////////////////////////////////////////////////////////

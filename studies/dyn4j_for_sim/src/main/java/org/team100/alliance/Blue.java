@@ -1,10 +1,10 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
-import org.team100.control.Idlepilot;
 import org.team100.control.ManualPilot;
 import org.team100.control.SelectorPilot;
 import org.team100.control.auto.AmpCycler;
+import org.team100.control.auto.Auton;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.SpeakerCycler;
 import org.team100.robot.RobotAssembly;
@@ -26,10 +26,11 @@ public class Blue implements Alliance {
     private final Source source;
 
     public Blue(SimWorld world) {
+        // near 3
         if (kRealPlayer) {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
-                            new Idlepilot(),
+                            new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 1, 2, 3),
                             new ManualPilot()),
                     new Player(world, false),
                     false);
@@ -38,28 +39,30 @@ public class Blue implements Alliance {
         } else {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
-                            new Idlepilot(),
+                            new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 3, 2, 1),
                             new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
                     new Player(world, false),
                     false);
         }
-        player.setState(2, 4, 0, 0); // initial position
+        player.setState(2, 7, 0, 0); // initial position
 
+        // far 3
         friend1 = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 8, 7, 6),
                         new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Friend("blue 1", world, false),
                 false);
-        friend1.setState(1, 1, 0, 0); // initial position
+        friend1.setState(2, 5.5, 0, 0); // initial position
 
+        // complement 2
         friend2 = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 4, 5),
                         new Defender()),
                 new Friend("blue 2", world, false),
                 false);
-        friend2.setState(1, 4, 0, 0); // initial position
+        friend2.setState(2, 3, 0, 0); // initial position
 
         source = new Source(world, new Translation2d(15.5, 1.0));
         source.setDefaultCommand(new SourceDefault(source, world, true, false));

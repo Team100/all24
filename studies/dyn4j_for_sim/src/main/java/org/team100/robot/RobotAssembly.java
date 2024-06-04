@@ -16,6 +16,7 @@ import org.team100.commands.DriveToNote;
 import org.team100.commands.DriveToPass;
 import org.team100.commands.DriveToSource;
 import org.team100.commands.DriveToSpeaker;
+import org.team100.commands.GoToStaged;
 import org.team100.commands.Intake;
 import org.team100.commands.LobCommand;
 import org.team100.commands.Outtake;
@@ -73,6 +74,8 @@ public class RobotAssembly {
                 new DriveToNote(m_drive, m_camera, debug));
         whileTrue(m_pilot::driveToSource,
                 new DriveToSource(m_drive, m_camera, debug));
+        whileTrue(m_pilot::driveToStaged,
+                new GoToStaged(m_pilot, m_drive, m_camera, debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
                         new DriveToSpeaker(m_drive, m_camera, debug),

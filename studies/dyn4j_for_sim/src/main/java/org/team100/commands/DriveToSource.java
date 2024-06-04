@@ -8,6 +8,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
+import org.team100.util.Arg;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,11 +22,11 @@ public class DriveToSource extends Command {
     /** The intake works at high angles. */
     private static final double kAngularTolerance = 0.75;
     /** Velocity doesn't matter at all. */
-    private static final int kVelocityTolerance = 5;
+    private static final double kVelocityTolerance = 5;
     /** Get close enough for the camera to see. */
     private static final double kCartesianTolerance = 2.5;
-    private static final int kAngularP = 10;
-    private static final int kCartesianP = 5;
+    private static final double kAngularP = 10;
+    private static final double kCartesianP = 5;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
     private final boolean m_debug;
@@ -35,6 +36,8 @@ public class DriveToSource extends Command {
             DriveSubsystem drive,
             CameraSubsystem camera,
             boolean debug) {
+        Arg.nonnull(drive);
+        Arg.nonnull(camera);
         m_drive = drive;
         m_goal = m_drive.sourcePosition();
         m_debug = debug;
@@ -54,7 +57,7 @@ public class DriveToSource extends Command {
             ForceViz.put("desired", pose, desired);
         if (m_debug && Debug.print())
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug&& Debug.print());
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug && Debug.print());
         if (m_debug && Debug.print())
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
@@ -64,6 +67,7 @@ public class DriveToSource extends Command {
         m_drive.drive(v);
     }
 
+    /** TODO: i think this never matters, the pilot cancels the command */
     @Override
     public boolean isFinished() {
         Pose2d pose = m_drive.getPose();

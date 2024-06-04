@@ -7,6 +7,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
+import org.team100.util.Arg;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
 
@@ -39,6 +40,8 @@ public class DriveToNote extends Command {
             DriveSubsystem drive,
             CameraSubsystem camera,
             boolean debug) {
+        Arg.nonnull(drive);
+        Arg.nonnull(camera);
         m_drive = drive;
         m_camera = camera;
         m_debug = debug;
@@ -89,10 +92,10 @@ public class DriveToNote extends Command {
      * don't move and sightings are all pretty new)
      */
     private void goToGoal(Pose2d pose) {
-     
-     // TODO: remember and prefer the previous fixation, unless some new sighting is
-     // much better.
-     
+
+        // TODO: remember and prefer the previous fixation, unless some new sighting is
+        // much better.
+
         NoteSighting closestSighting = m_camera.findClosestNote(pose);
         if (closestSighting == null) {
             // no nearby note, no need to move
@@ -129,8 +132,6 @@ public class DriveToNote extends Command {
         // need to turn? avoid the edges.
         finish(desired, !aligned);
     }
-
-
 
     private boolean aligned(double angleError) {
         return Math.abs(angleError) < IndexerSubsystem.kAdmittanceRad;

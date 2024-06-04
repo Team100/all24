@@ -1,8 +1,8 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
-import org.team100.control.Idlepilot;
 import org.team100.control.SelectorPilot;
+import org.team100.control.auto.Auton;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
@@ -20,29 +20,32 @@ public class Red implements Alliance {
     private final Source source;
 
     public Red(SimWorld world) {
+        // near 3
         scorer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 11, 10, 9),
                         new Scorer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red scorer", world, false),
                 false);
-        scorer.setState(15, 3, 0, 0);
+        scorer.setState(14, 7, 0, 0);
 
+        // far 3
         passer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 8, 7, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, false),
                 false);
-        passer.setState(15, 5, 0, 0);
+        passer.setState(14, 5.5, 0, 0);
 
+        // complement 2
         defender = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(), 4, 5),
                         new Defender()),
                 new Foe("red defender", world, false),
                 false);
-        defender.setState(13, 7, 0, 0);
+        defender.setState(14, 3, 0, 0);
 
         source = new Source(world, new Translation2d(1.0, 1.0));
         source.setDefaultCommand(new SourceDefault(source, world, false, false));
