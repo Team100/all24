@@ -53,7 +53,9 @@ public class RobotAssembly {
             RobotBody robotBody,
             boolean debug) {
         m_drive = new DriveSubsystem(robotBody);
-        m_indexer = new IndexerSubsystem(this, robotBody);
+        m_indexer = new IndexerSubsystem(this, robotBody, debug);
+        // every robot gets a preload in the indexer.
+        m_indexer.preload();
         m_shooter = new ShooterSubsystem(this, robotBody, debug);
         m_camera = new CameraSubsystem(robotBody);
         // must come after the initializations above.
@@ -112,8 +114,9 @@ public class RobotAssembly {
 
     }
 
-    public void setState(double x, double y, double vx, double vy) {
-        m_drive.setState(x, y, vx, vy);
+    /** Coordinates here use "blue" origin. */
+    public void setState(double x, double y, double theta, double vx, double vy) {
+        m_drive.setState(x, y, theta, vx, vy);
     }
 
     public DriveSubsystem getDrive() {

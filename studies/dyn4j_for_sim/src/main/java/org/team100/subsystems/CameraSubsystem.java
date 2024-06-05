@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /** Makes lists of robots and nearby notes it can see. */
 public class CameraSubsystem extends SubsystemBase {
     /** Ignore note sightings further away than this. */
-    private static final double kMaxNoteDistance = 5;
+    public static final double kMaxNoteDistance = 5;
     /** Ignore robot sightings further away than this. */
     private static final double kMaxRobotDistance = 5;
 

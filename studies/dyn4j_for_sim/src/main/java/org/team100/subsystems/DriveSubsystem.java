@@ -36,8 +36,10 @@ public class DriveSubsystem extends SubsystemBase {
      * meters and meters per second
      * for initialization
      */
-    public void setState(double x, double y, double vx, double vy) {
+    public void setState(double x, double y, double theta, double vx, double vy) {
         m_robotBody.getTransform().identity();
+        // rotation is around the origin, so rotate first.  :-)
+        m_robotBody.getTransform().rotate(theta);
         m_robotBody.getTransform().translate(x, y);
         m_robotBody.setAtRest(false);
         m_robotBody.setLinearVelocity(new Vector2(vx, vy));

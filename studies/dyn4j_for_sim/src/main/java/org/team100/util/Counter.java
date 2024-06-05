@@ -19,20 +19,26 @@ public class Counter implements IntSupplier {
 
     @Override
     public int getAsInt() {
+        return m_count;
+    }
+
+    public void reset() {
+        System.out.println("count reset");
+        m_count = 0;
+    }
+
+    /** Since "get" is not reliably called, this needs to be called periodically. */
+    public void periodic() {
         boolean newValue = m_supplier.getAsBoolean();
         if (newValue && !m_value) {
             m_value = true;
             // count positive edge
+            System.out.println("count increment");
             m_count++;
         } else if (!newValue && m_value) {
             // ignore negative edge
             m_value = false;
         }
-        return m_count;
-    }
-
-    public void reset() {
-        m_count = 0;
     }
 
 }

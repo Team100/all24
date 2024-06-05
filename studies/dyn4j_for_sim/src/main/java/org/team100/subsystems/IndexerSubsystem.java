@@ -7,6 +7,7 @@ import org.team100.robot.RobotAssembly;
 import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
+import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,6 +25,7 @@ public class IndexerSubsystem extends SubsystemBase {
     public static final double kAdmittanceRad = 0.2;
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
+    private final boolean m_debug;
 
     /**
      * We're allowed zero or one notes.
@@ -34,9 +36,10 @@ public class IndexerSubsystem extends SubsystemBase {
     /** Joint linking the note to the robot, so we can remove it when ejecting. */
     private Joint<Body100> m_joint;
 
-    public IndexerSubsystem(RobotAssembly assembly, RobotBody robotBody) {
+    public IndexerSubsystem(RobotAssembly assembly, RobotBody robotBody, boolean debug) {
         m_assembly = assembly;
         m_robotBody = robotBody;
+        m_debug = debug;
     }
 
     /** There's a note in the indexer */
@@ -95,17 +98,27 @@ public class IndexerSubsystem extends SubsystemBase {
             }
 
             // successful pick.
-            m_note = note;
-
-            // move the note to the center of the robot first
-            m_note.setTransform(m_robotBody.getTransform());
-            m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
-            m_robotBody.getWorld().addJoint(m_joint);
-            m_note.carry();
+            load(note);
             return true;
-
         }
         return false;
+    }
+
+    public void load(Note note) {
+        m_note = note;
+        // move the note to the center of the robot
+        m_note.setTransform(m_robotBody.getTransform());
+        m_joint = new WeldJoint<>(m_note, m_robotBody, new Vector2());
+        m_robotBody.getWorld().addJoint(m_joint);
+        m_note.carry();
+    }
+
+    public void preload() {
+        Note note = new Note(m_debug);
+        SimWorld world = m_robotBody.getWorld();
+        world.addBody(note);
+        world.addStepListener(note);
+        load(note);
     }
 
     /**

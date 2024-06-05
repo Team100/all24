@@ -9,6 +9,7 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
+import org.dyn4j.world.listener.StepListener;
 import org.team100.field.FieldMap;
 import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
@@ -77,8 +78,12 @@ public class SimWorld {
         t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
-    public void addBody(RobotBody body) {
+    public void addBody(Body100 body) {
         world.addBody(body);
+    }
+
+    public void addStepListener(StepListener<Body100> listener) {
+        world.addStepListener(listener);
     }
 
     public void addJoint(Joint<Body100> joint) {
