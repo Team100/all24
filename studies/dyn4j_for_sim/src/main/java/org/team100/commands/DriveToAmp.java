@@ -28,26 +28,26 @@ public class DriveToAmp extends Command {
             boolean debug) {
         m_drive = drive;
         m_goal = m_drive.ampPosition();
-        m_debug = debug;
-        m_tactics = new Tactics(drive, camera);
+        m_debug = debug && Debug.enable();
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("DriveToAmp");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug && Debug.print());
-        if (m_debug && Debug.print())
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
+        if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" total v %s", v);
         m_drive.drive(v);
     }
@@ -59,7 +59,7 @@ public class DriveToAmp extends Command {
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf("translation error %5.2f rotation error %5.2f\n",
                     translationError, rotationError);
         return translationError < 0.1

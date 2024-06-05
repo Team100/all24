@@ -42,6 +42,10 @@ public class IndexerSubsystem extends SubsystemBase {
         m_debug = debug;
     }
 
+    public static boolean aligned(double angleRad) {
+        return Math.abs(angleRad) < IndexerSubsystem.kAdmittanceRad;
+    } 
+
     /** There's a note in the indexer */
     public boolean full() {
         return m_note != null;

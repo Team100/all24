@@ -27,6 +27,10 @@ public class Counter implements IntSupplier {
         m_count = 0;
     }
 
+    public void set(int idx) {
+        m_count = idx;
+    }
+
     /** Since "get" is not reliably called, this needs to be called periodically. */
     public void periodic() {
         boolean newValue = m_supplier.getAsBoolean();

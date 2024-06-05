@@ -40,29 +40,29 @@ public class DriveToSource extends Command {
         Arg.nonnull(camera);
         m_drive = drive;
         m_goal = m_drive.sourcePosition();
-        m_debug = debug;
-        m_tactics = new Tactics(drive, camera);
+        m_debug = debug && Debug.enable();
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug )
             System.out.print("DriveToSource");
         Pose2d pose = m_drive.getPose();
-        if (m_debug && Debug.print())
+        if (m_debug )
             System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
         FieldRelativeVelocity desired = goToGoal(pose);
         if (m_debug)
             ForceViz.put("desired", pose, desired);
-        if (m_debug && Debug.print())
+        if (m_debug )
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug && Debug.print());
-        if (m_debug && Debug.print())
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
+        if (m_debug )
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        if (m_debug && Debug.print())
+        if (m_debug )
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }

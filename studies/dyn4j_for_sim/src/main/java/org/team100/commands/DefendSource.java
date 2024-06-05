@@ -57,35 +57,34 @@ public class DefendSource extends Command {
         m_skill = skill;
         m_drive = drive;
         m_camera = camera;
-        m_debug = debug;
-        m_tactics = new Tactics(drive, camera);
+        m_debug = debug && Debug.enable();
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("Defend");
         Pose2d pose = m_drive.getPose();
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
         FieldRelativeVelocity desired = work(
                 m_skill,
                 pose,
                 m_drive.getRobotBody().defenderPosition(),
                 m_drive.getRobotBody().opponentSourcePosition(),
-                m_camera.recentSightings(),
-                m_debug);
+                m_camera.recentSightings());
         if (m_debug)
             ForceViz.put("desired", pose, desired);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false, m_debug && Debug.print());
-        if (m_debug && Debug.print())
+        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false, m_debug);
+        if (m_debug)
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
@@ -99,8 +98,7 @@ public class DefendSource extends Command {
             Pose2d pose,
             Pose2d defenderPosition,
             Pose2d opponentSourcePosition,
-            NavigableMap<Double, RobotSighting> recentSightings,
-            boolean debug) {
+            NavigableMap<Double, RobotSighting> recentSightings) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
 
         Vector2 myPosition = new Vector2(pose.getX(), pose.getY());
@@ -112,7 +110,7 @@ public class DefendSource extends Command {
                 toWaitingSpot.getX(),
                 toWaitingSpot.getY(),
                 0).times(kWaitingAttraction);
-        if (debug && Debug.print())
+        if (m_debug)
             System.out.printf(" waiting %s", waiting);
         v = v.plus(waiting);
 
@@ -126,7 +124,7 @@ public class DefendSource extends Command {
                     toCorner.getX(),
                     toCorner.getY(),
                     0).times(magnitude);
-            if (debug && Debug.print())
+            if (m_debug)
                 System.out.printf(" repel %s", repel);
             // v = v.plus(repel);
             v = repel;
@@ -166,7 +164,7 @@ public class DefendSource extends Command {
                 // don't chase it too far
                 continue;
             }
-            if (debug && Debug.print())
+            if (m_debug )
                 System.out.printf(" foe (%5.2f, %5.2f)", foe.getX(), foe.getY());
             // drive towards the opponent
             Vector2 toOpponent = myPosition.to(
@@ -174,7 +172,7 @@ public class DefendSource extends Command {
             Vector2 force = toOpponent.product(
                     m_skill * kDefensePushing / toOpponent.getMagnitudeSquared());
             FieldRelativeVelocity push = new FieldRelativeVelocity(force.x, force.y, 0);
-            if (debug && Debug.print())
+            if (m_debug )
                 System.out.printf(" push %s", push);
             // v = v.plus(push);
             v = push;
@@ -187,7 +185,7 @@ public class DefendSource extends Command {
             FieldRelativeVelocity corner = new FieldRelativeVelocity(
                     toFoe.getX() * m_skill * kCorner,
                     toFoe.getY() * m_skill * kCorner, 0);
-            if (debug && Debug.print())
+            if (m_debug)
                 System.out.printf(" corner %s", corner);
             v = v.plus(corner);
 

@@ -11,9 +11,9 @@ public class Steal extends Command {
     private final DriveSubsystem m_drive;
     private final Tactics m_tactics;
 
-    public Steal(DriveSubsystem drive, CameraSubsystem camera) {
+    public Steal(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
         m_drive = drive;
-        m_tactics = new Tactics(drive, camera);
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 

@@ -1,7 +1,6 @@
 package org.team100.control.auto;
 
 import java.util.Arrays;
-import java.util.NavigableMap;
 import java.util.Optional;
 
 import org.team100.control.Pilot;
@@ -11,13 +10,13 @@ import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
 import org.team100.util.Arg;
-import org.team100.util.Counter;
+import org.team100.util.Latch;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /**
- * Fetch a note, shoot it into the speaker, repeat.
+ * Fetch a staged note, shoot it into the speaker, repeat.
  * 
  * TODO: make a special "shoot preload" command.
  * 
@@ -27,6 +26,12 @@ import edu.wpi.first.math.geometry.Translation2d;
  * for the estimate.
  * 
  * So the choice of note to pursue depends on this belief.
+ * 
+ * Does not improvise (uses the staged notes only), because otherwise it would
+ * always choose the close ones instead of its strategic goal, which might be
+ * far away.
+ * 
+ * TODO: add opportunistic diversion.
  */
 public class Auton implements Pilot {
     private static final double kBeliefUpdateTolerance = 0.1;
@@ -34,21 +39,26 @@ public class Auton implements Pilot {
     // tolerance for go-to-staged-note paths.
     private static final double kStageTolerance = 0.6;
 
-    // ignore notes further than this.
-    // the limit is very small to prevent distraction.
-    // TODO: what if the target note is missing?
-    private static final double kMaxNoteDistance = 0.5;
-
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
     private final Pose2d m_shooting;
     private final boolean m_debug;
-    private final Integer[] m_notes;
+    /** List of note id's we should go get. */
+    private final Integer[] m_agenda;
+    /** Parallel list of presence probability. */
     private final double[] m_beliefs;
-    private final Counter m_counter;
+    /**
+     * Which note within the agenda we're currently looking for. Increments when we
+     * start looking, i.e. when the indexer becomes *empty*.
+     */
+    // private final Counter m_noteIndex;
+    /** Latches the pick event. */
+    private final Latch m_picked;
 
     private boolean m_enabled = false;
+    /** hm the note counter is problematic, just remember the current goal. */
+    private int m_goalNoteIdx;
 
     public Auton(
             DriveSubsystem drive,
@@ -56,39 +66,38 @@ public class Auton implements Pilot {
             IndexerSubsystem indexer,
             Pose2d shooting,
             boolean debug,
-            Integer... notes) {
+            Integer... agenda) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
         Arg.nonnull(indexer);
-        Arg.nonempty(notes);
+        Arg.nonempty(agenda);
         m_drive = drive;
         m_camera = camera;
         m_indexer = indexer;
-        m_notes = notes;
-        m_beliefs = new double[notes.length];
-        // the initial state is certainty that each position is be full.
+        m_agenda = agenda;
+        m_beliefs = new double[agenda.length];
+        // initially, each position is full.
         Arrays.fill(m_beliefs, 1);
         m_shooting = shooting;
         m_debug = debug;
-        m_counter = new Counter(m_indexer::full);
+        // increment on empty.
+        // m_noteIndex = new Counter(() -> !m_indexer.full());
+        // the first index is 0 so the starting index is -1
+        // m_noteIndex.set(-1);
+        m_goalNoteIdx = -1;
+        m_picked = new Latch(m_indexer::full);
     }
 
     // first go to the right place, ignoring nearby notes on the way.
     @Override
     public boolean driveToStaged() {
-        return m_enabled && !nearGoal() && !m_indexer.full();
-    }
-
-    // once we see a note, go to it ...
-    @Override
-    public boolean driveToNote() {
-        return m_enabled && noteNearby() && nearGoal() && !m_indexer.full();
+        return m_enabled && !m_indexer.full();
     }
 
     // ... and intake it
     @Override
     public boolean intake() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return m_enabled && nearGoal() && !m_indexer.full();
     }
 
     // if we have one, go score it.
@@ -105,15 +114,23 @@ public class Auton implements Pilot {
 
     @Override
     public int goalNote() {
-        // there is no goal note if we already have one
-        if (m_indexer.full())
+        if (m_indexer.full()) {
+            // no goal if we already have one
             return 0;
-        int idx = m_counter.getAsInt();
-        if (idx > m_notes.length - 1)
+        }
+        // int idx = m_noteIndex.getAsInt();
+        int idx = m_goalNoteIdx;
+        if (idx > m_agenda.length - 1) {
+            // no goal if we're done
             return 0;
-        Integer noteId = m_notes[idx];
+        }
+        if (idx < 0) {
+            // no goal if we haven't started yet
+            return 0;
+        }
+        Integer noteId = m_agenda[idx];
         if (m_debug)
-            System.out.println("goal note id " + noteId);
+            System.out.println("agenda note id " + noteId);
         return noteId;
     }
 
@@ -125,16 +142,25 @@ public class Auton implements Pilot {
     @Override
     public void reset() {
         m_enabled = false;
-        m_counter.reset();
+        // m_noteIndex.reset();
+        m_goalNoteIdx = -1;
     }
 
     @Override
     public void periodic() {
-        m_counter.periodic();
+        if (m_debug) {
+            System.out.print("periodic beliefs: ");
+            for (int i = 0; i < m_beliefs.length; ++i) {
+                System.out.printf(" %5.3f", m_beliefs[i]);
+            }
+            System.out.println();
+        }
+        // m_noteIndex.periodic();
+        m_picked.periodic();
         updateBeliefs();
         // beliefs decay to zero over time.
         for (int i = 0; i < m_beliefs.length; ++i) {
-            m_beliefs[i] *= 0.01;
+            m_beliefs[i] *= 0.9999;
         }
     }
 
@@ -147,14 +173,17 @@ public class Auton implements Pilot {
      * (notes missing), if we know what the vision radius is.
      */
     private void updateBeliefs() {
+        if (m_debug)
+            System.out.printf("idx %d\n", m_goalNoteIdx);
+            // System.out.printf("idx %d\n", m_noteIndex.getAsInt());
         Pose2d robotPose = m_drive.getPose();
-        double visionRadiusM = CameraSubsystem.kMaxNoteDistance;
-        // (timestamp, sighting)
-        NavigableMap<Double, NoteSighting> notes = m_camera.recentNoteSightings();
-
-        // join our agenda to the sightings.
-        for (int i = 0; i < m_notes.length; ++i) {
-            int noteId = m_notes[i];
+        if (m_debug)
+            System.out.printf("pose %5.3f %5.3f\n", robotPose.getX(), robotPose.getY());
+        // make this smaller to account for lag
+        double visionRadiusM = CameraSubsystem.kMaxNoteDistance - 1;
+        // left-join the agenda to the sightings.
+        for (int i = 0; i < m_agenda.length; ++i) {
+            int noteId = m_agenda[i];
             Optional<StagedNote> n = StagedNote.get(noteId);
             if (n.isEmpty())
                 continue;
@@ -163,40 +192,95 @@ public class Auton implements Pilot {
                 // too far to see, do not update belief
                 continue;
             }
-            for (NoteSighting sighting : notes.values()) {
-                // can we see it?
-                if (noteLocation.getDistance(sighting.position()) < kBeliefUpdateTolerance) {
-                    // found it!
-                    m_beliefs[i] = 1;
-                }
+            findit(i, noteLocation);
+        }
+        if (m_picked.getAsBoolean()) {
+            // if we just picked a note then it's gone; this overrides whatever the camera
+            // says.
+            int idx = m_goalNoteIdx;
+            // int idx = m_noteIndex.getAsInt();
+            if (m_debug)
+                System.out.printf("picked %d\n", idx);
+            if (idx >= 0 && idx < m_beliefs.length)
+                m_beliefs[idx] = 0;
+        }
+        // update the index so we don't look for missing notes
+        // for (int i = m_noteIndex.getAsInt(); i < m_beliefs.length; ++i) {
+        for (int i = m_goalNoteIdx; i < m_beliefs.length; ++i) {
+            if (i < 0)
+                continue;
+            if (m_beliefs[i] > 0.1) {
+                m_goalNoteIdx = i;
+                break;
             }
-            // it's gone!
-            m_beliefs[i] = 0;
+            // if (m_beliefs[i] < 0.1) {
+            //     // skip this one
+            //     m_noteIndex.set(i + 1);
+            // } else {
+            //     // this is the one we want.
+            //     break;
+            // }
+        }
+        if (m_debug) {
+            System.out.print("beliefs: ");
+            for (int i = 0; i < m_beliefs.length; ++i) {
+                System.out.printf(" %5.3f", m_beliefs[i]);
+            }
+            System.out.println();
         }
 
     }
 
-    private boolean noteNearby() {
-        Pose2d pose = m_drive.getPose();
-        NoteSighting closestSighting = m_camera.findClosestNote(pose);
-        if (closestSighting == null) {
-            return false;
+    /**
+     * Look through recent sightings for note i at location l. if we find it, update
+     * belief to true; if not, update to false.
+     */
+    private void findit(int i, Translation2d noteLocation) {
+        if (m_debug)
+            System.out.printf("trying to find location %5.3f %5.3f\n", noteLocation.getX(), noteLocation.getY());
+        for (NoteSighting sighting : m_camera.recentNoteSightings().values()) {
+            if (m_debug)
+                System.out.printf("sighting %5.3f %5.3f\n", sighting.position().getX(), sighting.position().getY());
+            // can we see it?
+            if (noteLocation.getDistance(sighting.position()) < kBeliefUpdateTolerance) {
+                // found it!
+                if (m_debug)
+                    System.out.printf("found note %d\n", i);
+                m_beliefs[i] = 1;
+                return;
+            }
         }
-        return closestSighting.position().getDistance(pose.getTranslation()) <= kMaxNoteDistance;
+        // it's gone!
+        if (m_debug)
+            System.out.printf("missing note %d\n", i);
+        m_beliefs[i] = 0;
     }
 
-    // this should actually latch somehow.
     private boolean nearGoal() {
         Pose2d pose = m_drive.getPose();
-        int idx = m_counter.getAsInt();
-        if (idx > m_notes.length - 1)
+        // int idx = m_noteIndex.getAsInt();
+        int idx = m_goalNoteIdx;
+        if (idx < 0) {
+            if (m_debug)
+                System.out.printf("skip idx %d\n", idx);
             return false;
-        Integer noteId = m_notes[idx];
+        }
+        if (idx > m_agenda.length - 1) {
+            if (m_debug)
+                System.out.printf("skip idx %d > agenda\n", idx);
+            return false;
+        }
+        Integer noteId = m_agenda[idx];
         Optional<StagedNote> n = StagedNote.get(noteId);
-        if (n.isEmpty())
+        if (n.isEmpty()) {
+            if (m_debug)
+                System.out.printf("bad id");
             return false;
+        }
         Translation2d goal = n.get().getLocation();
         double distance = goal.getDistance(pose.getTranslation());
+        if (m_debug)
+            System.out.printf("distance %5.3f\n", distance);
         return distance < kStageTolerance;
     }
 

@@ -48,11 +48,11 @@ public class Red implements Alliance {
         passer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(14, 5.5, new Rotation2d()), true,
+                                new Pose2d(14, 3, new Rotation2d()), false,
                                 4, 5, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, false),
-                false);
+                true);
         // initially below the subwoofer
         passer.setState(15.3, 3, 0, 0, 0);
 

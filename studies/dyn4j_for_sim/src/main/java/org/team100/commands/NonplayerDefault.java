@@ -10,9 +10,9 @@ public class NonplayerDefault extends Command {
     private final DriveSubsystem m_drive;
     private final Tactics m_tactics;
 
-    public NonplayerDefault(DriveSubsystem drive, CameraSubsystem camera) {
+    public NonplayerDefault(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
         m_drive = drive;
-        m_tactics = new Tactics(drive, camera);
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 

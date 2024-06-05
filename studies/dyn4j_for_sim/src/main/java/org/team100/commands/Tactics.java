@@ -28,8 +28,12 @@ public class Tactics {
     private final Tactic m_obstacleRepulsion;
     private final Tactic m_steerAroundRobots;
     private final Tactic m_robotRepulsion;
+    private final boolean m_debug;
 
-    public Tactics(DriveSubsystem drive, CameraSubsystem camera) {
+    public Tactics(
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
         m_drive = drive;
         m_camera = camera;
         m_avoidEdges = new AvoidEdges(m_drive);
@@ -38,6 +42,7 @@ public class Tactics {
         m_obstacleRepulsion = new ObstacleRepulsion(m_drive);
         m_steerAroundRobots = new SteerAroundRobots(m_drive, m_camera);
         m_robotRepulsion = new RobotRepulsion(m_drive, m_camera);
+        m_debug = debug && Debug.enable();
     }
 
     /**
@@ -67,7 +72,7 @@ public class Tactics {
         }
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
 
-        if (debug && Debug.print())
+        if (m_debug)
             System.out.printf(" tactic %s", v);
 
         return v;

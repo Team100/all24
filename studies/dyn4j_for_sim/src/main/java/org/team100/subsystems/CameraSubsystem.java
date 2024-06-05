@@ -144,11 +144,16 @@ public class CameraSubsystem extends SubsystemBase {
             Vector2 notePosition = note.getWorldCenter();
             double distance = position.distance(notePosition);
             // can't see that far
-            if (distance > kMaxNoteDistance)
+            if (distance > kMaxNoteDistance) {
+                if (m_robotBody.isDebug())
+                    System.out.printf("skip far sighting %5.3f %5.3f\n", notePosition.x, notePosition.y);
                 continue;
+            }
             double now = Timer.getFPGATimestamp();
             NoteSighting sighting = new NoteSighting(
                     new Translation2d(notePosition.x, notePosition.y));
+            if (m_robotBody.isDebug())
+                System.out.printf("new sighting %5.3f %5.3f\n", notePosition.x, notePosition.y);
             noteSightings.put(now, sighting);
         }
     }

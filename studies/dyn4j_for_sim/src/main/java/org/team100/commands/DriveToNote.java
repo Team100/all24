@@ -44,14 +44,14 @@ public class DriveToNote extends Command {
         Arg.nonnull(camera);
         m_drive = drive;
         m_camera = camera;
-        m_debug = debug;
-        m_tactics = new Tactics(drive, camera);
+        m_debug = debug && Debug.enable();
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("DriveToNote");
 
         // where are we with respect to the goal?
@@ -74,15 +74,15 @@ public class DriveToNote extends Command {
     private void finish(FieldRelativeVelocity desired, boolean avoidEdges) {
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" desire %s", desired);
 
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true, m_debug && Debug.print());
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true, m_debug);
 
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
 
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
@@ -106,7 +106,7 @@ public class DriveToNote extends Command {
         // found a note
 
         Translation2d targetFieldRelative = closestSighting.position();
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
                     pose.getX(), pose.getY(), targetFieldRelative.getX(), targetFieldRelative.getY());
 
@@ -117,7 +117,7 @@ public class DriveToNote extends Command {
         double angleError = MathUtil.angleModulus(
                 robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
 
-        boolean aligned = aligned(angleError);
+        boolean aligned = IndexerSubsystem.aligned(angleError);
 
         Translation2d cartesianU_FB = getCartesianU_FB(
                 robotToTargetFieldRelative,
@@ -131,10 +131,6 @@ public class DriveToNote extends Command {
 
         // need to turn? avoid the edges.
         finish(desired, !aligned);
-    }
-
-    private boolean aligned(double angleError) {
-        return Math.abs(angleError) < IndexerSubsystem.kAdmittanceRad;
     }
 
     /** Go to the note if aligned. If not, or if we missed, go 1m away. */

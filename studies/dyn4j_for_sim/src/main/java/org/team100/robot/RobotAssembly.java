@@ -69,7 +69,7 @@ public class RobotAssembly {
         // things that both the driver and autopilot would do
 
         whileTrue(m_pilot::intake,
-                new Intake(m_indexer));
+                new Intake(m_indexer, debug));
         whileTrue(m_pilot::defend,
                 new DefendSource(0.1, m_drive, m_camera, debug));
         whileTrue(m_pilot::driveToNote,

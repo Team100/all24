@@ -42,27 +42,27 @@ public class DriveToSpeaker extends Command {
             boolean debug) {
         m_pilot = pilot;
         m_drive = drive;
-        m_debug = debug;
-        m_tactics = new Tactics(drive, camera);
+        m_debug = debug && Debug.enable();
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     /** TODO: replace with a more general driving plan */
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("DriveToSpeaker");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug && Debug.print());
-        if (m_debug && Debug.print())
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug);
+        if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }

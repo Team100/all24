@@ -29,26 +29,26 @@ public class DriveToPass extends Command {
     public DriveToPass(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
         m_drive = drive;
         m_goal = m_drive.passingPosition();
-        m_debug = debug;
-        m_tactics = new Tactics(drive, camera);
+        m_debug = debug && Debug.enable();
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("DriveToPass execute");
         FieldRelativeVelocity desired = goToGoal();
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug && Debug.print());
-        if (m_debug && Debug.print())
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug);
+        if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }
@@ -66,7 +66,7 @@ public class DriveToPass extends Command {
     /** Proportional feedback with a limiter. */
     private FieldRelativeVelocity goToGoal() {
         Pose2d pose = m_drive.getPose();
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
                     pose.getX(), pose.getY(), m_goal.getX(), m_goal.getY());
 
