@@ -40,7 +40,7 @@ public class Blue implements Alliance {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
                             new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                    new Pose2d(3.0, 7.5, new Rotation2d(Math.PI)), false,
+                                    new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
                                     8, 7, 6),
                             new ManualPilot()),
                     new Player(world, false),
@@ -51,7 +51,7 @@ public class Blue implements Alliance {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
                             new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                    new Pose2d(3.0, 7.5, new Rotation2d(Math.PI)), false,
+                                    new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
                                     8, 7, 6),
                             new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
                     new Player(world, false),

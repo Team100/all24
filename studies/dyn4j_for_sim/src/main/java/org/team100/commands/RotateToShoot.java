@@ -62,6 +62,7 @@ public class RotateToShoot extends Command {
         double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
         double velocity = m_drive.getVelocity().norm();
-        return error < kAngleTolerance && velocity < kVelocityTolerance;
+        double omega = m_drive.getVelocity().theta();
+        return error < kAngleTolerance && velocity < kVelocityTolerance && omega < kVelocityTolerance;
     }
 }

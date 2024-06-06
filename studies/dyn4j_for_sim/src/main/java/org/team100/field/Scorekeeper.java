@@ -260,6 +260,7 @@ public class Scorekeeper
         if (m_debug) {
             System.out.println("outside");
         }
+        System.out.printf("Body %s left the field!\n", body);
         m_doomed.add(body);
     }
 

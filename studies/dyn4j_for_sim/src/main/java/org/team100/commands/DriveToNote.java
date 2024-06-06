@@ -27,20 +27,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToNote extends Command {
     private static final double kCartesianP = 5;
     private static final double kRotationP = 5;
-    /** Go this far from the note until rotated correctly. */
-    private static final double kPickRadius = 1;
 
+    private final IndexerSubsystem m_indexer;
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final boolean m_debug;
     private final Tactics m_tactics;
 
     public DriveToNote(
+            IndexerSubsystem indexer,
             DriveSubsystem drive,
             CameraSubsystem camera,
             boolean debug) {
+        Arg.nonnull(indexer);
         Arg.nonnull(drive);
         Arg.nonnull(camera);
+        m_indexer = indexer;
         m_drive = drive;
         m_camera = camera;
         m_debug = debug && Debug.enable();
@@ -62,7 +64,6 @@ public class DriveToNote extends Command {
         goToGoal(pose);
     }
 
-  
     /**
      * Go to the closest note, irrespective of the age of the sighting (since notes
      * don't move and sightings are all pretty new)
@@ -93,11 +94,11 @@ public class DriveToNote extends Command {
         double angleError = MathUtil.angleModulus(
                 robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
 
-        boolean aligned = IndexerSubsystem.aligned(angleError);
+        boolean aligned = m_indexer.aligned(angleError);
 
-        Translation2d cartesianU_FB = getCartesianU_FB(
+        Translation2d cartesianU_FB = m_indexer.getCartesianError(
                 robotToTargetFieldRelative,
-                aligned);
+                aligned).times(kCartesianP);
 
         double angleU_FB = angleError * kRotationP;
 
@@ -108,21 +109,4 @@ public class DriveToNote extends Command {
         // need to turn? avoid the edges.
         m_drive.drive(m_tactics.finish(desired, true, !aligned, true));
     }
-
-    /** Go to the note if aligned. If not, or if we missed, go 1m away. */
-    private Translation2d getCartesianU_FB(Translation2d robotToTargetFieldRelative, boolean aligned) {
-        double distance = robotToTargetFieldRelative.getNorm();
-        if (distance < IndexerSubsystem.kMinPickDistanceM || !aligned) {
-            // target distance is lower than the tangent point: we ran the note
-            // over without picking it, so back up.
-            // also back up if not aligned.
-            double targetDistance = distance - kPickRadius;
-            Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
-            return targetTranslation.times(kCartesianP);
-        }
-
-        // aligned, drive over the note
-        return robotToTargetFieldRelative.times(kCartesianP);
-    }
-
 }

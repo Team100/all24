@@ -73,11 +73,11 @@ public class RobotAssembly {
         whileTrue(m_pilot::defend,
                 new DefendSource(0.1, m_drive, m_camera, debug));
         whileTrue(m_pilot::driveToNote,
-                new DriveToNote(m_drive, m_camera, debug));
+                new DriveToNote(m_indexer, m_drive, m_camera, debug));
         whileTrue(m_pilot::driveToSource,
                 new DriveToSource(m_drive, m_camera, debug));
         whileTrue(m_pilot::driveToStaged,
-                new GoToStaged(m_pilot, m_drive, m_camera, debug));
+                new GoToStaged(m_pilot, m_indexer, m_drive, m_camera, debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
                         new DriveToSpeaker(m_pilot, m_drive, m_camera, debug),

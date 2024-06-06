@@ -35,7 +35,7 @@ public class Red implements Alliance {
         scorer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(14, 7, new Rotation2d()), false,
+                                new Pose2d(14, 7, new Rotation2d(-0.5)), false,
                                 11, 10, 9),
                         new Scorer(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(13.5, 5.5, new Rotation2d()))),
@@ -48,7 +48,7 @@ public class Red implements Alliance {
         passer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(14, 3, new Rotation2d()), false,
+                                new Pose2d(14, 3, new Rotation2d(0.5)), false,
                                 4, 5, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, false),

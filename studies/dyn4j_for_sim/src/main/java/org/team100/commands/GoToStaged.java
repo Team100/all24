@@ -25,19 +25,23 @@ public class GoToStaged extends Command {
     private static final double kCartesianP = 5;
 
     private final Pilot m_pilot;
+    private final IndexerSubsystem m_indexer;
     private final DriveSubsystem m_drive;
     private final boolean m_debug;
     private final Tactics m_tactics;
 
     public GoToStaged(
             Pilot pilot,
+            IndexerSubsystem indexer,
             DriveSubsystem drive,
             CameraSubsystem camera,
             boolean debug) {
         Arg.nonnull(pilot);
+        Arg.nonnull(indexer);
         Arg.nonnull(drive);
         Arg.nonnull(camera);
         m_pilot = pilot;
+        m_indexer = indexer;
         m_drive = drive;
         m_debug = debug && Debug.enable();
         m_tactics = new Tactics(drive, camera, debug);
@@ -70,11 +74,11 @@ public class GoToStaged extends Command {
         double angleError = MathUtil.angleModulus(
                 robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
 
-        boolean aligned = IndexerSubsystem.aligned(angleError);
+        boolean aligned = m_indexer.aligned(angleError);
 
-        Translation2d cartesianU_FB = getCartesianU_FB(
+        Translation2d cartesianU_FB = m_indexer.getCartesianError(
                 robotToTargetFieldRelative,
-                aligned);
+                aligned).times(kCartesianP);
 
         double angleU_FB = angleError * kAngularP;
 
@@ -84,29 +88,4 @@ public class GoToStaged extends Command {
         // need to turn? avoid the edges.
         m_drive.drive(m_tactics.finish(desired, true, !aligned, true));
     }
-
-
-    
-
-    // TODO: dedupe with drivetonote
-
-    private Translation2d getCartesianU_FB(Translation2d robotToTargetFieldRelative, boolean aligned) {
-        double distance = robotToTargetFieldRelative.getNorm();
-        if (distance < IndexerSubsystem.kMinPickDistanceM || !aligned) {
-            // target distance is lower than the tangent point: we ran the note
-            // over without picking it, so back up.
-            // also back up if not aligned.
-            if (m_debug)
-                System.out.print(" unaligned");
-            double targetDistance = distance - 1;
-            Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
-            return targetTranslation.times(kCartesianP);
-        }
-        if (m_debug)
-            System.out.print(" aligned");
-
-        // aligned, drive over the note
-        return robotToTargetFieldRelative.times(kCartesianP);
-    }
-
 }
