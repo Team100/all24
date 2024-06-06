@@ -1,5 +1,6 @@
 package org.team100.commands;
 
+import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.planner.AvoidEdges;
@@ -27,16 +28,21 @@ public class Tactics {
     private final Tactic m_obstacleRepulsion;
     private final Tactic m_steerAroundRobots;
     private final Tactic m_robotRepulsion;
+    private final boolean m_debug;
 
-    public Tactics(DriveSubsystem drive, CameraSubsystem camera) {
+    public Tactics(
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
         m_drive = drive;
         m_camera = camera;
-        m_avoidEdges = new AvoidEdges(m_drive);
-        m_avoidSubwoofers = new AvoidSubwoofers(m_drive);
-        m_steerAroundObstacles = new SteerAroundObstacles(m_drive);
-        m_obstacleRepulsion = new ObstacleRepulsion(m_drive);
-        m_steerAroundRobots = new SteerAroundRobots(m_drive, m_camera);
-        m_robotRepulsion = new RobotRepulsion(m_drive, m_camera);
+        m_avoidEdges = new AvoidEdges(m_drive, debug);
+        m_avoidSubwoofers = new AvoidSubwoofers(m_drive, debug);
+        m_steerAroundObstacles = new SteerAroundObstacles(m_drive, debug);
+        m_obstacleRepulsion = new ObstacleRepulsion(m_drive, debug);
+        m_steerAroundRobots = new SteerAroundRobots(m_drive, m_camera, debug);
+        m_robotRepulsion = new RobotRepulsion(m_drive, m_camera, debug);
+        m_debug = debug && Debug.enable();
     }
 
     /**
@@ -50,21 +56,24 @@ public class Tactics {
             FieldRelativeVelocity desired,
             boolean avoidObstacles,
             boolean avoidEdges,
-            boolean avoidRobots,
-            boolean debug) {
+            boolean avoidRobots) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         if (avoidObstacles) {
-            v = v.plus(m_steerAroundObstacles.apply(desired, debug));
-            v = v.plus(m_obstacleRepulsion.apply(desired, debug));
+            v = v.plus(m_steerAroundObstacles.apply(desired));
+            v = v.plus(m_obstacleRepulsion.apply(desired));
         }
         if (avoidEdges)
-            v = v.plus(m_avoidEdges.apply(desired, debug));
-        v = v.plus(m_avoidSubwoofers.apply(desired, debug));
+            v = v.plus(m_avoidEdges.apply(desired));
+        v = v.plus(m_avoidSubwoofers.apply(desired));
         if (avoidRobots) {
-            v = v.plus(m_steerAroundRobots.apply(desired, debug));
-            v = v.plus(m_robotRepulsion.apply(desired, debug));
+            v = v.plus(m_steerAroundRobots.apply(desired));
+            v = v.plus(m_robotRepulsion.apply(desired));
         }
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+
+        if (m_debug)
+            System.out.printf(" tactic %s", v);
+
         return v;
     }
 

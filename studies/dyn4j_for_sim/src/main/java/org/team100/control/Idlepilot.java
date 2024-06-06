@@ -5,11 +5,6 @@ package org.team100.control;
  */
 public class Idlepilot implements Pilot {
     @Override
-    public void onEnd() {
-        //
-    }
-
-    @Override
     public void begin() {
         //
     }
@@ -18,5 +13,4 @@ public class Idlepilot implements Pilot {
     public void reset() {
         //
     }
-
 }

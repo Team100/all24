@@ -17,6 +17,7 @@ import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.Speaker;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -71,7 +72,7 @@ public class Scorekeeper
         return true;
     }
 
-    /** Return true if the score is rejected (i.e. bounce out) */
+    /** Return true if the score is rejected (i.e. collision i.e. bounce out) */
     private boolean score(
             Body100 maybeNote,
             Body100 maybeSpeaker,
@@ -116,10 +117,19 @@ public class Scorekeeper
         return true;
     }
 
-    /** Return true if the score is rejected (i.e. bounce out). */
-    private boolean tryScore(Body100 b1, Body100 b2, Body100 sensor, Runnable handler, double maxSpeed) {
+    /**
+     * Return true if the score is rejected (i.e. it's a "collision" so a bounce
+     * out).
+     */
+    private boolean tryScore(
+            Body100 b1,
+            Body100 b2,
+            Body100 sensor,
+            Runnable handler,
+            double maxSpeed) {
         // false is success so if either one succeeds, we have success.
-        return score(b1, b2, sensor, handler, maxSpeed) && score(b2, b1, sensor, handler, maxSpeed);
+        return score(b1, b2, sensor, handler, maxSpeed)
+                && score(b2, b1, sensor, handler, maxSpeed);
     }
 
     /**
@@ -131,8 +141,6 @@ public class Scorekeeper
         Body100 b1 = collision.getBody1();
         Body100 b2 = collision.getBody2();
 
-        // does not respect amplification.
-
         return tryScore(b1, b2, m_redSpeaker, this::scoreRedSpeaker, Double.MAX_VALUE)
                 && tryScore(b1, b2, m_blueSpeaker, this::scoreBlueSpeaker, Double.MAX_VALUE)
                 && tryScore(b1, b2, m_redAmp, this::scoreRedAmp, 0.4)
@@ -140,38 +148,54 @@ public class Scorekeeper
     }
 
     private void scoreBlueAmp() {
-        m_blue.TeleopAmpNoteCount++;
-        if (m_blue.TeleopAmpNoteCount - m_blueAmplifiedCount >= 2) {
-            // time to amplify
-            m_blueAmpTime = Timer.getFPGATimestamp();
-            m_blueAmplifiedCount = m_blue.TeleopAmpNoteCount;
+        if (DriverStation.isAutonomous()) {
+            m_blue.AutoAmpNoteCount++;
+        } else {
+            m_blue.TeleopAmpNoteCount++;
+            if (m_blue.TeleopAmpNoteCount - m_blueAmplifiedCount >= 2) {
+                // time to amplify
+                m_blueAmpTime = Timer.getFPGATimestamp();
+                m_blueAmplifiedCount = m_blue.TeleopAmpNoteCount;
+            }
         }
     }
 
     private void scoreRedAmp() {
-        m_red.TeleopAmpNoteCount++;
-        if (m_red.TeleopAmpNoteCount - m_redAmplifiedCount >= 2) {
-            // time to amplify
-            m_redAmpTime = Timer.getFPGATimestamp();
-            m_redAmplifiedCount = m_red.TeleopAmpNoteCount;
+        if (DriverStation.isAutonomous()) {
+            m_red.AutoAmpNoteCount++;
+        } else {
+            m_red.TeleopAmpNoteCount++;
+            if (m_red.TeleopAmpNoteCount - m_redAmplifiedCount >= 2) {
+                // time to amplify
+                m_redAmpTime = Timer.getFPGATimestamp();
+                m_redAmplifiedCount = m_red.TeleopAmpNoteCount;
+            }
         }
     }
 
     private void scoreBlueSpeaker() {
-        if (m_blueAmpTime != null) {
-            // amplified
-            m_blue.TeleopSpeakerNoteCountAmplified++;
+        if (DriverStation.isAutonomous()) {
+            m_blue.AutoSpeakerNoteCount++;
         } else {
-            m_blue.TeleopSpeakerNoteCountNotAmplified++;
+            if (m_blueAmpTime != null) {
+                // amplified
+                m_blue.TeleopSpeakerNoteCountAmplified++;
+            } else {
+                m_blue.TeleopSpeakerNoteCountNotAmplified++;
+            }
         }
     }
 
     private void scoreRedSpeaker() {
-        if (m_redAmpTime != null) {
-            // amplified
-            m_red.TeleopSpeakerNoteCountAmplified++;
+        if (DriverStation.isAutonomous()) {
+            m_red.AutoSpeakerNoteCount++;
         } else {
-            m_red.TeleopSpeakerNoteCountNotAmplified++;
+            if (m_redAmpTime != null) {
+                // amplified
+                m_red.TeleopSpeakerNoteCountAmplified++;
+            } else {
+                m_red.TeleopSpeakerNoteCountNotAmplified++;
+            }
         }
     }
 

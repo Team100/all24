@@ -2,6 +2,11 @@ package org.team100.control;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
+import edu.wpi.first.math.geometry.Pose2d;
+
+/**
+ * The Pilot is the interface for manual or autonomous control.
+ */
 public interface Pilot {
     /**
      * In comp this is controller units [-1,1] but here we want the autopilot to use
@@ -11,6 +16,7 @@ public interface Pilot {
         return new FieldRelativeVelocity(0, 0, 0);
     }
 
+    /** Run the intake until a note is in the indexer. */
     default boolean intake() {
         return false;
     }
@@ -35,11 +41,13 @@ public interface Pilot {
         return false;
     }
 
-    default boolean driveToSpeaker() {
+    /** Drive to the speaker with a note and shoot it. */
+    default boolean scoreSpeaker() {
         return false;
     }
 
-    default boolean driveToAmp() {
+    /** Drive to the amp with a note and score it. */
+    default boolean scoreAmp() {
         return false;
     }
 
@@ -47,7 +55,8 @@ public interface Pilot {
         return false;
     }
 
-    default boolean driveToPass() {
+    /** Drive to the passing spot with a note and lob it. */
+    default boolean pass() {
         return false;
     }
 
@@ -63,12 +72,27 @@ public interface Pilot {
         return false;
     }
 
-    void onEnd();
+    default boolean driveToStaged() {
+        return false;
+    }
+
+    default Pose2d shootingLocation() {
+        return new Pose2d();
+    }
+
+    /**
+     * The ID of the note to drive to. Zero means "closest one". This is an int
+     * instead of the StagedNote enum because it's more like a controller, i.e. four
+     * button channels.
+     */
+    default int goalNote() {
+        return 0;
+    }
 
     /**
      * The controller states here are monitored with triggers, which notice
      * **EDGES** so we need to start with everything off, and wait until the trigger
-     * is litening.
+     * is listening.
      */
     void begin();
 
@@ -76,6 +100,6 @@ public interface Pilot {
     void reset();
 
     default void periodic() {
-        
+
     }
 }

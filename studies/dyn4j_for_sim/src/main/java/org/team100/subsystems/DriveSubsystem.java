@@ -8,6 +8,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -35,8 +36,10 @@ public class DriveSubsystem extends SubsystemBase {
      * meters and meters per second
      * for initialization
      */
-    public void setState(double x, double y, double vx, double vy) {
+    public void setState(double x, double y, double theta, double vx, double vy) {
         m_robotBody.getTransform().identity();
+        // rotation is around the origin, so rotate first.  :-)
+        m_robotBody.getTransform().rotate(theta);
         m_robotBody.getTransform().translate(x, y);
         m_robotBody.setAtRest(false);
         m_robotBody.setLinearVelocity(new Vector2(vx, vy));
@@ -87,5 +90,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     public Pose2d passingPosition() {
         return m_robotBody.passingPosition();
+    }
+
+    public Translation2d speakerPosition() {
+        return m_robotBody.speakerPosition();
     }
 }

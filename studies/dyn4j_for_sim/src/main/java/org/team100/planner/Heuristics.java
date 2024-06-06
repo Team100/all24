@@ -1,8 +1,15 @@
 package org.team100.planner;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 
 public class Heuristics {
+
+    private final boolean m_debug;
+
+    public Heuristics(boolean debug) {
+        m_debug = debug && Debug.enable();
+    }
 
     /**
      * Return a velocity vector that, if added to the supplied velocity, will yield
@@ -11,7 +18,7 @@ public class Heuristics {
      * If the target is behind us, return zero force.
      * TODO: use wpilib types
      */
-    public static Vector2 steerToAvoid(
+    public Vector2 steerToAvoid(
             Vector2 position,
             Vector2 velocity,
             Vector2 targetPosition,
@@ -27,6 +34,9 @@ public class Heuristics {
         }
         double timeToGo = distanceToGo / velocity.getMagnitude();
 
+        if (m_debug)
+            System.out.printf(" timeToGo %5.3f", timeToGo);
+
         Vector2 closestApproachRelative = closestApproachPoint.difference(targetPosition);
 
         double closestApproachDistance = closestApproachRelative.getMagnitude();
@@ -34,9 +44,11 @@ public class Heuristics {
         if (closestApproachDistance < 1e-3) {
             return velocity.getNegative();
         }
-        // thie is the extra cross-track distance we need
+        // this is the extra cross-track distance we need
         double steer = Math.max(0, distance - closestApproachDistance);
         double steerVelocity = steer / timeToGo;
+        if (m_debug)
+            System.out.printf(" steerVelocity %5.3f", steerVelocity);
         return closestApproachRelative.setMagnitude(steerVelocity);
     }
 
@@ -51,7 +63,7 @@ public class Heuristics {
      * https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#
      * Vector_formulation
      */
-    public static Vector2 closestApproach(
+    public Vector2 closestApproach(
             Vector2 position,
             Vector2 velocity,
             Vector2 targetPosition) {
@@ -78,7 +90,7 @@ public class Heuristics {
      * This is the same as the zero-velocity version, but in the target's reference
      * frame instead of the field frame.
      */
-    public static Vector2 closestApproach(
+    public Vector2 closestApproach(
             Vector2 position,
             Vector2 velocity,
             Vector2 targetPosition,
@@ -93,9 +105,5 @@ public class Heuristics {
         }
         // TODO: this is wrong, need to know the time
         return targetRelativeClosestApproach.add(targetVelocity);
-    }
-
-    private Heuristics() {
-        //
     }
 }

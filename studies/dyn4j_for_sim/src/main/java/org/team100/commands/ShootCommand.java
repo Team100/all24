@@ -16,7 +16,7 @@ public class ShootCommand extends Command {
     public ShootCommand(IndexerSubsystem indexer, ShooterSubsystem shooter, boolean debug) {
         m_indexer = indexer;
         m_shooter = shooter;
-        m_debug = debug;
+        m_debug = debug && Debug.enable();
         addRequirements(indexer, shooter);
     }
 
@@ -26,7 +26,7 @@ public class ShootCommand extends Command {
      */
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("ShootCommand\n");
         // stash the note in the assembly handoff
         if (!m_indexer.towardsShooter()) {
@@ -36,14 +36,5 @@ public class ShootCommand extends Command {
 
         // take the note from the handoff
         m_shooter.shoot();
-    }
-
-    /**
-     * This version finishes immediately, which is clearly wrong.
-     * TODO: add spinning, feeding delays.
-     */
-    @Override
-    public boolean isFinished() {
-        return true;
     }
 }

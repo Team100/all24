@@ -82,7 +82,8 @@ dependencies {
     // for simulation, collision detection
     implementation 'org.dyn4j:dyn4j:4.2.0'
     // for nonplayer state machines
-    implementation 'com.github.stateless4j:stateless4j:2.6.0'
+    // replaced this with an enum
+    // implementation 'com.github.stateless4j:stateless4j:2.6.0'
 }
 
 test {

@@ -37,20 +37,13 @@ public class ShooterSubsystem extends SubsystemBase {
     /** range (meters): pitch (radians) */
     private final InterpolatingDoubleTreeMap shooterMap;
 
-    /**
-     * 
-     * @param assembly
-     * @param robotBody
-     * @param speakerPosition used to calculate range
-     */
     public ShooterSubsystem(
             RobotAssembly assembly,
             RobotBody robotBody,
-            Translation2d speakerPosition,
             boolean debug) {
         m_assembly = assembly;
         m_robotBody = robotBody;
-        m_speakerPosition = speakerPosition;
+        m_speakerPosition = robotBody.speakerPosition();
         m_debug = debug;
         shooterMap = new InterpolatingDoubleTreeMap();
         populateShooterMap();

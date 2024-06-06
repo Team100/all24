@@ -52,13 +52,8 @@ public class ProxyPilot implements Pilot {
     }
 
     @Override
-    public boolean driveToSpeaker() {
-        return m_pilot.driveToSpeaker();
-    }
-
-    @Override
-    public void onEnd() {
-        m_pilot.onEnd();
+    public boolean scoreSpeaker() {
+        return m_pilot.scoreSpeaker();
     }
 
     @Override
@@ -70,5 +65,4 @@ public class ProxyPilot implements Pilot {
     public void reset() {
         m_pilot.reset();
     }
-
 }

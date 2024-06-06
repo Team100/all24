@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 public abstract class RobotBody extends Body100 {
     /** All robots are squares about 30 inches on a side. */
@@ -19,6 +20,7 @@ public abstract class RobotBody extends Body100 {
 
     private final SimWorld m_world;
 
+    /** Note: adds this to the world. */
     protected RobotBody(String id, SimWorld world, boolean debug) {
         super(id, debug);
         m_world = world;
@@ -39,6 +41,7 @@ public abstract class RobotBody extends Body100 {
         // fiddled with damping until it seemed "right"
         setAngularDamping(2);
         setLinearDamping(2);
+        m_world.addBody(this);
     }
 
     public String getName() {
@@ -66,6 +69,8 @@ public abstract class RobotBody extends Body100 {
 
     public abstract Pose2d passingPosition();
 
+    public abstract Translation2d speakerPosition();
+
     public SimWorld getWorld() {
         return m_world;
     }
@@ -78,6 +83,10 @@ public abstract class RobotBody extends Body100 {
                 translation.x,
                 translation.y,
                 new Rotation2d(angle));
+    }
+
+    public double getRotationAngle() {
+        return transform.getRotationAngle();
     }
 
     public FieldRelativeVelocity getVelocity() {
