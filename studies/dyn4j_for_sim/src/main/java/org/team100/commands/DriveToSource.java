@@ -5,6 +5,7 @@ import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.planner.Drive;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
@@ -52,7 +53,7 @@ public class DriveToSource extends Command {
         Pose2d pose = m_drive.getPose();
         if (m_debug )
             System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
-        FieldRelativeVelocity desired = goToGoal(pose);
+        FieldRelativeVelocity desired = Drive.goToGoal(pose, m_goal, m_debug);
         if (m_debug)
             ForceViz.put("desired", pose, desired);
         if (m_debug )
@@ -78,16 +79,6 @@ public class DriveToSource extends Command {
         return translationError < kCartesianTolerance
                 && Math.abs(rotationError) < kAngularTolerance
                 && velocity < kVelocityTolerance;
-    }
-
-    private FieldRelativeVelocity goToGoal(Pose2d pose) {
-        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
-        Vector2 positionError = new Vector2(transform.getX(), transform.getY());
-        double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
-        Vector2 cartesianU_FB = positionError.product(kCartesianP);
-        double angularU_FB = rotationError * kAngularP;
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB)
-                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
     }
 
 }
