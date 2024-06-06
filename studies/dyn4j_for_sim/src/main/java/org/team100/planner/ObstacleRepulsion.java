@@ -1,5 +1,6 @@
 package org.team100.planner;
 
+import org.team100.Debug;
 import org.team100.field.FieldMap;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
@@ -13,16 +14,18 @@ public class ObstacleRepulsion implements Tactic {
     private static final double kObstacleRepulsion = 10;
 
     private final DriveSubsystem m_drive;
+    private final boolean m_debug;
 
     /**
-     * @param drive  provides pose
+     * @param drive provides pose
      */
-    public ObstacleRepulsion(DriveSubsystem drive) {
+    public ObstacleRepulsion(DriveSubsystem drive, boolean debug) {
         m_drive = drive;
+        m_debug = debug && Debug.enable();
     }
 
     @Override
-    public FieldRelativeVelocity apply(FieldRelativeVelocity desired, boolean debug) {
+    public FieldRelativeVelocity apply(FieldRelativeVelocity desired) {
         Pose2d myPosition = m_drive.getPose();
         final double maxDistance = 1.5;
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
@@ -38,10 +41,10 @@ public class ObstacleRepulsion implements Tactic {
                 // the maximum force is (1.3-0.3) = 0.6 * k
                 double scale = kObstacleRepulsion * (1 / norm - 1 / maxDistance);
                 Translation2d force = normalized.times(scale);
-                if (debug)
+                if (m_debug)
                     System.out.printf(" obstacleRepulsion (%5.2f, %5.2f)", force.getX(), force.getY());
                 FieldRelativeVelocity repel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
-                if (debug)
+                if (m_debug)
                     ForceViz.put("tactics", pose, repel);
                 v = v.plus(repel);
             }

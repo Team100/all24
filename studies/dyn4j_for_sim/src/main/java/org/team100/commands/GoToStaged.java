@@ -61,6 +61,8 @@ public class GoToStaged extends Command {
 
         // TODO: dedupe with drivetonote
         Translation2d targetFieldRelative = n.get().getLocation();
+        if (m_debug)
+            System.out.printf(" goal (%5.2f,%5.2f)", targetFieldRelative.getX(), targetFieldRelative.getY());
         Translation2d robotToTargetFieldRelative = targetFieldRelative.minus(pose.getTranslation());
         Rotation2d robotToTargetAngleFieldRelative = robotToTargetFieldRelative.getAngle();
 
@@ -92,7 +94,7 @@ public class GoToStaged extends Command {
         if (m_debug)
             System.out.printf(" desire %s", desired);
 
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true);
 
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
@@ -110,10 +112,14 @@ public class GoToStaged extends Command {
             // target distance is lower than the tangent point: we ran the note
             // over without picking it, so back up.
             // also back up if not aligned.
+            if (m_debug)
+                System.out.print(" unaligned");
             double targetDistance = distance - 1;
             Translation2d targetTranslation = robotToTargetFieldRelative.times(targetDistance);
             return targetTranslation.times(kCartesianP);
         }
+        if (m_debug)
+            System.out.print(" aligned");
 
         // aligned, drive over the note
         return robotToTargetFieldRelative.times(kCartesianP);

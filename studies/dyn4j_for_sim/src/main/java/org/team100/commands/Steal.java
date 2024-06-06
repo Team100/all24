@@ -19,7 +19,7 @@ public class Steal extends Command {
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(new FieldRelativeVelocity(0, 0, 0),true, true, true, false);
+        FieldRelativeVelocity v = m_tactics.apply(new FieldRelativeVelocity(0, 0, 0),true, true, true);
         // a = a.plus(goToGoal());
         m_drive.drive(v);
     }

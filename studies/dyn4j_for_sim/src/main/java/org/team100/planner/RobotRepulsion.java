@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
@@ -23,18 +24,24 @@ public class RobotRepulsion implements Tactic {
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final boolean m_debug;
 
     /**
      * @param drive  provides pose
      * @param camera provides robot sightings
      */
-    public RobotRepulsion(DriveSubsystem drive, CameraSubsystem camera) {
+    public RobotRepulsion(
+            DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_debug = debug && Debug.enable();
+
     }
 
     @Override
-    public FieldRelativeVelocity apply(FieldRelativeVelocity myVelocity, boolean debug) {
+    public FieldRelativeVelocity apply(FieldRelativeVelocity myVelocity) {
         Pose2d myPosition = m_drive.getPose();
         NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
         final double maxDistance = 3;
@@ -66,13 +73,13 @@ public class RobotRepulsion implements Tactic {
                 // the maximum force is (1.3-0.3) = 1 * k
                 double scale = kRobotRepulsion * (1 / norm - 1 / maxDistance);
                 Translation2d force = normalized.times(scale);
-                if (debug)
+                if (m_debug)
                     System.out.printf(" robotRepulsion target (%5.2f, %5.2f) range %5.2f F (%5.2f, %5.2f)",
                             target.getX(), target.getY(), norm, force.getX(), force.getY());
                 FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
                 if (myVelocity.dot(robotRepel) < 0) {
                     // don't bother repelling if we're heading away
-                    if (debug)
+                    if (m_debug)
                         ForceViz.put("tactics", myPosition, robotRepel);
                     v = v.plus(robotRepel);
                 }

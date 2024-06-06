@@ -11,5 +11,5 @@ public interface Tactic {
      * @param debug   print details to the console
      * @return a feasible velocity
      */
-    FieldRelativeVelocity apply(FieldRelativeVelocity desired, boolean debug);
+    FieldRelativeVelocity apply(FieldRelativeVelocity desired);
 }

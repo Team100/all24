@@ -130,7 +130,7 @@ public class Auton implements Pilot {
         }
         Integer noteId = m_agenda[idx];
         if (m_debug)
-            System.out.println("agenda note id " + noteId);
+            System.out.printf(" agenda note id %d", noteId);
         return noteId;
     }
 
@@ -175,7 +175,7 @@ public class Auton implements Pilot {
     private void updateBeliefs() {
         if (m_debug)
             System.out.printf("idx %d\n", m_goalNoteIdx);
-            // System.out.printf("idx %d\n", m_noteIndex.getAsInt());
+        // System.out.printf("idx %d\n", m_noteIndex.getAsInt());
         Pose2d robotPose = m_drive.getPose();
         if (m_debug)
             System.out.printf("pose %5.3f %5.3f\n", robotPose.getX(), robotPose.getY());
@@ -188,10 +188,14 @@ public class Auton implements Pilot {
             if (n.isEmpty())
                 continue;
             Translation2d noteLocation = n.get().getLocation();
-            if (noteLocation.getDistance(robotPose.getTranslation()) > visionRadiusM) {
+            double lookingDistance = noteLocation.getDistance(robotPose.getTranslation());
+            if (lookingDistance > visionRadiusM) {
                 // too far to see, do not update belief
                 continue;
             }
+
+            if (m_debug)
+                System.out.printf("looking distance %5.3f\n", lookingDistance);
             findit(i, noteLocation);
         }
         if (m_picked.getAsBoolean()) {
@@ -214,11 +218,11 @@ public class Auton implements Pilot {
                 break;
             }
             // if (m_beliefs[i] < 0.1) {
-            //     // skip this one
-            //     m_noteIndex.set(i + 1);
+            // // skip this one
+            // m_noteIndex.set(i + 1);
             // } else {
-            //     // this is the one we want.
-            //     break;
+            // // this is the one we want.
+            // break;
             // }
         }
         if (m_debug) {

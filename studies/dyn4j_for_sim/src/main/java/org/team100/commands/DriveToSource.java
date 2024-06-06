@@ -57,7 +57,7 @@ public class DriveToSource extends Command {
             ForceViz.put("desired", pose, desired);
         if (m_debug )
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true);
         if (m_debug )
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);

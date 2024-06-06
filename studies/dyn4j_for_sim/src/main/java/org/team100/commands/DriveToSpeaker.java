@@ -27,6 +27,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class DriveToSpeaker extends Command {
     private static final double kTranslationTolerance = 0.75;
+    // REALLY loose.  will this actually work?
+    // private static final double kTranslationTolerance = 2;
     private static final double kVelocityTolerance = 1;
     private static final double kAngularTolerance = 0.25;
     private static final double kAngularP = 10;
@@ -57,7 +59,7 @@ public class DriveToSpeaker extends Command {
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, true, true);
         if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);

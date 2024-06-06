@@ -79,7 +79,7 @@ public class DefendSource extends Command {
             ForceViz.put("desired", pose, desired);
         if (m_debug)
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false);
         if (m_debug)
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);

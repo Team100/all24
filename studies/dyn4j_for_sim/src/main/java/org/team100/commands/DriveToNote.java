@@ -77,7 +77,7 @@ public class DriveToNote extends Command {
         if (m_debug)
             System.out.printf(" desire %s", desired);
 
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true, m_debug);
+        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true);
 
         v = v.plus(desired);
         v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);

@@ -52,7 +52,7 @@ public class Red implements Alliance {
                                 4, 5, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, false),
-                true);
+                false);
         // initially below the subwoofer
         passer.setState(15.3, 3, 0, 0, 0);
 
