@@ -25,33 +25,33 @@ public class RotateToShoot extends Command {
     private final DriveSubsystem m_drive;
     private final boolean m_debug;
 
-    public RotateToShoot(Translation2d speakerPosition, DriveSubsystem drive, boolean debug) {
-        m_speakerPosition = speakerPosition;
+    public RotateToShoot(DriveSubsystem drive, boolean debug) {
+        m_speakerPosition = drive.speakerPosition();
         m_drive = drive;
-        m_debug = debug;
+        m_debug = debug && Debug.enable();
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.print("RotateToShoot");
         FieldRelativeVelocity goalVelocity = new FieldRelativeVelocity(0, 0, 0);
         FieldRelativeVelocity velocityError = goalVelocity.minus(m_drive.getVelocity());
         FieldRelativeVelocity velocityFeedback = velocityError.times(kVelocityP, kOmegaP);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" v_FB %s", velocityFeedback);
 
         Pose2d pose = m_drive.getPose();
         double goalAngle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
         double angularError = MathUtil.angleModulus(goalAngle - pose.getRotation().getRadians());
         FieldRelativeVelocity angularFeedback = new FieldRelativeVelocity(0, 0, angularError * kAngularP);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" a_FB %s", angularFeedback);
 
         FieldRelativeVelocity v = velocityFeedback.plus(angularFeedback)
                 .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        if (m_debug && Debug.print())
+        if (m_debug)
             System.out.printf(" final v %s\n", v);
         m_drive.drive(v);
     }

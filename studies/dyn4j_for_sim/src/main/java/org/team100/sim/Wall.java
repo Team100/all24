@@ -10,9 +10,9 @@ import org.dyn4j.geometry.MassType;
 public class Wall extends Body100 {
     private final Range m_vertical;
 
-    public Wall(String id, Convex convex, double heightM) {
+    public Wall(String id, Convex convex, double bottomM, double heightM) {
         super(id, false);
-        m_vertical = new Range(0, heightM);
+        m_vertical = new Range(bottomM, heightM);
         // 0.5 friction is a guess
         // 0.5 restitution is a guess
         BodyFixture fixture = addFixture(convex, 1.0, 0.5, 0.5);

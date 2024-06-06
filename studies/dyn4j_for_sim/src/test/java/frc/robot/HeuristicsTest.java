@@ -9,13 +9,14 @@ import org.team100.planner.Heuristics;
 
 class HeuristicsTest {
     private static final double kDelta = 0.001;
+    Heuristics m_heuristics = new Heuristics(false);
 
     @Test
     void testMotionless() {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(0, 0);
         Vector2 targetPosition = new Vector2(1, 1);
-        Vector2 closestApproach = Heuristics.closestApproach(
+        Vector2 closestApproach = m_heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -27,7 +28,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(2, 0);
-        Vector2 closestApproach = Heuristics.closestApproach(
+        Vector2 closestApproach = m_heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -40,7 +41,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(1, 2);
-        Vector2 closestApproach = Heuristics.closestApproach(
+        Vector2 closestApproach = m_heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -53,7 +54,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(-1, 2);
-        Vector2 closestApproach = Heuristics.closestApproach(
+        Vector2 closestApproach = m_heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -66,7 +67,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 1);
         Vector2 targetPosition = new Vector2(0, 2);
-        Vector2 closestApproach = Heuristics.closestApproach(
+        Vector2 closestApproach = m_heuristics.closestApproach(
                 position,
                 velocity,
                 targetPosition);
@@ -79,7 +80,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(2, 0);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -94,7 +95,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(0, 2);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -109,7 +110,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(1, -0.5);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -124,7 +125,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(0, 0);
         Vector2 targetPosition = new Vector2(1, -0.5);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -139,7 +140,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(0, 0);
         Vector2 targetPosition = new Vector2(0, -0.5);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -154,7 +155,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(0, -0.5);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -169,7 +170,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 0);
         Vector2 targetPosition = new Vector2(-1, -0.5);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -184,7 +185,7 @@ class HeuristicsTest {
         Vector2 position = new Vector2(0, 0);
         Vector2 velocity = new Vector2(1, 1);
         Vector2 targetPosition = new Vector2(1, 0);
-        Vector2 steer = Heuristics.steerToAvoid(
+        Vector2 steer = m_heuristics.steerToAvoid(
                 position,
                 velocity,
                 targetPosition,
@@ -192,11 +193,5 @@ class HeuristicsTest {
         // steer left to avoid target on the right
         assertEquals(-0.414, steer.x, kDelta);
         assertEquals(0.414, steer.y, kDelta);
-    }
-
-    @Test
-    void testMovingTarget() {
-        // TODO: finish the moving target case.
-        // fail();
     }
 }

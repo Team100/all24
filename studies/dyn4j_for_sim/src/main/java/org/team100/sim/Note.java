@@ -64,7 +64,6 @@ public class Note extends Body100 {
     /** Camera can see it */
     public boolean isVisible() {
         return !m_carried && !isFlying();
-
     }
 
     public void setFlying(boolean flying) {

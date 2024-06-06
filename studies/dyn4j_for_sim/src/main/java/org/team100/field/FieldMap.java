@@ -5,6 +5,7 @@ import static java.util.Map.entry;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /** Stage post obstacles */
 public class FieldMap {
@@ -33,6 +34,8 @@ public class FieldMap {
     public static final Map<String, Pose2d> subwoofers = Map.ofEntries(
             entry("blue subwoofer", new Pose2d(0, 5.547, new Rotation2d(0))),
             entry("red subwoofer", new Pose2d(16.541, 5.547, new Rotation2d(0))));
+
+    public static final Map<Integer, Translation2d> notes = Map.ofEntries();
 
     private FieldMap() {
         //

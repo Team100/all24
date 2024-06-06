@@ -48,12 +48,12 @@ public class ManualPilot implements Pilot {
     }
 
     @Override
-    public boolean driveToSpeaker() {
+    public boolean scoreSpeaker() {
         return m_controller.getRawButton(7);
     }
 
     @Override
-    public boolean driveToAmp() {
+    public boolean scoreAmp() {
         return m_controller.getRawButton(8);
     }
 
@@ -63,18 +63,13 @@ public class ManualPilot implements Pilot {
     }
 
     @Override
-    public boolean driveToPass() {
+    public boolean pass() {
         return m_controller.getRawButton(10);
     }
 
     @Override
     public boolean shootCommand() {
         return m_controller.getRawButton(11);
-    }
-
-    @Override
-    public void onEnd() {
-        //
     }
 
     @Override

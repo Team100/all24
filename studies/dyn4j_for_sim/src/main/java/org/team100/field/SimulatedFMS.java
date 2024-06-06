@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DriverStation.MatchType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.CallbackStore;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -52,13 +53,13 @@ public class SimulatedFMS {
     public double getMatchTime() {
         if (DriverStationSim.getEnabled()) {
             double elapsed = Timer.getFPGATimestamp() - m_time;
-            if (DriverStationSim.getAutonomous()) {
+            if (DriverStation.isAutonomous()) {
                 return 15 - elapsed;
             } else {
                 return 135 - elapsed;
             }
         } else {
-            if (DriverStationSim.getAutonomous()) {
+            if (DriverStation.isAutonomous()) {
                 // enabled and autonomous == in the 3 sec after auton
                 return 135;
             } else {

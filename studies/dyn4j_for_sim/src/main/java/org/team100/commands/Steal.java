@@ -11,15 +11,15 @@ public class Steal extends Command {
     private final DriveSubsystem m_drive;
     private final Tactics m_tactics;
 
-    public Steal(DriveSubsystem drive, CameraSubsystem camera) {
+    public Steal(DriveSubsystem drive, CameraSubsystem camera, boolean debug) {
         m_drive = drive;
-        m_tactics = new Tactics(drive, camera);
+        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        FieldRelativeVelocity v = m_tactics.apply(new FieldRelativeVelocity(0, 0, 0),true, true, true, false);
+        FieldRelativeVelocity v = m_tactics.apply(new FieldRelativeVelocity(0, 0, 0),true, true, true);
         // a = a.plus(goToGoal());
         m_drive.drive(v);
     }

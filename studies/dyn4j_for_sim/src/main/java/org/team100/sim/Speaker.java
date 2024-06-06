@@ -5,14 +5,15 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.MassType;
 
 /**
- * Slot sensor
+ * The lower extent of the speaker sensor is 1mm higher than the wall.
+ * The upper extent is very high, modeling the ricochet inside the speaker.
  * 
- * TODO: replace this with a more realistic geometry.
+ * The speaker is a sensor.
  */
 public class Speaker extends Body100 {
-    // 1mm higher than the wall
-    // TODO: some other way to keep the speaker and the wall from interfering
-    private final Range m_vertical = new Range(1.984, 2.2);
+    private final Range m_vertical = new Range(
+            SimWorld.allianceWallHeightM + 0.001,
+            4);
 
     public Speaker(String id, Convex convex) {
         super(id, false);

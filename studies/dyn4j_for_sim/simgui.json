@@ -14,8 +14,26 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/AutoNoteDetection": "String Chooser",
+      "/SmartDashboard/AvoidVisionJitter": "String Chooser",
+      "/SmartDashboard/DriveSteerCouplingCompensation": "String Chooser",
+      "/SmartDashboard/DriveToNoteWithRotation": "String Chooser",
+      "/SmartDashboard/FlushOften": "String Chooser",
+      "/SmartDashboard/FullStateTrajectoryFollower": "String Chooser",
+      "/SmartDashboard/HeedVision": "String Chooser",
+      "/SmartDashboard/LimitBatterySag": "String Chooser",
+      "/SmartDashboard/OscillateDirect": "String Chooser",
+      "/SmartDashboard/OscillateTheta": "String Chooser",
       "/SmartDashboard/Scheduler": "Scheduler",
+      "/SmartDashboard/SlipperyTires": "String Chooser",
+      "/SmartDashboard/StickyHeading": "String Chooser",
       "/SmartDashboard/Telemetry Level": "String Chooser",
+      "/SmartDashboard/Triangulate": "String Chooser",
+      "/SmartDashboard/UseCameraUpdater": "String Chooser",
+      "/SmartDashboard/UseCommandExecutor": "String Chooser",
+      "/SmartDashboard/UseExecutorAsync": "String Chooser",
+      "/SmartDashboard/UseInitialVelocity": "String Chooser",
+      "/SmartDashboard/UseSetpointGenerator": "String Chooser",
       "/field": "Field2d"
     },
     "windows": {

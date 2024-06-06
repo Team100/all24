@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.Debug;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
@@ -25,18 +26,24 @@ public class SteerAroundRobots implements Tactic {
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final Heuristics m_heuristics;
+    private final boolean m_debug;
 
     /**
-     * @param drive provides pose
+     * @param drive  provides pose
      * @param camera provides robot sightings
      */
-    public SteerAroundRobots(DriveSubsystem drive, CameraSubsystem camera) {
+    public SteerAroundRobots(DriveSubsystem drive,
+            CameraSubsystem camera,
+            boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_heuristics = new Heuristics(debug);
+        m_debug = debug && Debug.enable();
     }
 
     @Override
-    public FieldRelativeVelocity apply(FieldRelativeVelocity myVelocity, boolean debug) {
+    public FieldRelativeVelocity apply(FieldRelativeVelocity myVelocity) {
         Pose2d myPosition = m_drive.getPose();
         NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
         // only look at robots less than 1 second away.
@@ -78,7 +85,7 @@ public class SteerAroundRobots implements Tactic {
                 continue;
 
             // treat the target as a fixed obstacle.
-            Vector2 steer = Heuristics.steerToAvoid(
+            Vector2 steer = m_heuristics.steerToAvoid(
                     new Vector2(myPosition.getX(), myPosition.getY()),
                     new Vector2(myVelocity.x(), myVelocity.y()),
                     new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()),
@@ -86,11 +93,11 @@ public class SteerAroundRobots implements Tactic {
             if (steer.getMagnitude() < 1e-3)
                 continue;
             Vector2 force = steer.product(kRobotSteer);
-            if (debug)
+            if (m_debug)
                 System.out.printf(" steerAroundRobots target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
                         mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
             FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
-            if (debug)
+            if (m_debug)
                 ForceViz.put("tactics", myPosition, robotSteer);
             v = v.plus(robotSteer);
         }

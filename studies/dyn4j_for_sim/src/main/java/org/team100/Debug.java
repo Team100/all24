@@ -1,10 +1,11 @@
 package org.team100;
 
+/** Global debug output control. */
 public class Debug {
-    private static final boolean kPrint = false;
+    private static final boolean kEnable = true;
 
-    public static boolean print() {
-        return kPrint;
+    public static boolean enable() {
+        return kEnable;
     }
 
     private Debug() {
