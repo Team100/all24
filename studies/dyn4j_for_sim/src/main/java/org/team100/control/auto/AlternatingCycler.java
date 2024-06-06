@@ -1,6 +1,6 @@
 package org.team100.control.auto;
 
-import org.team100.control.Pilot;
+import org.team100.control.AutoPilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * TODO: add alliance input for choosing
  * TODO: notice the amplified mode
  */
-public class AlternatingCycler implements Pilot {
+public class AlternatingCycler extends AutoPilot {
     /** Ignore sightings further away than this. */
     private static final double kMaxNoteDistance = 8.0;
 
@@ -32,8 +32,6 @@ public class AlternatingCycler implements Pilot {
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
 
-    private boolean m_enabled = false;
-
     // placeholder for alliance strategy input or amplification input
     private boolean ampNext = false;
 
@@ -49,18 +47,17 @@ public class AlternatingCycler implements Pilot {
         m_drive = drive;
         m_camera = camera;
         m_indexer = indexer;
-
     }
 
     @Override
     public void begin() {
-        m_enabled = true;
+        super.begin();
         m_state = State.ToSource;
     }
 
     @Override
     public void reset() {
-        m_enabled = false;
+        super.reset();
         m_state = State.Initial;
     }
 
@@ -72,29 +69,29 @@ public class AlternatingCycler implements Pilot {
      */
     @Override
     public boolean scoreAmp() {
-        return m_enabled && m_state == State.ToAmp && m_indexer.full();
+        return enabled() && m_state == State.ToAmp && m_indexer.full();
     }
 
     @Override
     public boolean scoreSpeaker() {
-        return m_enabled && m_state == State.ToSpeaker && m_indexer.full();
+        return enabled() && m_state == State.ToSpeaker && m_indexer.full();
     }
 
     @Override
     public boolean driveToSource() {
-        return m_enabled && !noteNearby() && !m_indexer.full();
+        return enabled() && !noteNearby() && !m_indexer.full();
     }
 
     // intake if there's a note nearby and none in the indexer.
     @Override
     public boolean intake() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return enabled() && noteNearby() && !m_indexer.full();
     }
 
     // drive to the note if there's one nearby and no note in the indexer.
     @Override
     public boolean driveToNote() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return enabled() && noteNearby() && !m_indexer.full();
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.team100.control.auto;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.team100.control.Pilot;
+import org.team100.control.AutoPilot;
 import org.team100.field.StagedNote;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
@@ -33,7 +33,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * 
  * TODO: add opportunistic diversion.
  */
-public class Auton implements Pilot {
+public class Auton extends AutoPilot {
     private static final double kBeliefUpdateTolerance = 0.1;
 
     // tolerance for go-to-staged-note paths.
@@ -56,7 +56,6 @@ public class Auton implements Pilot {
     /** Latches the pick event. */
     private final Latch m_picked;
 
-    private boolean m_enabled = false;
     /** hm the note counter is problematic, just remember the current goal. */
     private int m_goalNoteIdx;
 
@@ -91,20 +90,20 @@ public class Auton implements Pilot {
     // first go to the right place, ignoring nearby notes on the way.
     @Override
     public boolean driveToStaged() {
-        return m_enabled && !m_indexer.full();
+        return enabled() && !m_indexer.full();
     }
 
     // ... and intake it
     @Override
     public boolean intake() {
-        return m_enabled && nearGoal() && !m_indexer.full();
+        return enabled() && nearGoal() && !m_indexer.full();
     }
 
     // if we have one, go score it.
     // there needs to be room for multiple scorers
     @Override
     public boolean scoreSpeaker() {
-        return m_enabled && m_indexer.full();
+        return enabled() && m_indexer.full();
     }
 
     @Override
@@ -135,14 +134,8 @@ public class Auton implements Pilot {
     }
 
     @Override
-    public void begin() {
-        m_enabled = true;
-    }
-
-    @Override
     public void reset() {
-        m_enabled = false;
-        // m_noteIndex.reset();
+        super.reset();
         m_goalNoteIdx = -1;
     }
 

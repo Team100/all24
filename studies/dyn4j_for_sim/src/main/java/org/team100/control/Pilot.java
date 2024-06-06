@@ -94,12 +94,16 @@ public interface Pilot {
      * **EDGES** so we need to start with everything off, and wait until the trigger
      * is listening.
      */
-    void begin();
+    default void begin() {
+        //
+    }
 
     /** Turn off all the outputs. */
-    void reset();
+    default void reset() {
+        //
+    }
 
     default void periodic() {
-
+        //
     }
 }

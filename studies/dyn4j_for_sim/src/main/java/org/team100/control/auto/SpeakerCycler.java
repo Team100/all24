@@ -1,6 +1,6 @@
 package org.team100.control.auto;
 
-import org.team100.control.Pilot;
+import org.team100.control.AutoPilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -19,7 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * Since this observes a subsystem, it needs to be constructed after the
  * subsystem is constructed.
  */
-public class SpeakerCycler implements Pilot {
+public class SpeakerCycler extends AutoPilot {
     /** Ignore sightings further away than this. */
     private static final double kMaxNoteDistance = 8.0;
 
@@ -27,8 +27,6 @@ public class SpeakerCycler implements Pilot {
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
     private final Pose2d m_shooting;
-
-    private boolean m_enabled = false;
 
     // todo: make these into observers not subsystems.
     public SpeakerCycler(
@@ -48,40 +46,30 @@ public class SpeakerCycler implements Pilot {
     // drive to the speaker if there's a note in the indexer.
     @Override
     public boolean scoreSpeaker() {
-        return m_enabled && m_indexer.full();
+        return enabled() && m_indexer.full();
     }
 
     // drive to the source if there's no note nearby and no note in the indexer.
     @Override
     public boolean driveToSource() {
-        return m_enabled && !noteNearby() && !m_indexer.full();
+        return enabled() && !noteNearby() && !m_indexer.full();
     }
 
     // intake if there's a note nearby and none in the indexer.
     @Override
     public boolean intake() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return enabled() && noteNearby() && !m_indexer.full();
     }
 
     // drive to the note if there's one nearby and no note in the indexer.
     @Override
     public boolean driveToNote() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return enabled() && noteNearby() && !m_indexer.full();
     }
 
     @Override
     public Pose2d shootingLocation() {
         return m_shooting;
-    }
-
-    @Override
-    public void begin() {
-        m_enabled = true;
-    }
-
-    @Override
-    public void reset() {
-        m_enabled = false;
     }
 
     ///////////////////////////////////////////////////////////////////

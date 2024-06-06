@@ -1,6 +1,6 @@
 package org.team100.control.auto;
 
-import org.team100.control.Pilot;
+import org.team100.control.AutoPilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * Pick up nearby notes and score them.
  * TODO: dedupe with speaker cycler.
  */
-public class Scorer implements Pilot {
+public class Scorer extends AutoPilot {
     /** Ignore sightings further away than this. */
     private static final double kMaxNoteDistance = 8.0;
 
@@ -30,7 +30,6 @@ public class Scorer implements Pilot {
     private final IndexerSubsystem m_indexer;
     private final Pose2d m_shooting;
     private State m_state;
-    private boolean m_enabled = false;
 
     public Scorer(
             DriveSubsystem drive,
@@ -49,24 +48,24 @@ public class Scorer implements Pilot {
 
     @Override
     public void begin() {
-        m_enabled = true;
+        super.begin();
         m_state = State.ToNoteForSpeaker;
     }
 
     @Override
     public void reset() {
-        m_enabled = false;
+        super.reset();
         m_state = State.Initial;
     }
 
     @Override
     public boolean scoreAmp() {
-        return m_enabled && m_state == State.ToAmp && m_indexer.full();
+        return enabled() && m_state == State.ToAmp && m_indexer.full();
     }
 
     @Override
     public boolean scoreSpeaker() {
-        return m_enabled && m_state == State.ToSpeaker && m_indexer.full();
+        return enabled() && m_state == State.ToSpeaker && m_indexer.full();
     }
 
     @Override
@@ -76,12 +75,12 @@ public class Scorer implements Pilot {
 
     @Override
     public boolean intake() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return enabled() && noteNearby() && !m_indexer.full();
     }
 
     @Override
     public boolean driveToNote() {
-        return m_enabled && noteNearby() && !m_indexer.full();
+        return enabled() && noteNearby() && !m_indexer.full();
     }
 
     @Override
