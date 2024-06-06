@@ -8,7 +8,6 @@ import org.team100.field.StagedNote;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
@@ -83,26 +82,11 @@ public class GoToStaged extends Command {
                 .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
 
         // need to turn? avoid the edges.
-        finish(desired, !aligned);
+        m_drive.drive(m_tactics.finish(desired, true, !aligned, true));
     }
 
-    // TODO: dedupe with drivetonote
-    // maybe this belongs in the drivetrain class
-    private void finish(FieldRelativeVelocity desired, boolean avoidEdges) {
-        if (m_debug)
-            ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug)
-            System.out.printf(" desire %s", desired);
 
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true);
-
-        v = v.plus(desired);
-        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-
-        if (m_debug)
-            System.out.printf(" final %s\n", v);
-        m_drive.drive(v);
-    }
+    
 
     // TODO: dedupe with drivetonote
 

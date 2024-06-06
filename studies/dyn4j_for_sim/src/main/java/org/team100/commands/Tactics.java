@@ -10,6 +10,7 @@ import org.team100.planner.RobotRepulsion;
 import org.team100.planner.SteerAroundObstacles;
 import org.team100.planner.SteerAroundRobots;
 import org.team100.planner.Tactic;
+import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 
@@ -43,6 +44,36 @@ public class Tactics {
         m_steerAroundRobots = new SteerAroundRobots(m_drive, m_camera, debug);
         m_robotRepulsion = new RobotRepulsion(m_drive, m_camera, debug);
         m_debug = debug && Debug.enable();
+    }
+
+    /**
+     * add tactics to desired.
+     * 
+     * @param desired
+     * @param avoidObstacles
+     * @param avoidEdges     if the robot needs to rotate, it might be too close to
+     *                       the edge to do
+     *                       so turn on repulsion in the needs-to-rotate condition.
+     * @param avoidRobots    for picking, maybe you want to be aggressive
+     */
+    public FieldRelativeVelocity finish(
+            FieldRelativeVelocity desired,
+            boolean avoidObstacles,
+            boolean avoidEdges,
+            boolean avoidRobots) {
+        if (m_debug)
+            ForceViz.put("desired", m_drive.getPose(), desired);
+        if (m_debug)
+            System.out.printf(" desire %s", desired);
+
+        FieldRelativeVelocity v = apply(desired, avoidObstacles, avoidEdges, avoidRobots);
+
+        v = v.plus(desired);
+        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+
+        if (m_debug)
+            System.out.printf(" final %s\n", v);
+        return v;
     }
 
     /**

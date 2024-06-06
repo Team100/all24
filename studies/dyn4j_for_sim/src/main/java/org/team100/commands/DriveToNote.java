@@ -4,7 +4,6 @@ import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.util.Arg;
@@ -63,30 +62,7 @@ public class DriveToNote extends Command {
         goToGoal(pose);
     }
 
-    /**
-     * add tactics and drive.
-     * if the robot needs to rotate, it might be too close to the edge to do
-     * so turn on repulsion in the needs-to-rotate condition.
-     * 
-     * @param desired
-     * @param avoidEdges
-     */
-    private void finish(FieldRelativeVelocity desired, boolean avoidEdges) {
-        if (m_debug)
-            ForceViz.put("desired", m_drive.getPose(), desired);
-        if (m_debug)
-            System.out.printf(" desire %s", desired);
-
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, avoidEdges, true);
-
-        v = v.plus(desired);
-        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-
-        if (m_debug)
-            System.out.printf(" final %s\n", v);
-        m_drive.drive(v);
-    }
-
+  
     /**
      * Go to the closest note, irrespective of the age of the sighting (since notes
      * don't move and sightings are all pretty new)
@@ -99,7 +75,7 @@ public class DriveToNote extends Command {
         NoteSighting closestSighting = m_camera.findClosestNote(pose);
         if (closestSighting == null) {
             // no nearby note, no need to move
-            finish(new FieldRelativeVelocity(0, 0, 0), false);
+            m_drive.drive(m_tactics.finish(new FieldRelativeVelocity(0, 0, 0), true, false, true));
             return;
         }
 
@@ -130,7 +106,7 @@ public class DriveToNote extends Command {
                 .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
 
         // need to turn? avoid the edges.
-        finish(desired, !aligned);
+        m_drive.drive(m_tactics.finish(desired, true, !aligned, true));
     }
 
     /** Go to the note if aligned. If not, or if we missed, go 1m away. */
