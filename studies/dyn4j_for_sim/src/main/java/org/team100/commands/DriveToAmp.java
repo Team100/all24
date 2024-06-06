@@ -5,6 +5,7 @@ import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.planner.Drive;
 import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
@@ -37,7 +38,7 @@ public class DriveToAmp extends Command {
     public void execute() {
         if (m_debug)
             System.out.print("DriveToAmp");
-        FieldRelativeVelocity desired = goToGoal();
+        FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal);
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
@@ -65,17 +66,5 @@ public class DriveToAmp extends Command {
         return translationError < 0.1
                 && Math.abs(rotationError) < 0.05
                 && velocity < 0.05;
-    }
-
-    /** Proportional feedback with a limiter. */
-    private FieldRelativeVelocity goToGoal() {
-        Pose2d pose = m_drive.getPose();
-        FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
-        Vector2 positionError = new Vector2(transform.getX(), transform.getY());
-        double rotationError = MathUtil.angleModulus(transform.getRotation().getRadians());
-        Vector2 cartesianU_FB = positionError.product(kCartesianP);
-        double angularU_FB = rotationError * kAngularP;
-        return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB)
-                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
     }
 }
