@@ -2,12 +2,9 @@ package org.team100.control.auto;
 
 import org.team100.control.AutoPilot;
 import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
 import org.team100.util.Arg;
-
-import edu.wpi.first.math.geometry.Pose2d;
 
 /**
  * Cycle from source to amp and back
@@ -15,9 +12,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * TODO: dedupe wth speaker cycler.
  */
 public class AmpCycler extends AutoPilot {
-    /** Ignore sightings further away than this. */
-    private static final double kMaxNoteDistance = 8.0;
-
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
@@ -41,27 +35,16 @@ public class AmpCycler extends AutoPilot {
 
     @Override
     public boolean driveToSource() {
-        return enabled() && !noteNearby() && !m_indexer.full();
+        return enabled() && !m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
     }
 
     @Override
     public boolean intake() {
-        return enabled() && noteNearby() && !m_indexer.full();
+        return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
     }
 
     @Override
     public boolean driveToNote() {
-        return enabled() && noteNearby() && !m_indexer.full();
-    }
-
-    ////////////////////////////////////////////////////////////
-
-    private boolean noteNearby() {
-        Pose2d pose = m_drive.getPose();
-        NoteSighting closestSighting = m_camera.findClosestNote(pose);
-        if (closestSighting == null) {
-            return false;
-        }
-        return closestSighting.position().getDistance(pose.getTranslation()) <= kMaxNoteDistance;
+        return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
     }
 }

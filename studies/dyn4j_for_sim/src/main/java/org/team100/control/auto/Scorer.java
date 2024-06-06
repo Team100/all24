@@ -2,7 +2,6 @@ package org.team100.control.auto;
 
 import org.team100.control.AutoPilot;
 import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
 import org.team100.util.Arg;
@@ -14,9 +13,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * TODO: dedupe with speaker cycler.
  */
 public class Scorer extends AutoPilot {
-    /** Ignore sightings further away than this. */
-    private static final double kMaxNoteDistance = 8.0;
-
     private enum State {
         Initial,
         ToNoteForSpeaker,
@@ -75,12 +71,12 @@ public class Scorer extends AutoPilot {
 
     @Override
     public boolean intake() {
-        return enabled() && noteNearby() && !m_indexer.full();
+        return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
     }
 
     @Override
     public boolean driveToNote() {
-        return enabled() && noteNearby() && !m_indexer.full();
+        return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
     }
 
     @Override
@@ -109,14 +105,4 @@ public class Scorer extends AutoPilot {
 
     }
 
-    //////////////////////////////////////////////////
-
-    private boolean noteNearby() {
-        Pose2d pose = m_drive.getPose();
-        NoteSighting closestSighting = m_camera.findClosestNote(pose);
-        if (closestSighting == null) {
-            return false;
-        }
-        return closestSighting.position().getDistance(pose.getTranslation()) <= kMaxNoteDistance;
-    }
 }
