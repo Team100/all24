@@ -1,12 +1,12 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
-import org.team100.control.Idlepilot;
 import org.team100.control.SelectorPilot;
 import org.team100.control.auto.Auton;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
+import org.team100.control.auto.ShootPreload;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
@@ -59,7 +59,7 @@ public class Red implements Alliance {
         // do nothing
         defender = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new ShootPreload(x.getDrive()),
                         new Defender()),
                 new Foe("red defender", world, false),
                 false);

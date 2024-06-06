@@ -86,11 +86,11 @@ public class RobotAssembly {
         whileTrue(m_pilot::scoreAmp,
                 Commands.sequence(
                         new DriveToAmp(m_drive, m_camera, debug),
-                        new AmpCommand(m_indexer, m_shooter)));
+                        new AmpCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::pass,
                 Commands.sequence(
                         new DriveToPass(m_drive, m_camera, debug),
-                        new LobCommand(m_indexer, m_shooter)));
+                        new LobCommand(m_indexer, m_shooter, debug)));
 
         ///////////////////////////////////////////////////////////////
         //
@@ -104,9 +104,9 @@ public class RobotAssembly {
         whileTrue(m_pilot::shoot,
                 new ShootCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::amp,
-                new AmpCommand(m_indexer, m_shooter));
+                new AmpCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::lob,
-                new LobCommand(m_indexer, m_shooter));
+                new LobCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::rotateToShoot,
                 new RotateToShoot(m_drive, debug));
         whileTrue(m_pilot::shootCommand,

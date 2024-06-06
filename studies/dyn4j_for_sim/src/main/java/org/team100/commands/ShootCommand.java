@@ -13,7 +13,10 @@ public class ShootCommand extends Command {
     private final ShooterSubsystem m_shooter;
     private final boolean m_debug;
 
-    public ShootCommand(IndexerSubsystem indexer, ShooterSubsystem shooter, boolean debug) {
+    public ShootCommand(
+            IndexerSubsystem indexer,
+            ShooterSubsystem shooter,
+            boolean debug) {
         m_indexer = indexer;
         m_shooter = shooter;
         m_debug = debug && Debug.enable();
@@ -30,7 +33,8 @@ public class ShootCommand extends Command {
             System.out.print("ShootCommand\n");
         // stash the note in the assembly handoff
         if (!m_indexer.towardsShooter()) {
-            System.out.println("no note");
+            if (m_debug)
+                System.out.println("no note");
             return;
         }
 

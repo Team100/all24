@@ -1,12 +1,12 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
-import org.team100.control.Idlepilot;
 import org.team100.control.ManualPilot;
 import org.team100.control.SelectorPilot;
 import org.team100.control.auto.AmpCycler;
 import org.team100.control.auto.Auton;
 import org.team100.control.auto.Defender;
+import org.team100.control.auto.ShootPreload;
 import org.team100.control.auto.SpeakerCycler;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -63,7 +63,7 @@ public class Blue implements Alliance {
         // do nothing
         friend1 = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new ShootPreload(x.getDrive()),
                         new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)))),
                 new Friend("blue 1", world, false),
