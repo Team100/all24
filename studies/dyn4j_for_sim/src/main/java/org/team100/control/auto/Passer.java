@@ -8,7 +8,6 @@ import org.team100.util.Arg;
 
 /**
  * Pick up notes at the source and lob them to the scoring corner.
- * TODO: dedupe with speaker cycler
  */
 public class Passer extends AutoPilot {
     private final DriveSubsystem m_drive;

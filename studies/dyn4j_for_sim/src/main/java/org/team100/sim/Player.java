@@ -25,11 +25,6 @@ public class Player extends RobotBody {
     }
 
     @Override
-    public Pose2d shootingPosition() {
-        return Friend.kShootingSpot;
-    }
-
-    @Override
     public Pose2d sourcePosition() {
         return Friend.kSource;
     }

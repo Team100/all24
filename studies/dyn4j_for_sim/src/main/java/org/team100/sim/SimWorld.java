@@ -62,7 +62,7 @@ public class SimWorld {
 
         setUpWalls();
         setUpStages();
-        setUpNotes();
+        setUpNotes(false);
         m_scorekeeper = setUpSensors();
 
         // cache the obstacle locations since we use them all the time.
@@ -349,10 +349,10 @@ public class SimWorld {
         world.addBody(post);
     }
 
-    private void setUpNotes() {
+    private void setUpNotes(boolean debug) {
         for (StagedNote n : StagedNote.values()) {
             Translation2d loc = n.getLocation();
-            addNote(loc.getX(), loc.getY(), false);
+            addNote(loc.getX(), loc.getY(), debug);
         }
     }
 

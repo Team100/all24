@@ -28,6 +28,7 @@ public class GoToStaged extends Command {
             IndexerSubsystem indexer,
             DriveSubsystem drive,
             CameraSubsystem camera,
+            Tactics tactics,
             boolean debug) {
         Arg.nonnull(pilot);
         Arg.nonnull(indexer);
@@ -37,7 +38,7 @@ public class GoToStaged extends Command {
         m_indexer = indexer;
         m_drive = drive;
         m_debug = debug && Debug.enable();
-        m_tactics = new Tactics(drive, camera, debug);
+        m_tactics = tactics;
         addRequirements(drive);
     }
 

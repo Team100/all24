@@ -59,8 +59,6 @@ public abstract class RobotBody extends Body100 {
 
     public abstract Pose2d ampPosition();
 
-    public abstract Pose2d shootingPosition();
-
     public abstract Pose2d sourcePosition();
 
     public abstract Pose2d opponentSourcePosition();

@@ -1,35 +1,36 @@
 package org.team100.commands;
 
+import java.util.function.Supplier;
+
 import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.planner.Drive;
 import org.team100.sim.ForceViz;
-import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveToPose extends Command {
-    private static final double kCartesianVelocityTolerance = 0.05;
-    private static final double kRotationTolerance = 0.05;
-    private static final double kTranslationTolerance = 0.1;
     private final DriveSubsystem m_drive;
-    private final Pose2d m_goal;
-    private final boolean m_debug;
+    private final Supplier<Pose2d> m_goal;
     private final Tactics m_tactics;
+    private final Tolerance m_tolerance;
+    private final boolean m_debug;
 
     public DriveToPose(
             DriveSubsystem drive,
-            CameraSubsystem camera,
-            Pose2d goal,
+            Supplier<Pose2d> goal,
+            Tactics tactics,
+            Tolerance tolerance,
             boolean debug) {
         m_drive = drive;
         m_goal = goal;
+        m_tactics = tactics;
+        m_tolerance = tolerance;
         m_debug = debug && Debug.enable();
-        m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
     }
 
@@ -37,12 +38,12 @@ public class DriveToPose extends Command {
     public void execute() {
         if (m_debug)
             System.out.print("DriveToPose");
-        FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal, m_debug);
+        FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal.get(), m_debug);
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, true, false, true);
+        FieldRelativeVelocity v = m_tactics.apply(desired);
         if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
@@ -54,16 +55,15 @@ public class DriveToPose extends Command {
 
     @Override
     public boolean isFinished() {
-        Pose2d pose = m_drive.getPose();
-        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_goal);
+        FieldRelativeDelta t = FieldRelativeDelta.delta(m_drive.getPose(), m_goal.get());
         double translationError = t.getTranslation().getNorm();
         double rotationError = t.getRotation().getRadians();
         double velocity = m_drive.getVelocity().norm();
         if (m_debug)
             System.out.printf("translation error %5.2f rotation error %5.2f\n",
                     translationError, rotationError);
-        return translationError < kTranslationTolerance
-                && Math.abs(rotationError) < kRotationTolerance
-                && velocity < kCartesianVelocityTolerance;
+        return translationError < m_tolerance.kTranslationTolerance()
+                && Math.abs(rotationError) < m_tolerance.kAngularTolerance()
+                && velocity < m_tolerance.kVelocityTolerance();
     }
 }

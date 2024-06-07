@@ -8,8 +8,6 @@ import org.team100.util.Arg;
 
 /**
  * Cycle from source to amp and back
- * 
- * TODO: dedupe wth speaker cycler.
  */
 public class AmpCycler extends AutoPilot {
     private final DriveSubsystem m_drive;

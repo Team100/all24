@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * Steer to avoid the stage posts.
  */
 public class SteerAroundObstacles implements Tactic {
-    private static final double kObstacleSteer = 5;
+    private static final double kObstacleSteer = 1;
 
     private final DriveSubsystem m_drive;
     private final Heuristics m_heuristics;

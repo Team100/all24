@@ -61,8 +61,15 @@ public class Drive {
         // we also want to turn the intake towards the note
         FieldRelativeVelocity desired = new FieldRelativeVelocity(cartesianU_FB.getX(), cartesianU_FB.getY(), angleU_FB)
                 .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-        // need to turn? avoid the edges.
-        return m_tactics.finish(desired, true, !aligned, true);
+        if (!aligned) {
+            // need to turn? avoid the edges.
+            return m_tactics.finish(desired);
+        }
+        if (robotToTargetFieldRelative.getNorm() < 1) {
+            // if close and aligned, don't need tactics at all.
+            return desired;
+        }
+        return m_tactics.finish(desired);
     }
 
     private Drive() {

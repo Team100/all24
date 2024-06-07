@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * Doesn't do anything if we're already heading away from the target.
  */
 public class RobotRepulsion implements Tactic {
-    private static final double kRobotRepulsion = 5;
+    private static final double kRobotRepulsion = 8;
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;

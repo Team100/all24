@@ -31,6 +31,7 @@ public class DriveToNote extends Command {
             IndexerSubsystem indexer,
             DriveSubsystem drive,
             CameraSubsystem camera,
+            Tactics tactics,
             boolean debug) {
         Arg.nonnull(indexer);
         Arg.nonnull(drive);
@@ -39,7 +40,7 @@ public class DriveToNote extends Command {
         m_drive = drive;
         m_camera = camera;
         m_debug = debug && Debug.enable();
-        m_tactics = new Tactics(drive, camera, debug);
+        m_tactics = tactics;
         addRequirements(drive);
     }
 
@@ -69,7 +70,7 @@ public class DriveToNote extends Command {
         NoteSighting closestSighting = m_camera.findClosestNote(pose);
         if (closestSighting == null) {
             // no nearby note, no need to move
-            m_drive.drive(m_tactics.finish(new FieldRelativeVelocity(0, 0, 0), true, false, true));
+            m_drive.drive(m_tactics.finish(new FieldRelativeVelocity(0, 0, 0)));
             return;
         }
 

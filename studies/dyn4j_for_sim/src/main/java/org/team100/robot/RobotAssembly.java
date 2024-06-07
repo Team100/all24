@@ -8,7 +8,6 @@ import org.team100.commands.DefendSource;
 import org.team100.commands.DriveToNote;
 import org.team100.commands.DriveToPose;
 import org.team100.commands.DriveToSource;
-import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.GoToStaged;
 import org.team100.commands.Intake;
 import org.team100.commands.LobCommand;
@@ -16,6 +15,8 @@ import org.team100.commands.Outtake;
 import org.team100.commands.PilotDrive;
 import org.team100.commands.RotateToShoot;
 import org.team100.commands.ShootCommand;
+import org.team100.commands.Tactics;
+import org.team100.commands.Tolerance;
 import org.team100.control.Pilot;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
@@ -51,7 +52,7 @@ public class RobotAssembly {
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
             boolean debug) {
-        m_drive = new DriveSubsystem(robotBody);
+        m_drive = new DriveSubsystem(robotBody, debug);
         m_indexer = new IndexerSubsystem(this, robotBody, debug);
         // every robot gets a preload in the indexer.
         m_indexer.preload();
@@ -70,25 +71,68 @@ public class RobotAssembly {
         whileTrue(m_pilot::intake,
                 new Intake(m_indexer, debug));
         whileTrue(m_pilot::defend,
-                new DefendSource(0.1, m_drive, m_camera, debug));
+                new DefendSource(
+                        0.1,
+                        m_drive,
+                        m_camera,
+                        robotBody::defenderPosition,
+                        robotBody::opponentSourcePosition,
+                        new Tactics(m_drive, m_camera, false, true, false, debug),
+                        debug));
         whileTrue(m_pilot::driveToNote,
-                new DriveToNote(m_indexer, m_drive, m_camera, debug));
+                new DriveToNote(
+                        m_indexer,
+                        m_drive,
+                        m_camera,
+                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        debug));
         whileTrue(m_pilot::driveToSource,
-                new DriveToSource(m_drive, m_camera, debug));
+                new DriveToSource(
+                        m_drive,
+                        m_camera,
+                        robotBody::sourcePosition,
+                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        new Tolerance(0.75, 5, 2.5),
+                        debug));
         whileTrue(m_pilot::driveToStaged,
-                new GoToStaged(m_pilot, m_indexer, m_drive, m_camera, debug));
+                new GoToStaged(
+                        m_pilot,
+                        m_indexer,
+                        m_drive,
+                        m_camera,
+                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
-                        new DriveToSpeaker(m_pilot, m_drive, m_camera, debug),
-                        new RotateToShoot(m_drive, debug),
+                        new DriveToPose(
+                                m_drive,
+                                m_pilot::shootingLocation,
+                                new Tactics(m_drive, m_camera, true, true, true, debug),
+                                new Tolerance(0.75, 1, 0.25),
+                                debug),
+                        new RotateToShoot(
+                                m_drive,
+                                robotBody::speakerPosition,
+                                new Tolerance(1, 0.05, 0.05),
+                                debug),
                         new ShootCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::scoreAmp,
                 Commands.sequence(
-                        new DriveToPose(m_drive, m_camera, m_drive.ampPosition(), debug),
+                        new DriveToPose(
+                                m_drive,
+                                robotBody::ampPosition,
+                                new Tactics(m_drive, m_camera, true, false, true, debug),
+                                new Tolerance(0.05, 0.05, 0.1),
+                                debug),
                         new AmpCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::pass,
                 Commands.sequence(
-                        new DriveToPose(m_drive, m_camera, m_drive.passingPosition(), debug),
+                        new DriveToPose(
+                                m_drive,
+                                robotBody::passingPosition,
+                                new Tactics(m_drive, m_camera, true, true, true, debug),
+                                new Tolerance(0.05, 0.05, 0.1),
+                                debug),
                         new LobCommand(m_indexer, m_shooter, debug)));
 
         ///////////////////////////////////////////////////////////////
@@ -107,7 +151,11 @@ public class RobotAssembly {
         whileTrue(m_pilot::lob,
                 new LobCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::rotateToShoot,
-                new RotateToShoot(m_drive, debug));
+                new RotateToShoot(
+                        m_drive,
+                        robotBody::speakerPosition,
+                        new Tolerance(1, 0.05, 0.05),
+                        debug));
         whileTrue(m_pilot::shootCommand,
                 new ShootCommand(m_indexer, m_shooter, debug));
 

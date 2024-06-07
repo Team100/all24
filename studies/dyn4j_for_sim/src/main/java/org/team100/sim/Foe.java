@@ -20,8 +20,6 @@ public class Foe extends RobotBody {
     static final Pose2d kSource = new Pose2d(1, 2, new Rotation2d());
     /** This is the robot center when facing the amp */
     private static final Pose2d kAmpSpot = new Pose2d(14.7, 7.5, new Rotation2d(-Math.PI / 2));
-    /** Shoot from about 3 meters away */
-    private static final Pose2d kShootingSpot = new Pose2d(13.5, 5.5, new Rotation2d());
     static final Pose2d kPassingSpot = new Pose2d(6.5, 1, new Rotation2d(0.65));
     static final Pose2d kDefendSpot = new Pose2d(13, 2, new Rotation2d(Math.PI));
     /** Center of the speaker: the target to shoot at. */
@@ -41,11 +39,6 @@ public class Foe extends RobotBody {
     @Override
     public Pose2d ampPosition() {
         return kAmpSpot;
-    }
-
-    @Override
-    public Pose2d shootingPosition() {
-        return kShootingSpot;
     }
 
     @Override

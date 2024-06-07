@@ -21,7 +21,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * Assumes they're not moving, which is a terrible assumption.
  */
 public class SteerAroundRobots implements Tactic {
-    private static final double kRobotSteer = 20;
+    private static final double kRobotSteer = 8;
     private static final double kMaxTargetVelocity = 4;
 
     private final DriveSubsystem m_drive;
