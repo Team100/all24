@@ -12,19 +12,22 @@ import org.team100.subsystems.DriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** TODO: extract a "drive to X" command */
-public class DriveToAmp extends Command {
+public class DriveToPose extends Command {
+    private static final double kCartesianVelocityTolerance = 0.05;
+    private static final double kRotationTolerance = 0.05;
+    private static final double kTranslationTolerance = 0.1;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
     private final boolean m_debug;
     private final Tactics m_tactics;
 
-    public DriveToAmp(
+    public DriveToPose(
             DriveSubsystem drive,
             CameraSubsystem camera,
+            Pose2d goal,
             boolean debug) {
         m_drive = drive;
-        m_goal = m_drive.ampPosition();
+        m_goal = goal;
         m_debug = debug && Debug.enable();
         m_tactics = new Tactics(drive, camera, debug);
         addRequirements(drive);
@@ -33,7 +36,7 @@ public class DriveToAmp extends Command {
     @Override
     public void execute() {
         if (m_debug)
-            System.out.print("DriveToAmp");
+            System.out.print("DriveToPose");
         FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal, m_debug);
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
@@ -59,8 +62,8 @@ public class DriveToAmp extends Command {
         if (m_debug)
             System.out.printf("translation error %5.2f rotation error %5.2f\n",
                     translationError, rotationError);
-        return translationError < 0.1
-                && Math.abs(rotationError) < 0.05
-                && velocity < 0.05;
+        return translationError < kTranslationTolerance
+                && Math.abs(rotationError) < kRotationTolerance
+                && velocity < kCartesianVelocityTolerance;
     }
 }

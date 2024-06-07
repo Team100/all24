@@ -3,17 +3,10 @@ package org.team100.robot;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
-import org.team100.sim.Note;
-import org.team100.sim.RobotBody;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
-import org.team100.subsystems.ShooterSubsystem;
 import org.team100.commands.AmpCommand;
 import org.team100.commands.DefendSource;
-import org.team100.commands.DriveToAmp;
 import org.team100.commands.DriveToNote;
-import org.team100.commands.DriveToPass;
+import org.team100.commands.DriveToPose;
 import org.team100.commands.DriveToSource;
 import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.GoToStaged;
@@ -24,6 +17,12 @@ import org.team100.commands.PilotDrive;
 import org.team100.commands.RotateToShoot;
 import org.team100.commands.ShootCommand;
 import org.team100.control.Pilot;
+import org.team100.sim.Note;
+import org.team100.sim.RobotBody;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.DriveSubsystem;
+import org.team100.subsystems.IndexerSubsystem;
+import org.team100.subsystems.ShooterSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -85,11 +84,11 @@ public class RobotAssembly {
                         new ShootCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::scoreAmp,
                 Commands.sequence(
-                        new DriveToAmp(m_drive, m_camera, debug),
+                        new DriveToPose(m_drive, m_camera, m_drive.ampPosition(), debug),
                         new AmpCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::pass,
                 Commands.sequence(
-                        new DriveToPass(m_drive, m_camera, debug),
+                        new DriveToPose(m_drive, m_camera, m_drive.passingPosition(), debug),
                         new LobCommand(m_indexer, m_shooter, debug)));
 
         ///////////////////////////////////////////////////////////////
