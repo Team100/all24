@@ -5,25 +5,18 @@ import java.util.Optional;
 import org.team100.Debug;
 import org.team100.control.Pilot;
 import org.team100.field.StagedNote;
-import org.team100.kinodynamics.Kinodynamics;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.planner.Drive;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
 import org.team100.util.Arg;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Drive to a staged note location */
 public class GoToStaged extends Command {
-    private static final double kAngularP = 5;
-    private static final double kCartesianP = 5;
-
     private final Pilot m_pilot;
     private final IndexerSubsystem m_indexer;
     private final DriveSubsystem m_drive;
@@ -62,30 +55,12 @@ public class GoToStaged extends Command {
         if (n.isEmpty())
             return;
 
-        // TODO: dedupe with drivetonote
-        Translation2d targetFieldRelative = n.get().getLocation();
-        if (m_debug)
-            System.out.printf(" goal (%5.2f,%5.2f)", targetFieldRelative.getX(), targetFieldRelative.getY());
-        Translation2d robotToTargetFieldRelative = targetFieldRelative.minus(pose.getTranslation());
-        Rotation2d robotToTargetAngleFieldRelative = robotToTargetFieldRelative.getAngle();
-
-        // intake is on the back
-        Rotation2d intakeAngleFieldRelative = GeometryUtil.flip(pose.getRotation());
-        double angleError = MathUtil.angleModulus(
-                robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
-
-        boolean aligned = m_indexer.aligned(angleError);
-
-        Translation2d cartesianU_FB = m_indexer.getCartesianError(
-                robotToTargetFieldRelative,
-                aligned).times(kCartesianP);
-
-        double angleU_FB = angleError * kAngularP;
-
-        FieldRelativeVelocity desired = new FieldRelativeVelocity(cartesianU_FB.getX(), cartesianU_FB.getY(), angleU_FB)
-                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-
-        // need to turn? avoid the edges.
-        m_drive.drive(m_tactics.finish(desired, true, !aligned, true));
+        FieldRelativeVelocity desired = Drive.goToGoalAligned(
+                m_tactics,
+                m_indexer,
+                pose,
+                n.get().getLocation(),
+                m_debug);
+        m_drive.drive(desired);
     }
 }

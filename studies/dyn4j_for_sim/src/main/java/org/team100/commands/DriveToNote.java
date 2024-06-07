@@ -1,19 +1,15 @@
 package org.team100.commands;
 
 import org.team100.Debug;
-import org.team100.kinodynamics.Kinodynamics;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.planner.Drive;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
-import org.team100.util.Arg;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
+import org.team100.util.Arg;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -25,9 +21,6 @@ import edu.wpi.first.wpilibj2.command.Command;
  * This never finishes; run it with an Intake command as the deadline.
  */
 public class DriveToNote extends Command {
-    private static final double kCartesianP = 5;
-    private static final double kRotationP = 5;
-
     private final IndexerSubsystem m_indexer;
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
@@ -82,31 +75,13 @@ public class DriveToNote extends Command {
 
         // found a note
 
-        Translation2d targetFieldRelative = closestSighting.position();
-        if (m_debug)
-            System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
-                    pose.getX(), pose.getY(), targetFieldRelative.getX(), targetFieldRelative.getY());
+        FieldRelativeVelocity desired = Drive.goToGoalAligned(
+                m_tactics,
+                m_indexer,
+                pose,
+                closestSighting.position(),
+                m_debug);
 
-        Translation2d robotToTargetFieldRelative = targetFieldRelative.minus(pose.getTranslation());
-        Rotation2d robotToTargetAngleFieldRelative = robotToTargetFieldRelative.getAngle();
-        // intake is on the back
-        Rotation2d intakeAngleFieldRelative = GeometryUtil.flip(pose.getRotation());
-        double angleError = MathUtil.angleModulus(
-                robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
-
-        boolean aligned = m_indexer.aligned(angleError);
-
-        Translation2d cartesianU_FB = m_indexer.getCartesianError(
-                robotToTargetFieldRelative,
-                aligned).times(kCartesianP);
-
-        double angleU_FB = angleError * kRotationP;
-
-        // we also want to turn the intake towards the note
-        FieldRelativeVelocity desired = new FieldRelativeVelocity(cartesianU_FB.getX(), cartesianU_FB.getY(), angleU_FB)
-                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
-
-        // need to turn? avoid the edges.
-        m_drive.drive(m_tactics.finish(desired, true, !aligned, true));
+        m_drive.drive(desired);
     }
 }

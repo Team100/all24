@@ -1,6 +1,5 @@
 package org.team100.commands;
 
-import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -10,14 +9,11 @@ import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** TODO: extract a "drive to X" command */
 public class DriveToAmp extends Command {
-    private static final int kAngularP = 10;
-    private static final int kCartesianP = 5;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
     private final boolean m_debug;
@@ -38,7 +34,7 @@ public class DriveToAmp extends Command {
     public void execute() {
         if (m_debug)
             System.out.print("DriveToAmp");
-        FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal);
+        FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal, m_debug);
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)

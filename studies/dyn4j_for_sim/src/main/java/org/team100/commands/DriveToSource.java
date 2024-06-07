@@ -1,6 +1,5 @@
 package org.team100.commands;
 
-import org.dyn4j.geometry.Vector2;
 import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -11,7 +10,6 @@ import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.util.Arg;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -26,8 +24,6 @@ public class DriveToSource extends Command {
     private static final double kVelocityTolerance = 5;
     /** Get close enough for the camera to see. */
     private static final double kCartesianTolerance = 2.5;
-    private static final double kAngularP = 10;
-    private static final double kCartesianP = 5;
     private final DriveSubsystem m_drive;
     private final Pose2d m_goal;
     private final boolean m_debug;
