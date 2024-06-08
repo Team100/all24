@@ -18,6 +18,7 @@ import org.team100.commands.ShootCommand;
 import org.team100.commands.Tactics;
 import org.team100.commands.Tolerance;
 import org.team100.control.Pilot;
+import org.team100.sim.ForceViz;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 import org.team100.subsystems.CameraSubsystem;
@@ -51,6 +52,7 @@ public class RobotAssembly {
     public RobotAssembly(
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
+            ForceViz viz,
             boolean debug) {
         m_drive = new DriveSubsystem(robotBody, debug);
         m_indexer = new IndexerSubsystem(this, robotBody, debug);
@@ -77,22 +79,24 @@ public class RobotAssembly {
                         m_camera,
                         robotBody::defenderPosition,
                         robotBody::opponentSourcePosition,
-                        new Tactics(m_drive, m_camera, false, true, false, debug),
+                        new Tactics(m_drive, m_camera, viz, false, true, false, debug),
+                        viz,
                         debug));
         whileTrue(m_pilot::driveToNote,
                 new DriveToNote(
                         m_indexer,
                         m_drive,
                         m_camera,
-                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz, true, true, true, debug),
                         debug));
         whileTrue(m_pilot::driveToCorner,
                 new DriveToPose(
                         m_drive,
                         m_pilot::cornerLocation,
                         () -> 0.0,
-                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
                         new Tolerance(1, 1, 0.25),
+                        viz,
                         debug));
         whileTrue(m_pilot::driveToSource,
                 new DriveToSource(
@@ -100,7 +104,8 @@ public class RobotAssembly {
                         m_camera,
                         robotBody::sourcePosition,
                         robotBody::yBias,
-                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        viz,
                         debug));
         whileTrue(m_pilot::driveToStaged,
                 new GoToStaged(
@@ -108,7 +113,7 @@ public class RobotAssembly {
                         m_indexer,
                         m_drive,
                         m_camera,
-                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
                         debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
@@ -117,8 +122,9 @@ public class RobotAssembly {
                                 m_drive,
                                 m_pilot::shootingLocation,
                                 robotBody::yBias,
-                                new Tactics(m_drive, m_camera, true, true, true, debug),
+                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
                                 new Tolerance(1, 1, 0.25),
+                                viz,
                                 debug),
                         // rotation takes care of cartesian error.
                         new RotateToShoot(
@@ -134,16 +140,18 @@ public class RobotAssembly {
                                 m_drive,
                                 robotBody::ampPosition,
                                 robotBody::yBias,
-                                new Tactics(m_drive, m_camera, true, false, true, debug),
+                                new Tactics(m_drive, m_camera, viz,true, false, true, debug),
                                 new Tolerance(0.5, 0.5, 0.5),
+                                viz,
                                 debug),
                         // then go exactly there, position is important
                         new DriveToPose(
                                 m_drive,
                                 robotBody::ampPosition,
                                 () -> 0.0,
-                                new Tactics(m_drive, m_camera, false, false, false, debug),
+                                new Tactics(m_drive, m_camera, viz,false, false, false, debug),
                                 new Tolerance(0.05, 0.05, 0.05),
+                                viz,
                                 debug),
                         new AmpCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::pass,
@@ -153,8 +161,9 @@ public class RobotAssembly {
                                 m_drive,
                                 robotBody::passingPosition,
                                 () -> 0.0,
-                                new Tactics(m_drive, m_camera, true, true, true, debug),
+                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
                                 new Tolerance(0.3, 0.3, 0.1),
+                                viz,
                                 debug),
                         new LobCommand(m_indexer, m_shooter, debug)));
 

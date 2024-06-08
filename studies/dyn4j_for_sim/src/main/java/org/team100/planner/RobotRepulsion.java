@@ -24,6 +24,7 @@ public class RobotRepulsion implements Tactic {
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final ForceViz m_viz;
     private final boolean m_debug;
 
     /**
@@ -33,9 +34,11 @@ public class RobotRepulsion implements Tactic {
     public RobotRepulsion(
             DriveSubsystem drive,
             CameraSubsystem camera,
+            ForceViz viz,
             boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_viz = viz;
         m_debug = debug && Debug.enable();
 
     }
@@ -80,7 +83,7 @@ public class RobotRepulsion implements Tactic {
                 if (myVelocity.dot(robotRepel) < 0) {
                     // don't bother repelling if we're heading away
                     if (m_debug)
-                        ForceViz.put("tactics", myPosition, robotRepel);
+                        m_viz.tactics(myPosition, robotRepel);
                     v = v.plus(robotRepel);
                 }
             }

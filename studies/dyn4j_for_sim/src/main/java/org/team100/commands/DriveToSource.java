@@ -24,6 +24,7 @@ public class DriveToSource extends Command {
     private final Supplier<Double> m_yBias;
     private final boolean m_debug;
     private final Tactics m_tactics;
+    private final ForceViz m_viz;
 
     public DriveToSource(
             DriveSubsystem drive,
@@ -31,6 +32,7 @@ public class DriveToSource extends Command {
             Supplier<Pose2d> goal,
             Supplier<Double> yBias,
             Tactics tactics,
+            ForceViz viz,
             boolean debug) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
@@ -39,6 +41,7 @@ public class DriveToSource extends Command {
         m_yBias = yBias;
         m_debug = debug && Debug.enable();
         m_tactics = tactics;
+        m_viz = viz;
         addRequirements(drive);
     }
 
@@ -53,7 +56,7 @@ public class DriveToSource extends Command {
         // provide "lanes"
         desired = desired.plus(new FieldRelativeVelocity(0, m_yBias.get(), 0));
         if (m_debug)
-            ForceViz.put("desired", pose, desired);
+            m_viz.desired(pose, desired);
         if (m_debug)
             System.out.printf(" desired %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired);

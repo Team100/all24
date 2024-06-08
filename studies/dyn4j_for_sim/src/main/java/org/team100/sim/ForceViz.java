@@ -13,13 +13,28 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.math.geometry.Pose2d;
 
 public class ForceViz {
-    private static final Telemetry t = Telemetry.get();
     private static final String kField = "field";
+    // see simgui.json for these names
+    private static final String kTactics = "tactics";
+    private static final String kDesired = "desired";
     private static final double kScale = 0.5;
 
-    public static final Map<String, List<Double>> items = new HashMap<>();
+    private final Telemetry t = Telemetry.get();
+    private final Map<String, List<Double>> items;
 
-    public static void put(String name, Pose2d p, FieldRelativeVelocity v) {
+    public ForceViz() {
+        items = new HashMap<>();
+    }
+
+    public void tactics(Pose2d p, FieldRelativeVelocity v) {
+        put(kTactics, p, v);
+    }
+
+    public void desired(Pose2d p, FieldRelativeVelocity v) {
+        put(kDesired, p, v);
+    }
+
+    private void put(String name, Pose2d p, FieldRelativeVelocity v) {
         // ignore small forces
         if (v.norm() < 0.1)
             return;
@@ -33,7 +48,7 @@ public class ForceViz {
         f.add(direction);
     }
 
-    public static void render() {
+    public void render() {
         for (Entry<String, List<Double>> entry : items.entrySet()) {
             t.log(
                     Level.DEBUG,
@@ -44,7 +59,4 @@ public class ForceViz {
         }
     }
 
-    private ForceViz() {
-        // TODO: make this not a static thing
-    }
 }

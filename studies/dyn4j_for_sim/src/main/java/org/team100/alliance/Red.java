@@ -10,6 +10,7 @@ import org.team100.control.auto.ShootPreload;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
+import org.team100.sim.ForceViz;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,7 +31,7 @@ public class Red implements Alliance {
     private final RobotAssembly defender;
     private final Source source;
 
-    public Red(SimWorld world) {
+    public Red(SimWorld world, ForceViz viz) {
         // near 3
         scorer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
@@ -45,6 +46,7 @@ public class Red implements Alliance {
                                 new Pose2d(13.5, 5.5, new Rotation2d()),
                                 new Pose2d(14, 7, new Rotation2d()))),
                 new Foe("red scorer", world, 0, false),
+                viz,
                 false);
         // initially in the upper corner
         scorer.setState(15.3, 7, 0, 0, 0);
@@ -57,6 +59,7 @@ public class Red implements Alliance {
                                 4, 5, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
                 new Foe("red passer", world, 0, false),
+                viz,
                 false);
         // initially below the subwoofer
         passer.setState(15.3, 3, 0, 0, 0);
@@ -67,6 +70,7 @@ public class Red implements Alliance {
                         new ShootPreload(x.getDrive()::getPose),
                         new Defender()),
                 new Foe("red defender", world, 0, false),
+                viz,
                 false);
         // initially near subwoofer
         defender.setState(15.8, 4.3, Math.PI / 3, 0, 0);

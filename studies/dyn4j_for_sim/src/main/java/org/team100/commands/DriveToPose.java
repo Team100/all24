@@ -19,6 +19,7 @@ public class DriveToPose extends Command {
     private final Supplier<Double> m_yBias;
     private final Tactics m_tactics;
     private final Tolerance m_tolerance;
+    private final ForceViz m_viz;
     private final boolean m_debug;
 
     public DriveToPose(
@@ -27,12 +28,14 @@ public class DriveToPose extends Command {
             Supplier<Double> yBias,
             Tactics tactics,
             Tolerance tolerance,
+            ForceViz viz,
             boolean debug) {
         m_drive = drive;
         m_goal = goal;
         m_yBias = yBias;
         m_tactics = tactics;
         m_tolerance = tolerance;
+        m_viz = viz;
         m_debug = debug && Debug.enable();
         addRequirements(drive);
     }
@@ -45,7 +48,7 @@ public class DriveToPose extends Command {
         // provide "lanes"
         desired = desired.plus(new FieldRelativeVelocity(0, m_yBias.get(), 0));
         if (m_debug)
-            ForceViz.put("desired", m_drive.getPose(), desired);
+            m_viz.desired(m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired);

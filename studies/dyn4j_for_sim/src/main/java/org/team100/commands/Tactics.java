@@ -27,6 +27,7 @@ public class Tactics {
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final List<Tactic> m_tactics;
+    private final ForceViz m_viz;
     private final boolean m_debug;
 
     /**
@@ -43,24 +44,26 @@ public class Tactics {
     public Tactics(
             DriveSubsystem drive,
             CameraSubsystem camera,
+            ForceViz viz,
             boolean avoidObstacles,
             boolean avoidEdges,
             boolean avoidRobots,
             boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_viz = viz;
         m_tactics = new ArrayList<>();
         if (avoidObstacles) {
-            m_tactics.add(new SteerAroundObstacles(m_drive, debug));
-            m_tactics.add(new ObstacleRepulsion(m_drive, debug));
+            m_tactics.add(new SteerAroundObstacles(m_drive, viz, debug));
+            m_tactics.add(new ObstacleRepulsion(m_drive, viz, debug));
         }
         if (avoidEdges) {
-            m_tactics.add(new AvoidEdges(m_drive, debug));
-            m_tactics.add(new AvoidSubwoofers(m_drive, debug));
+            m_tactics.add(new AvoidEdges(m_drive, viz, debug));
+            m_tactics.add(new AvoidSubwoofers(m_drive, viz, debug));
         }
         if (avoidRobots) {
-            m_tactics.add(new SteerAroundRobots(m_drive, m_camera, debug));
-            m_tactics.add(new RobotRepulsion(m_drive, m_camera, debug));
+            m_tactics.add(new SteerAroundRobots(m_drive, m_camera, viz, debug));
+            m_tactics.add(new RobotRepulsion(m_drive, m_camera, viz, debug));
         }
         m_debug = debug && Debug.enable();
     }
@@ -68,7 +71,7 @@ public class Tactics {
     /** add tactics to desired. */
     public FieldRelativeVelocity finish(FieldRelativeVelocity desired) {
         if (m_debug)
-            ForceViz.put("desired", m_drive.getPose(), desired);
+            m_viz.desired(m_drive.getPose(), desired);
         if (m_debug)
             System.out.printf(" desire %s", desired);
         FieldRelativeVelocity v = apply(desired);
