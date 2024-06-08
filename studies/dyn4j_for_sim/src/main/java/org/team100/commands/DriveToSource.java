@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
-import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.planner.Drive;
 import org.team100.sim.ForceViz;
@@ -23,7 +22,6 @@ public class DriveToSource extends Command {
     private final DriveSubsystem m_drive;
     private final Supplier<Pose2d> m_goal;
     private final Supplier<Double> m_yBias;
-    private final Tolerance m_tolerance;
     private final boolean m_debug;
     private final Tactics m_tactics;
 
@@ -33,14 +31,12 @@ public class DriveToSource extends Command {
             Supplier<Pose2d> goal,
             Supplier<Double> yBias,
             Tactics tactics,
-            Tolerance tolerance,
             boolean debug) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
         m_drive = drive;
         m_goal = goal;
         m_yBias = yBias;
-        m_tolerance = tolerance;
         m_debug = debug && Debug.enable();
         m_tactics = tactics;
         addRequirements(drive);
@@ -69,18 +65,4 @@ public class DriveToSource extends Command {
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
     }
-
-    /** TODO: i think this never matters, the pilot cancels the command */
-    @Override
-    public boolean isFinished() {
-        Pose2d pose = m_drive.getPose();
-        FieldRelativeDelta t = FieldRelativeDelta.delta(pose, m_goal.get());
-        double translationError = t.getTranslation().getNorm();
-        double rotationError = t.getRotation().getRadians();
-        double velocity = m_drive.getVelocity().norm();
-        return translationError < m_tolerance.kTranslationTolerance()
-                && Math.abs(rotationError) < m_tolerance.kAngularTolerance()
-                && velocity < m_tolerance.kVelocityTolerance();
-    }
-
 }

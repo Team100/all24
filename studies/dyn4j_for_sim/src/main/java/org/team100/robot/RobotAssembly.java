@@ -27,7 +27,6 @@ import org.team100.subsystems.ShooterSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -102,7 +101,6 @@ public class RobotAssembly {
                         robotBody::sourcePosition,
                         robotBody::yBias,
                         new Tactics(m_drive, m_camera, true, true, true, debug),
-                        new Tolerance(0.75, 5, 2.5),
                         debug));
         whileTrue(m_pilot::driveToStaged,
                 new GoToStaged(
