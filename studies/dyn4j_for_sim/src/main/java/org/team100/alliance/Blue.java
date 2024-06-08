@@ -54,7 +54,7 @@ public class Blue implements Alliance {
                                     new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
                                     8, 7, 6),
                             new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
-                    new Player(world, 1.5, false),
+                    new Player(world, 1, false),
                     false);
         }
         // initially in the upper corner
@@ -66,7 +66,7 @@ public class Blue implements Alliance {
                         new ShootPreload(x.getDrive()),
                         new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)))),
-                new Friend("blue 1", world, -2, false),
+                new Friend("blue 1", world, -1, false),
                 false);
         // initially near subwoofer
         friend1.setState(0.7, 4.3, 2 * Math.PI / 3, 0, 0); // initial position
