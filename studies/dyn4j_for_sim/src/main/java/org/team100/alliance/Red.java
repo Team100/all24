@@ -64,7 +64,7 @@ public class Red implements Alliance {
         // do nothing
         defender = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new ShootPreload(x.getDrive()),
+                        new ShootPreload(x.getDrive()::getPose),
                         new Defender()),
                 new Foe("red defender", world, 0, false),
                 false);

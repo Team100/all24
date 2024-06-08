@@ -1,22 +1,23 @@
 package org.team100.control.auto;
 
+import java.util.function.Supplier;
+
 import org.team100.control.AutoPilot;
-import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
 public class ShootPreload extends AutoPilot {
 
-    private final DriveSubsystem m_drive;
+    private final Supplier<Pose2d> m_pose;
 
-    public ShootPreload(DriveSubsystem drive) {
-        m_drive = drive;
+    public ShootPreload(Supplier<Pose2d> pose) {
+        m_pose = pose;
     }
 
     /** Shoot from wherever you are. */
     @Override
     public Pose2d shootingLocation() {
-        return m_drive.getPose();
+        return m_pose.get();
     }
 
     @Override

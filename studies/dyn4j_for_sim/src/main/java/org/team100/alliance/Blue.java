@@ -63,7 +63,7 @@ public class Blue implements Alliance {
         // do nothing
         friend1 = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new ShootPreload(x.getDrive()),
+                        new ShootPreload(x.getDrive()::getPose),
                         new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)))),
                 new Friend("blue 1", world, -1, false),

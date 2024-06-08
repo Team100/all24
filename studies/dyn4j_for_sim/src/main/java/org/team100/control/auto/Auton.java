@@ -18,8 +18,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 /**
  * Fetch a staged note, shoot it into the speaker, repeat.
  * 
- * TODO: make a special "shoot preload" command.
- * 
  * The new design here will have an array for "state" of notes that remain to be
  * picked; each note state is a belief informed by observations and decayed by
  * the passage of time. The state unit is probability of presence, a crisp value
