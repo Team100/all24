@@ -27,6 +27,7 @@ import org.team100.subsystems.ShooterSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -85,6 +86,14 @@ public class RobotAssembly {
                         m_drive,
                         m_camera,
                         new Tactics(m_drive, m_camera, true, true, true, debug),
+                        debug));
+        whileTrue(m_pilot::driveToCorner,
+                new DriveToPose(
+                        m_drive,
+                        m_pilot::cornerLocation,
+                        () -> 0.0,
+                        new Tactics(m_drive, m_camera, true, true, true, debug),
+                        new Tolerance(1, 1, 0.25),
                         debug));
         whileTrue(m_pilot::driveToSource,
                 new DriveToSource(
@@ -147,7 +156,7 @@ public class RobotAssembly {
                                 robotBody::passingPosition,
                                 () -> 0.0,
                                 new Tactics(m_drive, m_camera, true, true, true, debug),
-                                new Tolerance(0.5, 0.5, 0.1),
+                                new Tolerance(0.3, 0.3, 0.1),
                                 debug),
                         new LobCommand(m_indexer, m_shooter, debug)));
 

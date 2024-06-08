@@ -76,7 +76,16 @@ public interface Pilot {
         return false;
     }
 
+    /** wait in the corner for passed notes. */
+    default boolean driveToCorner() {
+        return false;
+    }
+
     default Pose2d shootingLocation() {
+        return new Pose2d();
+    }
+
+    default Pose2d cornerLocation() {
         return new Pose2d();
     }
 

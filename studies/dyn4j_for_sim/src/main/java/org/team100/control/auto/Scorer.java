@@ -1,5 +1,7 @@
 package org.team100.control.auto;
 
+import java.util.function.Supplier;
+
 import org.team100.control.AutoPilot;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
@@ -10,7 +12,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 /**
  * Pick up nearby notes and score them.
- * TODO: dedupe with speaker cycler.
+ * 
+ * if not amplified, score in the amp.
+ * if amplified, score in the speaker.
  */
 public class Scorer extends AutoPilot {
     private enum State {
@@ -24,21 +28,27 @@ public class Scorer extends AutoPilot {
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
+    private final Supplier<Boolean> m_amplified;
     private final Pose2d m_shooting;
+    private final Pose2d m_corner;
     private State m_state;
 
     public Scorer(
             DriveSubsystem drive,
             CameraSubsystem camera,
             IndexerSubsystem indexer,
-            Pose2d shooting) {
+            Supplier<Boolean> amplified,
+            Pose2d shooting,
+            Pose2d corner) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
         Arg.nonnull(indexer);
         m_drive = drive;
         m_camera = camera;
         m_indexer = indexer;
+        m_amplified = amplified;
         m_shooting = shooting;
+        m_corner = corner;
         m_state = State.Initial;
     }
 
@@ -56,12 +66,14 @@ public class Scorer extends AutoPilot {
 
     @Override
     public boolean scoreAmp() {
-        return enabled() && m_state == State.ToAmp && m_indexer.full();
+        // return enabled() && m_state == State.ToAmp && m_indexer.full();
+        return enabled() && !m_amplified.get() && m_indexer.full();
     }
 
     @Override
     public boolean scoreSpeaker() {
-        return enabled() && m_state == State.ToSpeaker && m_indexer.full();
+        // return enabled() && m_state == State.ToSpeaker && m_indexer.full();
+        return enabled() && m_amplified.get() && m_indexer.full();
     }
 
     @Override
@@ -77,6 +89,16 @@ public class Scorer extends AutoPilot {
     @Override
     public boolean driveToNote() {
         return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
+    }
+
+    @Override
+    public boolean driveToCorner() {
+        return enabled() && !m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
+    }
+
+    @Override
+    public Pose2d cornerLocation() {
+        return m_corner;
     }
 
     @Override
@@ -104,5 +126,4 @@ public class Scorer extends AutoPilot {
         }
 
     }
-
 }

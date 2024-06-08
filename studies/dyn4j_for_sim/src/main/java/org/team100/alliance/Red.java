@@ -37,8 +37,13 @@ public class Red implements Alliance {
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(14, 7, new Rotation2d(-0.5)), false,
                                 11, 10, 9),
-                        new Scorer(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(13.5, 5.5, new Rotation2d()))),
+                        new Scorer(
+                                x.getDrive(),
+                                x.getCamera(),
+                                x.getIndexer(),
+                                () -> world.getScorekeeper().redAmplified() > 0,
+                                new Pose2d(13.5, 5.5, new Rotation2d()),
+                                new Pose2d(14, 7, new Rotation2d()))),
                 new Foe("red scorer", world, 0, false),
                 false);
         // initially in the upper corner
