@@ -69,6 +69,9 @@ public abstract class RobotBody extends Body100 {
 
     public abstract Translation2d speakerPosition();
 
+    /** For "lanes" this is a bias in output Y velocity. */
+    public abstract double yBias();
+
     public SimWorld getWorld() {
         return m_world;
     }

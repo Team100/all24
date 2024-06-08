@@ -43,7 +43,7 @@ public class Blue implements Alliance {
                                     new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
                                     8, 7, 6),
                             new ManualPilot()),
-                    new Player(world, false),
+                    new Player(world, 0, false),
                     false);
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
@@ -54,7 +54,7 @@ public class Blue implements Alliance {
                                     new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
                                     8, 7, 6),
                             new AmpCycler(x.getDrive(), x.getCamera(), x.getIndexer())),
-                    new Player(world, false),
+                    new Player(world, 1.5, false),
                     false);
         }
         // initially in the upper corner
@@ -66,7 +66,7 @@ public class Blue implements Alliance {
                         new ShootPreload(x.getDrive()),
                         new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)))),
-                new Friend("blue 1", world, false),
+                new Friend("blue 1", world, -2, false),
                 false);
         // initially near subwoofer
         friend1.setState(0.7, 4.3, 2 * Math.PI / 3, 0, 0); // initial position
@@ -78,7 +78,7 @@ public class Blue implements Alliance {
                                 new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)), false,
                                 3, 2, 1),
                         new Defender()),
-                new Friend("blue 2", world, false),
+                new Friend("blue 2", world, 0, false),
                 false);
         // initially at subwoofer
         friend2.setState(1.4, 5.5, Math.PI, 0, 0);

@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveToPose extends Command {
     private final DriveSubsystem m_drive;
     private final Supplier<Pose2d> m_goal;
+    private final Supplier<Double> m_yBias;
     private final Tactics m_tactics;
     private final Tolerance m_tolerance;
     private final boolean m_debug;
@@ -23,11 +24,13 @@ public class DriveToPose extends Command {
     public DriveToPose(
             DriveSubsystem drive,
             Supplier<Pose2d> goal,
+            Supplier<Double> yBias,
             Tactics tactics,
             Tolerance tolerance,
             boolean debug) {
         m_drive = drive;
         m_goal = goal;
+        m_yBias = yBias;
         m_tactics = tactics;
         m_tolerance = tolerance;
         m_debug = debug && Debug.enable();
@@ -39,6 +42,8 @@ public class DriveToPose extends Command {
         if (m_debug)
             System.out.print("DriveToPose");
         FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal.get(), m_debug);
+        // provide "lanes"
+        desired = desired.plus(new FieldRelativeVelocity(0, m_yBias.get(), 0));
         if (m_debug)
             ForceViz.put("desired", m_drive.getPose(), desired);
         if (m_debug)

@@ -39,7 +39,7 @@ public class Red implements Alliance {
                                 11, 10, 9),
                         new Scorer(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(13.5, 5.5, new Rotation2d()))),
-                new Foe("red scorer", world, false),
+                new Foe("red scorer", world, 0, false),
                 false);
         // initially in the upper corner
         scorer.setState(15.3, 7, 0, 0, 0);
@@ -48,10 +48,10 @@ public class Red implements Alliance {
         passer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(14, 3, new Rotation2d(0.5)), false,
+                                new Pose2d(13.5, 3.4, new Rotation2d(0.5)), false,
                                 4, 5, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
-                new Foe("red passer", world, false),
+                new Foe("red passer", world, 0, false),
                 false);
         // initially below the subwoofer
         passer.setState(15.3, 3, 0, 0, 0);
@@ -61,7 +61,7 @@ public class Red implements Alliance {
                 x -> SelectorPilot.autonSelector(
                         new ShootPreload(x.getDrive()),
                         new Defender()),
-                new Foe("red defender", world, false),
+                new Foe("red defender", world, 0, false),
                 false);
         // initially near subwoofer
         defender.setState(15.8, 4.3, Math.PI / 3, 0, 0);

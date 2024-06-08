@@ -8,9 +8,12 @@ import edu.wpi.first.math.geometry.Translation2d;
  */
 public class Player extends RobotBody {
 
+    private final double m_yBias;
+
     /** Note: adds this to the world. */
-    public Player(SimWorld world, boolean debug) {
+    public Player(SimWorld world, double yBias, boolean debug) {
         super("player", world, debug);
+        m_yBias = yBias;
     }
 
     @Override
@@ -47,5 +50,10 @@ public class Player extends RobotBody {
     @Override
     public Translation2d speakerPosition() {
         return Friend.kSpeaker;
+    }
+
+    @Override
+    public double yBias() {
+        return m_yBias;
     }
 }

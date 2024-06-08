@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  * 
  * Friends should have human-readable names.
  * 
- * TODO: coordinate "lanes" among alliance-mates
  * TODO: spin away if close to an opponent
  */
 public class Friend extends RobotBody {
@@ -25,9 +24,12 @@ public class Friend extends RobotBody {
     /** Center of the speaker: the target to shoot at. */
     static final Translation2d kSpeaker = new Translation2d(0, 5.548);
 
+    private final double m_yBias;
+
     /** Note: adds this to the world. */
-    public Friend(String id, SimWorld world, boolean debug) {
+    public Friend(String id, SimWorld world, double yBias, boolean debug) {
         super(id, world, debug);
+        m_yBias = yBias;
     }
 
     @Override
@@ -65,6 +67,11 @@ public class Friend extends RobotBody {
     @Override
     public Translation2d speakerPosition() {
         return kSpeaker;
+    }
+
+    @Override
+    public double yBias() {
+        return m_yBias;
     }
 
 }

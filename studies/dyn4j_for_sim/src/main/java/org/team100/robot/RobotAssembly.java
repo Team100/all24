@@ -91,6 +91,7 @@ public class RobotAssembly {
                         m_drive,
                         m_camera,
                         robotBody::sourcePosition,
+                        robotBody::yBias,
                         new Tactics(m_drive, m_camera, true, true, true, debug),
                         new Tolerance(0.75, 5, 2.5),
                         debug));
@@ -104,12 +105,15 @@ public class RobotAssembly {
                         debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
+                        // here the lane accuracy issue is no problem
                         new DriveToPose(
                                 m_drive,
                                 m_pilot::shootingLocation,
+                                robotBody::yBias,
                                 new Tactics(m_drive, m_camera, true, true, true, debug),
-                                new Tolerance(0.75, 1, 0.25),
+                                new Tolerance(1, 1, 0.25),
                                 debug),
+                        // rotation takes care of cartesian error.
                         new RotateToShoot(
                                 m_drive,
                                 robotBody::speakerPosition,
@@ -118,20 +122,32 @@ public class RobotAssembly {
                         new ShootCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::scoreAmp,
                 Commands.sequence(
+                        // first go approximately there, in the "lane"
                         new DriveToPose(
                                 m_drive,
                                 robotBody::ampPosition,
+                                robotBody::yBias,
                                 new Tactics(m_drive, m_camera, true, false, true, debug),
-                                new Tolerance(0.05, 0.05, 0.1),
+                                new Tolerance(0.5, 0.5, 0.5),
+                                debug),
+                        // then go exactly there, position is important
+                        new DriveToPose(
+                                m_drive,
+                                robotBody::ampPosition,
+                                () -> 0.0,
+                                new Tactics(m_drive, m_camera, false, false, false, debug),
+                                new Tolerance(0.05, 0.05, 0.05),
                                 debug),
                         new AmpCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::pass,
                 Commands.sequence(
+                        // location can be pretty approximate
                         new DriveToPose(
                                 m_drive,
                                 robotBody::passingPosition,
+                                () -> 0.0,
                                 new Tactics(m_drive, m_camera, true, true, true, debug),
-                                new Tolerance(0.05, 0.05, 0.1),
+                                new Tolerance(0.5, 0.5, 0.1),
                                 debug),
                         new LobCommand(m_indexer, m_shooter, debug)));
 
