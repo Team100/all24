@@ -4,7 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-
+/*Hello */
 public class Robot extends TimedRobot {
     private final Servo m_swing = new Servo(0);
     private final Servo m_boom = new Servo(1);
@@ -20,7 +20,7 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         m_swing.setAngle(50);
         m_boom.setAngle(70);
-        
+
         m_stick.setAngle(90);
         m_wrist.setAngle(90);
         m_twist.setAngle(0); // not enough controller channels, leave twist fixed
