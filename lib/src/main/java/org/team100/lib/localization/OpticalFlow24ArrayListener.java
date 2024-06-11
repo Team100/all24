@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 import java.util.EnumSet;
 import java.util.HashMap;
 import org.team100.lib.config.Camera;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Transform3d;
@@ -19,8 +20,10 @@ public class OpticalFlow24ArrayListener {
     private StructBuffer<Translation2d> m_buf = StructBuffer.create(Translation2d.struct);
     HashMap<Translation2d,Camera> list = new HashMap<>();
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
-    public OpticalFlow24ArrayListener(SwerveDrivePoseEstimator100 poseEstimator) {
+    private final SwerveDriveSubsystem m_swerveDriveSubsystem;
+    public OpticalFlow24ArrayListener(SwerveDrivePoseEstimator100 poseEstimator, SwerveDriveSubsystem swerveDriveSubsystem) {
         m_poseEstimator = poseEstimator;
+        m_swerveDriveSubsystem = swerveDriveSubsystem;
     }
 
     void consumeValues(NetworkTableEvent e) {
@@ -56,8 +59,9 @@ public class OpticalFlow24ArrayListener {
         }
     }
 
-    private void updateOdometry(Translation2d change) {
-        Translation2d finalTranslation2d = change.plus(m_poseEstimator.getEstimatedPosition().translation());
+    private void updateOdometry(Translation2d changeInTranslation) {
+        Translation2d finalTranslation2d = changeInTranslation.plus(m_poseEstimator.getEstimatedPosition().translation());
+        m_swerveDriveSubsystem.resetTranslation(finalTranslation2d);
     }
 
     public void enable() {

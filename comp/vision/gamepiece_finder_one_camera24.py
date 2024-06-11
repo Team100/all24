@@ -41,8 +41,12 @@ class GamePieceFinder:
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (4,150, 100)
-        self.object_higher = (16, 255, 255)
+        #for light
+        self.object_lower = (7,150, 170)
+        self.object_higher = (14, 255, 255)
+        #for darkness
+        # self.object_lower = (4,150, 100)
+        # self.object_higher = (16, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt()
