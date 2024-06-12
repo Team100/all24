@@ -33,11 +33,11 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
     }
 
     public void outtake() {
-        ampDrive.setDutyCycle(1);
+        ampDrive.setDutyCycle(-1);
     }
 
     public void intake() {
-        ampDrive.setDutyCycle(-1);
+        ampDrive.setDutyCycle(1);
     }
 
     public void stop() {

@@ -282,6 +282,11 @@ public class SwerveKinodynamics implements Glassy {
         return m_MaxSteeringVelocityRad_S;
     }
 
+    /** Cruise speed of the swerve steering axes, rad/s. */
+    public double getMaxSteeringAccelRad_S2() {
+        return m_maxSteeringAccelerationRad_S2;
+    }
+
     /** Spin cruise speed, rad/s. Computed from drive and frame size. */
     public double getMaxAngleSpeedRad_S() {
         return m_maxAngleSpeedRad_S;

@@ -14,6 +14,7 @@ import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.FeedToAmp;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.OuttakeCommand;
+import org.team100.frc2024.motion.ShootSmartWithRotation;
 import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.amp.AmpPivot;
 import org.team100.frc2024.motion.amp.AmpSet;
@@ -22,7 +23,6 @@ import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
@@ -335,7 +335,7 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShooterLockCommand(shooterLock, driverControl::velocity, m_drive));
+                new ShootSmartWithRotation(m_drive, m_shooter,m_feeder, m_intake, shooterLock, driverControl::velocity));
 
         //////////////////
         //
