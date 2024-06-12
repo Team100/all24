@@ -61,7 +61,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     BooleanSupplier m_trigger;
     Pose2d m_prevPose;
     private boolean isAligned;
-
     public ManualWithShooterLock(
             String parent,
             SwerveKinodynamics swerveKinodynamics,

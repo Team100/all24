@@ -124,7 +124,6 @@ class MouseVision:
         # frame = cv2.resize(frame, (368,544))
         # this  makes a view, very fast (150 ns)
         # start time to calculate FPS
-        start = time.time()
         metadata = request.get_metadata()
         sensor_timestamp = metadata["SensorTimestamp"]
         system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
@@ -215,9 +214,12 @@ class MouseVision:
         self.prev_gray = frame_gray
 
         # End time
-        end = time.time()
         # calculate the FPS for current frame detection
-        self.fps = 1 / (end - start)
+        current_time = time.time()
+        total_et = current_time - self.frame_time
+        self.frame_time = current_time
+
+        self.fps = 1 / total_et
         self.vision_fps.set(self.fps)
         # Show Results
         cv2.putText(
@@ -267,8 +269,8 @@ def main():
         height = 616
     elif model == "imx296":
         print("GS Camera")
-        fullwidth = 64  # slightly larger than the detector, to match stride
-        fullheight = 64
+        fullwidth = 1456  # slightly larger than the detector, to match stride
+        fullheight = 1088
         # medium detection resolution, compromise speed vs range
         width = 64    
         height = 64    

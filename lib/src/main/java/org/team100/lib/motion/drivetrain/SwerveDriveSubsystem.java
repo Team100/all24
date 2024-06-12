@@ -18,6 +18,7 @@ import org.team100.lib.util.ExpiringMemoizingSupplier;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -198,6 +199,15 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     public void stop() {
         m_swerveLocal.stop();
+    }
+
+    public void resetTranslation(Translation2d translation) {
+        m_poseEstimator.resetPosition(
+                m_heading.getHeadingNWU(),
+                new SwerveDriveWheelPositions(m_swerveLocal.positions()),
+                new Pose2d(translation, m_heading.getHeadingNWU()),
+                Timer.getFPGATimestamp());
+        m_stateSupplier.reset();
     }
 
     public void resetPose(Pose2d robotPose) {

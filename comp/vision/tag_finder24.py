@@ -75,10 +75,10 @@ class CameraData:
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1472  # slightly larger than the detector, to match stride
+            fullwidth = 1456  # slightly larger than the detector, to match stride
             fullheight = 1088
             # medium detection resolution, compromise speed vs range
-            self.width = 1472
+            self.width = 1456 
             self.height = 1088
         else:
             print("UNKNOWN CAMERA: " + model)
@@ -339,10 +339,10 @@ class TagFinder:
         topic_name = "vision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/fps").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/latency").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/latency").publish()
             )
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
