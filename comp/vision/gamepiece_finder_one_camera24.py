@@ -42,8 +42,12 @@ class GamePieceFinder:
 
         # opencv hue values are 0-180, half the usual number
         #for light
-        self.object_lower = (7,150, 170)
-        self.object_higher = (14, 255, 255)
+        lower_value_bound = 190
+        lower_saturation_bound = 10
+        self.object_lower = (0,lower_saturation_bound, lower_value_bound)
+        self.object_higher = (15, 255, 255)
+        self.secobject_lower = (165,lower_saturation_bound, lower_value_bound)
+        self.secobject_higher = (180, 255, 255)
         #for darkness
         # self.object_lower = (4,150, 100)
         # self.object_higher = (16, 255, 255)
@@ -127,7 +131,9 @@ class GamePieceFinder:
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
-        img_range = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+        img1 = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+        img2 = cv2.inRange(img_hsv, self.secobject_lower, self.secobject_higher)
+        img_range = cv2.bitwise_or(img1, img2)
 
         floodfill = img_range.copy()
         h, w = img_range.shape[:2]

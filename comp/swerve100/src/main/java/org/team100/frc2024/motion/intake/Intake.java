@@ -58,11 +58,7 @@ public class Intake extends SubsystemBase implements Glassy {
         }
     }
 
-    boolean intakeSmartReady = false;
-
     public void intakeSmart() {
-        if (intakeSmartReady)
-            return;
         if (!m_sensors.getFeederSensor()) {
             count++;
         } else {
@@ -85,7 +81,6 @@ public class Intake extends SubsystemBase implements Glassy {
             centeringPWM.setSpeed(0);
             superRollers.setVelocity(0);
             count = 0;
-            intakeSmartReady = true;
         }
 
         currentCount++;
@@ -99,7 +94,6 @@ public class Intake extends SubsystemBase implements Glassy {
 
     public void resetCurrentCount() {
         currentCount = 0;
-        intakeSmartReady = false;
     }
 
     public void runLowerIntake() {

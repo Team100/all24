@@ -30,6 +30,7 @@ public class SwerveKinodynamicsFactory {
                 // so should be a bit higher top speed and less acceleration.
                 return new SwerveKinodynamics(
                         5, // max vel m/s
+                        10, // stall m/s/s
                         3, // max accel m/s/s
                         10, // max decel m/s/s
                         20, // max module steering rate rad/s

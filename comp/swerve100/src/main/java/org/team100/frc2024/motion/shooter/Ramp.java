@@ -1,7 +1,6 @@
 package org.team100.frc2024.motion.shooter;
 
 import java.util.Optional;
-
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
@@ -18,7 +17,7 @@ public class Ramp extends Command {
     public Ramp(Shooter shooter, SwerveDriveSubsystem drive) {
         m_shooter = shooter;
         m_drive = drive;
-        addRequirements(m_shooter);
+        addRequirements(m_shooter, m_drive);
     }
 
     @Override
