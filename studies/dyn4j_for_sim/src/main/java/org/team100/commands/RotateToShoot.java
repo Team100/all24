@@ -1,5 +1,7 @@
 package org.team100.commands;
 
+import java.util.function.Supplier;
+
 import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -16,18 +18,22 @@ import edu.wpi.first.wpilibj2.command.Command;
  * TODO: make a shoot-on-the-move command
  */
 public class RotateToShoot extends Command {
-    private static final double kAngleTolerance = 0.05;
-    private static final double kVelocityTolerance = 0.05;
     private static final double kAngularP = 10;
     private static final double kOmegaP = 1;
     private static final double kVelocityP = 1;
-    private final Translation2d m_speakerPosition;
+    private final Supplier<Translation2d> m_speakerPosition;
     private final DriveSubsystem m_drive;
+    private final Tolerance m_tolerance;
     private final boolean m_debug;
 
-    public RotateToShoot(DriveSubsystem drive, boolean debug) {
-        m_speakerPosition = drive.speakerPosition();
+    public RotateToShoot(
+            DriveSubsystem drive,
+            Supplier<Translation2d> target,
+            Tolerance tolerance,
+            boolean debug) {
+        m_speakerPosition = target;
         m_drive = drive;
+        m_tolerance = tolerance;
         m_debug = debug && Debug.enable();
         addRequirements(drive);
     }
@@ -43,7 +49,7 @@ public class RotateToShoot extends Command {
             System.out.printf(" v_FB %s", velocityFeedback);
 
         Pose2d pose = m_drive.getPose();
-        double goalAngle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
+        double goalAngle = m_speakerPosition.get().minus(pose.getTranslation()).getAngle().getRadians();
         double angularError = MathUtil.angleModulus(goalAngle - pose.getRotation().getRadians());
         FieldRelativeVelocity angularFeedback = new FieldRelativeVelocity(0, 0, angularError * kAngularP);
         if (m_debug)
@@ -59,9 +65,11 @@ public class RotateToShoot extends Command {
     @Override
     public boolean isFinished() {
         Pose2d pose = m_drive.getPose();
-        double angle = m_speakerPosition.minus(pose.getTranslation()).getAngle().getRadians();
+        double angle = m_speakerPosition.get().minus(pose.getTranslation()).getAngle().getRadians();
         double error = MathUtil.angleModulus(angle - pose.getRotation().getRadians());
         double velocity = m_drive.getVelocity().norm();
-        return error < kAngleTolerance && velocity < kVelocityTolerance;
+        double omega = m_drive.getVelocity().theta();
+        return error < m_tolerance.kAngularTolerance() && velocity < m_tolerance.kVelocityTolerance()
+                && omega < m_tolerance.kVelocityTolerance();
     }
 }

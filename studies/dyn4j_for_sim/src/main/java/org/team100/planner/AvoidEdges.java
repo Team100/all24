@@ -14,13 +14,18 @@ public class AvoidEdges implements Tactic {
     private static final double kWallRepulsion = 5;
 
     private final DriveSubsystem m_drive;
+    private final ForceViz m_viz;
     private final boolean m_debug;
 
     /**
      * @param drive provides pose
      */
-    public AvoidEdges(DriveSubsystem drive, boolean debug) {
+    public AvoidEdges(
+            DriveSubsystem drive,
+            ForceViz viz,
+            boolean debug) {
         m_drive = drive;
+        m_viz = viz;
         m_debug = debug && Debug.enable();
 
     }
@@ -40,7 +45,7 @@ public class AvoidEdges implements Tactic {
         if (m_debug)
             System.out.printf(" avoidEdges (%5.2f, %5.2f)", v.x(), v.y());
         if (m_debug)
-            ForceViz.put("tactics", pose, v);
+            m_viz.tactics(pose, v);
         return v;
     }
 

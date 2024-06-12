@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  * 
  * Foes should have human-readable names.
  * 
- * TODO: coordinate "lanes" among alliance-mates
  * TODO: spin away if close to an opponent
  */
 public class Foe extends RobotBody {
@@ -20,16 +19,17 @@ public class Foe extends RobotBody {
     static final Pose2d kSource = new Pose2d(1, 2, new Rotation2d());
     /** This is the robot center when facing the amp */
     private static final Pose2d kAmpSpot = new Pose2d(14.7, 7.5, new Rotation2d(-Math.PI / 2));
-    /** Shoot from about 3 meters away */
-    private static final Pose2d kShootingSpot = new Pose2d(13.5, 5.5, new Rotation2d());
     static final Pose2d kPassingSpot = new Pose2d(6.5, 1, new Rotation2d(0.65));
     static final Pose2d kDefendSpot = new Pose2d(13, 2, new Rotation2d(Math.PI));
     /** Center of the speaker: the target to shoot at. */
     private static final Translation2d kSpeaker = new Translation2d(16.541, 5.548);
 
+    private final double m_yBias;
+
     /** Note: adds this to the world. */
-    public Foe(String id, SimWorld world, boolean debug) {
+    public Foe(String id, SimWorld world, double yBias, boolean debug) {
         super(id, world, debug);
+        m_yBias = yBias;
     }
 
     @Override
@@ -41,11 +41,6 @@ public class Foe extends RobotBody {
     @Override
     public Pose2d ampPosition() {
         return kAmpSpot;
-    }
-
-    @Override
-    public Pose2d shootingPosition() {
-        return kShootingSpot;
     }
 
     @Override
@@ -71,6 +66,11 @@ public class Foe extends RobotBody {
     @Override
     public Translation2d speakerPosition() {
         return kSpeaker;
+    }
+
+    @Override
+    public double yBias() {
+        return m_yBias;
     }
 
 }

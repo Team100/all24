@@ -21,11 +21,12 @@ import edu.wpi.first.math.geometry.Translation2d;
  * Assumes they're not moving, which is a terrible assumption.
  */
 public class SteerAroundRobots implements Tactic {
-    private static final double kRobotSteer = 20;
+    private static final double kRobotSteer = 8;
     private static final double kMaxTargetVelocity = 4;
 
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final ForceViz m_viz;
     private final Heuristics m_heuristics;
     private final boolean m_debug;
 
@@ -33,11 +34,14 @@ public class SteerAroundRobots implements Tactic {
      * @param drive  provides pose
      * @param camera provides robot sightings
      */
-    public SteerAroundRobots(DriveSubsystem drive,
+    public SteerAroundRobots(
+            DriveSubsystem drive,
             CameraSubsystem camera,
+            ForceViz viz,
             boolean debug) {
         m_drive = drive;
         m_camera = camera;
+        m_viz = viz;
         m_heuristics = new Heuristics(debug);
         m_debug = debug && Debug.enable();
     }
@@ -98,7 +102,7 @@ public class SteerAroundRobots implements Tactic {
                         mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
             FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
             if (m_debug)
-                ForceViz.put("tactics", myPosition, robotSteer);
+                m_viz.tactics(myPosition, robotSteer);
             v = v.plus(robotSteer);
         }
         return v;

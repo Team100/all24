@@ -71,14 +71,4 @@ public class ManualPilot implements Pilot {
     public boolean shootCommand() {
         return m_controller.getRawButton(11);
     }
-
-    @Override
-    public void begin() {
-        //
-    }
-
-    @Override
-    public void reset() {
-        //
-    }
 }

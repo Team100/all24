@@ -14,13 +14,18 @@ public class ObstacleRepulsion implements Tactic {
     private static final double kObstacleRepulsion = 10;
 
     private final DriveSubsystem m_drive;
+    private final ForceViz m_viz;
     private final boolean m_debug;
 
     /**
      * @param drive provides pose
      */
-    public ObstacleRepulsion(DriveSubsystem drive, boolean debug) {
+    public ObstacleRepulsion(
+            DriveSubsystem drive,
+            ForceViz viz,
+            boolean debug) {
         m_drive = drive;
+        m_viz = viz;
         m_debug = debug && Debug.enable();
     }
 
@@ -45,7 +50,7 @@ public class ObstacleRepulsion implements Tactic {
                     System.out.printf(" obstacleRepulsion (%5.2f, %5.2f)", force.getX(), force.getY());
                 FieldRelativeVelocity repel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
                 if (m_debug)
-                    ForceViz.put("tactics", pose, repel);
+                    m_viz.tactics(pose, repel);
                 v = v.plus(repel);
             }
         }

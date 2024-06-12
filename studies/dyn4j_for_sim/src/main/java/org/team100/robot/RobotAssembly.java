@@ -3,19 +3,11 @@ package org.team100.robot;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
-import org.team100.sim.Note;
-import org.team100.sim.RobotBody;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
-import org.team100.subsystems.ShooterSubsystem;
 import org.team100.commands.AmpCommand;
 import org.team100.commands.DefendSource;
-import org.team100.commands.DriveToAmp;
 import org.team100.commands.DriveToNote;
-import org.team100.commands.DriveToPass;
+import org.team100.commands.DriveToPose;
 import org.team100.commands.DriveToSource;
-import org.team100.commands.DriveToSpeaker;
 import org.team100.commands.GoToStaged;
 import org.team100.commands.Intake;
 import org.team100.commands.LobCommand;
@@ -23,7 +15,16 @@ import org.team100.commands.Outtake;
 import org.team100.commands.PilotDrive;
 import org.team100.commands.RotateToShoot;
 import org.team100.commands.ShootCommand;
+import org.team100.commands.Tactics;
+import org.team100.commands.Tolerance;
 import org.team100.control.Pilot;
+import org.team100.sim.ForceViz;
+import org.team100.sim.Note;
+import org.team100.sim.RobotBody;
+import org.team100.subsystems.CameraSubsystem;
+import org.team100.subsystems.DriveSubsystem;
+import org.team100.subsystems.IndexerSubsystem;
+import org.team100.subsystems.ShooterSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -51,8 +52,9 @@ public class RobotAssembly {
     public RobotAssembly(
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
+            ForceViz viz,
             boolean debug) {
-        m_drive = new DriveSubsystem(robotBody);
+        m_drive = new DriveSubsystem(robotBody, debug);
         m_indexer = new IndexerSubsystem(this, robotBody, debug);
         // every robot gets a preload in the indexer.
         m_indexer.preload();
@@ -71,26 +73,99 @@ public class RobotAssembly {
         whileTrue(m_pilot::intake,
                 new Intake(m_indexer, debug));
         whileTrue(m_pilot::defend,
-                new DefendSource(0.1, m_drive, m_camera, debug));
+                new DefendSource(
+                        0.1,
+                        m_drive,
+                        m_camera,
+                        robotBody::defenderPosition,
+                        robotBody::opponentSourcePosition,
+                        new Tactics(m_drive, m_camera, viz, false, true, false, debug),
+                        viz,
+                        debug));
         whileTrue(m_pilot::driveToNote,
-                new DriveToNote(m_drive, m_camera, debug));
+                new DriveToNote(
+                        m_indexer,
+                        m_drive,
+                        m_camera,
+                        new Tactics(m_drive, m_camera, viz, true, true, true, debug),
+                        debug));
+        whileTrue(m_pilot::driveToCorner,
+                new DriveToPose(
+                        m_drive,
+                        m_pilot::cornerLocation,
+                        () -> 0.0,
+                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tolerance(1, 1, 0.25),
+                        viz,
+                        debug));
         whileTrue(m_pilot::driveToSource,
-                new DriveToSource(m_drive, m_camera, debug));
+                new DriveToSource(
+                        m_drive,
+                        m_camera,
+                        robotBody::sourcePosition,
+                        robotBody::yBias,
+                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        viz,
+                        debug));
         whileTrue(m_pilot::driveToStaged,
-                new GoToStaged(m_pilot, m_drive, m_camera, debug));
+                new GoToStaged(
+                        m_pilot,
+                        m_indexer,
+                        m_drive,
+                        m_camera,
+                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
-                        new DriveToSpeaker(m_pilot, m_drive, m_camera, debug),
-                        new RotateToShoot(m_drive, debug),
+                        // here the lane accuracy issue is no problem
+                        new DriveToPose(
+                                m_drive,
+                                m_pilot::shootingLocation,
+                                robotBody::yBias,
+                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                                new Tolerance(1, 1, 0.25),
+                                viz,
+                                debug),
+                        // rotation takes care of cartesian error.
+                        new RotateToShoot(
+                                m_drive,
+                                robotBody::speakerPosition,
+                                new Tolerance(1, 0.05, 0.05),
+                                debug),
                         new ShootCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::scoreAmp,
                 Commands.sequence(
-                        new DriveToAmp(m_drive, m_camera, debug),
-                        new AmpCommand(m_indexer, m_shooter)));
+                        // first go approximately there, in the "lane"
+                        new DriveToPose(
+                                m_drive,
+                                robotBody::ampPosition,
+                                robotBody::yBias,
+                                new Tactics(m_drive, m_camera, viz,true, false, true, debug),
+                                new Tolerance(0.5, 0.5, 0.5),
+                                viz,
+                                debug),
+                        // then go exactly there, position is important
+                        new DriveToPose(
+                                m_drive,
+                                robotBody::ampPosition,
+                                () -> 0.0,
+                                new Tactics(m_drive, m_camera, viz,false, false, false, debug),
+                                new Tolerance(0.05, 0.05, 0.05),
+                                viz,
+                                debug),
+                        new AmpCommand(m_indexer, m_shooter, debug)));
         whileTrue(m_pilot::pass,
                 Commands.sequence(
-                        new DriveToPass(m_drive, m_camera, debug),
-                        new LobCommand(m_indexer, m_shooter)));
+                        // location can be pretty approximate
+                        new DriveToPose(
+                                m_drive,
+                                robotBody::passingPosition,
+                                () -> 0.0,
+                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                                new Tolerance(0.3, 0.3, 0.1),
+                                viz,
+                                debug),
+                        new LobCommand(m_indexer, m_shooter, debug)));
 
         ///////////////////////////////////////////////////////////////
         //
@@ -104,11 +179,15 @@ public class RobotAssembly {
         whileTrue(m_pilot::shoot,
                 new ShootCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::amp,
-                new AmpCommand(m_indexer, m_shooter));
+                new AmpCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::lob,
-                new LobCommand(m_indexer, m_shooter));
+                new LobCommand(m_indexer, m_shooter, debug));
         whileTrue(m_pilot::rotateToShoot,
-                new RotateToShoot(m_drive, debug));
+                new RotateToShoot(
+                        m_drive,
+                        robotBody::speakerPosition,
+                        new Tolerance(1, 0.05, 0.05),
+                        debug));
         whileTrue(m_pilot::shootCommand,
                 new ShootCommand(m_indexer, m_shooter, debug));
 

@@ -28,7 +28,8 @@ public class ShooterSubsystem extends SubsystemBase {
     private static final double kAmpImpulseNs = 1.2;
 
     /** Slightly beyond vertical. */
-    private static final double kAmpElevationRad = -1.66;
+    // private static final double kAmpElevationRad = -1.66;
+    private static final double kAmpElevationRad = -1.6;
 
     private final RobotAssembly m_assembly;
     private final RobotBody m_robotBody;
@@ -83,7 +84,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /**
      * @param impulseNs    measured in newton-seconds.
-     * @param elevationRad from the "front", for amp, use >pi/2.
+     * @param elevationRad pitch angle (positive down) from the "front", for amp,
+     *                     use >pi/2.
      */
     private void shooter(double impulseNs, double elevationRad) {
         if (m_assembly.m_indexerShooterHandoff == null) {

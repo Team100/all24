@@ -1,15 +1,16 @@
 package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
-import org.team100.control.Idlepilot;
 import org.team100.control.SelectorPilot;
 import org.team100.control.auto.Auton;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
+import org.team100.control.auto.ShootPreload;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
+import org.team100.sim.ForceViz;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,16 +31,22 @@ public class Red implements Alliance {
     private final RobotAssembly defender;
     private final Source source;
 
-    public Red(SimWorld world) {
+    public Red(SimWorld world, ForceViz viz) {
         // near 3
         scorer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(14, 7, new Rotation2d()), false,
+                                new Pose2d(14, 7, new Rotation2d(-0.5)), false,
                                 11, 10, 9),
-                        new Scorer(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(13.5, 5.5, new Rotation2d()))),
-                new Foe("red scorer", world, false),
+                        new Scorer(
+                                x.getDrive(),
+                                x.getCamera(),
+                                x.getIndexer(),
+                                () -> world.getScorekeeper().redAmplified() > 0,
+                                new Pose2d(13.5, 5.5, new Rotation2d()),
+                                new Pose2d(14, 7, new Rotation2d()))),
+                new Foe("red scorer", world, 0, false),
+                viz,
                 false);
         // initially in the upper corner
         scorer.setState(15.3, 7, 0, 0, 0);
@@ -48,10 +55,11 @@ public class Red implements Alliance {
         passer = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
-                                new Pose2d(14, 3, new Rotation2d()), false,
+                                new Pose2d(13.5, 3.4, new Rotation2d(0.5)), false,
                                 4, 5, 6),
                         new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
-                new Foe("red passer", world, false),
+                new Foe("red passer", world, 0, false),
+                viz,
                 false);
         // initially below the subwoofer
         passer.setState(15.3, 3, 0, 0, 0);
@@ -59,9 +67,10 @@ public class Red implements Alliance {
         // do nothing
         defender = new RobotAssembly(
                 x -> SelectorPilot.autonSelector(
-                        new Idlepilot(),
+                        new ShootPreload(x.getDrive()::getPose),
                         new Defender()),
-                new Foe("red defender", world, false),
+                new Foe("red defender", world, 0, false),
+                viz,
                 false);
         // initially near subwoofer
         defender.setState(15.8, 4.3, Math.PI / 3, 0, 0);

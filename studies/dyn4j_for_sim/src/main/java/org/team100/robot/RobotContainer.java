@@ -16,11 +16,13 @@ public class RobotContainer {
     private final Alliance m_blue;
     /** Foes */
     private final Alliance m_red;
+    private final ForceViz m_viz;
 
     public RobotContainer(SimWorld world) {
         m_world = world;
-        m_blue = new Blue(m_world);
-        m_red = new Red(m_world);
+        m_viz = new ForceViz();
+        m_blue = new Blue(m_world, m_viz);
+        m_red = new Red(m_world, m_viz);
         SmartDashboard.putData(CommandScheduler.getInstance());
     }
 
@@ -32,7 +34,7 @@ public class RobotContainer {
         m_blue.reset();
         m_red.reset();
         m_world.render();
-        ForceViz.render();
+        m_viz.render();
     }
 
     public void teleopInit() {
@@ -57,7 +59,7 @@ public class RobotContainer {
     public void robotPeriodic() {
         m_world.update();
         m_world.render();
-        ForceViz.render();
+        m_viz.render();
     }
 
     public void autonomousInit() {
