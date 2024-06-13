@@ -18,6 +18,7 @@ import org.team100.frc2024.motion.ShootSmartWithRotation;
 import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.amp.AmpPivot;
 import org.team100.frc2024.motion.amp.AmpSet;
+import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
@@ -37,6 +38,7 @@ import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
+import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
@@ -195,7 +197,7 @@ public class RobotContainer implements Glassy {
         // RESET 180
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
-
+        FullStateDriveController fullStateController = new FullStateDriveController();
         HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
@@ -212,8 +214,18 @@ public class RobotContainer implements Glassy {
                         m_intake,
                         notePositionDetector::getClosestTranslation2d,
                         m_drive,
-                        dthetaController,
+                        fullStateController,
                         swerveKinodynamics));
+
+        whileTrue(driverControl::driveToAmp,
+                new DriveToAmp(
+                        m_drive,
+                        swerveKinodynamics,
+                        m_ampPivot,
+                        m_ampFeeder,
+                        m_intake,
+                        m_shooter,
+                        m_feeder));
 
         whileTrue(operatorControl::intake, new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
 
@@ -240,9 +252,9 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(2.5, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(0.25, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0, 0, 0); // .5
+        PIDController omegaController = new PIDController(1, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 

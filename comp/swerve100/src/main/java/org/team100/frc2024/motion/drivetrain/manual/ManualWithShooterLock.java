@@ -75,14 +75,14 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_name = Names.append(parent, this);
         m_trigger = () -> false;
         Constraints100 c = new Constraints100(
-                swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
-                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed);
+                swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed/8);
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
     @Override
     public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), -1.0 * m_heading.getHeadingRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -102,8 +102,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
-        double headingRate = m_heading.getHeadingRateNWU();
-
+        double headingRate = -1.0 * m_heading.getHeadingRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
         Rotation2d bearing = bearing(currentTranslation, target);
@@ -144,14 +143,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
 
         t.log(Level.TRACE, m_name, "target", target);
-        t.log(Level.TRACE, m_name, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "theta/measurement", measurement);
+        t.log(Level.SILENT, m_name, "theta/setpoint", m_thetaSetpoint);
+        t.log(Level.SILENT, m_name, "theta/measurement", measurement);
         t.log(Level.TRACE, m_name, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.TRACE, m_name, "theta/fb", thetaFB);
+        t.log(Level.SILENT, m_name, "theta/fb", thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        t.log(Level.TRACE, m_name, "omega/reference", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
-        t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
+        t.log(Level.SILENT, m_name, "omega/measurement", headingRate);
+        t.log(Level.SILENT, m_name, "omega/error", m_omegaController.getPositionError());
         t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
         t.log(Level.TRACE, m_name, "target motion", targetMotion);
         t.log(Level.TRACE, m_name, "goal X", goal.x());

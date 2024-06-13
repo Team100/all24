@@ -56,7 +56,7 @@ public class ShootSmartWithRotation extends Command100{
         double angle = MathUtil.angleModulus(Math.atan2(difference.getY(),difference.getX())-Math.PI);
         t.log(Level.DEBUG, m_name, "angle", angle);
         double angleModulus = MathUtil.angleModulus(m_drive.getPose().getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "realangle", angle);
+        t.log(Level.DEBUG, m_name, "realangle", angleModulus);
         double angleError = angle-angleModulus;
         double distance = robotLocation.getDistance(speakerLocation);
         m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
