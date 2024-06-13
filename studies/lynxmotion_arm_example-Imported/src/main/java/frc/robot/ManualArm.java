@@ -24,6 +24,13 @@ public class ManualArm extends Command {
         m_arm.addWrist(MathUtil.applyDeadband(m_controller.getRightX(), DEADBAND));
         m_arm.addGrip(MathUtil.applyDeadband(m_controller.getLeftTriggerAxis()
                 - m_controller.getRightTriggerAxis(), DEADBAND));
+        double twistSpeed = 0;
+        if (m_controller.getLeftBumper()) {
+            twistSpeed = 1;
+        } else if (m_controller.getRightBumper()) {
+            twistSpeed = -1;
+        } 
+        m_arm.addTwist(twistSpeed);
     }
 
 }

@@ -17,18 +17,18 @@ public class Robot extends TimedRobot {
 
         new Trigger(m_controller::getAButton).whileTrue(m_arm.run(m_arm::init));
         new Trigger(m_controller::getBButton).whileTrue(m_arm.run(m_arm::origin));
-        new Trigger(m_controller::getYButton).whileTrue(
-                Commands.sequence(
-                        new Preset(0, 162, 174, 0, 0, m_arm),
-                        new Preset(46, 48, 131, 159, 0, m_arm)));
+
         new Trigger(m_controller::getXButton).whileTrue(
                 Commands.sequence(
-                        new DistancePreset(0, 3, 0, m_arm),
-                        new DistancePreset(0, 7, 0, m_arm),
-                        new DistancePreset(0, 9, 0, m_arm),
-                        new DistancePreset(0, 11, 0, m_arm),
-                        new DistancePreset(0, 17, 0, m_arm)));
-
+                        new DistancePreset(10, 8.63, 0, 114.5, true, m_arm),
+                        new DistancePreset(10, 8.63, 90, 114.5, false, m_arm),
+                        new DistancePreset(90, 8.63, 90, 114.5, true, m_arm),
+                        new DistancePreset(90, 8.63, 0, 114.5, false, m_arm)));
+        new Trigger(m_controller::getYButton).whileTrue(
+                Commands.sequence(
+                        new CoordinatePreset(3, 5, 0, true, m_arm),
+                        new CoordinatePreset(3, 5, 90, false, m_arm)));
+                        
     }
 
     @Override
