@@ -1,5 +1,9 @@
 package frc.robot;
 
+import org.team100.subsystems.ElevationSubsystem;
+import org.team100.subsystems.FeedSubsystem;
+import org.team100.subsystems.WheelSubsystem;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
@@ -18,7 +22,7 @@ public class RobotContainer {
     public void bind() {
 
         m_controller.povUp().whileTrue(m_elev.up());
-        m_controller.povUp().whileTrue(m_elev.down());
+        m_controller.povDown().whileTrue(m_elev.down());
         m_elev.setDefaultCommand(m_elev.stop());
 
         m_controller.b().whileTrue(m_wheels.shoot());
@@ -26,6 +30,10 @@ public class RobotContainer {
 
         m_controller.a().whileTrue(m_feed.feed());
         m_feed.setDefaultCommand(m_feed.stop());
+    }
+
+    public void teleopInit() {
+        m_elev.init();
     }
 
 }

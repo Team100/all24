@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * the control input is a fraction of the total range of motion, i.e. [0,1]
  *
  * the "profile" is simply a slew rate limiter, which results in infinite
- * acceleration.  TODO: Maybe get rid of this entirely?
+ * acceleration. TODO: Maybe get rid of this entirely?
  * 
  * Servo hardware includes an outboard feedback controller, so there is no
  * feedback here.
@@ -40,23 +40,28 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * @see https://rocelec.widen.net/view/pdf/npfew4u7vv/M51660.pdf
  */
 public class PositionServoWithFeedback {
-    private static final double kEncoderScale = 1.0;
-    private static final double kEncoderOffset = 0.0;
+    // 0.15 is 0.177
+    // 1.0 is 0.447
+    private static final double kEncoderScale = 3.148148;
+    private static final double kEncoderOffset = -0.407222;
+    private final String m_name;
     private final PWM m_pwm;
     private final AnalogInput m_input;
     private final AnalogEncoder m_encoder;
     private final SlewRateLimiter m_profile;
 
     public PositionServoWithFeedback(
+            String name,
             int pwmChannel,
             int encoderChannel,
-            double slewRateRad_S) {
+            double slewRatePerSec) {
+        m_name = name;
         m_pwm = new PWM(pwmChannel);
         m_pwm.setBoundsMicroseconds(2300, 0, 0, 0, 700);
         m_pwm.setPeriodMultiplier(PeriodMultiplier.k4X);
         m_input = new AnalogInput(encoderChannel);
         m_encoder = new AnalogEncoder(m_input);
-        m_profile = new SlewRateLimiter(slewRateRad_S);
+        m_profile = new SlewRateLimiter(slewRatePerSec);
     }
 
     /** Initialize the pwm and profile to the current measurement. */
@@ -69,21 +74,28 @@ public class PositionServoWithFeedback {
     /** @param goal position fraction of servo motion [0,1] */
     public void set(double goal) {
         goal = MathUtil.clamp(goal, 0, 1);
-        SmartDashboard.putNumber("goal [0,1]", goal);
+        SmartDashboard.putNumber(m_name + "/goal [0,1]", goal);
 
         double setpoint = m_profile.calculate(goal);
-        SmartDashboard.putNumber("setpoint [0,1]", setpoint);
+        SmartDashboard.putNumber(m_name + "/setpoint [0,1]", setpoint);
         m_pwm.setPosition(setpoint);
+
+        // compare setpoint and measurement
+        System.out.printf("setpoint %5.3f measurement %5.3f\n", setpoint, get());
     }
 
     public double get() {
         double measurement = MathUtil.clamp(m_encoder.getAbsolutePosition() * kEncoderScale + kEncoderOffset, 0, 1);
-        SmartDashboard.putNumber("measurement [0,1]", measurement);
+        SmartDashboard.putNumber(m_name + "/measurement [0,1]", measurement);
         return measurement;
     }
 
     public void close() {
         m_input.close();
+    }
+
+    public void periodic() {
+        get();  // just to log the measurement
     }
 
 }
