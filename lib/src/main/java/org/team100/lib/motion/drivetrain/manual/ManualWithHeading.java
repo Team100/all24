@@ -64,8 +64,8 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
         Constraints100 c = new Constraints100(
-                swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
-                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * .1);
+                swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed/8);
         m_profile = new TrapezoidProfile100(c, 0.01);
     }
 
@@ -145,19 +145,24 @@ public class ManualWithHeading implements FieldRelativeDriver {
         double thetaFB = m_thetaController.calculate(headingMeasurement, m_thetaSetpoint.x());
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-
+        if (Math.abs(omegaFB) < 0.1) {
+            omegaFB = 0;
+        }
+        if (Math.abs(thetaFB) < 0.5) {
+            thetaFB = 0;
+        }
         double omega = MathUtil.clamp(
-                thetaFF + thetaFB + omegaFB,
+                thetaFF + thetaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");
-        t.log(Level.TRACE, m_name, "theta setpoint", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
-        t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
+        t.log(Level.SILENT, m_name, "theta setpoint", m_thetaSetpoint);
+        t.log(Level.SILENT, m_name, "measurement/theta", headingMeasurement);
+        t.log(Level.SILENT, m_name, "measurement/omega", headingRate);
+        t.log(Level.SILENT, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
+        t.log(Level.SILENT  , m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

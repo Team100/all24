@@ -252,7 +252,7 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(0.25, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(10, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(1, 0, 0); // .5
 
@@ -314,7 +314,7 @@ public class RobotContainer implements Glassy {
                         thetaController,
                         omegaController));
 
-        PIDController omega2Controller = new PIDController(0, 0, 0); // .5
+        PIDController omega2Controller = new PIDController(0.5, 0, 0); // .5
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,

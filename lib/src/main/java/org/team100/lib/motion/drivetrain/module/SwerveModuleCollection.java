@@ -126,7 +126,7 @@ public class SwerveModuleCollection {
                                 kRearLeft, currentLimit, statorLimit, 56, WCPSwerveModule100.DriveRatio.FAST,
                                 DutyCycleTurningEncoder.class,
                                 51,
-                                6,
+                                5,
                                 0.334580,
                                 kinodynamics, Drive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.get(

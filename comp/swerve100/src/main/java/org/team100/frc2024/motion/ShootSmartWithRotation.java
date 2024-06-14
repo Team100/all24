@@ -45,6 +45,8 @@ public class ShootSmartWithRotation extends Command100{
     }
 
     public void execute100(double dt) {
+        FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
+        m_drive.driveInFieldCoords(twist, 0.02);
     Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent()) {
             return;
@@ -63,8 +65,6 @@ public class ShootSmartWithRotation extends Command100{
         double rangeM = robotLocation.getDistance(speakerLocation);
         double angleRad = ShooterUtil.getAngleRad(rangeM);
         double errorRad = m_shooter.getPivotPosition() - angleRad;
-        FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
-        m_drive.driveInFieldCoords(twist, 0.02);
         if (Math.hypot(m_drive.getState().y().v(), m_drive.getState().x().v())>0.01) {
             return;
         }
