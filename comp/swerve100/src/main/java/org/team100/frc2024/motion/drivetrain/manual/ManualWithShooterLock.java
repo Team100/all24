@@ -174,15 +174,15 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             omegaFB = 0;
         }
         t.log(Level.TRACE, m_name, "target", target);
-        t.log(Level.SILENT, m_name, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.SILENT, m_name, "theta/measurement", measurement);
+        t.log(Level.TRACE, m_name, "theta/setpoint", m_thetaSetpoint);
+        t.log(Level.TRACE, m_name, "theta/measurement", measurement);
         t.log(Level.TRACE, m_name, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.SILENT, m_name, "theta/fb", thetaFB);
-        t.log(Level.SILENT, m_name, "omega/measurement", headingRate);
-        t.log(Level.SILENT, m_name, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.SILENT, m_name, "omega/fb", omegaFB);
+        t.log(Level.TRACE, m_name, "theta/fb", thetaFB);
+        t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
+        t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
+        t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
         t.log(Level.TRACE, m_name, "target motion", targetMotion);
-        t.log(Level.SILENT, m_name, "goal", goal);
+        t.log(Level.TRACE, m_name, "goal", goal);
         prevGoal = goal;
         double omega = MathUtil.clamp(
                 thetaFF ,
