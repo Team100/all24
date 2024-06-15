@@ -7,11 +7,9 @@ import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.motion.simple.Speeding;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
-import org.team100.lib.visualization.SpeedingVisualization;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * and it's fragile. we want to eject as fast as possible
  * though, so try a high accel limit.
  */
-public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy {
+public class IndexerSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 30;
 
     /**
@@ -75,7 +73,6 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
                         m_name,
                         params);
         }
-        SpeedingVisualization.make(m_name, this);
     }
 
     public void index() {
@@ -99,7 +96,6 @@ public class IndexerSubsystem extends SubsystemBase implements Speeding, Glassy 
         m_servo.stop();
     }
     
-    @Override
     public double getVelocity() {
         return m_servo.getVelocity();
     }
