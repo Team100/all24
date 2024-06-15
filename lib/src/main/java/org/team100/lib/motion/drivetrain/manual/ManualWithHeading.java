@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -145,7 +146,17 @@ public class ManualWithHeading implements FieldRelativeDriver {
         double thetaFB = m_thetaController.calculate(headingMeasurement, m_thetaSetpoint.x());
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-
+        switch (Identity.instance) {
+            case BLANK:
+                break;
+            default:
+                if (Math.abs(omegaFB) < 0.2) {
+                    omegaFB = 0;
+                }
+                if (Math.abs(thetaFB) < 0.5) {
+                    thetaFB = 0;
+                }
+        }
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),

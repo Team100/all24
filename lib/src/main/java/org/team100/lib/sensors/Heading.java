@@ -30,7 +30,7 @@ public class Heading implements HeadingInterface {
 
     @Override
     public double getHeadingRateNWU() {
-        double currentHeadingRateNWU = Math.toRadians(-1.0 * m_gyro.getYawRateNEDDeg_s());
+        double currentHeadingRateNWU = Math.toRadians(m_gyro.getYawRateNEDDeg_s());
         t.log(Level.TRACE, m_name, "Heading Rate NWU (rad_s)", currentHeadingRateNWU);
         return currentHeadingRateNWU;
     }
