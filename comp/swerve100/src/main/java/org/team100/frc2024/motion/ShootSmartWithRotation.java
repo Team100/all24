@@ -45,6 +45,8 @@ public class ShootSmartWithRotation extends Command100{
     }
 
     public void execute100(double dt) {
+        FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
+        m_drive.driveInFieldCoords(twist, 0.02);
     Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent()) {
             return;
@@ -56,15 +58,13 @@ public class ShootSmartWithRotation extends Command100{
         double angle = MathUtil.angleModulus(Math.atan2(difference.getY(),difference.getX())-Math.PI);
         t.log(Level.DEBUG, m_name, "angle", angle);
         double angleModulus = MathUtil.angleModulus(m_drive.getPose().getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "realangle", angle);
+        t.log(Level.DEBUG, m_name, "realangle", angleModulus);
         double angleError = angle-angleModulus;
         double distance = robotLocation.getDistance(speakerLocation);
         m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
         double rangeM = robotLocation.getDistance(speakerLocation);
         double angleRad = ShooterUtil.getAngleRad(rangeM);
         double errorRad = m_shooter.getPivotPosition() - angleRad;
-        FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
-        m_drive.driveInFieldCoords(twist, 0.02);
         if (Math.hypot(m_drive.getState().y().v(), m_drive.getState().x().v())>0.01) {
             return;
         }

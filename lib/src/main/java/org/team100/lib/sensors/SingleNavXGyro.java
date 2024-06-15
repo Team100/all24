@@ -1,6 +1,7 @@
 package org.team100.lib.sensors;
 
 import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
@@ -9,6 +10,7 @@ import org.team100.lib.util.Util;
 import com.kauailabs.navx.frc.AHRS;
 import com.kauailabs.navx.frc.AHRS.SerialDataType;
 
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -26,7 +28,13 @@ public class SingleNavXGyro implements Gyro100 {
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?
-        m_gyro1 = new AHRS(SerialPort.Port.kUSB, SerialDataType.kProcessedData, kUpdateRateHz);
+        switch (Identity.instance) {
+            case COMP_BOT:
+                m_gyro1 = new AHRS(SPI.Port.kMXP);
+                break;
+            default:
+                m_gyro1 = new AHRS(SerialPort.Port.kUSB, SerialDataType.kProcessedData, kUpdateRateHz);
+        }
         m_gyro1.enableBoardlevelYawReset(true);
 
         Util.println("waiting for navx connection...");
@@ -76,6 +84,8 @@ public class SingleNavXGyro implements Gyro100 {
     /**
      * NOTE NOTE NOTE this is NED = clockwise positive = backwards
      * 
+     * 6/12/24
+     * WARNNINGGGGG DO NOT USE THIS WITHOUT AN MXP GYRO, IT WILL ALWAYS RETURN 0
      * @returns rate in degrees/sec
      */
     @Override
@@ -86,7 +96,7 @@ public class SingleNavXGyro implements Gyro100 {
         //
         // the recommended workaround is to use getRawGyroZ() instead.
         float rateDeg_S = m_gyro1.getRawGyroZ();
-        t.log(Level.TRACE, m_name, "Rate NED (rad_s)", rateDeg_S);
+        t.log(Level.TRACE, m_name, "Rate NED (deg_s)", rateDeg_S);
         return rateDeg_S;
     }
 

@@ -158,8 +158,8 @@ public class ExampleSubsystem extends SubsystemBase {
         () -> {
           System.out.println(angles);
           System.out.println(upperServoTheta);
-          System.out.println("Theta 2: " + th2);
-          System.out.println("Theta 1: " + th1);
+          // System.out.println("Theta 2: " + th2);
+          // System.out.println("Theta 1: " + th1);
           System.out.println("New Theta: " + newtheta);
           System.out.println("Angle 1: " + angles.th1);
           System.out.println("Angle 2: " + angles.th2);
@@ -169,16 +169,16 @@ public class ExampleSubsystem extends SubsystemBase {
         });
   }
 
-  // @Override
-  // public void periodic() {
-  //   // This method will be called once per scheduler run
-  //   m_servo.set(0.5);
-  //   x_servo.set(0.5);
-  //   y_servo.set(0.5);
-  //   wrist_servo.set(0.5);
-  //   claw_servo.set(0.5);
-  //   last_servo.set(0.5);
-  // }
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    m_servo.set(0.5);
+    x_servo.set(0.5);
+    y_servo.set(0.5);
+    wrist_servo.set(0.5);
+    claw_servo.set(0.5);
+    last_servo.set(0.5);
+  }
 
   @Override
   public void simulationPeriodic() {
