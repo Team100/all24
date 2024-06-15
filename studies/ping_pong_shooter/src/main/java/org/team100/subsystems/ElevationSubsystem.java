@@ -15,27 +15,31 @@ public class ElevationSubsystem extends SubsystemBase {
 
     private final PositionServoWithFeedback m_elevation;
 
-    private double m_current_elevation;
+    private double m_position;
 
     public ElevationSubsystem() {
         m_elevation = new PositionServoWithFeedback("angle", 3, 3, kRatePerSec);
     }
 
-    public void init() {
-        m_elevation.init();
-        m_current_elevation = m_elevation.get();
-    }
-
     public Command up() {
-        return run(this::incrementPosition);
+        return run(() -> setVelocity(kRatePerSec));
     }
 
     public Command down() {
-        return run(this::decrementPosition);
+        return run(() -> setVelocity(-kRatePerSec));
     }
 
     public Command stop() {
-        return run(this::maintainPosition);
+        return run(() -> setVelocity(0));
+    }
+
+    public void enable() {
+        m_position = m_elevation.getPosition();
+        m_elevation.enable();
+    }
+
+    public void disable() {
+        m_elevation.disable();
     }
 
     @Override
@@ -45,20 +49,9 @@ public class ElevationSubsystem extends SubsystemBase {
 
     ////////////////////////////////////////////////////////
 
-    private void incrementPosition() {
-        m_current_elevation += kRatePerSec* kDtSec;
-        m_current_elevation = MathUtil.clamp(m_current_elevation, kMin, kMax);
-        m_elevation.set(m_current_elevation);
+    private void setVelocity(double ratePerSec) {
+        m_position += ratePerSec * kDtSec;
+        m_position = MathUtil.clamp(m_position, kMin, kMax);
+        m_elevation.setPosition(m_position);
     }
-
-    private void decrementPosition() {
-        m_current_elevation -= kRatePerSec * kDtSec;
-        m_current_elevation = MathUtil.clamp(m_current_elevation, kMin, kMax);
-        m_elevation.set(m_current_elevation);
-    }
-
-    private void maintainPosition() {
-        m_elevation.set(m_current_elevation);
-    }
-
 }

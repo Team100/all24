@@ -12,9 +12,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * TODO: add flywheel speed gate here.
  */
 public class FeedSubsystem extends SubsystemBase {
-    // using 40 rev/s it takes awhile to get back up to speed.
-    private static final double kFeedSpeed = 0.5; // full speed
-    private static final double kBackSpeed = -0.25; // back a bit more slowly
+    private static final double kFeedSpeed = 0.5; // moderate feed rate
+    private static final double kBackSpeed = -0.25; // back a more slowly
     private final VelocityServoWithFeedback m_servo;
 
     public FeedSubsystem() {
@@ -29,8 +28,17 @@ public class FeedSubsystem extends SubsystemBase {
         return run(() -> m_servo.setSpeed(kBackSpeed));
     }
 
+    /** hold position. */
     public Command stop() {
         return run(() -> m_servo.setSpeed(0));
+    }
+
+    public void enable() {
+        m_servo.setSpeed(0);
+    }
+
+    public void disable() {
+        m_servo.disable();
     }
 
     @Override

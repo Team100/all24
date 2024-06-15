@@ -9,41 +9,22 @@ import edu.wpi.first.wpilibj.PWM.PeriodMultiplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
- * Represents a positional servo with positional feedback.
+ * Represents a positional servo with positional feedback, such as the Feetch
+ * FS51606B-FB.
  * 
- * The measurement signal is an analog voltage that varies from some minimum to
- * some maximum, representing the whole range of motion. This needs to be
- * calibrated.
- * 
- * For simplicity's sake:
- * 
- * the control input is a fraction of the total range of motion, i.e. [0,1]
- *
- * the "profile" is simply a slew rate limiter, which results in infinite
- * acceleration. TODO: Maybe get rid of this entirely?
- * 
- * Servo hardware includes an outboard feedback controller, so there is no
- * feedback here.
- * 
- * Velocity is not measured or controlled by the outboard controller.
- * 
- * A typical servo control method is simply proportional feedback with a
- * deadband.
- * 
- * Note this class does not implement "motor safety" i.e. it's possible to move
- * the servo while disabled.
- * 
- * The PWM parameters match the Feetch FS5160B.
+ * The positional measurement is only used here for initialization, to avoid
+ * jumping at startup.
  * 
  * @see https://www.pololu.com/product/3442
  * @see https://www.princeton.edu/~mae412/TEXT/NTRAK2002/292-302.pdf
  * @see https://rocelec.widen.net/view/pdf/npfew4u7vv/M51660.pdf
  */
 public class PositionServoWithFeedback {
-    // 0.15 is 0.177
-    // 1.0 is 0.447
+    // The scale and offset are derived here:
+    // https://docs.google.com/spreadsheets/d/1I54xvnMfn0FJnX9UgfJ5rrI9iUO81Urhvoy3D3JJbsQ
     private static final double kEncoderScale = 3.148148;
     private static final double kEncoderOffset = -0.407222;
+
     private final String m_name;
     private final PWM m_pwm;
     private final AnalogInput m_input;
@@ -57,6 +38,7 @@ public class PositionServoWithFeedback {
             double slewRatePerSec) {
         m_name = name;
         m_pwm = new PWM(pwmChannel);
+        // These parameters match the Feetch FS5106B-FB.
         m_pwm.setBoundsMicroseconds(2300, 0, 0, 0, 700);
         m_pwm.setPeriodMultiplier(PeriodMultiplier.k4X);
         m_input = new AnalogInput(encoderChannel);
@@ -64,15 +46,8 @@ public class PositionServoWithFeedback {
         m_profile = new SlewRateLimiter(slewRatePerSec);
     }
 
-    /** Initialize the pwm and profile to the current measurement. */
-    public void init() {
-        double measurement = get();
-        m_profile.reset(measurement);
-        set(measurement);
-    }
-
     /** @param goal position fraction of servo motion [0,1] */
-    public void set(double goal) {
+    public void setPosition(double goal) {
         goal = MathUtil.clamp(goal, 0, 1);
         SmartDashboard.putNumber(m_name + "/goal [0,1]", goal);
 
@@ -81,18 +56,29 @@ public class PositionServoWithFeedback {
         m_pwm.setPosition(setpoint);
     }
 
-    public double get() {
+    /** returns the current position in the range [0,1] */
+    public double getPosition() {
         double measurement = MathUtil.clamp(m_encoder.getAbsolutePosition() * kEncoderScale + kEncoderOffset, 0, 1);
         SmartDashboard.putNumber(m_name + "/measurement [0,1]", measurement);
         return measurement;
     }
 
-    public void close() {
-        m_input.close();
+    /** Initialize the pwm and profile to the current measurement. */
+    public void enable() {
+        double measurement = getPosition();
+        m_profile.reset(measurement);
+        setPosition(measurement);
+    }
+
+    public void disable() {
+        m_pwm.setDisabled();
     }
 
     public void periodic() {
-        get();  // just to log the measurement
+        getPosition(); // just to log the measurement
     }
 
+    public void close() {
+        m_input.close();
+    }
 }

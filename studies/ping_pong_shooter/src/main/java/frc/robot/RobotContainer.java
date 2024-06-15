@@ -17,9 +17,6 @@ public class RobotContainer {
         m_elev = new ElevationSubsystem();
         m_wheels = new WheelSubsystem(() -> ((-1.0 * m_controller.getRawAxis(3)) + 1) / 2);
         m_feed = new FeedSubsystem();
-    }
-
-    public void bind() {
 
         m_controller.povUp().whileTrue(m_elev.up());
         m_controller.povDown().whileTrue(m_elev.down());
@@ -34,11 +31,14 @@ public class RobotContainer {
     }
 
     public void teleopInit() {
-        m_elev.init();
+        m_elev.enable();
+        m_feed.enable();
         m_wheels.enable();
     }
 
     public void teleopExit() {
+        m_elev.disable();
+        m_feed.disable();
         m_wheels.disable();
     }
 
