@@ -28,9 +28,12 @@ public class VelocityServoWithFeedback {
     // TODO: calibrate this
     private static final double kDistancePerRotation = 1.0;
     // full state gain: x, v
-    private static final double[] kK = new double[] { 1.0, 1.0 };
+    // private static final double[] kK = new double[] { 1.0, 1.0 };
+    private static final double[] kK = new double[] { 0.0, 0.0 };
     // maximum allowed output
     private static final double kMaxU = 1.0;
+
+    private final String m_name;
     private final PWM m_pwm;
     private final DutyCycleEncoder m_encoder;
 
@@ -40,8 +43,10 @@ public class VelocityServoWithFeedback {
     private double m_time;
 
     public VelocityServoWithFeedback(
+            String name,
             int pwmChannel,
             int encoderChannel) {
+        m_name = name;
         m_pwm = new PWM(pwmChannel);
         m_pwm.setBoundsMicroseconds(1720, 1520, 1500, 1480, 1280); // parallax360
         m_pwm.setPeriodMultiplier(PWM.PeriodMultiplier.k4X);
@@ -55,24 +60,25 @@ public class VelocityServoWithFeedback {
 
     /** Goal is not wrapped, might be far from measurement. */
     public void setPosition(double positionGoal) {
-        SmartDashboard.putNumber("goal", positionGoal);
+        SmartDashboard.putNumber(m_name + "/goal", positionGoal);
         // velocity goal is always zero
         final double velocityGoal = 0;
 
         double positionError = positionGoal - m_position;
-        SmartDashboard.putNumber("positionError", positionError);
+        SmartDashboard.putNumber(m_name + "/positionError", positionError);
 
         double velocityError = velocityGoal - m_velocity;
-        SmartDashboard.putNumber("velocityError", velocityError);
+        SmartDashboard.putNumber(m_name + "/velocityError", velocityError);
 
         // dot product of gains * errors
-        double u_FB = kK[0] * positionError + kK[1] * velocityError;
+        double u_FB = -1.0 * (kK[0] * positionError + kK[1] * velocityError);
         u_FB = MathUtil.clamp(u_FB, -kMaxU, kMaxU);
-        SmartDashboard.putNumber("u_FB", u_FB);
+        SmartDashboard.putNumber(m_name + "/u_FB", u_FB);
 
         m_pwm.setSpeed(u_FB);
     }
 
+    /** @goal range [-1,1] */
     public void setSpeed(double goal) {
         m_pwm.setSpeed(goal);
     }
@@ -90,8 +96,8 @@ public class VelocityServoWithFeedback {
         m_position = position;
         m_velocity = dx / dt;
         m_time = now;
-        SmartDashboard.putNumber("position", m_position);
-        SmartDashboard.putNumber("velocity", m_velocity);
+        SmartDashboard.putNumber(m_name + "/position", m_position);
+        SmartDashboard.putNumber(m_name + "/velocity", m_velocity);
     }
 
 }

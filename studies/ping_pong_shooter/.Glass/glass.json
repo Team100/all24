@@ -2,6 +2,9 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "angle": {
+          "open": true
+        },
         "open": true
       }
     },
@@ -9,10 +12,22 @@
       "/FMSInfo": "FMSInfo"
     }
   },
-  "NetworkTables Info": {
-    "visible": true
-  },
   "NetworkTables Settings": {
     "mode": "Client (NT4)"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 338
+        }
+      ]
+    }
   }
 }

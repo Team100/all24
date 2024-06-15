@@ -23,4 +23,9 @@ public class Robot extends TimedRobot {
         m_robotContainer.teleopInit();
     }
 
+    @Override
+    public void teleopExit() {
+        m_robotContainer.teleopExit();
+    }
+
 }

@@ -79,9 +79,6 @@ public class PositionServoWithFeedback {
         double setpoint = m_profile.calculate(goal);
         SmartDashboard.putNumber(m_name + "/setpoint [0,1]", setpoint);
         m_pwm.setPosition(setpoint);
-
-        // compare setpoint and measurement
-        System.out.printf("setpoint %5.3f measurement %5.3f\n", setpoint, get());
     }
 
     public double get() {
