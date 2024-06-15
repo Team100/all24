@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /**
  * TODO: the old code worked differently: it would back up a bit at the end to
  * set the next ball in a standard place. maybe we don't need that?
+ * 
+ * TODO: add flywheel speed gate here.
  */
 public class FeedSubsystem extends SubsystemBase {
     // using 40 rev/s it takes awhile to get back up to speed.
