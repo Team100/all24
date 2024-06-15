@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Represents a continuous-rotation velocity-controlled servo with positional
- * feedback.
+ * feedback, such as the Parallax360.
  * 
  * Positional control is just proportional feedback.
  * 
@@ -18,6 +18,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * PWM parameters match the Parallax360.
  * 
  * The measurement signal is a 910hz PWM signal ranging from 2.7% to 97.1%.
+ * 
+ * TODO: use the positional input to feed one ball at a time, and add a selector
+ * button to choose "semi-auto" or "full auto" mode.
  * 
  * @see https://www.pololu.com/product/3432
  * @see https://www.pololu.com/file/0J1395/900-00360-Feedback-360-HS-Servo-v1.2.pdf
@@ -48,7 +51,8 @@ public class VelocityServoWithFeedback {
             int encoderChannel) {
         m_name = name;
         m_pwm = new PWM(pwmChannel);
-        m_pwm.setBoundsMicroseconds(1720, 1520, 1500, 1480, 1280); // parallax360
+        // These parameters match the Parallax 360.
+        m_pwm.setBoundsMicroseconds(1720, 1520, 1500, 1480, 1280);
         m_pwm.setPeriodMultiplier(PWM.PeriodMultiplier.k4X);
         m_pwm.setSpeed(0.0);
         m_pwm.setZeroLatch();
@@ -83,8 +87,8 @@ public class VelocityServoWithFeedback {
         m_pwm.setSpeed(goal);
     }
 
-    public double getPosition() {
-        return m_encoder.getDistance();
+    public void disable() {
+        m_pwm.setDisabled();
     }
 
     /** Calculates velocity with one-step finite difference: noisy. */

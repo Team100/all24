@@ -24,27 +24,24 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * "counterclockwise" when both low, and "braking" when the two inputs are
  * different.
  * 
- * The RoboRIO DIO ports include "pull ups" so before being activated they'll
+ * The RoboRIO DIO ports include "pull ups" so before being activated, they'll
  * float high.
  * 
  * So they should be wired to the "pulled up" inputs of the controller, and the
  * other inputs should be wired to ground.
  * 
- * so the trouble is that if you say "duty cycle 0" then it seems to sit low,
- * which is the opposite of what you want. i guess i could just fix it here, 1 -
- * dc.
+ * The "off" pwm state needs to be high, i.e. 100% duty cycle, so invert.
  * 
- * There's also an "inhibit" input, pulled low, active low.
- * 
- * I think the RoboRIO output "on" time is 0-4096 microseconds, and the minimum
- * period is 5050 microseconds, so the maximum duty cycle is 0.81%
+ * Here we're using the RoboRIO DIO ports rather than the PWM outputs, because
+ * the PWM outputs are really intended for servo control, and can't produce the
+ * full range of duty cycle.
  * 
  * @see https://www.pololu.com/product/4789
  * @see https://www.pololu.com/product/2137
  * @see https://www.pololu.com/product/4761
  */
 public class Flywheel {
-    public static enum Direction {
+    public enum Direction {
         Forward, Reverse
     }
 
@@ -55,10 +52,9 @@ public class Flywheel {
     private static final double[] kK = new double[] { 0.05, 0.0 };
     // private static final double[] kK = new double[] { 1.0, 1.0 };
 
-    // TODO: calibrate this
-    // private static final double kV = 0.0;
     // free speed at the encoder appears to be about 2500 rpm or 40 rev/s
     private static final double kV = 0.024;
+
     /**
      * gear ratio for pololu 4789 is 15.24884259
      * 
@@ -72,6 +68,7 @@ public class Flywheel {
     private final String m_name;
     private final DigitalOutput m_output;
     private final Direction m_direction;
+    /** measurement in turns */
     private final Encoder m_encoder;
 
     // for accel calculation
@@ -90,8 +87,12 @@ public class Flywheel {
         m_output.setPWMRate(kPWMFreqHz);
         m_direction = direction;
         m_encoder = new Encoder(encoderChannelA, encoderChannelB, false, EncodingType.k1X);
-        // distance per pulse in turns is 1/ticksperturn.
+        // distance per pulse in turns is 1/ticks_per_turn.
         m_encoder.setDistancePerPulse(1 / TICKS_PER_TURN);
+        // target speed is about 40 rev/s, so about 1800 hz.
+        // since the main loop runs at 50 hz, there are about 36 ticks per loop
+        // so we wouldn't lose too much freshness by averaging a few of them.
+        m_encoder.setSamplesToAverage(4);
     }
 
     /** @param velocityGoalRev_S in revs per second */
@@ -130,7 +131,7 @@ public class Flywheel {
     }
 
     public void periodic() {
-        // uses distance per pulse to produce distance per second.
+        // rate is measured in turns per second
         double velocityRev_S = m_encoder.getRate() * (m_direction == Direction.Forward ? 1.0 : -1.0);
         double now = Timer.getFPGATimestamp();
         double dt = now - m_time;
