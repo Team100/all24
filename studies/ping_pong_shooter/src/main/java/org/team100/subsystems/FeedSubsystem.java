@@ -10,8 +10,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * set the next ball in a standard place. maybe we don't need that?
  */
 public class FeedSubsystem extends SubsystemBase {
-    private static final double kFeedSpeed = 1.0; // full speed
-    private static final double kBackSpeed = -0.5; // back a bit more slowly
+    // using 40 rev/s it takes awhile to get back up to speed.
+    private static final double kFeedSpeed = 0.5; // full speed
+    private static final double kBackSpeed = -0.25; // back a bit more slowly
     private final VelocityServoWithFeedback m_servo;
 
     public FeedSubsystem() {

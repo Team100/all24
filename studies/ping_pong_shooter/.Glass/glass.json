@@ -5,7 +5,16 @@
         "angle": {
           "open": true
         },
-        "open": true
+        "feed": {
+          "open": true
+        },
+        "left": {
+          "open": true
+        },
+        "open": true,
+        "right": {
+          "open": true
+        }
       }
     },
     "types": {
@@ -19,13 +28,47 @@
     "Plot <0>": {
       "plots": [
         {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
           "backgroundColor": [
             0.0,
             0.0,
             0.0,
             0.8500000238418579
           ],
-          "height": 338
+          "height": 162,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/left/velocityGoal (rev_s)"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/left/velocity (rev_s)"
+            }
+          ]
+        },
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 162
         }
       ]
     }

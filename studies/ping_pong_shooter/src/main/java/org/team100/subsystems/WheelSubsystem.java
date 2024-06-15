@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class WheelSubsystem extends SubsystemBase {
     // free speed is about 40? maybe this should be 20.
-    private static final double kMaxSpeedRev_S = 30;
+    // but faster is more impressive so try for maximum speed for now.
+    // should use bigger motors/wheels.
+    private static final double kMaxSpeedRev_S = 35;
 
     private final DoubleSupplier m_speed;
 
