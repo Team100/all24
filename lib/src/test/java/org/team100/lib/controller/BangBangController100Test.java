@@ -11,8 +11,10 @@ class BangBangController100Test {
     private static final double kDt = 0.02;
 
     @Test
-    void testChatter() {
-        // try to produce chatter, set tolerance to zero
+    void testDelay() {
+        // this doesn't show chatter on the switching curve, it shows
+        // oscillation around the goal, caused by delay, just like a proportional
+        // controller.
         final Profile100 profile = new TrapezoidProfile100(1, 1, 0);
         final State100 goal = new State100();
         final State100 initial = new State100(1, 0);
@@ -27,6 +29,11 @@ class BangBangController100Test {
             queue.addLast(newState);
             System.out.printf("%5.3f, %5.3f, %5.3f\n", newState.x(), newState.v(), newState.a());
         }
+    }
+
+    @Test
+    void testNoise() {
+        // noise should create chatter on the switching curve.
     }
 
     /** Create and initialize the delay queue. */
