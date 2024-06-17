@@ -21,7 +21,7 @@ class BangBangController100Test {
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
         double delay = 0.1;
-        for (int i1 = 0; i1 < (int) (delay / kDt); ++i1) {
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initial);
         }
 
@@ -52,7 +52,7 @@ class BangBangController100Test {
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
         double delay = 0.1;
-        for (int i1 = 0; i1 < (int) (delay / kDt); ++i1) {
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initial);
         }
 
@@ -85,7 +85,8 @@ class BangBangController100Test {
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
         double delay = 0.1;
-        for (int i1 = 0; i1 < (int) (delay / kDt); ++i1) {
+        // double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
@@ -194,9 +195,9 @@ class BangBangController100Test {
             // System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f\n", tSec, x, v, a);
 
             System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f,, %5.3f, %5.3f, %5.3f, %5.3f, %5.3f,, %5.3f, %5.3f\n",
-            tSec, x, v, a,
-            u_FFVolts, u_FBVolts, u_TOTALVolts, netVolts, currentAmps,
-            u.v(), u.a());
+                    tSec, x, v, a,
+                    u_FFVolts, u_FBVolts, u_TOTALVolts, netVolts, currentAmps,
+                    u.v(), u.a());
 
             resultRad = new State100(x, v, a);
         }

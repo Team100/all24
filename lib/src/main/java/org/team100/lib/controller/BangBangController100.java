@@ -250,8 +250,13 @@ public class BangBangController100 implements Profile100 {
         return Math.min(dt, dtg);
     }
 
-    /** Return dt at full accel. */
+    /**
+     * Return dt at full accel.
+     * 
+     * direction is now actually "error"
+     */
     private State100 full(double dt, State100 in_initial, double direction) {
+        direction = MathUtil.clamp(direction, -1, 1);
         double x = in_initial.x() + in_initial.v() * dt
                 + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(dt, 2);
         double v = in_initial.v() + direction * m_constraints.maxAcceleration * dt;
