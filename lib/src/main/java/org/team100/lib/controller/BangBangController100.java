@@ -161,6 +161,7 @@ public class BangBangController100 implements Profile100 {
         return full(dt, initial, 1);
     }
 
+    /** @param t1 time to switching, sec, always positive */
     private State100 handleIminus(double dt, State100 initial, State100 goal, double t1) {
 
         if (MathUtil.isNear(t1, 0, 1e-12)) {
@@ -256,6 +257,7 @@ public class BangBangController100 implements Profile100 {
      * direction is now actually "error"
      */
     private State100 full(double dt, State100 in_initial, double direction) {
+        final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
         double x = in_initial.x() + in_initial.v() * dt
                 + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(dt, 2);
