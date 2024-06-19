@@ -65,7 +65,7 @@ import edu.wpi.first.math.MathUtil;
  * we don't use the ETA anywhere. Note if we want to coordinate multiple axes
  * using ETA's, we'll have to change this.
  */
-public class BangBangController100 implements Profile100 {
+public class BangBangController100 {
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
     private static final double kBoundaryTolerance = 1e-12;
@@ -111,7 +111,6 @@ public class BangBangController100 implements Profile100 {
      * a real system, it will tend to get ahead of the profile, but only by one time
      * period.
      */
-    @Override
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
         State100 initial = new State100(initialRaw.x(),
                 MathUtil.clamp(initialRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
