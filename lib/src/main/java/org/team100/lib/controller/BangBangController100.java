@@ -78,7 +78,9 @@ public class BangBangController100 implements Profile100 {
     // reversing chatter
     // there's also a threshold below which the whole thing reverts to proportional.
     private static final double kFinish = 0.1;
-    private static final double[] kK = new double[] { 1.0, 10.0 };
+    // private static final double[] kK = new double[] { 1.0, 10.0 };
+    // try a more balanced control
+    private static final double[] kK = new double[] { 10.0, 10.0 };
 
     private final Constraints100 m_constraints;
     private final double m_tolerance;

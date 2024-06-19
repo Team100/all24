@@ -99,7 +99,7 @@ class BangBangController100Test {
 
         State100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
-        final int iterations = 200;
+        final int iterations = 400;
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
