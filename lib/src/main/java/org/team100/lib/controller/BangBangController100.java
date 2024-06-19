@@ -54,8 +54,18 @@ import edu.wpi.first.math.MathUtil;
  * 
  * It might be slower around the switching points, since it can call itself once
  * or twice, once per segment.
+ * 
+ * 2024: to get this profile-maker to be a controller, add a linear part to the
+ * sliding-mode.
+ * 
+ * the I and G curves are calculated using the supplied constraints, but the
+ * applied effort is more, to push the system away from the boundary.
  */
 public class BangBangController100 implements Profile100 {
+    // extra effort at the boundary
+    private static final double kExtra = 1.25;
+    // half-width of the linear part of the response.
+    private static final double kBoundarySec = 0.1;
     private final Constraints100 m_constraints;
     private final double m_tolerance;
 
@@ -92,9 +102,13 @@ public class BangBangController100 implements Profile100 {
         State100 goal = new State100(goalRaw.x(),
                 MathUtil.clamp(goalRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
 
+        // AT THE GOAL
+
         if (goal.near(initial, m_tolerance)) {
             return goal;
         }
+
+        // AT CRUISING VELOCITY
 
         if (MathUtil.isNear(m_constraints.maxVelocity, initial.v(), 1e-12)) {
             return keepCruising(dt, initial, goal);
@@ -112,15 +126,21 @@ public class BangBangController100 implements Profile100 {
             return initial;
         }
 
+        // ON THE INITIAL PATH
+
         if (Double.isNaN(t1IplusGminus)) {
             // the valid path is I-G+, assume we're on I-
+            System.out.printf("on I- %6.3f\n", t1IminusGplus);
             return handleIminus(dt, initial, goal, t1IminusGplus);
         }
 
         if (Double.isNaN(t1IminusGplus)) {
             // the valid path is I+G-, assume we're on I+
+            System.out.printf("on I+ %6.3f\n", t1IplusGminus);
             return handleIplus(dt, initial, goal, t1IplusGminus);
         }
+
+        // ON THE GOAL PATH
 
         // There can be one path with zero duration, indicating that we're on the goal
         // path at the switch point. In that case, we want to switch immediately and
@@ -133,6 +153,8 @@ public class BangBangController100 implements Profile100 {
             return full(dt, initial, -1);
         }
 
+        System.out.println("nonzero");
+
         // There can be two non-zero-duration paths. As above, this happens when we're
         // on the goal path. The difference is that in this case, the goal has non-zero
         // velocity. One path goes directly to the goal, but it's also possible to make
@@ -144,7 +166,20 @@ public class BangBangController100 implements Profile100 {
         return full(dt, initial, -1);
     }
 
+    /** @param t1 time to switching, always positive */
     private State100 handleIplus(double dt, State100 initial, State100 goal, double t1) {
+        if (t1 < kBoundarySec) {
+            // within the boundary layer, so "soft switch"
+            // truncateDt does nothing if we're outside dt.
+            double effort = 1 - t1 / kBoundarySec;
+            return full(truncateDt(dt, initial, goal), initial, -1.0 * effort);
+        }
+        if (t1 < (2.0 * kBoundarySec)) {
+            // within the "slow down" boundary layer, so moderate the effort
+            // truncateDt does nothing if we're outside dt.
+            double effort = (t1 - kBoundarySec) / kBoundarySec;
+            return full(truncateDt(dt, initial, goal), initial, effort);
+        }
         if (MathUtil.isNear(t1, 0, 1e-12)) {
             // switch eta is zero: go to the goal via G-
             return full(truncateDt(dt, initial, goal), initial, -1);
@@ -163,7 +198,18 @@ public class BangBangController100 implements Profile100 {
 
     /** @param t1 time to switching, sec, always positive */
     private State100 handleIminus(double dt, State100 initial, State100 goal, double t1) {
-
+        if (t1 < kBoundarySec) {
+            // within the boundary layer, so "soft switch"
+            // truncateDt does nothing if we're outside dt.
+            double effort = 1 - t1 / kBoundarySec;
+            return full(truncateDt(dt, initial, goal), initial, effort);
+        }
+        if (t1 < (2.0 * kBoundarySec)) {
+            // within the "slow down" boundary layer, so moderate the effort
+            // truncateDt does nothing if we're outside dt.
+            double effort = (t1 - kBoundarySec) / kBoundarySec;
+            return full(truncateDt(dt, initial, goal), initial, -1.0 * effort);
+        }
         if (MathUtil.isNear(t1, 0, 1e-12)) {
             // Switch ETA is zero: go to the goal via G+
             return full(truncateDt(dt, initial, goal), initial, 1);
@@ -255,14 +301,20 @@ public class BangBangController100 implements Profile100 {
      * Return dt at full accel.
      * 
      * direction is now actually "error"
+     * 
+     * This is one method for both I and G, which means I is faster than planned, so
+     * the whole path is faster than planned, which I think is fine, we don't use
+     * the ETA anywhere. Note if we want to coordinate multiple axes using ETA's
+     * we'll have to change this.
      */
     private State100 full(double dt, State100 in_initial, double direction) {
-        final double scale = 0.1;
+        // final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
-        double x = in_initial.x() + in_initial.v() * dt
-                + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(dt, 2);
-        double v = in_initial.v() + direction * m_constraints.maxAcceleration * dt;
-        double a = direction * m_constraints.maxAcceleration;
+        double x_i = in_initial.x();
+        double v_i = in_initial.v();
+        double a = direction * m_constraints.maxAcceleration * kExtra;
+        double v = v_i + a * dt;
+        double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
         return new State100(x, v, a);
     }
 
