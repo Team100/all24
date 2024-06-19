@@ -5,6 +5,11 @@ import java.util.Queue;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Graphs for these tests are located here
+ * 
+ * https://docs.google.com/spreadsheets/d/1iBkfx08k89OAlbCgJ4-BDdx4meIBZ949ViCQly79_6M
+ */
 @SuppressWarnings("java:S2699") // no assertions here
 class BangBangController100Test {
     private static final double kDt = 0.02;
@@ -117,10 +122,10 @@ class BangBangController100Test {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final BangBangController100 profile = new BangBangController100(1, 0.8, 0);
-        State100 goalRad = new State100();
+        final BangBangController100 profile = new BangBangController100(1, 0.9, 0);
+        State100 goalRad = new State100(1, 1);
         // just use rotation for now
-        State100 initialRad = new State100(1, 0);
+        State100 initialRad = new State100(0, 0);
 
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
