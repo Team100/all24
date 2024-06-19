@@ -20,7 +20,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
-import org.team100.lib.visualization.SpeedingVisualization;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -136,7 +135,6 @@ public class DrumShooter extends Shooter {
                         softLimits);
 
         }
-        SpeedingVisualization.make(m_name, this);
     }
 
     @Override
@@ -207,7 +205,6 @@ public class DrumShooter extends Shooter {
     }
 
     /** Returns the average of the two rollers */
-    @Override
     public double getVelocity() {
         return (leftRoller.getVelocity() + rightRoller.getVelocity()) / 2;
     }

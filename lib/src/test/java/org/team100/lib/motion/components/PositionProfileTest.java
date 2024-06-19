@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.motor.MockMotor100;
-import org.team100.lib.profile.ChoosableProfile;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.units.Distance100;
@@ -39,7 +39,7 @@ class PositionProfileTest implements Timeless {
      */
     @Test
     void testTrapezoid() {
-        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        Profile100 profile = new ProfileWPI(1, 1);
         servo = new PositionServo<>(
                 name,
                 motor,
@@ -90,45 +90,6 @@ class PositionProfileTest implements Timeless {
         verify(0.050, 0.995, 0.100);
         verify(-0.050, 1.000, 0.000);
         verify(-0.025, 1.000, 0.000);
-    }
-
-    @Test
-    void testExponential() {
-        ChoosableProfile profile = new ChoosableProfile(1, 1, ChoosableProfile.Mode.EXPONENTIAL);
-        servo = new PositionServo<>(
-                name,
-                motor,
-                encoder,
-                1,
-                controller2,
-                profile,
-                Distance100.instance);
-        servo.reset();
-        verifyExp();
-    }
-
-    private void verifyExp() {
-        verify(0.228, 0.009, 0.181);
-        verify(0.391, 0.035, 0.330);
-        verify(0.513, 0.074, 0.451);
-        verify(0.608, 0.125, 0.551);
-        verify(0.682, 0.184, 0.632);
-        verify(0.741, 0.251, 0.699);
-        verify(0.788, 0.323, 0.753);
-        verify(0.827, 0.401, 0.798);
-        verify(0.859, 0.483, 0.835);
-        verify(0.884, 0.568, 0.865);
-        verify(0.905, 0.655, 0.889);
-        verify(0.923, 0.745, 0.909);
-        verify(0.937, 0.837, 0.926);
-        verify(0.634, 0.921, 0.673);
-        verify(0.272, 0.972, 0.370);
-        verify(0.009, 0.997, 0.122);
-        verify(-0.100, 1.000, 0.000);
-        verify(-0.050, 1.000, 0.000);
-        verify(-0.025, 1.000, 0.000);
-        verify(-0.013, 1.000, 0.000);
-        verify(-0.006, 1.000, 0.000);
     }
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {

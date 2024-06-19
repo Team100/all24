@@ -15,7 +15,11 @@ public class RobotContainer {
     public RobotContainer() {
         m_controller = new CommandXboxController(0);
         m_elev = new ElevationSubsystem();
-        m_wheels = new WheelSubsystem(() -> ((-1.0 * m_controller.getRawAxis(3)) + 1) / 2);
+        // joystick throttle
+        // m_wheels = new WheelSubsystem(() -> ((-1.0 * m_controller.getRawAxis(3)) + 1) / 2);
+        // xbox trigger
+        m_wheels = new WheelSubsystem(() -> (m_controller.getRawAxis(3)));
+
         m_feed = new FeedSubsystem();
 
         m_controller.povUp().whileTrue(m_elev.up());
