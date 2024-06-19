@@ -55,17 +55,31 @@ import edu.wpi.first.math.MathUtil;
  * It might be slower around the switching points, since it can call itself once
  * or twice, once per segment.
  * 
- * 2024: to get this profile-maker to be a controller, add a linear part to the
- * sliding-mode.
+ * 2024: to get this profile-maker to be a controller, make a few changes.
  * 
- * the I and G curves are calculated using the supplied constraints, but the
- * applied effort is more, to push the system away from the boundary.
+ * I paths go a little stronger than planned, to push the system onto G
+ * G paths go a little weaker, so the system drifts away from G
+ * Near the goal, use full state.
+ *
+ * Note that the differences in effort will make the ETA wrong, which is fine,
+ * we don't use the ETA anywhere. Note if we want to coordinate multiple axes
+ * using ETA's, we'll have to change this.
  */
 public class BangBangController100 implements Profile100 {
-    // extra effort at the boundary
-    private static final double kExtra = 1.25;
-    // half-width of the linear part of the response.
-    private static final double kBoundarySec = 0.1;
+    // how close to a boundary (e.g. switching curve, max v) to behave as if we were
+    // "on" the boundary
+    private static final double kBoundaryTolerance = 1e-12;
+    // switching curve is calculated using the supplied constraint
+    // actual G effort is a little *less* than this constraint
+    private static final double kWeakG = 0.9;
+    // actual I effort is a little *more* than this constraint
+    private static final double kStrongI = 1.1;
+    // the result should be oscillation just past the switching curve, and no
+    // reversing chatter
+    // there's also a threshold below which the whole thing reverts to proportional.
+    private static final double kFinish = 0.1;
+    private static final double[] kK = new double[] { 1.0, 10.0 };
+
     private final Constraints100 m_constraints;
     private final double m_tolerance;
 
@@ -102,18 +116,31 @@ public class BangBangController100 implements Profile100 {
         State100 goal = new State100(goalRaw.x(),
                 MathUtil.clamp(goalRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
 
-        // AT THE GOAL
-
+        // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
             return goal;
         }
 
+        // NEAR THE GOAL: USE FULL STATE to avoid oscillation
+        if (goal.near(initial, kFinish)) {
+            double xError = goal.x() - initial.x();
+            double vError = goal.v() - initial.v();
+            double u_FBx = xError * kK[0];
+            double u_FBv = vError * kK[1];
+            double u_FB = u_FBx + u_FBv;
+            double a = u_FB;
+            double v = initial.v() + a * dt;
+            double x = initial.x() + initial.v() * dt + 0.5 * a * Math.pow(dt, 2);
+            System.out.printf("full state %6.3f %6.3f\n", u_FBx, u_FBv);
+            return new State100(x, v, a);
+        }
+
         // AT CRUISING VELOCITY
 
-        if (MathUtil.isNear(m_constraints.maxVelocity, initial.v(), 1e-12)) {
+        if (MathUtil.isNear(m_constraints.maxVelocity, initial.v(), kBoundaryTolerance)) {
             return keepCruising(dt, initial, goal);
         }
-        if (MathUtil.isNear(-m_constraints.maxVelocity, initial.v(), 1e-12)) {
+        if (MathUtil.isNear(-m_constraints.maxVelocity, initial.v(), kBoundaryTolerance)) {
             return keepCruisingMinus(dt, initial, goal);
         }
 
@@ -146,11 +173,11 @@ public class BangBangController100 implements Profile100 {
         // path at the switch point. In that case, we want to switch immediately and
         // proceed to the goal.
         dt = truncateDt(dt, initial, goal);
-        if (MathUtil.isNear(0, t1IminusGplus, 1e-12)) {
-            return full(dt, initial, 1);
+        if (MathUtil.isNear(0, t1IminusGplus, kBoundaryTolerance)) {
+            return fullG(dt, initial, 1);
         }
-        if (MathUtil.isNear(0, t1IplusGminus, 1e-12)) {
-            return full(dt, initial, -1);
+        if (MathUtil.isNear(0, t1IplusGminus, kBoundaryTolerance)) {
+            return fullG(dt, initial, -1);
         }
 
         System.out.println("nonzero");
@@ -161,28 +188,20 @@ public class BangBangController100 implements Profile100 {
         // a little loop in phase space, backing up and ending up in the same place, on
         // the way to the goal. We want to avoid these little loops.
         if (t1IminusGplus > t1IplusGminus) {
-            return full(dt, initial, 1);
+            return fullG(dt, initial, 1);
         }
-        return full(dt, initial, -1);
+        return fullG(dt, initial, -1);
     }
 
-    /** @param t1 time to switching, always positive */
+    /**
+     * On the I path, what should we do?
+     * 
+     * @param t1 time to switching, always positive
+     */
     private State100 handleIplus(double dt, State100 initial, State100 goal, double t1) {
-        if (t1 < kBoundarySec) {
-            // within the boundary layer, so "soft switch"
-            // truncateDt does nothing if we're outside dt.
-            double effort = 1 - t1 / kBoundarySec;
-            return full(truncateDt(dt, initial, goal), initial, -1.0 * effort);
-        }
-        if (t1 < (2.0 * kBoundarySec)) {
-            // within the "slow down" boundary layer, so moderate the effort
-            // truncateDt does nothing if we're outside dt.
-            double effort = (t1 - kBoundarySec) / kBoundarySec;
-            return full(truncateDt(dt, initial, goal), initial, effort);
-        }
-        if (MathUtil.isNear(t1, 0, 1e-12)) {
-            // switch eta is zero: go to the goal via G-
-            return full(truncateDt(dt, initial, goal), initial, -1);
+        if (MathUtil.isNear(t1, 0, kBoundaryTolerance)) {
+            // switch eta is zero! Switch to G, i.e. go to the goal via G-
+            return fullG(truncateDt(dt, initial, goal), initial, -1);
         }
         if (t1 < dt) {
             // We Encounter G- during dt, so switch.
@@ -192,27 +211,19 @@ public class BangBangController100 implements Profile100 {
             // We encounter vmax, so cruise.
             return cruise(dt, initial, 1);
         }
-        // We will not encounter any boundary during dt
-        return full(dt, initial, 1);
+        // We will not encounter any boundary during dt, stay on I
+        return fullI(dt, initial, 1);
     }
 
-    /** @param t1 time to switching, sec, always positive */
+    /**
+     * On the I path, what should we do?
+     * 
+     * @param t1 time to switching, sec, always positive
+     */
     private State100 handleIminus(double dt, State100 initial, State100 goal, double t1) {
-        if (t1 < kBoundarySec) {
-            // within the boundary layer, so "soft switch"
-            // truncateDt does nothing if we're outside dt.
-            double effort = 1 - t1 / kBoundarySec;
-            return full(truncateDt(dt, initial, goal), initial, effort);
-        }
-        if (t1 < (2.0 * kBoundarySec)) {
-            // within the "slow down" boundary layer, so moderate the effort
-            // truncateDt does nothing if we're outside dt.
-            double effort = (t1 - kBoundarySec) / kBoundarySec;
-            return full(truncateDt(dt, initial, goal), initial, -1.0 * effort);
-        }
-        if (MathUtil.isNear(t1, 0, 1e-12)) {
-            // Switch ETA is zero: go to the goal via G+
-            return full(truncateDt(dt, initial, goal), initial, 1);
+        if (MathUtil.isNear(t1, 0, kBoundaryTolerance)) {
+            // Switch ETA is zero! Switch to G, i.e. go to the goal via G+
+            return fullG(truncateDt(dt, initial, goal), initial, 1);
         }
         if (t1 < dt) {
             // We encounter G+ during dt, so switch.
@@ -222,8 +233,8 @@ public class BangBangController100 implements Profile100 {
             // we did encounter vmax, though
             return cruise(dt, initial, -1);
         }
-        // We will not encounter any boundary during dt
-        return full(dt, initial, -1);
+        // We will not encounter any boundary during dt, stay on I
+        return fullI(dt, initial, -1);
     }
 
     private State100 keepCruising(double dt, State100 initial, State100 goal) {
@@ -236,9 +247,9 @@ public class BangBangController100 implements Profile100 {
         double dc = gminus - initial.x();
         // time to go
         double dct = dc / m_constraints.maxVelocity;
-        if (MathUtil.isNear(0, dct, 1e-12)) {
+        if (MathUtil.isNear(0, dct, kBoundaryTolerance)) {
             // we are at the intersection of vmax and G-, so head down G-
-            return full(truncateDt(dt, initial, goal), initial, -1);
+            return fullG(truncateDt(dt, initial, goal), initial, -1);
         }
         if (dct < dt) {
             // there are two segments
@@ -260,9 +271,9 @@ public class BangBangController100 implements Profile100 {
         // negative
         double dc = gplus - initial.x();
         double dct = dc / -m_constraints.maxVelocity;
-        if (MathUtil.isNear(0, dct, 1e-12)) {
+        if (MathUtil.isNear(0, dct, kBoundaryTolerance)) {
             // We're at the intersection of -vmax and G+, so head up G+
-            return full(truncateDt(dt, initial, goal), initial, 1);
+            return fullG(truncateDt(dt, initial, goal), initial, 1);
         }
         if (dct < dt) {
             double tremaining = dt - dct;
@@ -298,21 +309,28 @@ public class BangBangController100 implements Profile100 {
     }
 
     /**
-     * Return dt at full accel.
-     * 
-     * direction is now actually "error"
-     * 
-     * This is one method for both I and G, which means I is faster than planned, so
-     * the whole path is faster than planned, which I think is fine, we don't use
-     * the ETA anywhere. Note if we want to coordinate multiple axes using ETA's
-     * we'll have to change this.
+     * For I paths, use slightly-stronger effort.
      */
-    private State100 full(double dt, State100 in_initial, double direction) {
+    private State100 fullI(double dt, State100 in_initial, double direction) {
         // final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();
         double v_i = in_initial.v();
-        double a = direction * m_constraints.maxAcceleration * kExtra;
+        double a = direction * m_constraints.maxAcceleration * kStrongI;
+        double v = v_i + a * dt;
+        double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
+        return new State100(x, v, a);
+    }
+
+    /**
+     * For G paths, use slightly-weaker effort.
+     */
+    private State100 fullG(double dt, State100 in_initial, double direction) {
+        // final double scale = 0.1;
+        direction = MathUtil.clamp(direction, -1, 1);
+        double x_i = in_initial.x();
+        double v_i = in_initial.v();
+        double a = direction * m_constraints.maxAcceleration * kWeakG;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
         return new State100(x, v, a);

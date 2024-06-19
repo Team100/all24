@@ -79,6 +79,44 @@ class BangBangController100Test {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
+        final BangBangController100 profile = new BangBangController100(1, 0.9, 0);
+        State100 goalRad = new State100();
+        // just use rotation for now
+        State100 initialRad = new State100(1, 0);
+
+        // measurements are substantially delayed.
+        Queue<State100> queue = new LinkedList<>();
+        // double delay = 0.1;
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        // final int iterations = 500;
+        final int iterations = 200;
+
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            double tSec = i * kDt;
+            State100 newStateRad = closedLoop(tSec, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
+    }
+
+    @Test
+    void testMovingGoalDelayWithClosedLoop() {
+        System.out.println("testMovingGoalDelayWithClosedLoop");
+        // what we actually do is pass the velocity to the outboard closed-loop velocity
+        // controller, and use kV and kA to make a feedforward voltage.
+
+        // motor real max accel is about 1 rad/s^2
+        // so to allow some headroom, use 20% less.
+        // max vel = 1 rad/s
+        // max accel = 0.8 rad/s^2
+
         final BangBangController100 profile = new BangBangController100(1, 0.8, 0);
         State100 goalRad = new State100();
         // just use rotation for now
