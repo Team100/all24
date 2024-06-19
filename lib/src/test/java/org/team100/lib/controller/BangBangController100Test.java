@@ -91,8 +91,8 @@ class BangBangController100Test {
 
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
-        // double delay = 0.1;
-        double delay = 0.0;
+        double delay = 0.1;
+        //double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
@@ -129,8 +129,8 @@ class BangBangController100Test {
 
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
-        // double delay = 0.1;
-        double delay = 0.0;
+        double delay = 0.1;
+        //double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
