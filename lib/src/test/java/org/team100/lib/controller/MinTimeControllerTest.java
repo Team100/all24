@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
  * https://docs.google.com/spreadsheets/d/1iBkfx08k89OAlbCgJ4-BDdx4meIBZ949ViCQly79_6M
  */
 @SuppressWarnings("java:S2699") // no assertions here
-class MinTimeController100Test {
+class MinTimeControllerTest {
     private static final double kDt = 0.02;
 
     @Test
@@ -19,7 +19,7 @@ class MinTimeController100Test {
         System.out.println("testDelayWithAccel");
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
-        final BangBangController100 profile = new BangBangController100(1, 1, 0);
+        final MinTimeController profile = new MinTimeController(1, 1, 0);
         State100 goal = new State100();
         State100 initial = new State100(1, 0);
 
@@ -50,7 +50,7 @@ class MinTimeController100Test {
         // ratio of the delay and the timestep (!)
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
-        final BangBangController100 profile = new BangBangController100(1, 1, 0);
+        final MinTimeController profile = new MinTimeController(1, 1, 0);
         State100 goal = new State100();
         State100 initial = new State100(1, 0);
 
@@ -84,7 +84,7 @@ class MinTimeController100Test {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final BangBangController100 profile = new BangBangController100(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
         State100 goalRad = new State100();
         // just use rotation for now
         State100 initialRad = new State100(1, 0);
@@ -122,7 +122,7 @@ class MinTimeController100Test {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final BangBangController100 profile = new BangBangController100(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
         State100 goalRad = new State100(1, 1);
         // just use rotation for now
         State100 initialRad = new State100(0, 0);

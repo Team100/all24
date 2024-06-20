@@ -65,7 +65,7 @@ import edu.wpi.first.math.MathUtil;
  * we don't use the ETA anywhere. Note if we want to coordinate multiple axes
  * using ETA's, we'll have to change this.
  */
-public class MinTimeController100 {
+public class MinTimeController {
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
     private static final double kBoundaryTolerance = 1e-12;
@@ -85,12 +85,12 @@ public class MinTimeController100 {
     private final Constraints100 m_constraints;
     private final double m_tolerance;
 
-    public MinTimeController100(Constraints100 constraints, double tolerance) {
+    public MinTimeController(Constraints100 constraints, double tolerance) {
         m_constraints = constraints;
         m_tolerance = tolerance;
     }
 
-    public MinTimeController100(double maxVel, double maxAccel, double tolerance) {
+    public MinTimeController(double maxVel, double maxAccel, double tolerance) {
         this(new Constraints100(maxVel, maxAccel), tolerance);
     }
 
