@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
  * https://docs.google.com/spreadsheets/d/1iBkfx08k89OAlbCgJ4-BDdx4meIBZ949ViCQly79_6M
  */
 @SuppressWarnings("java:S2699") // no assertions here
-class BangBangController100Test {
+class MinTimeController100Test {
     private static final double kDt = 0.02;
 
     @Test
