@@ -1,7 +1,6 @@
 package org.team100.lib.controller;
 
 import org.team100.lib.profile.Constraints100;
-import org.team100.lib.profile.Profile100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -78,8 +77,10 @@ public class MinTimeController {
     // reversing chatter
     // there's also a threshold below which the whole thing reverts to proportional.
     private static final double kFinish = 0.1;
-    // private static final double[] kK = new double[] { 1.0, 10.0 };
-    // try a more balanced control
+    // low gains => low output, settles very slowly.
+    // private static final double[] kK = new double[] { 1.0, 1.0 };
+    // high gains => full output, settles very fast.
+    // using high gain with delay will yield orbiting
     private static final double[] kK = new double[] { 10.0, 10.0 };
 
     private final Constraints100 m_constraints;
