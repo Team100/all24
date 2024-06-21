@@ -51,14 +51,10 @@ public class TrapezoidProfile100 implements Profile100 {
     private final double m_maxAcceleration;
     private final double m_tolerance;
 
-    public TrapezoidProfile100(Constraints100 constraints, double tolerance) {
-        m_maxVelocity = constraints.maxVelocity;
-        m_maxAcceleration = constraints.maxAcceleration;
-        m_tolerance = tolerance;
-    }
-
     public TrapezoidProfile100(double maxVel, double maxAccel, double tolerance) {
-        this(new Constraints100(maxVel, maxAccel), tolerance);
+        m_maxVelocity = maxVel;
+        m_maxAcceleration = maxAccel;
+        m_tolerance = tolerance;
     }
 
     /**

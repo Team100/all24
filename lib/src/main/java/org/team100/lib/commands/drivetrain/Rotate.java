@@ -7,7 +7,6 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -73,10 +72,10 @@ public class Rotate extends Command100 {
     public void initialize100() {
         m_controller.reset();
         resetRefTheta(0.02);
-        Constraints100 c = new Constraints100(
+        m_profile = new TrapezoidProfile100(
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleAccelRad_S2());
-        m_profile = new TrapezoidProfile100(c, 0.05);
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2(),
+                0.05);
         // first align the wheels
         m_steeringAligned = false;
     }

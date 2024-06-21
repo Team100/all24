@@ -10,7 +10,6 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -64,10 +63,10 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_omegaController = omegaController;
         m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
-        Constraints100 c = new Constraints100(
+        m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
-                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * .1);
-        m_profile = new TrapezoidProfile100(c, 0.01);
+                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * .1,
+                0.01);
     }
 
     public void reset(Pose2d currentPose) {
