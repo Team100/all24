@@ -1,19 +1,46 @@
 package org.team100.lib.controller;
 
-import org.team100.lib.profile.Constraints100;
-import org.team100.lib.profile.Profile100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 
 /**
- * A bang-bang controller with sigmoid effort at the switching point, to
- * eliminate chatter. The general idea is to move the zero-effort point away
- * from the switching point, and to reserve some extra effort in case we pass
- * the switching point. So there are three control effort levels: minimum,
- * target, and maximum.
+ * This is a minimum-time controller for the double integrator, with
+ * acceleration and velocity limits. The control policy is to apply maximum
+ * acceleration towards the goal (tracing the "initial path" in state space, a
+ * parabola), until the "switching curve" is reached, and then apply maximum
+ * deceleration before arriving (following the switching curve to the goal, on
+ * the "goal path"). This strategy is a type of "sliding mode" controller, and
+ * so it is subject to "chatter" on the switching curve.
  * 
- * This is a copy of TrapezoidProfile100, I need to add anti-chatter.
+ * To prevent chattering, the switching curve acceleration is slightly higher
+ * than the actual goal path acceleration, which leads the system to drift away
+ * from the switching curve. The "initial path" acceleration is a little higher
+ * than the switching curve acceleration, which pushes the system back on to the
+ * switching curve. So the control output does chatter a bit between "really all
+ * the way on" and "most of the way on" -- much better than full scale reverse
+ * chatter. The level of chattering (and thus the level of disturbance-rejecting
+ * control authority available) is adjustable. Note that these differences in
+ * effort will make the ETA wrong, which is fine, we don't use the ETA anywhere.
+ * Note if we want to coordinate multiple axes using ETA's, we'll have to change
+ * this.
+ * 
+ * Control switches to full-state proportional feedback in the neighborhood of
+ * the goal, to prevent full-scale orbiting.
+ * 
+ * The usual WPI pattern for this sort of path would be to construct a feasible
+ * trapezoid profile, and then use a combination of feedforward and feedback
+ * control to follow it. The issue with that approach is that the profile
+ * blindly follows its own timer, which results in two problems: ignorance of
+ * disturbances and tuning complexity: feedback parameters need to work well
+ * with a very strong feedforward input *and* with the total absence of
+ * feedforward (in case the profile timer expires).
+ * 
+ * {@see https://liberzon.csl.illinois.edu/teaching/cvoc/node85.html}
+ * {@see https://underactuated.mit.edu/dp.html#minimum_time_double_integrator}
+ * 
+ * This class is very similar to
+ * {@link org.team100.lib.profile.TrapezoidProfile100}, described here:
  * 
  * This uses the approach from LaValle 2023: between any two points in phase
  * space, the optimal acceleration-limited path is via two parabolas, perhaps
@@ -55,17 +82,9 @@ import edu.wpi.first.math.MathUtil;
  * It might be slower around the switching points, since it can call itself once
  * or twice, once per segment.
  * 
- * 2024: to get this profile-maker to be a controller, make a few changes.
- * 
- * I paths go a little stronger than planned, to push the system onto G
- * G paths go a little weaker, so the system drifts away from G
- * Near the goal, use full state.
- *
- * Note that the differences in effort will make the ETA wrong, which is fine,
- * we don't use the ETA anywhere. Note if we want to coordinate multiple axes
- * using ETA's, we'll have to change this.
+ * TODO: allow different acceleration and deceleration.
  */
-public class BangBangController100 {
+public class MinTimeController {
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
     private static final double kBoundaryTolerance = 1e-12;
@@ -78,20 +97,20 @@ public class BangBangController100 {
     // reversing chatter
     // there's also a threshold below which the whole thing reverts to proportional.
     private static final double kFinish = 0.1;
-    // private static final double[] kK = new double[] { 1.0, 10.0 };
-    // try a more balanced control
+    // low gains => low output, settles very slowly.
+    // private static final double[] kK = new double[] { 1.0, 1.0 };
+    // high gains => full output, settles very fast.
+    // using high gain with delay will yield orbiting
     private static final double[] kK = new double[] { 10.0, 10.0 };
 
-    private final Constraints100 m_constraints;
+    private final double m_maxVelocity;
+    private final double m_maxAcceleration;
     private final double m_tolerance;
 
-    public BangBangController100(Constraints100 constraints, double tolerance) {
-        m_constraints = constraints;
+    public MinTimeController(double maxVel, double maxAccel, double tolerance) {
+        m_maxVelocity = maxVel;
+        m_maxAcceleration = maxAccel;
         m_tolerance = tolerance;
-    }
-
-    public BangBangController100(double maxVel, double maxAccel, double tolerance) {
-        this(new Constraints100(maxVel, maxAccel), tolerance);
     }
 
     /**
@@ -113,9 +132,9 @@ public class BangBangController100 {
      */
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
         State100 initial = new State100(initialRaw.x(),
-                MathUtil.clamp(initialRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
+                MathUtil.clamp(initialRaw.v(), -m_maxVelocity, m_maxVelocity));
         State100 goal = new State100(goalRaw.x(),
-                MathUtil.clamp(goalRaw.v(), -m_constraints.maxVelocity, m_constraints.maxVelocity));
+                MathUtil.clamp(goalRaw.v(), -m_maxVelocity, m_maxVelocity));
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
@@ -138,10 +157,10 @@ public class BangBangController100 {
 
         // AT CRUISING VELOCITY
 
-        if (MathUtil.isNear(m_constraints.maxVelocity, initial.v(), kBoundaryTolerance)) {
+        if (MathUtil.isNear(m_maxVelocity, initial.v(), kBoundaryTolerance)) {
             return keepCruising(dt, initial, goal);
         }
-        if (MathUtil.isNear(-m_constraints.maxVelocity, initial.v(), kBoundaryTolerance)) {
+        if (MathUtil.isNear(-m_maxVelocity, initial.v(), kBoundaryTolerance)) {
             return keepCruisingMinus(dt, initial, goal);
         }
 
@@ -208,7 +227,7 @@ public class BangBangController100 {
             // We Encounter G- during dt, so switch.
             return traverseSwitch(dt, initial, goal, t1, 1);
         }
-        if (initial.v() + m_constraints.maxAcceleration * dt > m_constraints.maxVelocity) {
+        if (initial.v() + m_maxAcceleration * dt > m_maxVelocity) {
             // We encounter vmax, so cruise.
             return cruise(dt, initial, 1);
         }
@@ -230,7 +249,7 @@ public class BangBangController100 {
             // We encounter G+ during dt, so switch.
             return traverseSwitch(dt, initial, goal, t1, -1);
         }
-        if (initial.v() - m_constraints.maxAcceleration * dt < -m_constraints.maxVelocity) {
+        if (initial.v() - m_maxAcceleration * dt < -m_maxVelocity) {
             // we did encounter vmax, though
             return cruise(dt, initial, -1);
         }
@@ -243,11 +262,11 @@ public class BangBangController100 {
         // will we reach it during dt?
         double c_minus = c_minus(goal);
         // the G- value at vmax
-        double gminus = c_minus - Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
+        double gminus = c_minus - Math.pow(m_maxVelocity, 2) / (2 * m_maxAcceleration);
         // distance to go
         double dc = gminus - initial.x();
         // time to go
-        double dct = dc / m_constraints.maxVelocity;
+        double dct = dc / m_maxVelocity;
         if (MathUtil.isNear(0, dct, kBoundaryTolerance)) {
             // we are at the intersection of vmax and G-, so head down G-
             return fullG(truncateDt(dt, initial, goal), initial, -1);
@@ -255,12 +274,12 @@ public class BangBangController100 {
         if (dct < dt) {
             // there are two segments
             double tremaining = dt - dct;
-            return calculate(tremaining, new State100(gminus, m_constraints.maxVelocity), goal);
+            return calculate(tremaining, new State100(gminus, m_maxVelocity), goal);
         }
         // we won't reach G-, so cruise for all of dt.
         return new State100(
-                initial.x() + m_constraints.maxVelocity * dt,
-                m_constraints.maxVelocity,
+                initial.x() + m_maxVelocity * dt,
+                m_maxVelocity,
                 0);
     }
 
@@ -268,22 +287,22 @@ public class BangBangController100 {
         // We're already at negative cruising speed, which means G+ is next.
         // will we reach it during dt?
         double c_plus = c_plus(goal);
-        double gplus = c_plus + Math.pow(m_constraints.maxVelocity, 2) / (2 * m_constraints.maxAcceleration);
+        double gplus = c_plus + Math.pow(m_maxVelocity, 2) / (2 * m_maxAcceleration);
         // negative
         double dc = gplus - initial.x();
-        double dct = dc / -m_constraints.maxVelocity;
+        double dct = dc / -m_maxVelocity;
         if (MathUtil.isNear(0, dct, kBoundaryTolerance)) {
             // We're at the intersection of -vmax and G+, so head up G+
             return fullG(truncateDt(dt, initial, goal), initial, 1);
         }
         if (dct < dt) {
             double tremaining = dt - dct;
-            return calculate(tremaining, new State100(gplus, -m_constraints.maxVelocity), goal);
+            return calculate(tremaining, new State100(gplus, -m_maxVelocity), goal);
         }
         // we won't reach G+, so cruise for all of dt
         return new State100(
-                initial.x() - m_constraints.maxVelocity * dt,
-                -m_constraints.maxVelocity,
+                initial.x() - m_maxVelocity * dt,
+                -m_maxVelocity,
                 0);
     }
 
@@ -294,8 +313,8 @@ public class BangBangController100 {
     private State100 traverseSwitch(double dt, State100 in_initial, final State100 goal, double t1, double direction) {
         // first get to the switching point
         double x = in_initial.x() + in_initial.v() * t1
-                + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(t1, 2);
-        double v = in_initial.v() + direction * m_constraints.maxAcceleration * t1;
+                + 0.5 * direction * m_maxAcceleration * Math.pow(t1, 2);
+        double v = in_initial.v() + direction * m_maxAcceleration * t1;
         // then go the other way for the remaining time
         double t2 = dt - t1;
         // just use the same method for the second part
@@ -305,7 +324,7 @@ public class BangBangController100 {
 
     /** Returns a shorter dt to avoid overshooting the goal state. */
     private double truncateDt(double dt, State100 in_initial, State100 in_goal) {
-        double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_constraints.maxAcceleration);
+        double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_maxAcceleration);
         return Math.min(dt, dtg);
     }
 
@@ -317,7 +336,7 @@ public class BangBangController100 {
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();
         double v_i = in_initial.v();
-        double a = direction * m_constraints.maxAcceleration * kStrongI;
+        double a = direction * m_maxAcceleration * kStrongI;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
         return new State100(x, v, a);
@@ -331,7 +350,7 @@ public class BangBangController100 {
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();
         double v_i = in_initial.v();
-        double a = direction * m_constraints.maxAcceleration * kWeakG;
+        double a = direction * m_maxAcceleration * kWeakG;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
         return new State100(x, v, a);
@@ -343,19 +362,19 @@ public class BangBangController100 {
      */
     private State100 cruise(double dt, State100 in_initial, double direction) {
         // need to clip (this is negative)
-        double dv = direction * m_constraints.maxVelocity - in_initial.v();
+        double dv = direction * m_maxVelocity - in_initial.v();
         // time to get to limit (positive)
-        double vt = dv / (direction * m_constraints.maxAcceleration);
+        double vt = dv / (direction * m_maxAcceleration);
         // location of that limit
         double xt = in_initial.x() + in_initial.v() * vt
-                + 0.5 * direction * m_constraints.maxAcceleration * Math.pow(vt, 2);
+                + 0.5 * direction * m_maxAcceleration * Math.pow(vt, 2);
         // remaining time
         double vt2 = dt - vt;
         // during that time, do we hit G+? i think it's not possible,
         // because this is the "not switching" branch.
         // so we just move along it
-        double x = xt + direction * m_constraints.maxVelocity * vt2;
-        return new State100(x, direction * m_constraints.maxVelocity, 0);
+        double x = xt + direction * m_maxVelocity * vt2;
+        return new State100(x, direction * m_maxVelocity, 0);
     }
 
     /** Time to switch point for I+G- path, or NaN if there is no path. */
@@ -364,7 +383,7 @@ public class BangBangController100 {
         // this fixes rounding errors
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
             return 0;
-        double t1 = (q_dot_switch - initial.v()) / m_constraints.maxAcceleration;
+        double t1 = (q_dot_switch - initial.v()) / m_maxAcceleration;
         if (t1 < 0) {
             return Double.NaN;
         }
@@ -378,7 +397,7 @@ public class BangBangController100 {
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
             return 0;
 
-        double t1 = (q_dot_switch - initial.v()) / (-1.0 * m_constraints.maxAcceleration);
+        double t1 = (q_dot_switch - initial.v()) / (-1.0 * m_maxAcceleration);
         if (t1 < 0) {
             return Double.NaN;
         }
@@ -400,8 +419,8 @@ public class BangBangController100 {
         // intercept of I+
         double c_plus = c_plus(initial);
         // position of I- at the velocity of goal
-        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_constraints.maxAcceleration);
-        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_constraints.maxAcceleration);
+        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
+        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
 
         // "limit" path we don't want.
         if (goal.v() <= initial.v() && goal.x() < p_minus)
@@ -414,7 +433,7 @@ public class BangBangController100 {
         // prevent rounding errors
         if (d < 0)
             d = 0;
-        return Math.sqrt(2 * m_constraints.maxAcceleration * d);
+        return Math.sqrt(2 * m_maxAcceleration * d);
     }
 
     /**
@@ -432,8 +451,8 @@ public class BangBangController100 {
         // intercept of I+
         double c_plus = c_plus(initial);
         // position of I- at the velocity of goal
-        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_constraints.maxAcceleration);
-        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_constraints.maxAcceleration);
+        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
+        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
 
         // "limit" path we don't want.
 
@@ -448,7 +467,7 @@ public class BangBangController100 {
         if (d < 0)
             d = 0;
 
-        return -1.0 * Math.sqrt(2 * m_constraints.maxAcceleration * d);
+        return -1.0 * Math.sqrt(2 * m_maxAcceleration * d);
     }
 
     /**
@@ -469,12 +488,12 @@ public class BangBangController100 {
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_minus(State100 s) {
-        return s.x() - Math.pow(s.v(), 2) / (-2.0 * m_constraints.maxAcceleration);
+        return s.x() - Math.pow(s.v(), 2) / (-2.0 * m_maxAcceleration);
     }
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_plus(State100 s) {
-        return s.x() - Math.pow(s.v(), 2) / (2.0 * m_constraints.maxAcceleration);
+        return s.x() - Math.pow(s.v(), 2) / (2.0 * m_maxAcceleration);
     }
 
     // for testing

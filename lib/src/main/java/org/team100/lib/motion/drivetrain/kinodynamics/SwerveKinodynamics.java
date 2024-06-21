@@ -4,7 +4,6 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
@@ -306,20 +305,6 @@ public class SwerveKinodynamics implements Glassy {
      */
     public double getMaxCapsizeAccelM_S2() {
         return m_MaxCapsizeAccelM_S2;
-    }
-
-    /** If you want to rotate the robot with a trapezoidal profile, use this. */
-    public Constraints100 getAngleConstraints() {
-        return new Constraints100(
-                getMaxAngleSpeedRad_S(),
-                getMaxAngleAccelRad_S2());
-    }
-
-    /** Trapezoidal profile for linear motion. */
-    public Constraints100 getDistanceConstraints() {
-        return new Constraints100(
-                getMaxDriveVelocityM_S(),
-                getMaxDriveAccelerationM_S2());
     }
 
     /**

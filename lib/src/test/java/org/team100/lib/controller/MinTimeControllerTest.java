@@ -2,6 +2,7 @@ package org.team100.lib.controller;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,15 +12,17 @@ import org.junit.jupiter.api.Test;
  * https://docs.google.com/spreadsheets/d/1iBkfx08k89OAlbCgJ4-BDdx4meIBZ949ViCQly79_6M
  */
 @SuppressWarnings("java:S2699") // no assertions here
-class BangBangController100Test {
+class MinTimeControllerTest {
     private static final double kDt = 0.02;
+
+    private final Random rand = new Random();
 
     @Test
     void testDelayWithAccel() {
         System.out.println("testDelayWithAccel");
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
-        final BangBangController100 profile = new BangBangController100(1, 1, 0);
+        final MinTimeController profile = new MinTimeController(1, 1, 0);
         State100 goal = new State100();
         State100 initial = new State100(1, 0);
 
@@ -50,7 +53,7 @@ class BangBangController100Test {
         // ratio of the delay and the timestep (!)
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
-        final BangBangController100 profile = new BangBangController100(1, 1, 0);
+        final MinTimeController profile = new MinTimeController(1, 1, 0);
         State100 goal = new State100();
         State100 initial = new State100(1, 0);
 
@@ -84,7 +87,7 @@ class BangBangController100Test {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final BangBangController100 profile = new BangBangController100(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
         State100 goalRad = new State100();
         // just use rotation for now
         State100 initialRad = new State100(1, 0);
@@ -92,7 +95,7 @@ class BangBangController100Test {
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
         double delay = 0.1;
-        //double delay = 0.0;
+        // double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
@@ -100,12 +103,50 @@ class BangBangController100Test {
         State100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 400;
+        final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(tSec, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
+    }
+
+    @Test
+    void testMaxVClosedLoop() {
+        System.out.println("testMaxVClosedLoop");
+
+        // motor real max accel is about 1 rad/s^2
+        // so to allow some headroom, use 20% less.
+        // max vel = 1 rad/s
+        // max accel = 0.8 rad/s^2
+
+        final MinTimeController profile = new MinTimeController(0.6, 0.9, 0);
+        State100 goalRad = new State100();
+        // just use rotation for now
+        State100 initialRad = new State100(1, 0);
+
+        // measurements are substantially delayed.
+        Queue<State100> queue = new LinkedList<>();
+        //double delay = 0.1;
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        // final int iterations = 500;
+        final int iterations = 400;
+        final double noise = 0.0;
+
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            double tSec = i * kDt;
+            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -122,7 +163,7 @@ class BangBangController100Test {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final BangBangController100 profile = new BangBangController100(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
         State100 goalRad = new State100(1, 1);
         // just use rotation for now
         State100 initialRad = new State100(0, 0);
@@ -130,7 +171,7 @@ class BangBangController100Test {
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
         double delay = 0.1;
-        //double delay = 0.0;
+        // double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
@@ -138,33 +179,145 @@ class BangBangController100Test {
         State100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 200;
+        final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(tSec, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
     }
 
+    /**
+     * Shows what happens when the motor response is significantly less than the
+     * model expects, i.e. the expected "profile" is "too fast". Since the system
+     * can't come close to the predicted goal path, it overshoots and orbits.
+     */
     @Test
     void testUnderdrive() {
         System.out.println("testUnderdrive");
-        // underdriving should create chatter.
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        State100 goalRad = new State100();
+        State100 initialRad = new State100(1, 0);
+        Queue<State100> queue = new LinkedList<>();
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        final int iterations = 400;
+        final double noise = 0.0;
+        final double drive = 0.5;
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            double tSec = i * kDt;
+
+            State100 newStateRad = closedLoop(tSec, noise, drive, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
     }
 
+    /**
+     * Shows what happens when the system responds more quickly than expected. When
+     * the system reaches the switching surface, it quickly leaves it, resulting in
+     * full-scale chatter on the goal path. Making the "weak G" really weak will
+     * help avoid full-scale reversing but it still chatters in the positive
+     * direction between strong and weak.
+     * 
+     * The lesson is that it's better to overestimate the system parameters (leading
+     * to overshoot) than to underestimate the parameters (leading to chatter).
+     */
     @Test
     void testOverdrive() {
         System.out.println("testOverdrive");
-        // overdriving should create chatter.
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        State100 goalRad = new State100();
+        State100 initialRad = new State100(1, 0);
+        Queue<State100> queue = new LinkedList<>();
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        final int iterations = 400;
+        final double noise = 0.0;
+        final double drive = 1.5;
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            double tSec = i * kDt;
+
+            State100 newStateRad = closedLoop(tSec, noise, drive, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
     }
 
+    State100 addNoise(double noise, State100 p) {
+        return new State100(addNoise(noise, p.x()), addNoise(noise, p.v()), p.a());
+    }
+
+    double addNoise(double noise, Double p) {
+        return rand.nextGaussian() * noise + p;
+    }
+
+    /**
+     * Illustrates noise in both position and velocity measurements.
+     * 
+     * Shows that the proportional controller in the center needs to be soft to
+     * avoid overresponding to the noise. another option would be to filter the
+     * noise though that would introduce delay.
+     * 
+     * The center section also needs to be bigger than the noise scale to avoid
+     * full-scale orbiting at the goal.
+     */
     @Test
-    void testNoise() {
-        System.out.println("testNoise");
-        // noise should create chatter on the switching curve.
+    void testDelayAndNoiseWithClosedLoop() {
+        System.out.println("testDelayAndNoiseWithClosedLoop");
+        // what we actually do is pass the velocity to the outboard closed-loop velocity
+        // controller, and use kV and kA to make a feedforward voltage.
+
+        // motor real max accel is about 1 rad/s^2
+        // so to allow some headroom, use 20% less.
+        // max vel = 1 rad/s
+        // max accel = 0.8 rad/s^2
+
+        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        final State100 goalRad = new State100();
+        // just use rotation for now
+        State100 initialRad = new State100(1, 0);
+
+        // queue contains actual state, not noise.
+        Queue<State100> queue = new LinkedList<>();
+        // double delay = 0.1;
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        // final int iterations = 500;
+        final int iterations = 400;
+        // the controller proportional zone needs to be bigger than the noise, to
+        // prevent full-scale orbiting
+        final double noise = 0.025;
+
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, addNoise(noise, delayedMeasurementRad), goalRad);
+            double tSec = i * kDt;
+            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
+
     }
 
     private static State100 applyAccelOnly(double tSec, State100 currentMeasurement, State100 u) {
@@ -184,8 +337,11 @@ class BangBangController100Test {
     /**
      * Behave like the Falcon closed-loop velocity controller using VelocityVoltage
      * control. ignores friction.
+     * 
+     * @param drive 1.0 is normal, more is overdrive, less is underdrive.
      */
-    private static State100 closedLoop(double t, State100 currentMeasurementRad, final State100 u) {
+    private State100 closedLoop(double t, double noise, double drive, State100 currentMeasurementRad,
+            final State100 u) {
         // volts per rev/s. about 10 volts per 100 rev/s = 0.1;
         final double kV = 0.1;
         // volts per rev/s^2.
@@ -217,8 +373,12 @@ class BangBangController100Test {
         State100 resultRad = currentMeasurementRad;
         for (int i = 0; i < 20; ++i) {
             double tSec = t + i * dt;
+            // these are actual states
+            double positionRad = resultRad.x();
             double speedRad_S = resultRad.v();
-            double errorRad_S = u.v() - speedRad_S;
+
+            // this includes noise
+            double errorRad_S = u.v() - addNoise(noise, speedRad_S);
             double u_FBVolts = kP * errorRad_S;
 
             // applied voltage
@@ -239,9 +399,11 @@ class BangBangController100Test {
             // than the motor is capable of.
 
             // target accel is 1 rad/s^2 so target torque
-            double a = torqueNm / kMomentOfInertiaKgM2;
+            // these are actual state, not noisy measurements.
+            // note the fudge factor for over/under drive
+            double a = drive * torqueNm / kMomentOfInertiaKgM2;
             double v = speedRad_S + a * dt;
-            double x = resultRad.x() + speedRad_S * dt + 0.5 * a * dt * dt;
+            double x = positionRad + speedRad_S * dt + 0.5 * a * dt * dt;
             // System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f\n", tSec, x, v, a);
 
             System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f\n",
@@ -252,6 +414,7 @@ class BangBangController100Test {
             resultRad = new State100(x, v, a);
         }
 
+        // return actual state, not noisy measurement.
         return resultRad;
 
     }

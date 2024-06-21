@@ -9,7 +9,6 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Math100;
 
@@ -49,15 +48,18 @@ public class DriveWithProfile2 extends Command100 {
         m_swerve = drivetrain;
         m_controller = controller;
         m_limits = limits;
-        Constraints100 thetaContraints = new Constraints100(
-                m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2());
-        Constraints100 driveContraints = new Constraints100(
+        xProfile = new TrapezoidProfile100(
                 m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2());
-        xProfile = new TrapezoidProfile100(driveContraints, 0.01);
-        yProfile = new TrapezoidProfile100(driveContraints, 0.01);
-        thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
+                m_limits.getMaxDriveAccelerationM_S2(),
+                0.01);
+        yProfile = new TrapezoidProfile100(
+                m_limits.getMaxDriveVelocityM_S(),
+                m_limits.getMaxDriveAccelerationM_S2(),
+                0.01);
+        thetaProfile = new TrapezoidProfile100(
+                m_limits.getMaxAngleSpeedRad_S(),
+                m_limits.getMaxAngleAccelRad_S2(),
+                0.01);
         addRequirements(m_swerve);
     }
 

@@ -12,7 +12,6 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -63,6 +62,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private State100 prevGoal;
     private boolean isAligned;
     private boolean first;
+
     public ManualWithShooterLock(
             String parent,
             SwerveKinodynamics swerveKinodynamics,
@@ -76,10 +76,10 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         isAligned = false;
         m_name = Names.append(parent, this);
         m_trigger = () -> false;
-        Constraints100 c = new Constraints100(
+        m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed/4);
-        m_profile = new TrapezoidProfile100(c, 0.01);
+                swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed / 4,
+                0.01);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         prevGoal = new State100();
         m_prevPose = currentPose;
         m_thetaController.reset();
-        m_omegaController.reset();  
+        m_omegaController.reset();
         m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_thetaController.setTolerance(0.05);
         m_omegaController.setTolerance(0.1);
@@ -129,28 +129,27 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // make sure the setpoint uses the modulus close to the measurement.
         if (first) {
             m_thetaSetpoint = new State100(
-            measurement,
-            headingRate );
+                    measurement,
+                    headingRate);
             first = false;
         } else {
-        m_thetaSetpoint = new State100(
-                Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
-                m_thetaSetpoint.v());
+            m_thetaSetpoint = new State100(
+                    Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
+                    m_thetaSetpoint.v());
         }
-                
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
         t.log(Level.TRACE, m_name, "apparent motion", targetMotion);
         State100 goal = new State100(bearing.getRadians(), targetMotion);
-        if (Math.abs(goal.x()-prevGoal.x()) < 0.05 || Math.abs(2*Math.PI - goal.x()-prevGoal.x()) < 0.05) {
-            goal = new State100(prevGoal.x(), goal.v(),goal.a());
+        if (Math.abs(goal.x() - prevGoal.x()) < 0.05 || Math.abs(2 * Math.PI - goal.x() - prevGoal.x()) < 0.05) {
+            goal = new State100(prevGoal.x(), goal.v(), goal.a());
         }
-        if (Math.abs(goal.v()-prevGoal.v()) < 0.05) {
-            goal = new State100(goal.x(), 0,goal.a());
+        if (Math.abs(goal.v() - prevGoal.v()) < 0.05) {
+            goal = new State100(goal.x(), 0, goal.a());
         }
         if (Math.abs(goal.a()) < 0.05) {
-            goal = new State100(goal.x(), goal.v(),0);
+            goal = new State100(goal.x(), goal.v(), 0);
         }
         m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
 
@@ -185,7 +184,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "goal", goal);
         prevGoal = goal;
         double omega = MathUtil.clamp(
-                thetaFF ,
+                thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);
