@@ -308,20 +308,6 @@ public class SwerveKinodynamics implements Glassy {
         return m_MaxCapsizeAccelM_S2;
     }
 
-    /** If you want to rotate the robot with a trapezoidal profile, use this. */
-    public Constraints100 getAngleConstraints() {
-        return new Constraints100(
-                getMaxAngleSpeedRad_S(),
-                getMaxAngleAccelRad_S2());
-    }
-
-    /** Trapezoidal profile for linear motion. */
-    public Constraints100 getDistanceConstraints() {
-        return new Constraints100(
-                getMaxDriveVelocityM_S(),
-                getMaxDriveAccelerationM_S2());
-    }
-
     /**
      * @param fronttrack
      * @param backtrack
