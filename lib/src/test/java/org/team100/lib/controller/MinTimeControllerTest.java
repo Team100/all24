@@ -22,7 +22,15 @@ class MinTimeControllerTest {
         System.out.println("testDelayWithAccel");
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
-        final MinTimeController profile = new MinTimeController(1, 1, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                1, // switchingA
+                0.9, // weakG
+                1.1, // strongI
+                0, // tolerance
+                0.1, // finish
+                new double[] { 10.0, 10.0 } // k
+        );
         State100 goal = new State100();
         State100 initial = new State100(1, 0);
 
@@ -53,7 +61,15 @@ class MinTimeControllerTest {
         // ratio of the delay and the timestep (!)
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
-        final MinTimeController profile = new MinTimeController(1, 1, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                1, // switchingA
+                0.9, // weakG
+                1.1, // strongI
+                0, // tolerance
+                0.1, // finish
+                new double[] { 10.0, 10.0 } // k
+        );
         State100 goal = new State100();
         State100 initial = new State100(1, 0);
 
@@ -87,7 +103,12 @@ class MinTimeControllerTest {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
         State100 goalRad = new State100();
         // just use rotation for now
         State100 initialRad = new State100(1, 0);
@@ -124,14 +145,19 @@ class MinTimeControllerTest {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final MinTimeController profile = new MinTimeController(0.6, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(
+                0.6, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
         State100 goalRad = new State100();
         // just use rotation for now
         State100 initialRad = new State100(1, 0);
 
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
-        //double delay = 0.1;
+        // double delay = 0.1;
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
@@ -163,7 +189,12 @@ class MinTimeControllerTest {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
         State100 goalRad = new State100(1, 1);
         // just use rotation for now
         State100 initialRad = new State100(0, 0);
@@ -199,7 +230,12 @@ class MinTimeControllerTest {
     @Test
     void testUnderdrive() {
         System.out.println("testUnderdrive");
-        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
         State100 goalRad = new State100();
         State100 initialRad = new State100(1, 0);
         Queue<State100> queue = new LinkedList<>();
@@ -236,7 +272,12 @@ class MinTimeControllerTest {
     @Test
     void testOverdrive() {
         System.out.println("testOverdrive");
-        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
         State100 goalRad = new State100();
         State100 initialRad = new State100(1, 0);
         Queue<State100> queue = new LinkedList<>();
@@ -289,7 +330,12 @@ class MinTimeControllerTest {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final MinTimeController profile = new MinTimeController(1, 0.9, 0);
+        final MinTimeController profile = new MinTimeController(
+                1, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
         final State100 goalRad = new State100();
         // just use rotation for now
         State100 initialRad = new State100(1, 0);
@@ -357,7 +403,7 @@ class MinTimeControllerTest {
         double u_FFVolts = kV * u.v() + kA * u.a();
 
         // kraken
-        final double kStallTorqueNm = 7.09;
+        // final double kStallTorqueNm = 7.09;
         final double kFreeSpeedRev_S = 100;
         final double kCurrentLimitA = 50;
         final double kMaxVolts = 12;

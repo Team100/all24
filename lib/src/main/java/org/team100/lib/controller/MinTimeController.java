@@ -88,29 +88,58 @@ public class MinTimeController {
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
     private static final double kBoundaryTolerance = 1e-12;
+
+    // ANTI-CHATTER
     // switching curve is calculated using the supplied constraint
     // actual G effort is a little *less* than this constraint
-    private static final double kWeakG = 0.9;
+    private final double m_weakG;
     // actual I effort is a little *more* than this constraint
-    private static final double kStrongI = 1.1;
+    private final double m_strongI;
     // the result should be oscillation just past the switching curve, and no
     // reversing chatter
-    // there's also a threshold below which the whole thing reverts to proportional.
-    private static final double kFinish = 0.1;
+
+    // FULL STATE MODE NEAR THE GOAL
+    // threshold below which we use proportional feedback.
+    private final double m_finish;
     // low gains => low output, settles very slowly.
-    // private static final double[] kK = new double[] { 1.0, 1.0 };
     // high gains => full output, settles very fast.
     // using high gain with delay will yield orbiting
-    private static final double[] kK = new double[] { 10.0, 10.0 };
+    private final double[] m_k;
 
     private final double m_maxVelocity;
-    private final double m_maxAcceleration;
+    private final double m_switchingAcceleration;
     private final double m_tolerance;
 
-    public MinTimeController(double maxVel, double maxAccel, double tolerance) {
+    /**
+     * 
+     * @param maxVel
+     * @param switchingAccel acceleration of the switching curve.
+     * @param weakG          acceleration of the goal path, should be less than
+     *                       switching.
+     * @param strongI        acceleration of the initial path, should be more than
+     *                       switching.
+     * @param tolerance      when x and v are both closer than this, return the
+     *                       goal.
+     * @param finish         when x and v are closer than this, switch to
+     *                       proportional
+     *                       full-state
+     * @param k              full-state gains
+     */
+    public MinTimeController(
+            double maxVel,
+            double switchingAccel,
+            double weakG,
+            double strongI,
+            double tolerance,
+            double finish,
+            double[] k) {
         m_maxVelocity = maxVel;
-        m_maxAcceleration = maxAccel;
+        m_switchingAcceleration = switchingAccel;
+        m_weakG = weakG;
+        m_strongI = strongI;
         m_tolerance = tolerance;
+        m_finish = finish;
+        m_k = k;
     }
 
     /**
@@ -142,11 +171,11 @@ public class MinTimeController {
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
-        if (goal.near(initial, kFinish)) {
+        if (goal.near(initial, m_finish)) {
             double xError = goal.x() - initial.x();
             double vError = goal.v() - initial.v();
-            double u_FBx = xError * kK[0];
-            double u_FBv = vError * kK[1];
+            double u_FBx = xError * m_k[0];
+            double u_FBv = vError * m_k[1];
             double u_FB = u_FBx + u_FBv;
             double a = u_FB;
             double v = initial.v() + a * dt;
@@ -227,7 +256,7 @@ public class MinTimeController {
             // We Encounter G- during dt, so switch.
             return traverseSwitch(dt, initial, goal, t1, 1);
         }
-        if (initial.v() + m_maxAcceleration * dt > m_maxVelocity) {
+        if (initial.v() + m_switchingAcceleration * dt > m_maxVelocity) {
             // We encounter vmax, so cruise.
             return cruise(dt, initial, 1);
         }
@@ -249,7 +278,7 @@ public class MinTimeController {
             // We encounter G+ during dt, so switch.
             return traverseSwitch(dt, initial, goal, t1, -1);
         }
-        if (initial.v() - m_maxAcceleration * dt < -m_maxVelocity) {
+        if (initial.v() - m_switchingAcceleration * dt < -m_maxVelocity) {
             // we did encounter vmax, though
             return cruise(dt, initial, -1);
         }
@@ -262,7 +291,7 @@ public class MinTimeController {
         // will we reach it during dt?
         double c_minus = c_minus(goal);
         // the G- value at vmax
-        double gminus = c_minus - Math.pow(m_maxVelocity, 2) / (2 * m_maxAcceleration);
+        double gminus = c_minus - Math.pow(m_maxVelocity, 2) / (2 * m_switchingAcceleration);
         // distance to go
         double dc = gminus - initial.x();
         // time to go
@@ -287,7 +316,7 @@ public class MinTimeController {
         // We're already at negative cruising speed, which means G+ is next.
         // will we reach it during dt?
         double c_plus = c_plus(goal);
-        double gplus = c_plus + Math.pow(m_maxVelocity, 2) / (2 * m_maxAcceleration);
+        double gplus = c_plus + Math.pow(m_maxVelocity, 2) / (2 * m_switchingAcceleration);
         // negative
         double dc = gplus - initial.x();
         double dct = dc / -m_maxVelocity;
@@ -313,8 +342,8 @@ public class MinTimeController {
     private State100 traverseSwitch(double dt, State100 in_initial, final State100 goal, double t1, double direction) {
         // first get to the switching point
         double x = in_initial.x() + in_initial.v() * t1
-                + 0.5 * direction * m_maxAcceleration * Math.pow(t1, 2);
-        double v = in_initial.v() + direction * m_maxAcceleration * t1;
+                + 0.5 * direction * m_switchingAcceleration * Math.pow(t1, 2);
+        double v = in_initial.v() + direction * m_switchingAcceleration * t1;
         // then go the other way for the remaining time
         double t2 = dt - t1;
         // just use the same method for the second part
@@ -324,7 +353,7 @@ public class MinTimeController {
 
     /** Returns a shorter dt to avoid overshooting the goal state. */
     private double truncateDt(double dt, State100 in_initial, State100 in_goal) {
-        double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_maxAcceleration);
+        double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_switchingAcceleration);
         return Math.min(dt, dtg);
     }
 
@@ -336,7 +365,7 @@ public class MinTimeController {
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();
         double v_i = in_initial.v();
-        double a = direction * m_maxAcceleration * kStrongI;
+        double a = direction * m_strongI;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
         return new State100(x, v, a);
@@ -350,7 +379,7 @@ public class MinTimeController {
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();
         double v_i = in_initial.v();
-        double a = direction * m_maxAcceleration * kWeakG;
+        double a = direction * m_weakG;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
         return new State100(x, v, a);
@@ -364,10 +393,10 @@ public class MinTimeController {
         // need to clip (this is negative)
         double dv = direction * m_maxVelocity - in_initial.v();
         // time to get to limit (positive)
-        double vt = dv / (direction * m_maxAcceleration);
+        double vt = dv / (direction * m_switchingAcceleration);
         // location of that limit
         double xt = in_initial.x() + in_initial.v() * vt
-                + 0.5 * direction * m_maxAcceleration * Math.pow(vt, 2);
+                + 0.5 * direction * m_switchingAcceleration * Math.pow(vt, 2);
         // remaining time
         double vt2 = dt - vt;
         // during that time, do we hit G+? i think it's not possible,
@@ -383,7 +412,7 @@ public class MinTimeController {
         // this fixes rounding errors
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
             return 0;
-        double t1 = (q_dot_switch - initial.v()) / m_maxAcceleration;
+        double t1 = (q_dot_switch - initial.v()) / m_switchingAcceleration;
         if (t1 < 0) {
             return Double.NaN;
         }
@@ -397,7 +426,7 @@ public class MinTimeController {
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
             return 0;
 
-        double t1 = (q_dot_switch - initial.v()) / (-1.0 * m_maxAcceleration);
+        double t1 = (q_dot_switch - initial.v()) / (-1.0 * m_switchingAcceleration);
         if (t1 < 0) {
             return Double.NaN;
         }
@@ -419,8 +448,8 @@ public class MinTimeController {
         // intercept of I+
         double c_plus = c_plus(initial);
         // position of I- at the velocity of goal
-        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
-        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
+        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_switchingAcceleration);
+        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_switchingAcceleration);
 
         // "limit" path we don't want.
         if (goal.v() <= initial.v() && goal.x() < p_minus)
@@ -433,7 +462,7 @@ public class MinTimeController {
         // prevent rounding errors
         if (d < 0)
             d = 0;
-        return Math.sqrt(2 * m_maxAcceleration * d);
+        return Math.sqrt(2 * m_switchingAcceleration * d);
     }
 
     /**
@@ -451,8 +480,8 @@ public class MinTimeController {
         // intercept of I+
         double c_plus = c_plus(initial);
         // position of I- at the velocity of goal
-        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
-        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_maxAcceleration);
+        double p_minus = c_minus - Math.pow(goal.v(), 2) / (2 * m_switchingAcceleration);
+        double p_plus = c_plus + Math.pow(goal.v(), 2) / (2 * m_switchingAcceleration);
 
         // "limit" path we don't want.
 
@@ -467,7 +496,7 @@ public class MinTimeController {
         if (d < 0)
             d = 0;
 
-        return -1.0 * Math.sqrt(2 * m_maxAcceleration * d);
+        return -1.0 * Math.sqrt(2 * m_switchingAcceleration * d);
     }
 
     /**
@@ -488,12 +517,12 @@ public class MinTimeController {
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_minus(State100 s) {
-        return s.x() - Math.pow(s.v(), 2) / (-2.0 * m_maxAcceleration);
+        return s.x() - Math.pow(s.v(), 2) / (-2.0 * m_switchingAcceleration);
     }
 
     /** Intercept of negative-acceleration path intersecting s */
     double c_plus(State100 s) {
-        return s.x() - Math.pow(s.v(), 2) / (2.0 * m_maxAcceleration);
+        return s.x() - Math.pow(s.v(), 2) / (2.0 * m_switchingAcceleration);
     }
 
     // for testing
