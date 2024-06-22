@@ -50,7 +50,7 @@ public class State100 {
     }
 
     public String toString() {
-        return String.format("State100(X: %5.3f, V: %5.3f, A: %5.3f)", m_x, m_v, m_a);
+        return String.format("State100(X %5.3f V %5.3f A %5.3f)", m_x, m_v, m_a);
     }
 
     @Override
