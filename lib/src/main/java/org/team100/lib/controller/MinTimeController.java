@@ -1,5 +1,7 @@
 package org.team100.lib.controller;
 
+import java.util.function.DoubleUnaryOperator;
+
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -106,12 +108,14 @@ public class MinTimeController {
     // using high gain with delay will yield orbiting
     private final double[] m_k;
 
+    private final DoubleUnaryOperator m_modulus;
+
     private final double m_maxVelocity;
     private final double m_switchingAcceleration;
     private final double m_tolerance;
 
     /**
-     * 
+     * @param modulus        for angle wrapping
      * @param maxVel
      * @param switchingAccel acceleration of the switching curve.
      * @param weakG          acceleration of the goal path, should be less than
@@ -126,6 +130,7 @@ public class MinTimeController {
      * @param k              full-state gains
      */
     public MinTimeController(
+            DoubleUnaryOperator modulus,
             double maxVel,
             double switchingAccel,
             double weakG,
@@ -133,6 +138,7 @@ public class MinTimeController {
             double tolerance,
             double finish,
             double[] k) {
+        m_modulus = modulus;
         m_maxVelocity = maxVel;
         m_switchingAcceleration = switchingAccel;
         m_weakG = weakG;
@@ -140,6 +146,14 @@ public class MinTimeController {
         m_tolerance = tolerance;
         m_finish = finish;
         m_k = k;
+    }
+
+    private State100 modulus(double x, double v, double a) {
+        return new State100(m_modulus.applyAsDouble(x), v, a);
+    }
+
+    private State100 modulus(State100 s) {
+        return modulus(s.x(), s.v(), s.a());
     }
 
     /**
@@ -162,12 +176,16 @@ public class MinTimeController {
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
         State100 initial = new State100(initialRaw.x(),
                 MathUtil.clamp(initialRaw.v(), -m_maxVelocity, m_maxVelocity));
-        State100 goal = new State100(goalRaw.x(),
+
+        // for periodic state spaces, choose an equivalent goal close to the initial
+        // state (may be outside the valid range, we'll fix it later).
+        State100 goal = new State100(
+                m_modulus.applyAsDouble(goalRaw.x() - initialRaw.x()) + initialRaw.x(),
                 MathUtil.clamp(goalRaw.v(), -m_maxVelocity, m_maxVelocity));
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
-            return goal;
+            return modulus(goal);
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
@@ -180,8 +198,7 @@ public class MinTimeController {
             double a = u_FB;
             double v = initial.v() + a * dt;
             double x = initial.x() + initial.v() * dt + 0.5 * a * Math.pow(dt, 2);
-            System.out.printf("full state %6.3f %6.3f\n", u_FBx, u_FBv);
-            return new State100(x, v, a);
+            return modulus(x, v, a);
         }
 
         // AT CRUISING VELOCITY
@@ -199,7 +216,7 @@ public class MinTimeController {
 
         if (Double.isNaN(t1IminusGplus) && Double.isNaN(t1IplusGminus)) {
             Util.warn("Both I-G+ and I+G- are NaN, this should never happen");
-            return initial;
+            return modulus(initial);
         }
 
         // ON THE INITIAL PATH
@@ -306,7 +323,7 @@ public class MinTimeController {
             return calculate(tremaining, new State100(gminus, m_maxVelocity), goal);
         }
         // we won't reach G-, so cruise for all of dt.
-        return new State100(
+        return modulus(
                 initial.x() + m_maxVelocity * dt,
                 m_maxVelocity,
                 0);
@@ -329,7 +346,7 @@ public class MinTimeController {
             return calculate(tremaining, new State100(gplus, -m_maxVelocity), goal);
         }
         // we won't reach G+, so cruise for all of dt
-        return new State100(
+        return modulus(
                 initial.x() - m_maxVelocity * dt,
                 -m_maxVelocity,
                 0);
@@ -368,7 +385,7 @@ public class MinTimeController {
         double a = direction * m_strongI;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
-        return new State100(x, v, a);
+        return modulus(x, v, a);
     }
 
     /**
@@ -382,7 +399,7 @@ public class MinTimeController {
         double a = direction * m_weakG;
         double v = v_i + a * dt;
         double x = x_i + v_i * dt + 0.5 * a * Math.pow(dt, 2);
-        return new State100(x, v, a);
+        return modulus(x, v, a);
     }
 
     /**
@@ -403,7 +420,7 @@ public class MinTimeController {
         // because this is the "not switching" branch.
         // so we just move along it
         double x = xt + direction * m_maxVelocity * vt2;
-        return new State100(x, direction * m_maxVelocity, 0);
+        return modulus(x, direction * m_maxVelocity, 0);
     }
 
     /** Time to switch point for I+G- path, or NaN if there is no path. */

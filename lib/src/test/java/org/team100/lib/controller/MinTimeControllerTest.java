@@ -3,8 +3,11 @@ package org.team100.lib.controller;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
+
+import edu.wpi.first.math.MathUtil;
 
 /**
  * Graphs for these tests are located here
@@ -23,6 +26,7 @@ class MinTimeControllerTest {
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 1, // switchingA
                 0.9, // weakG
@@ -62,6 +66,7 @@ class MinTimeControllerTest {
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 1, // switchingA
                 0.9, // weakG
@@ -92,6 +97,100 @@ class MinTimeControllerTest {
         }
     }
 
+    /** What happens when we try to go from -pi to pi? */
+    @Test
+    void testAngleWrapping() {
+        System.out.println("testAngleWrapping");
+
+        final MinTimeController profile = new MinTimeController(
+                MathUtil::angleModulus,
+                1, // maxV
+                0.9, // switchingA
+                0.8, // weakG
+                1.0, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
+        // almost -pi
+        State100 initialRad = new State100(-3, 0);
+        // almost pi
+        State100 goalRad = new State100(3, 0);
+
+        // measurements are substantially delayed.
+        Queue<State100> queue = new LinkedList<>();
+        // double delay = 0.1;
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        // final int iterations = 500;
+        final int iterations = 400;
+        final double noise = 0.0;
+
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            double tSec = i * kDt;
+            State100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
+    }
+
+    /**
+     * This is one of my favorite puzzle cases. We're heading fast in one direction
+     * and want to go more than half way around the cirlce in that same direction,
+     * so it's better to keep going even though the distance is longer.
+     * 
+     * The current MinTimeController does not do the right thing in this case.
+     * 
+     * To do the right thing, it would have to compare the ETAs of the "inside the
+     * modulus" path vs the "crossing the modulus" path.
+     * 
+     * In reality the controller attempts to stop, but the velocity carries the
+     * system over boundary anyway, and it speeds up again. It would be better not
+     * to have that little pause, but it's not the end of the world. It would be
+     * good to clean up the math in MinTimeController so this case works correctly.
+     */
+    @Test
+    void testMovingAngleWrapping() {
+        System.out.println("testMovingAngleWrapping");
+
+        final MinTimeController profile = new MinTimeController(
+                MathUtil::angleModulus,
+                1, // maxV
+                0.4, // switchingA
+                0.3, // weakG
+                0.5, // strongI
+                0, 0.1, new double[] { 10.0, 10.0 });
+        // the short distance is across pi
+        // but we're moving fast the other way.
+        State100 initialRad = new State100(1.7, -1);
+        State100 goalRad = new State100(-1.7, -1);
+
+        // measurements are substantially delayed.
+        Queue<State100> queue = new LinkedList<>();
+        // double delay = 0.1;
+        double delay = 0.0;
+        for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
+            queue.add(initialRad);
+        }
+
+        State100 actualCurrentStateRad = initialRad;
+        // final int iterations = 500;
+        final int iterations = 400;
+        final double noise = 0.0;
+
+        for (int i = 0; i < iterations; ++i) {
+            State100 delayedMeasurementRad = queue.remove();
+            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            double tSec = i * kDt;
+            State100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
+            queue.add(newStateRad);
+            actualCurrentStateRad = newStateRad;
+        }
+    }
+
     @Test
     void testDelayWithClosedLoop() {
         System.out.println("testDelayWithClosedLoop");
@@ -104,6 +203,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 0.9, // switchingA
                 0.8, // weakG
@@ -130,7 +230,7 @@ class MinTimeControllerTest {
             State100 delayedMeasurementRad = queue.remove();
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -146,6 +246,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 0.6, // maxV
                 0.9, // switchingA
                 0.8, // weakG
@@ -172,7 +273,7 @@ class MinTimeControllerTest {
             State100 delayedMeasurementRad = queue.remove();
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -190,6 +291,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 0.9, // switchingA
                 0.8, // weakG
@@ -216,7 +318,7 @@ class MinTimeControllerTest {
             State100 delayedMeasurementRad = queue.remove();
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -231,6 +333,7 @@ class MinTimeControllerTest {
     void testUnderdrive() {
         System.out.println("testUnderdrive");
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 0.9, // switchingA
                 0.8, // weakG
@@ -253,7 +356,7 @@ class MinTimeControllerTest {
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
 
-            State100 newStateRad = closedLoop(tSec, noise, drive, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -273,6 +376,7 @@ class MinTimeControllerTest {
     void testOverdrive() {
         System.out.println("testOverdrive");
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 0.9, // switchingA
                 0.8, // weakG
@@ -295,7 +399,7 @@ class MinTimeControllerTest {
             State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
 
-            State100 newStateRad = closedLoop(tSec, noise, drive, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -331,6 +435,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                x -> x,
                 1, // maxV
                 0.9, // switchingA
                 0.8, // weakG
@@ -359,7 +464,7 @@ class MinTimeControllerTest {
             State100 delayedMeasurementRad = queue.remove();
             State100 u = profile.calculate(kDt, addNoise(noise, delayedMeasurementRad), goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(tSec, noise, 1.0, actualCurrentStateRad, u);
+            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -386,7 +491,12 @@ class MinTimeControllerTest {
      * 
      * @param drive 1.0 is normal, more is overdrive, less is underdrive.
      */
-    private State100 closedLoop(double t, double noise, double drive, State100 currentMeasurementRad,
+    private State100 closedLoop(
+            DoubleUnaryOperator modulus,
+            double t,
+            double noise,
+            double drive,
+            State100 currentMeasurementRad,
             final State100 u) {
         // volts per rev/s. about 10 volts per 100 rev/s = 0.1;
         final double kV = 0.1;
@@ -449,7 +559,7 @@ class MinTimeControllerTest {
             // note the fudge factor for over/under drive
             double a = drive * torqueNm / kMomentOfInertiaKgM2;
             double v = speedRad_S + a * dt;
-            double x = positionRad + speedRad_S * dt + 0.5 * a * dt * dt;
+            double x = modulus.applyAsDouble(positionRad + speedRad_S * dt + 0.5 * a * dt * dt);
             // System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f\n", tSec, x, v, a);
 
             System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f\n",
