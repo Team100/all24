@@ -2,8 +2,6 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle100;
@@ -19,13 +17,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * Feedforward and feedback control of a single module.
  */
 public class SwerveModule100 implements Glassy {
-
-    /**
-     * To counteract drive torque coupling, the steering motor applies a negative
-     * torque.
-     */
-    private static final double kDriveSteerCoupling = -0.1;
-
     protected static final double dt = 0.02;
 
     private final String m_name;
@@ -59,14 +50,8 @@ public class SwerveModule100 implements Glassy {
     void setRawDesiredState(SwerveModuleState state) {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
-        if (Experiments.instance.enabled(Experiment.DriveSteerCouplingCompensation)) {
-            m_driveServo.setVelocity(state.speedMetersPerSecond);
-            m_turningServo.setPosition(state.angle.getRadians(), kDriveSteerCoupling * m_driveServo.getTorque());
-        } else {
-            m_driveServo.setVelocity(state.speedMetersPerSecond);
-            m_turningServo.setPosition(state.angle.getRadians());
-        }
-
+        m_driveServo.setVelocity(state.speedMetersPerSecond);
+        m_turningServo.setPosition(state.angle.getRadians());
     }
 
     /** For testing */

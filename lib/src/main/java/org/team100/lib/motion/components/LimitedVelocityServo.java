@@ -58,11 +58,6 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     }
 
     @Override
-    public double getTorque() {
-        return m_servo.getTorque();
-    }
-
-    @Override
     public void stop() {
         m_servo.stop();
         m_limiter.reset(0);

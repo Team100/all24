@@ -58,11 +58,6 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     }
 
     @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void close() {
         // m_motor.close();
     }

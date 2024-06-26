@@ -68,7 +68,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         m_setpoint = new State100(getPosition(), getVelocity());
         prevTime = Timer.getFPGATimestamp();
 
-        //TODO figure this out
+        // TODO figure this out
         // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
         // which is never what we want. but this might be wrong
         // for some other reason
@@ -115,7 +115,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
     }
 
-     /**
+    /**
      * @param goal For distance, use meters, For angle, use radians.
      */
     @Override
@@ -136,7 +136,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
         double u_FF = m_setpoint.v();
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
 
-        double u_TOTAL = (u_FB + u_FF)/m_maxVel;
+        double u_TOTAL = (u_FB + u_FF) / m_maxVel;
         u_TOTAL = MathUtil.clamp(u_TOTAL, -1, 1);
 
         m_motor.setDutyCycle(u_TOTAL);
@@ -157,8 +157,7 @@ public class PositionServo<T extends Measure100> implements PositionServoInterfa
 
     /**
      * @param goal                For distance, use meters, For angle, use radians.
-     * @param feedForwardTorqueNm used for gravity and drive/steer decoupling, this
-     *                            is a passthrough to the motor.
+     * @param feedForwardTorqueNm used for gravity compensation, passthrough.
      */
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {

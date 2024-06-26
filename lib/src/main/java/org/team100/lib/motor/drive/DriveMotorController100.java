@@ -61,11 +61,6 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
     }
 
     @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void close() {
         // m_motor.close();
     }

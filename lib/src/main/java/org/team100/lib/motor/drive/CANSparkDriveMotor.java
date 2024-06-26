@@ -39,12 +39,4 @@ public abstract class CANSparkDriveMotor extends CANSparkMotor<Distance100> {
         double motorTorqueNm = wheelTorqueNm / m_gearRatio;
         setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
     }
-    
-    @Override
-    public double getTorque() {
-        double motorTorqueNm = getMotorTorque();
-        double wheelTorqueNm = motorTorqueNm * m_gearRatio;
-        return wheelTorqueNm * 2 / m_wheelDiameterM;
-    }
-
 }
