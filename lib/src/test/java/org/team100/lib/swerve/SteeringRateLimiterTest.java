@@ -2,10 +2,6 @@ package org.team100.lib.swerve;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -34,12 +30,19 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 0 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
-        List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
+        Rotation2d[] overrideSteering = new Rotation2d[1];
 
-        double s = c.enforceSteeringLimit(desiredModuleStates,
-                prevModuleStates, prev_vx,
-                prev_vy, prev_heading, desired_vx, desired_vy,
-                desired_heading, overrideSteering, 0.02);
+        double s = c.enforceSteeringLimit(
+                desiredModuleStates,
+                prevModuleStates,
+                prev_vx,
+                prev_vy,
+                prev_heading,
+                desired_vx,
+                desired_vy,
+                desired_heading,
+                overrideSteering,
+                0.02);
 
         assertEquals(1.0, s, kDelta);
     }
@@ -61,7 +64,7 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 1 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotation90 };
-        List<Optional<Rotation2d>> overrideSteering = new ArrayList<>();
+        Rotation2d[] overrideSteering = new Rotation2d[1];
 
         double s = c.enforceSteeringLimit(desiredModuleStates,
                 prevModuleStates, prev_vx,
@@ -70,8 +73,8 @@ class SteeringRateLimiterTest {
 
         // s = 0 stops the drive motors
         assertEquals(0, s, kDelta);
-        assertEquals(1, overrideSteering.size());
+        assertEquals(1, overrideSteering.length);
         // limit is 1 radian per second, time step is 0.02 sec, so 0.02 radians
-        assertEquals(0.02, overrideSteering.get(0).get().getRadians(), kDelta);
+        assertEquals(0.02, overrideSteering[0].getRadians(), kDelta);
     }
 }

@@ -1,8 +1,5 @@
 package org.team100.lib.swerve;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -32,6 +29,7 @@ public class SteeringRateLimiter implements Glassy {
         m_limits = limits;
     }
 
+    /** note overrideSteering is an outvar */
     public double enforceSteeringLimit(
             SwerveModuleState[] desiredModuleStates,
             SwerveModuleState[] prevModuleStates,
@@ -41,13 +39,12 @@ public class SteeringRateLimiter implements Glassy {
             double[] desired_vx,
             double[] desired_vy,
             Rotation2d[] desired_heading,
-            List<Optional<Rotation2d>> overrideSteering,
+            Rotation2d[] overrideSteering,
             double kDtSec) {
 
         double min_s = 1.0;
         final double max_theta_step = kDtSec * m_limits.getMaxSteeringVelocityRad_S();
         for (int i = 0; i < prevModuleStates.length; ++i) {
-            overrideSteering.add(Optional.empty());
             if (Math.abs(prevModuleStates[i].speedMetersPerSecond - 0.0) <= 1e-12) {
                 // If module is stopped, we know that we will need to move straight to the final
                 // steering angle, so limit based purely on rotation in place.
@@ -55,7 +52,7 @@ public class SteeringRateLimiter implements Glassy {
                 if (Math.abs(desiredModuleStates[i].speedMetersPerSecond - 0.0) <= 1e-12) {
                     // Both previous and desired states are stopped.
                     // Just leave module at its current angle.
-                    overrideSteering.set(i, Optional.of(prevModuleStates[i].angle));
+                    overrideSteering[i] = prevModuleStates[i].angle;
                     continue;
                 }
 
@@ -68,13 +65,13 @@ public class SteeringRateLimiter implements Glassy {
 
                 if (numStepsNeeded <= 1.0) {
                     // Steer directly to goal angle.
-                    overrideSteering.set(i, Optional.of(desiredModuleStates[i].angle));
+                    overrideSteering[i] = desiredModuleStates[i].angle;
                     // Don't limit the global min_s;
                     continue;
                 } else {
                     // Adjust steering by max_theta_step.
-                    overrideSteering.set(i, Optional.of(prevModuleStates[i].angle.rotateBy(
-                            Rotation2d.fromRadians(Math.signum(rotationRad) * max_theta_step))));
+                    overrideSteering[i] =  prevModuleStates[i].angle.rotateBy(
+                            Rotation2d.fromRadians(Math.signum(rotationRad) * max_theta_step));
                     min_s = 0.0;
                     continue;
                 }

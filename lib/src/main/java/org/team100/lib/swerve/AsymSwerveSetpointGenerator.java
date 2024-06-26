@@ -1,9 +1,5 @@
 package org.team100.lib.swerve;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -115,11 +111,11 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         // steering angle to command (since
         // inverse kinematics doesn't care about angle, we can be opportunistically
         // lazy).
-        List<Optional<Rotation2d>> overrideSteering = new ArrayList<>(prevModuleStates.length);
+        Rotation2d[] overrideSteering = new Rotation2d[prevModuleStates.length];
 
         if (desiredIsStopped) {
             for (int i = 0; i < prevModuleStates.length; ++i) {
-                overrideSteering.add(Optional.of(prevModuleStates[i].angle));
+                overrideSteering[i] = prevModuleStates[i].angle;
             }
         } else {
             double steering_min_s = m_steeringRateLimiter.enforceSteeringLimit(
@@ -235,7 +231,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             double dy,
             double dtheta,
             double min_s,
-            List<Optional<Rotation2d>> overrideSteering,
+            Rotation2d[] overrideSteering,
             double kDtSec) {
         ChassisSpeeds setpointSpeeds = makeSpeeds(
                 prevSetpoint.getChassisSpeeds(),
@@ -257,11 +253,11 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     }
 
     /** Overwrite the states with the supplied steering overrides, if any. */
-    private void applyOverrides(List<Optional<Rotation2d>> overrides, SwerveModuleState[] states) {
+    private void applyOverrides(Rotation2d[] overrides, SwerveModuleState[] states) {
         for (int i = 0; i < states.length; ++i) {
-            final Optional<Rotation2d> maybeOverride = overrides.get(i);
-            if (maybeOverride.isPresent()) {
-                Rotation2d override = maybeOverride.get();
+            final Rotation2d maybeOverride = overrides[i];
+            if (maybeOverride != null) {
+                Rotation2d override = maybeOverride;
                 if (SwerveUtil.shouldFlip(override.minus(states[i].angle))) {
                     states[i].speedMetersPerSecond *= -1.0;
                 }
