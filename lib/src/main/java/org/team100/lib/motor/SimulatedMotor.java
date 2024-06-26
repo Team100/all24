@@ -55,14 +55,6 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
         t.log(Level.TRACE, m_name, "velocity", m_velocity);
     }
 
-    /**
-     * this is definitely wrong, always returns zero. beware.
-     */
-    @Override
-    public double getTorque() {
-        return 0;
-    }
-
     public double getVelocity() {
         return m_velocity;
     }

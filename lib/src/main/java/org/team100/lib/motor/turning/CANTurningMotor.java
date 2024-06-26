@@ -165,11 +165,6 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     }
 
     @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void close() {
         m_motor.close();
     }

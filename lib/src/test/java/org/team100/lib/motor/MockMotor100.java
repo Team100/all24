@@ -26,11 +26,6 @@ public class MockMotor100<T extends Measure100> implements Motor100<T>, GenericT
     }
 
     @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void close() {
         //
     }

@@ -59,11 +59,6 @@ public class NeoProxy implements Motor100<Distance100>, NeoTorqueModel {
     }
 
     @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void stop() {
         m_motor.stopMotor();
     }

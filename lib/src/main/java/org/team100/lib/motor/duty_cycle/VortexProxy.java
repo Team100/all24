@@ -51,11 +51,6 @@ public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel 
     }
 
     @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void stop() {
         m_motor.stopMotor();
     }

@@ -103,14 +103,6 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
         log();
     }
 
-    public double getMotorTorque() {
-        // I looked into latency compensation of this signal but it doesn't seem
-        // possible. latency compensation requires a signal and its time derivative,
-        // e.g. position and velocity, or yaw and angular velocity. There doesn't seem
-        // to be such a thing for current.
-        return m_torque.getAsDouble() * kTNm_amp();
-    }
-
     @Override
     public void stop() {
         m_motor.stopMotor();
@@ -140,6 +132,15 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
         t.log(Level.TRACE, m_name, "error (rev_s)", m_error);
         t.log(Level.TRACE, m_name, "supply current (A)", m_supply);
         t.log(Level.TRACE, m_name, "stator current (A)", m_stator);
+        t.log(Level.TRACE, m_name, "torque (Nm)", getMotorTorque());
         t.log(Level.DEBUG, m_name, "temperature (C)", m_temp);
+    }
+
+    private double getMotorTorque() {
+        // I looked into latency compensation of this signal but it doesn't seem
+        // possible. latency compensation requires a signal and its time derivative,
+        // e.g. position and velocity, or yaw and angular velocity. There doesn't seem
+        // to be such a thing for current.
+        return m_torque.getAsDouble() * kTNm_amp();
     }
 }

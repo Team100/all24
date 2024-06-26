@@ -38,12 +38,6 @@ public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
         setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
     }
 
-    @Override
-    public double getTorque() {
-        double motorTorqueNm = getMotorTorque();
-        return motorTorqueNm * m_gearRatio;
-    }
-
     /** Position in rad */
     @Override
     public Double getPosition() {

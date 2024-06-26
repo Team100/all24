@@ -15,6 +15,7 @@ public interface PositionServoInterface<T extends Measure100> extends Glassy {
     void reset();
 
     void setPositionDirect(double goal);
+
     /**
      * @param goal For distance, use meters, For angle, use radians.
      */
@@ -22,7 +23,7 @@ public interface PositionServoInterface<T extends Measure100> extends Glassy {
 
     /**
      * @param goal
-     * @param feedForwardTorque used for drive/steer decoupling and gravity
+     * @param feedForwardTorque used for gravity compensation
      */
     void setPosition(double goal, double feedForwardTorqueNm);
 
@@ -54,7 +55,5 @@ public interface PositionServoInterface<T extends Measure100> extends Glassy {
     default String getGlassName() {
         return "PositionServo";
     }
-
-    
 
 }

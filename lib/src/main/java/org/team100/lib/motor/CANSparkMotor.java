@@ -120,6 +120,7 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
         t.log(Level.TRACE, m_name, "velocity (RPM)", m_encoder.getVelocity());
         t.log(Level.TRACE, m_name, "current (A)", m_motor.getOutputCurrent());
         t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.TRACE, m_name, "torque (Nm)", getMotorTorque());
         t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());
     }
 

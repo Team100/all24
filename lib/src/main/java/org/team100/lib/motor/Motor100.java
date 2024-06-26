@@ -26,12 +26,6 @@ public interface Motor100<T extends Measure100> extends Glassy, TorqueModel {
      */
     void setVelocity(double velocity, double accel, double torque);
 
-    /**
-     * @return Current applied torque in N or Nm, for drive/steer
-     *         decoupling.
-     */
-    double getTorque();
-
     void stop();
 
     /**
