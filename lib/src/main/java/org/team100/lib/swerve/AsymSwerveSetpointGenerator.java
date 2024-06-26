@@ -35,6 +35,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     private final SwerveKinodynamics m_limits;
 
     private final CapsizeAccelerationLimiter m_centripetalLimiter;
+    private final SteeringOverride m_SteeringOverride;
     private final SteeringRateLimiter m_steeringRateLimiter;
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
     private final BatterySagLimiter m_BatterySagLimiter;
@@ -44,6 +45,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         m_limits = limits;
         m_name = Names.append(parent, this);
         m_centripetalLimiter = new CapsizeAccelerationLimiter(m_name, limits);
+        m_SteeringOverride = new SteeringOverride(m_name, limits);
         m_steeringRateLimiter = new SteeringRateLimiter(m_name, limits);
         m_DriveAccelerationLimiter = new DriveAccelerationLimiter(m_name, limits);
         m_BatterySagLimiter = new BatterySagLimiter();
@@ -118,9 +120,14 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 overrideSteering[i] = prevModuleStates[i].angle;
             }
         } else {
-            double steering_min_s = m_steeringRateLimiter.enforceSteeringLimit(
+            double override_min_s = m_SteeringOverride.overrideIfStopped(
                     desiredModuleStates,
                     prevModuleStates,
+                    overrideSteering,
+                    kDtSec);
+            min_s = Math.min(min_s, override_min_s);
+
+            double steering_min_s = m_steeringRateLimiter.enforceSteeringLimit(
                     prev_vx,
                     prev_vy,
                     prev_heading,
