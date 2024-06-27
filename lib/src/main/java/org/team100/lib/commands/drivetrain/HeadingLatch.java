@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * dtheta input.
  */
 public class HeadingLatch {
-    private static final double unlatch = 0.1;
+    private static final double unlatch = 0.01;
     private Rotation2d m_desiredRotation = null;
 
     public Rotation2d latchedRotation(
