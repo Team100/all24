@@ -102,7 +102,8 @@ public class SingleNavXGyro implements Gyro100 {
         // bandwidth is 6600 hz, so the expected noise is about 0.007 rad/s.
         // The zero offset is specified as 1 deg/s (0.02 rad/s).
         // The deadband here is very slow: 0.05 rad/s is 2 min/revolution
-        if (Math.abs(rateDeg_S) < 0.05) {
+        // measurement here is degrees, 0.05 rad is about 2.9 deg
+        if (Math.abs(rateDeg_S) < 2.9) {
             rateDeg_S = 0;
         }
 
