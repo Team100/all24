@@ -26,6 +26,8 @@ public class Rotate extends Command100 {
 
     private static final double kXToleranceRad = 0.02;
     private static final double kVToleranceRad_S = 0.02;
+    // don't try to rotate at max speed
+    private static final double kSpeed = 0.5;
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_robotDrive;
@@ -73,8 +75,8 @@ public class Rotate extends Command100 {
         m_controller.reset();
         resetRefTheta(0.02);
         m_profile = new TrapezoidProfile100(
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleAccelRad_S2(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kSpeed,
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kSpeed,
                 0.05);
         // first align the wheels
         m_steeringAligned = false;
