@@ -166,8 +166,11 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         double kRotationSpeed = Math.max(0.5, oRatio);
 
         double maxSpeedRad_S = Math.max(Math.abs(headingRate) + 0.001,
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
-        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed;
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * 0.1;
+        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * 0.1;
+
+        t.log(Level.TRACE, m_name, "maxSpeedRad_S", maxSpeedRad_S);
+        t.log(Level.TRACE, m_name, "maxAccelRad_S2", maxAccelRad_S2);
 
         final TrapezoidProfile100 m_profile = new TrapezoidProfile100(
                 maxSpeedRad_S,
@@ -219,7 +222,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
 
     @Override
     public String getGlassName() {
-        return "ManualWithHeading";
+        return "ManualWithProfiledHeading";
     }
 
 }
