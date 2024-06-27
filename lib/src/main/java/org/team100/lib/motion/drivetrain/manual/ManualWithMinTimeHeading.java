@@ -4,13 +4,12 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
-import org.team100.lib.config.Identity;
+import org.team100.lib.controller.MinTimeController;
 import org.team100.lib.controller.State100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -19,7 +18,6 @@ import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -29,7 +27,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  */
-public class ManualWithHeading implements FieldRelativeDriver {
+public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
     private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_swerveKinodynamics;
@@ -37,8 +35,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
-    private final PIDController m_thetaController;
-    private final PIDController m_omegaController;
+    private final MinTimeController m_controller;
     private final String m_name;
 
     // package private for testing
@@ -55,27 +52,30 @@ public class ManualWithHeading implements FieldRelativeDriver {
      * @param thetaController
      * @param omegaController
      */
-    public ManualWithHeading(
+    public ManualWithMinTimeHeading(
             String parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
-            Supplier<Rotation2d> desiredRotation,
-            PIDController thetaController,
-            PIDController omegaController) {
+            Supplier<Rotation2d> desiredRotation) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_desiredRotation = desiredRotation;
-        m_thetaController = thetaController;
-        m_omegaController = omegaController;
         m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
+        m_controller = new MinTimeController(
+            MathUtil::angleModulus,
+            1, // maxV
+            0.4, // switchingA
+            0.3, // weakG
+            0.5, // strongI
+            0,
+            0.1,
+            new double[] { 10.0, 10.0 });
     }
 
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        m_thetaController.reset();
-        m_omegaController.reset();
         updateSetpoint(currentPose.getRotation().getRadians(), getHeadingRateNWURad_S());
     }
 
@@ -151,38 +151,12 @@ public class ManualWithHeading implements FieldRelativeDriver {
         // the omega goal in snap mode is always zero.
         State100 goalState = new State100(m_goal.getRadians(), 0);
 
-        // the profile has no state and is ~free to instantiate so make a new one every
-        // time. the max speed adapts to the observed speed (plus a little).
-        // the max speed should be half of the absolute max, to compromise translation
-        // and rotation, unless the actual translation speed is less, in which case we
-        // can rotate faster.
-
-        // how fast do we want to go?
-        double xySpeed = twistM_S.norm();
-        // fraction of the maximum speed
-        double xyRatio = Math.min(1, xySpeed / m_swerveKinodynamics.getMaxDriveVelocityM_S());
-        // fraction left for rotation
-        double oRatio = 1 - xyRatio;
-        // actual speed is at least half
-        double kRotationSpeed = Math.max(0.5, oRatio);
-
-        double maxSpeedRad_S = Math.max(Math.abs(headingRate) + 0.001,
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed);
-        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed;
-
-        final TrapezoidProfile100 m_profile = new TrapezoidProfile100(
-                maxSpeedRad_S,
-                maxAccelRad_S2,
-                0.01);
-
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goalState);
+        m_thetaSetpoint = m_controller.calculate(kDtSec, m_thetaSetpoint, goalState);
 
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
-        double thetaFB = m_thetaController.calculate(headingMeasurement, m_thetaSetpoint.x());
-
-        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+  
         // switch (Identity.instance) {
         // case BLANK:
         // break;
@@ -194,8 +168,9 @@ public class ManualWithHeading implements FieldRelativeDriver {
         // thetaFB = 0;
         // }
         // }
+
         double omega = MathUtil.clamp(
-                thetaFF + thetaFB + omegaFB,
+                thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
@@ -208,8 +183,6 @@ public class ManualWithHeading implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
         t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
         t.log(Level.TRACE, m_name, "thetaFF", thetaFF);
-        t.log(Level.TRACE, m_name, "thetaFB", thetaFB);
-        t.log(Level.TRACE, m_name, "omegaFB", omegaFB);
         t.log(Level.TRACE, m_name, "output/omega", omega);
 
         // desaturate the end result to feasibility by preferring the rotation over

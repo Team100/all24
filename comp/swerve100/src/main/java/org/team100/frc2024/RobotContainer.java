@@ -62,7 +62,9 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithFullStateHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithMinTimeHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
@@ -279,14 +281,27 @@ public class RobotContainer implements Glassy {
         driveManually.register("FIELD_RELATIVE_TWIST", false,
                 new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
 
-        driveManually.register("SNAPS", true,
-                new ManualWithHeading(
+        driveManually.register("SNAPS_PROFILED", true,
+                new ManualWithProfiledHeading(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+        driveManually.register("SNAPS_FULL_STATE", true,
+                new ManualWithFullStateHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        driverControl::desiredRotation,
+                        new double[] { 1.0, 1.0 }));
+        driveManually.register("SNAPS_MIN_TIME", true,
+                new ManualWithMinTimeHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        driverControl::desiredRotation));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(

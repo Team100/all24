@@ -162,7 +162,9 @@ class MinTimeControllerTest {
                 0.4, // switchingA
                 0.3, // weakG
                 0.5, // strongI
-                0, 0.1, new double[] { 10.0, 10.0 });
+                0,
+                0.1,
+                new double[] { 10.0, 10.0 });
         // the short distance is across pi
         // but we're moving fast the other way.
         State100 initialRad = new State100(1.7, -1);
@@ -528,7 +530,7 @@ class MinTimeControllerTest {
         double dt = 0.001;
         State100 resultRad = currentMeasurementRad;
         for (int i = 0; i < 20; ++i) {
-            double tSec = t + i * dt;
+            // double tSec = t + i * dt;
             // these are actual states
             double positionRad = resultRad.x();
             double speedRad_S = resultRad.v();
@@ -562,10 +564,11 @@ class MinTimeControllerTest {
             double x = modulus.applyAsDouble(positionRad + speedRad_S * dt + 0.5 * a * dt * dt);
             // System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f\n", tSec, x, v, a);
 
-            // System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f\n",
-            //         tSec, x, v, a,
-            //         u_FFVolts, u_FBVolts, u_TOTALVolts, netVolts, currentAmps,
-            //         u.v(), u.a());
+            // System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f,, %6.3f, %6.3f, %6.3f, %6.3f,
+            // %6.3f,, %6.3f, %6.3f\n",
+            // tSec, x, v, a,
+            // u_FFVolts, u_FBVolts, u_TOTALVolts, netVolts, currentAmps,
+            // u.v(), u.a());
 
             resultRad = new State100(x, v, a);
         }

@@ -24,7 +24,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
-class ManualWithHeadingTest {
+class ManualWithProfiledHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
 
@@ -40,7 +40,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -76,7 +76,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -119,7 +119,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -145,10 +145,6 @@ class ManualWithHeadingTest {
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         // but at t0 it hasn't started yet.
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(m_manualWithHeading.m_goal.getRadians(), 0);
-        // assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial,
-        // goal).v(), kDelta);
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
@@ -199,7 +195,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -225,10 +221,6 @@ class ManualWithHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // at t0 there's not much position in the profile but there is velocity
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(Math.PI / 2, 0);
-        // assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial,
-        // goal).v(), kDelta);
         verify(0, 0, 0.770, v);
 
         // say we've rotated a little.
@@ -272,7 +264,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(0, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -334,7 +326,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
