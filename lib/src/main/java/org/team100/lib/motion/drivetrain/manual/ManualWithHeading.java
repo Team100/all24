@@ -76,7 +76,11 @@ public class ManualWithHeading implements FieldRelativeDriver {
         m_latch.unlatch();
         m_thetaController.reset();
         m_omegaController.reset();
-        updateSetpoint(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        updateSetpoint(currentPose.getRotation().getRadians(), getHeadingRateNWURad_S());
+    }
+
+    private double getHeadingRateNWURad_S() {
+        return m_heading.getHeadingRateNWU();
     }
 
     /** Call this to keep the setpoint in sync with the manual rotation. */
@@ -113,7 +117,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
 
         Rotation2d currentRotation = currentPose.getRotation();
         double headingMeasurement = currentRotation.getRadians();
-        double headingRate = m_heading.getHeadingRateNWU();
+        double headingRate = getHeadingRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(currentRotation, pov, twistM_S.theta());
@@ -158,7 +162,7 @@ public class ManualWithHeading implements FieldRelativeDriver {
         // fraction of the maximum speed
         double xyRatio = Math.min(1, xySpeed / m_swerveKinodynamics.getMaxDriveVelocityM_S());
         // fraction left for rotation
-        double oRatio = 1-xyRatio;
+        double oRatio = 1 - xyRatio;
         // actual speed is at least half
         double kRotationSpeed = Math.max(0.5, oRatio);
 

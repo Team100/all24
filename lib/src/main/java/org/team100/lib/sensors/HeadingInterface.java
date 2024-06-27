@@ -17,6 +17,9 @@ public interface HeadingInterface extends Glassy {
 
     /**
      * Rate in rad/s: counterclockwise positive.
+     * 
+     * This should apply whatever deadbanding should be used for the implementing
+     * sensor.
      */
     double getHeadingRateNWU();
 
