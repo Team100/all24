@@ -76,10 +76,8 @@ public class TrapezoidProfile100 implements Profile100 {
      */
     @Override
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
-        State100 initial = new State100(initialRaw.x(),
-                MathUtil.clamp(initialRaw.v(), -m_maxVelocity, m_maxVelocity));
-        State100 goal = new State100(goalRaw.x(),
-                MathUtil.clamp(goalRaw.v(), -m_maxVelocity, m_maxVelocity));
+        State100 initial = limitVelocity(initialRaw);
+        State100 goal = limitVelocity(goalRaw);
 
         if (goal.near(initial, m_tolerance)) {
             return goal;
@@ -133,6 +131,16 @@ public class TrapezoidProfile100 implements Profile100 {
         return full(dt, initial, -1);
     }
 
+    private State100 limitVelocity(final State100 s) {
+        // note buffer here to keep the subsequent logic from thinking we're "cruising"
+        // in cases where the too-high velocity is just the initial measurement.
+        // if we're *actually* trying to cruise, then the downstream logic will notice
+        State100 initial = new State100(
+                s.x(),
+                MathUtil.clamp(s.v(), -m_maxVelocity + 0.000001, m_maxVelocity - 0.000001));
+        return initial;
+    }
+
     private State100 handleIplus(double dt, State100 initial, State100 goal, double t1) {
         if (MathUtil.isNear(t1, 0, 1e-12)) {
             // switch eta is zero: go to the goal via G-
@@ -169,9 +177,12 @@ public class TrapezoidProfile100 implements Profile100 {
     }
 
     private State100 keepCruising(double dt, State100 initial, State100 goal) {
+        // System.out.printf("keep cruising x_i %6.3f v_i %6.3f a_i %6.3f\n", initial.x(), initial.v(), initial.a());
+
         // We're already at positive cruising speed, which means G- is next.
         // will we reach it during dt?
         double c_minus = c_minus(goal);
+        // System.out.printf("c_minus %6.3f\n", c_minus);
         // the G- value at vmax
         double gminus = c_minus - Math.pow(m_maxVelocity, 2) / (2 * m_maxAcceleration);
         // distance to go
@@ -185,6 +196,7 @@ public class TrapezoidProfile100 implements Profile100 {
         if (dct < dt) {
             // there are two segments
             double tremaining = dt - dct;
+            // System.out.printf("tremaining %6.3f\n", tremaining);
             return calculate(tremaining, new State100(gminus, m_maxVelocity), goal);
         }
         // we won't reach G-, so cruise for all of dt.
@@ -241,6 +253,8 @@ public class TrapezoidProfile100 implements Profile100 {
 
     /** Return dt at full accel. */
     private State100 full(double dt, State100 in_initial, double direction) {
+        // System.out.printf("full x_i %6.3f v_i %6.3f a_i %6.3f\n", in_initial.x(),
+        // in_initial.v(), in_initial.a());
         double x = in_initial.x() + in_initial.v() * dt
                 + 0.5 * direction * m_maxAcceleration * Math.pow(dt, 2);
         double v = in_initial.v() + direction * m_maxAcceleration * dt;

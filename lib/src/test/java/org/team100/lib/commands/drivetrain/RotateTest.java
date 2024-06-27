@@ -61,12 +61,12 @@ class RotateTest extends Fixtured implements Timeless {
             fixture.drive.periodic();
             rotate.execute100(0.02);
         }
-        assertEquals(1, rotate.refTheta.x(), 0.2);
+        assertEquals(0.461, rotate.refTheta.x(), 0.2);
         assertEquals(-0.512, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[0].angle.getRadians(), 0.1);
 
         // should be done rotating now
-        for (int i = 0; i < 25; ++i) {
+        for (int i = 0; i < 50; ++i) {
             stepTime(0.02);
             fixture.drive.periodic();
             rotate.execute100(0.02);
