@@ -223,13 +223,13 @@ public class MinTimeController {
 
         if (Double.isNaN(t1IplusGminus)) {
             // the valid path is I-G+, assume we're on I-
-            System.out.printf("on I- %6.3f\n", t1IminusGplus);
+            // System.out.printf("on I- %6.3f\n", t1IminusGplus);
             return handleIminus(dt, initial, goal, t1IminusGplus);
         }
 
         if (Double.isNaN(t1IminusGplus)) {
             // the valid path is I+G-, assume we're on I+
-            System.out.printf("on I+ %6.3f\n", t1IplusGminus);
+            // System.out.printf("on I+ %6.3f\n", t1IplusGminus);
             return handleIplus(dt, initial, goal, t1IplusGminus);
         }
 

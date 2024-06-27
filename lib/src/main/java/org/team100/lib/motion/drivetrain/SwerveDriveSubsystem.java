@@ -93,7 +93,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
     }
 
-
     /** @return current measurements */
     public SwerveModuleState[] moduleStates() {
         return m_swerveLocal.states();
@@ -118,22 +117,23 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * Feasibility is enforced by the setpoint generator (if enabled) and the
      * desaturator.
      * 
-     * @param twist  Field coordinate velocities in meters and radians per second.
+     * @param v      Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void driveInFieldCoords(FieldRelativeVelocity twist, double kDtSec) {
+    public void driveInFieldCoords(FieldRelativeVelocity v, double kDtSec) {
+        t.log(Level.TRACE, m_name, "drive input", v);
         DriverControl.Speed speed = m_speed.get();
         t.log(Level.TRACE, m_name, "control_speed", speed);
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
         t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);
-        twist = GeometryUtil.scale(twist, driverSkillLevel.scale());
+        v = GeometryUtil.scale(v, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                twist.x(),
-                twist.y(),
-                twist.theta(),
+                v.x(),
+                v.y(),
+                v.theta(),
                 m_stateSupplier.get().pose().getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
