@@ -193,7 +193,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
     @Override
     public String getGlassName() {
-        return "ManualWithHeading";
+        return "ManualWithMinTimeHeading";
     }
 
 }
