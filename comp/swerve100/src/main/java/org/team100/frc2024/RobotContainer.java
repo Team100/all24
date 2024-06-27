@@ -252,9 +252,11 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(10, 0, 0); // 1.7
+        // TODO (jun 24) tune theta and omega control
+        // TODO replace with min-time or full-state
+        PIDController thetaController = new PIDController(2, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(1, 0, 0); // .5
+        PIDController omegaController = new PIDController(0, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
@@ -347,7 +349,8 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShootSmartWithRotation(m_drive, m_shooter,m_feeder, m_intake, shooterLock, driverControl::velocity));
+                new ShootSmartWithRotation(m_drive, m_shooter, m_feeder, m_intake, shooterLock,
+                        driverControl::velocity));
 
         //////////////////
         //
