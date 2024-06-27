@@ -256,9 +256,9 @@ public class RobotContainer implements Glassy {
 
         // TODO (jun 24) tune theta and omega control
         // TODO replace with min-time or full-state
-        PIDController thetaController = new PIDController(2, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(0.0, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0, 0, 0); // .5
+        PIDController omegaController = new PIDController(0.0, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
@@ -289,13 +289,16 @@ public class RobotContainer implements Glassy {
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+
+        // these gains are not terrible; trying to go faster seems to induce oscillation
         driveManually.register("SNAPS_FULL_STATE", true,
                 new ManualWithFullStateHeading(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
-                        new double[] { 1.0, 1.0 }));
+                        new double[] { 5.0, 0.5 }));
+                        
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(
                         m_name,
