@@ -135,7 +135,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
         // in snap mode we take dx and dy from the user, and control dtheta.
         // the omega goal in snap mode is always zero.
-        m_thetaSetpoint =  new State100(m_goal.getRadians(), 0);
+        m_thetaSetpoint = new State100(m_goal.getRadians(), 0);
 
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
@@ -150,12 +150,12 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         // case BLANK:
         // break;
         // default:
-        // if (Math.abs(omegaFB) < 0.2) {
-        // omegaFB = 0;
-        // }
-        // if (Math.abs(thetaFB) < 0.5) {
-        // thetaFB = 0;
-        // }
+        if (Math.abs(omegaFB) < 0.05) {
+            omegaFB = 0;
+        }
+        if (Math.abs(thetaFB) < 0.05) {
+            thetaFB = 0;
+        }
         // }
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -168,8 +168,8 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaSetpoint);
         t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
         t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
+        t.log(Level.TRACE, m_name, "error/theta", thetaError);
+        t.log(Level.TRACE, m_name, "error/omega", omegaError);
         t.log(Level.TRACE, m_name, "thetaFF", thetaFF);
         t.log(Level.TRACE, m_name, "thetaFB", thetaFB);
         t.log(Level.TRACE, m_name, "omegaFB", omegaFB);
@@ -183,7 +183,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
     @Override
     public String getGlassName() {
-        return "ManualWithHeading";
+        return "ManualWithFullStateHeading";
     }
 
 }
