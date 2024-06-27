@@ -2,7 +2,6 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.hid.DriverControl;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -17,8 +16,8 @@ public class HeadingLatch {
     public Rotation2d latchedRotation(
             Rotation2d currentRotation,
             Rotation2d pov,
-            DriverControl.Velocity input) {
-        if (Math.abs(input.theta()) > unlatch) {
+            double inputOmega) {
+        if (Math.abs(inputOmega) > unlatch) {
             // if the driver is trying to drive, then let them
             m_desiredRotation = null;
         } else if (pov != null) {
