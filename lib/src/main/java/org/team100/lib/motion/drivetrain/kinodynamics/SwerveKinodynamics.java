@@ -11,7 +11,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Tire;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -435,17 +434,21 @@ public class SwerveKinodynamics implements Glassy {
         double maxOmega = getMaxAngleSpeedRad_S();
         double xySpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
         double xyAngle = Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond);
-        double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
-
-        if (xySpeed < 1e-12) {
-            return new ChassisSpeeds(0, 0, MathUtil.clamp(speeds.omegaRadiansPerSecond, -maxOmega, maxOmega));
-        }
-        if (Math.abs(speeds.omegaRadiansPerSecond) < 1e-12) {
-            return new ChassisSpeeds(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
-        }
+        // this could be negative if xySpeed is too high
+        double omegaForSpeed = maxOmega * (1 - xySpeed / maxV);
         if (Math.abs(speeds.omegaRadiansPerSecond) <= omegaForSpeed) {
+            // omega + xyspeed is feasible
             return speeds;
         }
+        if (xySpeed < 1e-12) {
+            // if we got here then omega alone is infeasible so use maxomega
+            return new ChassisSpeeds(0, 0, Math.signum(speeds.omegaRadiansPerSecond) * maxOmega);
+        }
+        if (Math.abs(speeds.omegaRadiansPerSecond) < 1e-12) {
+            // if we got here then xyspeed alone is infeasible so use maxV
+            return new ChassisSpeeds(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
+        }
+
         double v = maxOmega * xySpeed * maxV / (maxOmega * xySpeed + Math.abs(speeds.omegaRadiansPerSecond) * maxV);
 
         double vRatio = v / xySpeed;
@@ -469,16 +472,20 @@ public class SwerveKinodynamics implements Glassy {
     public FieldRelativeVelocity analyticDesaturation(FieldRelativeVelocity speeds) {
         double maxV = getMaxDriveVelocityM_S();
         double maxOmega = getMaxAngleSpeedRad_S();
-        double xySpeed = Math.hypot(speeds.x(), speeds.y());
+        double xySpeed = speeds.norm();
         double xyAngle = Math.atan2(speeds.y(), speeds.x());
-        double omegaForSpeed = maxOmega * Math.max(0, (1 - xySpeed / maxV));
+        // this could be negative if xySpeed is too high
+        double omegaForSpeed = maxOmega * (1 - xySpeed / maxV);
         if (Math.abs(speeds.theta()) <= omegaForSpeed) {
+            // omega + xyspeed is feasible
             return speeds;
         }
         if (xySpeed < 1e-12) {
-            return new FieldRelativeVelocity(0, 0, maxOmega);
+            // if we got here then omega alone is infeasible so use maxomega
+            return new FieldRelativeVelocity(0, 0, Math.signum(speeds.theta()) * maxOmega);
         }
         if (Math.abs(speeds.theta()) < 1e-12) {
+            // if we got here then xyspeed alone is infeasible so use maxV
             return new FieldRelativeVelocity(maxV * Math.cos(xyAngle), maxV * Math.sin(xyAngle), 0);
         }
 
@@ -510,7 +517,7 @@ public class SwerveKinodynamics implements Glassy {
     /** Scales translation to accommodate the rotation. */
     public FieldRelativeVelocity preferRotation(FieldRelativeVelocity speeds) {
         double oRatio = Math.min(1, speeds.theta() / getMaxAngleSpeedRad_S());
-        double xySpeed = Math.hypot(speeds.x(), speeds.y());
+        double xySpeed = speeds.norm();
         double maxV = getMaxDriveVelocityM_S();
         double xyRatio = Math.min(1, xySpeed / maxV);
         double ratio = Math.min(1 - oRatio, xyRatio);

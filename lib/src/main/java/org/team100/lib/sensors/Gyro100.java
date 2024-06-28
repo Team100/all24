@@ -8,6 +8,9 @@ import org.team100.lib.dashboard.Glassy;
 public interface Gyro100 extends Glassy {
     /**
      * Degrees per second, clockwise-positive NED.
+     * 
+     * This should apply whatever deadbanding is appropriate for the implementing
+     * sensor.
      */
     float getYawRateNEDDeg_s();
 

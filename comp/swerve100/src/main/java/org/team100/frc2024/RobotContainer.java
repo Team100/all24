@@ -62,7 +62,9 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithFullStateHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithMinTimeHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
@@ -252,9 +254,11 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(10, 0, 0); // 1.7
+        // TODO (jun 24) tune theta and omega control
+        // TODO replace with min-time or full-state
+        PIDController thetaController = new PIDController(2.0, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(1, 0, 0); // .5
+        PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
@@ -277,14 +281,30 @@ public class RobotContainer implements Glassy {
         driveManually.register("FIELD_RELATIVE_TWIST", false,
                 new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
 
-        driveManually.register("SNAPS", true,
-                new ManualWithHeading(
+        driveManually.register("SNAPS_PROFILED", true,
+                new ManualWithProfiledHeading(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+
+        // these gains are not terrible; trying to go faster seems to induce oscillation
+        driveManually.register("SNAPS_FULL_STATE", true,
+                new ManualWithFullStateHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        driverControl::desiredRotation,
+                        new double[] { 5.0, 0.5 }));
+                        
+        driveManually.register("SNAPS_MIN_TIME", true,
+                new ManualWithMinTimeHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        driverControl::desiredRotation));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
@@ -347,7 +367,8 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShootSmartWithRotation(m_drive, m_shooter,m_feeder, m_intake, shooterLock, driverControl::velocity));
+                new ShootSmartWithRotation(m_drive, m_shooter, m_feeder, m_intake, shooterLock,
+                        driverControl::velocity));
 
         //////////////////
         //

@@ -86,6 +86,7 @@ public class SingleNavXGyro implements Gyro100 {
      * 
      * 6/12/24
      * WARNNINGGGGG DO NOT USE THIS WITHOUT AN MXP GYRO, IT WILL ALWAYS RETURN 0
+     * 
      * @returns rate in degrees/sec
      */
     @Override
@@ -95,9 +96,19 @@ public class SingleNavXGyro implements Gyro100 {
         // https://github.com/kauailabs/navxmxp/issues/69
         //
         // the recommended workaround is to use getRawGyroZ() instead.
-        float rateDeg_S = m_gyro1.getRawGyroZ();
+        double rateDeg_S = m_gyro1.getRawGyroZ();
+
+        // NavX spec says the noise density of the gyro is 0.005 deg/s/sqrt(hz), and the
+        // bandwidth is 6600 hz, so the expected noise is about 0.007 rad/s.
+        // The zero offset is specified as 1 deg/s (0.02 rad/s).
+        // The deadband here is very slow: 0.05 rad/s is 2 min/revolution
+        // measurement here is degrees, 0.05 rad is about 2.9 deg
+        if (Math.abs(rateDeg_S) < 2.9) {
+            rateDeg_S = 0;
+        }
+
         t.log(Level.TRACE, m_name, "Rate NED (deg_s)", rateDeg_S);
-        return rateDeg_S;
+        return (float) rateDeg_S;
     }
 
     private void logStuff() {

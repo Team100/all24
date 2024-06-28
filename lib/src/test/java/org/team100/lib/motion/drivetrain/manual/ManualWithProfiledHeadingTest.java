@@ -16,6 +16,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
 
@@ -23,7 +24,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
-class ManualWithHeadingTest {
+class ManualWithProfiledHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
 
@@ -39,7 +40,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -75,7 +76,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -118,7 +119,7 @@ class ManualWithHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -126,7 +127,7 @@ class ManualWithHeadingTest {
                 thetaController,
                 omegaController);
 
-        // no dtheta
+        // facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
         // reset means setpoint is currentpose.
@@ -144,15 +145,12 @@ class ManualWithHeadingTest {
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
         // but at t0 it hasn't started yet.
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(m_manualWithHeading.m_goal.getRadians(), 0);
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).v(), kDelta);
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
         assertEquals(0.0002, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(0.004, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
-        verify(0, 0, 0.015, twistM_S);
+        assertEquals(0.017, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        verify(0, 0, 0.017, twistM_S);
 
         // let go of the pov to let the profile run.
         desiredRotation = null;
@@ -162,18 +160,18 @@ class ManualWithHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.565, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(1.017, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 2.585, twistM_S);
+        verify(0, 0, 2.828, twistM_S);
 
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.197, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.183, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 0.899, twistM_S);
+        verify(0, 0, 0.824, twistM_S);
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -197,7 +195,7 @@ class ManualWithHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        ManualWithHeading m_manualWithHeading = new ManualWithHeading(
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 swerveKinodynamics,
                 heading,
@@ -205,58 +203,220 @@ class ManualWithHeadingTest {
                 thetaController,
                 omegaController);
 
+        // currently facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
 
-        // face towards +y
+        // want to face towards +y
         desiredRotation = GeometryUtil.kRotation90;
         // no dtheta
 
+        // no stick input
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
-
-        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
+        FieldRelativeVelocity v = m_manualWithHeading.apply(
                 new SwerveState(currentPose, new FieldRelativeVelocity(0, 0, 0)),
                 twist1_1);
 
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
+
         // at t0 there's not much position in the profile but there is velocity
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(Math.PI / 2, 0);
-        assertEquals(0, m_manualWithHeading.m_profile.calculate(0, initial, goal).v(), kDelta);
-        verify(0, 0, 0.015, twistM_S);
+        verify(0, 0, 0.016, v);
 
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
+
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
-        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.566, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
+        assertEquals(1.017, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 2.585, twistM_S);
+        verify(0, 0, 2.828, v);
 
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
-        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.197, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
+        assertEquals(0.183, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
-        verify(0, 0, 0.899, twistM_S);
+        // still want to go really fast?
+        verify(0, 0, 0.824, v);
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
         m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
-        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
+        v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be no more profile to follow
-        verify(0, 0, 0, twistM_S);
+        verify(0, 0, 0, v);
     }
 
-    private void verify(double dx, double dy, double dtheta, FieldRelativeVelocity twist) {
-        assertEquals(dx, twist.x(), kDelta);
-        assertEquals(dy, twist.y(), kDelta);
-        assertEquals(dtheta, twist.theta(), kDelta);
+    @Test
+    void testStickyHeading() {
+        Experiments.instance.testOverride(Experiment.StickyHeading, true);
+        MockHeading heading = new MockHeading();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
+        Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
+
+        PIDController thetaController = new PIDController(0, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(0, 0, 0);
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
+                "foo",
+                swerveKinodynamics,
+                heading,
+                rotationSupplier,
+                thetaController,
+                omegaController);
+
+        // driver rotates a bit
+        DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
+
+        SwerveState currentState = new SwerveState(
+                GeometryUtil.kPoseZero,
+                new FieldRelativeVelocity(0, 0, 0));
+        // no POV
+        desiredRotation = null;
+
+        FieldRelativeVelocity v = m_manualWithHeading.apply(currentState, twist1_1);
+        // scale 1.0 input to max omega
+        assertNull(m_manualWithHeading.m_goal);
+        assertNull(m_manualWithHeading.m_thetaSetpoint);
+        verify(0, 0, 2.828, v);
+
+        // already going full speed:
+        currentState = new SwerveState(
+                GeometryUtil.kPoseZero,
+                new FieldRelativeVelocity(0, 0, 2.828));
+        // gyro indicates the correct speed
+        heading.rate = 2.828;
+        v = m_manualWithHeading.apply(currentState, twist1_1);
+        assertNull(m_manualWithHeading.m_goal);
+        assertNull(m_manualWithHeading.m_thetaSetpoint);
+        verify(0, 0, 2.828, v);
+
+        // let go of the stick
+        twist1_1 = new DriverControl.Velocity(0, 0, 0);
+        currentState = new SwerveState(
+                GeometryUtil.kPoseZero,
+                new FieldRelativeVelocity(0, 0, 2.828));
+        // gyro rate is still full speed.
+        heading.rate = 2.828;
+        v = m_manualWithHeading.apply(currentState, twist1_1);
+        // goal is the current state but at rest
+        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        // setpoint respects velocity (though it's trying to slow down)
+        assertEquals(0.028, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(1.397, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // just feedforward
+        verify(0, 0, 1.397, v);
+    }
+
+    @Test
+    void testStickyHeading2() {
+        Experiments.instance.testOverride(Experiment.StickyHeading, true);
+        MockHeading heading = new MockHeading();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
+        assertEquals(8.485, swerveKinodynamics.getMaxAngleAccelRad_S2(), kDelta);
+        Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
+
+        PIDController thetaController = new PIDController(3.5, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        PIDController omegaController = new PIDController(3.5, 0, 0);
+        ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
+                "foo",
+                swerveKinodynamics,
+                heading,
+                rotationSupplier,
+                thetaController,
+                omegaController);
+
+        // driver rotates a bit
+        DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
+
+        SwerveState currentState = new SwerveState(
+                GeometryUtil.kPoseZero,
+                new FieldRelativeVelocity(0, 0, 0));
+        // no POV
+        desiredRotation = null;
+
+        FieldRelativeVelocity v = m_manualWithHeading.apply(currentState, twist1_1);
+        // scale 1.0 input to max omega
+        assertNull(m_manualWithHeading.m_goal);
+        assertNull(m_manualWithHeading.m_thetaSetpoint);
+        verify(0, 0, 2.828, v);
+
+        // already going full speed:
+        currentState = new SwerveState(
+                GeometryUtil.kPoseZero,
+                new FieldRelativeVelocity(0, 0, 2.828));
+        // gyro indicates the correct speed
+        heading.rate = 2.828;
+        v = m_manualWithHeading.apply(currentState, twist1_1);
+        assertNull(m_manualWithHeading.m_goal);
+        assertNull(m_manualWithHeading.m_thetaSetpoint);
+        verify(0, 0, 2.828, v);
+
+        // let go of the stick
+        twist1_1 = new DriverControl.Velocity(0, 0, 0);
+        currentState = new SwerveState(
+                GeometryUtil.kPoseZero,
+                new FieldRelativeVelocity(0, 0, 2.828));
+        // gyro rate is still full speed.
+        heading.rate = 2.828;
+        v = m_manualWithHeading.apply(currentState, twist1_1);
+        // 2.828 rad/s
+        // 10 rad/s^2 (in the latch)
+        // 0.2828 sec
+        // 0.399 rad
+
+        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        // velocity carries forward
+        assertEquals(0.028, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        // not sure how it can slow down so fast
+        assertEquals(1.397, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // includes some feedback, this is saturated
+        verify(0, 0, -2.828, v);
+    }
+
+    /**
+     * Troubleshooting the profile itself, realized the max speed was too low above
+     */
+    @Test
+    void testProfile() {
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        // trapezoid adapts to max actual speed
+        double kRotationSpeed = 0.5;
+        assertEquals(1.414, swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed, kDelta);
+        assertEquals(4.243, swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed, kDelta);
+        TrapezoidProfile100 m_profile = new TrapezoidProfile100(
+                2.829,
+                4.2,
+                0.01);
+        // at max heading rate
+        State100 initialRaw = new State100(0, 2.828, 0);
+        // goal is the same but stopped, which is an overshoot profile
+        State100 goalRaw = new State100(0, 0, 0);
+        State100 u = initialRaw;
+
+        // this produces nonsensical results. using a faster profile works fine
+        // but the very slow profile is wrong somehow
+        // oh it's because the current speed is faster than the max speed,
+        // which never happens in reality but it should do something less dumb.
+
+        for (int i = 0; i < 100; ++i) {
+            u = m_profile.calculate(0.02, u, goalRaw);
+            // System.out.printf("%6.3f, %6.3f, %6.3f\n", u.x(), u.v(), u.a());
+        }
+    }
+
+    private void verify(double vx, double vy, double omega, FieldRelativeVelocity v) {
+        assertEquals(vx, v.x(), kDelta);
+        assertEquals(vy, v.y(), kDelta);
+        assertEquals(omega, v.theta(), kDelta);
     }
 }

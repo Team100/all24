@@ -11,6 +11,7 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return Math.hypot(x, y);
     }
 
+    // TODO: handle the 0,0 case correctly
     public Rotation2d angle() {
         return new Rotation2d(x, y);
     }
