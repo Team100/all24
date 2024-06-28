@@ -74,5 +74,9 @@ public enum Experiment {
     /**
      * Periodically publish all tag poses to all cameras
      */
-    UseCameraUpdater
+    UseCameraUpdater,
+    /**
+     * Filter rotational output to remove oscillation
+     */
+    UseThetaFilter
 }

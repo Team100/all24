@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.controller.State100;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -19,6 +21,7 @@ import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -39,6 +42,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final String m_name;
+    private final LinearFilter m_outputFilter;
 
     // package private for testing
     Rotation2d m_goal = null;
@@ -68,6 +72,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_omegaController = omegaController;
         m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
     }
 
     public void reset(Pose2d currentPose) {
@@ -188,7 +193,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         double thetaFB = m_thetaController.calculate(headingMeasurement, m_thetaSetpoint.x());
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-      
+
         // deadband the output to prevent shivering.
         if (Math.abs(omegaFB) < 0.1) {
             omegaFB = 0;
@@ -196,11 +201,15 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         if (Math.abs(thetaFB) < 0.1) {
             thetaFB = 0;
         }
- 
+
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+            // output filtering to prevent oscillation due to delay
+            omega = m_outputFilter.calculate(omega);
+        }
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");

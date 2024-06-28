@@ -6,6 +6,8 @@ import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.controller.MinTimeController;
 import org.team100.lib.controller.State100;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -18,6 +20,7 @@ import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -37,6 +40,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private final HeadingLatch m_latch;
     private final MinTimeController m_controller;
     private final String m_name;
+    private final LinearFilter m_outputFilter;
 
     // package private for testing
     Rotation2d m_goal = null;
@@ -62,6 +66,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_desiredRotation = desiredRotation;
         m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
 
         // these parameters are total guesses
         m_controller = new MinTimeController(
@@ -143,16 +148,16 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // whatever the measurement is
         // min-time doesn't use this
         // if (m_thetaSetpoint == null) {
-        //     // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
-        //     // overshoot?
-        //     // updateSetpoint(headingMeasurement, headingRate);
-        //     m_thetaSetpoint = state.theta();
+        // // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
+        // // overshoot?
+        // // updateSetpoint(headingMeasurement, headingRate);
+        // m_thetaSetpoint = state.theta();
         // }
 
         // use the modulus closest to the measurement
         // m_thetaSetpoint = new State100(
-        //         Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
-        //         m_thetaSetpoint.v());
+        // Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
+        // m_thetaSetpoint.v());
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
@@ -184,6 +189,10 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+            // output filtering to prevent oscillation due to delay
+            omega = m_outputFilter.calculate(omega);
+        }
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");
