@@ -151,25 +151,20 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         double thetaFB = m_K[0] * thetaError;
         double omegaFB = m_K[1] * omegaError;
 
-        // switch (Identity.instance) {
-        // case BLANK:
-        // break;
-        // default:
+        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+            // output filtering to prevent oscillation due to delay
+            omegaFB = m_outputFilter.calculate(omegaFB);
+        }
         if (Math.abs(omegaFB) < 0.05) {
             omegaFB = 0;
         }
         if (Math.abs(thetaFB) < 0.05) {
             thetaFB = 0;
         }
-        // }
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
-            // output filtering to prevent oscillation due to delay
-            omega = m_outputFilter.calculate(omega);
-        }
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");

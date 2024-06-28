@@ -169,30 +169,17 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
-        // switch (Identity.instance) {
-        // case BLANK:
-        // break;
-        // default:
-        // if (Math.abs(omegaFB) < 0.2) {
-        // omegaFB = 0;
-        // }
-        // if (Math.abs(thetaFB) < 0.5) {
-        // thetaFB = 0;
-        // }
-        // }
-
+        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+            // output filtering to prevent oscillation due to delay
+            thetaFF = m_outputFilter.calculate(thetaFF);
+        }
         if (Math.abs(thetaFF) < 0.05) {
             thetaFF = 0;
         }
-
         double omega = MathUtil.clamp(
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
-            // output filtering to prevent oscillation due to delay
-            omega = m_outputFilter.calculate(omega);
-        }
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");
