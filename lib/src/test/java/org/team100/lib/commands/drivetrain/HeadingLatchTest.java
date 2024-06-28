@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -18,10 +19,11 @@ class HeadingLatchTest {
     void testInit() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingLatch l = new HeadingLatch();
+        State100 s = new State100();
         Rotation2d currentRotation = new Rotation2d();
         Rotation2d pov = null;
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        Rotation2d desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        Rotation2d desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertNull(desiredRotation);
     }
 
@@ -29,13 +31,14 @@ class HeadingLatchTest {
     void testLatch() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingLatch l = new HeadingLatch();
+        State100 s = new State100();
         Rotation2d currentRotation = new Rotation2d();
         Rotation2d pov = GeometryUtil.kRotation90;
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        Rotation2d desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        Rotation2d desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertEquals(Math.PI / 2, desiredRotation.getRadians(), kDelta);
         pov = null;
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertEquals(Math.PI / 2, desiredRotation.getRadians(), kDelta);
     }
 
@@ -43,16 +46,17 @@ class HeadingLatchTest {
     void testUnLatch() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingLatch l = new HeadingLatch();
+        State100 s = new State100();
         Rotation2d currentRotation = new Rotation2d();
         Rotation2d pov = GeometryUtil.kRotation90;
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        Rotation2d desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        Rotation2d desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertEquals(Math.PI / 2, desiredRotation.getRadians(), kDelta);
         pov = null;
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertEquals(Math.PI / 2, desiredRotation.getRadians(), kDelta);
         input = new DriverControl.Velocity(0, 0, 1);
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertNull(desiredRotation);
     }
 
@@ -60,16 +64,17 @@ class HeadingLatchTest {
     void testExplicitUnLatch() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingLatch l = new HeadingLatch();
+        State100 s = new State100();
         Rotation2d currentRotation = new Rotation2d();
         Rotation2d pov = GeometryUtil.kRotation90;
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        Rotation2d desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        Rotation2d desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertEquals(Math.PI / 2, desiredRotation.getRadians(), kDelta);
         pov = null;
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertEquals(Math.PI / 2, desiredRotation.getRadians(), kDelta);
         l.unlatch();
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertNull(desiredRotation);
     }
 
@@ -77,21 +82,28 @@ class HeadingLatchTest {
     void testSticky() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         HeadingLatch l = new HeadingLatch();
+        State100 s = new State100(1, 1);
         Rotation2d currentRotation = new Rotation2d(1);
         Rotation2d pov = null;
         // driver steering, latch does nothing.
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 1);
-        Rotation2d desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
+        Rotation2d desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
         assertNull(desiredRotation);
 
         // let go of the steering stick, latch uses current
+        s = new State100(1, 1);
         input = new DriverControl.Velocity(0, 0, 0);
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
-        assertEquals(1, desiredRotation.getRadians(), kDelta);
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
+        // max A = 10 rad/s^2
+        // V = 1 rad/s
+        // t = 0.1 sec
+        // dx = 0.05 rad
+        // setpoint = 1.05 rad
+        assertEquals(1.05, desiredRotation.getRadians(), kDelta);
 
         // latch remembers even when current changes
         currentRotation = new Rotation2d(2);
-        desiredRotation = l.latchedRotation(currentRotation, pov, input.theta());
-        assertEquals(1, desiredRotation.getRadians(), kDelta);
+        desiredRotation = l.latchedRotation(s, currentRotation, pov, input.theta());
+        assertEquals(1.05, desiredRotation.getRadians(), kDelta);
     }
 }

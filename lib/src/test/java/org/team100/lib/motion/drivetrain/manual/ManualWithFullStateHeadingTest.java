@@ -161,7 +161,7 @@ class ManualWithFullStateHeadingTest {
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
         // very light pushing
-        verify(0, 0, 0.021, twistM_S);
+        verify(0, 0, 0, twistM_S);
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -230,7 +230,7 @@ class ManualWithFullStateHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // pretty close to the goal now, so low output
-        verify(0, 0, 0.016, v);
+        verify(0, 0, 0, v);
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -291,12 +291,12 @@ class ManualWithFullStateHeadingTest {
         heading.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
-        assertEquals(0, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // setpoint is the goal
-        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.399, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // trying to stop
-        verify(0, 0, -2.828, v);
+        verify(0, 0, -2.428, v);
     }
 
     @Test
@@ -349,12 +349,12 @@ class ManualWithFullStateHeadingTest {
         heading.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
-        assertEquals(0, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // in this version the setpoint is the goal
-        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.399, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // try very hard to stop
-        verify(0, 0, -2.828, v);
+        verify(0, 0, -2.428, v);
     }
 
     /**
