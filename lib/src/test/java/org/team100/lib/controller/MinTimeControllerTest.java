@@ -26,6 +26,7 @@ class MinTimeControllerTest {
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 1, // switchingA
@@ -66,6 +67,7 @@ class MinTimeControllerTest {
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 1, // switchingA
@@ -103,6 +105,7 @@ class MinTimeControllerTest {
         // System.out.println("testAngleWrapping");
 
         final MinTimeController profile = new MinTimeController(
+                "test",
                 MathUtil::angleModulus,
                 1, // maxV
                 0.9, // switchingA
@@ -157,6 +160,7 @@ class MinTimeControllerTest {
         // System.out.println("testMovingAngleWrapping");
 
         final MinTimeController profile = new MinTimeController(
+                "test",
                 MathUtil::angleModulus,
                 1, // maxV
                 0.4, // switchingA
@@ -205,6 +209,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -248,6 +253,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 0.6, // maxV
                 0.9, // switchingA
@@ -293,6 +299,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -335,6 +342,7 @@ class MinTimeControllerTest {
     void testUnderdrive() {
         // System.out.println("testUnderdrive");
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -378,6 +386,7 @@ class MinTimeControllerTest {
     void testOverdrive() {
         // System.out.println("testOverdrive");
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -437,6 +446,7 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
 
         final MinTimeController profile = new MinTimeController(
+                "test",
                 x -> x,
                 1, // maxV
                 0.9, // switchingA

@@ -2,6 +2,10 @@ package org.team100.lib.controller;
 
 import java.util.function.DoubleUnaryOperator;
 
+import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -86,7 +90,9 @@ import edu.wpi.first.math.MathUtil;
  * 
  * TODO: allow different acceleration and deceleration.
  */
-public class MinTimeController {
+public class MinTimeController implements Glassy {
+    private final Telemetry t = Telemetry.get();
+
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
     private static final double kBoundaryTolerance = 1e-12;
@@ -113,6 +119,7 @@ public class MinTimeController {
     private final double m_maxVelocity;
     private final double m_switchingAcceleration;
     private final double m_tolerance;
+    private final String m_name;
 
     /**
      * @param modulus        for angle wrapping
@@ -130,6 +137,7 @@ public class MinTimeController {
      * @param k              full-state gains
      */
     public MinTimeController(
+            String parent,
             DoubleUnaryOperator modulus,
             double maxVel,
             double switchingAccel,
@@ -146,6 +154,8 @@ public class MinTimeController {
         m_tolerance = tolerance;
         m_finish = finish;
         m_k = k;
+        m_name = Names.append(parent, this);
+
     }
 
     private State100 modulus(double x, double v, double a) {
@@ -185,11 +195,13 @@ public class MinTimeController {
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
+            t.log(Level.TRACE, m_name, "mode", "within tolerance");
             return modulus(goal);
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
         if (goal.near(initial, m_finish)) {
+            t.log(Level.TRACE, m_name, "mode", "full state");
             double xError = goal.x() - initial.x();
             double vError = goal.v() - initial.v();
             double u_FBx = xError * m_k[0];
@@ -218,6 +230,8 @@ public class MinTimeController {
             Util.warn("Both I-G+ and I+G- are NaN, this should never happen");
             return modulus(initial);
         }
+
+        t.log(Level.TRACE, m_name, "mode", "min time");
 
         // ON THE INITIAL PATH
 
@@ -556,5 +570,10 @@ public class MinTimeController {
         // opposite, i.e. they're on the same trajectory, in which case we want to
         // switch immediately
         return 0;
+    }
+
+    @Override
+    public String getGlassName() {
+        return "MinTimeController";
     }
 }

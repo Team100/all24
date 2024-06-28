@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 
@@ -11,9 +12,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class HeadingLatch {
     private static final double unlatch = 0.01;
+    private static final double maxARad_S2 = 10;
     private Rotation2d m_desiredRotation = null;
 
     public Rotation2d latchedRotation(
+            State100 state,
             Rotation2d currentRotation,
             Rotation2d pov,
             double inputOmega) {
@@ -27,7 +30,9 @@ public class HeadingLatch {
                 Experiments.instance.enabled(Experiment.StickyHeading)) {
             // if the driver is providing no input, and there's no sticky heading,
             // then use the current heading as the sticky heading.
-            m_desiredRotation = currentRotation;
+            // give the robot a chance to slow down to avoid overshoot.
+            double t = Math.abs(state.v()) / maxARad_S2;
+            m_desiredRotation = new Rotation2d(state.x() + state.v() * t / 2);
         }
         return m_desiredRotation;
     }

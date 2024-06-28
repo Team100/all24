@@ -111,7 +111,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         double headingRate = getHeadingRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(currentRotation, pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint

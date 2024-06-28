@@ -62,15 +62,18 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_desiredRotation = desiredRotation;
         m_name = Names.append(parent, this);
         m_latch = new HeadingLatch();
+
+        // these parameters are total guesses
         m_controller = new MinTimeController(
-            MathUtil::angleModulus,
-            1, // maxV
-            0.4, // switchingA
-            0.3, // weakG
-            0.5, // strongI
-            0,
-            0.1,
-            new double[] { 10.0, 10.0 });
+                m_name,
+                MathUtil::angleModulus,
+                15, // maxV
+                12, // switchingA
+                9, // weakG
+                20, // strongI
+                0.01, // tolerance
+                0.1, // finish
+                new double[] { 5.0, 0.5 });
     }
 
     public void reset(Pose2d currentPose) {
@@ -116,11 +119,13 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         Rotation2d currentRotation = currentPose.getRotation();
-        double headingMeasurement = currentRotation.getRadians();
-        double headingRate = getHeadingRateNWURad_S();
+        double headingMeasurement = state.theta().x();
+        // not sure which is better
+        double headingRate = state.theta().v();
+        // double headingRate = getHeadingRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(currentRotation, pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
@@ -136,27 +141,29 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
-        if (m_thetaSetpoint == null) {
-            // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
-            // overshoot?
-            updateSetpoint(headingMeasurement, headingRate);
-        }
+        // min-time doesn't use this
+        // if (m_thetaSetpoint == null) {
+        //     // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
+        //     // overshoot?
+        //     // updateSetpoint(headingMeasurement, headingRate);
+        //     m_thetaSetpoint = state.theta();
+        // }
 
         // use the modulus closest to the measurement
-        m_thetaSetpoint = new State100(
-                Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
-                m_thetaSetpoint.v());
+        // m_thetaSetpoint = new State100(
+        //         Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
+        //         m_thetaSetpoint.v());
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
-        State100 goalState = new State100(m_goal.getRadians(), 0);
+        State100 goalState = new State100(
+                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()), 0);
 
-        m_thetaSetpoint = m_controller.calculate(kDtSec, m_thetaSetpoint, goalState);
+        m_thetaSetpoint = m_controller.calculate(kDtSec, state.theta(), goalState);
 
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
-  
         // switch (Identity.instance) {
         // case BLANK:
         // break;
@@ -168,6 +175,10 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // thetaFB = 0;
         // }
         // }
+
+        if (Math.abs(thetaFF) < 0.05) {
+            thetaFF = 0;
+        }
 
         double omega = MathUtil.clamp(
                 thetaFF,
@@ -182,6 +193,8 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
         t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
         t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
+        t.log(Level.TRACE, m_name, "goal_error/theta", m_thetaSetpoint.x() - goalState.x());
+        t.log(Level.TRACE, m_name, "goal_error/omega", m_thetaSetpoint.v() - goalState.v());
         t.log(Level.TRACE, m_name, "thetaFF", thetaFF);
         t.log(Level.TRACE, m_name, "output/omega", omega);
 

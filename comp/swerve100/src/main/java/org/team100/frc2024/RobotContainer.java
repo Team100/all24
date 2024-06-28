@@ -256,9 +256,9 @@ public class RobotContainer implements Glassy {
 
         // TODO (jun 24) tune theta and omega control
         // TODO replace with min-time or full-state
-        PIDController thetaController = new PIDController(0.0, 0, 0); // 1.7
+        PIDController thetaController = new PIDController(2.0, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0.0, 0, 0); // .5
+        PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 

@@ -119,7 +119,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         double headingRate = getHeadingRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(currentRotation, pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
@@ -136,8 +136,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
         if (m_thetaSetpoint == null) {
-            // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
-            // overshoot?
             updateSetpoint(headingMeasurement, headingRate);
         }
 
@@ -165,9 +163,14 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         // actual speed is at least half
         double kRotationSpeed = Math.max(0.5, oRatio);
 
+        // finally reduce the speed to make it easier
+        final double lessV = 0.5;
+        // kinodynamic max A seems too high?
+        final double lessA = 0.1;
+
         double maxSpeedRad_S = Math.max(Math.abs(headingRate) + 0.001,
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * 0.1;
-        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * 0.1;
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * lessV;
+        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * lessA;
 
         t.log(Level.TRACE, m_name, "maxSpeedRad_S", maxSpeedRad_S);
         t.log(Level.TRACE, m_name, "maxAccelRad_S2", maxAccelRad_S2);
@@ -185,17 +188,15 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         double thetaFB = m_thetaController.calculate(headingMeasurement, m_thetaSetpoint.x());
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        // switch (Identity.instance) {
-        // case BLANK:
-        // break;
-        // default:
-        // if (Math.abs(omegaFB) < 0.2) {
-        // omegaFB = 0;
-        // }
-        // if (Math.abs(thetaFB) < 0.5) {
-        // thetaFB = 0;
-        // }
-        // }
+      
+        // deadband the output to prevent shivering.
+        if (Math.abs(omegaFB) < 0.1) {
+            omegaFB = 0;
+        }
+        if (Math.abs(thetaFB) < 0.1) {
+            thetaFB = 0;
+        }
+ 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
