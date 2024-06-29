@@ -2,7 +2,6 @@ package org.team100.lib.motion.drivetrain;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.InitCommand;
 import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.config.DriverSkill;
 import org.team100.lib.geometry.GeometryUtil;
@@ -24,7 +23,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * There are four mutually exclusive drive methods.
@@ -54,15 +52,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 5000);
         stop();
         t.log(Level.INFO, "field", ".type", "Field2d");
-    }
-
-    /**
-     * Runs the action on initialize and never ends; this is useful for commands
-     * that set something once, and then lock out the default command, so it should
-     * be used with Trigger.whileTrue()
-     */
-    public Command runInit(Runnable action) {
-        return new InitCommand(action, this);
     }
 
     /**
