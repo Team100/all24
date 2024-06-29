@@ -42,7 +42,7 @@ public class DefenseSelfTest extends Command {
     @Override
     public void execute() {
         // check for progress
-        SwerveModuleState[] states = m_drivetrain.moduleStates();
+        SwerveModuleState[] states = m_drivetrain.getSwerveLocal().states();
         if (!MathUtil.isNear(Math.PI / 4, states[0].angle.getRotations(), kToleranceRad)) {
             return;
         }
@@ -73,7 +73,7 @@ public class DefenseSelfTest extends Command {
         else
             m_listener.fail(this, fmt, kExpectedDuration, time);
 
-        SwerveModulePosition[] positions = m_drivetrain.positions();
+        SwerveModulePosition[] positions = m_drivetrain.getSwerveLocal().positions();
         fmt = "front left expected %5.3f actual %5.3f";
         double expected = Math.PI / 4;
         double actual = positions[0].angle.getRadians();

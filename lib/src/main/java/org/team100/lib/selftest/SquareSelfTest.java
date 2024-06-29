@@ -35,14 +35,14 @@ public class SquareSelfTest extends Command {
 
     @Override
     public void initialize() {
-        m_initial = m_drivetrain.getPose();
+        m_initial = m_drivetrain.getState().pose();
         m_timer.restart();
         terminate = false;
     }
 
     @Override
     public void execute() {
-        Pose2d state = m_drivetrain.getPose();
+        Pose2d state = m_drivetrain.getState().pose();
         double x = state.getX() - m_initial.getX();
         double y = state.getY() - m_initial.getY();
         double t = m_timer.get();
@@ -102,7 +102,7 @@ public class SquareSelfTest extends Command {
             m_listener.fail(this, fmt, kExpectedDuration, time);
 
         // should end up near where we started.
-        Pose2d state = m_drivetrain.getPose();
+        Pose2d state = m_drivetrain.getState().pose();
         double x = state.getX() - m_initial.getX();
         double y = state.getY() - m_initial.getY();
         double theta = state.getRotation().getRadians() - m_initial.getRotation().getRadians();

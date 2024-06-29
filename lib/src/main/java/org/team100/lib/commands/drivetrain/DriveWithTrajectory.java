@@ -72,7 +72,7 @@ public class DriveWithTrajectory extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 

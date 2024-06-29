@@ -72,7 +72,7 @@ public class DriveWithProfile2 extends Command100 {
 
     @Override
     public void execute100(double dt) {
-        Rotation2d currentRotation = m_swerve.getPose().getRotation();
+        Rotation2d currentRotation = m_swerve.getState().pose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
         Rotation2d bearing = new Rotation2d(

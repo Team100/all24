@@ -435,7 +435,7 @@ public class RobotContainer implements Glassy {
 
     public void onInit() {
         // m_drive.resetPose()
-        m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d(Math.PI)));
+        m_drive.resetPose(new Pose2d(m_drive.getState().pose().getTranslation(), new Rotation2d(Math.PI)));
 
     }
 

@@ -35,7 +35,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
             int channel,
             double inputOffset,
             double gearRatio,
-            Drive drive) {
+            EncoderDrive drive) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);

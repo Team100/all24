@@ -32,7 +32,7 @@ public class RotateCommand extends Command {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (alliance.isEmpty())
             return;
-        double measurement = m_drive.getPose().getRotation().getRadians();
+        double measurement = m_drive.getState().pose().getRotation().getRadians();
         double setpoint = m_goal.getRadians();
         setpoint = Math100.getMinDistance(measurement, setpoint);
         double dtheta = m_controller.calculate(measurement, setpoint);
@@ -47,7 +47,7 @@ public class RotateCommand extends Command {
             Util.warn("no alliance present!");
             return true;
         }
-        double errorRad = m_goal.getRadians() - m_drive.getPose().getRotation().getRadians();
+        double errorRad = m_goal.getRadians() - m_drive.getState().pose().getRotation().getRadians();
         return Math.abs(errorRad) < kToleranceRad;
     }
 }

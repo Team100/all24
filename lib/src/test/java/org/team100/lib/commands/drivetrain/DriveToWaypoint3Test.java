@@ -57,7 +57,7 @@ class DriveToWaypoint3Test extends Fixtured {
                 controller);
         DriveToWaypoint3.shutDownForTest();
         command.initialize();
-        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
+        assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);
         command.end(false);
     }
@@ -85,7 +85,7 @@ class DriveToWaypoint3Test extends Fixtured {
         DriveToWaypoint3 command = new DriveToWaypoint3(goal, drivetrain, maker, m_controller);
         DriveToWaypoint3.shutDownForTest();
         command.initialize();
-        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
+        assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);
         command.end(false);
     }

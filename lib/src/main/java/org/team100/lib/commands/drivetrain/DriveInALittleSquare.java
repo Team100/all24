@@ -78,7 +78,7 @@ public class DriveInALittleSquare extends Command100 {
                 }
                 break;
             case STEERING:
-                if (Util.all(m_swerve.atGoal())) {
+                if (Util.all(m_swerve.getSwerveLocal().atGoal())) {
                     // we were steering, but all the setpoints have been reached, so switch to
                     // driving
                     m_state = DriveState.DRIVING;

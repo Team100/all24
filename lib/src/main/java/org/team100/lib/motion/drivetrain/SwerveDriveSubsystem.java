@@ -7,7 +7,6 @@ import org.team100.lib.config.DriverSkill;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
-import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -20,7 +19,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -35,8 +33,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
     private final String m_name;
-
-    private ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
+    private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
             HeadingInterface heading,
@@ -48,51 +45,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal = swerveLocal;
         m_speed = speed;
         m_name = Names.name(this);
-        // state update at 200 hz.
-        m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 5000);
+        // state update at 100 hz.
+        m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();
         t.log(Level.INFO, "field", ".type", "Field2d");
-    }
-
-    /**
-     * Updates odometry.
-     * 
-     * Periodic() should not do actuation. Let commands do that.
-     */
-    @Override
-    public void periodic100(double dt) {
-        t.log(Level.DEBUG, m_name, "pose", m_stateSupplier.get());
-        t.log(Level.TRACE, m_name, "Tur Deg", m_stateSupplier.get().pose().getRotation().getDegrees());
-        t.log(Level.DEBUG, m_name, "pose array",
-                new double[] {
-                        m_stateSupplier.get().pose().getX(),
-                        m_stateSupplier.get().pose().getY(),
-                        m_stateSupplier.get().pose().getRotation().getRadians()
-                });
-        t.log(Level.DEBUG, m_name, "state", m_stateSupplier.get());
-
-        // Update the Field2d widget
-        // the name "field" is used by Field2d.
-        // the name "robot" can be anything.
-        t.log(Level.INFO, "field", "robot", new double[] {
-                m_stateSupplier.get().pose().getX(),
-                m_stateSupplier.get().pose().getY(),
-                m_stateSupplier.get().pose().getRotation().getDegrees()
-        });
-        t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
-    }
-
-    /** @return current measurements */
-    public SwerveModuleState[] moduleStates() {
-        return m_swerveLocal.states();
-    }
-
-    public SwerveModuleState[] desiredStates() {
-        return m_swerveLocal.getDesiredStates();
-    }
-
-    public void resetSetpoint(SwerveSetpoint setpoint) {
-        m_swerveLocal.resetSetpoint(setpoint);
     }
 
     ////////////////
@@ -158,7 +114,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
         t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
-
         m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
 
@@ -208,62 +163,55 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_stateSupplier.reset();
     }
 
+    public void resetSetpoint(SwerveSetpoint setpoint) {
+        m_swerveLocal.resetSetpoint(setpoint);
+    }
+
     ///////////////////////////////////////////////////////////////
     //
     // Observers
     //
 
-    /** Pose snapshot from periodic(). */
-    public Pose2d getPose() {
-        return getState().pose();
-    }
-
     /**
-     * This is intended for tuning. Snapshot from periodic().
-     * 
-     * The omega signal here will be delayed relative to the gyro. Use the gyro if
-     * you really just want omega.
-     * 
-     * @return meters and radians per second
-     */
-    public FieldRelativeVelocity getVelocity() {
-        return getState().velocity();
-    }
-
-    /**
-     * This is intended for tuning. Snapshot from periodic.
-     * 
-     * @return meters and radians per second squared
-     */
-    public FieldRelativeAcceleration getAcceleration() {
-        return getState().acceleration();
-    }
-
-    /**
-     * SwerveState representing the drivetrain's pose, velocity, and acceleration,
-     * snapshot from periodic, is field relative
+     * SwerveState representing the drivetrain's field-relative pose, velocity, and
+     * acceleration. This is rate-limited and cached.
      */
     public SwerveState getState() {
         return m_stateSupplier.get();
     }
 
-    /** The controllers are on the profiles. */
-    public boolean[] atSetpoint() {
-        return m_swerveLocal.atSetpoint();
+    public SwerveLocalObserver getSwerveLocal() {
+        return m_swerveLocal;
     }
 
-    /** The profiles setpoints are at their goals. */
-    public boolean[] atGoal() {
-        return m_swerveLocal.atGoal();
-    }
+    ///////////////////////////////////////////////////////////////
 
-    /** for testing only */
-    public SwerveModulePosition[] positions() {
-        return m_swerveLocal.positions();
-    }
+    /**
+     * Updates odometry.
+     * 
+     * Periodic() should not do actuation. Let commands do that.
+     */
+    @Override
+    public void periodic100(double dt) {
+        t.log(Level.DEBUG, m_name, "pose", m_stateSupplier.get());
+        t.log(Level.TRACE, m_name, "Tur Deg", m_stateSupplier.get().pose().getRotation().getDegrees());
+        t.log(Level.DEBUG, m_name, "pose array",
+                new double[] {
+                        m_stateSupplier.get().pose().getX(),
+                        m_stateSupplier.get().pose().getY(),
+                        m_stateSupplier.get().pose().getRotation().getRadians()
+                });
+        t.log(Level.DEBUG, m_name, "state", m_stateSupplier.get());
 
-    public void close() {
-        m_swerveLocal.close();
+        // Update the Field2d widget
+        // the name "field" is used by Field2d.
+        // the name "robot" can be anything.
+        t.log(Level.INFO, "field", "robot", new double[] {
+                m_stateSupplier.get().pose().getX(),
+                m_stateSupplier.get().pose().getY(),
+                m_stateSupplier.get().pose().getRotation().getDegrees()
+        });
+        t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
     }
 
     @Override
@@ -271,9 +219,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         return "SwerveDriveSubsystem";
     }
 
+    public void close() {
+        m_swerveLocal.close();
+    }
+
     /////////////////////////////////////////////////////////////////
-    //
-    // Private
 
     /** used by the supplier */
     private SwerveState update() {

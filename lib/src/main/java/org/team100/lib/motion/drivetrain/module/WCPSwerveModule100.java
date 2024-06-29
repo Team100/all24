@@ -4,7 +4,7 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
@@ -26,7 +26,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     /**
      * Flipped belt ratios.
      * 
-     * See https://docs.wcproducts.com/wcp-swervex/misc/other-configurations/ratio-options
+     * See
+     * https://docs.wcproducts.com/wcp-swervex/misc/other-configurations/ratio-options
      */
     public enum DriveRatio {
         FAST(5.5),
@@ -40,23 +41,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     // WCP 4 inch wheel
-    private static final double kWheelDiameterM = 0.0975; //0.1015
+    private static final double kWheelDiameterM = 0.0975; // 0.1015
 
-    /**
-     * @param name                  like "front left" or whatever
-     * @param curerntLimit          in amps
-     * @param driveMotorCanId
-     * @param encoderClass          select the type of encoder that exists on the
-     *                              robot
-     * @param turningMotorCanId
-     * @param turningEncoderChannel
-     * @param turningOffset
-     * @param kinodynamics
-     */
     public static WCPSwerveModule100 get(
             String name,
-            double currentLimit,
-            double statorLimit,
+            double supplyLimitAmps,
+            double statorLimitAmps,
             int driveMotorCanId,
             DriveRatio ratio,
             Class<? extends Encoder100<Angle100>> encoderClass,
@@ -64,17 +54,17 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics,
-            Drive drive,
+            EncoderDrive drive,
             MotorPhase motorPhase) {
-        PIDConstants drivePidConstants = new PIDConstants(.2); //.2
+        PIDConstants drivePidConstants = new PIDConstants(.2); // .2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
         Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
-                currentLimit,
-                statorLimit,
+                supplyLimitAmps,
+                statorLimitAmps,
                 driveMotorCanId,
                 ratio,
                 drivePidConstants,
@@ -98,18 +88,18 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static VelocityServo<Distance100> driveServo(
             String name,
-            double currentLimit,
+            double supplyLimit,
             double statorLimit,
             int driveMotorCanId,
             DriveRatio ratio,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-                
+
         MotorWithEncoder100<Distance100> driveMotor = new Kraken6DriveMotor(
                 name,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
-                currentLimit,
+                supplyLimit,
                 statorLimit,
                 ratio.m_ratio,
                 kWheelDiameterM,
@@ -129,7 +119,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             double gearRatio,
             SwerveKinodynamics kinodynamics,
-            Drive drive,
+            EncoderDrive drive,
             MotorPhase motorPhase,
             PIDConstants lowLevelPID,
             Feedforward100 ff) {
@@ -175,7 +165,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int channel,
             double inputOffset,
             double gearRatio,
-            Drive drive) {
+            EncoderDrive drive) {
         if (encoderClass == AnalogTurningEncoder.class) {
             return new AnalogTurningEncoder(name,
                     channel,

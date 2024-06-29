@@ -65,10 +65,10 @@ public class DriveManually extends Command100 {
         // Note this is not necessarily "at rest," because we might start driving
         // manually while the robot is moving.
         ChassisSpeeds currentSpeeds = m_drive.getState().chassisSpeeds();
-        SwerveModuleState[] currentStates = m_drive.moduleStates();
+        SwerveModuleState[] currentStates = m_drive.getSwerveLocal().states();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
-        Pose2d p = m_drive.getPose();
+        Pose2d p = m_drive.getState().pose();
         for (Driver d : m_drivers.values()) {
             d.reset(p);
         }
@@ -84,7 +84,7 @@ public class DriveManually extends Command100 {
         if (!(manualMode.equals(currentManualMode))) {
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
-            Pose2d p = m_drive.getPose();
+            Pose2d p = m_drive.getState().pose();
             for (Driver d : m_drivers.values()) {
                 d.reset(p);
             }

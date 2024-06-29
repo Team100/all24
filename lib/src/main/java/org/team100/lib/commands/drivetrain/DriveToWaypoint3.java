@@ -92,7 +92,7 @@ public class DriveToWaypoint3 extends Command100 {
             TimedPose desiredState = samplePoint.state();
             t.log(Level.TRACE, m_name, "Desired X", desiredState.state().getPose().getX());
             t.log(Level.TRACE, m_name, "Desired Y", desiredState.state().getPose().getY());
-            Pose2d currentPose = m_swerve.getPose();
+            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
@@ -112,7 +112,7 @@ public class DriveToWaypoint3 extends Command100 {
             TimedPose desiredState = samplePoint.state();
             t.log(Level.TRACE, m_name, "Desired X", desiredState.state().getPose().getX());
             t.log(Level.TRACE, m_name, "Desired Y", desiredState.state().getPose().getY());
-            Pose2d currentPose = m_swerve.getPose();
+            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
@@ -121,10 +121,10 @@ public class DriveToWaypoint3 extends Command100 {
 
         t.log(Level.TRACE, m_name, "Aligned", m_steeringAligned);
 
-        t.log(Level.TRACE, m_name, "Pose X", m_swerve.getPose().getX());
-        t.log(Level.TRACE, m_name, "Pose Y", m_swerve.getPose().getY());
+        t.log(Level.TRACE, m_name, "Pose X", m_swerve.getState().pose().getX());
+        t.log(Level.TRACE, m_name, "Pose Y", m_swerve.getState().pose().getY());
         t.log(Level.TRACE, m_name, "Desired Rot", m_goal.getRotation().getRadians());
-        t.log(Level.TRACE, m_name, "Pose Rot", m_swerve.getPose().getRotation().getRadians());
+        t.log(Level.TRACE, m_name, "Pose Rot", m_swerve.getState().pose().getRotation().getRadians());
     }
 
     @Override

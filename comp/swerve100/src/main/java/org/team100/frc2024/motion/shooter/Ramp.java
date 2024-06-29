@@ -25,7 +25,7 @@ public class Ramp extends Command {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (alliance.isPresent()) {
             m_shooter.forward();
-            Translation2d robotLocation = m_drive.getPose().getTranslation();
+            Translation2d robotLocation = m_drive.getState().pose().getTranslation();
             Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
             double distance = robotLocation.getDistance(speakerLocation);
             m_shooter.setAngle(ShooterUtil.getAngleRad(distance));

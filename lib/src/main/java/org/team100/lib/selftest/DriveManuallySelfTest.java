@@ -42,14 +42,14 @@ public class DriveManuallySelfTest extends Command {
 
     @Override
     public void initialize() {
-        m_initial = m_drivetrain.getPose();
+        m_initial = m_drivetrain.getState().pose();
         m_timer.restart();
         terminate = false;
     }
 
     @Override
     public void execute() {
-        if (GeometryUtil.distance(m_drivetrain.getPose(), m_initial) > kMaxDistance) {
+        if (GeometryUtil.distance(m_drivetrain.getState().pose(), m_initial) > kMaxDistance) {
             m_listener.fail(this, "Too far from initial pose");
             terminate = true;
         }
@@ -70,7 +70,7 @@ public class DriveManuallySelfTest extends Command {
         else
             m_listener.fail(this, fmt, expected, time);
 
-        Pose2d state = m_drivetrain.getPose();
+        Pose2d state = m_drivetrain.getState().pose();
 
         // 0.5 m/s for 2 s is roughly 1m
         expected = 1;

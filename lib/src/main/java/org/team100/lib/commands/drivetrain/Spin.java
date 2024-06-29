@@ -39,7 +39,7 @@ public class Spin extends Command100 {
     @Override
     public void initialize100() {
         m_controller.reset();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         m_center = currentPose.getTranslation();
         m_initialRotation = currentPose.getRotation().getRadians();
         m_speedRad_S = 0;
@@ -65,7 +65,7 @@ public class Spin extends Command100 {
 
         SwerveState reference = new SwerveState(xState, yState, rotation);
 
-        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
         // force dx and dy to zero, clamp dtheta
         FieldRelativeVelocity clamped = new FieldRelativeVelocity(0, 0,
                 MathUtil.clamp(fieldRelativeTarget.theta(), -kMaxSpeed, kMaxSpeed));
