@@ -194,6 +194,10 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
 
+        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+            // output filtering to prevent oscillation due to delay
+            omegaFB = m_outputFilter.calculate(omegaFB);
+        }
         // deadband the output to prevent shivering.
         if (Math.abs(omegaFB) < 0.1) {
             omegaFB = 0;
@@ -201,15 +205,10 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         if (Math.abs(thetaFB) < 0.1) {
             thetaFB = 0;
         }
-
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
-            // output filtering to prevent oscillation due to delay
-            omega = m_outputFilter.calculate(omega);
-        }
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, m_name, "mode", "snap");
