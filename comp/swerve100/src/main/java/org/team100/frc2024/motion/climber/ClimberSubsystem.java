@@ -86,7 +86,6 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     public void zeroClimbers() {
         e1.reset();
         e2.reset();
-
     }
 
     public void setLeft(double value) {
