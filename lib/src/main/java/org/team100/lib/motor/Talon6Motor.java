@@ -137,6 +137,14 @@ public abstract class Talon6Motor<T extends Measure100>
         Phoenix100.warn(() -> m_motor.setPosition(0));
     }
 
+    public double getVelocityRev_S() {
+        return m_velocity.getAsDouble();
+    }
+
+    public double getPositionRev() {
+        return m_position.getAsDouble();
+    }
+
     protected void log() {
         // suppliers here are never touched in the non-logging case.
         t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocity);

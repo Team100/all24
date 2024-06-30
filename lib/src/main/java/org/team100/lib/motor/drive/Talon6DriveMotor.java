@@ -57,9 +57,9 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
     /** Position in meters */
     @Override
     public Double getPosition() {
-        double positionRev = m_position.getAsDouble();
-        double positionM = positionRev * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "position (rev)", positionRev);
+        double motorPositionRev = m_position.getAsDouble();
+        double positionM = motorPositionRev * m_distancePerTurn;
+        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
         t.log(Level.DEBUG, m_name, "position (m)", positionM);
         return positionM;
     }
@@ -67,9 +67,9 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
     /** Velocity in meters/sec */
     @Override
     public double getRate() {
-        double velocityRev_S = m_velocity.getAsDouble();
-        double velocityM_S = velocityRev_S * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
+        double motorVelocityRev_S = m_velocity.getAsDouble();
+        double velocityM_S = motorVelocityRev_S * m_distancePerTurn;
+        t.log(Level.TRACE, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
         t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
         return velocityM_S;
     }

@@ -46,21 +46,21 @@ public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
     /** Position in rad */
     @Override
     public Double getPosition() {
-        double positionRev = m_position.getAsDouble();
-        double positionRad = positionRev * 2 * Math.PI;
-        t.log(Level.TRACE, m_name, "position (rev)", positionRev);
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        double motorPositionRev = m_position.getAsDouble();
+        double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
+        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
+        t.log(Level.DEBUG, m_name, "output position (rad)", positionRad);
         return positionRad;
     }
 
     /** Velocity in rad/sec */
     @Override
     public double getRate() {
-        double velocityRev_S = m_velocity.getAsDouble();
-        double velocityRad_S = velocityRev_S * 2 * Math.PI;
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", velocityRad_S);
-        return velocityRad_S;
+        double motorVelocityRev_S = m_velocity.getAsDouble();
+        double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
+        t.log(Level.TRACE, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
+        t.log(Level.DEBUG, m_name, "output velocity (rad_s)", outputVelocityRad_S);
+        return outputVelocityRad_S;
     }
 
 }
