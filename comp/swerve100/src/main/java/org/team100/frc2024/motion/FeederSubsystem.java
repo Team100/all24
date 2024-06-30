@@ -7,7 +7,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 
-import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -16,50 +16,51 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    private final PWM feedRoller;
+    // this uses PWMSparkMax instead of PWM to get MotorSafety.
+    private final PWMSparkMax feedRoller;
     private final SensorInterface m_sensors;
     public FeederSubsystem(SensorInterface sensors) {
         m_name = Names.name(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                feedRoller = new PWM(3);
+                feedRoller = new PWMSparkMax(3);
                 break;
             case BLANK:
             default:
-                feedRoller = new PWM(3);
+                feedRoller = new PWMSparkMax(3);
         }
         m_sensors = sensors;
     }
 
     public void starve() {
-        feedRoller.setSpeed(-0.2);
+        feedRoller.set(-0.2);
     }
 
     public void feed() {
-        feedRoller.setSpeed(0.8);
+        feedRoller.set(0.8);
     }
 
     public void intake() {
-        feedRoller.setSpeed(0.5);
+        feedRoller.set(0.5);
     }
 
     public void intakeSmart() {
         if (m_sensors.getFeederSensor()) {
-            feedRoller.setSpeed(0.5);
+            feedRoller.set(0.5);
         }
     }
 
     public void outtake() {
-        feedRoller.setSpeed(-0.1);
+        feedRoller.set(-0.1);
     }
 
     public void stop() {
-        feedRoller.setSpeed(0);
+        feedRoller.set(0);
     }
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "speed", feedRoller.getSpeed());
+        t.log(Level.DEBUG, m_name, "speed", feedRoller.get());
     }
 
     @Override
