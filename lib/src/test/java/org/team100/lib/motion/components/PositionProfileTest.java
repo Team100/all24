@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -19,15 +19,15 @@ class PositionProfileTest implements Timeless {
     private static final double kDelta = 0.001;
 
     private final String name;
-    private final MockMotor100<Distance100> motor;
+    private final MockVelocityMotor100<Distance100> motor;
     private final MockEncoder100<Distance100> encoder;
     private final double period;
     private final PIDController controller2;
-    private PositionServo<Distance100> servo;
+    private OnboardPositionServo<Distance100> servo;
 
     public PositionProfileTest() {
         name = "test";
-        motor = new MockMotor100<>();
+        motor = new MockVelocityMotor100<>();
         encoder = new MockEncoder100<>();
         period = 0.1;
         controller2 = new PIDController(5, 0, 0, period);
@@ -40,7 +40,7 @@ class PositionProfileTest implements Timeless {
     @Test
     void testTrapezoid() {
         Profile100 profile = new ProfileWPI(1, 1);
-        servo = new PositionServo<>(
+        servo = new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -56,7 +56,7 @@ class PositionProfileTest implements Timeless {
     @Test
     void testProfile() {
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        servo = new PositionServo<>(
+        servo = new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -94,7 +94,7 @@ class PositionProfileTest implements Timeless {
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
-        servo.setPosition(1);
+        servo.setPosition(1, 0);
         stepTime(0.02);
         // useful to fix up the examples above
         if (dump)

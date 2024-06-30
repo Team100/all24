@@ -13,7 +13,6 @@ public abstract class Shooter extends SubsystemBase implements Glassy {
     public abstract boolean atVelocitySetpoint();
     public abstract boolean atVelocitySetpoint(boolean bool);
 
-    public abstract void setDutyCycle(double value);
     public abstract double getPivotPosition();
     public abstract void setPivotPosition(double angleRad);
     public abstract void outtake();

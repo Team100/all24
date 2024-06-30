@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.turning.MockEncoder100;
-import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.units.Angle100;
@@ -15,22 +15,22 @@ class AnglePositionServoProfileTest {
     private static final double kDelta = 0.001;
 
     private final String name;
-    private final MockMotor100<Angle100> motor;
+    private final MockVelocityMotor100<Angle100> motor;
     private final MockEncoder100<Angle100> encoder;
     private final double period;
     private final PIDController controller2;
-    private final PositionServo<Angle100> servo;
+    private final OnboardPositionServo<Angle100> servo;
 
     public AnglePositionServoProfileTest() {
         name = "test";
-        motor = new MockMotor100<>();
+        motor = new MockVelocityMotor100<>();
         encoder = new MockEncoder100<>();
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);
         controller2.enableContinuousInput(-Math.PI, Math.PI);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        servo = new PositionServo<>(
+        servo = new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -73,7 +73,7 @@ class AnglePositionServoProfileTest {
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
         encoder.angle += motor.velocity * period;
-        servo.setPosition(1);
+        servo.setPosition(1, 0);
         assertEquals(motorVelocity, motor.velocity, kDelta);
         assertEquals(setpointPosition, servo.getSetpoint().x(), kDelta);
         assertEquals(setpointVelocity, servo.getSetpoint().v(), kDelta);

@@ -47,7 +47,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     }
 
     /**
-     * Velocity kV only.
+     * Velocity kV only, ignores accel and torque.
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
@@ -60,5 +60,10 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     @Override
     public void close() {
         // m_motor.close();
+    }
+
+    @Override
+    public String getGlassName() {
+        return "TurningMotorController100";
     }
 }

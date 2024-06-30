@@ -74,4 +74,10 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     private double getTorque() {
         return kTNm_amp() * m_motor.getOutputCurrent();
     }
+
+    @Override
+    public String getGlassName() {
+        return "JointMotor";
+    }
+    
 }

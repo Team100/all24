@@ -48,11 +48,6 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     }
 
     @Override
-    public void setDutyCycle(double dutyCycle) {
-        m_servo.setDutyCycle(dutyCycle);
-    }
-
-    @Override
     public double getVelocity() {
         return m_servo.getVelocity();
     }

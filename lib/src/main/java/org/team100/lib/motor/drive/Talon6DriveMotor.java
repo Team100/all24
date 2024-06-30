@@ -48,6 +48,12 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
         setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
     }
 
+    // TODO: this is not done, finish it.
+    @Override
+    public void setPosition(double positionM, double torqueN) {
+        setMotorPosition(positionM, torqueN);
+    }
+
     /** Position in meters */
     @Override
     public Double getPosition() {

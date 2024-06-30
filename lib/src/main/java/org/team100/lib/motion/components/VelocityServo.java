@@ -14,9 +14,6 @@ public interface VelocityServo<T extends Measure100> extends Glassy {
      */
     void setVelocity(double setpoint);
 
-    /** Direct control for testing. */
-    void setDutyCycle(double dutyCycle);
-
     /**
      * @return Current velocity measurement. Note this can be noisy, maybe filter
      *         it.

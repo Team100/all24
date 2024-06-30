@@ -87,7 +87,7 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static PositionServoInterface<Angle100> neoAngleServo(
+    public static PositionServo<Angle100> neoAngleServo(
             String name,
             int canId,
             MotorPhase motorPhase,
@@ -109,7 +109,7 @@ public class ServoFactory {
                 motor,
                 param.gearRatio());
 
-        return new PositionServo<>(
+        return new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -123,7 +123,7 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static PositionServoInterface<Angle100> neoVortexAngleServo(
+    public static PositionServo<Angle100> neoVortexAngleServo(
             String name,
             int canId,
             MotorPhase motorPhase,
@@ -144,7 +144,7 @@ public class ServoFactory {
                 name,
                 motor,
                 param.gearRatio());
-        return new PositionServo<>(
+        return new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -154,7 +154,7 @@ public class ServoFactory {
                 Angle100.instance);
     }
 
-    public static PositionServoInterface<Angle100> simulatedAngleServo(
+    public static PositionServo<Angle100> simulatedAngleServo(
             String name,
             SysParam param,
             PIDController controller) {
@@ -166,7 +166,7 @@ public class ServoFactory {
                 1,
                 0, // minimum hard stop
                 2); // maximum hard stop
-        return new PositionServo<>(
+        return new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -180,7 +180,7 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static PositionServoInterface<Distance100> neoDistanceServo(
+    public static PositionServo<Distance100> neoDistanceServo(
             String name,
             int canId,
             MotorPhase motorPhase,
@@ -202,7 +202,7 @@ public class ServoFactory {
                 name,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
-        return new PositionServo<>(
+        return new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -218,7 +218,7 @@ public class ServoFactory {
      * 
      * @param ff in VOLTS VOLTS VOLTS
      */
-    public static PositionServo<Distance100> neoVortexDistanceServo(
+    public static OnboardPositionServo<Distance100> neoVortexDistanceServo(
             String name,
             int canId,
             MotorPhase motorPhase,
@@ -240,7 +240,7 @@ public class ServoFactory {
                 name,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
-        return new PositionServo<>(
+        return new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,
@@ -250,14 +250,14 @@ public class ServoFactory {
                 Distance100.instance);
     }
 
-    public static PositionServoInterface<Distance100> simulatedDistanceServo(
+    public static PositionServo<Distance100> simulatedDistanceServo(
             String name,
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
         SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, 600);
         Encoder100<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
-        return new PositionServo<>(
+        return new OnboardPositionServo<>(
                 name,
                 motor,
                 encoder,

@@ -24,4 +24,9 @@ public class NeoVortexDriveMotor extends CANSparkDriveMotor implements NeoVortex
                 motorPhase, currentLimit, gearRatio, wheelDiameter,
                 ff, pid);
     }
+
+    @Override
+    public String getGlassName() {
+        return "NeoVortexDriveMotor";
+    }
 }

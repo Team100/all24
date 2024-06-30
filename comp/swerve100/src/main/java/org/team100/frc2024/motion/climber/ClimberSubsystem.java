@@ -4,7 +4,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
@@ -20,9 +20,9 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 40;
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    private final Motor100<Distance100> v1;
+    private final DutyCycleMotor100 v1;
     private final Encoder100<Distance100> e1;
-    private final Motor100<Distance100> v2;
+    private final DutyCycleMotor100 v2;
     private final Encoder100<Distance100> e2;
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
@@ -86,7 +86,6 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     public void zeroClimbers() {
         e1.reset();
         e2.reset();
-
     }
 
     public void setLeft(double value) {

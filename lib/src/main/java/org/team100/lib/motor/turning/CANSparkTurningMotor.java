@@ -35,4 +35,10 @@ public abstract class CANSparkTurningMotor extends CANSparkMotor<Angle100> {
         double motorTorqueNm = outputTorqueNm / m_gearRatio;
         setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
     }
+
+    // TODO: this is not done, finish it.
+    @Override
+    public void setPosition(double positionRad, double torqueNm) {
+        setMotorPosition(positionRad, torqueNm);
+    }
 }

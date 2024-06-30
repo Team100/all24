@@ -5,7 +5,6 @@ import org.team100.lib.units.Measure100;
 public class MockVelocityServo<T extends Measure100> implements VelocityServo<T> {
 
     double m_setpoint;
-    double m_dutyCycle;
 
     @Override
     public void reset() {
@@ -15,11 +14,6 @@ public class MockVelocityServo<T extends Measure100> implements VelocityServo<T>
     @Override
     public void setVelocity(double setpoint) {
         m_setpoint = setpoint;
-    }
-
-    @Override
-    public void setDutyCycle(double dutyCycle) {
-        m_dutyCycle = dutyCycle;
     }
 
     @Override
