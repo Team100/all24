@@ -62,7 +62,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
         if (m_currentTrajectory == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
-                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getPose());
+                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getState().pose());
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
                 TrajectoryVisualization.setViz(m_currentTrajectory);
@@ -85,7 +85,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            Pose2d currentPose = m_swerve.getPose();
+            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             t.log(Level.TRACE, m_name, "reference", reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -101,7 +101,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            Pose2d currentPose = m_swerve.getPose();
+            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             t.log(Level.TRACE, m_name, "reference", reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);

@@ -58,7 +58,7 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void initialize100() {
-        final Pose2d start = m_swerve.getPose();
+        final Pose2d start = m_swerve.getState().pose();
         final double startVelocity = 0;
         Pose2d end = m_goal;
         final double endVelocity = 0;
@@ -96,7 +96,7 @@ public class DriveToWaypoint100 extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         if (output == null)

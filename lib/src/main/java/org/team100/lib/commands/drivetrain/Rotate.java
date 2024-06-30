@@ -85,7 +85,7 @@ public class Rotate extends Command100 {
     private void resetRefTheta(double dt) {
         ChassisSpeeds initialSpeeds = m_robotDrive.getState().chassisSpeeds();
         refTheta = new State100(
-                m_robotDrive.getPose().getRotation().getRadians(),
+                m_robotDrive.getState().pose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
     }
 
@@ -98,7 +98,7 @@ public class Rotate extends Command100 {
                 && MathUtil.isNear(refTheta.v(), m_goalState.v(), kVToleranceRad_S);
 
         // measurement
-        Pose2d currentPose = m_robotDrive.getPose();
+        Pose2d currentPose = m_robotDrive.getState().pose();
 
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose

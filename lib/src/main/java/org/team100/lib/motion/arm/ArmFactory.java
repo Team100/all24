@@ -4,7 +4,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.arm.JointMotor;
@@ -42,7 +42,7 @@ public class ArmFactory {
                 1, // analog input 1
                 kLowerEncoderOffset,
                 1, // encoder is 1:1 with the arm joint
-                Drive.INVERSE);
+                EncoderDrive.INVERSE);
 
         Motor100<Angle100> upperMotor = new JointMotor(kUpper, 30, 1);
         Encoder100<Angle100> upperEncoder = new AnalogTurningEncoder(
@@ -50,7 +50,7 @@ public class ArmFactory {
                 0, // analog input 0
                 kUpperEncoderOffset,
                 1, // encoder is 1:1 with the arm joint
-                Drive.DIRECT);
+                EncoderDrive.DIRECT);
 
         return new ArmSubsystem(
                 kArm,

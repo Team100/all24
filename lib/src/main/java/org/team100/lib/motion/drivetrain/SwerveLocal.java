@@ -24,7 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The swerve drive in local, or robot, reference frame. This class knows
  * nothing about the outside world, it just accepts chassis speeds.
  */
-public class SwerveLocal implements Glassy {
+public class SwerveLocal implements Glassy, SwerveLocalObserver {
     private static final SwerveModuleState[] states0 = new SwerveModuleState[] {
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
             new SwerveModuleState(0, GeometryUtil.kRotationZero),
@@ -53,9 +53,7 @@ public class SwerveLocal implements Glassy {
     private final String m_name;
     private SwerveSetpoint prevSetpoint;
 
-    public SwerveLocal(
-            SwerveKinodynamics swerveKinodynamics,
-            SwerveModuleCollection modules) {
+    public SwerveLocal(SwerveKinodynamics swerveKinodynamics, SwerveModuleCollection modules) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_name = Names.name(this);
@@ -66,6 +64,7 @@ public class SwerveLocal implements Glassy {
     //////////////////////////////////////////////////////////
     //
     // Actuators. These are mutually exclusive within an iteration.
+    //
 
     /**
      * Drives the modules to produce the target chassis speed.
@@ -153,6 +152,12 @@ public class SwerveLocal implements Glassy {
                 targetModuleStates[3].angle);
     }
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Observers
+    //
+
+    @Override
     public SwerveModuleState[] getDesiredStates() {
         return m_modules.getDesiredStates();
     }
@@ -161,25 +166,27 @@ public class SwerveLocal implements Glassy {
         return m_modules.getSetpoint();
     }
 
-    ////////////////////////////////////////////////////////////////////
-    // Getters
-
-    /** @return current measurements */
+    @Override
     public SwerveModuleState[] states() {
         return m_modules.states();
     }
 
+    @Override
     public SwerveModulePosition[] positions() {
         return m_modules.positions();
     }
 
+    @Override
     public boolean[] atSetpoint() {
         return m_modules.atSetpoint();
     }
 
+    @Override
     public boolean[] atGoal() {
         return m_modules.atGoal();
     }
+
+    ///////////////////////////////////////////
 
     public void close() {
         m_modules.close();

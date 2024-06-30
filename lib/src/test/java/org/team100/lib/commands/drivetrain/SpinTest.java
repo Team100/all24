@@ -26,8 +26,8 @@ class SpinTest extends Fixtured implements Timeless {
         assertEquals(0, command.m_initialRotation, kDelta);
         assertEquals(0, command.m_angleRad, kDelta);
         assertEquals(0.01, command.m_speedRad_S, kDelta);
-        assertEquals(0, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-0.785, fixture.drive.desiredStates()[0].angle.getRadians(), 0.01);
+        assertEquals(0, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(-0.785, fixture.drive.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), 0.01);
 
         stepTime(5);
         command.execute100(5);
@@ -39,13 +39,13 @@ class SpinTest extends Fixtured implements Timeless {
         // test drivetrain is 0.5m on a side, thus radius
         // of about 0.353 m. so 0.5 rad/s
 
-        assertEquals(-0.176, fixture.drive.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0.176, fixture.drive.desiredStates()[1].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 4, fixture.drive.desiredStates()[1].angle.getRadians(), kDelta);
-        assertEquals(-0.176, fixture.drive.desiredStates()[2].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 4, fixture.drive.desiredStates()[2].angle.getRadians(), kDelta);
-        assertEquals(0.176, fixture.drive.desiredStates()[3].speedMetersPerSecond, kDelta);
-        assertEquals(-Math.PI / 4, fixture.drive.desiredStates()[3].angle.getRadians(), kDelta);
+        assertEquals(-0.176, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(0.176, fixture.drive.getSwerveLocal().getDesiredStates()[1].speedMetersPerSecond, kDelta);
+        assertEquals(Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[1].angle.getRadians(), kDelta);
+        assertEquals(-0.176, fixture.drive.getSwerveLocal().getDesiredStates()[2].speedMetersPerSecond, kDelta);
+        assertEquals(Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[2].angle.getRadians(), kDelta);
+        assertEquals(0.176, fixture.drive.getSwerveLocal().getDesiredStates()[3].speedMetersPerSecond, kDelta);
+        assertEquals(-Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[3].angle.getRadians(), kDelta);
     }
 
 }

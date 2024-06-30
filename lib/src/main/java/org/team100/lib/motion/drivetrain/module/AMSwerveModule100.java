@@ -3,7 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
@@ -98,7 +98,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio,
-                Drive.DIRECT);
+                EncoderDrive.DIRECT);
 
         PIDController turningPositionController = new PIDController(
                 0.5, // kP

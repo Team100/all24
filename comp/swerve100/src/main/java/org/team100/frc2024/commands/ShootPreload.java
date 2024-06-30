@@ -76,7 +76,7 @@ public class ShootPreload extends Command {
 
         t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
 
-        double distance = m_drive.getPose().getTranslation()
+        double distance = m_drive.getState().pose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
         m_timer.reset();
         m_shooter.forward();
@@ -96,7 +96,7 @@ public class ShootPreload extends Command {
 
         double pivotSetpoint;
         if (m_pivotOverride == -1) {
-            double distance = m_drive.getPose().getTranslation()
+            double distance = m_drive.getState().pose().getTranslation()
                     .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
             pivotSetpoint = ShooterUtil.getAngleRad(distance);
         } else {

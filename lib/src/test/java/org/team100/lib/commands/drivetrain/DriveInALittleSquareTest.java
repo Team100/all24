@@ -33,8 +33,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), kDelta);
 
         // the second time, it knows, so we switch to driving.
         stepTime(0.02);
@@ -43,8 +43,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         assertEquals(0.02, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        assertEquals(0.02, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, swerve.desiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(0.02, swerve.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), kDelta);
 
         // step through the driving phase
         stepTime(2.5);
@@ -57,8 +57,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
-        assertEquals(0, swerve.desiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 2, swerve.desiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
+        assertEquals(Math.PI / 2, swerve.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), kDelta);
     }
 
     @Test
@@ -77,7 +77,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
 
         // a little while later we should be driving
         // at this point the speed is still zero
-        assertEquals(0.0, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);
+        assertEquals(0.0, fixture.drive.getSwerveLocal().states()[0].speedMetersPerSecond, 0.005);
         stepTime(0.1);
         fixture.drive.periodic();
         // this changes the speed
@@ -87,9 +87,9 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         assertEquals(0.1, command.m_setpoint.v(), 0.05);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
-        assertEquals(0.1, fixture.drive.moduleStates()[0].speedMetersPerSecond, 0.005);
+        assertEquals(0.1, fixture.drive.getSwerveLocal().states()[0].speedMetersPerSecond, 0.005);
         // position isn't updated until the next time-step.
-        assertEquals(0.0, fixture.drive.positions()[0].distanceMeters, 0.005);
+        assertEquals(0.0, fixture.drive.getSwerveLocal().positions()[0].distanceMeters, 0.005);
 
         // drive to the next corner. at 1 m/s/s this should be a triangular
         // profile that takes exactly 2 sec total but we started at 0.1 so 1.9
@@ -97,8 +97,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
             stepTime(0.02);
             fixture.drive.periodic();
             command.execute100(0.02);
-            double speed = fixture.drive.moduleStates()[0].speedMetersPerSecond;
-            double distance = fixture.drive.positions()[0].distanceMeters;
+            double speed = fixture.drive.getSwerveLocal().states()[0].speedMetersPerSecond;
+            double distance = fixture.drive.getSwerveLocal().positions()[0].distanceMeters;
             DriveState state = command.m_state;
             if (dump)
                 Util.printf("t %5.3f state %s speed %5.3f distance %5.3f\n", t, state.toString(), speed, distance);
@@ -111,15 +111,15 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
-        assertEquals(0, fixture.drive.moduleStates()[0].speedMetersPerSecond, kDelta);
-        assertFalse(fixture.drive.atGoal()[0]);
+        assertEquals(0, fixture.drive.getSwerveLocal().states()[0].speedMetersPerSecond, kDelta);
+        assertFalse(fixture.drive.getSwerveLocal().atGoal()[0]);
 
         // wait a half second.
         for (double t = 0; t < 0.5; t += 0.02) {
             stepTime(0.02);
             fixture.drive.periodic();
             command.execute100(0.02);
-            double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
+            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
@@ -133,8 +133,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         }
         // after that time, the wheels have rotated.
         // note the controller tolerance is
-        assertEquals(Math.PI / 2, fixture.drive.moduleStates()[0].angle.getRadians(), 0.01);
-        assertTrue(fixture.drive.atGoal()[0]);
+        assertEquals(Math.PI / 2, fixture.drive.getSwerveLocal().states()[0].angle.getRadians(), 0.01);
+        assertTrue(fixture.drive.getSwerveLocal().atGoal()[0]);
         // and we're driving again
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         // we're not quite motionless, we're already going a little.

@@ -15,10 +15,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class SimulatedSwerveModule100 extends SwerveModule100 {
 
-    /** @param name like "front left" or whatever */
-    public static SimulatedSwerveModule100 get(
-            String name,
-            SwerveKinodynamics kinodynamics) {
+    public static SimulatedSwerveModule100 get(String name, SwerveKinodynamics kinodynamics) {
         VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
         PositionServoInterface<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
         return new SimulatedSwerveModule100(name, driveServo, turningServo);

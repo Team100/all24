@@ -3,7 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.PositionServoInterface;
@@ -33,7 +33,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     // andymark ma3 encoder is 1:1
     private static final double turningGearRatio = 1.0;
 
-    /** @param name like "front left" or whatever */
     public static AMCANSwerveModule100 get(
             String name,
             double currentLimit,
@@ -42,7 +41,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            Drive turningDrive,
+            EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
@@ -95,7 +94,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            Drive turningDrive,
+            EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
         CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(

@@ -58,7 +58,7 @@ public class OscillateSelfTest extends Command {
     @Override
     public void initialize() {
         m_timer.restart();
-        m_initial = m_drivetrain.getPose();
+        m_initial = m_drivetrain.getState().pose();
         prevOscillateTheta = Experiments.instance.enabled(Experiment.OscillateTheta);
         prevOscillateDirect = Experiments.instance.enabled(Experiment.OscillateDirect);
         Experiments.instance.testOverride(Experiment.OscillateTheta, m_rotation);
@@ -68,7 +68,7 @@ public class OscillateSelfTest extends Command {
 
     @Override
     public void execute() {
-        if (GeometryUtil.distance(m_drivetrain.getPose(), m_initial) > kMaxDistance) {
+        if (GeometryUtil.distance(m_drivetrain.getState().pose(), m_initial) > kMaxDistance) {
             m_listener.fail(this, "Too far from initial pose");
             terminate = true;
         }

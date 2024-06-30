@@ -46,7 +46,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
 
     @Override
     public void initialize100() {
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
         m_iter = null;
         m_aligned = false;

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class SingleNavXGyro implements Gyro100 {
     private static final byte kUpdateRateHz = (byte) 200;
+    private static final int kSPIBitRateHz = 500000;
     private final Telemetry t = Telemetry.get();
     private final AHRS m_gyro1;
     private final String m_name;
@@ -30,7 +31,9 @@ public class SingleNavXGyro implements Gyro100 {
         // much CPU?
         switch (Identity.instance) {
             case COMP_BOT:
-                m_gyro1 = new AHRS(SPI.Port.kMXP);
+                // Jun 29 2024: actually use the specified bit rate
+                // m_gyro1 = new AHRS(SPI.Port.kMXP);
+                m_gyro1 = new AHRS(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
                 break;
             default:
                 m_gyro1 = new AHRS(SerialPort.Port.kUSB, SerialDataType.kProcessedData, kUpdateRateHz);
