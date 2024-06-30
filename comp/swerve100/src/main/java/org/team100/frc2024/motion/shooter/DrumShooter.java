@@ -7,6 +7,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
@@ -45,6 +46,8 @@ public class DrumShooter extends Shooter {
     private static final double kFeed = 5;
     /** Outtake velocity. */
     private static final double kOut = -6;
+    private static final double kDriveReduction = 1;
+    private static final double kWheelDiameterM = 0.1;
 
     private final Telemetry t = Telemetry.get();
 
@@ -72,34 +75,39 @@ public class DrumShooter extends Shooter {
         double period = 0.02;
         double[] softLimits = new double[] { 0, 45 };
 
+        String leftName = m_name + "/Left";
+        String rightName = m_name + "/Right";
         switch (Identity.instance) {
             case COMP_BOT:
+                double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
                 Falcon6DriveMotor leftMotor = new Falcon6DriveMotor(
-                        m_name + "/Left",
+                        leftName,
                         leftID,
                         MotorPhase.REVERSE,
                         supplyLimit,
                         statorLimit,
-                        1,
-                        0.1,
+                        kDriveReduction,
+                        kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
-
-                leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftMotor);
+                Talon6DriveEncoder leftEncoder = new Talon6DriveEncoder(
+                        leftName, leftMotor, distancePerTurn);
+                leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftEncoder);
 
                 Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
-                        m_name + "/Right",
+                        rightName,
                         rightID,
                         MotorPhase.FORWARD,
                         supplyLimit,
                         statorLimit,
-                        1,
-                        0.1,
+                        kDriveReduction,
+                        kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
-
-                rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightMotor);
+                Talon6DriveEncoder rightEncoder = new Talon6DriveEncoder(
+                        rightName, rightMotor, distancePerTurn);
+                rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightEncoder);
 
                 pivotServo = new GravityServo(
                         new NeoProxy(m_name, pivotID, IdleMode.kCoast, 40),
@@ -115,10 +123,10 @@ public class DrumShooter extends Shooter {
             default:
                 // For testing and simulation
                 leftRoller = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Left",
+                        leftName,
                         shooterParams);
                 rightRoller = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Right",
+                        rightName,
                         shooterParams);
                 // motor speed is rad/s
                 SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(m_name, 600);

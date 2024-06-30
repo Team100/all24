@@ -65,10 +65,4 @@ public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
     void resetPosition() {
         m_encoder.setPosition(0);
     }
-
-    @Override
-    public String getGlassName() {
-        return "VortexProxy";
-    }
-
 }

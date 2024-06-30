@@ -64,9 +64,4 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
     public void close() {
         // m_motor.close();
     }
-
-    @Override
-    public String getGlassName() {
-        return "DriveMotorController100";
-    }
 }

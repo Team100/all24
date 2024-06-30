@@ -10,4 +10,9 @@ public interface BaseMotor100 extends Glassy {
      * For test cleanup.
      */
     void close();
+
+    @Override
+    default String getGlassName() {
+        return "Motor100";
+    }
 }

@@ -21,7 +21,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
  * Superclass for TalonFX motors.
  */
 public abstract class Talon6Motor<T extends Measure100>
-        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel, Encoder100<T> {
+        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
     protected final Telemetry t = Telemetry.get();
     protected final String m_name;
     private final TalonFX m_motor;
@@ -118,11 +118,6 @@ public abstract class Talon6Motor<T extends Measure100>
     @Override
     public void stop() {
         m_motor.stopMotor();
-    }
-
-    @Override
-    public void reset() {
-        resetPosition();
     }
 
     @Override
