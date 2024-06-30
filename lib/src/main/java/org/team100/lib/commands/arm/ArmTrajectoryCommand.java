@@ -1,5 +1,7 @@
 package org.team100.lib.commands.arm;
 
+import java.util.Optional;
+
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
@@ -71,8 +73,11 @@ public class ArmTrajectoryCommand extends Command100 {
     @Override
     public void initialize100() {
         m_timer.restart();
+        Optional<ArmAngles> position = m_armSubsystem.getPosition();
+        if (position.isEmpty())
+            return;
         m_trajectory = m_trajectories.makeTrajectory(
-                m_armKinematicsM.forward(m_armSubsystem.getPosition()), m_goal);
+                m_armKinematicsM.forward(position.get()), m_goal);
     }
 
     @Override
@@ -84,15 +89,19 @@ public class ArmTrajectoryCommand extends Command100 {
 
         State desiredState = getDesiredState();
 
-        ArmAngles measurement = m_armSubsystem.getPosition();
-        ArmAngles velocityMeasurement = m_armSubsystem.getVelocity();
+        Optional<ArmAngles> measurement = m_armSubsystem.getPosition();
+        if (measurement.isEmpty())
+            return;
+        Optional<ArmAngles> velocityMeasurement = m_armSubsystem.getVelocity();
+        if (velocityMeasurement.isEmpty())
+            return;
 
         // position reference
         ArmAngles r = getThetaPosReference(desiredState);
 
         // position feedback
-        double u1_pos = m_lowerPosController.calculate(measurement.th1, r.th1);
-        double u2_pos = m_upperPosController.calculate(measurement.th2, r.th2);
+        double u1_pos = m_lowerPosController.calculate(measurement.get().th1, r.th1);
+        double u2_pos = m_upperPosController.calculate(measurement.get().th2, r.th2);
 
         // velocity reference
         ArmAngles rdot = getThetaVelReference(desiredState, r);
@@ -102,8 +111,8 @@ public class ArmTrajectoryCommand extends Command100 {
         double ff1 = rdot.th1 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
 
         // velocity feedback
-        double u1_vel = m_lowerVelController.calculate(velocityMeasurement.th1, rdot.th1);
-        double u2_vel = m_upperVelController.calculate(velocityMeasurement.th2, rdot.th2);
+        double u1_vel = m_lowerVelController.calculate(velocityMeasurement.get().th1, rdot.th1);
+        double u2_vel = m_upperVelController.calculate(velocityMeasurement.get().th2, rdot.th2);
 
         double u1 = ff1 + u1_pos + u1_vel;
         double u2 = ff2 + u2_pos + u2_vel;
@@ -125,7 +134,7 @@ public class ArmTrajectoryCommand extends Command100 {
         State state = m_trajectory.sample(curTime);
         // the last state in the trajectory includes whatever the terminal acceleration
         // was, so if you keep sampling past the end, you'll be trying to accelerate
-        // away from the endpoint, even though the desired velocity is zero.  :-(
+        // away from the endpoint, even though the desired velocity is zero. :-(
         // so we just fix it here:
         if (curTime > m_trajectory.getTotalTimeSeconds())
             state.accelerationMetersPerSecondSq = 0;
@@ -176,7 +185,7 @@ public class ArmTrajectoryCommand extends Command100 {
 
     ////////////////////////////////
 
-        private static PIDController controller(double p, double d) {
+    private static PIDController controller(double p, double d) {
         PIDController c = new PIDController(p, 0, d);
         c.setTolerance(kTolerance);
         return c;

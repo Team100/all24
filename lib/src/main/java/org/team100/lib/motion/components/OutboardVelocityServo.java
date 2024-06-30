@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.telemetry.Telemetry;
@@ -50,7 +52,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
      *         it.
      */
     @Override
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_encoder.getRate();
     }
 
@@ -60,7 +62,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     }
 
     @Override
-    public double getDistance() {
+    public OptionalDouble getDistance() {
         return m_encoder.getPosition();
     }
 

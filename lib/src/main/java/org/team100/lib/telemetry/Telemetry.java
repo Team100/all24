@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -174,6 +175,15 @@ public class Telemetry {
             t.setRetained(true);
             return t.publish();
         }, DoublePublisher.class).set(val);
+    }
+
+    public void log(Level level, String root, String leaf, OptionalDouble val) {
+        if (!m_level.admit(level))
+            return;
+        if (val.isEmpty()) {
+            return;
+        }
+        log(level, root, leaf, val.getAsDouble());
     }
 
     // using a supplier here is faster in the non-logging case.

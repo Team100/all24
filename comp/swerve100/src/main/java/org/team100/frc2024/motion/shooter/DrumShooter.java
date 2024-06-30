@@ -1,10 +1,13 @@
 package org.team100.frc2024.motion.shooter;
 
+import java.util.OptionalDouble;
+
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.DutyCycleEncoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
@@ -20,10 +23,12 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Direct-drive shooter with top and bottom drums.
@@ -35,7 +40,7 @@ import edu.wpi.first.math.controller.PIDController;
  * Empirically it seems to take a second or so to spin
  * up, so set the acceleration a bit higher than that to start.
  */
-public class DrumShooter extends Shooter {
+public class DrumShooter extends SubsystemBase implements Glassy {
     /** Left roller setpoint, m/s */
     private static final double kLeftRollerVelocity = 20;
     /** Right roller setpoint m/s */
@@ -150,50 +155,38 @@ public class DrumShooter extends Shooter {
         }
     }
 
-    @Override
     public void forward() {
         leftRoller.setVelocity(kLeftRollerVelocity);
         rightRoller.setVelocity(kRightRollerVelocity);
     }
 
-    @Override
     public void stop() {
         leftRoller.setVelocity(kIdleVelocity);
         rightRoller.setVelocity(kIdleVelocity);
         pivotServo.stop();
     }
 
-    @Override
     public void reset() {
         pivotServo.reset();
     }
 
-    @Override
     public void rezero() {
         // pivotServo.rezero();
     }
 
-    @Override
     public void setAngle(double goalRad) {
         pivotServo.setPosition(goalRad);
     }
 
-    public double getAngleRad() {
+    public OptionalDouble getAngleRad() {
         return pivotServo.getPosition();
-    }
-
-    @Override
-    public void periodic() {
-        t.log(Level.DEBUG, "Drum SHooter", "left velocity", leftRoller.getVelocity());
-        t.log(Level.DEBUG, "Drum SHooter", "right velocity", rightRoller.getVelocity());
-        t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());
     }
 
     public boolean readyToShoot() {
         return atVelocitySetpoint(false);
     }
 
-    public double getPivotPosition() {
+    public OptionalDouble getPivotPosition() {
         return pivotServo.getRawPosition();
     }
 
@@ -206,22 +199,31 @@ public class DrumShooter extends Shooter {
         rightRoller.setVelocity(kFeed);
     }
 
-    @Override
     public void outtake() {
         leftRoller.setVelocity(kOut);
         rightRoller.setVelocity(kOut);
     }
 
     /** Returns the average of the two rollers */
-    public double getVelocity() {
-        return (leftRoller.getVelocity() + rightRoller.getVelocity()) / 2;
+    public OptionalDouble getVelocity() {
+        OptionalDouble leftVelocity = leftRoller.getVelocity();
+        OptionalDouble rightVelocity = rightRoller.getVelocity();
+        if (leftVelocity.isEmpty() || rightVelocity.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of((leftVelocity.getAsDouble() + rightVelocity.getAsDouble()) / 2);
     }
 
     /** uses pretty wide tolerance, applied symmetrically. */
-    @Override
     public boolean atVelocitySetpoint() {
-        double leftError = leftRoller.getVelocity() - kLeftRollerVelocity;
-        double rightError = rightRoller.getVelocity() - kRightRollerVelocity;
+        OptionalDouble leftVelocity = leftRoller.getVelocity();
+        OptionalDouble rightVelocity = rightRoller.getVelocity();
+        if (leftVelocity.isEmpty() || rightVelocity.isEmpty()) {
+            // using signal-space for error condition, so warn
+            Util.warn("no velocity measurement available");
+            return false;
+        }
+        double leftError = leftVelocity.getAsDouble() - kLeftRollerVelocity;
+        double rightError = rightVelocity.getAsDouble() - kRightRollerVelocity;
         return (Math.abs(leftError) < 10) && (Math.abs(rightError) < 10);
     }
 
@@ -229,15 +231,33 @@ public class DrumShooter extends Shooter {
      * @param wide if true, use very wide velocity tolernace, for when we don't care
      *             exactly what the speed is. otherwise, use very narrow tolerance.
      */
-    @Override
     public boolean atVelocitySetpoint(boolean wide) {
+        OptionalDouble leftVelocity = leftRoller.getVelocity();
+        OptionalDouble rightVelocity = rightRoller.getVelocity();
+        if (leftVelocity.isEmpty() || rightVelocity.isEmpty()) {
+            // using signal-space for error condition, so warn
+            Util.warn("no velocity measurement available");
+            return false;
+        }
         if (wide) {
-            double leftRatio = leftRoller.getVelocity() / kLeftRollerVelocity;
-            double rightRatio = rightRoller.getVelocity() / kRightRollerVelocity;
+            double leftRatio = leftVelocity.getAsDouble() / kLeftRollerVelocity;
+            double rightRatio = rightVelocity.getAsDouble() / kRightRollerVelocity;
             return (leftRatio > 0.5) && (rightRatio > 0.5);
         }
-        double leftError = leftRoller.getVelocity() - kLeftRollerVelocity;
-        double rightError = rightRoller.getVelocity() - kRightRollerVelocity;
+        double leftError = leftVelocity.getAsDouble() - kLeftRollerVelocity;
+        double rightError = rightVelocity.getAsDouble() - kRightRollerVelocity;
         return (Math.abs(leftError) < 0.5) && (Math.abs(rightError) < 0.5);
+    }
+
+    @Override
+    public void periodic() {
+        t.log(Level.DEBUG, "Drum SHooter", "left velocity", leftRoller.getVelocity());
+        t.log(Level.DEBUG, "Drum SHooter", "right velocity", rightRoller.getVelocity());
+        t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());
+    }
+
+    @Override
+    public String getGlassName() {
+        return "DrumShooter";
     }
 }

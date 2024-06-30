@@ -1,5 +1,7 @@
 package org.team100.lib.encoder.turning;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
@@ -37,14 +39,14 @@ public class NeoVortexTurningEncoder implements Encoder100<Angle100> {
 
     /** Position of the mechanism in radians. */
     @Override
-    public Double getPosition() {
-        return getPositionRad();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionRad());
     }
 
     /** Velocity of the mechanism in radians per second. */
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getRateRad_S());
     }
 
     @Override

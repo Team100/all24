@@ -1,5 +1,7 @@
 package org.team100.lib.encoder.drive;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
@@ -36,14 +38,14 @@ public class NeoVortexDriveEncoder implements Encoder100<Distance100> {
 
     /** Position in meters. */
     @Override
-    public Double getPosition() {
-        return getPositionM();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionM());
     }
 
     /** Velocity in meters/sec. */
     @Override
-    public double getRate() {
-        return getVelocityM_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getVelocityM_S());
     }
 
     @Override

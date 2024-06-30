@@ -1,5 +1,7 @@
 package org.team100.frc2024.selftest;
 
+import java.util.OptionalDouble;
+
 import org.team100.frc2024.motion.indexer.IndexerSubsystem;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
@@ -25,7 +27,7 @@ public class IndexerSelfTest extends Command {
         m_listener = listener;
         m_timer = new Timer();
     }
-    
+
     public void treatment() {
         // spin up the mechanism.
         m_indexer.index();
@@ -39,9 +41,9 @@ public class IndexerSelfTest extends Command {
     @Override
     public void execute() {
         // during the test period, the velocity should exceed the expected velocity.
-        double v = m_indexer.getVelocity();
-        maxVelocity = Math.max(maxVelocity, v);
-        if (v > kExpectedVelocity) {
+        OptionalDouble v = m_indexer.getVelocity();
+        maxVelocity = Math.max(maxVelocity, v.getAsDouble());
+        if (v.getAsDouble() > kExpectedVelocity) {
             pass = true;
         }
 

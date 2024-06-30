@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
@@ -92,6 +93,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             DriveRatio ratio,
             PIDConstants pidConstants,
             Feedforward100 ff) {
+        double distancePerTurn = kWheelDiameterM * Math.PI / ratio.m_ratio;
 
         Kraken6DriveMotor driveMotor = new Kraken6DriveMotor(
                 name,
@@ -103,10 +105,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kWheelDiameterM,
                 pidConstants,
                 ff);
+        Talon6DriveEncoder encoder = new Talon6DriveEncoder(
+                name, driveMotor, distancePerTurn);
         return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
-                driveMotor);
+                encoder);
     }
 
     private static PositionServo<Angle100> turningServo(

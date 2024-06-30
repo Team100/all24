@@ -1,5 +1,7 @@
 package org.team100.lib.encoder.turning;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.turning.Talon6TurningMotor;
 import org.team100.lib.telemetry.Telemetry;
@@ -23,22 +25,22 @@ public class Talon6TurningEncoder implements Encoder100<Angle100> {
 
     /** Position in radians */
     @Override
-    public Double getPosition() {
+    public OptionalDouble getPosition() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
         t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
         t.log(Level.DEBUG, m_name, "output position (rad)", positionRad);
-        return positionRad;
+        return OptionalDouble.of(positionRad);
     }
 
     /** Velocity in rad/s */
     @Override
-    public double getRate() {
+    public OptionalDouble getRate() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
         t.log(Level.TRACE, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
         t.log(Level.DEBUG, m_name, "output velocity (rad_s)", outputVelocityRad_S);
-        return outputVelocityRad_S;
+        return OptionalDouble.of(outputVelocityRad_S);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package org.team100.frc2024.motion.indexer;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -96,7 +98,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
         m_servo.stop();
     }
     
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_servo.getVelocity();
     }
 

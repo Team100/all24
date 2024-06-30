@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;
@@ -48,7 +50,7 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     }
 
     @Override
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_servo.getVelocity();
     }
 
@@ -59,7 +61,7 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     }
 
     @Override
-    public double getDistance() {
+    public OptionalDouble getDistance() {
         return m_servo.getDistance();
     }
 

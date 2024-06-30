@@ -1,5 +1,7 @@
 package org.team100.lib.encoder;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -50,7 +52,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     }
 
     @Override
-    public Double getPosition() {
+    public OptionalDouble getPosition() {
         double now = Timer.getFPGATimestamp();
         double dt = now - m_time;
         double m_rate = m_motor.getVelocity() / m_reduction;
@@ -58,14 +60,14 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
         t.log(Level.TRACE, m_name, "position", m_position);
-        return m_position;
+        return OptionalDouble.of(m_position);
     }
 
     @Override
-    public double getRate() {
+    public OptionalDouble getRate() {
         double m_rate = m_motor.getVelocity() / m_reduction;
         t.log(Level.TRACE, m_name, "rate", m_rate);
-        return m_rate;
+        return OptionalDouble.of(m_rate);
     }
 
     @Override

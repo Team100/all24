@@ -23,7 +23,7 @@ public class SwerveModuleVisualization {
 
     public static void make(SwerveModule100 module) {
         SwerveModuleVisualization v = new SwerveModuleVisualization(module);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1, "SwerveModuleVisualization" + module.getName());
+        AsyncFactory.get().addPeriodic(v::viz, 0.1, "SwerveModuleVisualization/" + module.getName());
     }
 
     private SwerveModuleVisualization(SwerveModule100 module) {

@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.PositionMotor100;
@@ -38,7 +40,10 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
 
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
-        double measurement = m_instance.modulus(m_encoder.getPosition());
+        OptionalDouble position = m_encoder.getPosition();
+        if (position.isEmpty())
+            return;
+        double measurement = m_instance.modulus(position.getAsDouble());
 
         // use the modulus closest to the measurement.
         // note zero velocity in the goal.
@@ -49,12 +54,12 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     }
 
     @Override
-    public double getPosition() {
+    public OptionalDouble getPosition() {
         return m_encoder.getPosition();
     }
 
     @Override
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_encoder.getRate();
     }
 

@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** Spin up the drums and set the angle based on range. */
 public class Ramp extends Command {
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final SwerveDriveSubsystem m_drive;
 
-    public Ramp(Shooter shooter, SwerveDriveSubsystem drive) {
+    public Ramp(DrumShooter shooter, SwerveDriveSubsystem drive) {
         m_shooter = shooter;
         m_drive = drive;
         addRequirements(m_shooter, m_drive);

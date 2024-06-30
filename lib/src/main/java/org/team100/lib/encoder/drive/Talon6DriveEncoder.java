@@ -1,5 +1,7 @@
 package org.team100.lib.encoder.drive;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.drive.Talon6DriveMotor;
 import org.team100.lib.telemetry.Telemetry;
@@ -24,22 +26,22 @@ public class Talon6DriveEncoder implements Encoder100<Distance100> {
 
     /** Position in meters */
     @Override
-    public Double getPosition() {
+    public OptionalDouble getPosition() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionM = motorPositionRev * m_distancePerTurn;
         t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
         t.log(Level.DEBUG, m_name, "position (m)", positionM);
-        return positionM;
+        return OptionalDouble.of(positionM);
     }
 
     /** Velocity in meters/sec */
     @Override
-    public double getRate() {
+    public OptionalDouble getRate() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double velocityM_S = motorVelocityRev_S * m_distancePerTurn;
         t.log(Level.TRACE, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
         t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
-        return velocityM_S;
+        return OptionalDouble.of(velocityM_S);
     }
 
     @Override

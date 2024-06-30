@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
@@ -65,8 +67,12 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public void reset() {
         m_controller.reset();
-        m_setpoint = new State100(getPosition(), getVelocity());
         prevTime = Timer.getFPGATimestamp();
+        OptionalDouble position = getPosition();
+        OptionalDouble velocity = getVelocity();
+        if (position.isEmpty() || velocity.isEmpty())
+            return;
+        m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
 
         // TODO figure this out
         // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
@@ -81,7 +87,10 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
      */
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
-        double measurement = m_instance.modulus(m_encoder.getPosition());
+        OptionalDouble position = m_encoder.getPosition();
+        if (position.isEmpty())
+            return;
+        double measurement = m_instance.modulus(position.getAsDouble());
 
         // use the modulus closest to the measurement.
         // note zero velocity in the goal.
@@ -123,12 +132,15 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
      *         this is radians.
      */
     @Override
-    public double getPosition() {
-        return m_instance.modulus(m_encoder.getPosition());
+    public OptionalDouble getPosition() {
+        OptionalDouble position = m_encoder.getPosition();
+        if (position.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(m_instance.modulus(position.getAsDouble()));
     }
 
     @Override
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_encoder.getRate();
     }
 

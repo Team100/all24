@@ -2,19 +2,19 @@ package org.team100.frc2024.motion;
 
 import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.frc2024.motion.shooter.Shooter;
+import org.team100.frc2024.motion.shooter.DrumShooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class OuttakeCommand extends Command {
     private final Intake m_intake;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final AmpFeeder m_amp;
     private final FeederSubsystem m_feeder;
 
     public OuttakeCommand(
             Intake intake,
-            Shooter shooter,
+            DrumShooter shooter,
             AmpFeeder amp,
             FeederSubsystem feeder) {
         m_intake = intake;
