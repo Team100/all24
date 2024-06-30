@@ -49,10 +49,15 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
         setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
     }
 
-    // TODO: this is not done, finish it.
     @Override
-    public void setPosition(double positionM, double torqueN) {
-        setMotorPosition(positionM, torqueN);
+    public void setPosition(double outputM, double outputM_S, double outputTorqueN) {
+        double wheelRev = outputM / (m_wheelDiameterM * Math.PI);
+        double motorRev = wheelRev * m_gearRatio;
+        double wheelRev_S = outputM_S / (m_wheelDiameterM * Math.PI);
+        double motorRev_S = wheelRev_S * m_gearRatio;
+        double wheelTorqueNm = outputTorqueN * m_wheelDiameterM / 2;
+        double motorTorqueNm = wheelTorqueNm / m_gearRatio;
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
     }
 
 }

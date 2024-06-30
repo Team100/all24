@@ -17,6 +17,11 @@ public interface PositionServo<T extends Measure100> extends Glassy {
     void reset();
 
     /**
+     * The angle measure here *does not* wind up, so 0 and 2pi are the same.
+     * 
+     * The measurements here are output measurements, e.g. shaft radians, not motor
+     * radians.
+     * 
      * @param goal              For distance, use meters, For angle, use radians.
      * @param feedForwardTorque used for gravity compensation
      */

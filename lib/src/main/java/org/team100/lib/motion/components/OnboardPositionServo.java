@@ -32,12 +32,10 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
     // for calculating acceleration
-    private double previousSetpoint = 0;
-    private double prevTime;
+    private double m_previousSetpoint = 0;
+    private double m_prevTime;
 
-    /**
-     * @param name may not start with a slash
-     */
+
     public OnboardPositionServo(
             String name,
             VelocityMotor100<T> motor,
@@ -46,14 +44,12 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
             PIDController controller,
             Profile100 profile,
             T instance) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
+        m_name = Names.append(name, this);
         m_motor = motor;
         m_encoder = encoder;
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
-        m_name = Names.append(name, this);
         m_profile = profile;
         m_instance = instance;
     }
@@ -67,7 +63,7 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public void reset() {
         m_controller.reset();
-        prevTime = Timer.getFPGATimestamp();
+        m_prevTime = Timer.getFPGATimestamp();
         OptionalDouble position = getPosition();
         OptionalDouble velocity = getVelocity();
         if (position.isEmpty() || velocity.isEmpty())
@@ -81,10 +77,6 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         // m_encoder.reset();
     }
 
-    /**
-     * @param goal                For distance, use meters, For angle, use radians.
-     * @param feedForwardTorqueNm used for gravity compensation, passthrough.
-     */
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
         OptionalDouble position = m_encoder.getPosition();
@@ -118,10 +110,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         t.log(Level.TRACE, m_name, "u_FB", u_FB);
         t.log(Level.TRACE, m_name, "u_FF", u_FF);
         t.log(Level.TRACE, m_name, "u_TOTAL", u_TOTAL);
-        t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Goal", m_goal);
+        t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
-        t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
         t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
         t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.TRACE, m_name, "Feedforward Torque", feedForwardTorqueNm);
@@ -198,10 +189,10 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
      */
     private double accel(double setpoint) {
         double now = Timer.getFPGATimestamp();
-        double dt = now - prevTime;
-        prevTime = now;
-        double accel = (setpoint - previousSetpoint) / dt;
-        previousSetpoint = setpoint;
+        double dt = now - m_prevTime;
+        m_prevTime = now;
+        double accel = (setpoint - m_previousSetpoint) / dt;
+        m_previousSetpoint = setpoint;
         return accel;
     }
 }

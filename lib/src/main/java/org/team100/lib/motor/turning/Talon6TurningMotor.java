@@ -38,8 +38,13 @@ public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
     }
 
     @Override
-    public void setPosition(double positionRad_S, double torqueNm) {
-        setMotorPosition(positionRad_S, torqueNm);
+    public void setPosition(double outputRad, double outputRad_S, double outputTorqueNm) {
+        double outputRev = outputRad / (2 * Math.PI);
+        double motorRev = outputRev * m_gearRatio;
+        double outputRev_S = outputRad_S / (2 * Math.PI);
+        double motorRev_S = outputRev_S * m_gearRatio;
+        double motorTorqueNm = outputTorqueNm / m_gearRatio;
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
     }
 
 }

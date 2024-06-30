@@ -82,36 +82,70 @@ public abstract class Talon6Motor<T extends Measure100>
         log();
     }
 
-    /** Set motor speed/voltage directly. */
-    public void setMotorVelocity(double motorRev_S, double motorRev_S2, double torqueNm) {
+    /**
+     * Set motor output using motor quantities (rev/s, rev/s^2, Nm).
+     */
+    protected void setMotorVelocity(
+            double motorRev_S,
+            double motorRev_S2,
+            double torqueNm) {
         double currentMotorRev_S = m_velocity.getAsDouble();
 
         double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
         double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
-
-        double torqueFFAmps = torqueNm / kTNm_amp();
-        double torqueFFVolts = torqueFFAmps * kROhms();
+        double torqueFFVolts = getTorqueFFVolts(torqueNm);
 
         double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
 
-        Phoenix100.warn(() -> m_motor.setControl(m_velocityVoltage
-                .withVelocity(motorRev_S)
-                .withFeedForward(kFFVolts)));
+        // VelocityVoltage has an acceleration field for kA feedforward but we use
+        // arbitrary feedforward for that.
+        Phoenix100.warn(() -> m_motor.setControl(
+                m_velocityVoltage
+                        .withVelocity(motorRev_S)
+                        .withFeedForward(kFFVolts)));
 
-        t.log(Level.TRACE, m_name, "motor input (RPS)", motorRev_S);
-        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "desired accel (rev_s2)", motorRev_S2);
+        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward (v)", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
         log();
     }
 
-    // TODO: this is not done; finish it
-    public void setMotorPosition(double p, double t) {
-        Phoenix100.warn(() -> m_motor.setControl(m_PositionVoltage
-                .withPosition(p)
-                .withFeedForward(t)));
+    /**
+     * Set motor output using motor quantities (rev, Nm).
+     * 
+     * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
+     * 
+     * TODO: this is not done; finish it
+     */
+    protected void setMotorPosition(
+            double motorRev,
+            double motorRev_S,
+            double torqueNm) {
+        double currentMotorRev_S = m_velocity.getAsDouble();
+
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double torqueFFVolts = getTorqueFFVolts(torqueNm);
+
+        double kFFVolts = frictionFFVolts + velocityFFVolts + torqueFFVolts;
+
+        // PositionVoltage has a velocity field for kV feedforward but we use arbitrary
+        // feedforward for that.
+        Phoenix100.warn(() -> m_motor.setControl(
+                m_PositionVoltage
+                        .withPosition(motorRev)
+                        .withFeedForward(kFFVolts)));
+                        
+        t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        log();
     }
 
     @Override

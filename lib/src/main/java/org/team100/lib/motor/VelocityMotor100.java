@@ -10,10 +10,12 @@ public interface VelocityMotor100<T extends Measure100> extends BaseMotor100 {
     /**
      * Velocity control with acceleration and holding torque.
      * 
-     * @param velocity desired velocity in m/s or rad/s.
-     * @param accel    desired accel in m/s^2 or rad/s^2
-     * @param torque   desired torque in N or Nm, for gravity compensation or
-     *                 holding.
+     * Measures here are mechanism measurements, not motor measurements, e.g. output
+     * shaft rad/s not motor shaft.
+     * 
+     * @param velocity m/s or rad/s.
+     * @param accel    m/s^2 or rad/s^2.
+     * @param torque   N or Nm, for gravity compensation or holding.
      */
     void setVelocity(double velocity, double accel, double torque);
 }

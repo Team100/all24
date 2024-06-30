@@ -17,7 +17,7 @@ public class MockPositionMotor100<T extends Measure100> implements PositionMotor
     }
 
     @Override
-    public void setPosition(double position, double torque) {
+    public void setPosition(double position, double velocity, double torque) {
         this.position = position;
     }
 

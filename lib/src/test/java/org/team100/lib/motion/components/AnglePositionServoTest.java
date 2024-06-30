@@ -28,11 +28,12 @@ class AnglePositionServoTest {
         PIDController turningController2 = new PIDController(1, 0, 0, period);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        double maxVel = 1;
         OnboardPositionServo<Angle100> servo = new OnboardPositionServo<>(
                 name,
                 turningMotor,
                 turningEncoder,
-                1,
+                maxVel,
                 turningController2,
                 profile,
                 Angle100.instance);
@@ -49,10 +50,27 @@ class AnglePositionServoTest {
         String name = "test";
         MockPositionMotor100<Angle100> motor = new MockPositionMotor100<>();
         MockEncoder100<Angle100> encoder = new MockEncoder100<>();
+        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
-        OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(name, motor, encoder, Angle100.instance);
+        OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
+                name,
+                motor,
+                encoder,
+                profile,
+                Angle100.instance);
         servo.reset();
+        // it moves slowly
         servo.setPosition(1, 0);
+        assertEquals(2e-4, motor.position, 1e-4);
+        servo.setPosition(1, 0);
+        assertEquals(8e-4, motor.position, 1e-4);
+        servo.setPosition(1, 0);
+        assertEquals(0.002, motor.position, kDelta);
+        for (int i = 0; i < 100; ++i) {
+            // run it for awhile
+            servo.setPosition(1, 0);
+            System.out.println(motor.position);
+        }
         assertEquals(1, motor.position, kDelta);
     }
 }

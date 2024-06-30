@@ -69,33 +69,60 @@ public abstract class CANSparkMotor<T extends Measure100>
     }
 
     /**
-     * Bypass the gear ratio, wheel diameter, etc, and set the motor directly.
+     * Set motor output using motor quantities (rev/s, rev/s^2, Nm).
      */
-    public void setMotorVelocity(double motorRev_S, double motorRev_S2, double torqueNm) {
-        double motorRev_M = motorRev_S * 60;
+    protected void setMotorVelocity(
+            double motorRev_S,
+            double motorRev_S2,
+            double torqueNm) {
+        double currentMotorRev_S = m_encoder.getVelocity() / 60;
 
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
-        double frictionFFVolts = m_ff.frictionFFVolts(m_encoder.getVelocity() / 60, motorRev_S);
         double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
-
-        double torqueFFAmps = torqueNm / kTNm_amp();
-        double torqueFFVolts = torqueFFAmps * kROhms();
+        double torqueFFVolts = getTorqueFFVolts(torqueNm);
 
         double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
 
-        Rev100.warn(() -> m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
+        double motorRev_M = motorRev_S * 60;
+        Rev100.warn(() -> m_pidController.setReference(
+                motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
 
-        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "desired accel (rev_s2)", motorRev_S2);
+        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward (v)", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
         log();
     }
 
-    // TODO: this is not done; finish it
-    public void setMotorPosition(double p, double t) {
-        Rev100.warn(() -> m_pidController.setReference(p, ControlType.kPosition, 0, t, ArbFFUnits.kVoltage));
+    /**
+     * Set motor output using motor quantities (rev, Nm).
+     * 
+     * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
+     */
+    protected void setMotorPosition(
+            double motorRev,
+            double motorRev_S,
+            double torqueNm) {
+        double currentMotorRev_S = m_encoder.getVelocity() / 60;
+
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double torqueFFVolts = getTorqueFFVolts(torqueNm);
+
+        double kFF = frictionFFVolts + velocityFFVolts + torqueFFVolts;
+
+        Rev100.warn(() -> m_pidController.setReference(
+                motorRev, ControlType.kPosition, 0, kFF, ArbFFUnits.kVoltage));
+                
+        t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        log();
     }
 
     /**

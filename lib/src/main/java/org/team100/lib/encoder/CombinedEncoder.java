@@ -5,7 +5,8 @@ import java.util.OptionalDouble;
 import org.team100.lib.units.Measure100;
 
 /**
- * Proxies two encoders and corrects one of them.
+ * Proxies two encoders and corrects the position of one of them every time you
+ * get it.  Also falls back to the secondary if the primary fails.
  * 
  * The use case is absolute + incremental encoders, in order to do outboard
  * closed-loop position control with only outboard incremental encoders --
@@ -13,37 +14,47 @@ import org.team100.lib.units.Measure100;
  * encoders are the secondary.
  */
 public class CombinedEncoder<T extends Measure100> implements Encoder100<T> {
-
     private final Encoder100<T> m_primary;
-    private final Encoder100<T> m_secondary;
+    private final SettableEncoder<T> m_secondary;
 
-    public CombinedEncoder(Encoder100<T> primary, Encoder100<T> secondary) {
+    public CombinedEncoder(Encoder100<T> primary, SettableEncoder<T> secondary) {
         m_primary = primary;
         m_secondary = secondary;
     }
 
     @Override
     public OptionalDouble getPosition() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPosition'");
+        OptionalDouble primaryPosition = m_primary.getPosition();
+        if (primaryPosition.isPresent()) {
+            // Adjust the secondary.
+            m_secondary.setPosition(primaryPosition.getAsDouble());
+            return primaryPosition;
+        }
+        // Primary is broken, maybe the secondary is still working.
+        return m_secondary.getPosition();
     }
 
     @Override
     public OptionalDouble getRate() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRate'");
+        OptionalDouble primaryRate = m_primary.getRate();
+        if (primaryRate.isPresent()) {
+            // Rate cannot be corrected so just return the primary value.
+            return primaryRate;
+        }
+        // Primary is broken, maybe the secondary is still working.
+        return m_secondary.getRate();
     }
 
     @Override
     public void reset() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'reset'");
+        m_primary.reset();
+        m_secondary.reset();
     }
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'close'");
+        m_primary.close();
+        m_secondary.close();
     }
 
 }
