@@ -139,7 +139,7 @@ public abstract class Talon6Motor<T extends Measure100>
                 m_PositionVoltage
                         .withPosition(motorRev)
                         .withFeedForward(kFFVolts)));
-                        
+
         t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
         t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
@@ -161,8 +161,15 @@ public abstract class Talon6Motor<T extends Measure100>
     /**
      * Sets integrated sensor position to zero.
      */
-    public void resetPosition() {
+    public void resetEncoderPosition() {
         Phoenix100.warn(() -> m_motor.setPosition(0));
+    }
+
+    /**
+     * Set integrated sensor position in rotations.
+     */
+    public void setEncoderPosition(double motorPositionRev) {
+        Phoenix100.warn(()->m_motor.setPosition(motorPositionRev));
     }
 
     public double getVelocityRev_S() {

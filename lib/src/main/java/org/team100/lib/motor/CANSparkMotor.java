@@ -116,7 +116,7 @@ public abstract class CANSparkMotor<T extends Measure100>
 
         Rev100.warn(() -> m_pidController.setReference(
                 motorRev, ControlType.kPosition, 0, kFF, ArbFFUnits.kVoltage));
-                
+
         t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
         t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
@@ -144,8 +144,15 @@ public abstract class CANSparkMotor<T extends Measure100>
     /**
      * Sets integrated sensor position to zero.
      */
-    public void resetPosition() {
+    public void resetEncoderPosition() {
         Rev100.warn(() -> m_encoder.setPosition(0));
+    }
+
+    /**
+     * Set integrated sensor position in rotations.
+     */
+    public void setEncoderPosition(double motorPositionRev) {
+        Rev100.warn(() -> m_encoder.setPosition(motorPositionRev));
     }
 
     protected void log() {

@@ -13,7 +13,11 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
-/** Very simple wrapper around SparkFlex for testing. */
+/**
+ * Very simple wrapper around SparkFlex for testing.
+ * 
+ * TODO: remove this class, use NeoVortexDriveEncoder instead.
+ */
 public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
@@ -54,11 +58,11 @@ public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
         m_motor.close();
     }
 
-    double getVelocity() {
+    double getVelocityRPM() {
         return m_encoder.getVelocity();
     }
 
-    double getPosition() {
+    double getPositionRot() {
         return m_encoder.getPosition();
     }
 
