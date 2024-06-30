@@ -11,7 +11,6 @@ import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.duty_cycle.NeoProxy;
@@ -40,6 +39,12 @@ public class DrumShooter extends Shooter {
     private static final double kLeftRollerVelocity = 20;
     /** Right roller setpoint m/s */
     private static final double kRightRollerVelocity = 15;
+    /** Spin the rollers gently all the time to reduce starting current. */
+    private static final double kIdleVelocity = 1;
+    /** Feed velocity. */
+    private static final double kFeed = 5;
+    /** Outtake velocity. */
+    private static final double kOut = -6;
 
     private final Telemetry t = Telemetry.get();
 
@@ -70,7 +75,7 @@ public class DrumShooter extends Shooter {
         switch (Identity.instance) {
             case COMP_BOT:
 
-                MotorWithEncoder100<Distance100> leftMotor = new Falcon6DriveMotor(
+                Falcon6DriveMotor leftMotor = new Falcon6DriveMotor(
                         m_name + "/Left",
                         leftID,
                         MotorPhase.REVERSE,
@@ -83,7 +88,7 @@ public class DrumShooter extends Shooter {
 
                 leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftMotor);
 
-                MotorWithEncoder100<Distance100> rightMotor = new Falcon6DriveMotor(
+                Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
                         m_name + "/Right",
                         rightID,
                         MotorPhase.FORWARD,
@@ -145,8 +150,8 @@ public class DrumShooter extends Shooter {
 
     @Override
     public void stop() {
-        leftRoller.setDutyCycle(0.05);
-        rightRoller.setDutyCycle(0.05);
+        leftRoller.setVelocity(kIdleVelocity);
+        rightRoller.setVelocity(kIdleVelocity);
         pivotServo.stop();
     }
 
@@ -180,11 +185,6 @@ public class DrumShooter extends Shooter {
         return atVelocitySetpoint(false);
     }
 
-    public void setDutyCycle(double value) {
-        leftRoller.setDutyCycle(value);
-        rightRoller.setDutyCycle(value);
-    }
-
     public double getPivotPosition() {
         return pivotServo.getRawPosition();
     }
@@ -194,14 +194,14 @@ public class DrumShooter extends Shooter {
     }
 
     public void feed() {
-        leftRoller.setDutyCycle(0.25);
-        rightRoller.setDutyCycle(0.25);
+        leftRoller.setVelocity(kFeed);
+        rightRoller.setVelocity(kFeed);
     }
 
     @Override
     public void outtake() {
-        leftRoller.setDutyCycle(-0.3);
-        rightRoller.setDutyCycle(-0.3);
+        leftRoller.setVelocity(kOut);
+        rightRoller.setVelocity(kOut);
     }
 
     /** Returns the average of the two rollers */

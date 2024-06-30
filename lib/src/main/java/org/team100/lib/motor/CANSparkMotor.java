@@ -2,6 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
@@ -14,7 +15,8 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
-public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T> {
+public abstract class CANSparkMotor<T extends Measure100>
+        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
     protected final Telemetry t = Telemetry.get();
     private final String m_name;
     protected final Feedforward100 m_ff;
@@ -89,6 +91,11 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
         t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
         log();
+    }
+
+    // TODO: this is not done; finish it
+    public void setMotorPosition(double p, double t) {
+        Rev100.warn(() -> m_pidController.setReference(p, ControlType.kPosition, 0, t, ArbFFUnits.kVoltage));
     }
 
     /**

@@ -2,8 +2,8 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
+import org.team100.lib.motion.components.OnboardPositionServo;
 import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedMotor;
@@ -17,7 +17,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     public static SimulatedSwerveModule100 get(String name, SwerveKinodynamics kinodynamics) {
         VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
-        PositionServoInterface<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
+        PositionServo<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
@@ -36,7 +36,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 driveEncoder);
     }
 
-    private static PositionServoInterface<Angle100> simulatedTurningServo(
+    private static PositionServo<Angle100> simulatedTurningServo(
             String name,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
@@ -56,7 +56,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServoInterface<Angle100> turningServo = new PositionServo<>(
+        PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
                 name,
                 turningMotor,
                 turningEncoder,
@@ -71,7 +71,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     private SimulatedSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServoInterface<Angle100> turningServo) {
+            PositionServo<Angle100> turningServo) {
         super(name, driveServo, turningServo);
         //
     }

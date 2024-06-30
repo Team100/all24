@@ -4,6 +4,8 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
@@ -11,13 +13,15 @@ import org.team100.lib.util.Names;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor<T extends Measure100> implements MotorWithEncoder100<T> {
+public abstract class Talon6Motor<T extends Measure100>
+        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel, Encoder100<T> {
     protected final Telemetry t = Telemetry.get();
     protected final String m_name;
     private final TalonFX m_motor;
@@ -36,6 +40,7 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
     // caching the control requests saves allocation
     private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0);
     private final DutyCycleOut m_dutyCycleOut = new DutyCycleOut(0);
+    private final PositionVoltage m_PositionVoltage = new PositionVoltage(0);
 
     protected Talon6Motor(
             String name,
@@ -101,6 +106,13 @@ public abstract class Talon6Motor<T extends Measure100> implements MotorWithEnco
         t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
         t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         log();
+    }
+
+    // TODO: this is not done; finish it
+    public void setMotorPosition(double p, double t) {
+        Phoenix100.warn(() -> m_motor.setControl(m_PositionVoltage
+                .withPosition(p)
+                .withFeedForward(t)));
     }
 
     @Override

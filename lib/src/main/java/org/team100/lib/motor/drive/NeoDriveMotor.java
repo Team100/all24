@@ -24,4 +24,9 @@ public class NeoDriveMotor extends CANSparkDriveMotor implements NeoTorqueModel 
                 motorPhase, currentLimit, gearRatio, wheelDiameter,
                 ff, pid);
     }
+
+    @Override
+    public String getGlassName() {
+        return "NeoDriveMotor";
+    }
 }

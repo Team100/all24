@@ -4,20 +4,10 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.units.Measure100;
 
 /** For testing. */
-public class NullPositionServo<T extends Measure100> implements PositionServoInterface<T> {
+public class NullPositionServo<T extends Measure100> implements PositionServo<T> {
 
     @Override
     public void reset() {
-        //
-    }
-
-    @Override
-    public void setPositionDirect(double goal) {
-        //
-    }
-
-    @Override
-    public void setPosition(double goal) {
         //
     }
 
@@ -26,11 +16,6 @@ public class NullPositionServo<T extends Measure100> implements PositionServoInt
         //
     }
 
-    @Override
-    public void setVelocity(double velocity) {
-        // 
-    }
-    
     @Override
     public double getPosition() {
         return 0.0;

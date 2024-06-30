@@ -3,7 +3,7 @@ package org.team100.frc2024.motion;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +13,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class GravityServo {
     private final Telemetry t = Telemetry.get();
-    private final Motor100<Distance100> m_motor;
+    private final DutyCycleMotor100 m_motor;
     private final String m_name;
     private final SysParam m_params;
     private final PIDController m_controller;
@@ -26,7 +26,7 @@ public class GravityServo {
     private State100 m_setpoint = new State100(0, 0);
 
     public GravityServo(
-            Motor100<Distance100> motor,
+            DutyCycleMotor100 motor,
             String name,
             SysParam params,
             PIDController controller,

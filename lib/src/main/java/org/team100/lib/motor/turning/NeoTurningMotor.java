@@ -23,4 +23,9 @@ public class NeoTurningMotor extends CANSparkTurningMotor implements NeoTorqueMo
         super(name, new CANSparkMax(canId, MotorType.kBrushless),
                 motorPhase, currentLimit, gearRatio, ff, pid);
     }
+
+    @Override
+    public String getGlassName() {
+        return "NeoTurningMotor";
+    }
 }

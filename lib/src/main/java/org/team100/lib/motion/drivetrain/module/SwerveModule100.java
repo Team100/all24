@@ -2,7 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.PositionServoInterface;
+import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
@@ -21,12 +21,12 @@ public class SwerveModule100 implements Glassy {
 
     private final String m_name;
     private final VelocityServo<Distance100> m_driveServo;
-    private final PositionServoInterface<Angle100> m_turningServo;
+    private final PositionServo<Angle100> m_turningServo;
 
     public SwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServoInterface<Angle100> turningServo) {
+            PositionServo<Angle100> turningServo) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
@@ -51,7 +51,7 @@ public class SwerveModule100 implements Glassy {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
         m_driveServo.setVelocity(state.speedMetersPerSecond);
-        m_turningServo.setPosition(state.angle.getRadians());
+        m_turningServo.setPosition(state.angle.getRadians(), 0);
     }
 
     /** For testing */
