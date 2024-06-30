@@ -61,15 +61,19 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
 
     private double getPositionRad() {
         // should be fast, no need to cache it.
-        double positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        double motorPositionRev = m_motor.getPositionRot();
+        double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
+        t.log(Level.DEBUG, m_name, "motor position (rev)", motorPositionRev);
+        t.log(Level.DEBUG, m_name, "output position (rad)", positionRad);
         return positionRad;
     }
 
     private double getRateRad_S() {
         // should be fast, no need to cache it.
-        double rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", rateRad_S);
-        return rateRad_S;
+        double motorVelocityRev_S = m_motor.getRateRPM() / 60;
+        double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
+        t.log(Level.DEBUG, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
+        t.log(Level.DEBUG, m_name, "output velocity (rad_s)", outputVelocityRad_S);
+        return outputVelocityRad_S;
     }
 }

@@ -61,7 +61,9 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     private double getPositionM() {
         // raw position is in rotations
         // this is fast so we don't need to cache it
-        double positionM = m_motor.getPositionRot() * m_distancePerTurn;
+        double motorPositionRev = m_motor.getPositionRot();
+        double positionM = motorPositionRev * m_distancePerTurn;
+        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
         t.log(Level.DEBUG, m_name, "position (m)", positionM);
         return positionM;
     }
