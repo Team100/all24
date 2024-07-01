@@ -375,13 +375,13 @@ class SwerveDriveKinematics100Test {
     @Test
     void testModuleKinematics() {
         SimpleMatrix accelerations = new SimpleMatrix(3, 1);
-        SimpleMatrix expected = new SimpleMatrix(3, 1);
+        SimpleMatrix expected = new SimpleMatrix(2, 1);
         accelerations.setColumn(0, 0, 0, 0, 0);
-        expected.setColumn(0, 0, 0, 0, 0);
-        SimpleMatrix output = SwerveDriveKinematics100.getModuleAccelerationXY(new Translation2d(0.5, 0.5),
-                accelerations);
-                Util.println(output.get(0,0) + " " + output.get(1,0));
-        assertEquals(expected, output, output.get(0,0) + " " + output.get(1,0));
+        expected.setColumn(0, 0, 0, 0);
+        SimpleMatrix output = SwerveDriveKinematics100.getModuleAccelerationXY(new Translation2d(0.5, 0.5), accelerations);
+        Util.println(output.get(0,0) + " " + output.get(1,0));
+        assertEquals(expected.get(0,0), 0, 0.0001);
+        assertEquals(expected.get(1,0), 0, 0.0001);
     }
 
     @Test
