@@ -61,8 +61,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
-            MotorPhase motorPhase,
-            Async async) {
+            MotorPhase motorPhase) {
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
@@ -90,7 +89,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningPidConstants,
                 turningFF);
 
-        return new WCPSwerveModule100(name, driveServo, turningServo, async);
+        return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
     private static VelocityServo<Distance100> driveServo(
@@ -232,9 +231,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private WCPSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo,
-            Async async) {
-        super(name, driveServo, turningServo, async);
+            PositionServo<Angle100> turningServo) {
+        super(name, driveServo, turningServo);
         //
     }
 }

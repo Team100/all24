@@ -40,6 +40,7 @@ import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
@@ -84,6 +85,7 @@ public class RobotContainerParkingLot {
                 kDriveStatorLimit,
                 swerveKinodynamics,
                 async);
+        SwerveModuleVisualization.make(m_modules, async);
         m_heading = HeadingFactory.get(
                 swerveKinodynamics,
                 m_modules,
