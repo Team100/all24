@@ -3,6 +3,8 @@ package org.team100.lib.sensors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.async.Async;
+import org.team100.lib.async.MockAsync;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -18,7 +20,8 @@ class SimulatedHeadingTest implements Timeless {
     @Test
     void testInitial() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l);
+        Async async = new MockAsync();
+        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
         SimulatedHeading h = new SimulatedHeading(l, c);
         assertEquals(0, h.getHeadingNWU().getRadians(), kDelta);
         assertEquals(0, h.getHeadingRateNWU(), kDelta);
@@ -27,7 +30,8 @@ class SimulatedHeadingTest implements Timeless {
     @Test
     void testTranslation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l);
+        Async async = new MockAsync();
+        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
         SwerveModulePosition[] p = c.positions();
         assertEquals(0, p[0].distanceMeters, kDelta);
         assertEquals(0, p[1].distanceMeters, kDelta);
@@ -55,7 +59,8 @@ class SimulatedHeadingTest implements Timeless {
     @Test
     void testRotation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l);
+        Async async = new MockAsync();
+        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
         // includes discretization
@@ -94,7 +99,8 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(-0.363, states[2].angle.getRadians(), kDelta);
         assertEquals(-0.224, states[3].angle.getRadians(), kDelta);
 
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l);
+        Async async = new MockAsync();
+        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
         SimulatedHeading h = new SimulatedHeading(l, c);
         c.reset();
 

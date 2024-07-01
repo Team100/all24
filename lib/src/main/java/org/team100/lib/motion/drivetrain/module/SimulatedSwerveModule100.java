@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.OnboardPositionServo;
@@ -15,10 +16,13 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class SimulatedSwerveModule100 extends SwerveModule100 {
 
-    public static SimulatedSwerveModule100 get(String name, SwerveKinodynamics kinodynamics) {
+    public static SimulatedSwerveModule100 get(
+            String name,
+            SwerveKinodynamics kinodynamics,
+            Async async) {
         VelocityServo<Distance100> driveServo = simulatedDriveServo(name + "/Drive");
         PositionServo<Angle100> turningServo = simulatedTurningServo(name + "/Turning", kinodynamics);
-        return new SimulatedSwerveModule100(name, driveServo, turningServo);
+        return new SimulatedSwerveModule100(name, driveServo, turningServo, async);
     }
 
     private static VelocityServo<Distance100> simulatedDriveServo(String name) {
@@ -71,8 +75,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     private SimulatedSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
-        super(name, driveServo, turningServo);
+            PositionServo<Angle100> turningServo,
+            Async async) {
+        super(name, driveServo, turningServo, async);
         //
     }
 

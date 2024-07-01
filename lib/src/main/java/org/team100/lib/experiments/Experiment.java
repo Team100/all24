@@ -64,10 +64,6 @@ public enum Experiment {
      */
     SlipperyTires,
     /**
-     * Use executor service for asyncs
-     */
-    UseExecutorAsync,
-    /**
      * Use Java executor for Command100.
      */
     UseCommandExecutor,

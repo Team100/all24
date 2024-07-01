@@ -3,6 +3,8 @@ package org.team100.frc2024;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.team100.lib.async.Async;
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
 import org.team100.lib.commands.drivetrain.DrawSquare;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
@@ -18,6 +20,7 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -43,7 +46,6 @@ import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -71,12 +73,21 @@ public class RobotContainerParkingLot {
      * The reason to put it here rather than commenting it out is so that it doesn't
      * rot.
      */
-    RobotContainerParkingLot(TimedRobot robot) {
-        driverControl = new DriverControlProxy();
-        operatorControl = new OperatorControlProxy();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, kDriveStatorLimit, swerveKinodynamics);
-        m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
+    RobotContainerParkingLot(TimedRobot100 robot) {
+        final AsyncFactory asyncFactory = new AsyncFactory(robot);
+        final Async async = asyncFactory.get();
+        driverControl = new DriverControlProxy(async);
+        operatorControl = new OperatorControlProxy(async);
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_modules = SwerveModuleCollection.get(
+                kDriveCurrentLimit,
+                kDriveStatorLimit,
+                swerveKinodynamics,
+                async);
+        m_heading = HeadingFactory.get(
+                swerveKinodynamics,
+                m_modules,
+                asyncFactory);
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
@@ -102,9 +113,9 @@ public class RobotContainerParkingLot {
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() ||
                 m_beep.getOutput();
-        m_monitor = new Monitor(new Annunciator(6), test);
+        m_monitor = new Monitor(new Annunciator(6, async), test);
         // The monitor runs less frequently than the control loop.
-        robot.addPeriodic(m_monitor::periodic, 0.2);
+        robot.addPeriodic(m_monitor::periodic, 0.2, "monitor");
 
         HolonomicDriveController3 controller = new HolonomicDriveController3();
 

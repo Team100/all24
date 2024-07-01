@@ -1,6 +1,6 @@
 package org.team100.lib.sensors;
 
-import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -24,7 +24,8 @@ public class SingleNavXGyro implements Gyro100 {
     private final AHRS m_gyro1;
     private final String m_name;
 
-    public SingleNavXGyro() {
+    /** NOTE: the async is just for logging, maybe don't use a whole thread for it. */
+    public SingleNavXGyro(Async async) {
         m_name = Names.name(this);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
@@ -49,7 +50,7 @@ public class SingleNavXGyro implements Gyro100 {
         }
 
         m_gyro1.zeroYaw();
-        AsyncFactory.get().addPeriodic(this::logStuff, 1, "SingleNavXGyro");
+        async.addPeriodic(this::logStuff, 1, "SingleNavXGyro");
     }
 
     /**

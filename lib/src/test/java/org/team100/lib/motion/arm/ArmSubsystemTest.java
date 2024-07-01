@@ -3,6 +3,8 @@ package org.team100.lib.motion.arm;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.async.Async;
+import org.team100.lib.async.MockAsync;
 import org.team100.lib.testing.Timeless;
 
 class ArmSubsystemTest implements Timeless {
@@ -11,7 +13,8 @@ class ArmSubsystemTest implements Timeless {
     // test simple direct motion
     @Test
     void testSimple() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
 
         assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);
         // upper joint lower limit is 0.1 but the IIR filter takes a bit to realize it.
