@@ -3,14 +3,15 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.ejml.simple.SimpleMatrix;
 import org.junit.jupiter.api.Test;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * None of these tests take tires into account.
@@ -369,6 +370,52 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(0.0, twist.dx, 0.1),
                 () -> assertEquals(-33.0, twist.dy, 0.1),
                 () -> assertEquals(1.5, twist.dtheta, 0.1));
+    }
+
+    @Test
+    void testModuleKinematics() {
+        SimpleMatrix accelerations = new SimpleMatrix(3, 1);
+        SimpleMatrix expected = new SimpleMatrix(3, 1);
+        accelerations.setColumn(0, 0, 0, 0, 0);
+        expected.setColumn(0, 0, 0, 0, 0);
+        SimpleMatrix output = SwerveDriveKinematics100.getModuleAccelerationXY(new Translation2d(0.5, 0.5),
+                accelerations);
+                Util.println(output.get(0,0) + " " + output.get(1,0));
+        assertEquals(expected, output, output.get(0,0) + " " + output.get(1,0));
+    }
+
+    @Test
+    void testModuleKinematics2() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+            new Translation2d(0.5, 0.5),
+            new Translation2d(0.5, -0.5),
+            new Translation2d(-0.5, 0.5),
+            new Translation2d(-0.5, -0.5));
+        SimpleMatrix velocities = new SimpleMatrix(3, 1);
+        SimpleMatrix velocities2 = new SimpleMatrix(3, 1);
+        SimpleMatrix accelerations = new SimpleMatrix(3, 1);
+        SimpleMatrix accelerations2 = new SimpleMatrix(3, 1);
+        velocities.setColumn(0, 0, 0, 0, 1);
+        accelerations.setColumn(0, 0, 0, 0, 0);
+        velocities2.setColumn(0, 0, 2, 1, 1);
+        accelerations2.setColumn(0, 0, 2, 2, 2);
+        SwerveModuleState[] prevStates = {new SwerveModuleState(),new SwerveModuleState(),new SwerveModuleState(),new SwerveModuleState()};
+        SwerveModuleState[] output2 = kinematics.statesFromVector(velocities, prevStates);
+        SwerveModuleState[] output = kinematics.accelerationFromVector(velocities,
+                accelerations,prevStates, 0.02);
+        SwerveModuleState[] output4 = kinematics.statesFromVector(velocities2, prevStates);
+        SwerveModuleState[] output3 = kinematics.accelerationFromVector(velocities2,
+                accelerations2,prevStates, 0.02);
+                Util.println(output[0].toString());
+        assertEquals(0, output[0].speedMetersPerSecond_2, 0.0001);
+        for (int i = 0; i < 4; i++) {
+            assertEquals(output[i].angle, output2[i].angle);
+            assertEquals(output[i].speedMetersPerSecond, output2[i].speedMetersPerSecond);
+        }
+        for (int i = 0; i < 4; i++) {
+            assertEquals(output3[i].angle, output4[i].angle);
+            assertEquals(output3[i].speedMetersPerSecond, output4[i].speedMetersPerSecond);
+        }
     }
 
     @Test

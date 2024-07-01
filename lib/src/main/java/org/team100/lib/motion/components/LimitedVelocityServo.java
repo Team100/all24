@@ -69,4 +69,10 @@ public class LimitedVelocityServo<T extends Measure100> implements VelocityServo
     public double getSetpoint() {
         return m_servo.getSetpoint();
     }
+
+    @Override
+    public void setVelocity(double setpoint, double setpoint_2) {
+        setpoint = MathUtil.clamp(setpoint, -m_maxVel, m_maxVel);
+        m_servo.setVelocity(setpoint, setpoint_2);
+    }
 }

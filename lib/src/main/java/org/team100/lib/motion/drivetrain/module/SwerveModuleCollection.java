@@ -10,9 +10,9 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.util.Util;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection {
@@ -26,7 +26,6 @@ public class SwerveModuleCollection {
     private final SwerveModule100 m_frontRight;
     private final SwerveModule100 m_rearLeft;
     private final SwerveModule100 m_rearRight;
-
     private SwerveModuleCollection(
             SwerveModule100 frontLeft,
             SwerveModule100 frontRight,

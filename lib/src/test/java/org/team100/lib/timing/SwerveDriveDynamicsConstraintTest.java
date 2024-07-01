@@ -1,6 +1,7 @@
 package org.team100.lib.timing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
@@ -12,7 +13,6 @@ import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * None of the tests here involve the Tire model.

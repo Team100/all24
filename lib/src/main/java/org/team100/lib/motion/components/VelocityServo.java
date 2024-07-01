@@ -15,6 +15,12 @@ public interface VelocityServo<T extends Measure100> extends Glassy {
      * @param setpoint
      */
     void setVelocity(double setpoint);
+    /**
+     * Velocity in meters/sec or radians/sec depending on T.
+     * 
+     * @param setpoint
+     */
+    void setVelocity(double setpoint, double setpoint_2);
 
     /**
      * @return Current velocity measurement. Note this can be noisy, maybe filter

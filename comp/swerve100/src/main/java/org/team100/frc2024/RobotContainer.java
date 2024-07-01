@@ -32,6 +32,7 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
@@ -41,6 +42,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.HolonomicDriveController100;
+import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -225,15 +227,17 @@ public class RobotContainer implements Glassy {
 
         // 254 PID follower
         DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF();
+        
+        HolonomicDriveController3 controller = new HolonomicDriveController3();
 
-        // Drive With Profile
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
                         m_intake,
                         notePositionDetector::getClosestTranslation2d,
                         m_drive,
-                        fullStateController,
+                        dthetaController,
                         swerveKinodynamics));
+        whileTrue(driverControl::actualCircle, new DriveInACircle(m_drive, controller, -1));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(

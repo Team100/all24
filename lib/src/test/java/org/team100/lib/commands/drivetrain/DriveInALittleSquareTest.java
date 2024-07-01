@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare.DriveState;
@@ -11,8 +12,6 @@ import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.util.Util;
-
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class DriveInALittleSquareTest extends Fixtured implements Timeless {
     boolean dump = false;

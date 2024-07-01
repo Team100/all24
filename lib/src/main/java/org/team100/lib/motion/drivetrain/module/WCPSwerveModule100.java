@@ -149,10 +149,10 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drive);
         PIDController turningPositionController = new PIDController(
                 20, // kP
-                0.06, // kI
+                0, // kI
                 0, // kD
                 dt);
-        turningPositionController.enableContinuousInput(-Math.PI, -Math.PI);
+        turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
 
         Profile100 profile = kinodynamics.getSteeringProfile();

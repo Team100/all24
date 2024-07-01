@@ -110,7 +110,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      */
     public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
         Pose2d currentPose = state.pose();
-
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
         // scale to max in both translation and rotation
@@ -214,6 +213,8 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "mode", "snap");
         t.log(Level.TRACE, m_name, "goal/theta", m_goal.getRadians());
         t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaSetpoint);
+        t.log(Level.TRACE, m_name, "thetaFB", thetaFB);
+        t.log(Level.TRACE, m_name, "omegaFB", omegaFB);
         t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
         t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
         t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);

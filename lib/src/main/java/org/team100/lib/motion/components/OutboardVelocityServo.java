@@ -47,6 +47,13 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
         t.log(Level.TRACE, m_name, "Desired setpoint", setpoint);
     }
 
+    @Override
+    public void setVelocity(double setpoint, double setpoint_2) {
+        m_setpoint = setpoint;
+        m_motor.setVelocity(setpoint, setpoint_2, 0);
+        t.log(Level.TRACE, m_name, "Desired setpoint", setpoint);
+    }
+
     /**
      * @return Current velocity measurement. Note this can be noisy, maybe filter
      *         it.

@@ -6,9 +6,9 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * Transform manual input into swerve module states, in a simpler way than

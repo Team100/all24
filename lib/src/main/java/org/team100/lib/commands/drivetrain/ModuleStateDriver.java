@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public interface ModuleStateDriver extends Glassy {
     /**

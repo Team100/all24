@@ -5,6 +5,8 @@ import java.util.OptionalDouble;
 import org.team100.lib.async.Async;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle100;
@@ -12,10 +14,9 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 import org.team100.lib.visualization.SwerveModuleVisualization;
-
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * Feedforward and feedback control of a single module.
@@ -50,7 +51,7 @@ public class SwerveModule100 implements Glassy {
                         desiredState,
                         new Rotation2d(position.getAsDouble())));
     }
-
+    
     /**
      * Only SwerveModuleCollection calls this.
      * 
@@ -59,8 +60,14 @@ public class SwerveModule100 implements Glassy {
     void setRawDesiredState(SwerveModuleState state) {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
-        m_driveServo.setVelocity(state.speedMetersPerSecond);
-        m_turningServo.setPosition(state.angle.getRadians(), 0);
+        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve))  {
+            m_driveServo.setVelocity(state.speedMetersPerSecond, state.speedMetersPerSecond_2);
+            m_turningServo.setPosition(state.angle.getRadians(), state.angle_2.getRadians());
+        } else {
+            m_driveServo.setVelocity(state.speedMetersPerSecond);
+            m_turningServo.setPosition(state.angle.getRadians(),0);
+        }
+
     }
 
     /** For testing */

@@ -4,12 +4,12 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * Makes a little square, one meter on a side, forever.

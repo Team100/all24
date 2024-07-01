@@ -1,4 +1,5 @@
 package org.team100.lib.motion.drivetrain.manual;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,7 +8,6 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SimpleManualModuleStatesTest {
     private static final double kDelta = 0.001;

@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.lib.commands.Command100;
-import org.team100.lib.controller.FullStateDriveController;
+import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -32,7 +32,7 @@ public class DriveWithProfileNote extends Command100 {
 
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
-    private final FullStateDriveController m_controller;
+    private final HolonomicDriveController100 m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
@@ -47,7 +47,7 @@ public class DriveWithProfileNote extends Command100 {
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
-            FullStateDriveController controller,
+            HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
         previousGoal = null;
         count = 0;

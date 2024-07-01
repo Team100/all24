@@ -1,4 +1,5 @@
 package org.team100.lib.commands.drivetrain;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,7 +23,6 @@ import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DataLogManager;
 
 class TrajectoryListCommandTest extends Fixtured implements Timeless {
