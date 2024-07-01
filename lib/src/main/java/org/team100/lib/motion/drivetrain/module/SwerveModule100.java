@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.PositionServo;
@@ -7,6 +9,7 @@ import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -39,7 +42,13 @@ public class SwerveModule100 implements Glassy {
      * Only SwerveModuleCollection calls this.
      */
     void setDesiredState(SwerveModuleState desiredState) {
-        setRawDesiredState(SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningServo.getPosition())));
+        OptionalDouble position = m_turningServo.getPosition();
+        if (position.isEmpty())
+            return;
+        setRawDesiredState(
+                SwerveModuleState.optimize(
+                        desiredState,
+                        new Rotation2d(position.getAsDouble())));
     }
 
     /**
@@ -92,11 +101,35 @@ public class SwerveModule100 implements Glassy {
 
     /** @return current measurements */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(m_driveServo.getVelocity(), new Rotation2d(m_turningServo.getPosition()));
+        OptionalDouble driveVelocity = m_driveServo.getVelocity();
+        OptionalDouble turningPosition = m_turningServo.getPosition();
+        if (driveVelocity.isEmpty()) {
+            Util.warn("no drive velocity measurement!");
+            return null;
+        }
+        if (turningPosition.isEmpty()) {
+            Util.warn("no turning position measurement!");
+            return null;
+        }
+        return new SwerveModuleState(
+                driveVelocity.getAsDouble(),
+                new Rotation2d(turningPosition.getAsDouble()));
     }
 
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(m_driveServo.getDistance(), new Rotation2d(m_turningServo.getPosition()));
+        OptionalDouble driveDistance = m_driveServo.getDistance();
+        OptionalDouble turningPosition = m_turningServo.getPosition();
+        if (driveDistance.isEmpty()) {
+            Util.warn("no drive distance measurement!");
+            return null;
+        }
+        if (turningPosition.isEmpty()) {
+            Util.warn("no turning position measurement!");
+            return null;
+        }
+        return new SwerveModulePosition(
+                driveDistance.getAsDouble(),
+                new Rotation2d(turningPosition.getAsDouble()));
     }
 
     boolean atSetpoint() {

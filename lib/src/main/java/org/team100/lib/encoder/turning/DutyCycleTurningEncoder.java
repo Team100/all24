@@ -1,10 +1,13 @@
 package org.team100.lib.encoder.turning;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -49,13 +52,21 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     }
 
     @Override
-    public Double getPosition() {
-        return getPositionRad();
+    public OptionalDouble getPosition() {
+        if (!m_encoder.isConnected()) {
+            Util.warn(String.format("encoder %d not connected", m_encoder.getSourceChannel()));
+            return OptionalDouble.empty();
+        }
+        return OptionalDouble.of(getPositionRad());
     }
 
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        if (!m_encoder.isConnected()) {
+            Util.warn(String.format("encoder %d not connected", m_encoder.getSourceChannel()));
+            return OptionalDouble.empty();
+        }
+        return OptionalDouble.of(getRateRad_S());
     }
 
     @Override

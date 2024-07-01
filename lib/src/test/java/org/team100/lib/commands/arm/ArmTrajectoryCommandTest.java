@@ -30,7 +30,7 @@ class ArmTrajectoryCommandTest implements Timeless {
                 goal);
         ArmTrajectoryCommand.shutDownForTest();
         command.initialize();
-        assertEquals(0, armSubSystem.getPosition().th1, kDelta);
+        assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);
         stepTime(0.02);
         command.execute100(0.02);
         // the goal is impossible so this is always finished.
@@ -62,8 +62,8 @@ class ArmTrajectoryCommandTest implements Timeless {
         }
         assertTrue(command.isFinished());
         // command tolerance is 0.02
-        assertEquals(0, armSubSystem.getPosition().th1, 0.02);
-        assertEquals(Math.PI / 2, armSubSystem.getPosition().th2, 0.02);
+        assertEquals(0, armSubSystem.getPosition().get().th1, 0.02);
+        assertEquals(Math.PI / 2, armSubSystem.getPosition().get().th2, 0.02);
         command.end(false);
         armSubSystem.close();
     }

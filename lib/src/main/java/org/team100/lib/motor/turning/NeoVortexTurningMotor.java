@@ -24,9 +24,4 @@ public class NeoVortexTurningMotor extends CANSparkTurningMotor implements NeoVo
         super(name, new CANSparkFlex(canId, MotorType.kBrushless),
                 motorPhase, currentLimit, gearRatio, ff, pid);
     }
-
-    @Override
-    public String getGlassName() {
-        return "NeoVortexTurningMotor";
-    }
 }

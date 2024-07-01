@@ -24,6 +24,8 @@ package org.team100.lib.config;
  *      a similar model, and also a discrete one which is more accurate.
  * @see {@link org.team100.lib.config.FeedforwardTest} which compares the
  *      models.
+ * 
+ * TODO: this class overlaps with TorqueModel, so dedupe it somehow.
  */
 public class Feedforward100 {
     private final double kV;

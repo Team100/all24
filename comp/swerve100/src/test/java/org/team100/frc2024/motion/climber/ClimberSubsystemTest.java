@@ -11,13 +11,13 @@ class ClimberSubsystemTest implements Timeless2024 {
     @Test
     void testSimple() {
         ClimberSubsystem c = new ClimberSubsystem(0, 0);
-        assertEquals(0, c.getLeftPosition(), kDelta);
+        assertEquals(0, c.getLeftPosition().getAsDouble(), kDelta);
         // run it for 0.25 sec at full output
         for (int i = 0; i < 12; ++i) {
             c.setLeft(1);
             stepTime(0.02);
         }
         // it's moved a lot
-        assertEquals(0.24, c.getLeftPosition(), kDelta);
+        assertEquals(0.24, c.getLeftPosition().getAsDouble(), kDelta);
     }
 }

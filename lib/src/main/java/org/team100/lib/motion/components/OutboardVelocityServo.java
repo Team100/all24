@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.telemetry.Telemetry;
@@ -23,24 +25,17 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     private double prevTime;
     private double m_setpoint;
 
-    /**
-     * @param name    may not start with slash
-     * @param motor
-     * @param encoder
-     */
     public OutboardVelocityServo(String name, VelocityMotor100<T> motor, Encoder100<T> encoder) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
+        m_name = Names.append(name, this);
         m_motor = motor;
         m_encoder = encoder;
-        m_name = Names.append(name, this);
     }
 
     @Override
     public void reset() {
         prevTime = Timer.getFPGATimestamp();
-        // ALERT!  @joel 2/19/24: I think encoder reset changes the internal offset
-        // which is never what we want.  but this might be wrong
+        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
+        // which is never what we want. but this might be wrong
         // for some other reason
         // m_encoder.reset();
     }
@@ -57,7 +52,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
      *         it.
      */
     @Override
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_encoder.getRate();
     }
 
@@ -67,7 +62,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     }
 
     @Override
-    public double getDistance() {
+    public OptionalDouble getDistance() {
         return m_encoder.getPosition();
     }
 

@@ -3,9 +3,9 @@ package org.team100.frc2024.motion.shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class TestShoot extends Command {
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
 
-    public TestShoot(Shooter shooter) {
+    public TestShoot(DrumShooter shooter) {
         m_shooter = shooter;
         addRequirements(m_shooter);
     }

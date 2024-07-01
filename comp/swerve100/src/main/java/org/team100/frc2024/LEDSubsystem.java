@@ -2,7 +2,7 @@ package org.team100.frc2024;
 
 import java.util.Optional;
 
-import org.team100.frc2024.motion.shooter.Shooter;
+import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.indicator.LEDIndicator.State;
 import org.team100.lib.localization.VisionDataProvider24;
@@ -21,7 +21,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     private final LEDIndicator m_indicator;
     private final SensorInterface m_sensors;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final VisionDataProvider24 m_vision;
 
     /**
@@ -35,7 +35,7 @@ public class LEDSubsystem extends SubsystemBase {
     public LEDSubsystem(
             LEDIndicator indicator,
             SensorInterface sensors,
-            Shooter shooter,
+            DrumShooter shooter,
             VisionDataProvider24 vision) {
         m_indicator = indicator;
         m_sensors = sensors;

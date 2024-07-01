@@ -1,5 +1,7 @@
 package org.team100.lib.encoder.turning;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -54,8 +56,8 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     }
 
     @Override
-    public Double getPosition() {
-        return getPositionRad();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionRad());
     }
 
     /**
@@ -70,8 +72,8 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
      * Use a Kalman filter if you can, to reduce the lag.
      */
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getRateRad_S());
     }
 
     @Override
@@ -86,8 +88,6 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         m_input.close();
         m_encoder.close();
     }
-
- 
 
     //////////////////////////////////////////////
 

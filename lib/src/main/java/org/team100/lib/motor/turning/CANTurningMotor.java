@@ -198,9 +198,4 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }
-
-    @Override
-    public String getGlassName() {
-        return "CANTurningMotor";
-    }
 }

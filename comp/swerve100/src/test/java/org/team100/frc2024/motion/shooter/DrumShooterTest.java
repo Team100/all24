@@ -15,7 +15,7 @@ class DrumShooterTest implements Timeless2024 {
             s.setAngle(1.0);
             stepTime(0.02);
         }
-        assertEquals(1, s.getAngleRad(), 0.001);
+        assertEquals(1, s.getAngleRad().getAsDouble(), 0.001);
     }
 
     @Test
@@ -28,7 +28,7 @@ class DrumShooterTest implements Timeless2024 {
 
         }
         // 17.5 is the average of the two drums in m/s
-        assertEquals(17.5, s.getVelocity(), kDelta);
+        assertEquals(17.5, s.getVelocity().getAsDouble(), kDelta);
     }
 
 }

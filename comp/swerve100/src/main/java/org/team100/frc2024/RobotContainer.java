@@ -28,7 +28,6 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.Ramp;
-import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
@@ -99,7 +98,7 @@ public class RobotContainer implements Glassy {
     private final SwerveModuleCollection m_modules;
     private final Command m_auton;
     private final SelfTestRunner m_selfTest;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final String m_name;
     private final CameraUpdater cameraUpdater;
     final SwerveDriveSubsystem m_drive;

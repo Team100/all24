@@ -63,9 +63,4 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
     public void close() {
         //
     }
-
-    @Override
-    public String getGlassName() {
-        return "SimulatedMotor";
-    }
 }

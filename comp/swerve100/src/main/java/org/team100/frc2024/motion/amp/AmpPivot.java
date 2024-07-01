@@ -1,5 +1,8 @@
 package org.team100.frc2024.motion.amp;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
+
 import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
@@ -85,12 +88,17 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         ampAngleServo.stop();
     }
 
-    public Double getPositionRad() {
+    public OptionalDouble getPositionRad() {
         return ampAngleServo.getPosition();
     }
 
-    public boolean inPosition() {
-        return getPositionRad() < 0.75 * Math.PI && getPositionRad() > .5 * Math.PI;
+    public Optional<Boolean> inPosition() {
+        OptionalDouble position = getPositionRad();
+        if (position.isEmpty())
+            return Optional.empty();
+        return Optional.of(
+                position.getAsDouble() < 0.75 * Math.PI
+                        && position.getAsDouble() > .5 * Math.PI);
     }
 
     @Override

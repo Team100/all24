@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
@@ -15,7 +17,12 @@ public interface PositionServo<T extends Measure100> extends Glassy {
     void reset();
 
     /**
-     * @param goal For distance, use meters, For angle, use radians.
+     * The angle measure here *does not* wind up, so 0 and 2pi are the same.
+     * 
+     * The measurements here are output measurements, e.g. shaft radians, not motor
+     * radians.
+     * 
+     * @param goal              For distance, use meters, For angle, use radians.
      * @param feedForwardTorque used for gravity compensation
      */
     void setPosition(double goal, double feedForwardTorqueNm);
@@ -24,9 +31,9 @@ public interface PositionServo<T extends Measure100> extends Glassy {
      * @return Current position measurement. For distance this is meters, for angle
      *         this is radians.
      */
-    double getPosition();
+    OptionalDouble getPosition();
 
-    double getVelocity();
+    OptionalDouble getVelocity();
 
     boolean atSetpoint();
 

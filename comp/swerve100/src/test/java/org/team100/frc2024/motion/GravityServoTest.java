@@ -46,7 +46,7 @@ class GravityServoTest implements Timeless2024 {
                 simEncoder,
                 softLimits);
         // start at zero
-        assertEquals(0, g.getPosition(), kDelta);
+        assertEquals(0, g.getPosition().getAsDouble(), kDelta);
         // one second
         for (int i = 0; i < 50; ++i) {
             g.setPosition(1);
@@ -54,7 +54,7 @@ class GravityServoTest implements Timeless2024 {
         }
         // this overshoots a little, i think maybe because of the slight lag in
         // measurement.
-        assertEquals(1, g.getPosition(), kDelta);
+        assertEquals(1, g.getPosition().getAsDouble(), kDelta);
     }
 
 }

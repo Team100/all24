@@ -61,9 +61,4 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     public void close() {
         // m_motor.close();
     }
-
-    @Override
-    public String getGlassName() {
-        return "TurningMotorController100";
-    }
 }

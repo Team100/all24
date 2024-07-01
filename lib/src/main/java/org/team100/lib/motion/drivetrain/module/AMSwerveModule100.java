@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.components.OnboardPositionServo;
@@ -67,6 +68,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             Feedforward100 ff) {
+        double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
         Falcon6DriveMotor driveMotor = new Falcon6DriveMotor(
                 name,
                 driveMotorCanId,
@@ -77,10 +79,12 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 kWheelDiameterM,
                 pidConstants,
                 ff);
+        Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
+                name, driveMotor, distancePerTurn);
         return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
-                driveMotor);
+                driveEncoder);
     }
 
     private static PositionServo<Angle100> turningServo(
@@ -89,8 +93,8 @@ public class AMSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
-        TurningMotorController100 turningMotor = new TurningMotorController100(name, 
-                 new VictorSP(turningMotorChannel),
+        TurningMotorController100 turningMotor = new TurningMotorController100(name,
+                new VictorSP(turningMotorChannel),
                 turningMotorChannel);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
                 name,

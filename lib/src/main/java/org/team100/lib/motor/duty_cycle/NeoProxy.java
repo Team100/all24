@@ -43,11 +43,6 @@ public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
     }
 
     @Override
-    public String getGlassName() {
-        return "NeoProxy";
-    }
-
-    @Override
     public void setDutyCycle(double output) {
         set(output);
     }

@@ -1,12 +1,13 @@
 package org.team100.frc2024.commands;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.frc2024.motion.shooter.Shooter;
+import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -22,7 +23,7 @@ public class ShootPreload extends Command {
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final Timer m_timer;
     private final SwerveDriveSubsystem m_drive;
     private final boolean m_isPreload;
@@ -33,7 +34,8 @@ public class ShootPreload extends Command {
 
     public ShootPreload(
             SensorInterface sensor,
-            Shooter shooter, Intake intake,
+            DrumShooter shooter,
+            Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             double pivotOverride,
@@ -51,7 +53,7 @@ public class ShootPreload extends Command {
 
     public ShootPreload(
             SensorInterface sensor,
-            Shooter shooter,
+            DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
@@ -104,18 +106,22 @@ public class ShootPreload extends Command {
         }
 
         m_shooter.setAngle(pivotSetpoint);
-
-        t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT", Math.abs(m_shooter.getPivotPosition() - pivotSetpoint));
+        OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
+        if (shooterPivotPosition.isPresent()) {
+            t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT",
+                    Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
+        }
 
         if (!m_sensor.getFeederSensor() && !m_sensor.getIntakeSensor()) {
             m_intake.stop();
             m_feeder.stop();
-
-            double error = m_shooter.getPivotPosition() - pivotSetpoint;
-            if (m_shooter.atVelocitySetpoint(m_isPreload)
-                    && Math.abs(error) < 0.01) {
-                atVelocity = true;
-                m_timer.start();
+            if (shooterPivotPosition.isPresent()) {
+                double error = shooterPivotPosition.getAsDouble() - pivotSetpoint;
+                if (m_shooter.atVelocitySetpoint(m_isPreload)
+                        && Math.abs(error) < 0.01) {
+                    atVelocity = true;
+                    m_timer.start();
+                }
             }
         }
 

@@ -1,5 +1,7 @@
 package org.team100.lib.encoder;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
@@ -16,8 +18,11 @@ public interface Encoder100<T extends Measure100> extends Glassy {
      * Distance is meters
      * Angle measure is counterclockwise-positive rad, and accumulates
      * turns; use MathUtil.AngleModulus if you want.
+     * 
+     * If the encoder can't return a valid measurement (e.g. because hardware is not
+     * connected), return empty.
      */
-    Double getPosition();
+    OptionalDouble getPosition();
 
     /**
      * Angular or linear velocity depending on parameter.
@@ -25,8 +30,11 @@ public interface Encoder100<T extends Measure100> extends Glassy {
      * Distance is m/s.
      * Angle measure is counterclockwise positive, rad/s.
      * Note some rate implementations can be noisy.
+     * 
+     * If the encoder can't return a valid measurement (e.g. because hardware is not
+     * connected), return empty.
      */
-    double getRate();
+    OptionalDouble getRate();
 
     /**
      * Resets position to zero

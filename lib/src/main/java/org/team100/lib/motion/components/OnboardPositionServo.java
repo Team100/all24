@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
@@ -30,12 +32,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
     // for calculating acceleration
-    private double previousSetpoint = 0;
-    private double prevTime;
+    private double m_previousSetpoint = 0;
+    private double m_prevTime;
 
-    /**
-     * @param name may not start with a slash
-     */
     public OnboardPositionServo(
             String name,
             VelocityMotor100<T> motor,
@@ -44,14 +43,12 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
             PIDController controller,
             Profile100 profile,
             T instance) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
+        m_name = Names.append(name, this);
         m_motor = motor;
         m_encoder = encoder;
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
-        m_name = Names.append(name, this);
         m_profile = profile;
         m_instance = instance;
     }
@@ -65,8 +62,12 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public void reset() {
         m_controller.reset();
-        m_setpoint = new State100(getPosition(), getVelocity());
-        prevTime = Timer.getFPGATimestamp();
+        m_prevTime = Timer.getFPGATimestamp();
+        OptionalDouble position = getPosition();
+        OptionalDouble velocity = getVelocity();
+        if (position.isEmpty() || velocity.isEmpty())
+            return;
+        m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
 
         // TODO figure this out
         // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
@@ -75,13 +76,12 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         // m_encoder.reset();
     }
 
-    /**
-     * @param goal                For distance, use meters, For angle, use radians.
-     * @param feedForwardTorqueNm used for gravity compensation, passthrough.
-     */
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
-        double measurement = m_instance.modulus(m_encoder.getPosition());
+        OptionalDouble position = m_encoder.getPosition();
+        if (position.isEmpty())
+            return;
+        double measurement = m_instance.modulus(position.getAsDouble());
 
         // use the modulus closest to the measurement.
         // note zero velocity in the goal.
@@ -109,10 +109,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         t.log(Level.TRACE, m_name, "u_FB", u_FB);
         t.log(Level.TRACE, m_name, "u_FF", u_FF);
         t.log(Level.TRACE, m_name, "u_TOTAL", u_TOTAL);
-        t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Goal", m_goal);
+        t.log(Level.DEBUG, m_name, "Measurement", measurement);
         t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
-        t.log(Level.DEBUG, m_name, "Setpoint Velocity", m_setpoint.v());
         t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
         t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
         t.log(Level.TRACE, m_name, "Feedforward Torque", feedForwardTorqueNm);
@@ -123,12 +122,15 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
      *         this is radians.
      */
     @Override
-    public double getPosition() {
-        return m_instance.modulus(m_encoder.getPosition());
+    public OptionalDouble getPosition() {
+        OptionalDouble position = m_encoder.getPosition();
+        if (position.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(m_instance.modulus(position.getAsDouble()));
     }
 
     @Override
-    public double getVelocity() {
+    public OptionalDouble getVelocity() {
         return m_encoder.getRate();
     }
 
@@ -186,10 +188,10 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
      */
     private double accel(double setpoint) {
         double now = Timer.getFPGATimestamp();
-        double dt = now - prevTime;
-        prevTime = now;
-        double accel = (setpoint - previousSetpoint) / dt;
-        previousSetpoint = setpoint;
+        double dt = now - m_prevTime;
+        m_prevTime = now;
+        double accel = (setpoint - m_previousSetpoint) / dt;
+        m_previousSetpoint = setpoint;
         return accel;
     }
 }

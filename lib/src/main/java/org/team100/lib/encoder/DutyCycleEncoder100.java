@@ -1,9 +1,12 @@
 package org.team100.lib.encoder;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
@@ -45,16 +48,17 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     }
 
     @Override
-    public Double getPosition() {
-
+    public OptionalDouble getPosition() {
         if (!m_encoder.isConnected()) {
-            return null;
+            Util.warn(String.format("encoder %d not connected", m_encoder.getSourceChannel()));
+            return OptionalDouble.empty();
         }
         if (m_reversed) {
-            return -(m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset())
-                    * m_encoder.getDistancePerRotation();
+            return OptionalDouble.of(-1.0 * (m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset())
+                    * m_encoder.getDistancePerRotation());
         }
-        return (m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation();
+        return OptionalDouble.of(
+                (m_encoder.getAbsolutePosition() - m_encoder.getPositionOffset()) * m_encoder.getDistancePerRotation());
     }
 
     /**
@@ -69,8 +73,12 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
      * Use a Kalman filter if you can, to reduce the lag.
      */
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        if (!m_encoder.isConnected()) {
+            Util.warn(String.format("encoder %d not connected", m_encoder.getSourceChannel()));
+            return OptionalDouble.empty();
+        }
+        return OptionalDouble.of(getRateRad_S());
     }
 
     @Override
@@ -85,7 +93,6 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
         // m_input.close();
         m_encoder.close();
     }
-
 
     //////////////////////////////////////////////
 

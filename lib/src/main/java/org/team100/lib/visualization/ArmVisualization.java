@@ -1,5 +1,7 @@
 package org.team100.lib.visualization;
 
+import java.util.Optional;
+
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -31,17 +33,21 @@ public class ArmVisualization {
     private ArmVisualization(ArmSubsystem armSubsystem) {
         m_armSubsystem = armSubsystem;
 
-        ArmAngles angles = m_armSubsystem.getPosition();
+        Optional<ArmAngles> angles = m_armSubsystem.getPosition();
 
         m_mechanism = new Mechanism2d(100, 100);
 
         MechanismRoot2d root = m_mechanism.getRoot("SideRoot", 50, 50);
 
         m_boomLigament = new MechanismLigament2d("Boom",
-                25, boomAngleDeg(angles), 5, new Color8Bit(Color.kWhite));
+                25,
+                angles.isPresent() ? boomAngleDeg(angles.get()) : 0,
+                5, new Color8Bit(Color.kWhite));
 
         m_stickLigament = new MechanismLigament2d("Stick",
-                25, stickAngleDeg(angles), 5, new Color8Bit(Color.kLightGreen));
+                25,
+                angles.isPresent() ? stickAngleDeg(angles.get()) : 0,
+                5, new Color8Bit(Color.kLightGreen));
 
         root.append(m_boomLigament).append(m_stickLigament);
 
@@ -49,9 +55,11 @@ public class ArmVisualization {
     }
 
     private void viz() {
-        ArmAngles angles = m_armSubsystem.getPosition();
-        m_boomLigament.setAngle(boomAngleDeg(angles));
-        m_stickLigament.setAngle(stickAngleDeg(angles));
+        Optional<ArmAngles> angles = m_armSubsystem.getPosition();
+        if (angles.isEmpty())
+            return;
+        m_boomLigament.setAngle(boomAngleDeg(angles.get()));
+        m_stickLigament.setAngle(stickAngleDeg(angles.get()));
     }
 
     // zero is straight up

@@ -1,5 +1,7 @@
 package org.team100.lib.encoder.turning;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
@@ -19,22 +21,22 @@ public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
     private static final int ticksPerRevolution = 1666;
 
     private final Telemetry t = Telemetry.get();
-    private final WPI_TalonSRX m_motor;
     private final String m_name;
+    private final WPI_TalonSRX m_motor;
 
     public TalonSRXTurningEncoder(String name, CANTurningMotor motor) {
-        m_motor = motor.getMotor();
         m_name = Names.append(name, this);
+        m_motor = motor.getMotor();
     }
 
     @Override
-    public Double getPosition() {
-        return getPositionRad();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionRad());
     }
 
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getRateRad_S());
     }
 
     @Override
