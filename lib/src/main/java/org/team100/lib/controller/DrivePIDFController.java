@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class DrivePIDFController implements DriveMotionController {
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
-    private static final Telemetry t = Telemetry.get();
 
+    private final Telemetry t = Telemetry.get();
     private final boolean m_feedforwardOnly;
     private final String m_name;
     private final double m_kPCart;
