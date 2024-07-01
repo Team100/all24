@@ -31,12 +31,10 @@ public class SwerveModule100 implements Glassy {
     public SwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo,
-            Async async) {
+            PositionServo<Angle100> turningServo) {
         m_name = Names.append(name, this);
         m_driveServo = driveServo;
         m_turningServo = turningServo;
-        SwerveModuleVisualization.make(this, async);
     }
 
     /**

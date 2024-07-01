@@ -16,6 +16,7 @@ import org.team100.lib.motion.components.OnboardPositionServo;
 import org.team100.lib.motion.components.OutboardPositionServo;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
+import org.team100.lib.motion.components.SelectablePositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
@@ -60,8 +61,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
-            MotorPhase motorPhase,
-            Async async) {
+            MotorPhase motorPhase) {
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
@@ -89,7 +89,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningPidConstants,
                 turningFF);
 
-        return new WCPSwerveModule100(name, driveServo, turningServo, async);
+        return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
     private static VelocityServo<Distance100> driveServo(
@@ -176,27 +176,31 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningGearRatio,
             PIDController turningPositionController,
             Profile100 profile) {
-        if (Experiments.instance.enabled(Experiment.OutboardSteering)) {
-            Talon6TurningEncoder builtInEncoder = new Talon6TurningEncoder(
-                    name, turningMotor, turningGearRatio);
-            CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
-                    turningEncoder, builtInEncoder);
-            return new OutboardPositionServo<>(
-                    name,
-                    turningMotor,
-                    combinedEncoder,
-                    profile,
-                    Angle100.instance);
-        } else {
-            return new OnboardPositionServo<>(
-                    name,
-                    turningMotor,
-                    turningEncoder,
-                    kinodynamics.getMaxSteeringVelocityRad_S(),
-                    turningPositionController,
-                    profile,
-                    Angle100.instance);
-        }
+        Talon6TurningEncoder builtInEncoder = new Talon6TurningEncoder(
+                name,
+                turningMotor,
+                turningGearRatio);
+        CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
+                turningEncoder,
+                builtInEncoder);
+        PositionServo<Angle100> outboard = new OutboardPositionServo<>(
+                name,
+                turningMotor,
+                combinedEncoder,
+                profile,
+                Angle100.instance);
+        PositionServo<Angle100> onboard = new OnboardPositionServo<>(
+                name,
+                turningMotor,
+                turningEncoder,
+                kinodynamics.getMaxSteeringVelocityRad_S(),
+                turningPositionController,
+                profile,
+                Angle100.instance);
+        return new SelectablePositionServo<>(
+                outboard,
+                onboard,
+                () -> Experiments.instance.enabled(Experiment.OutboardSteering));
     }
 
     private static Encoder100<Angle100> turningEncoder(
@@ -227,9 +231,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private WCPSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo,
-            Async async) {
-        super(name, driveServo, turningServo, async);
+            PositionServo<Angle100> turningServo) {
+        super(name, driveServo, turningServo);
         //
     }
 }
