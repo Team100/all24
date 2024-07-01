@@ -33,8 +33,8 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
-    private static final Telemetry t = Telemetry.get();
 
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
     private final DriveMotionController m_controller;

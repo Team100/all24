@@ -25,11 +25,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithTrajectory extends Command100 {
-    private static final Telemetry t = Telemetry.get();
     private static final double kMaxVel = 5;
     private static final double kMaxAcc = 5;
     private static final double kStartVel = 0;
     private static final double kEndVel = 0;
+
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final Trajectory100 trajectory;

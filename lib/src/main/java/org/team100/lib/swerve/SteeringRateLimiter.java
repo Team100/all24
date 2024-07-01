@@ -16,8 +16,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * minimum across all modules, since that is the active constraint.
  */
 public class SteeringRateLimiter implements Glassy {
-    private static final Telemetry t = Telemetry.get();
     private static final int kMaxIterations = 10;
+    
+    private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 

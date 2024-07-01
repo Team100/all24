@@ -15,9 +15,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * if any module is stopped and misaligned, stop everything until it's aligned.
  */
 public class SteeringOverride implements Glassy {
-
     private static final double kEpsilon = 1e-3;
-    private static final Telemetry t = Telemetry.get();
+
+    private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 

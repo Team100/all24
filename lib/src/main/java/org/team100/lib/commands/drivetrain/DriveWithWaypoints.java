@@ -25,13 +25,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithWaypoints extends Command100 {
-    private static final Telemetry t = Telemetry.get();
-
     private static final double max_vel = 5;
     private static final double max_acc = 5;
     private static final double start_vel = 0;
     private static final double end_vel = 0;
 
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> constraints;
