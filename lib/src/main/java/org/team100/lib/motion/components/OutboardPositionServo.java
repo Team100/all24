@@ -3,7 +3,7 @@ package org.team100.lib.motion.components;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
@@ -16,6 +16,10 @@ import edu.wpi.first.math.MathUtil;
 /**
  * Passthrough to outboard closed-loop position control, using a profile with
  * velocity feedforward, also extra torque (e.g. for gravity).
+ * 
+ * Must be used with a combined encoder, to "zero" the motor encoder.
+ * 
+ * TODO: allow other zeroing strategies.
  */
 public class OutboardPositionServo<T extends Measure100> implements PositionServo<T> {
     private static final double kDtSec = 0.02;
@@ -24,7 +28,7 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final PositionMotor100<T> m_motor;
-    private final Encoder100<T> m_encoder;
+    private final CombinedEncoder<T> m_encoder;
     private final Profile100 m_profile;
     private final T m_instance;
 
@@ -34,7 +38,7 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     public OutboardPositionServo(
             String name,
             PositionMotor100<T> motor,
-            Encoder100<T> encoder,
+            CombinedEncoder<T> encoder,
             Profile100 profile,
             T instance) {
         m_name = Names.append(name, this);

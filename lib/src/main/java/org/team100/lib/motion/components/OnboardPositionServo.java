@@ -35,7 +35,6 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     private double m_previousSetpoint = 0;
     private double m_prevTime;
 
-
     public OnboardPositionServo(
             String name,
             VelocityMotor100<T> motor,

@@ -78,5 +78,9 @@ public enum Experiment {
     /**
      * Filter rotational output to remove oscillation
      */
-    UseThetaFilter
+    UseThetaFilter,
+    /**
+     * Use outboard closed-loop position control for steering instead of onboard PID
+     */
+    OutboardSteering
 }

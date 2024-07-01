@@ -2,12 +2,17 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.encoder.turning.Talon6TurningEncoder;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.OnboardPositionServo;
+import org.team100.lib.motion.components.OutboardPositionServo;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
@@ -149,16 +154,47 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningPositionController.setTolerance(0.1, 0.1);
 
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
+        PositionServo<Angle100> turningServo = getTurningServo(
                 name,
+                kinodynamics,
                 turningMotor,
                 turningEncoder,
-                kinodynamics.getMaxSteeringVelocityRad_S(),
+                turningGearRatio,
                 turningPositionController,
-                profile,
-                Angle100.instance);
+                profile);
         turningServo.reset();
         return turningServo;
+    }
+
+    private static PositionServo<Angle100> getTurningServo(
+            String name,
+            SwerveKinodynamics kinodynamics,
+            Falcon6TurningMotor turningMotor,
+            Encoder100<Angle100> turningEncoder,
+            double turningGearRatio,
+            PIDController turningPositionController,
+            Profile100 profile) {
+        if (Experiments.instance.enabled(Experiment.OutboardSteering)) {
+            Talon6TurningEncoder builtInEncoder = new Talon6TurningEncoder(
+                    name, turningMotor, turningGearRatio);
+            CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
+                    turningEncoder, builtInEncoder);
+            return new OutboardPositionServo<>(
+                    name,
+                    turningMotor,
+                    combinedEncoder,
+                    profile,
+                    Angle100.instance);
+        } else {
+            return new OnboardPositionServo<>(
+                    name,
+                    turningMotor,
+                    turningEncoder,
+                    kinodynamics.getMaxSteeringVelocityRad_S(),
+                    turningPositionController,
+                    profile,
+                    Angle100.instance);
+        }
     }
 
     private static Encoder100<Angle100> turningEncoder(

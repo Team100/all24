@@ -3,6 +3,7 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.motor.MockPositionMotor100;
 import org.team100.lib.motor.MockVelocityMotor100;
@@ -49,13 +50,16 @@ class AnglePositionServoTest {
     void testOutboard() {
         String name = "test";
         MockPositionMotor100<Angle100> motor = new MockPositionMotor100<>();
-        MockEncoder100<Angle100> encoder = new MockEncoder100<>();
+        MockEncoder100<Angle100> externalEncoder = new MockEncoder100<>();
+        MockEncoder100<Angle100> builtInEncoder = new MockEncoder100<>();
+        CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
+                externalEncoder, builtInEncoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
         OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
                 name,
                 motor,
-                encoder,
+                combinedEncoder,
                 profile,
                 Angle100.instance);
         servo.reset();
