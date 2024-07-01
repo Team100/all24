@@ -43,8 +43,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             EncoderDrive turningDrive,
-            SwerveKinodynamics kinodynamics,
-            Async async) {
+            SwerveKinodynamics kinodynamics) {
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
         VelocityServo<Distance100> driveServo = driveServo(
@@ -63,7 +62,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 turningDrive,
                 kinodynamics);
 
-        return new AMCANSwerveModule100(name, driveServo, turningServo, async);
+        return new AMCANSwerveModule100(name, driveServo, turningServo);
 
     }
 
@@ -129,8 +128,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     private AMCANSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo,
-            Async async) {
-        super(name, driveServo, turningServo, async);
+            PositionServo<Angle100> turningServo) {
+        super(name, driveServo, turningServo);
     }
 }
