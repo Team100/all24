@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.async.Async;
+import org.team100.lib.async.MockAsync;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
@@ -21,7 +23,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testSimple() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -41,7 +44,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testSimple2() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -70,7 +74,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testPosRefernce() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -86,7 +91,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testVelRefernce() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(

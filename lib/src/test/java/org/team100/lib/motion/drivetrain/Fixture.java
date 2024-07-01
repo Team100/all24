@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
+import org.team100.lib.async.Async;
+import org.team100.lib.async.MockAsync;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -28,8 +30,8 @@ public class Fixture {
 
     public Fixture() {
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
-
-        collection = SwerveModuleCollection.get(10, 20, swerveKinodynamics);
+        Async async = new MockAsync();
+        collection = SwerveModuleCollection.get(10, 20, swerveKinodynamics, async);
         heading = new SimulatedHeading(swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
                 heading.getHeadingNWU(),

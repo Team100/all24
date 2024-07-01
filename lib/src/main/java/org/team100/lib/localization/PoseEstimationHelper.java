@@ -20,8 +20,8 @@ import edu.wpi.first.math.geometry.Translation3d;
  * Static methods used to interpret camera input.
  */
 public class PoseEstimationHelper {
-    private static final Telemetry t = Telemetry.get();
     private static final String kName = PoseEstimationHelper.class.getSimpleName();
+    private static final Telemetry t = Telemetry.get();
 
     /**
      * Converts camera rotation to an object to a robot relative translation,

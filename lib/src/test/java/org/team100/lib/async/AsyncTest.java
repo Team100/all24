@@ -9,7 +9,8 @@ class AsyncTest {
 
     @Test
     void testSimple() throws InterruptedException {
-        AsyncFactory.get().addPeriodic(() -> counter += 1, 0.1, "test");
+        Async async = new ExecutorAsync();
+        async.addPeriodic(() -> counter += 1, 0.1, "test");
         Thread.sleep(1000); // 1 sec
         assertEquals(9, counter, 1);
     }

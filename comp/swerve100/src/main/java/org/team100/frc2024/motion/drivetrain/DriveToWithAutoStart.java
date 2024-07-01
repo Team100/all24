@@ -29,8 +29,8 @@ public class DriveToWithAutoStart extends Command100 {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 5;
-    private static final Telemetry t = Telemetry.get();
-
+    
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;

@@ -3,6 +3,7 @@ package org.team100.lib.motion.arm;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
@@ -48,7 +49,8 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
             Motor100<Angle100> lowerMotor,
             Encoder100<Angle100> lowerEncoder,
             Motor100<Angle100> upperMotor,
-            Encoder100<Angle100> upperEncoder) {
+            Encoder100<Angle100> upperEncoder,
+            Async async) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
@@ -64,7 +66,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         Optional<ArmAngles> position = getPosition();
         if (position.isPresent())
             m_previousPosition = position.get();
-        ArmVisualization.make(this);
+        ArmVisualization.make(this, async);
     }
 
     /** Arm angles (radians), 0 up, positive forward. */

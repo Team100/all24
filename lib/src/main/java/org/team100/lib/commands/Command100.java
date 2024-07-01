@@ -27,11 +27,12 @@ import edu.wpi.first.wpilibj2.command.Command;
  * The glass name leaf is always the implementing class name.
  */
 public abstract class Command100 extends Command implements Glassy {
-    private static final Telemetry t = Telemetry.get();
     private static final int kExecutePeriodMilliS = 5;
 
     private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
             new MaxPriorityThreads());
+
+    private final Telemetry t = Telemetry.get();
     protected final String m_name;
 
     private double prevTime;

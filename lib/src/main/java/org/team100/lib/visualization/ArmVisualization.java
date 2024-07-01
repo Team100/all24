@@ -2,7 +2,7 @@ package org.team100.lib.visualization;
 
 import java.util.Optional;
 
-import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.async.Async;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmSubsystem;
 
@@ -25,9 +25,9 @@ public class ArmVisualization {
     private final MechanismLigament2d m_boomLigament;
     private final MechanismLigament2d m_stickLigament;
 
-    public static void make(ArmSubsystem armSubsystem) {
+    public static void make(ArmSubsystem armSubsystem, Async async) {
         ArmVisualization v = new ArmVisualization(armSubsystem);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1, "ArmVisualization" + armSubsystem.getName());
+        async.addPeriodic(v::viz, 0.1, "ArmVisualization" + armSubsystem.getName());
     }
 
     private ArmVisualization(ArmSubsystem armSubsystem) {

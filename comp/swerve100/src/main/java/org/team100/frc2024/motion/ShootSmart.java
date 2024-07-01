@@ -17,8 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command {
-    private static final Telemetry t = Telemetry.get();
-
+    private final Telemetry t = Telemetry.get();
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;

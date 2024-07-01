@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.PositionServo;
@@ -29,13 +30,12 @@ public class SwerveModule100 implements Glassy {
     public SwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
+            PositionServo<Angle100> turningServo,
+            Async async) {
         m_name = Names.append(name, this);
         m_driveServo = driveServo;
         m_turningServo = turningServo;
-        SwerveModuleVisualization.make(this);
+        SwerveModuleVisualization.make(this, async);
     }
 
     /**

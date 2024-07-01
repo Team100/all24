@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.CombinedEncoder;
@@ -59,7 +60,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
-            MotorPhase motorPhase) {
+            MotorPhase motorPhase,
+            Async async) {
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
@@ -87,7 +89,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningPidConstants,
                 turningFF);
 
-        return new WCPSwerveModule100(name, driveServo, turningServo);
+        return new WCPSwerveModule100(name, driveServo, turningServo, async);
     }
 
     private static VelocityServo<Distance100> driveServo(
@@ -225,8 +227,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private WCPSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
-        super(name, driveServo, turningServo);
+            PositionServo<Angle100> turningServo,
+            Async async) {
+        super(name, driveServo, turningServo, async);
         //
     }
 }

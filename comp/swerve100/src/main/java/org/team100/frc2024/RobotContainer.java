@@ -29,6 +29,8 @@ import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.Ramp;
 import org.team100.frc2024.motion.shooter.TestShoot;
+import org.team100.lib.async.Async;
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -42,6 +44,7 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -70,6 +73,8 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.TelemetryLevelPoller;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.util.Names;
@@ -105,11 +110,16 @@ public class RobotContainer implements Glassy {
     final AmpFeeder m_ampFeeder;
     final AmpPivot m_ampPivot;
 
-    public RobotContainer() throws IOException {
+    public RobotContainer(TimedRobot100 robot) throws IOException {
+        final AsyncFactory asyncFactory = new AsyncFactory(robot);
+        final Async async = asyncFactory.get();
+        final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
+        poller.setDefault(Level.TRACE);
+
         m_name = Names.name(this);
 
-        final DriverControl driverControl = new DriverControlProxy();
-        final OperatorControl operatorControl = new OperatorControlProxy();
+        final DriverControl driverControl = new DriverControlProxy(async);
+        final OperatorControl operatorControl = new OperatorControlProxy(async);
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         final SensorInterface m_sensors;
@@ -122,9 +132,16 @@ public class RobotContainer implements Glassy {
                 m_sensors = new MockSensors();
         }
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, kDriveStatorLimit, swerveKinodynamics);
+        m_modules = SwerveModuleCollection.get(
+                kDriveCurrentLimit,
+                kDriveStatorLimit,
+                swerveKinodynamics,
+                async);
 
-        final HeadingInterface m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
+        final HeadingInterface m_heading = HeadingFactory.get(
+                swerveKinodynamics,
+                m_modules,
+                asyncFactory);
 
         // these are the old numbers, just used as defaults. see VisionDataProvider24
         // for updated stddevs.
@@ -297,7 +314,7 @@ public class RobotContainer implements Glassy {
                         m_heading,
                         driverControl::desiredRotation,
                         new double[] { 5.0, 0.5 }));
-                        
+
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(
                         m_name,

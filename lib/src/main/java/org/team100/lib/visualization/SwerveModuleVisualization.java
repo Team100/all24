@@ -1,6 +1,6 @@
 package org.team100.lib.visualization;
 
-import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.async.Async;
 import org.team100.lib.motion.drivetrain.module.SwerveModule100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelChooser;
@@ -21,9 +21,9 @@ public class SwerveModuleVisualization {
     private final MechanismLigament2d m_steer;
     private final MechanismLigament2d m_drive;
 
-    public static void make(SwerveModule100 module) {
+    public static void make(SwerveModule100 module, Async async) {
         SwerveModuleVisualization v = new SwerveModuleVisualization(module);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1, "SwerveModuleVisualization/" + module.getName());
+        async.addPeriodic(v::viz, 0.1, "SwerveModuleVisualization/" + module.getName());
     }
 
     private SwerveModuleVisualization(SwerveModule100 module) {

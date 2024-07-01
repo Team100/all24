@@ -1,5 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
@@ -42,7 +43,8 @@ public class AMSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             SwerveKinodynamics kinodynamics,
             PIDConstants pidConstants,
-            Feedforward100 ff) {
+            Feedforward100 ff,
+            Async async) {
 
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
@@ -59,7 +61,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 turningOffset,
                 kinodynamics);
 
-        return new AMSwerveModule100(name, driveServo, turningServo);
+        return new AMSwerveModule100(name, driveServo, turningServo, async);
     }
 
     private static VelocityServo<Distance100> driveServo(String name,
@@ -126,8 +128,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
     private AMSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
-        super(name, driveServo, turningServo);
+            PositionServo<Angle100> turningServo,
+            Async async) {
+        super(name, driveServo, turningServo, async);
         //
     }
 

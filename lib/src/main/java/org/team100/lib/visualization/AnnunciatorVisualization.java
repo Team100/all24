@@ -1,7 +1,7 @@
 package org.team100.lib.visualization;
 
 import org.team100.lib.telemetry.Annunciator;
-import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.async.Async;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -20,9 +20,13 @@ public class AnnunciatorVisualization {
     private final Mechanism2d m_mechanism;
     private final MechanismLigament2d m_ligament;
 
-    public static void make(Annunciator annunciator) {
+    /**
+     * Since this is just a visualization, maybe don't burn a whole async thread for
+     * it.
+     */
+    public static void make(Annunciator annunciator, Async async) {
         AnnunciatorVisualization v = new AnnunciatorVisualization(annunciator);
-        AsyncFactory.get().addPeriodic(v::viz, 0.1, "AnnunciatorVisualization");
+        async.addPeriodic(v::viz, 0.1, "AnnunciatorVisualization");
     }
 
     private AnnunciatorVisualization(Annunciator annunciator) {
