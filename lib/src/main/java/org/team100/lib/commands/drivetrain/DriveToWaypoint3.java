@@ -8,7 +8,6 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.StraightLineTrajectory;

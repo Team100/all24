@@ -7,14 +7,14 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.arm.ArmTrajectories;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.Timer;
 
 /**

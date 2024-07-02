@@ -9,7 +9,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;

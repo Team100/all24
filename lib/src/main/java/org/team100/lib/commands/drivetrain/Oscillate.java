@@ -6,7 +6,6 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;

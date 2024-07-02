@@ -7,7 +7,6 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
