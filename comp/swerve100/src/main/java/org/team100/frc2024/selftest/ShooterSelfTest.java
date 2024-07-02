@@ -1,6 +1,8 @@
 package org.team100.frc2024.selftest;
 
-import org.team100.frc2024.motion.shooter.Shooter;
+import java.util.OptionalDouble;
+
+import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
@@ -10,17 +12,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 /** Test the Shooter subsystem. */
 @ExcludeFromJacocoGeneratedReport
 public class ShooterSelfTest extends Command {
-       private static final double kExpectedDuration = 1;
+    private static final double kExpectedDuration = 1;
     private static final double kExpectedVelocity = 1;
 
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final SelfTestListener m_listener;
     private final Timer m_timer;
 
     private double maxVelocity = 0;
     private boolean pass = false;
 
-    public ShooterSelfTest(Shooter shooter, SelfTestListener listener) {
+    public ShooterSelfTest(DrumShooter shooter, SelfTestListener listener) {
         m_shooter = shooter;
         m_listener = listener;
         m_timer = new Timer();
@@ -39,9 +41,11 @@ public class ShooterSelfTest extends Command {
     @Override
     public void execute() {
         // during the test period, the velocity should exceed the expected velocity.
-        double v = m_shooter.getVelocity();
-        maxVelocity = Math.max(maxVelocity, v);
-        if (v > kExpectedVelocity) {
+        OptionalDouble v = m_shooter.getVelocity();
+        if (v.isEmpty())
+            return;
+        maxVelocity = Math.max(maxVelocity, v.getAsDouble());
+        if (v.getAsDouble() > kExpectedVelocity) {
             pass = true;
         }
     }
@@ -61,5 +65,5 @@ public class ShooterSelfTest extends Command {
             m_listener.fail(this, fmt, kExpectedVelocity, maxVelocity);
         }
     }
-    
+
 }

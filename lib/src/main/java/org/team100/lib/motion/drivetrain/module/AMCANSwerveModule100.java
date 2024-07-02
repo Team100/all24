@@ -1,16 +1,17 @@
 package org.team100.lib.motion.drivetrain.module;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.motion.components.OnboardPositionServo;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.PositionServoInterface;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.MotorWithEncoder100;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
@@ -33,7 +34,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     // andymark ma3 encoder is 1:1
     private static final double turningGearRatio = 1.0;
 
-    /** @param name like "front left" or whatever */
     public static AMCANSwerveModule100 get(
             String name,
             double currentLimit,
@@ -42,7 +42,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            Drive turningDrive,
+            EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
@@ -54,7 +54,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 drivePidConstants,
                 ff);
 
-        PositionServoInterface<Angle100> turningServo = turningServo(
+        PositionServo<Angle100> turningServo = turningServo(
                 name + "/Turning",
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -73,7 +73,8 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        MotorWithEncoder100<Distance100> driveMotor = new Falcon6DriveMotor(
+        double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
+        Falcon6DriveMotor driveMotor = new Falcon6DriveMotor(
                 name,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
@@ -83,19 +84,20 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 kWheelDiameterM,
                 pidConstants,
                 ff);
-
+        Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
+                name, driveMotor, distancePerTurn);
         return new OutboardVelocityServo<>(
                 name,
                 driveMotor,
-                driveMotor);
+                driveEncoder);
     }
 
-    private static PositionServoInterface<Angle100> turningServo(
+    private static PositionServo<Angle100> turningServo(
             String name,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
-            Drive turningDrive,
+            EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
         CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
@@ -111,7 +113,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServoInterface<Angle100> turningServo = new PositionServo<>(
+        PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
                 name,
                 turningMotor,
                 turningEncoder,
@@ -126,7 +128,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     private AMCANSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServoInterface<Angle100> turningServo) {
+            PositionServo<Angle100> turningServo) {
         super(name, driveServo, turningServo);
     }
 }

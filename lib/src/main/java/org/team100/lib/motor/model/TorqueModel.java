@@ -6,6 +6,8 @@ package org.team100.lib.motor.model;
  * Child interfaces should implement defaults representing specific motors.
  * 
  * These child interfaces should be used as mix-ins for specific motor classes.
+ * 
+ * TODO: dedupe this class and Feedforward100.
  */
 public interface TorqueModel {
     /**
@@ -19,5 +21,10 @@ public interface TorqueModel {
      * desired torque.
      */
     double kTNm_amp();
+
+    default double getTorqueFFVolts(double torqueNm) {
+        double torqueFFAmps = torqueNm / kTNm_amp();
+        return torqueFFAmps * kROhms();
+    }
 
 }

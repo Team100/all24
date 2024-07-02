@@ -13,8 +13,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil {
-    private static final Telemetry t = Telemetry.get();
     private static final String kName = DriveMotionControllerUtil.class.getSimpleName();
+    private static final Telemetry t = Telemetry.get();
 
     /**
      * Returns robot-relative direction of motion.

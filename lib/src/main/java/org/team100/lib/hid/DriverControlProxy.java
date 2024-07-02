@@ -1,6 +1,6 @@
 package org.team100.lib.hid;
 
-import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.async.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,17 +14,21 @@ import edu.wpi.first.wpilibj.DriverStation;
 public class DriverControlProxy implements DriverControl {
     private static class NoDriverControl implements DriverControl {
     }
+
     private static final int kPort = 0;
     private static final double kFreq = 1;
 
     private String m_name;
     private DriverControl m_driverControl;
 
-    public DriverControlProxy() {
+    /**
+     * The async is just to scan for control updates, maybe don't use a whole thread
+     * for it.
+     */
+    public DriverControlProxy(Async async) {
         refresh();
-        AsyncFactory.get().addPeriodic(this::refresh, kFreq, "DriverControlProxy");
+        async.addPeriodic(this::refresh, kFreq, "DriverControlProxy");
     }
-
 
     public void refresh() {
         // name is blank if not connected
@@ -88,7 +92,7 @@ public class DriverControlProxy implements DriverControl {
     @Override
     public boolean driveToAmp() {
         return m_driverControl.driveToAmp();
-    }    
+    }
 
     @Override
     public Translation2d target() {
@@ -151,24 +155,25 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean test(){
+    public boolean test() {
         return m_driverControl.test();
     }
 
     @Override
-    public int pov(){
+    public int pov() {
         return m_driverControl.pov();
     }
 
     @Override
-    public boolean shooterLock(){
+    public boolean shooterLock() {
         return m_driverControl.shooterLock();
     }
 
     @Override
-    public boolean outtakeFromAmp(){
+    public boolean outtakeFromAmp() {
         return m_driverControl.shooterLock();
     }
+
     @Override
     public boolean ampLock() {
         return m_driverControl.ampLock();

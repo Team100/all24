@@ -26,6 +26,7 @@
         "workbench.colorCustomizations": {
             "debugConsole.infoForeground":"#000000"
         },
-        "debug.console.fontFamily": "courier"
+        "debug.console.fontFamily": "courier",
+        "debug.console.collapseIdenticalLines": false
     }
 }

@@ -183,7 +183,7 @@ public class DrivePursuitController implements DriveMotionController {
         final Translation2d steeringVector = new Translation2d(
                 steeringDirection.getCos() * normalizedSpeed,
                 steeringDirection.getSin() * normalizedSpeed);
-                
+
         ChassisSpeeds u_FF = new ChassisSpeeds(
                 steeringVector.getX() * m_limits.getMaxDriveVelocityM_S(),
                 steeringVector.getY() * m_limits.getMaxDriveVelocityM_S(),

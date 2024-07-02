@@ -30,8 +30,8 @@ public class DriveToWaypoint100 extends Command100 {
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
     private static final double kMaxAccelM_S_S = 2;
-    private static final Telemetry t = Telemetry.get();
-
+     
+    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
@@ -58,7 +58,7 @@ public class DriveToWaypoint100 extends Command100 {
 
     @Override
     public void initialize100() {
-        final Pose2d start = m_swerve.getPose();
+        final Pose2d start = m_swerve.getState().pose();
         final double startVelocity = 0;
         Pose2d end = m_goal;
         final double endVelocity = 0;
@@ -96,7 +96,7 @@ public class DriveToWaypoint100 extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         if (output == null)

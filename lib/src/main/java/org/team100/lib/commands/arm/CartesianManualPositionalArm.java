@@ -1,5 +1,6 @@
 package org.team100.lib.commands.arm;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.commands.Command100;
@@ -63,20 +64,22 @@ public class CartesianManualPositionalArm extends Command100 {
             return;
         }
 
-        ArmAngles measurement = m_arm.getPosition();
+        Optional<ArmAngles> measurement = m_arm.getPosition();
+        if (measurement.isEmpty())
+            return;
 
-        Translation2d cartesian_measurement = m_kinematics.forward(measurement);
+        Translation2d cartesian_measurement = m_kinematics.forward(measurement.get());
 
         double u1 = MathUtil.clamp(
-                m_lowerController.calculate(measurement.th1, setpoint.th1), -1, 1);
+                m_lowerController.calculate(measurement.get().th1, setpoint.th1), -1, 1);
         double u2 = MathUtil.clamp(
-                m_upperController.calculate(measurement.th2, setpoint.th2), -1, 1);
+                m_upperController.calculate(measurement.get().th2, setpoint.th2), -1, 1);
 
         m_arm.set(u1, u2);
 
         t.log(Level.TRACE, m_name, "input", input);
         t.log(Level.TRACE, m_name, "setpoint", setpoint);
-        t.log(Level.TRACE, m_name, "measurement", measurement);
+        t.log(Level.TRACE, m_name, "measurement", measurement.get());
         t.log(Level.TRACE, m_name, "cartesian_measurement", cartesian_measurement);
         t.log(Level.TRACE, m_name, "output/u1", u1);
         t.log(Level.TRACE, m_name, "output/u2", u2);

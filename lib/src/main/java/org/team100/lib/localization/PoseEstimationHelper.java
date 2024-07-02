@@ -20,8 +20,8 @@ import edu.wpi.first.math.geometry.Translation3d;
  * Static methods used to interpret camera input.
  */
 public class PoseEstimationHelper {
-    private static final Telemetry t = Telemetry.get();
     private static final String kName = PoseEstimationHelper.class.getSimpleName();
+    private static final Telemetry t = Telemetry.get();
 
     /**
      * Converts camera rotation to an object to a robot relative translation,
@@ -91,9 +91,10 @@ public class PoseEstimationHelper {
                 Translation2d fieldRelativeNote = currentPose
                         .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
                         .getTranslation();
+                Tnotes.add(fieldRelativeNote);
                 if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
                     if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
-                        Tnotes.add(fieldRelativeNote);
+                        // Tnotes.add(fieldRelativeNote);
                     }
                 }
             }

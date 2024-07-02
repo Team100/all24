@@ -1,10 +1,11 @@
 package org.team100.lib.motion.arm;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.Drive;
+import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.arm.JointMotor;
@@ -18,19 +19,19 @@ public class ArmFactory {
     private static final String kLower = "arm/lower";
     private static final String kUpper = "arm/upper";
 
-    public static ArmSubsystem get() {
+    public static ArmSubsystem get(Async async) {
         switch (Identity.instance) {
             case TEST_BOARD_6B:
-                return real();
+                return real(async);
             case BLANK:
                 // for testing
-                return simulated();
+                return simulated(async);
             default:
-                return simulated();
+                return simulated(async);
         }
     }
 
-    private static ArmSubsystem real() {
+    private static ArmSubsystem real(Async async) {
         final double kLowerEncoderOffset = 0.861614;
         final double kUpperEncoderOffset = 0.266396;
 
@@ -42,7 +43,7 @@ public class ArmFactory {
                 1, // analog input 1
                 kLowerEncoderOffset,
                 1, // encoder is 1:1 with the arm joint
-                Drive.INVERSE);
+                EncoderDrive.INVERSE);
 
         Motor100<Angle100> upperMotor = new JointMotor(kUpper, 30, 1);
         Encoder100<Angle100> upperEncoder = new AnalogTurningEncoder(
@@ -50,17 +51,18 @@ public class ArmFactory {
                 0, // analog input 0
                 kUpperEncoderOffset,
                 1, // encoder is 1:1 with the arm joint
-                Drive.DIRECT);
+                EncoderDrive.DIRECT);
 
         return new ArmSubsystem(
                 kArm,
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder);
+                upperEncoder,
+                async);
     }
 
-    private static ArmSubsystem simulated() {
+    private static ArmSubsystem simulated(Async async) {
         // for testing
         // note very high reduction ratio
         // motor speed is rad/s
@@ -77,7 +79,8 @@ public class ArmFactory {
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder);
+                upperEncoder,
+                async);
     }
 
     private ArmFactory() {

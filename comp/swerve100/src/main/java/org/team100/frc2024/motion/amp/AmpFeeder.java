@@ -2,10 +2,9 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.NeoProxy;
-import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -17,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class AmpFeeder extends SubsystemBase implements Glassy {
     private final String m_name;
-    private final Motor100<Distance100> ampDrive;
+    private final DutyCycleMotor100 ampDrive;
 
     public AmpFeeder() {
         m_name = Names.name(this);
@@ -33,11 +32,11 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
     }
 
     public void outtake() {
-        ampDrive.setDutyCycle(1);
+        ampDrive.setDutyCycle(-1);
     }
 
     public void intake() {
-        ampDrive.setDutyCycle(-1);
+        ampDrive.setDutyCycle(1);
     }
 
     public void stop() {

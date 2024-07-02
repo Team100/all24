@@ -18,6 +18,7 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
 
     private final double m_gearRatio;
     private final double m_wheelDiameterM;
+    // TODO: just use distance???
     private final double m_distancePerTurn;
 
     protected Talon6DriveMotor(
@@ -49,30 +50,14 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
     }
 
     @Override
-    public double getTorque() {
-        double motorTorqueNm = getMotorTorque();
-        double wheelTorqueNm = motorTorqueNm * m_gearRatio;
-        return wheelTorqueNm * 2 / m_wheelDiameterM;
-    }
-
-    /** Position in meters */
-    @Override
-    public Double getPosition() {
-        double positionRev = m_position.getAsDouble();
-        double positionM = positionRev * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "position (rev)", positionRev);
-        t.log(Level.DEBUG, m_name, "position (m)", positionM);
-        return positionM;
-    }
-
-    /** Velocity in meters/sec */
-    @Override
-    public double getRate() {
-        double velocityRev_S = m_velocity.getAsDouble();
-        double velocityM_S = velocityRev_S * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
-        return velocityM_S;
+    public void setPosition(double outputM, double outputM_S, double outputTorqueN) {
+        double wheelRev = outputM / (m_wheelDiameterM * Math.PI);
+        double motorRev = wheelRev * m_gearRatio;
+        double wheelRev_S = outputM_S / (m_wheelDiameterM * Math.PI);
+        double motorRev_S = wheelRev_S * m_gearRatio;
+        double wheelTorqueNm = outputTorqueN * m_wheelDiameterM / 2;
+        double motorTorqueNm = wheelTorqueNm / m_gearRatio;
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
     }
 
 }

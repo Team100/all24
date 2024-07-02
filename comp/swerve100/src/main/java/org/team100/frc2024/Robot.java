@@ -7,6 +7,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.telemetry.JvmLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -17,12 +18,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot implements Glassy {
+public class Robot extends TimedRobot100 implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
@@ -49,7 +49,7 @@ public class Robot extends TimedRobot implements Glassy {
         SmartDashboard.putData(CommandScheduler.getInstance());
 
         try {
-            m_robotContainer = new RobotContainer();
+            m_robotContainer = new RobotContainer(this);
         } catch (IOException e) {
             throw new IllegalStateException("Robot Container Instantiation Failed", e);
         }

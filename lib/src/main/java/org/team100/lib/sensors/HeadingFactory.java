@@ -1,5 +1,6 @@
 package org.team100.lib.sensors;
 
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -12,7 +13,8 @@ public class HeadingFactory {
 
     public static HeadingInterface get(
             SwerveKinodynamics kinodynamics,
-            SwerveModuleCollection collection) {
+            SwerveModuleCollection collection,
+            AsyncFactory asyncFactory) {
         switch (Identity.instance) {
             case BLANK:
                 // for simulation
@@ -24,7 +26,7 @@ public class HeadingFactory {
                     // this seems only to be a problem in some test or
                     // simulation scenarios.
                     // System.loadLibrary("vmxHaljni");
-                    Gyro100 ahrsclass = new GyroFactory(Identity.instance).get();
+                    Gyro100 ahrsclass = new GyroFactory(Identity.instance, asyncFactory).get();
                     return new Heading(ahrsclass);
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.

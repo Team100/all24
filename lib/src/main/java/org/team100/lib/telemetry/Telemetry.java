@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -11,7 +12,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.geometry.Vector2d;
@@ -47,8 +47,6 @@ import edu.wpi.first.networktables.StringArrayTopic;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Simple logging wrapper.
@@ -92,9 +90,11 @@ public class Telemetry {
      */
     private static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
+    private static final String kName = "Telemetry";
+
+    private final Chronos m_chronos = Chronos.get();
     private final NetworkTableInstance inst;
     private final Map<String, Publisher> pubs;
-    private final SendableChooser<Level> m_levelChooser;
     private Level m_level;
 
     /**
@@ -104,28 +104,13 @@ public class Telemetry {
     private Telemetry() {
         inst = NetworkTableInstance.getDefault();
         pubs = new ConcurrentHashMap<>();
-        m_levelChooser = TelemetryLevelChooser.get();
-        for (Level level : Level.values()) {
-            m_levelChooser.addOption(level.name(), level);
-        }
-
-        // ***********************************
-        // DEFAULT LEVEL
-        //
-        // set this to SILENT unless you want the logs for analysis
-
-        Util.warn("Setting default telemetry to DEBUG.  Fix this for comp.");
-        m_levelChooser.setDefaultOption(Level.TRACE.name(), Level.TRACE);
-        // m_levelChooser.setDefaultOption(Level.INFO.name(), Level.INFO);
-
-        SmartDashboard.putData(m_levelChooser);
-        updateLevel();
-        AsyncFactory.get().addPeriodic(this::updateLevel, 1, "Telemetry");
+        // this will be overridden by {@link TelemetryLevelPoller}
+        m_level = Level.TRACE;
         DataLogManager.start();
     }
 
-    private void updateLevel() {
-        m_level = m_levelChooser.getSelected();
+    void setLevel(Level level) {
+        m_level = level;
     }
 
     public static Telemetry get() {
@@ -162,18 +147,32 @@ public class Telemetry {
     }
 
     public void log(Level level, String root, String leaf, Double val) {
-        if (val == null)
-            return;
+        m_chronos.start(kName);
+        try {
+            if (val == null)
+                return;
+            if (!m_level.admit(level))
+                return;
+            String key = Telemetry.append(root, leaf);
+            print(key, val);
+            pub(key, k -> {
+                DoubleTopic t = inst.getDoubleTopic(k);
+                t.publish();
+                t.setRetained(true);
+                return t.publish();
+            }, DoublePublisher.class).set(val);
+        } finally {
+            m_chronos.end(kName);
+        }
+    }
+
+    public void log(Level level, String root, String leaf, OptionalDouble val) {
         if (!m_level.admit(level))
             return;
-        String key = Telemetry.append(root, leaf);
-        print(key, val);
-        pub(key, k -> {
-            DoubleTopic t = inst.getDoubleTopic(k);
-            t.publish();
-            t.setRetained(true);
-            return t.publish();
-        }, DoublePublisher.class).set(val);
+        if (val.isEmpty()) {
+            return;
+        }
+        log(level, root, leaf, val.getAsDouble());
     }
 
     // using a supplier here is faster in the non-logging case.

@@ -45,7 +45,8 @@ public interface OperatorControl extends Glassy {
     }
 
     default int pov() {
-        return 0;
+        // the "null" state is -1
+        return -1;
     }
 
     default boolean intake() {
@@ -87,7 +88,7 @@ public interface OperatorControl extends Glassy {
     }
 
     default double getLeftAxis() {
-        return 1;
+        return 0;
     }
 
     default double getRightAxis() {

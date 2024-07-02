@@ -1,11 +1,12 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.units.Measure100;
 
 public class MockVelocityServo<T extends Measure100> implements VelocityServo<T> {
 
     double m_setpoint;
-    double m_dutyCycle;
 
     @Override
     public void reset() {
@@ -18,18 +19,8 @@ public class MockVelocityServo<T extends Measure100> implements VelocityServo<T>
     }
 
     @Override
-    public void setDutyCycle(double dutyCycle) {
-        m_dutyCycle = dutyCycle;
-    }
-
-    @Override
-    public double getVelocity() {
-        return m_setpoint;
-    }
-
-    @Override
-    public double getTorque() {
-        return 0;
+    public OptionalDouble getVelocity() {
+        return OptionalDouble.of(m_setpoint);
     }
 
     @Override
@@ -38,7 +29,7 @@ public class MockVelocityServo<T extends Measure100> implements VelocityServo<T>
     }
 
     @Override
-    public double getDistance() {
+    public OptionalDouble getDistance() {
         throw new UnsupportedOperationException("Unimplemented method 'getDistance'");
     }
 

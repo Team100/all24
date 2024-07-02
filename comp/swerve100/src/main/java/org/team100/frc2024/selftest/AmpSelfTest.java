@@ -1,5 +1,7 @@
 package org.team100.frc2024.selftest;
 
+import java.util.OptionalDouble;
+
 import org.team100.frc2024.motion.amp.AmpPivot;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
@@ -49,7 +51,10 @@ public class AmpSelfTest extends Command {
         // the arm should be near the correct position at some
         // point during the waiting period.
         if (m_timer.get() > kUpTime && m_timer.get() < kWaitTime) {
-            position = m_amp.getPositionRad();
+            OptionalDouble ampPosition = m_amp.getPositionRad();
+            if (ampPosition.isEmpty())
+                return;
+            position = ampPosition.getAsDouble();
             if (MathUtil.isNear(position, kExpectedPosition, 0.1)) {
                 pass = true;
             }

@@ -23,7 +23,7 @@ public class SetRotation extends Command {
 
     @Override
     public void initialize() {
-        m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), m_rotation));
+        m_drive.resetPose(new Pose2d(m_drive.getState().pose().getTranslation(), m_rotation));
     }
 
     @Override

@@ -1,11 +1,12 @@
 package org.team100.frc2024.motion;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.frc2024.motion.shooter.Shooter;
+import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -16,12 +17,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command {
-    private static final Telemetry t = Telemetry.get();
-
+    private final Telemetry t = Telemetry.get();
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final SwerveDriveSubsystem m_drive;
     private final boolean m_isPreload;
 
@@ -29,7 +29,7 @@ public class ShootSmart extends Command {
 
     public ShootSmart(
             SensorInterface sensor,
-            Shooter shooter,
+            DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
@@ -53,12 +53,15 @@ public class ShootSmart extends Command {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
-        Translation2d robotLocation = m_drive.getPose().getTranslation();
+        Translation2d robotLocation = m_drive.getState().pose().getTranslation();
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
         double rangeM = robotLocation.getDistance(speakerLocation);
         double angleRad = ShooterUtil.getAngleRad(rangeM);
-        double errorRad = m_shooter.getPivotPosition() - angleRad;
-        t.log(Level.DEBUG, "ShootSmart", "pivot error (rad)", errorRad);
+        OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
+        if (shooterPivotPosition.isPresent()) {
+            double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
+            t.log(Level.DEBUG, "ShootSmart", "pivot error (rad)", errorRad);
+        }
 
         // no matter the note position, set the shooter angle and speed
         m_shooter.setAngle(angleRad);
@@ -74,9 +77,12 @@ public class ShootSmart extends Command {
             // both sensors are dark, note is in position, wait for drums to spin up
             m_intake.stop();
             m_feeder.stop();
-            if (m_shooter.atVelocitySetpoint(m_isPreload) && Math.abs(errorRad) < 0.01) {
-                // latch ready
-                atVelocity = true;
+            if (shooterPivotPosition.isPresent()) {
+                double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
+                if (m_shooter.atVelocitySetpoint(m_isPreload) && Math.abs(errorRad) < 0.01) {
+                    // latch ready
+                    atVelocity = true;
+                }
             }
         }
         if (atVelocity) {

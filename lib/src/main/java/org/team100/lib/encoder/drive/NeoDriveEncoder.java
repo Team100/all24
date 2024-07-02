@@ -1,6 +1,8 @@
 package org.team100.lib.encoder.drive;
 
-import org.team100.lib.encoder.Encoder100;
+import java.util.OptionalDouble;
+
+import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +15,7 @@ import org.team100.lib.util.Names;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoDriveEncoder implements Encoder100<Distance100> {
+public class NeoDriveEncoder implements SettableEncoder<Distance100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final NeoDriveMotor m_motor;
@@ -36,19 +38,26 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
 
     /** Position in meters. */
     @Override
-    public Double getPosition() {
-        return getPositionM();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionM());
     }
 
     /** Velocity in meters/sec. */
     @Override
-    public double getRate() {
-        return getVelocityM_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getVelocityM_S());
+    }
+
+    /** Position in meters. */
+    @Override
+    public void setPosition(double positionM) {
+        double motorPositionRev = positionM / m_distancePerTurn;
+        m_motor.setEncoderPosition(motorPositionRev);
     }
 
     @Override
     public void reset() {
-        m_motor.resetPosition();
+        m_motor.resetEncoderPosition();
     }
 
     @Override
@@ -61,7 +70,9 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
     private double getPositionM() {
         // raw position is in rotations
         // this is fast so we don't need to cache it
-        double positionM = m_motor.getPositionRot() * m_distancePerTurn;
+        double motorPositionRev = m_motor.getPositionRot();
+        double positionM = motorPositionRev * m_distancePerTurn;
+        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
         t.log(Level.DEBUG, m_name, "position (m)", positionM);
         return positionM;
     }
@@ -73,5 +84,4 @@ public class NeoDriveEncoder implements Encoder100<Distance100> {
         t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
         return velocityM_S;
     }
-
 }

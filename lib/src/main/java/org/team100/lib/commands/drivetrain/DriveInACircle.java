@@ -33,8 +33,7 @@ public class DriveInACircle extends Command100 {
     private static final double kMaxSpeed = 0.5;
     private static final double kAccel = 0.5;
 
-    private static final Telemetry t = Telemetry.get();
-
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
@@ -69,7 +68,7 @@ public class DriveInACircle extends Command100 {
     @Override
     public void initialize100() {
         m_controller.reset();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         m_initialRotation = currentPose.getRotation().getRadians();
         m_center = getCenter(currentPose, kRadiusM);
         m_speedRad_S = 0;
@@ -96,7 +95,7 @@ public class DriveInACircle extends Command100 {
                 m_initialRotation,
                 m_turnRatio);
 
-        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getPose(), reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
         t.log(Level.TRACE, m_name, "center", m_center);

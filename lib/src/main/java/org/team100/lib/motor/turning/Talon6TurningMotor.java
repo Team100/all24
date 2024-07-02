@@ -4,7 +4,6 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 
 /**
@@ -39,29 +38,13 @@ public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
     }
 
     @Override
-    public double getTorque() {
-        double motorTorqueNm = getMotorTorque();
-        return motorTorqueNm * m_gearRatio;
-    }
-
-    /** Position in rad */
-    @Override
-    public Double getPosition() {
-        double positionRev = m_position.getAsDouble();
-        double positionRad = positionRev * 2 * Math.PI;
-        t.log(Level.TRACE, m_name, "position (rev)", positionRev);
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
-        return positionRad;
-    }
-
-    /** Velocity in rad/sec */
-    @Override
-    public double getRate() {
-        double velocityRev_S = m_velocity.getAsDouble();
-        double velocityRad_S = velocityRev_S * 2 * Math.PI;
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", velocityRev_S);
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", velocityRad_S);
-        return velocityRad_S;
+    public void setPosition(double outputRad, double outputRad_S, double outputTorqueNm) {
+        double outputRev = outputRad / (2 * Math.PI);
+        double motorRev = outputRev * m_gearRatio;
+        double outputRev_S = outputRad_S / (2 * Math.PI);
+        double motorRev_S = outputRev_S * m_gearRatio;
+        double motorTorqueNm = outputTorqueNm / m_gearRatio;
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
     }
 
 }

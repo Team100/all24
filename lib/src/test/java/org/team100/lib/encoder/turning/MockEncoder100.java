@@ -1,19 +1,22 @@
 package org.team100.lib.encoder.turning;
 
-import org.team100.lib.encoder.Encoder100;
+import java.util.OptionalDouble;
+
+import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.units.Measure100;
 
-public class MockEncoder100<T extends Measure100> implements Encoder100<T> {
+public class MockEncoder100<T extends Measure100> implements SettableEncoder<T> {
     public double angle = 0;
     public double rate = 0;
+
     @Override
-    public Double getPosition() {
-        return angle;
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(angle);
     }
 
     @Override
-    public double getRate() {
-        return rate;
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(rate);
     }
 
     @Override
@@ -24,5 +27,10 @@ public class MockEncoder100<T extends Measure100> implements Encoder100<T> {
     @Override
     public void close() {
         //
+    }
+
+    @Override
+    public void setPosition(double position) {
+        this.angle = position;
     }
 }

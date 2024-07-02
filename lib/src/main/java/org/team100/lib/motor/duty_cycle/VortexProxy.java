@@ -1,12 +1,11 @@
 package org.team100.lib.motor.duty_cycle;
 
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoVortexTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -14,8 +13,12 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
-/** Very simple wrapper around SparkFlex for testing. */
-public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel {
+/**
+ * Very simple wrapper around SparkFlex for testing.
+ * 
+ * TODO: remove this class, use NeoVortexDriveEncoder instead.
+ */
+public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final CANSparkFlex m_motor;
@@ -46,16 +49,6 @@ public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel 
     }
 
     @Override
-    public void setVelocity(double velocity, double accel, double torque) {
-        throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
-    }
-
-    @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
-    }
-
-    @Override
     public void stop() {
         m_motor.stopMotor();
     }
@@ -65,16 +58,15 @@ public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel 
         m_motor.close();
     }
 
-    double getVelocity() {
+    double getVelocityRPM() {
         return m_encoder.getVelocity();
     }
 
-    double getPosition() {
+    double getPositionRot() {
         return m_encoder.getPosition();
     }
 
     void resetPosition() {
         m_encoder.setPosition(0);
     }
-
 }

@@ -1,10 +1,12 @@
 package org.team100.frc2024.motion.climber;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
@@ -20,9 +22,9 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 40;
     private final Telemetry t = Telemetry.get();
     private final String m_name;
-    private final Motor100<Distance100> v1;
+    private final DutyCycleMotor100 v1;
     private final Encoder100<Distance100> e1;
-    private final Motor100<Distance100> v2;
+    private final DutyCycleMotor100 v2;
     private final Encoder100<Distance100> e2;
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
@@ -56,37 +58,42 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void setLeftWithSoftLimits(double value) {
-        if (e1.getPosition() > 300 && value >= 0) {
+        OptionalDouble e1Position = e1.getPosition();
+        if (e1Position.isEmpty()) {
             v1.setDutyCycle(0);
             return;
         }
-
-        if (e1.getPosition() < 5 && value <= 0) {
+        if (e1Position.getAsDouble() > 300 && value >= 0) {
             v1.setDutyCycle(0);
             return;
         }
-        // s1.set(value);
+        if (e1Position.getAsDouble() < 5 && value <= 0) {
+            v1.setDutyCycle(0);
+            return;
+        }
         Telemetry.get().log(Level.DEBUG, m_name, "LEFT VALUE", value);
     }
 
     public void setRightWithSoftLimits(double value) {
-        if (e2.getPosition() > 300 && value >= 0) {
+        OptionalDouble e2Position = e2.getPosition();
+         if (e2Position.isEmpty()) {
             v2.setDutyCycle(0);
             return;
         }
-
-        if (e2.getPosition() < 5 && value <= 0) {
+        if (e2Position.getAsDouble() > 300 && value >= 0) {
             v2.setDutyCycle(0);
             return;
         }
-        // s2.set(value);
+        if (e2Position.getAsDouble() < 5 && value <= 0) {
+            v2.setDutyCycle(0);
+            return;
+        }
         Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
     }
 
     public void zeroClimbers() {
         e1.reset();
         e2.reset();
-
     }
 
     public void setLeft(double value) {
@@ -97,11 +104,11 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         v2.setDutyCycle(value);
     }
 
-    public double getRightPosition() {
+    public OptionalDouble getRightPosition() {
         return e2.getPosition();
     }
 
-    public double getLeftPosition() {
+    public OptionalDouble getLeftPosition() {
         return e1.getPosition();
     }
 

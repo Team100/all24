@@ -11,10 +11,9 @@ import org.team100.lib.util.Names;
  * Enforces drive motor torque constraints.
  */
 public class DriveAccelerationLimiter implements Glassy {
-    private static final Telemetry t = Telemetry.get();
-
     private static final int kMaxIterations = 10;
 
+    private final Telemetry t = Telemetry.get();
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 

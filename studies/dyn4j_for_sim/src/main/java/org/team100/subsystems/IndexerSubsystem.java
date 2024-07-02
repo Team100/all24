@@ -10,11 +10,15 @@ import org.team100.sim.RobotBody;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Manages the note and joint. */
 public class IndexerSubsystem extends SubsystemBase {
-    public static final double kMinPickDistanceM = 0.437;
+    /** Go this far from the note until rotated correctly. */
+    private static final double kPickRadius = 1;
+    /** Correct center-to-center distance for picking. */
+    private static final double kMinPickDistanceM = 0.437;
     /**
      * Intake velocity admittance: need to drive over the note.
      */
@@ -42,9 +46,9 @@ public class IndexerSubsystem extends SubsystemBase {
         m_debug = debug;
     }
 
-    public static boolean aligned(double angleRad) {
+    public boolean aligned(double angleRad) {
         return Math.abs(angleRad) < IndexerSubsystem.kAdmittanceRad;
-    } 
+    }
 
     /** There's a note in the indexer */
     public boolean full() {
@@ -158,4 +162,23 @@ public class IndexerSubsystem extends SubsystemBase {
         m_note = null;
         return true;
     }
+
+    public Translation2d getCartesianError(Translation2d robotToTargetFieldRelative, boolean aligned) {
+        double distance = robotToTargetFieldRelative.getNorm();
+        if (distance < kMinPickDistanceM || !aligned) {
+            // target distance is lower than the tangent point: we ran the note
+            // over without picking it, so back up.
+            // also back up if not aligned.
+            if (m_debug)
+                System.out.print(" unaligned");
+            double targetDistance = distance - kPickRadius;
+            return robotToTargetFieldRelative.times(targetDistance);
+        }
+        if (m_debug)
+            System.out.print(" aligned");
+
+        // aligned, drive over the note
+        return robotToTargetFieldRelative;
+    }
+
 }

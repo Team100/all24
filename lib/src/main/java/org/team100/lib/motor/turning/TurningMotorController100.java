@@ -47,7 +47,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     }
 
     /**
-     * Velocity kV only.
+     * Velocity kV only, ignores accel and torque.
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {
@@ -55,11 +55,6 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
         double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
         m_motor.set(motorDutyCycle);
         t.log(Level.TRACE, m_name, "duty cycle", motorDutyCycle);
-    }
-
-    @Override
-    public double getTorque() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTorque'");
     }
 
     @Override

@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.async.Async;
+import org.team100.lib.async.MockAsync;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
@@ -21,7 +23,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testSimple() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -30,7 +33,7 @@ class ArmTrajectoryCommandTest implements Timeless {
                 goal);
         ArmTrajectoryCommand.shutDownForTest();
         command.initialize();
-        assertEquals(0, armSubSystem.getPosition().th1, kDelta);
+        assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);
         stepTime(0.02);
         command.execute100(0.02);
         // the goal is impossible so this is always finished.
@@ -41,7 +44,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testSimple2() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -62,15 +66,16 @@ class ArmTrajectoryCommandTest implements Timeless {
         }
         assertTrue(command.isFinished());
         // command tolerance is 0.02
-        assertEquals(0, armSubSystem.getPosition().th1, 0.02);
-        assertEquals(Math.PI / 2, armSubSystem.getPosition().th2, 0.02);
+        assertEquals(0, armSubSystem.getPosition().get().th1, 0.02);
+        assertEquals(Math.PI / 2, armSubSystem.getPosition().get().th2, 0.02);
         command.end(false);
         armSubSystem.close();
     }
 
     @Test
     void testPosRefernce() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -86,7 +91,8 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testVelRefernce() {
-        ArmSubsystem armSubSystem = ArmFactory.get();
+        Async async = new MockAsync();
+        ArmSubsystem armSubSystem = ArmFactory.get(async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(

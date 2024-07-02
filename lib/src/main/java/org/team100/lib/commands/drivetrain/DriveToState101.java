@@ -30,8 +30,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class DriveToState101 extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
-    private static final Telemetry t = Telemetry.get();
-
+    
+    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
@@ -54,17 +54,17 @@ public class DriveToState101 extends Command100 {
 
     @Override
     public void initialize100() {
-        Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getPose().getTranslation());
+        Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getState().pose().getTranslation());
         Transform2d transform = new Transform2d(toGoal, toGoal.getAngle()).inverse();
-        Pose2d startPose = new Pose2d(m_swerve.getPose().getTranslation(), transform.getRotation());
-        FieldRelativeVelocity startVelocity = m_swerve.getVelocity();
+        Pose2d startPose = new Pose2d(m_swerve.getState().pose().getTranslation(), transform.getRotation());
+        FieldRelativeVelocity startVelocity = m_swerve.getState().velocity();
         Pose2d startWaypoint = getStartWaypoint(startPose, startVelocity);
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(), new Rotation2d(1, -1));
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
                 endWaypoint);
         List<Rotation2d> headings = List.of(
-                m_swerve.getPose().getRotation(),
+                m_swerve.getState().pose().getRotation(),
                 m_goal.getRotation());
         Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
                 waypointsM,
@@ -89,7 +89,7 @@ public class DriveToState101 extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 

@@ -163,10 +163,10 @@ class GamePieceFinder:
         topic_name = "noteVision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/fps").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + camera.id + "/latency").publish()
+                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/latency").publish()
             )
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Rotation3d).publish().set(

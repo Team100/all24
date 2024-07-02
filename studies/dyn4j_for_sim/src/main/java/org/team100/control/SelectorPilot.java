@@ -101,8 +101,18 @@ public class SelectorPilot implements Pilot {
     }
 
     @Override
+    public boolean driveToCorner() {
+        return select(Pilot::driveToCorner);
+    }
+
+    @Override
     public Pose2d shootingLocation() {
         return select(Pilot::shootingLocation);
+    }
+
+    @Override
+    public Pose2d cornerLocation() {
+        return select(Pilot::cornerLocation);
     }
 
     @Override

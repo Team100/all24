@@ -1,5 +1,6 @@
 package org.team100.lib.commands.arm;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.motion.arm.ArmAngles;
@@ -39,8 +40,10 @@ public class CartesianManualArm extends Command {
     @Override
     public void execute() {
         Translation2d cartesianVelocity = new Translation2d(m_dx.getAsDouble(), m_dy.getAsDouble());
-        ArmAngles position = m_arm.getPosition();
-        ArmAngles jointVelocity = m_kinematics.inverseVel(position, cartesianVelocity);
+        Optional<ArmAngles> position = m_arm.getPosition();
+        if (position.isEmpty())
+            return;
+        ArmAngles jointVelocity = m_kinematics.inverseVel(position.get(), cartesianVelocity);
         m_arm.set(kMaxDutyCycle * jointVelocity.th1, kMaxDutyCycle * jointVelocity.th2);
     }
 

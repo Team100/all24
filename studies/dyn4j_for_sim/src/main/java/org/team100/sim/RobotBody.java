@@ -59,8 +59,6 @@ public abstract class RobotBody extends Body100 {
 
     public abstract Pose2d ampPosition();
 
-    public abstract Pose2d shootingPosition();
-
     public abstract Pose2d sourcePosition();
 
     public abstract Pose2d opponentSourcePosition();
@@ -70,6 +68,9 @@ public abstract class RobotBody extends Body100 {
     public abstract Pose2d passingPosition();
 
     public abstract Translation2d speakerPosition();
+
+    /** For "lanes" this is a bias in output Y velocity. */
+    public abstract double yBias();
 
     public SimWorld getWorld() {
         return m_world;

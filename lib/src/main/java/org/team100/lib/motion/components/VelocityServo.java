@@ -1,5 +1,7 @@
 package org.team100.lib.motion.components;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.units.Measure100;
 
@@ -14,23 +16,15 @@ public interface VelocityServo<T extends Measure100> extends Glassy {
      */
     void setVelocity(double setpoint);
 
-    /** Direct control for testing. */
-    void setDutyCycle(double dutyCycle);
-
     /**
      * @return Current velocity measurement. Note this can be noisy, maybe filter
      *         it.
      */
-    double getVelocity();
-
-    /**
-     * @return Current applied torque.  Used for drive/steer decoupling.
-     */
-    double getTorque();
+    OptionalDouble getVelocity();
 
     void stop();
 
-    double getDistance();
+    OptionalDouble getDistance();
 
     /** For testing */
     double getSetpoint();

@@ -2,6 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
@@ -14,7 +15,8 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
-public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T> {
+public abstract class CANSparkMotor<T extends Measure100>
+        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
     protected final Telemetry t = Telemetry.get();
     private final String m_name;
     protected final Feedforward100 m_ff;
@@ -67,27 +69,59 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
     }
 
     /**
-     * Bypass the gear ratio, wheel diameter, etc, and set the motor directly.
+     * Set motor output using motor quantities (rev/s, rev/s^2, Nm).
      */
-    public void setMotorVelocity(double motorRev_S, double motorRev_S2, double torqueNm) {
-        double motorRev_M = motorRev_S * 60;
+    protected void setMotorVelocity(
+            double motorRev_S,
+            double motorRev_S2,
+            double torqueNm) {
+        double currentMotorRev_S = m_encoder.getVelocity() / 60;
 
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
-        double frictionFFVolts = m_ff.frictionFFVolts(m_encoder.getVelocity() / 60, motorRev_S);
         double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
-
-        double torqueFFAmps = torqueNm / kTNm_amp();
-        double torqueFFVolts = torqueFFAmps * kROhms();
+        double torqueFFVolts = getTorqueFFVolts(torqueNm);
 
         double kFF = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
 
-        Rev100.warn(() -> m_pidController.setReference(motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
+        double motorRev_M = motorRev_S * 60;
+        Rev100.warn(() -> m_pidController.setReference(
+                motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
 
-        t.log(Level.TRACE, m_name, "friction feedforward volts", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward volts", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward volts", accelFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward volts", torqueFFVolts);
         t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "desired accel (rev_s2)", motorRev_S2);
+        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "accel feedforward (v)", accelFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        log();
+    }
+
+    /**
+     * Set motor output using motor quantities (rev, Nm).
+     * 
+     * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
+     */
+    protected void setMotorPosition(
+            double motorRev,
+            double motorRev_S,
+            double torqueNm) {
+        double currentMotorRev_S = m_encoder.getVelocity() / 60;
+
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double torqueFFVolts = getTorqueFFVolts(torqueNm);
+
+        double kFF = frictionFFVolts + velocityFFVolts + torqueFFVolts;
+
+        Rev100.warn(() -> m_pidController.setReference(
+                motorRev, ControlType.kPosition, 0, kFF, ArbFFUnits.kVoltage));
+
+        t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
+        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
         log();
     }
 
@@ -110,8 +144,15 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
     /**
      * Sets integrated sensor position to zero.
      */
-    public void resetPosition() {
+    public void resetEncoderPosition() {
         Rev100.warn(() -> m_encoder.setPosition(0));
+    }
+
+    /**
+     * Set integrated sensor position in rotations.
+     */
+    public void setEncoderPosition(double motorPositionRev) {
+        Rev100.warn(() -> m_encoder.setPosition(motorPositionRev));
     }
 
     protected void log() {
@@ -120,6 +161,7 @@ public abstract class CANSparkMotor<T extends Measure100> implements Motor100<T>
         t.log(Level.TRACE, m_name, "velocity (RPM)", m_encoder.getVelocity());
         t.log(Level.TRACE, m_name, "current (A)", m_motor.getOutputCurrent());
         t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.TRACE, m_name, "torque (Nm)", getMotorTorque());
         t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());
     }
 

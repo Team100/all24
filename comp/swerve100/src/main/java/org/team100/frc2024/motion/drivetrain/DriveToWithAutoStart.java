@@ -29,8 +29,8 @@ public class DriveToWithAutoStart extends Command100 {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 5;
-    private static final Telemetry t = Telemetry.get();
-
+    
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;
@@ -53,7 +53,7 @@ public class DriveToWithAutoStart extends Command100 {
 
     @Override
     public void initialize100() {
-        Pose2d startPose = m_swerve.getPose();
+        Pose2d startPose = m_swerve.getState().pose();
         Translation2d startTranslation = new Translation2d();
         Translation2d endTranslation = m_goalWaypoint.getTranslation();
         Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
@@ -90,7 +90,7 @@ public class DriveToWithAutoStart extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 

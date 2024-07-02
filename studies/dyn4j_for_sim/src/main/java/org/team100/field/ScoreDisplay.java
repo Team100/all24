@@ -123,7 +123,6 @@ public class ScoreDisplay {
 
     /**
      * Like The Blue Alliance, but with blue on the left.
-     * TODO: add endgame section
      */
     public void finalScore() {
         final int ampPoint = 1;

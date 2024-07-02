@@ -24,6 +24,7 @@ public class SlipperyTireUtil {
     /** Clip corner speeds to this. */
     private static final double kMaxSpeedM_s = 5.0;
     private static final Telemetry t = Telemetry.get();
+
     private final Tire m_tire;
 
     public SlipperyTireUtil(Tire tire) {

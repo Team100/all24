@@ -10,8 +10,8 @@ import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.ChangeIntakeState;
 import org.team100.frc2024.motion.intake.ChangeIntakeState2;
 import org.team100.frc2024.motion.intake.Intake;
+import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.RampShooter;
-import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
@@ -44,7 +44,7 @@ public class AutoMaker {
     private final SensorInterface m_sensors;
     private final List<TimingConstraint> m_constraints;
     private final Intake m_intake;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final FeederSubsystem m_feeder;
     private final NotePosition24ArrayListener m_notePosition24ArrayListener;
     private final double kShooterScale;
@@ -61,7 +61,7 @@ public class AutoMaker {
             DriveMotionController controller,
             double shooterScale,
             FeederSubsystem feeder,
-            Shooter shooter,
+            DrumShooter shooter,
             Intake intake,
             SensorInterface sensor,
             NotePosition24ArrayListener notePosition24ArrayListener,

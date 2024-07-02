@@ -14,17 +14,22 @@ import edu.wpi.first.math.geometry.Translation2d;
  * Steer to avoid the stage posts.
  */
 public class SteerAroundObstacles implements Tactic {
-    private static final double kObstacleSteer = 5;
+    private static final double kObstacleSteer = 1;
 
     private final DriveSubsystem m_drive;
+    private final ForceViz m_viz;
     private final Heuristics m_heuristics;
     private final boolean m_debug;
 
     /**
      * @param drive provides pose
      */
-    public SteerAroundObstacles(DriveSubsystem drive, boolean debug) {
+    public SteerAroundObstacles(
+            DriveSubsystem drive,
+            ForceViz viz,
+            boolean debug) {
         m_drive = drive;
+        m_viz = viz;
         m_heuristics = new Heuristics(debug);
         m_debug = debug && Debug.enable();
 
@@ -57,7 +62,7 @@ public class SteerAroundObstacles implements Tactic {
                         force.y);
             FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x, force.y, 0);
             if (m_debug)
-                ForceViz.put("tactics", pose, steering);
+                m_viz.tactics(pose, steering);
             v = v.plus(steering);
         }
         return v;

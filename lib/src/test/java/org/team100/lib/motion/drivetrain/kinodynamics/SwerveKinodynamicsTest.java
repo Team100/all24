@@ -23,7 +23,7 @@ class SwerveKinodynamicsTest {
         double wheelbase = 0.5;
         double driveV = 1;
         SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
-                1,Tire.noslip());
+                1, Tire.noslip());
         assertEquals(1, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -40,7 +40,7 @@ class SwerveKinodynamicsTest {
         double wheelbase = 0.5;
         double driveV = 4;
         SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
-                1,Tire.noslip());
+                1, Tire.noslip());
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -57,7 +57,7 @@ class SwerveKinodynamicsTest {
         double wheelbase = 1;
         double driveV = 4;
         SwerveKinodynamics k = new SwerveKinodynamics(driveV, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
-                1,Tire.noslip());
+                1, Tire.noslip());
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -74,7 +74,7 @@ class SwerveKinodynamicsTest {
         double wheelbase = 0.5;
         double driveA = 1;
         SwerveKinodynamics k = new SwerveKinodynamics(1, 1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
-                1,Tire.noslip());
+                1, Tire.noslip());
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -92,7 +92,7 @@ class SwerveKinodynamicsTest {
         double wheelbase = 1;
         double driveA = 1;
         SwerveKinodynamics k = new SwerveKinodynamics(1, 1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
-                1,Tire.noslip());
+                1, Tire.noslip());
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -110,7 +110,8 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double vcg = 0.3;
-        SwerveKinodynamics k = new SwerveKinodynamics(1, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2, vcg,Tire.noslip());
+        SwerveKinodynamics k = new SwerveKinodynamics(1, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2, vcg,
+                Tire.noslip());
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
         double fulcrum = Math.min(track / 2, wheelbase / 2);
@@ -331,6 +332,20 @@ class SwerveKinodynamicsTest {
             assertEquals(1.885, i.vxMetersPerSecond, kDelta);
             assertEquals(1.885, i.vyMetersPerSecond, kDelta);
             assertEquals(3.771, i.omegaRadiansPerSecond, kDelta);
+        }
+    }
+
+    @Test
+    void testAnalyticDesaturation4() {
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        {
+            // verify the sign of the omega clamp
+            assertEquals(11.314, l.getMaxAngleSpeedRad_S(), kDelta);
+            FieldRelativeVelocity s = new FieldRelativeVelocity(0, 0, -20);
+            FieldRelativeVelocity i = l.analyticDesaturation(s);
+            assertEquals(0, i.x(), kDelta);
+            assertEquals(0, i.y(), kDelta);
+            assertEquals(-11.314, i.theta(), kDelta);
         }
     }
 

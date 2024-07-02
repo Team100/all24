@@ -1,6 +1,7 @@
 package org.team100.commands;
 
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
@@ -44,8 +45,11 @@ public class DefendSource extends Command {
     private final double m_skill;
     private final DriveSubsystem m_drive;
     private final CameraSubsystem m_camera;
+    private final Supplier<Pose2d> m_position;
+    private final Supplier<Pose2d> m_source;
     private final boolean m_debug;
     private final Tactics m_tactics;
+    private final ForceViz m_viz;
 
     private int m_pinCounter = 0;
 
@@ -53,12 +57,19 @@ public class DefendSource extends Command {
             double skill,
             DriveSubsystem drive,
             CameraSubsystem camera,
+            Supplier<Pose2d> position,
+            Supplier<Pose2d> source,
+            Tactics tactics,
+            ForceViz viz,
             boolean debug) {
         m_skill = skill;
         m_drive = drive;
         m_camera = camera;
+        m_position = position;
+        m_source = source;
         m_debug = debug && Debug.enable();
-        m_tactics = new Tactics(drive, camera, debug);
+        m_tactics = tactics;
+        m_viz = viz;
         addRequirements(drive);
     }
 
@@ -72,14 +83,14 @@ public class DefendSource extends Command {
         FieldRelativeVelocity desired = work(
                 m_skill,
                 pose,
-                m_drive.getRobotBody().defenderPosition(),
-                m_drive.getRobotBody().opponentSourcePosition(),
+                m_position.get(),
+                m_source.get(),
                 m_camera.recentSightings());
         if (m_debug)
-            ForceViz.put("desired", pose, desired);
+            m_viz.desired(pose, desired);
         if (m_debug)
             System.out.printf(" desired %s", desired);
-        FieldRelativeVelocity v = m_tactics.apply(desired, false, true, false);
+        FieldRelativeVelocity v = m_tactics.apply(desired);
         if (m_debug)
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
@@ -164,7 +175,7 @@ public class DefendSource extends Command {
                 // don't chase it too far
                 continue;
             }
-            if (m_debug )
+            if (m_debug)
                 System.out.printf(" foe (%5.2f, %5.2f)", foe.getX(), foe.getY());
             // drive towards the opponent
             Vector2 toOpponent = myPosition.to(
@@ -172,7 +183,7 @@ public class DefendSource extends Command {
             Vector2 force = toOpponent.product(
                     m_skill * kDefensePushing / toOpponent.getMagnitudeSquared());
             FieldRelativeVelocity push = new FieldRelativeVelocity(force.x, force.y, 0);
-            if (m_debug )
+            if (m_debug)
                 System.out.printf(" push %s", push);
             // v = v.plus(push);
             v = push;

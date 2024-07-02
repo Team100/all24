@@ -7,7 +7,6 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
@@ -27,6 +26,8 @@ public class Rotate extends Command100 {
 
     private static final double kXToleranceRad = 0.02;
     private static final double kVToleranceRad_S = 0.02;
+    // don't try to rotate at max speed
+    private static final double kSpeed = 0.5;
 
     private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_robotDrive;
@@ -73,10 +74,10 @@ public class Rotate extends Command100 {
     public void initialize100() {
         m_controller.reset();
         resetRefTheta(0.02);
-        Constraints100 c = new Constraints100(
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleAccelRad_S2());
-        m_profile = new TrapezoidProfile100(c, 0.05);
+        m_profile = new TrapezoidProfile100(
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kSpeed,
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kSpeed,
+                0.05);
         // first align the wheels
         m_steeringAligned = false;
     }
@@ -84,7 +85,7 @@ public class Rotate extends Command100 {
     private void resetRefTheta(double dt) {
         ChassisSpeeds initialSpeeds = m_robotDrive.getState().chassisSpeeds();
         refTheta = new State100(
-                m_robotDrive.getPose().getRotation().getRadians(),
+                m_robotDrive.getState().pose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
     }
 
@@ -97,7 +98,7 @@ public class Rotate extends Command100 {
                 && MathUtil.isNear(refTheta.v(), m_goalState.v(), kVToleranceRad_S);
 
         // measurement
-        Pose2d currentPose = m_robotDrive.getPose();
+        Pose2d currentPose = m_robotDrive.getState().pose();
 
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose

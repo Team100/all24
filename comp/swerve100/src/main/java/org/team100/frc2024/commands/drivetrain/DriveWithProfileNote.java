@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.lib.commands.Command100;
-import org.team100.lib.controller.HolonomicDriveController100;
+import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -13,7 +13,6 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.Constraints100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -33,37 +32,44 @@ public class DriveWithProfileNote extends Command100 {
 
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
-    private final HolonomicDriveController100 m_controller;
+    private final FullStateDriveController m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-
+    private Optional<Translation2d> previousGoal;
     private State100 xSetpoint;
     private State100 ySetpoint;
     private State100 thetaSetpoint;
+    private int count;
 
     public DriveWithProfileNote(
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController100 controller,
+            FullStateDriveController controller,
             SwerveKinodynamics limits) {
+        previousGoal = null;
+        count = 0;
         m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;
         m_limits = limits;
 
-        Constraints100 driveContraints = new Constraints100(m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2() / 2);
-        Constraints100 thetaContraints = new Constraints100(m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2() / 4);
-
-        xProfile = new TrapezoidProfile100(driveContraints, 0.01);
-        yProfile = new TrapezoidProfile100(driveContraints, 0.01);
-        thetaProfile = new TrapezoidProfile100(thetaContraints, 0.01);
-        addRequirements(m_swerve);
+        xProfile = new TrapezoidProfile100(
+                m_limits.getMaxDriveVelocityM_S(),
+                m_limits.getMaxDriveAccelerationM_S2() / 2,
+                0.01);
+        yProfile = new TrapezoidProfile100(
+                m_limits.getMaxDriveVelocityM_S(),
+                m_limits.getMaxDriveAccelerationM_S2() / 2,
+                0.01);
+        thetaProfile = new TrapezoidProfile100(
+                m_limits.getMaxAngleSpeedRad_S(),
+                m_limits.getMaxAngleAccelRad_S2() / 4,
+                0.01);
+        addRequirements(m_swerve, m_intake);
     }
 
     @Override
@@ -78,24 +84,32 @@ public class DriveWithProfileNote extends Command100 {
         // intake the whole time
         m_intake.intakeSmart();
         Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
-
         if (optGoal.isEmpty()) {
-            m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
-            t.log(Level.INFO, m_name, "Note detected", false);
-            return;
+            if (previousGoal == null) {
+                m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
+                t.log(Level.DEBUG, m_name, "Note detected", false);
+                return;
+            }
+            optGoal = previousGoal;
+            count++;
+            if (count == 50) {
+                return;
+            }
+        } else {
+            count = 0;
         }
         Translation2d goal = optGoal.get();
 
-        t.log(Level.INFO, m_name, "Note detected", true);
+        t.log(Level.DEBUG, m_name, "Note detected", true);
         Rotation2d rotationGoal;
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
             rotationGoal = new Rotation2d(
-                    goal.minus(m_swerve.getPose().getTranslation()).getAngle().getRadians() + Math.PI);
+                    goal.minus(m_swerve.getState().pose().getTranslation()).getAngle().getRadians() + Math.PI);
         } else {
-            rotationGoal = m_swerve.getPose().getRotation();
+            rotationGoal = m_swerve.getState().pose().getRotation();
         }
         // take the short path
-        double measurement = m_swerve.getPose().getRotation().getRadians();
+        double measurement = m_swerve.getState().pose().getRotation().getRadians();
         rotationGoal = new Rotation2d(
                 Math100.getMinDistance(measurement, rotationGoal.getRadians()));
 
@@ -120,10 +134,10 @@ public class DriveWithProfileNote extends Command100 {
                 goal.getY(),
                 0 });
         m_swerve.driveInFieldCoords(twistGoal, dt);
+
     }
 
     @Override
     public void end100(boolean interrupted) {
-        m_swerve.stop();
     }
 }

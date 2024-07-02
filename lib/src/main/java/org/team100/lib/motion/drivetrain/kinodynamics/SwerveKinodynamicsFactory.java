@@ -28,16 +28,18 @@ public class SwerveKinodynamicsFactory {
                 // these numbers are a guess based on the betabot numbers.
                 // the comp bot uses the "fast" ratio and FOC falcons
                 // so should be a bit higher top speed and less acceleration.
+                // note these measurements were updated jun 24.
                 return new SwerveKinodynamics(
                         5, // max vel m/s
-                        3, // max accel m/s/s
-                        10, // max decel m/s/s
+                        10, // stall m/s/s
+                        10, // max accel m/s/s
+                        20, // max decel m/s/s
                         20, // max module steering rate rad/s
                         60, // max module steering accel rad/s/s
-                        0.491, // front wheelbase m
-                        0.44, // back wheelbase m
-                        0.491, // wheelbase m
-                        0.29, // front offset m
+                        0.48, // front track m
+                        0.43, // back track m
+                        0.46, // wheelbase m
+                        0.31, // front offset m
                         0.1, // vcg m
                         Tire.noslip());
             case SWERVE_TWO:
@@ -50,7 +52,7 @@ public class SwerveKinodynamicsFactory {
                         20 * Math.PI, // steering accel rad/s/s
                         0.380, // track m
                         0.445, // wheelbase m
-                        .2225, // front offset m
+                        0.2225, // front offset m
                         0.3, // vcg m
                         Tire.noslip());
             case SWERVE_ONE:

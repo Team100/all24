@@ -33,8 +33,8 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
-    private static final Telemetry t = Telemetry.get();
 
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
     private final DriveMotionController m_controller;
@@ -60,7 +60,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
         Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
         if (!optionalAlliance.isPresent())
             return;
-        Pose2d startPose = m_swerve.getPose();
+        Pose2d startPose = m_swerve.getState().pose();
         Rotation2d rotationToGoal = m_goalTranslation.minus(startPose.getTranslation()).getAngle();
         Rotation2d startRotation = rotationToGoal.times(1.5);
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), startRotation);
@@ -91,7 +91,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 

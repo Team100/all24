@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.WrapperCommand;
  */
 public class CommandMaker {
 
-
     /**
      * Try the new Choreo library.
      * 
@@ -27,7 +26,7 @@ public class CommandMaker {
         return new WrapperCommand(
                 Choreo.choreoSwerveCommand(
                         trajectory,
-                        drivetrain::getPose,
+                        () -> drivetrain.getState().pose(),
                         new PIDController(0.25, 0.0, 0.0),
                         new PIDController(0.25, 0.0, 0.0),
                         new PIDController(0.25, 0.0, 0.0),

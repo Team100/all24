@@ -14,21 +14,23 @@ import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.FeedToAmp;
 import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.OuttakeCommand;
+import org.team100.frc2024.motion.ShootSmartWithRotation;
 import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.amp.AmpPivot;
 import org.team100.frc2024.motion.amp.AmpSet;
+import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
-import org.team100.frc2024.motion.drivetrain.manual.ShooterLockCommand;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.Ramp;
-import org.team100.frc2024.motion.shooter.Shooter;
 import org.team100.frc2024.motion.shooter.TestShoot;
+import org.team100.lib.async.Async;
+import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
@@ -37,10 +39,12 @@ import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
+import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
@@ -60,16 +64,21 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualWithHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithFullStateHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithMinTimeHeading;
+import org.team100.lib.motion.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.TelemetryLevelPoller;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.util.Names;
+import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -95,18 +104,23 @@ public class RobotContainer implements Glassy {
     private final SwerveModuleCollection m_modules;
     private final Command m_auton;
     private final SelfTestRunner m_selfTest;
-    private final Shooter m_shooter;
+    private final DrumShooter m_shooter;
     private final String m_name;
     private final CameraUpdater cameraUpdater;
     final SwerveDriveSubsystem m_drive;
     final AmpFeeder m_ampFeeder;
     final AmpPivot m_ampPivot;
 
-    public RobotContainer() throws IOException {
+    public RobotContainer(TimedRobot100 robot) throws IOException {
+        final AsyncFactory asyncFactory = new AsyncFactory(robot);
+        final Async async = asyncFactory.get();
+        final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
+        poller.setDefault(Level.TRACE);
+
         m_name = Names.name(this);
 
-        final DriverControl driverControl = new DriverControlProxy();
-        final OperatorControl operatorControl = new OperatorControlProxy();
+        final DriverControl driverControl = new DriverControlProxy(async);
+        final OperatorControl operatorControl = new OperatorControlProxy(async);
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         final SensorInterface m_sensors;
@@ -119,9 +133,16 @@ public class RobotContainer implements Glassy {
                 m_sensors = new MockSensors();
         }
 
-        m_modules = SwerveModuleCollection.get(kDriveCurrentLimit, kDriveStatorLimit, swerveKinodynamics);
-
-        final HeadingInterface m_heading = HeadingFactory.get(swerveKinodynamics, m_modules);
+        m_modules = SwerveModuleCollection.get(
+                kDriveCurrentLimit,
+                kDriveStatorLimit,
+                swerveKinodynamics,
+                async);
+        SwerveModuleVisualization.make(m_modules, async);
+        final HeadingInterface m_heading = HeadingFactory.get(
+                swerveKinodynamics,
+                m_modules,
+                asyncFactory);
 
         // these are the old numbers, just used as defaults. see VisionDataProvider24
         // for updated stddevs.
@@ -195,7 +216,7 @@ public class RobotContainer implements Glassy {
         // RESET 180
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
-
+        FullStateDriveController fullStateController = new FullStateDriveController();
         HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
@@ -212,8 +233,18 @@ public class RobotContainer implements Glassy {
                         m_intake,
                         notePositionDetector::getClosestTranslation2d,
                         m_drive,
-                        dthetaController,
+                        fullStateController,
                         swerveKinodynamics));
+
+        whileTrue(driverControl::driveToAmp,
+                new DriveToAmp(
+                        m_drive,
+                        swerveKinodynamics,
+                        m_ampPivot,
+                        m_ampFeeder,
+                        m_intake,
+                        m_shooter,
+                        m_feeder));
 
         whileTrue(operatorControl::intake, new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
 
@@ -240,9 +271,11 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        PIDController thetaController = new PIDController(2.5, 0, 0); // 1.7
+        // TODO (jun 24) tune theta and omega control
+        // TODO replace with min-time or full-state
+        PIDController thetaController = new PIDController(2.0, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0, 0, 0); // .5
+        PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
@@ -265,14 +298,30 @@ public class RobotContainer implements Glassy {
         driveManually.register("FIELD_RELATIVE_TWIST", false,
                 new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
 
-        driveManually.register("SNAPS", true,
-                new ManualWithHeading(
+        driveManually.register("SNAPS_PROFILED", true,
+                new ManualWithProfiledHeading(
                         m_name,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
+
+        // these gains are not terrible; trying to go faster seems to induce oscillation
+        driveManually.register("SNAPS_FULL_STATE", true,
+                new ManualWithFullStateHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        driverControl::desiredRotation,
+                        new double[] { 5.0, 0.5 }));
+
+        driveManually.register("SNAPS_MIN_TIME", true,
+                new ManualWithMinTimeHeading(
+                        m_name,
+                        swerveKinodynamics,
+                        m_heading,
+                        driverControl::desiredRotation));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
@@ -302,7 +351,7 @@ public class RobotContainer implements Glassy {
                         thetaController,
                         omegaController));
 
-        PIDController omega2Controller = new PIDController(0, 0, 0); // .5
+        PIDController omega2Controller = new PIDController(0.5, 0, 0); // .5
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
@@ -335,7 +384,8 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShooterLockCommand(shooterLock, driverControl::velocity, m_drive));
+                new ShootSmartWithRotation(m_drive, m_shooter, m_feeder, m_intake, shooterLock,
+                        driverControl::velocity));
 
         //////////////////
         //
@@ -402,7 +452,7 @@ public class RobotContainer implements Glassy {
 
     public void onInit() {
         // m_drive.resetPose()
-        m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d(Math.PI)));
+        m_drive.resetPose(new Pose2d(m_drive.getState().pose().getTranslation(), new Rotation2d(Math.PI)));
 
     }
 

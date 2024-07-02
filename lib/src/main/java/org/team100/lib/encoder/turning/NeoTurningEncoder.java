@@ -1,6 +1,8 @@
 package org.team100.lib.encoder.turning;
 
-import org.team100.lib.encoder.Encoder100;
+import java.util.OptionalDouble;
+
+import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +15,7 @@ import org.team100.lib.util.Names;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoTurningEncoder implements Encoder100<Angle100> {
+public class NeoTurningEncoder implements SettableEncoder<Angle100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final NeoTurningMotor m_motor;
@@ -37,19 +39,25 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
 
     /** Position of the mechanism in radians. */
     @Override
-    public Double getPosition() {
-        return getPositionRad();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionRad());
     }
 
     /** Velocity of the mechanism in radians per second. */
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getRateRad_S());
+    }
+
+    @Override
+    public void setPosition(double positionRad) {
+        double motorPositionRev = positionRad * m_gearRatio / (2 * Math.PI);
+        m_motor.setEncoderPosition(motorPositionRev);
     }
 
     @Override
     public void reset() {
-        m_motor.resetPosition();
+        m_motor.resetEncoderPosition();
     }
 
     @Override
@@ -61,15 +69,19 @@ public class NeoTurningEncoder implements Encoder100<Angle100> {
 
     private double getPositionRad() {
         // should be fast, no need to cache it.
-        double positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        double motorPositionRev = m_motor.getPositionRot();
+        double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
+        t.log(Level.DEBUG, m_name, "motor position (rev)", motorPositionRev);
+        t.log(Level.DEBUG, m_name, "output position (rad)", positionRad);
         return positionRad;
     }
 
     private double getRateRad_S() {
         // should be fast, no need to cache it.
-        double rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", rateRad_S);
-        return rateRad_S;
+        double motorVelocityRev_S = m_motor.getRateRPM() / 60;
+        double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
+        t.log(Level.DEBUG, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
+        t.log(Level.DEBUG, m_name, "output velocity (rad_s)", outputVelocityRad_S);
+        return outputVelocityRad_S;
     }
 }

@@ -1,6 +1,6 @@
 package org.team100.lib.hid;
 
-import org.team100.lib.async.AsyncFactory;
+import org.team100.lib.async.Async;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,9 +19,13 @@ public class OperatorControlProxy implements OperatorControl {
     private String m_name;
     private OperatorControl m_operatorControl;
 
-    public OperatorControlProxy() {
+    /**
+     * The async is just to scan for control updates, maybe don't use a whole thread
+     * for it.
+     */
+    public OperatorControlProxy(Async async) {
         refresh();
-        AsyncFactory.get().addPeriodic(this::refresh, kFreq, "OperatorControlProxy");
+        async.addPeriodic(this::refresh, kFreq, "OperatorControlProxy");
     }
 
     public void refresh() {

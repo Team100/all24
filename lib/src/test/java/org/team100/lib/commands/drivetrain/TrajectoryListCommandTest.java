@@ -51,7 +51,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 x -> List.of(maker.line(x)));
         TrajectoryListCommand.shutDownForTest();
         c.initialize();
-        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
+        assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         c.execute100(0);
         assertFalse(c.isFinished());
         // the trajectory takes a little over 2s
@@ -63,7 +63,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         }
         // at goal; wide tolerance due to test timing
         assertTrue(c.isFinished());
-        assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
+        assertEquals(1.031, fixture.drive.getState().pose().getX(), 0.05);
     }
 
     /**
@@ -89,7 +89,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             stepTime(kDtS);
             fixture.drive.periodic();
             command.execute100(kDtS);
-            double measurement = fixture.drive.moduleStates()[0].angle.getRadians();
+            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.getRadians();
             SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.

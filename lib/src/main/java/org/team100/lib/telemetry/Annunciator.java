@@ -1,5 +1,6 @@
 package org.team100.lib.telemetry;
 
+import org.team100.lib.async.Async;
 import org.team100.lib.visualization.AnnunciatorVisualization;
 
 import edu.wpi.first.util.function.BooleanConsumer;
@@ -13,9 +14,9 @@ public class Annunciator implements BooleanConsumer {
     private final DigitalOutput m_pwm;
     private boolean state;
 
-    public Annunciator(int channel) {
+    public Annunciator(int channel, Async async) {
         m_pwm = new DigitalOutput(channel);
-        AnnunciatorVisualization.make(this);
+        AnnunciatorVisualization.make(this, async);
     }
 
     @Override

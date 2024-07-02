@@ -25,13 +25,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveWithWaypoints extends Command100 {
-    private static final Telemetry t = Telemetry.get();
-
     private static final double max_vel = 5;
     private static final double max_acc = 5;
     private static final double start_vel = 0;
     private static final double end_vel = 0;
 
+    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> constraints;
@@ -51,7 +50,7 @@ public class DriveWithWaypoints extends Command100 {
 
     @Override
     public void initialize100() {
-        final Pose2d start = m_swerve.getPose();
+        final Pose2d start = m_swerve.getState().pose();
         List<Pose2d> newWaypointM = new ArrayList<>(m_goal.get());
         newWaypointM.add(0, start);
 
@@ -79,7 +78,7 @@ public class DriveWithWaypoints extends Command100 {
     @Override
     public void execute100(double dt) {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getPose();
+        Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         t.log(Level.DEBUG, m_name, "chassis speeds", output);

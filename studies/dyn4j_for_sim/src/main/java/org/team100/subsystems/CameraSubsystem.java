@@ -81,6 +81,15 @@ public class CameraSubsystem extends SubsystemBase {
         return closestSighting;
     }
 
+    /** Return true if there's a recent note sighting within the sighting limit. */
+    public boolean noteNearby(Pose2d pose) {
+        NoteSighting closestSighting = findClosestNote(pose);
+        if (closestSighting == null) {
+            return false;
+        }
+        return closestSighting.position().getDistance(pose.getTranslation()) <= kMaxNoteDistance;
+    }
+
     /**
      * Key is timestamp in seconds.
      */

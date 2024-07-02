@@ -52,11 +52,6 @@ public enum Experiment {
      */
     FullStateTrajectoryFollower,
     /**
-     * Compensate for drive/steer coupling
-     * https://docs.google.com/document/d/1Zm6VpteqNMmT0VaTDhN5U6-jF3VS11uCoykzZUIGQdU/edit
-     */
-    DriveSteerCouplingCompensation,
-    /**
      * Use softer vision update gains
      */
     AvoidVisionJitter,
@@ -69,15 +64,19 @@ public enum Experiment {
      */
     SlipperyTires,
     /**
-     * Use executor service for asyncs
-     */
-    UseExecutorAsync,
-    /**
      * Use Java executor for Command100.
      */
     UseCommandExecutor,
     /**
      * Periodically publish all tag poses to all cameras
      */
-    UseCameraUpdater
+    UseCameraUpdater,
+    /**
+     * Filter rotational output to remove oscillation
+     */
+    UseThetaFilter,
+    /**
+     * Use outboard closed-loop position control for steering instead of onboard PID
+     */
+    OutboardSteering
 }

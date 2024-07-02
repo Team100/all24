@@ -1,5 +1,9 @@
 package org.team100.lib.motion.arm;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
+
+import org.team100.lib.async.Async;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
@@ -16,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 /**
  * Arm mechanism with two joints.
  */
-public class ArmSubsystem extends SubsystemBase implements Glassy  {
+public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
@@ -36,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
      * 
      * @param name
      * @param lowerMotor
-     * @param lowerEncoder  Lower arm angle (radians), 0 up, positive forward.
+     * @param lowerEncoder Lower arm angle (radians), 0 up, positive forward.
      * @param upperMotor
      * @param upperEncoder Upper arm angle (radians), 0 up, positive forward.
      */
@@ -45,7 +49,8 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
             Motor100<Angle100> lowerMotor,
             Encoder100<Angle100> lowerEncoder,
             Motor100<Angle100> upperMotor,
-            Encoder100<Angle100> upperEncoder) {
+            Encoder100<Angle100> upperEncoder,
+            Async async) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
@@ -58,28 +63,36 @@ public class ArmSubsystem extends SubsystemBase implements Glassy  {
         m_upperArmMotor = upperMotor;
         m_upperArmEncoder = upperEncoder;
 
-        m_previousPosition = getPosition();
-        ArmVisualization.make(this);
+        Optional<ArmAngles> position = getPosition();
+        if (position.isPresent())
+            m_previousPosition = position.get();
+        ArmVisualization.make(this, async);
     }
 
     /** Arm angles (radians), 0 up, positive forward. */
-    public ArmAngles getPosition() {
+    public Optional<ArmAngles> getPosition() {
+        OptionalDouble lowerPosition = m_lowerArmEncoder.getPosition();
+        OptionalDouble upperPosition = m_upperArmEncoder.getPosition();
+        if (lowerPosition.isEmpty() || upperPosition.isEmpty())
+            return Optional.empty();
         ArmAngles position = new ArmAngles(
-                MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(m_lowerArmEncoder.getPosition())),
-                MathUtil.angleModulus(m_upperMeasurementFilter.calculate(m_upperArmEncoder.getPosition())));
+                MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(lowerPosition.getAsDouble())),
+                MathUtil.angleModulus(m_upperMeasurementFilter.calculate(upperPosition.getAsDouble())));
         t.log(Level.TRACE, m_name, "position", position);
-        return position;
+        return Optional.of(position);
     }
 
     /** Joint velocities in radians per second. */
-    public ArmAngles getVelocity() {
-        ArmAngles position = getPosition();
-        double th1 = position.th1 - m_previousPosition.th1;
-        double th2 = position.th2 - m_previousPosition.th2;
-        m_previousPosition = position;
+    public Optional<ArmAngles> getVelocity() {
+        Optional<ArmAngles> position = getPosition();
+        if (position.isEmpty())
+            return Optional.empty();
+        double th1 = position.get().th1 - m_previousPosition.th1;
+        double th2 = position.get().th2 - m_previousPosition.th2;
+        m_previousPosition = position.get();
         ArmAngles velocity = new ArmAngles(th1 * 50, th2 * 50);
         t.log(Level.TRACE, m_name, "velocity", velocity);
-        return velocity;
+        return Optional.of(velocity);
     }
 
     /**

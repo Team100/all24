@@ -76,7 +76,16 @@ public interface Pilot {
         return false;
     }
 
+    /** wait in the corner for passed notes. */
+    default boolean driveToCorner() {
+        return false;
+    }
+
     default Pose2d shootingLocation() {
+        return new Pose2d();
+    }
+
+    default Pose2d cornerLocation() {
         return new Pose2d();
     }
 
@@ -94,12 +103,16 @@ public interface Pilot {
      * **EDGES** so we need to start with everything off, and wait until the trigger
      * is listening.
      */
-    void begin();
+    default void begin() {
+        //
+    }
 
     /** Turn off all the outputs. */
-    void reset();
+    default void reset() {
+        //
+    }
 
     default void periodic() {
-
+        //
     }
 }

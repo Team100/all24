@@ -1,6 +1,8 @@
 package org.team100.lib.encoder.turning;
 
-import org.team100.lib.encoder.Encoder100;
+import java.util.OptionalDouble;
+
+import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +15,7 @@ import org.team100.lib.util.Names;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoVortexTurningEncoder implements Encoder100<Angle100> {
+public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
     private final Telemetry t = Telemetry.get();
     private final String m_name;
     private final NeoVortexTurningMotor m_motor;
@@ -37,19 +39,25 @@ public class NeoVortexTurningEncoder implements Encoder100<Angle100> {
 
     /** Position of the mechanism in radians. */
     @Override
-    public Double getPosition() {
-        return getPositionRad();
+    public OptionalDouble getPosition() {
+        return OptionalDouble.of(getPositionRad());
     }
 
     /** Velocity of the mechanism in radians per second. */
     @Override
-    public double getRate() {
-        return getRateRad_S();
+    public OptionalDouble getRate() {
+        return OptionalDouble.of(getRateRad_S());
+    }
+
+    @Override
+    public void setPosition(double positionRad) {
+        double motorPositionRev = positionRad * m_gearRatio / (2 * Math.PI);
+        m_motor.setEncoderPosition(motorPositionRev);
     }
 
     @Override
     public void reset() {
-        m_motor.resetPosition();
+        m_motor.resetEncoderPosition();
     }
 
     @Override

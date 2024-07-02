@@ -1,5 +1,6 @@
 package org.team100.frc2024.motion.climber;
 
+import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -31,20 +32,31 @@ public class ClimberDefault extends Command {
         if (m_povSupplier.get() == -1) {
             m_climber.setLeft(m_leftSupplier.get());
             m_climber.setRight(m_rightSupplier.get());
-        } else if (m_povSupplier.get() == 0) {
-            double rightPose = m_climber.getRightPosition();
-            double leftPose = m_climber.getLeftPosition();
-            double leftValue = leftController.calculate(leftPose, 85);
-            double rightValue = rightController.calculate(rightPose, 85);
-            m_climber.setLeft(leftValue);
-            m_climber.setRight(rightValue);
-        } else if (m_povSupplier.get() == 180) {
-            double rightPose = m_climber.getRightPosition();
-            double leftPose = m_climber.getLeftPosition();
-            double leftValue = leftController.calculate(leftPose, 10);
-            double rightValue = rightController.calculate(rightPose, 10);
-            m_climber.setLeft(leftValue);
-            m_climber.setRight(rightValue);
+            return;
         }
+        if (m_povSupplier.get() == 0) {
+            double setpoint = 85;
+            actuate(setpoint);
+        } else if (m_povSupplier.get() == 180) {
+            double setpoint = 10;
+            actuate(setpoint);
+        } else {
+            m_climber.setLeft(0);
+            m_climber.setRight(0);
+        }
+    }
+
+    private void actuate(double setpoint) {
+        OptionalDouble leftPose = m_climber.getLeftPosition();
+        OptionalDouble rightPose = m_climber.getRightPosition();
+        if (leftPose.isEmpty() || rightPose.isEmpty()) {
+            m_climber.setLeft(0);
+            m_climber.setRight(0);
+            return;
+        }
+        double leftValue = leftController.calculate(leftPose.getAsDouble(), setpoint);
+        double rightValue = rightController.calculate(rightPose.getAsDouble(), setpoint);
+        m_climber.setLeft(leftValue);
+        m_climber.setRight(rightValue);
     }
 }

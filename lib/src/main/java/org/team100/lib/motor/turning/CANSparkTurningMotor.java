@@ -37,9 +37,12 @@ public abstract class CANSparkTurningMotor extends CANSparkMotor<Angle100> {
     }
 
     @Override
-    public double getTorque() {
-        double motorTorqueNm = getMotorTorque();
-        return motorTorqueNm * m_gearRatio;
+    public void setPosition(double outputRad, double outputRad_S, double outputTorqueNm) {
+        double outputRev = outputRad / (2 * Math.PI);
+        double motorRev = outputRev * m_gearRatio;
+        double outputRev_S = outputRad_S / (2 * Math.PI);
+        double motorRev_S = outputRev_S * m_gearRatio;
+        double motorTorqueNm = outputTorqueNm / m_gearRatio;
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
     }
-
 }
