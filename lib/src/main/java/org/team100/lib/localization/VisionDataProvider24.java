@@ -9,7 +9,9 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Chronos.Sample;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
@@ -69,6 +71,7 @@ public class VisionDataProvider24 implements Glassy {
     /** Discard results further than this from the previous one. */
     private static final double kVisionChangeToleranceMeters = 0.1;
     // private static final double kVisionChangeToleranceMeters = 1;
+    private static final String kName = "VisionDataProvider24";
 
     private final Telemetry t = Telemetry.get();
 
@@ -76,6 +79,7 @@ public class VisionDataProvider24 implements Glassy {
     private final FireControl m_fireControl;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final String m_name;
+    private final Chronos m_chronos = Chronos.get();
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -109,7 +113,7 @@ public class VisionDataProvider24 implements Glassy {
                 new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
                 this::accept);
-    } 
+    }
 
     /**
      * The age of the last pose estimate, in microseconds.
@@ -127,43 +131,48 @@ public class VisionDataProvider24 implements Glassy {
      */
 
     public void accept(NetworkTableEvent e) {
-        ValueEventData ve = e.valueData;
-        NetworkTableValue v = ve.value;
-        String name = ve.getTopic().getName();
-        String[] fields = name.split("/");
-        if (fields.length != 3)
-            return;
-        if (fields[2].equals("fps")) {
-            // FPS is not used by the robot
-        } else if (fields[2].equals("latency")) {
-            // latency is not used by the robot
-        } else if (fields[2].equals("blips")) {
-            // decode the way StructArrayEntryImpl does
-            byte[] b = v.getRaw();
-            if (b.length == 0)
+        Sample s = m_chronos.sample(kName + "/accept");
+        try {
+            ValueEventData ve = e.valueData;
+            NetworkTableValue v = ve.value;
+            String name = ve.getTopic().getName();
+            String[] fields = name.split("/");
+            if (fields.length != 3)
                 return;
-            Blip24[] blips;
-            try {
-                synchronized (m_buf) {
-                    blips = m_buf.readArray(b);
+            if (fields[2].equals("fps")) {
+                // FPS is not used by the robot
+            } else if (fields[2].equals("latency")) {
+                // latency is not used by the robot
+            } else if (fields[2].equals("blips")) {
+                // decode the way StructArrayEntryImpl does
+                byte[] b = v.getRaw();
+                if (b.length == 0)
+                    return;
+                Blip24[] blips;
+                try {
+                    synchronized (m_buf) {
+                        blips = m_buf.readArray(b);
+                    }
+                } catch (RuntimeException ex) {
+                    return;
                 }
-            } catch (RuntimeException ex) {
-                return;
+                // the ID of the camera
+                String cameraSerialNumber = fields[1];
+
+                Optional<Alliance> alliance = DriverStation.getAlliance();
+                if (!alliance.isPresent())
+                    return;
+
+                estimateRobotPose(
+                        cameraSerialNumber,
+                        blips,
+                        alliance.get());
+            } else {
+                // this event is not for us
+                // Util.println("weird vision update key: " + name);
             }
-            // the ID of the camera
-            String cameraSerialNumber = fields[1];
-
-            Optional<Alliance> alliance = DriverStation.getAlliance();
-            if (!alliance.isPresent())
-                return;
-
-            estimateRobotPose(
-                    cameraSerialNumber,
-                    blips,
-                    alliance.get());
-        } else {
-            // this event is not for us
-            // Util.println("weird vision update key: " + name);
+        } finally {
+            s.end();
         }
     }
 
@@ -234,7 +243,7 @@ public class VisionDataProvider24 implements Glassy {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
                 t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
-                
+
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
 
@@ -256,59 +265,65 @@ public class VisionDataProvider24 implements Glassy {
             final double frameTimeSec,
             final Rotation2d gyroRotation,
             Alliance alliance) {
-        for (Blip24 blip : blips) {
+        Sample s = m_chronos.sample(kName + "/estimateFromBlips");
+        try {
+            for (Blip24 blip : blips) {
 
-            // this is just for logging
-            Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-            t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
+                // this is just for logging
+                Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
+                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
-            Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
-            if (!tagInFieldCoordsOptional.isPresent())
-                continue;
+                Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
+                if (!tagInFieldCoordsOptional.isPresent())
+                    continue;
 
-            if (blip.getPose().getTranslation().getNorm() > 5) {
-                return;
-            }
-
-            // Gyro only produces yaw so use zero roll and zero pitch
-            Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
-                    0, 0, gyroRotation.getRadians());
-
-            Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-            t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag In Field Cords", tagInFieldCoords.toPose2d());
-
-            Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
-                    cameraInRobotCoordinates,
-                    tagInFieldCoords,
-                    blip,
-                    robotRotationInFieldCoordsFromGyro,
-                    kTagRotationBeliefThresholdMeters);
-
-            Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
-
-            Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
-
-            t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
-
-            if (!Experiments.instance.enabled(Experiment.HeedVision))
-                continue;
-
-            if (lastRobotInFieldCoords != null) {
-                double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
-                if (distanceM <= kVisionChangeToleranceMeters) {
-                    // this hard limit excludes false positives, which were a bigger problem in 2023
-                    // due to the coarse tag family used. in 2024 this might not be an issue.
-                    m_poseEstimator.setStdDevs(
-                            stateStdDevs(),
-                            visionMeasurementStdDevs(distanceM));
-                    latestTimeUs = RobotController.getFPGATime();
-                    m_poseEstimator.addVisionMeasurement(
-                            currentRobotinFieldCoords,
-                            frameTimeSec);
-
+                if (blip.getPose().getTranslation().getNorm() > 5) {
+                    return;
                 }
+
+                // Gyro only produces yaw so use zero roll and zero pitch
+                Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(
+                        0, 0, gyroRotation.getRadians());
+
+                Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
+                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag In Field Cords",
+                        tagInFieldCoords.toPose2d());
+
+                Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
+                        cameraInRobotCoordinates,
+                        tagInFieldCoords,
+                        blip,
+                        robotRotationInFieldCoordsFromGyro,
+                        kTagRotationBeliefThresholdMeters);
+
+                Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
+
+                Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
+
+                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
+
+                if (!Experiments.instance.enabled(Experiment.HeedVision))
+                    continue;
+
+                if (lastRobotInFieldCoords != null) {
+                    double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
+                    if (distanceM <= kVisionChangeToleranceMeters) {
+                        // this hard limit excludes false positives, which were a bigger problem in 2023
+                        // due to the coarse tag family used. in 2024 this might not be an issue.
+                        m_poseEstimator.setStdDevs(
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distanceM));
+                        latestTimeUs = RobotController.getFPGATime();
+                        m_poseEstimator.addVisionMeasurement(
+                                currentRobotinFieldCoords,
+                                frameTimeSec);
+
+                    }
+                }
+                lastRobotInFieldCoords = currentRobotinFieldCoords;
             }
-            lastRobotInFieldCoords = currentRobotinFieldCoords;
+        } finally {
+            s.end();
         }
     }
 
