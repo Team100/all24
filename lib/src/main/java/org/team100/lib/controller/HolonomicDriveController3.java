@@ -80,20 +80,20 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        t.log(Level.TRACE, m_name, "u_FF/x", xFF);
-        t.log(Level.TRACE, m_name, "u_FF/y", yFF);
-        t.log(Level.TRACE, m_name, "u_FF/theta", thetaFF);
-        t.log(Level.TRACE, m_name, "u_FB/x", xFB);
-        t.log(Level.TRACE, m_name, "u_FB/y", yFB);
-        t.log(Level.TRACE, m_name, "u_FB/theta", thetaFB);
-        t.log(Level.TRACE, m_name, "measurement", currentPose);
+        t.log(Level.TRACE, "u_FF/x", xFF);
+        t.log(Level.TRACE, "u_FF/y", yFF);
+        t.log(Level.TRACE, "u_FF/theta", thetaFF);
+        t.log(Level.TRACE, "u_FB/x", xFB);
+        t.log(Level.TRACE, "u_FB/y", yFB);
+        t.log(Level.TRACE, "u_FB/theta", thetaFB);
+        t.log(Level.TRACE, "measurement", currentPose);
 
-        t.log(Level.TRACE, m_name, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.TRACE, m_name, "setpoint/y", m_yController.getSetpoint());
-        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.TRACE, m_name, "error/x", m_xController.getPositionError());
-        t.log(Level.TRACE, m_name, "error/y", m_yController.getPositionError());
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaController.getPositionError());
+        t.log(Level.TRACE, "setpoint/x", m_xController.getSetpoint());
+        t.log(Level.TRACE, "setpoint/y", m_yController.getSetpoint());
+        t.log(Level.TRACE, "setpoint/theta", m_thetaController.getSetpoint());
+        t.log(Level.TRACE, "error/x", m_xController.getPositionError());
+        t.log(Level.TRACE, "error/y", m_yController.getPositionError());
+        t.log(Level.TRACE, "error/theta", m_thetaController.getPositionError());
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }

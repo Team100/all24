@@ -73,7 +73,7 @@ public class VisionDataProvider24 implements Glassy {
     // private static final double kVisionChangeToleranceMeters = 1;
     private static final String kName = "VisionDataProvider24";
 
-    private final Telemetry.Logger t ;
+    private final Telemetry.Logger t;
 
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
@@ -243,7 +243,7 @@ public class VisionDataProvider24 implements Glassy {
                     (blip.getId() == 5 && alliance == Alliance.Red)) {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
-                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Firing Solution", translation2d);
+                t.log(Level.DEBUG, cameraSerialNumber + "/Firing Solution", translation2d);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
@@ -272,7 +272,7 @@ public class VisionDataProvider24 implements Glassy {
 
                 // this is just for logging
                 Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
+                t.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
                 Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
                 if (!tagInFieldCoordsOptional.isPresent())
@@ -287,7 +287,7 @@ public class VisionDataProvider24 implements Glassy {
                         0, 0, gyroRotation.getRadians());
 
                 Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Tag In Field Cords",
+                t.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag In Field Cords",
                         tagInFieldCoords.toPose2d());
 
                 Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
@@ -301,7 +301,7 @@ public class VisionDataProvider24 implements Glassy {
 
                 Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
 
-                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
+                t.log(Level.DEBUG, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
@@ -372,7 +372,7 @@ public class VisionDataProvider24 implements Glassy {
                 Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
                 Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
 
-                t.log(Level.DEBUG, m_name, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
+                t.log(Level.DEBUG, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;

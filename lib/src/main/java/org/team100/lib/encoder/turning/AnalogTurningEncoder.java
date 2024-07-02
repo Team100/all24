@@ -51,7 +51,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
                 m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
                 break;
         }
-        t.log(Level.DEBUG, m_name, "channel", m_encoder.getChannel());
+        t.log(Level.DEBUG, "channel", m_encoder.getChannel());
     }
 
     @Override
@@ -93,10 +93,10 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     private double getPositionRad() {
         // this should be fast, need not be cached.
         double positionRad = m_encoder.getDistance();
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
-        t.log(Level.DEBUG, m_name, "position (turns)", m_encoder.get());
-        t.log(Level.DEBUG, m_name, "position (absolute)", m_encoder.getAbsolutePosition());
-        t.log(Level.DEBUG, m_name, "position (volts)", m_input.getVoltage());
+        t.log(Level.DEBUG, "position (rad)", positionRad);
+        t.log(Level.DEBUG, "position (turns)", m_encoder.get());
+        t.log(Level.DEBUG, "position (absolute)", m_encoder.getAbsolutePosition());
+        t.log(Level.DEBUG, "position (volts)", m_input.getVoltage());
         return positionRad;
     }
 
@@ -120,7 +120,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         prevTime = time;
 
         double rateRad_S = dx / dt;
-        t.log(Level.DEBUG, m_name, "rate (rad)s)", rateRad_S);
+        t.log(Level.DEBUG, "rate (rad)s)", rateRad_S);
         return rateRad_S;
     }
 }

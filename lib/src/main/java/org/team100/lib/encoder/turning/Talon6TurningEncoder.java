@@ -29,8 +29,8 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
     public OptionalDouble getPosition() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
-        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
-        t.log(Level.DEBUG, m_name, "output position (rad)", positionRad);
+        t.log(Level.TRACE,  "motor position (rev)", motorPositionRev);
+        t.log(Level.DEBUG,  "output position (rad)", positionRad);
         return OptionalDouble.of(positionRad);
     }
 
@@ -39,8 +39,8 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
     public OptionalDouble getRate() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
-        t.log(Level.TRACE, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
-        t.log(Level.DEBUG, m_name, "output velocity (rad_s)", outputVelocityRad_S);
+        t.log(Level.TRACE,  "motor velocity (rev_s)", motorVelocityRev_S);
+        t.log(Level.DEBUG,  "output velocity (rad_s)", outputVelocityRad_S);
         return OptionalDouble.of(outputVelocityRad_S);
     }
 

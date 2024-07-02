@@ -72,12 +72,12 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v1.setDutyCycle(0);
             return;
         }
-        t.log(Level.DEBUG, m_name, "LEFT VALUE", value);
+        t.log(Level.DEBUG, "LEFT VALUE", value);
     }
 
     public void setRightWithSoftLimits(double value) {
         OptionalDouble e2Position = e2.getPosition();
-         if (e2Position.isEmpty()) {
+        if (e2Position.isEmpty()) {
             v2.setDutyCycle(0);
             return;
         }
@@ -89,7 +89,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v2.setDutyCycle(0);
             return;
         }
-        t.log(Level.DEBUG, m_name, "RIGHT VALUE", value);
+        t.log(Level.DEBUG, "RIGHT VALUE", value);
     }
 
     public void zeroClimbers() {
@@ -115,10 +115,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", e1.getPosition());
-        t.log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", e2.getPosition());
-        t.log(Level.DEBUG, m_name, "RPM 1", e1.getRate());
-        t.log(Level.DEBUG, m_name, "RPM 2", e2.getRate());
+        t.log(Level.DEBUG, "CLIMBER 1 ENCODER", e1.getPosition());
+        t.log(Level.DEBUG, "CLIMBER 2 ENCODER", e2.getPosition());
+        t.log(Level.DEBUG, "RPM 1", e1.getRate());
+        t.log(Level.DEBUG, "RPM 2", e2.getRate());
     }
 
     @Override

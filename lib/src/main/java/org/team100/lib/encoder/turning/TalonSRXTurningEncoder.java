@@ -56,7 +56,7 @@ public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
         // should be fast, no need to cache
         double rawPosition = m_motor.getSelectedSensorPosition();
         double positionRad = MathUtil.angleModulus(rawPosition / ticksPerRevolution * 2 * Math.PI);
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        t.log(Level.DEBUG, "position (rad)", positionRad);
         return positionRad;
     }
 
@@ -66,7 +66,7 @@ public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
         double rawRate = m_motor.getSelectedSensorVelocity();
         // times ten because rate is per 100ms
         double rateRad_S = 2.0 * Math.PI * 10.0 * rawRate / ticksPerRevolution;
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", rateRad_S);
+        t.log(Level.DEBUG, "velocity (rad_s)", rateRad_S);
         return rateRad_S;
     }
 

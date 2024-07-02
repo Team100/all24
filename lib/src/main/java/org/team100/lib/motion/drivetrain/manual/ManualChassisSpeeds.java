@@ -45,7 +45,7 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver {
 
         // desaturate to feasibility
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
-        t.log(Level.TRACE, m_name, "speeds", speeds);
+        t.log(Level.TRACE, "speeds", speeds);
         return speeds;
     }
 

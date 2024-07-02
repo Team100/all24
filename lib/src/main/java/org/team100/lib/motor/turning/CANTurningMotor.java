@@ -126,7 +126,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
 
         m_name = Names.append(name, this);
         t = Telemetry.get().logger(m_name);
-        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
+        t.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
     }
 
     public WPI_TalonSRX getMotor() {
@@ -136,7 +136,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, m_name, "Output", output);
+        t.log(Level.TRACE, "Output", output);
         log();
     }
 
@@ -171,9 +171,9 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     }
 
     public void log() {
-        t.log(Level.TRACE, m_name, "Encoder Value",
+        t.log(Level.TRACE, "Encoder Value",
                 m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.log(Level.TRACE, m_name, "Velocity Value",
+        t.log(Level.TRACE, "Velocity Value",
                 m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 

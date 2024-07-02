@@ -38,7 +38,7 @@ public class CompetitionData {
     }
 
     public static void logMatchTime() {
-        t.log(Level.DEBUG, "Competition Data", "Match Time Remaining", DriverStation.getMatchTime());
+        t.log(Level.DEBUG, "Match Time Remaining", DriverStation.getMatchTime());
 
     }
 

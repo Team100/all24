@@ -73,8 +73,8 @@ public class NeoDriveEncoder implements SettableEncoder<Distance100> {
         // this is fast so we don't need to cache it
         double motorPositionRev = m_motor.getPositionRot();
         double positionM = motorPositionRev * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
-        t.log(Level.DEBUG, m_name, "position (m)", positionM);
+        t.log(Level.TRACE, "motor position (rev)", motorPositionRev);
+        t.log(Level.DEBUG, "position (m)", positionM);
         return positionM;
     }
 
@@ -82,7 +82,7 @@ public class NeoDriveEncoder implements SettableEncoder<Distance100> {
         // raw velocity is in RPM
         // this is fast so we don't need to cache it
         double velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
+        t.log(Level.DEBUG, "velocity (m_s)", velocityM_S);
         return velocityM_S;
     }
 }

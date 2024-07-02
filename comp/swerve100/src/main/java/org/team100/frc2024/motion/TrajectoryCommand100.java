@@ -34,7 +34,7 @@ public class TrajectoryCommand100 extends Command100 {
         m_trajectory = trajectory;
         m_controller = controller;
         m_goal = m_trajectory.getLastPoint().state().state().getPose();
-        t.log(Level.TRACE, m_name, "goal", m_goal);
+        t.log(Level.TRACE, "goal", m_goal);
         addRequirements(m_robotDrive);
     }
 
@@ -54,10 +54,11 @@ public class TrajectoryCommand100 extends Command100 {
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);
 
-        t.log(Level.TRACE, m_name, "chassis speeds", output);
-        double thetaErrorRad = m_goal.getRotation().getRadians() - m_robotDrive.getState().pose().getRotation().getRadians();
-        t.log(Level.TRACE, m_name, "THETA ERROR", thetaErrorRad);
-        t.log(Level.TRACE, m_name, "FINSIHED", false);
+        t.log(Level.TRACE, "chassis speeds", output);
+        double thetaErrorRad = m_goal.getRotation().getRadians()
+                - m_robotDrive.getState().pose().getRotation().getRadians();
+        t.log(Level.TRACE, "THETA ERROR", thetaErrorRad);
+        t.log(Level.TRACE, "FINSIHED", false);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class TrajectoryCommand100 extends Command100 {
 
     @Override
     public void end100(boolean interrupted) {
-        t.log(Level.TRACE, m_name, "FINSIHED", true);
+        t.log(Level.TRACE, "FINSIHED", true);
         m_robotDrive.stop();
         TrajectoryVisualization.clear();
     }

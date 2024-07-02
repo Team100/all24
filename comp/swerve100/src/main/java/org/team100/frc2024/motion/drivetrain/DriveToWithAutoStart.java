@@ -29,7 +29,7 @@ public class DriveToWithAutoStart extends Command100 {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 5;
-    
+
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;
@@ -93,7 +93,7 @@ public class DriveToWithAutoStart extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        t.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeedsNormally(output, dt);
     }

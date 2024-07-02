@@ -62,7 +62,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "speed", feedRoller.get());
+        t.log(Level.DEBUG, "speed", feedRoller.get());
     }
 
     @Override

@@ -31,7 +31,6 @@ public class ArmTrajectoryCommand extends Command100 {
     private static final double kA = 0.2;
     private static final double kRotsPerSecToVoltsPerSec = 4;
 
-
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
     private final Translation2d m_goal;
@@ -118,14 +117,14 @@ public class ArmTrajectoryCommand extends Command100 {
 
         m_armSubsystem.set(u1, u2);
 
-        t.log(Level.TRACE, m_name, "Lower FF ", ff1);
-        t.log(Level.TRACE, m_name, "Lower Controller Output: ", u1_pos);
-        t.log(Level.TRACE, m_name, "Upper FF ", ff2);
-        t.log(Level.TRACE, m_name, "Upper Controller Output: ", u2_pos);
-        t.log(Level.TRACE, m_name, "Lower Ref: ", r.th1);
-        t.log(Level.TRACE, m_name, "Upper Ref: ", r.th2);
-        t.log(Level.TRACE, m_name, "Output Upper: ", u1);
-        t.log(Level.TRACE, m_name, "Output Lower: ", u2);
+        t.log(Level.TRACE, "Lower FF ", ff1);
+        t.log(Level.TRACE, "Lower Controller Output: ", u1_pos);
+        t.log(Level.TRACE, "Upper FF ", ff2);
+        t.log(Level.TRACE, "Upper Controller Output: ", u2_pos);
+        t.log(Level.TRACE, "Lower Ref: ", r.th1);
+        t.log(Level.TRACE, "Upper Ref: ", r.th2);
+        t.log(Level.TRACE, "Output Upper: ", u1);
+        t.log(Level.TRACE, "Output Lower: ", u2);
     }
 
     private State getDesiredState() {

@@ -64,7 +64,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getYawNEDDeg() {
         float yawDeg = m_gyro1.getYaw();
-        t.log(Level.TRACE, m_name, "Yaw NED (deg)", yawDeg);
+        t.log(Level.TRACE,  "Yaw NED (deg)", yawDeg);
         return yawDeg;
     }
 
@@ -74,7 +74,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getPitchDeg() {
         float pitchDeg = m_gyro1.getPitch();
-        t.log(Level.TRACE, m_name, "Pitch (deg)", pitchDeg);
+        t.log(Level.TRACE,  "Pitch (deg)", pitchDeg);
         return pitchDeg;
     }
 
@@ -84,7 +84,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getRollDeg() {
         float rollDeg = m_gyro1.getRoll();
-        t.log(Level.TRACE, m_name, "Roll (deg)", rollDeg);
+        t.log(Level.TRACE, "Roll (deg)", rollDeg);
         return rollDeg;
     }
 
@@ -114,20 +114,20 @@ public class SingleNavXGyro implements Gyro100 {
             rateDeg_S = 0;
         }
 
-        t.log(Level.TRACE, m_name, "Rate NED (deg_s)", rateDeg_S);
+        t.log(Level.TRACE, "Rate NED (deg_s)", rateDeg_S);
         return (float) rateDeg_S;
     }
 
     private void logStuff() {
         if (m_gyro1.isConnected()) {
-            t.log(Level.TRACE, m_name, "Connected", true);
+            t.log(Level.TRACE, "Connected", true);
         } else {
-            t.log(Level.ERROR, m_name, "Connected", false);
+            t.log(Level.ERROR, "Connected", false);
         }
-        t.log(Level.TRACE, m_name, "Angle (deg)", m_gyro1.getAngle());
-        t.log(Level.TRACE, m_name, "Fused (deg)", m_gyro1.getFusedHeading());
-        t.log(Level.TRACE, m_name, "Yaw (deg)", m_gyro1.getYaw());
-        t.log(Level.TRACE, m_name, "Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
-        t.log(Level.TRACE, m_name, "Compass Heading (deg)", m_gyro1.getCompassHeading());
+        t.log(Level.TRACE, "Angle (deg)", m_gyro1.getAngle());
+        t.log(Level.TRACE, "Fused (deg)", m_gyro1.getFusedHeading());
+        t.log(Level.TRACE, "Yaw (deg)", m_gyro1.getYaw());
+        t.log(Level.TRACE, "Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
+        t.log(Level.TRACE, "Compass Heading (deg)", m_gyro1.getCompassHeading());
     }
 }

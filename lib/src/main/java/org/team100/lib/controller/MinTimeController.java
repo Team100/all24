@@ -195,13 +195,13 @@ public class MinTimeController implements Glassy {
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
-            t.log(Level.TRACE, m_name, "mode", "within tolerance");
+            t.log(Level.TRACE, "mode", "within tolerance");
             return modulus(goal);
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
         if (goal.near(initial, m_finish)) {
-            t.log(Level.TRACE, m_name, "mode", "full state");
+            t.log(Level.TRACE, "mode", "full state");
             double xError = goal.x() - initial.x();
             double vError = goal.v() - initial.v();
             double u_FBx = xError * m_k[0];
@@ -231,7 +231,7 @@ public class MinTimeController implements Glassy {
             return modulus(initial);
         }
 
-        t.log(Level.TRACE, m_name, "mode", "min time");
+        t.log(Level.TRACE, "mode", "min time");
 
         // ON THE INITIAL PATH
 

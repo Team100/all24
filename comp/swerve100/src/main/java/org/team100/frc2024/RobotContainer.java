@@ -73,8 +73,11 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.util.Names;
@@ -85,6 +88,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -116,6 +120,22 @@ public class RobotContainer implements Glassy {
         final Async async = asyncFactory.get();
         final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
         poller.setDefault(Level.TRACE);
+
+
+        // TODO: remove all this, it's joel figuring out how to do choosers and logging.
+        // slash here makes a tree
+        var foo = new NamedChooser<String>("asdf/foochooser") {
+
+        };
+        foo.addOption("bar", "bar");
+        // any value is fine, i.e. slashes have no effect
+        foo.setDefaultOption("blarg/baz", "baz");
+        foo.onChange((val) -> System.out.println(val));
+        SmartDashboard.putData(foo);
+
+        Logger l = Telemetry.get().logger("mylogger");
+        // slashes are ok everywhere
+        l.log(Level.ERROR, "qwerty/uiop", 1.0);
 
         m_name = Names.name(this);
 

@@ -122,7 +122,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            t.log(Level.TRACE, m_name, "mode", "free");
+            t.log(Level.TRACE, "mode", "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -168,17 +168,17 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        t.log(Level.TRACE, m_name, "mode", "snap");
-        t.log(Level.TRACE, m_name, "goal/theta", m_goal.getRadians());
-        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
-        t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
-        t.log(Level.TRACE, m_name, "error/theta", thetaError);
-        t.log(Level.TRACE, m_name, "error/omega", omegaError);
-        t.log(Level.TRACE, m_name, "thetaFF", thetaFF);
-        t.log(Level.TRACE, m_name, "thetaFB", thetaFB);
-        t.log(Level.TRACE, m_name, "omegaFB", omegaFB);
-        t.log(Level.TRACE, m_name, "output/omega", omega);
+        t.log(Level.TRACE, "mode", "snap");
+        t.log(Level.TRACE, "goal/theta", m_goal.getRadians());
+        t.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
+        t.log(Level.TRACE, "measurement/theta", headingMeasurement);
+        t.log(Level.TRACE, "measurement/omega", headingRate);
+        t.log(Level.TRACE, "error/theta", thetaError);
+        t.log(Level.TRACE, "error/omega", omegaError);
+        t.log(Level.TRACE, "thetaFF", thetaFF);
+        t.log(Level.TRACE, "thetaFB", thetaFB);
+        t.log(Level.TRACE, "omegaFB", omegaFB);
+        t.log(Level.TRACE, "output/omega", omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

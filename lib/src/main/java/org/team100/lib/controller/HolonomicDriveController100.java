@@ -52,7 +52,7 @@ public class HolonomicDriveController100 implements Glassy {
         PIDController theta = theta();
         theta.setTolerance(rotationPosition, rotationVelocity);
         PIDController omega = omega();
-        //I don't think we really care about acceleration
+        // I don't think we really care about acceleration
         omega.setTolerance(rotationVelocity, 100000000);
         return new HolonomicDriveController100(x, y, theta, omega);
     }
@@ -83,20 +83,20 @@ public class HolonomicDriveController100 implements Glassy {
         double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
         double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
         double omega = thetaFF + thetaFB + omegaFB;
-        t.log(Level.TRACE, m_name, "u_FF/x", xFF);
-        t.log(Level.TRACE, m_name, "u_FF/y", yFF);
-        t.log(Level.TRACE, m_name, "u_FF/theta", thetaFF);
-        t.log(Level.TRACE, m_name, "u_FB/x", xFB);
-        t.log(Level.TRACE, m_name, "u_FB/y", yFB);
-        t.log(Level.TRACE, m_name, "u_FB/theta", thetaFB);
-        t.log(Level.TRACE, m_name, "measurement", currentPose);
+        t.log(Level.TRACE, "u_FF/x", xFF);
+        t.log(Level.TRACE, "u_FF/y", yFF);
+        t.log(Level.TRACE, "u_FF/theta", thetaFF);
+        t.log(Level.TRACE, "u_FB/x", xFB);
+        t.log(Level.TRACE, "u_FB/y", yFB);
+        t.log(Level.TRACE, "u_FB/theta", thetaFB);
+        t.log(Level.TRACE, "measurement", currentPose);
 
-        t.log(Level.DEBUG, m_name, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.DEBUG, m_name, "setpoint/y", m_yController.getSetpoint());
-        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.TRACE, m_name, "error/x", m_xController.getPositionError());
-        t.log(Level.TRACE, m_name, "error/y", m_yController.getPositionError());
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaController.getPositionError());
+        t.log(Level.DEBUG, "setpoint/x", m_xController.getSetpoint());
+        t.log(Level.DEBUG, "setpoint/y", m_yController.getSetpoint());
+        t.log(Level.TRACE, "setpoint/theta", m_thetaController.getSetpoint());
+        t.log(Level.TRACE, "error/x", m_xController.getPositionError());
+        t.log(Level.TRACE, "error/y", m_yController.getPositionError());
+        t.log(Level.TRACE, "error/theta", m_thetaController.getPositionError());
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }
@@ -163,5 +163,4 @@ public class HolonomicDriveController100 implements Glassy {
         return "HolonomicDriveController100";
     }
 
-    
 }

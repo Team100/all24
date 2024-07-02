@@ -103,19 +103,19 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
 
         // pass the feedforward through unmodified
         m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
-        t.log(Level.DEBUG, m_name, "Desired velocity setpoint", u_TOTAL);
+        t.log(Level.DEBUG, "Desired velocity setpoint", u_TOTAL);
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        t.log(Level.TRACE, m_name, "u_FB", u_FB);
-        t.log(Level.TRACE, m_name, "u_FF", u_FF);
-        t.log(Level.TRACE, m_name, "u_TOTAL", u_TOTAL);
-        t.log(Level.DEBUG, m_name, "Goal", m_goal);
-        t.log(Level.DEBUG, m_name, "Measurement", measurement);
-        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
-        t.log(Level.TRACE, m_name, "Controller Position Error", m_controller.getPositionError());
-        t.log(Level.TRACE, m_name, "Controller Velocity Error", m_controller.getVelocityError());
-        t.log(Level.TRACE, m_name, "Feedforward Torque", feedForwardTorqueNm);
+        t.log(Level.TRACE, "u_FB", u_FB);
+        t.log(Level.TRACE, "u_FF", u_FF);
+        t.log(Level.TRACE, "u_TOTAL", u_TOTAL);
+        t.log(Level.DEBUG, "Goal", m_goal);
+        t.log(Level.DEBUG, "Measurement", measurement);
+        t.log(Level.DEBUG, "Setpoint", m_setpoint);
+        t.log(Level.TRACE, "Controller Position Error", m_controller.getPositionError());
+        t.log(Level.TRACE, "Controller Velocity Error", m_controller.getVelocityError());
+        t.log(Level.TRACE, "Feedforward Torque", feedForwardTorqueNm);
     }
 
     /**
@@ -138,9 +138,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        t.log(Level.DEBUG, m_name, "Position Tolerance", m_controller.getPositionTolerance());
-        t.log(Level.DEBUG, m_name, "Velocity Tolerance", m_controller.getVelocityTolerance());
-        t.log(Level.DEBUG, m_name, "At Setpoint", atSetpoint);
+        t.log(Level.DEBUG, "Position Tolerance", m_controller.getPositionTolerance());
+        t.log(Level.DEBUG, "Velocity Tolerance", m_controller.getVelocityTolerance());
+        t.log(Level.DEBUG, "At Setpoint", atSetpoint);
         return atSetpoint;
     }
 

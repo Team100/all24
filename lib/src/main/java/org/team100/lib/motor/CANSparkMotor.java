@@ -41,17 +41,17 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
-        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceId());
-        t.register(Level.TRACE, m_name, "P", pid.getP(), this::setP);
-        t.register(Level.TRACE, m_name, "I", pid.getI(), this::setI);
-        t.register(Level.TRACE, m_name, "D", pid.getD(), this::setD);
-        t.register(Level.TRACE, m_name, "IZone", pid.getIZone(), this::setIZone);
+        t.log(Level.TRACE, "Device ID", m_motor.getDeviceId());
+        t.register(Level.TRACE, "P", pid.getP(), this::setP);
+        t.register(Level.TRACE, "I", pid.getI(), this::setI);
+        t.register(Level.TRACE, "D", pid.getD(), this::setD);
+        t.register(Level.TRACE, "IZone", pid.getIZone(), this::setIZone);
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, m_name, "Output", output);
+        t.log(Level.TRACE, "Output", output);
         log();
     }
 
@@ -89,12 +89,12 @@ public abstract class CANSparkMotor<T extends Measure100>
         Rev100.warn(() -> m_pidController.setReference(
                 motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
 
-        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
-        t.log(Level.TRACE, m_name, "desired accel (rev_s2)", motorRev_S2);
-        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward (v)", accelFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        t.log(Level.TRACE, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, "desired accel (rev_s2)", motorRev_S2);
+        t.log(Level.TRACE, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, "accel feedforward (v)", accelFFVolts);
+        t.log(Level.TRACE, "torque feedforward (v)", torqueFFVolts);
         log();
     }
 
@@ -118,11 +118,11 @@ public abstract class CANSparkMotor<T extends Measure100>
         Rev100.warn(() -> m_pidController.setReference(
                 motorRev, ControlType.kPosition, 0, kFF, ArbFFUnits.kVoltage));
 
-        t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
-        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
-        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        t.log(Level.TRACE, "desired position (rev)", motorRev);
+        t.log(Level.TRACE, "desired speed (rev_s)", motorRev_S);
+        t.log(Level.TRACE, "friction feedforward (v)", frictionFFVolts);
+        t.log(Level.TRACE, "velocity feedforward (v)", velocityFFVolts);
+        t.log(Level.TRACE, "torque feedforward (v)", torqueFFVolts);
         log();
     }
 
@@ -157,13 +157,13 @@ public abstract class CANSparkMotor<T extends Measure100>
     }
 
     protected void log() {
-        t.log(Level.TRACE, m_name, "position (rev)", m_encoder.getPosition());
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_encoder.getVelocity() / 60);
-        t.log(Level.TRACE, m_name, "velocity (RPM)", m_encoder.getVelocity());
-        t.log(Level.TRACE, m_name, "current (A)", m_motor.getOutputCurrent());
-        t.log(Level.TRACE, m_name, "duty cycle", m_motor.getAppliedOutput());
-        t.log(Level.TRACE, m_name, "torque (Nm)", getMotorTorque());
-        t.log(Level.TRACE, m_name, "temperature (C)", m_motor.getMotorTemperature());
+        t.log(Level.TRACE, "position (rev)", m_encoder.getPosition());
+        t.log(Level.TRACE, "velocity (rev_s)", m_encoder.getVelocity() / 60);
+        t.log(Level.TRACE, "velocity (RPM)", m_encoder.getVelocity());
+        t.log(Level.TRACE, "current (A)", m_motor.getOutputCurrent());
+        t.log(Level.TRACE, "duty cycle", m_motor.getAppliedOutput());
+        t.log(Level.TRACE, "torque (Nm)", getMotorTorque());
+        t.log(Level.TRACE, "temperature (C)", m_motor.getMotorTemperature());
     }
 
     private void setP(double p) {

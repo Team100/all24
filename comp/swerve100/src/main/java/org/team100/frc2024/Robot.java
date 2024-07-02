@@ -72,19 +72,19 @@ public class Robot extends TimedRobot100 implements Glassy {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
-        // t.log(Level.DEBUG, m_name, "Voltage", m_pdh.getVoltage());
-        // t.log(Level.DEBUG, m_name, "Total Current", m_pdh.getTotalCurrent());
+        // t.log(Level.DEBUG, "Voltage", m_pdh.getVoltage());
+        // t.log(Level.DEBUG, "Total Current", m_pdh.getTotalCurrent());
 
         // for(int channel = 0; channel < 20; channel++){
-        // t.log(Level.DEBUG, m_name, "Channel " + String.valueOf(channel),
+        // t.log(Level.DEBUG, "Channel " + String.valueOf(channel),
         // m_pdh.getCurrent(channel));
 
         // }
 
-        t.log(Level.DEBUG, m_name, "DriverStation MatchTime", DriverStation.getMatchTime());
-        t.log(Level.DEBUG, m_name, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
-        t.log(Level.DEBUG, m_name, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
-        t.log(Level.DEBUG, m_name, "DriverStation FMSAttached", DriverStation.isFMSAttached());
+        t.log(Level.DEBUG, "DriverStation MatchTime", DriverStation.getMatchTime());
+        t.log(Level.DEBUG, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
+        t.log(Level.DEBUG, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
+        t.log(Level.DEBUG, "DriverStation FMSAttached", DriverStation.isFMSAttached());
 
         m_jvmLogger.logGarbageCollectors();
         m_jvmLogger.logMemoryPools();
@@ -98,12 +98,12 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void disabledPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "disabled");
+        t.log(Level.DEBUG, "mode", "disabled");
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        t.log(Level.DEBUG, m_name, "key list size", keyListSize);
+        t.log(Level.DEBUG, "key list size", keyListSize);
 
         // this forces the static initializer to run, so that the widget appears.
-        t.log(Level.INFO, m_name, "active auton routine", AutonChooser.routine().name());
+        t.log(Level.INFO, "active auton routine", AutonChooser.routine().name());
     }
 
     @Override
@@ -151,24 +151,24 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void autonomousPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "autonomous");
+        t.log(Level.DEBUG, "mode", "autonomous");
     }
 
     @Override
     public void simulationPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "simulation");
+        t.log(Level.DEBUG, "mode", "simulation");
     }
 
     @Override
     public void teleopPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "teleop");
-        t.log(Level.DEBUG, "Robot", "voltage", RobotController.getBatteryVoltage());
+        t.log(Level.DEBUG, "mode", "teleop");
+        t.log(Level.DEBUG, "voltage", RobotController.getBatteryVoltage());
 
     }
 
     @Override
     public void testPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "test");
+        t.log(Level.DEBUG, "mode", "test");
     }
 
     private void banner() {

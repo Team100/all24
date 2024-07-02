@@ -50,21 +50,21 @@ public class Tire {
      * @param dtS       length of the current period
      */
     public Vector2d actual(Vector2d cornerM_s, Vector2d wheelM_s, double dtS) {
-        t.log(Level.WARN, "tire", "corner M_s", cornerM_s);
-        t.log(Level.WARN, "tire", "wheel M_s", wheelM_s);
-        t.log(Level.INFO, "tire", "dtS", dtS); // usually about 0.02
+        t.log(Level.WARN, "corner M_s", cornerM_s);
+        t.log(Level.WARN, "wheel M_s", wheelM_s);
+        t.log(Level.INFO, "dtS", dtS); // usually about 0.02
 
         Vector2d desiredAccelM_s_s = desiredAccelM_s_s(cornerM_s, wheelM_s, dtS);
-        t.log(Level.INFO, "tire", "desired accel M_s_s", desiredAccelM_s_s);
+        t.log(Level.INFO, "desired accel M_s_s", desiredAccelM_s_s);
         double fraction = fraction(desiredAccelM_s_s);
         double scale = scale(fraction);
         Vector2d scaledAccelM_s_s = scaledAccelM_s_s(desiredAccelM_s_s, scale);
         Vector2d limitedAccelM_s_s = limit(scaledAccelM_s_s);
-        t.log(Level.INFO, "tire", "limited accel M_s_s", limitedAccelM_s_s);
+        t.log(Level.INFO, "limited accel M_s_s", limitedAccelM_s_s);
 
         // Vector2d actual = apply(cornerM_s, desiredAccelM_s_s, dtS);
         Vector2d actual = apply(cornerM_s, limitedAccelM_s_s, dtS);
-        t.log(Level.WARN, "tire", "actual M_s", actual);
+        t.log(Level.WARN, "actual M_s", actual);
         return actual;
     }
 
@@ -114,11 +114,11 @@ public class Tire {
         double normM_s_s = scaledAccelM_s_s.norm();
         double saturationM_s_s = m_saturationM_s_s;
         if (normM_s_s <= saturationM_s_s) {
-            t.log(Level.DEBUG, "tire", "limit M_s_s", scaledAccelM_s_s);
+            t.log(Level.DEBUG, "limit M_s_s", scaledAccelM_s_s);
             return scaledAccelM_s_s;
         }
         Vector2d limitedM_s_s = scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
-        t.log(Level.DEBUG, "tire", "limit M_s_s", limitedM_s_s);
+        t.log(Level.DEBUG, "limit M_s_s", limitedM_s_s);
         return limitedM_s_s;
     }
 }

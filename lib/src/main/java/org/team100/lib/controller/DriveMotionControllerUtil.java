@@ -26,7 +26,7 @@ public class DriveMotionControllerUtil {
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
         motion_direction = measurement.getRotation().unaryMinus().rotateBy(motion_direction);
-        t.log(Level.TRACE, kName, "motion direction", motion_direction);
+        t.log(Level.TRACE, "motion direction", motion_direction);
         return motion_direction;
     }
 
@@ -35,7 +35,7 @@ public class DriveMotionControllerUtil {
      */
     public static ChassisSpeeds feedforward(Pose2d currentPose, TimedPose setpoint) {
         final double velocity_m = setpoint.velocityM_S();
-        t.log(Level.TRACE, kName, "setpoint velocity", velocity_m);
+        t.log(Level.TRACE, "setpoint velocity", velocity_m);
 
         // robot-relative motion direction
         Rotation2d motion_direction = direction(currentPose, setpoint);
@@ -46,7 +46,7 @@ public class DriveMotionControllerUtil {
         double omega = velocity_m * setpoint.state().getHeadingRate();
 
         ChassisSpeeds u_FF = new ChassisSpeeds(vx, vy, omega);
-        t.log(Level.DEBUG, kName, "u_FF", u_FF);
+        t.log(Level.DEBUG, "u_FF", u_FF);
         return u_FF;
     }
 
@@ -56,12 +56,12 @@ public class DriveMotionControllerUtil {
             double kPCart,
             double kPTheta) {
         final Twist2d positionError = getErrorTwist(currentPose, setpoint);
-        t.log(Level.DEBUG, kName, "errorTwist", positionError);
+        t.log(Level.DEBUG, "errorTwist", positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,
                 kPTheta * positionError.dtheta);
-        t.log(Level.DEBUG, kName, "u_FB", u_FB);
+        t.log(Level.DEBUG, "u_FB", u_FB);
         return u_FB;
     }
 
@@ -75,12 +75,12 @@ public class DriveMotionControllerUtil {
                 currentPose,
                 setpoint,
                 currentRobotRelativeVelocity);
-        t.log(Level.TRACE, kName, "velocityError", velocityError);
+        t.log(Level.TRACE, "velocityError", velocityError);
         final ChassisSpeeds u_VFB = new ChassisSpeeds(
                 kPCartV * velocityError.vxMetersPerSecond,
                 kPCartV * velocityError.vyMetersPerSecond,
                 kPThetaV * velocityError.omegaRadiansPerSecond);
-        t.log(Level.TRACE, kName, "u_VFB", u_VFB);
+        t.log(Level.TRACE, "u_VFB", u_VFB);
         return u_VFB;
     }
 

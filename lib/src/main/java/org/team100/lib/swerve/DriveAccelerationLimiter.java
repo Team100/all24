@@ -38,7 +38,7 @@ public class DriveAccelerationLimiter implements Glassy {
                     desired_vx[i],
                     desired_vy[i],
                     kDtSec);
-            t.log(Level.DEBUG, m_name, "max_vel_step", max_vel_step);
+            t.log(Level.DEBUG, "max_vel_step", max_vel_step);
 
             // reduces the size of the search space if min_s is already constrained (by
             // earlier modules)
@@ -57,7 +57,7 @@ public class DriveAccelerationLimiter implements Glassy {
                 break;
             }
         }
-        t.log(Level.DEBUG, m_name, "s", min_s);
+        t.log(Level.DEBUG, "s", min_s);
         return min_s;
     }
 

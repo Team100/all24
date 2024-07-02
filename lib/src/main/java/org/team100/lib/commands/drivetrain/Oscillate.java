@@ -35,7 +35,6 @@ public class Oscillate extends Command100 {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
 
-
     private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;
     private final TriangleWave m_triangle;
@@ -52,7 +51,7 @@ public class Oscillate extends Command100 {
     public Oscillate(SwerveDriveSubsystem swerve) {
         m_swerve = swerve;
         m_period = 4 * kMaxSpeed / kAccel;
-        t.log(Level.DEBUG, m_name, "period", m_period);
+        t.log(Level.DEBUG, "period", m_period);
         m_square = new SquareWave(kAccel, m_period);
         m_triangle = new TriangleWave(kMaxSpeed, m_period);
         m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
@@ -106,19 +105,19 @@ public class Oscillate extends Command100 {
 
         }
 
-        t.log(Level.DEBUG, m_name, "time", time);
-        t.log(Level.DEBUG, m_name, "setpoint/accel", accelM_S_S);
-        t.log(Level.DEBUG, m_name, "setpoint/speed", speedM_S);
-        t.log(Level.DEBUG, m_name, "setpoint/position", positionM);
+        t.log(Level.DEBUG, "time", time);
+        t.log(Level.DEBUG, "setpoint/accel", accelM_S_S);
+        t.log(Level.DEBUG, "setpoint/speed", speedM_S);
+        t.log(Level.DEBUG, "setpoint/position", positionM);
 
         SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-            t.log(Level.DEBUG, m_name, "measurement/speed", swerveState.theta().v());
-            t.log(Level.DEBUG, m_name, "measurement/position",
+            t.log(Level.DEBUG, "measurement/speed", swerveState.theta().v());
+            t.log(Level.DEBUG, "measurement/position",
                     swerveState.theta().x() - m_initial.theta().x());
         } else {
-            t.log(Level.DEBUG, m_name, "measurement/speed", swerveState.x().v());
-            t.log(Level.DEBUG, m_name, "measurement/position",
+            t.log(Level.DEBUG, "measurement/speed", swerveState.x().v());
+            t.log(Level.DEBUG, "measurement/position",
                     swerveState.x().x() - m_initial.x().x());
         }
     }

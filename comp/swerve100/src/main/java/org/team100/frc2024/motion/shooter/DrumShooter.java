@@ -256,9 +256,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, "Drum SHooter", "left velocity", leftRoller.getVelocity());
-        t.log(Level.DEBUG, "Drum SHooter", "right velocity", rightRoller.getVelocity());
-        t.log(Level.DEBUG, "Drum SHooter", "pivot angle", pivotServo.getPosition());
+        t.log(Level.DEBUG, "left velocity", leftRoller.getVelocity());
+        t.log(Level.DEBUG, "right velocity", rightRoller.getVelocity());
+        t.log(Level.DEBUG, "pivot angle", pivotServo.getPosition());
     }
 
     @Override

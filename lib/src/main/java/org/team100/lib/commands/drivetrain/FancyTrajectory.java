@@ -30,7 +30,6 @@ public class FancyTrajectory extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
-
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
@@ -74,7 +73,7 @@ public class FancyTrajectory extends Command100 {
         Pose2d currentPose = m_robotDrive.getState().pose();
         ChassisSpeeds currentSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
-        t.log(Level.TRACE, m_name, "chassis speeds", output);
+        t.log(Level.TRACE, "chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output, dt);
     }
 

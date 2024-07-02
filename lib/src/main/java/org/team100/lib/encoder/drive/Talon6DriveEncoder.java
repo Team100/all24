@@ -30,8 +30,8 @@ public class Talon6DriveEncoder implements SettableEncoder<Distance100> {
     public OptionalDouble getPosition() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionM = motorPositionRev * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
-        t.log(Level.DEBUG, m_name, "position (m)", positionM);
+        t.log(Level.TRACE,  "motor position (rev)", motorPositionRev);
+        t.log(Level.DEBUG,  "position (m)", positionM);
         return OptionalDouble.of(positionM);
     }
 
@@ -40,8 +40,8 @@ public class Talon6DriveEncoder implements SettableEncoder<Distance100> {
     public OptionalDouble getRate() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double velocityM_S = motorVelocityRev_S * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "motor velocity (rev_s)", motorVelocityRev_S);
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
+        t.log(Level.TRACE,  "motor velocity (rev_s)", motorVelocityRev_S);
+        t.log(Level.DEBUG,  "velocity (m_s)", velocityM_S);
         return OptionalDouble.of(velocityM_S);
     }
 

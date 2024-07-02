@@ -40,7 +40,7 @@ public class Veering extends Command100 {
         double dx = m_square.applyAsDouble(time);
         FieldRelativeVelocity input = new FieldRelativeVelocity(dx, 0, kOmega);
         m_swerve.driveInFieldCoords(input, dt);
-        t.log(Level.TRACE, m_name, "input", input);
+        t.log(Level.TRACE, "input", input);
     }
 
     @Override

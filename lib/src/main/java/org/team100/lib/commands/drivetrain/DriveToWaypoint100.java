@@ -30,7 +30,7 @@ public class DriveToWaypoint100 extends Command100 {
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
     private static final double kMaxAccelM_S_S = 2;
-     
+
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
@@ -101,7 +101,7 @@ public class DriveToWaypoint100 extends Command100 {
         if (output == null)
             return;
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        t.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeedsNormally(output, dt);
     }

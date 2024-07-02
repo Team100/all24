@@ -96,11 +96,11 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
         }
         // Return the opposite bound if the other is null
         if (topBound == null) {
-            t.log(Level.TRACE, "buffer", "bottom", bottomBound.getValue().toString());
+            t.log(Level.TRACE, "bottom", bottomBound.getValue().toString());
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
-            t.log(Level.TRACE, "buffer", "top", topBound.getValue().toString());
+            t.log(Level.TRACE, "top", topBound.getValue().toString());
             return topBound.getValue();
         }
 
@@ -109,8 +109,8 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
         // (the difference between the current time and bottom bound) and (the
         // difference between top and bottom bounds).
 
-        t.log(Level.TRACE, "buffer", "bottom", bottomBound.getValue().toString());
-        t.log(Level.TRACE, "buffer", "top", topBound.getValue().toString());
+        t.log(Level.TRACE, "bottom", bottomBound.getValue().toString());
+        t.log(Level.TRACE, "top", topBound.getValue().toString());
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;

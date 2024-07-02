@@ -52,7 +52,7 @@ public class SlipperyTireUtil {
         SwerveModulePosition[] result = new SwerveModulePosition[deltas.length];
         for (int i = 0; i < deltas.length; i++) {
             SwerveModulePosition delta = deltas[i];
-            t.log(Level.WARN, "tireutil", "deltas", delta);
+            t.log(Level.WARN, "deltas", delta);
 
             // this is robot-relative
             Vector2d wheelSpeedM_s = new Vector2d(
@@ -60,15 +60,15 @@ public class SlipperyTireUtil {
                     delta.distanceMeters * delta.angle.getSin() / dtS);
 
             // corners are robot-relative
-            t.log(Level.WARN, "tireutil", "corner", corners[i]);
+            t.log(Level.WARN, "corner", corners[i]);
             Vector2d cornerSpeedM_s = corners[i].times(1 / cornerDtS);
             // cap the allowed corner speed.
             if (cornerSpeedM_s.norm() > kMaxSpeedM_s) {
                 cornerSpeedM_s = cornerSpeedM_s.times(kMaxSpeedM_s / cornerSpeedM_s.norm());
             }
             Vector2d actualSpeedM_s = m_tire.actual(cornerSpeedM_s, wheelSpeedM_s, dtS);
-            t.log(Level.WARN, "tireutil", "cornerSpeed", cornerSpeedM_s);
-            t.log(Level.WARN, "tireutil", "actualSpeed", actualSpeedM_s);
+            t.log(Level.WARN, "cornerSpeed", cornerSpeedM_s);
+            t.log(Level.WARN, "actualSpeed", actualSpeedM_s);
 
             // this throws away the "optimization" of the input. :(
             // TODO: fix that
@@ -77,8 +77,8 @@ public class SlipperyTireUtil {
                     Math.hypot(actualSpeedM_s.getX(), actualSpeedM_s.getY()) * dtS,
                     new Rotation2d(actualSpeedM_s.getX(), actualSpeedM_s.getY()));
 
-            t.log(Level.WARN, "tireutil", "result", result[i]);
-            t.log(Level.WARN, "tireutil", "dts", dtS);
+            t.log(Level.WARN, "result", result[i]);
+            t.log(Level.WARN, "dts", dtS);
         }
         return result;
     }
@@ -118,10 +118,10 @@ public class SlipperyTireUtil {
             SwerveDriveKinematics100 kinematics,
             Pose2d pose0,
             Pose2d pose1) {
-        t.log(Level.TRACE, "tireutil", "pose0x", pose0.getX());
-        t.log(Level.TRACE, "tireutil", "pose1x", pose1.getX());
+        t.log(Level.TRACE, "pose0x", pose0.getX());
+        t.log(Level.TRACE, "pose1x", pose1.getX());
         Twist2d twist = pose0.log(pose1);
-        t.log(Level.TRACE, "tireutil", "twistdx", twist.dx);
+        t.log(Level.TRACE, "twistdx", twist.dx);
         SwerveModulePosition[] p = kinematics.toSwerveModulePosition(twist);
         return kinematics.pos2vec(p);
     }

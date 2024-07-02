@@ -77,7 +77,7 @@ public class ShootPreload extends Command {
         if (!alliance.isPresent())
             return;
 
-        t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
+        t.log(Level.DEBUG, "command state", "initialize");
 
         double distance = m_drive.getState().pose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
@@ -91,8 +91,8 @@ public class ShootPreload extends Command {
 
     @Override
     public void execute() {
-        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        t.log(Level.DEBUG, "ShootSmart", "END", 0);
+        t.log(Level.DEBUG, "command state", "end");
+        t.log(Level.DEBUG, "END", 0);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
@@ -109,7 +109,7 @@ public class ShootPreload extends Command {
         m_shooter.setAngle(pivotSetpoint);
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
-            t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT",
+            t.log(Level.DEBUG, "PIVOT DEFECIT",
                     Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
         }
 
@@ -138,9 +138,9 @@ public class ShootPreload extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        t.log(Level.DEBUG, "ShootSmart", "END", 1);
+        t.log(Level.DEBUG, "command state", "end");
+        t.log(Level.DEBUG, "command state", "end");
+        t.log(Level.DEBUG, "END", 1);
         atVelocity = false;
         finished = false;
         m_timer.stop();
