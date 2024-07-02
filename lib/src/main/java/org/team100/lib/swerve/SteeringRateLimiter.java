@@ -34,6 +34,7 @@ public class SteeringRateLimiter implements Glassy {
             double[] desired_vx,
             double[] desired_vy,
             Rotation2d[] desired_heading,
+            Rotation2d[] desired_heading_velocity,
             Rotation2d[] overrideSteering,
             double kDtSec) {
 

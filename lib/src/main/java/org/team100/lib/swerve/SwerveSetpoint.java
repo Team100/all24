@@ -1,9 +1,9 @@
 package org.team100.lib.swerve;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /** 
  * Used to track setpoints over time and enforce limits.

@@ -1,6 +1,5 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;

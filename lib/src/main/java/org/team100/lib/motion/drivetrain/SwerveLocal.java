@@ -14,11 +14,12 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * The swerve drive in local, or robot, reference frame. This class knows
@@ -176,7 +177,10 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         return m_modules.positions();
     }
 
-    @Override
+    public Translation2d[] getModuleLocations() {
+        return m_swerveKinodynamics.getKinematics().getModuleLocations();
+    }
+
     public boolean[] atSetpoint() {
         return m_modules.atSetpoint();
     }
@@ -198,8 +202,14 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
 
     public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
         // Informs SwerveDriveKinematics of the module states.
-        SwerveModuleState[] states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
-                kDtSec);
+        SwerveModuleState[] states;
+        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
+            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, prevSetpoint.getChassisSpeeds(), prevSetpoint.getModuleStates(),gyroRateRad_S,
+                    kDtSec);
+        } else {
+            states = m_swerveKinodynamics.toSwerveModuleStates(speeds,prevSetpoint.getModuleStates(), gyroRateRad_S, 
+                    kDtSec);
+        }
         setModuleStates(states);
         prevSetpoint = new SwerveSetpoint(speeds, states);
     }
@@ -230,7 +240,8 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
 
     /** Desaturation mutates states. */
     private void setModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics100.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S());
+        SwerveDriveKinematics100.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxDriveAccelerationM_S2(),m_swerveKinodynamics.getMaxDriveDecelerationM_S2(), m_swerveKinodynamics.getMaxSteeringVelocityRad_S());
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
     }

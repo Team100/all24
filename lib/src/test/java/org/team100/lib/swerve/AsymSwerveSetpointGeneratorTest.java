@@ -1,4 +1,5 @@
 package org.team100.lib.swerve;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,7 +14,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class AsymSwerveSetpointGeneratorTest {
     private static final double kDelta = 0.001;

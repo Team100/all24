@@ -9,5 +9,4 @@ class ExampleTest {
     void testNothing() {
         assertTrue(true);
     }
-    
 }

@@ -72,6 +72,10 @@ public enum Experiment {
      */
     UseCameraUpdater,
     /**
+     * 
+     */
+    UseSecondDerivativeSwerve,
+    /**
      * Filter rotational output to remove oscillation
      */
     UseThetaFilter,

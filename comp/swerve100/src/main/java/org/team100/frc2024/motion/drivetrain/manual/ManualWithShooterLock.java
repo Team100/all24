@@ -61,8 +61,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private Pose2d m_prevPose;
     private State100 prevGoal;
     private boolean isAligned;
-    private boolean first;
-
+    
     public ManualWithShooterLock(
             String parent,
             SwerveKinodynamics swerveKinodynamics,
@@ -86,7 +85,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
-        first = true;
         prevGoal = new State100();
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -126,17 +124,11 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         t.log(Level.TRACE, m_name, "Bearing Check", bearing.minus(currentRotation).getDegrees());
 
-        // make sure the setpoint uses the modulus close to the measurement.
-        if (first) {
-            m_thetaSetpoint = new State100(
-                    measurement,
-                    headingRate);
-            first = false;
-        } else {
+            // make sure the setpoint uses the modulus close to the measurement.
             m_thetaSetpoint = new State100(
                     Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
                     m_thetaSetpoint.v());
-        }
+
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
@@ -184,7 +176,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         t.log(Level.TRACE, m_name, "goal", goal);
         prevGoal = goal;
         double omega = MathUtil.clamp(
-                thetaFF,
+                thetaFF+ omegaFB + thetaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);

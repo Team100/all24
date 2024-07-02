@@ -9,7 +9,6 @@ import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * None of the tests here involve the Tire model.

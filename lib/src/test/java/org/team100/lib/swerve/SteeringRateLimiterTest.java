@@ -1,7 +1,6 @@
 package org.team100.lib.swerve;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -23,6 +22,7 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 0 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
+        Rotation2d[] desired_heading_velocity = new Rotation2d[] { GeometryUtil.kRotationZero };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
         double s = c.enforceSteeringLimit(
@@ -32,6 +32,7 @@ class SteeringRateLimiterTest {
                 desired_vx,
                 desired_vy,
                 desired_heading,
+                desired_heading_velocity,
                 overrideSteering,
                 0.02);
 
@@ -49,6 +50,7 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 1 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotation90 };
+        Rotation2d[] desired_heading_velocity = new Rotation2d[] { GeometryUtil.kRotation90 };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
         double s = c.enforceSteeringLimit(
@@ -58,6 +60,7 @@ class SteeringRateLimiterTest {
                 desired_vx,
                 desired_vy,
                 desired_heading,
+                desired_heading_velocity,
                 overrideSteering,
                 0.02);
         // s = 0 stops the drive motors

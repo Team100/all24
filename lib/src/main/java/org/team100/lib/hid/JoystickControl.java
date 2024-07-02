@@ -47,7 +47,7 @@ public abstract class JoystickControl implements DriverControl {
 
     @Override
     public boolean actualCircle() {
-        return button(2);
+        return m_controller.getRawButton(2);
     }
 
     @Override
