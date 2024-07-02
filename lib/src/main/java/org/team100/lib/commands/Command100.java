@@ -32,7 +32,7 @@ public abstract class Command100 extends Command implements Glassy {
     private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
             new MaxPriorityThreads());
 
-    private final Telemetry t = Telemetry.get();
+    protected final Telemetry.Logger t;
     protected final String m_name;
 
     private double prevTime;
@@ -40,6 +40,7 @@ public abstract class Command100 extends Command implements Glassy {
 
     protected Command100() {
         m_name = Names.append(Command100.class.getSimpleName(), this);
+        t = Telemetry.get().logger(m_name);
     }
 
     public void initialize100() {

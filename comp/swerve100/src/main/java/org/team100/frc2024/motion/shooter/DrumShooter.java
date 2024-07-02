@@ -54,15 +54,20 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private static final double kDriveReduction = 1;
     private static final double kWheelDiameterM = 0.1;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
 
     private final String m_name;
     private final VelocityServo<Distance100> leftRoller;
     private final VelocityServo<Distance100> rightRoller;
     private final GravityServo pivotServo;
 
-    public DrumShooter(int leftID, int rightID, int pivotID, double supplyLimit, double statorLimit) {
+    public DrumShooter(
+            int leftID,
+            int rightID, int pivotID,
+            double supplyLimit,
+            double statorLimit) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(
                 1, // gear ratio

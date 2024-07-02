@@ -20,12 +20,13 @@ import edu.wpi.first.math.MathUtil;
 public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
     private static final int ticksPerRevolution = 1666;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final WPI_TalonSRX m_motor;
 
     public TalonSRXTurningEncoder(String name, CANTurningMotor motor) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor.getMotor();
     }
 

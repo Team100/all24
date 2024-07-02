@@ -25,7 +25,7 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     private static final double kDtSec = 0.02;
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final PositionMotor100<T> m_motor;
     private final CombinedEncoder<T> m_encoder;
@@ -42,6 +42,7 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
             Profile100 profile,
             T instance) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor;
         m_encoder = encoder;
         m_profile = profile;

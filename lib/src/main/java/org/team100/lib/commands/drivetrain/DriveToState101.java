@@ -31,7 +31,6 @@ public class DriveToState101 extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
     
-    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;

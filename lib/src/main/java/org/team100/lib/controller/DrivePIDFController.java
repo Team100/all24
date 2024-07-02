@@ -23,7 +23,7 @@ public class DrivePIDFController implements DriveMotionController {
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final boolean m_feedforwardOnly;
     private final String m_name;
     private final double m_kPCart;
@@ -41,6 +41,7 @@ public class DrivePIDFController implements DriveMotionController {
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     @Override

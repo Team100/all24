@@ -23,7 +23,7 @@ import com.revrobotics.CANSparkMax;
 public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     /** Very much not calibrated. */
     private static final double kV = 0.1;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t ;
     private final CANSparkMax m_motor;
     private final String m_name;
 
@@ -34,7 +34,7 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
      */
     public JointMotor(String name, int canId, int currentLimit) {
         m_name = Names.append(name, this);
-
+        t = Telemetry.get().logger(m_name);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, MotorPhase.FORWARD, 10);
@@ -74,5 +74,5 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     private double getTorque() {
         return kTNm_amp() * m_motor.getOutputCurrent();
     }
-    
+
 }

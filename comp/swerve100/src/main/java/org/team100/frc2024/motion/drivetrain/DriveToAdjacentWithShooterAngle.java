@@ -34,7 +34,6 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
     private final DriveMotionController m_controller;

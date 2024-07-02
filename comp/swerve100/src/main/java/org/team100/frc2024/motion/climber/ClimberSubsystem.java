@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 40;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final DutyCycleMotor100 v1;
     private final Encoder100<Distance100> e1;
@@ -29,6 +29,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         switch (Identity.instance) {
             case COMP_BOT:
                 VortexProxy vp1 = new VortexProxy(
@@ -71,7 +72,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v1.setDutyCycle(0);
             return;
         }
-        Telemetry.get().log(Level.DEBUG, m_name, "LEFT VALUE", value);
+        t.log(Level.DEBUG, m_name, "LEFT VALUE", value);
     }
 
     public void setRightWithSoftLimits(double value) {
@@ -88,7 +89,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v2.setDutyCycle(0);
             return;
         }
-        Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
+        t.log(Level.DEBUG, m_name, "RIGHT VALUE", value);
     }
 
     public void zeroClimbers() {

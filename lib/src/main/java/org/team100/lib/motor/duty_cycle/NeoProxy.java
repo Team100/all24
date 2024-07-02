@@ -19,7 +19,7 @@ import com.revrobotics.CANSparkMax;
  * This makes the code that uses it easier to test.
  */
 public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
 
     private final CANSparkMax m_motor;
@@ -30,6 +30,7 @@ public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
             IdleMode idleMode,
             int currentLimit) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, idleMode, MotorPhase.FORWARD, 20);

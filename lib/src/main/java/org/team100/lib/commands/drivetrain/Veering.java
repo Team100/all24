@@ -18,7 +18,6 @@ public class Veering extends Command100 {
     private static final double kPeriod = 10;
     /** omega command in rad/s */
     private static final double kOmega = Math.PI;
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;
     private final Timer m_timer;

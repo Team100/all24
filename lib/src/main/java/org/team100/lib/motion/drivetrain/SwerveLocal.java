@@ -45,7 +45,7 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
             new SwerveModuleState(0, new Rotation2d(-3 * Math.PI / 4))
     };
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t ;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollection m_modules;
@@ -57,6 +57,7 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_name, m_swerveKinodynamics);
         prevSetpoint = new SwerveSetpoint();
     }

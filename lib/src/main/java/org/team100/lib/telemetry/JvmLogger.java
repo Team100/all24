@@ -17,13 +17,14 @@ import org.team100.lib.util.Names;
  * LoggedRobot.GcStatsCollector().
  */
 public class JvmLogger implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
 
     public JvmLogger() {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         times = new HashMap<>();
         counts = new HashMap<>();
     }

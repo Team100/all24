@@ -20,13 +20,14 @@ public class DriverXboxControl implements DriverControl {
     private static final double kExpo = 0.65;
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t ;
     private final XboxController m_controller;
     private final String m_name;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
     public DriverXboxControl() {
         m_controller = new XboxController(0);
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     @Override

@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * Sets the annunciator if bounds are exceeded.
  */
 public class Monitor implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final BooleanConsumer m_annunciator;
     private final BooleanSupplier m_test;
@@ -32,6 +32,7 @@ public class Monitor implements Glassy {
      */
     public Monitor(BooleanConsumer annunciator, BooleanSupplier test) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         m_annunciator = annunciator;
         m_test = test;
         m_pdp = new PowerDistribution(1, ModuleType.kRev);

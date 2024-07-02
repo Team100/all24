@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * counterclockwise-positive.
  */
 public class Heading implements HeadingInterface {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
 
     private final Gyro100 m_gyro;
     private final String m_name;
@@ -19,6 +19,7 @@ public class Heading implements HeadingInterface {
     public Heading(Gyro100 gyro) {
         m_gyro = gyro;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     @Override

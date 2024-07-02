@@ -33,7 +33,6 @@ public class DriveInACircle extends Command100 {
     private static final double kMaxSpeed = 0.5;
     private static final double kAccel = 0.5;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final double m_turnRatio;
     private final HolonomicDriveController3 m_controller;

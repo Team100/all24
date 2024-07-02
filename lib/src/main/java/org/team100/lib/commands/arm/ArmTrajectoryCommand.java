@@ -31,7 +31,6 @@ public class ArmTrajectoryCommand extends Command100 {
     private static final double kA = 0.2;
     private static final double kRotsPerSecToVoltsPerSec = 4;
 
-    private final Telemetry t = Telemetry.get();
 
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;

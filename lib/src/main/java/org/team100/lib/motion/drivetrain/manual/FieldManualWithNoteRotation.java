@@ -46,7 +46,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
      * translation
      */
     private static final double kRotationSpeed = 0.5;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final Supplier<Optional<Translation2d>> m_target;
@@ -74,6 +74,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
         m_trigger = trigger;
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,

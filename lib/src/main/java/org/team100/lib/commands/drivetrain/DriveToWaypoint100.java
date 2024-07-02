@@ -31,7 +31,6 @@ public class DriveToWaypoint100 extends Command100 {
     private static final double kMaxVelM_S = 2;
     private static final double kMaxAccelM_S_S = 2;
      
-    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;

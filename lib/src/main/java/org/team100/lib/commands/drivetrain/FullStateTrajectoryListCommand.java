@@ -26,7 +26,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * Follow a list of trajectories with the full state controller.
  */
 public class FullStateTrajectoryListCommand extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final FullStateDriveController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;

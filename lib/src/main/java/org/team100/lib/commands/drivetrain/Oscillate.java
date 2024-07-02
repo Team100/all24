@@ -35,7 +35,6 @@ public class Oscillate extends Command100 {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
 
-    private final Telemetry t = Telemetry.get();
 
     private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;

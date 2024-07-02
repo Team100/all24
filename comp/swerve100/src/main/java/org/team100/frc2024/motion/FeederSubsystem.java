@@ -14,13 +14,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Feeder feeds the shooter.
  */
 public class FeederSubsystem extends SubsystemBase implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
     private final PWMSparkMax feedRoller;
     private final SensorInterface m_sensors;
+
     public FeederSubsystem(SensorInterface sensors) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         switch (Identity.instance) {
             case COMP_BOT:
                 feedRoller = new PWMSparkMax(3);

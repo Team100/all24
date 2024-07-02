@@ -14,7 +14,7 @@ import org.team100.lib.units.Distance100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class GravityServo {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final DutyCycleMotor100 m_motor;
     private final String m_name;
     private final SysParam m_params;
@@ -38,6 +38,7 @@ public class GravityServo {
             double[] softLimits) {
         m_motor = motor;
         m_name = name;
+        t = Telemetry.get().logger(m_name);
         m_params = params;
         m_controller = controller;
         m_controller.setTolerance(0.02);

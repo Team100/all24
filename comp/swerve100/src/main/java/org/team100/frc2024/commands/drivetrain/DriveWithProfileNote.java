@@ -26,7 +26,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * Creates a profile to the translation of a note and follows it
  */
 public class DriveWithProfileNote extends Command100 {
-    private final Telemetry t = Telemetry.get();
 
     private final Intake m_intake;
 

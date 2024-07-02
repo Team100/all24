@@ -91,7 +91,7 @@ import edu.wpi.first.math.MathUtil;
  * TODO: allow different acceleration and deceleration.
  */
 public class MinTimeController implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
 
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
@@ -155,7 +155,7 @@ public class MinTimeController implements Glassy {
         m_finish = finish;
         m_k = k;
         m_name = Names.append(parent, this);
-
+        t = Telemetry.get().logger(m_name);
     }
 
     private State100 modulus(double x, double v, double a) {

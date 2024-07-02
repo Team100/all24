@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Passthrough to outboard closed-loop velocity control.
  */
 public class OutboardVelocityServo<T extends Measure100> implements VelocityServo<T> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final VelocityMotor100<T> m_motor;
     private final Encoder100<T> m_encoder;
     private final String m_name;
@@ -27,6 +27,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
 
     public OutboardVelocityServo(String name, VelocityMotor100<T> motor, Encoder100<T> encoder) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor;
         m_encoder = encoder;
     }

@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  * There are several flaws in this implementation.
  */
 public class CartesianManualPositionalArm extends Command100 {
-    private final Telemetry t = Telemetry.get();
 
     private final ArmSubsystem m_arm;
     private final ArmKinematics m_kinematics;

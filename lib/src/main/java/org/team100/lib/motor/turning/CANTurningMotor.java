@@ -82,7 +82,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
      */
     private static final double saturationVoltage = 11;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final WPI_TalonSRX m_motor;
     private final String m_name;
 
@@ -125,6 +125,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
         m_motor.setSensorPhase(true);
 
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
     }
 

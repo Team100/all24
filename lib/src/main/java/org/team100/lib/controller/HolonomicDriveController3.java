@@ -16,7 +16,7 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
@@ -34,6 +34,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_yController = yController;
         m_thetaController = thetaController;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     public static HolonomicDriveController3 withTolerance(

@@ -26,10 +26,15 @@ public class Robot extends TimedRobot100 implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
-    private final Telemetry t = Telemetry.get();
-    private final String m_name = Names.name(this);
+    private final Telemetry.Logger t;
+    private final String m_name;
     private RobotContainer m_robotContainer;
     private JvmLogger m_jvmLogger;
+
+    public Robot() {
+        m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
+    }
 
     @Override
     public void robotInit() {
@@ -58,7 +63,7 @@ public class Robot extends TimedRobot100 implements Glassy {
 
         DataLogManager.start();
 
-        // This reduces the allocated heap size, not just the used heap size, which 
+        // This reduces the allocated heap size, not just the used heap size, which
         // means more-frequent and smaller subsequent GC's.
         System.gc();
     }

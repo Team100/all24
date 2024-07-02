@@ -30,7 +30,6 @@ public class DriveWithTrajectory extends Command100 {
     private static final double kStartVel = 0;
     private static final double kEndVel = 0;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final Trajectory100 trajectory;

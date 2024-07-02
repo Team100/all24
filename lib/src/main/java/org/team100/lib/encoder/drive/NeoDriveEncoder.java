@@ -16,7 +16,7 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoDriveEncoder implements SettableEncoder<Distance100> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final NeoDriveMotor m_motor;
     private final double m_distancePerTurn;
@@ -32,6 +32,7 @@ public class NeoDriveEncoder implements SettableEncoder<Distance100> {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
     }

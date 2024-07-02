@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class ShootSmartWithRotation extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final DrumShooter m_shooter;
     private final SwerveDriveSubsystem m_drive;
     private final ManualWithShooterLock m_driver;

@@ -9,7 +9,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
 
 public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final Talon6TurningMotor m_motor;
     private final double m_gearRatio;
@@ -19,6 +19,7 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
             Talon6TurningMotor m_motor,
             double m_gearRatio) {
         this.m_name = m_name;
+        t = Telemetry.get().logger(m_name);
         this.m_motor = m_motor;
         this.m_gearRatio = m_gearRatio;
     }

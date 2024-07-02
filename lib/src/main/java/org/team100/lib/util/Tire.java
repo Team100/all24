@@ -18,7 +18,7 @@ public class Tire {
     private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
 
     private final double m_saturationM_s_s;
     private final double m_slipAtSaturation0_1;
@@ -27,6 +27,7 @@ public class Tire {
     Tire(double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
+        t = Telemetry.get().logger("tire");
     }
 
     public static Tire noslip() {

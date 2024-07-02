@@ -18,14 +18,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The twist components, x, y, and theta, are mapped directly to the
  * corresponding ChassisSpeeds components (and scaled).
  */
-public class ManualChassisSpeeds implements ChassisSpeedDriver{
-    private final Telemetry t = Telemetry.get();
+public class ManualChassisSpeeds implements ChassisSpeedDriver {
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
     public ManualChassisSpeeds(String parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
     }
 
     /**

@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.Timer;
  * This is an experiment.
  */
 public class TrajectoryCommand100 extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final Trajectory100 m_trajectory;

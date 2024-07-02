@@ -32,7 +32,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     /** Absolute input supplier, null if free */
@@ -65,6 +65,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_heading = heading;
         m_desiredRotation = desiredRotation;
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
 

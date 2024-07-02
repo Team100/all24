@@ -73,7 +73,7 @@ public class VisionDataProvider24 implements Glassy {
     // private static final double kVisionChangeToleranceMeters = 1;
     private static final String kName = "VisionDataProvider24";
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t ;
 
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
@@ -105,6 +105,7 @@ public class VisionDataProvider24 implements Glassy {
         m_poseEstimator = poseEstimator;
         m_fireControl = fireControl;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     /** Start listening for updates. */

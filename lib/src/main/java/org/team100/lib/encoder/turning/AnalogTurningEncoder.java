@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
  */
 public class AnalogTurningEncoder implements Encoder100<Angle100> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final AnalogInput m_input;
     private final AnalogEncoder m_encoder;
@@ -38,9 +38,8 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
             double inputOffset,
             double gearRatio,
             EncoderDrive drive) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_input = new AnalogInput(channel);
         m_encoder = new AnalogEncoder(m_input);
         m_encoder.setPositionOffset(inputOffset);

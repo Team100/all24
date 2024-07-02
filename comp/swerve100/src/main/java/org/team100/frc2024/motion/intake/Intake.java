@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final SensorInterface m_sensors;
 
@@ -32,6 +32,7 @@ public class Intake extends SubsystemBase implements Glassy {
 
     public Intake(SensorInterface sensors) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         m_sensors = sensors;
 
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);

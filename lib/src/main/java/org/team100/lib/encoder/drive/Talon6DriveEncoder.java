@@ -10,7 +10,7 @@ import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
 public class Talon6DriveEncoder implements SettableEncoder<Distance100> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final Talon6DriveMotor m_motor;
     private final double m_distancePerTurn;
@@ -20,6 +20,7 @@ public class Talon6DriveEncoder implements SettableEncoder<Distance100> {
             Talon6DriveMotor motor,
             double distancePerTurn) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
     }

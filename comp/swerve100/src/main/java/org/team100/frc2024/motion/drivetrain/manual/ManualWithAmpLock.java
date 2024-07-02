@@ -44,7 +44,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
      * translation
      */
     private static final double kRotationSpeed = 0.5;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final PIDController m_thetaController;
@@ -67,6 +67,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed,

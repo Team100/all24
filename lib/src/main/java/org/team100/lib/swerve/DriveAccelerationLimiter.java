@@ -13,13 +13,14 @@ import org.team100.lib.util.Names;
 public class DriveAccelerationLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 
     public DriveAccelerationLimiter(String parent, SwerveKinodynamics limits) {
         m_limits = limits;
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
     }
 
     public double enforceWheelAccelLimit(

@@ -6,12 +6,13 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class CompSensors implements SensorInterface {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final DigitalInput intakeSensor;
     private final DigitalInput feederSensor;
     private final DigitalInput ampSensor;
 
     public CompSensors(int port1, int port2, int port3) {
+        t = Telemetry.get().logger("CompSensors");
         intakeSensor = new DigitalInput(port1);
         feederSensor = new DigitalInput(port2);
         ampSensor = new DigitalInput(port3);

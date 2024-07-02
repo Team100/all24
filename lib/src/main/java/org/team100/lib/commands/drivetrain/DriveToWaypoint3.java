@@ -33,7 +33,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * {@link DriveMotionController} classes.
  */
 public class DriveToWaypoint3 extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;

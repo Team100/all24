@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Positional control via onboard control of motor velocity.
  */
 public class OnboardPositionServo<T extends Measure100> implements PositionServo<T> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final VelocityMotor100<T> m_motor;
     private final Encoder100<T> m_encoder;
     private final double m_maxVel;
@@ -44,6 +44,7 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
             Profile100 profile,
             T instance) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor;
         m_encoder = encoder;
         m_maxVel = maxVel;

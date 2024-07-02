@@ -17,7 +17,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
      * Very much not calibrated. Say 100 rev/s max so 0.01?
      */
     private static final double velocityFFDutyCycle_Rev_S = 0.01;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final MotorController m_motor;
     private final String m_name;
     private final double m_gearRatio;
@@ -28,11 +28,10 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
             MotorController motorController,
             double kDriveReduction,
             double wheelDiameter) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_motor = motorController;
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
     }

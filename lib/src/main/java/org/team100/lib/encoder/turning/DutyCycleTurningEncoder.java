@@ -20,8 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
  * have no common parent, so there's some duplication here.
  */
 public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
-    private final Telemetry t = Telemetry.get();
-
+    private final Telemetry.Logger t;
     private final DutyCycleEncoder m_encoder;
     private final String m_name;
 
@@ -34,9 +33,8 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
             double inputOffset,
             double gearRatio,
             EncoderDrive drive) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         switch (drive) {

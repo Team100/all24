@@ -14,7 +14,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil {
     private static final String kName = DriveMotionControllerUtil.class.getSimpleName();
-    private static final Telemetry t = Telemetry.get();
+    private static final Telemetry.Logger t = Telemetry.get().logger(kName);
 
     /**
      * Returns robot-relative direction of motion.

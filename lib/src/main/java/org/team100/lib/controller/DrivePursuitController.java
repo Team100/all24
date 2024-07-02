@@ -37,7 +37,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 public class DrivePursuitController implements DriveMotionController {
     public static final double EPSILON = 1e-6;
-    public static final Telemetry t = Telemetry.get();
 
     private static final double kPathLookaheadTime = 0.25;
     private static final double kPathMinLookaheadDistance = 12.0;
@@ -53,6 +52,7 @@ public class DrivePursuitController implements DriveMotionController {
 
     private final SwerveKinodynamics m_limits;
     private final String m_name;
+    public final Telemetry.Logger t;
 
     private Lookahead mSpeedLookahead = null;
 
@@ -66,6 +66,7 @@ public class DrivePursuitController implements DriveMotionController {
     DrivePursuitController(SwerveKinodynamics limits) {
         m_limits = limits;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     @Override

@@ -20,13 +20,16 @@ import edu.wpi.first.wpilibj.Timer;
 public class SingleNavXGyro implements Gyro100 {
     private static final byte kUpdateRateHz = (byte) 200;
     private static final int kSPIBitRateHz = 500000;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final AHRS m_gyro1;
     private final String m_name;
 
-    /** NOTE: the async is just for logging, maybe don't use a whole thread for it. */
+    /**
+     * NOTE: the async is just for logging, maybe don't use a whole thread for it.
+     */
     public SingleNavXGyro(Async async) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?

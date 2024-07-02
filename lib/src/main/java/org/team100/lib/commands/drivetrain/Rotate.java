@@ -29,7 +29,6 @@ public class Rotate extends Command100 {
     // don't try to rotate at max speed
     private static final double kSpeed = 0.5;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_robotDrive;
     private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;

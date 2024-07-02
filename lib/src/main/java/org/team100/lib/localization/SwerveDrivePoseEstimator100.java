@@ -43,7 +43,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     // look back a little to get a pose for velocity estimation
     private static final double velocityDtS = 0.02;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
@@ -85,6 +85,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
         m_tireUtil = new SlipperyTireUtil(m_kinodynamics.getTire());

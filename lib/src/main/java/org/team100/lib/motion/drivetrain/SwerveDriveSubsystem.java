@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.Timer;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends Subsystem100 {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
@@ -45,6 +45,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal = swerveLocal;
         m_speed = speed;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();

@@ -18,7 +18,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
      * Say 600 rad/s max so 0.0016?
      */
     private static final double velocityFFDutyCycle_Rad_S = 0.0016;
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final MotorController m_motor;
     private final String m_name;
     private final double m_gearRatio;
@@ -27,11 +27,10 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
             String name,
             MotorController motorController,
             double kDriveReduction) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_motor = motorController;
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_gearRatio = kDriveReduction;
     }
 

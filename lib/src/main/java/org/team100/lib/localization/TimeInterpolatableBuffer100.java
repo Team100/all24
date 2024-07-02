@@ -19,7 +19,7 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  * The buffer is never empty, so get() always returns *something*.
  */
 public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final double m_historyS;
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
 
@@ -33,6 +33,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
 
     public TimeInterpolatableBuffer100(double historyS, double timeS, T initialValue) {
+        t = Telemetry.get().logger("buffer");
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);

@@ -19,7 +19,7 @@ import com.revrobotics.RelativeEncoder;
  * TODO: remove this class, use NeoVortexDriveEncoder instead.
  */
 public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final CANSparkFlex m_motor;
     private final RelativeEncoder m_encoder;
@@ -30,6 +30,7 @@ public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
             MotorPhase phase,
             int currentLimit) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, phase, 20);

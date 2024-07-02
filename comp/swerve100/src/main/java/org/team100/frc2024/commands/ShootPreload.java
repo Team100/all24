@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootPreload extends Command {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -39,6 +39,7 @@ public class ShootPreload extends Command {
             SwerveDriveSubsystem drive,
             double pivotOverride,
             boolean isPreload) {
+        t = Telemetry.get().logger("ShootSmart");
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -57,6 +58,7 @@ public class ShootPreload extends Command {
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
+        t = Telemetry.get().logger("ShootSmart");
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;

@@ -17,12 +17,13 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class SteeringOverride implements Glassy {
     private static final double kEpsilon = 1e-3;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 
     public SteeringOverride(String parent, SwerveKinodynamics limits) {
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
         m_limits = limits;
     }
 

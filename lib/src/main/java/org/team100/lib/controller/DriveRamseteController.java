@@ -33,11 +33,12 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
     private static final double kLooperDt = 0.02;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
 
     public DriveRamseteController() {
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     private TrajectoryTimeIterator m_iter;

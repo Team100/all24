@@ -21,7 +21,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
  */
 public abstract class Talon6Motor<T extends Measure100>
         implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
-    protected final Telemetry t = Telemetry.get();
+    protected final Telemetry.Logger t;
     protected final String m_name;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
@@ -50,6 +50,7 @@ public abstract class Talon6Motor<T extends Measure100>
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = new TalonFX(canId);
         m_ff = ff;
 
@@ -169,7 +170,7 @@ public abstract class Talon6Motor<T extends Measure100>
      * Set integrated sensor position in rotations.
      */
     public void setEncoderPosition(double motorPositionRev) {
-        Phoenix100.warn(()->m_motor.setPosition(motorPositionRev));
+        Phoenix100.warn(() -> m_motor.setPosition(motorPositionRev));
     }
 
     public double getVelocityRev_S() {

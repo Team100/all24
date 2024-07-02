@@ -28,7 +28,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * essentially like ignoring cross-track error.
  */
 public class PermissiveTrajectoryListCommand extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final List<Function<Pose2d, Trajectory100>> m_trajectories;

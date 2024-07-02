@@ -30,7 +30,6 @@ public class FancyTrajectory extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
-    private final Telemetry t = Telemetry.get();
 
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;

@@ -19,13 +19,14 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The input dy is ignored.
  */
 public class SimpleManualModuleStates implements ModuleStateDriver {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
     public SimpleManualModuleStates(String parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_name = Names.append(parent, this);
+        t = Telemetry.get().logger(m_name);
     }
 
     /**

@@ -16,7 +16,7 @@ import edu.wpi.first.math.MathUtil;
  * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final double m_freeSpeed;
     private double m_velocity = 0;
@@ -26,9 +26,8 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
      * @param kV   velocity units at full output
      */
     public SimulatedMotor(String name, double freeSpeed) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_freeSpeed = freeSpeed;
     }
 

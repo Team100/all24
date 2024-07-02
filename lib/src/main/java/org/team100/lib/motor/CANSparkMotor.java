@@ -17,7 +17,7 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 public abstract class CANSparkMotor<T extends Measure100>
         implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
-    protected final Telemetry t = Telemetry.get();
+    protected final Telemetry.Logger t;
     private final String m_name;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;
@@ -33,6 +33,7 @@ public abstract class CANSparkMotor<T extends Measure100>
             PIDConstants pid) {
         m_motor = motor;
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_ff = ff;
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, motorPhase, 20);

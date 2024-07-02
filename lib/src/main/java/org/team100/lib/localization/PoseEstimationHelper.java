@@ -21,7 +21,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class PoseEstimationHelper {
     private static final String kName = PoseEstimationHelper.class.getSimpleName();
-    private static final Telemetry t = Telemetry.get();
+    private static final Telemetry.Logger t = Telemetry.get().logger(kName);
 
     /**
      * Converts camera rotation to an object to a robot relative translation,

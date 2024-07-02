@@ -16,7 +16,7 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController100 implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
@@ -37,6 +37,7 @@ public class HolonomicDriveController100 implements Glassy {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.name(this);
+        t = Telemetry.get().logger(m_name);
     }
 
     public static HolonomicDriveController100 withTolerance(

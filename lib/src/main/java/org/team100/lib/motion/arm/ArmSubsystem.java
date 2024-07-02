@@ -24,7 +24,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
@@ -51,9 +51,8 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
             Motor100<Angle100> upperMotor,
             Encoder100<Angle100> upperEncoder,
             Async async) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);

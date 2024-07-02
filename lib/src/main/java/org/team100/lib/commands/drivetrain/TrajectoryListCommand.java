@@ -32,7 +32,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * follower, try the {@link DriveMotionController} classes.
  */
 public class TrajectoryListCommand extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;

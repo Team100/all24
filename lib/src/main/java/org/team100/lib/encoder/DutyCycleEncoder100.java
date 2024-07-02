@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Duty cycle encoder such as the AMS 5048.
  */
 public class DutyCycleEncoder100 implements Encoder100<Distance100> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     public final DutyCycleEncoder m_encoder;
 
@@ -36,11 +36,9 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
             int channel,
             double inputOffset,
             boolean reversed) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-
         m_reversed = reversed;
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);

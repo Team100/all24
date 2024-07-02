@@ -16,7 +16,7 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoTurningEncoder implements SettableEncoder<Angle100> {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry.Logger t;
     private final String m_name;
     private final NeoTurningMotor m_motor;
     private final double m_gearRatio;
@@ -29,9 +29,8 @@ public class NeoTurningEncoder implements SettableEncoder<Angle100> {
             String name,
             NeoTurningMotor motor,
             double gearRatio) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name);
         m_motor = motor;
         m_gearRatio = gearRatio;
         reset();
