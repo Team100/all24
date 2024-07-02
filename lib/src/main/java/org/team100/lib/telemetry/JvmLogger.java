@@ -28,6 +28,7 @@ public class JvmLogger implements Glassy {
         counts = new HashMap<>();
     }
 
+    /** This doesn't seem to ever log anything. */
     public void logGarbageCollectors() {
         long accumTime = 0;
         long accumCount = 0;
@@ -41,13 +42,13 @@ public class JvmLogger implements Glassy {
             long thisCount = collectionCount - counts.get(pool);
             times.put(pool, collectionTime);
             counts.put(pool, collectionCount);
-            t.log(Level.DEBUG, m_name, "GCTimeMS/" + pool, thisTime);
-            t.log(Level.DEBUG, m_name, "GCCounts/" + pool, thisCount);
+            t.log(Level.TRACE, m_name, "GCTimeMS/" + pool, thisTime);
+            t.log(Level.TRACE, m_name, "GCCounts/" + pool, thisCount);
             accumTime += thisTime;
             accumCount += thisCount;
         }
-        t.log(Level.DEBUG, m_name, "GCTimeMS/total", accumTime);
-        t.log(Level.DEBUG, m_name, "GCCounts/total", accumCount);
+        t.log(Level.TRACE, m_name, "GCTimeMS/total", accumTime);
+        t.log(Level.TRACE, m_name, "GCCounts/total", accumCount);
     }
 
     public void logMemoryPools() {
@@ -55,15 +56,15 @@ public class JvmLogger implements Glassy {
         for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
             MemoryUsage usage = bean.getUsage();
             accumUsage += usage.getUsed();
-            t.log(Level.DEBUG, m_name, "MemoryPool/" + bean.getName(), usage.getUsed());
+            t.log(Level.INFO, m_name, "MemoryPool/" + bean.getName(), usage.getUsed());
         }
-        t.log(Level.DEBUG, m_name, "MemoryPool/total", accumUsage);
+        t.log(Level.INFO, m_name, "MemoryPool/total", accumUsage);
     }
 
     public void logMemoryUsage() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
-        t.log(Level.DEBUG, m_name, "MemoryUsage/heap", bean.getHeapMemoryUsage().getUsed());
-        t.log(Level.DEBUG, m_name, "MemoryUsage/non-heap", bean.getNonHeapMemoryUsage().getUsed());
+        t.log(Level.INFO, m_name, "MemoryUsage/heap", bean.getHeapMemoryUsage().getUsed());
+        t.log(Level.INFO, m_name, "MemoryUsage/non-heap", bean.getNonHeapMemoryUsage().getUsed());
     }
 
     @Override

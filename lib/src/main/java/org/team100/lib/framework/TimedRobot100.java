@@ -160,9 +160,13 @@ public class TimedRobot100 extends IterativeRobotBase {
 
             final double elapsed = chronos.elapsed();
             for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
-                double fraction = durations.getValue() / elapsed;
-                t.log(Level.INFO, kName, "fraction/" + durations.getKey(), fraction);
+                Double duration = durations.getValue();
+                String name = durations.getKey();
+                t.log(Level.INFO, kName, "duration (s)/" + name, duration);
+                double fraction = duration / elapsed;
+                t.log(Level.INFO, kName, "fraction (pct)/" + name, 100.0 * fraction);
             }
+            chronos.reset();
         }
     }
 
