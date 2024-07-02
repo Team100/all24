@@ -6,7 +6,7 @@ import org.team100.lib.units.Measure100;
 
 /**
  * Proxies two encoders and corrects the position of one of them every time you
- * get it.  Also falls back to the secondary if the primary fails.
+ * get it. Also falls back to the secondary if the primary fails.
  * 
  * The use case is absolute + incremental encoders, in order to do outboard
  * closed-loop position control with only outboard incremental encoders --
@@ -15,20 +15,39 @@ import org.team100.lib.units.Measure100;
  */
 public class CombinedEncoder<T extends Measure100> implements Encoder100<T> {
     private final Encoder100<T> m_primary;
+    private final double m_authority;
     private final SettableEncoder<T> m_secondary;
 
-    public CombinedEncoder(Encoder100<T> primary, SettableEncoder<T> secondary) {
+    /**
+     * 
+     * @param primary
+     * @param authority how to discount the primary updates: 1.0 = it's truth, 0.0 =
+     *                  ignore it.
+     * @param secondary
+     */
+    public CombinedEncoder(
+            Encoder100<T> primary,
+            double authority,
+            SettableEncoder<T> secondary) {
+        if (authority < 0)
+            throw new IllegalArgumentException("authority must be >= 0");
+        if (authority > 1)
+            throw new IllegalArgumentException("authority must be <= 1");
         m_primary = primary;
+        m_authority = authority;
         m_secondary = secondary;
     }
 
     @Override
     public OptionalDouble getPosition() {
-        OptionalDouble primaryPosition = m_primary.getPosition();
-        if (primaryPosition.isPresent()) {
+        OptionalDouble optPrimaryPosition = m_primary.getPosition();
+        if (optPrimaryPosition.isPresent()) {
             // Adjust the secondary.
-            m_secondary.setPosition(primaryPosition.getAsDouble());
-            return primaryPosition;
+            double primaryPosition = optPrimaryPosition.getAsDouble();
+            double secondaryPosition = m_secondary.getPosition().orElse(primaryPosition);
+            double correctedPosition = m_authority * primaryPosition + (1.0 - m_authority) * secondaryPosition;
+            m_secondary.setPosition(correctedPosition);
+            return OptionalDouble.of(correctedPosition);
         }
         // Primary is broken, maybe the secondary is still working.
         return m_secondary.getPosition();
