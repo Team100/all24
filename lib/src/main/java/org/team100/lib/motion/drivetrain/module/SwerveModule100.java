@@ -2,7 +2,6 @@ package org.team100.lib.motion.drivetrain.module;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
@@ -13,7 +12,6 @@ import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
-import org.team100.lib.visualization.SwerveModuleVisualization;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
