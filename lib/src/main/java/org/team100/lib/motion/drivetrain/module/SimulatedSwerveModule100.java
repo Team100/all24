@@ -1,6 +1,5 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.OnboardPositionServo;
