@@ -339,7 +339,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
      * @param dt            time to aim for
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -367,7 +367,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
      * @param dt            time to aim for
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, SwerveModuleState[] prevStates, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, SwerveModuleState100[] prevStates, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -396,7 +396,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
      * @param dt            time to aim for
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -434,7 +434,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
      * @param dt            time to aim for
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, SwerveModuleState[] prevStates, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, SwerveModuleState100[] prevStates, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -459,14 +459,14 @@ public class SwerveKinodynamics implements Glassy {
     /**
      * The resulting state speeds are always positive.
      */
-    public SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds, ChassisSpeeds prevIn, SwerveModuleState[] prevStates, double dt, int i) {
+    public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds, ChassisSpeeds prevIn, SwerveModuleState100[] prevStates, double dt) {
         ChassisSpeeds chassisSpeedsAcceleration = speeds.minus(prevIn).div(dt);
-        return m_kinematics.toSwerveModuleStates(speeds, chassisSpeedsAcceleration, prevStates, dt, i);
+        return m_kinematics.toSwerveModuleStates(speeds, chassisSpeedsAcceleration, prevStates, dt);
     }
     /**
      * The resulting state speeds are always positive.
      */
-    public SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
+    public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
         return m_kinematics.toSwerveModuleStates(speeds);
     }
 
@@ -477,7 +477,7 @@ public class SwerveKinodynamics implements Glassy {
      * 
      * Does not take Tires into account.
      */
-    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
+    public ChassisSpeeds toChassisSpeeds(SwerveModuleState100... moduleStates) {
         // does not take tires into account
         return m_kinematics.toChassisSpeeds(moduleStates);
     }
@@ -493,7 +493,7 @@ public class SwerveKinodynamics implements Glassy {
     public ChassisSpeeds toChassisSpeedsWithDiscretization(
             double gyroRateRad_S,
             double dt,
-            SwerveModuleState... moduleStates) {
+            SwerveModuleState100... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
         Twist2d twist = new Twist2d(
                 discreteSpeeds.vxMetersPerSecond * dt,
@@ -631,8 +631,8 @@ public class SwerveKinodynamics implements Glassy {
         double ratio = Math.min(1 - oRatio, xyRatio);
         double xyAngle = Math.atan2(speeds.y(), speeds.x());
         return new FieldRelativeVelocity(
-                (ratio * maxV * Math.cos(xyAngle)),
-                (ratio * maxV * Math.sin(xyAngle)),
+                ratio * maxV * Math.cos(xyAngle),
+                ratio * maxV * Math.sin(xyAngle),
                 speeds.theta());
     }
 

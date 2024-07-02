@@ -6,7 +6,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -32,17 +32,17 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
      * There's no conflict between translation and rotation velocities in this mode.
      */
     @Override
-    public SwerveModuleState[] apply(DriverControl.Velocity input) {
+    public SwerveModuleState100[] apply(DriverControl.Velocity input) {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.theta());
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
         t.log(Level.TRACE, m_name, "speed m_s", speedM_S);
         t.log(Level.TRACE, m_name, "angle rad", angle.getRadians());
-        return new SwerveModuleState[] {
-                new SwerveModuleState(speedM_S, angle),
-                new SwerveModuleState(speedM_S, angle),
-                new SwerveModuleState(speedM_S, angle),
-                new SwerveModuleState(speedM_S, angle)
+        return new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, angle),
+                new SwerveModuleState100(speedM_S, angle),
+                new SwerveModuleState100(speedM_S, angle),
+                new SwerveModuleState100(speedM_S, angle)
         };
     }
 

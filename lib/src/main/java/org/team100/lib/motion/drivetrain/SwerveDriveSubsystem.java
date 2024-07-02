@@ -14,7 +14,7 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ExpiringMemoizingSupplier;
 import org.team100.lib.util.Names;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -122,7 +122,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /** Does not desaturate. */
-    public void setRawModuleStates(SwerveModuleState[] states) {
+    public void setRawModuleStates(SwerveModuleState100[] states) {
         m_swerveLocal.setRawModuleStates(states);
     }
 

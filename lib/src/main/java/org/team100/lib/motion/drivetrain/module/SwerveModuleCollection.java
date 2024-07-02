@@ -10,7 +10,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.util.Util;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
@@ -186,14 +186,14 @@ public class SwerveModuleCollection {
     // Actuators
     //
 
-    public void setDesiredStates(SwerveModuleState[] swerveModuleStates) {
+    public void setDesiredStates(SwerveModuleState100[] swerveModuleStates) {
         m_frontLeft.setDesiredState(swerveModuleStates[0]);
         m_frontRight.setDesiredState(swerveModuleStates[1]);
         m_rearLeft.setDesiredState(swerveModuleStates[2]);
         m_rearRight.setDesiredState(swerveModuleStates[3]);
     }
 
-    public void setRawDesiredStates(SwerveModuleState[] swerveModuleStates) {
+    public void setRawDesiredStates(SwerveModuleState100[] swerveModuleStates) {
         m_frontLeft.setRawDesiredState(swerveModuleStates[0]);
         m_frontRight.setRawDesiredState(swerveModuleStates[1]);
         m_rearLeft.setRawDesiredState(swerveModuleStates[2]);
@@ -219,8 +219,8 @@ public class SwerveModuleCollection {
     // Observers
     //
 
-    public SwerveModuleState[] getDesiredStates() {
-        return new SwerveModuleState[] {
+    public SwerveModuleState100[] getDesiredStates() {
+        return new SwerveModuleState100[] {
                 m_frontLeft.getDesiredState(),
                 m_frontRight.getDesiredState(),
                 m_rearLeft.getDesiredState(),
@@ -246,8 +246,8 @@ public class SwerveModuleCollection {
         };
     }
 
-    public SwerveModuleState[] states() {
-        return new SwerveModuleState[] {
+    public SwerveModuleState100[] states() {
+        return new SwerveModuleState100[] {
                 m_frontLeft.getState(),
                 m_frontRight.getState(),
                 m_rearLeft.getState(),

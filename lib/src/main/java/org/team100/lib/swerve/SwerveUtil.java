@@ -1,7 +1,7 @@
 package org.team100.lib.swerve;
 
 import java.util.function.DoubleBinaryOperator;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Math100;
@@ -101,8 +101,8 @@ public class SwerveUtil {
      */
     public static boolean desiredIsStopped(
             ChassisSpeeds desiredState,
-            SwerveModuleState[] desiredModuleStates,
-            SwerveModuleState[] prevModuleStates) {
+            SwerveModuleState100[] desiredModuleStates,
+            SwerveModuleState100[] prevModuleStates) {
         if (GeometryUtil.isZero(desiredState)) {
             for (int i = 0; i < prevModuleStates.length; ++i) {
                 desiredModuleStates[i].angle = prevModuleStates[i].angle;

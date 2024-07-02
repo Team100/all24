@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 /**
  * Manual drivetrain control.
@@ -63,7 +63,7 @@ public class DriveManually extends Command100 {
         // Note this is not necessarily "at rest," because we might start driving
         // manually while the robot is moving.
         ChassisSpeeds currentSpeeds = m_drive.getState().chassisSpeeds();
-        SwerveModuleState[] currentStates = m_drive.getSwerveLocal().states();
+        SwerveModuleState100[] currentStates = m_drive.getSwerveLocal().states();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
         Pose2d p = m_drive.getState().pose();

@@ -4,7 +4,7 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.util.Util;
 
@@ -91,11 +91,11 @@ public class DriveInALittleSquare extends Command100 {
         }
 
         // there are four states here because state is mutable :-(
-        SwerveModuleState[] states = new SwerveModuleState[] {
-                new SwerveModuleState(m_setpoint.v(), m_goal),
-                new SwerveModuleState(m_setpoint.v(), m_goal),
-                new SwerveModuleState(m_setpoint.v(), m_goal),
-                new SwerveModuleState(m_setpoint.v(), m_goal)
+        SwerveModuleState100[] states = new SwerveModuleState100[] {
+                new SwerveModuleState100(m_setpoint.v(), m_goal),
+                new SwerveModuleState100(m_setpoint.v(), m_goal),
+                new SwerveModuleState100(m_setpoint.v(), m_goal),
+                new SwerveModuleState100(m_setpoint.v(), m_goal)
         };
         m_swerve.setRawModuleStates(states);
     }

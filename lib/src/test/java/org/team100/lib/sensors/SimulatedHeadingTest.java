@@ -1,7 +1,7 @@
 package org.team100.lib.sensors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.async.Async;
@@ -40,7 +40,7 @@ class SimulatedHeadingTest implements Timeless {
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 0);
         // includes discretization
-        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 0, 0.02);
+        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 0, 0.02);
         c.reset();
         // go for 0.4s
         for (int i = 0; i < 20; ++i) {
@@ -64,7 +64,7 @@ class SimulatedHeadingTest implements Timeless {
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
         // includes discretization
-        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
+        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
 
         c.reset();
         // steering velocity is 13 rad/s, we need to go about 2 rad? so wait 0.2 sec?
@@ -88,7 +88,7 @@ class SimulatedHeadingTest implements Timeless {
 
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
         // includes discretization
-        SwerveModuleState[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
+        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
         // these are discretized so not symmetrical
         assertEquals(0.779, states[0].speedMetersPerSecond, kDelta);
         assertEquals(1.268, states[1].speedMetersPerSecond, kDelta);
@@ -110,7 +110,7 @@ class SimulatedHeadingTest implements Timeless {
             c.setDesiredStates(states);
             stepTime(0.02);
         }
-        SwerveModuleState[] states2 = c.states();
+        SwerveModuleState100[] states2 = c.states();
 
         // we get back what we put in
         assertEquals(0.779, states2[0].speedMetersPerSecond, kDelta);

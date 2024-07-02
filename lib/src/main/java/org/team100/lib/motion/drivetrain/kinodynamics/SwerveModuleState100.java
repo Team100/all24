@@ -15,8 +15,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /** Represents the state of one swerve module. */
-public class SwerveModuleState
-    implements Comparable<SwerveModuleState>, ProtobufSerializable, StructSerializable {
+public class SwerveModuleState100
+    implements Comparable<SwerveModuleState100>, ProtobufSerializable, StructSerializable {
   /** Speed of the wheel of the module. */
   public double speedMetersPerSecond;
   /** Angle of the module. */
@@ -35,9 +35,9 @@ public class SwerveModuleState
   public static final SwerveModuleStateStruct struct = new SwerveModuleStateStruct();
 
   /** Constructs a SwerveModuleState with zeros for speed and angle. */
-  public SwerveModuleState() {}
+  public SwerveModuleState100() {}
 
-  public SwerveModuleState(double speedMetersPerSecond, Optional<Rotation2d> angle) {
+  public SwerveModuleState100(double speedMetersPerSecond, Optional<Rotation2d> angle) {
     this.speedMetersPerSecond = speedMetersPerSecond;
     Optional<Rotation2d> optAngle = angle;
     if (optAngle.isPresent()) {
@@ -51,7 +51,7 @@ public class SwerveModuleState
    * @param speedMetersPerSecond The speed of the wheel of the module.
    * @param angle The angle of the module.
    */
-  public  SwerveModuleState(double speedMetersPerSecond, Rotation2d angle) {
+  public  SwerveModuleState100(double speedMetersPerSecond, Rotation2d angle) {
     this.speedMetersPerSecond = speedMetersPerSecond;
     this.angle = angle;
   }
@@ -64,7 +64,7 @@ public class SwerveModuleState
    * @param speedMetersPerSecond_2 The acceleration of the wheel of the module.
    * @param angle_2 The angular velocity of the module.
    */
-  public SwerveModuleState(double speedMetersPerSecond, Rotation2d angle, double speedMetersPerSecond_2, Rotation2d angle_2) {
+  public SwerveModuleState100(double speedMetersPerSecond, Rotation2d angle, double speedMetersPerSecond_2, Rotation2d angle_2) {
     this.speedMetersPerSecond = speedMetersPerSecond;
     this.angle = angle;
     this.speedMetersPerSecond_2 = speedMetersPerSecond_2;
@@ -77,14 +77,14 @@ public class SwerveModuleState
    * @param speed The speed of the wheel of the module.
    * @param angle The angle of the module.
    */
-  public SwerveModuleState(Measure<Velocity<Distance>> speed, Rotation2d angle) {
+  public SwerveModuleState100(Measure<Velocity<Distance>> speed, Rotation2d angle) {
     this(speed.in(MetersPerSecond), angle);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof SwerveModuleState) {
-      SwerveModuleState other = (SwerveModuleState) obj;
+    if (obj instanceof SwerveModuleState100) {
+      SwerveModuleState100 other = (SwerveModuleState100) obj;
       return Math.abs(other.speedMetersPerSecond - speedMetersPerSecond) < 1E-9
           && angle.equals(other.angle);
     }
@@ -104,7 +104,7 @@ public class SwerveModuleState
    * @return 1 if this is greater, 0 if both are equal, -1 if other is greater.
    */
   @Override
-  public int compareTo(SwerveModuleState other) {
+  public int compareTo(SwerveModuleState100 other) {
     return Double.compare(this.speedMetersPerSecond, other.speedMetersPerSecond);
   }
 
@@ -123,17 +123,17 @@ public class SwerveModuleState
    * @param currentAngle The current module angle.
    * @return Optimized swerve module state.
    */
-  public static SwerveModuleState optimize(
-      SwerveModuleState desiredState, Rotation2d currentAngle) {
+  public static SwerveModuleState100 optimize(
+      SwerveModuleState100 desiredState, Rotation2d currentAngle) {
     var delta = desiredState.angle.minus(currentAngle);
     if (Math.abs(delta.getDegrees()) > 90.0) {
-      return new SwerveModuleState(
+      return new SwerveModuleState100(
           -desiredState.speedMetersPerSecond,
           desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)),
           desiredState.speedMetersPerSecond_2,
           desiredState.angle_2.times(-1));
     } else {
-      return new SwerveModuleState(desiredState.speedMetersPerSecond, desiredState.angle, desiredState.speedMetersPerSecond_2, desiredState.angle_2);
+      return new SwerveModuleState100(desiredState.speedMetersPerSecond, desiredState.angle, desiredState.speedMetersPerSecond_2, desiredState.angle_2);
     }
   }
 }

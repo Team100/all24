@@ -1,5 +1,5 @@
 package org.team100.lib.commands.drivetrain;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -90,7 +90,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             fixture.drive.periodic();
             command.execute100(kDtS);
             double measurement = fixture.drive.getSwerveLocal().states()[0].angle.getRadians();
-            SwerveModuleState goal = fixture.swerveLocal.getDesiredStates()[0];
+            SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)

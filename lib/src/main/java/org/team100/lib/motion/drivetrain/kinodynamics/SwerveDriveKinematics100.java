@@ -6,6 +6,7 @@ import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -27,6 +28,7 @@ public class SwerveDriveKinematics100 {
     private final int m_numModules;
     private final Translation2d[] m_moduleLocations;
     private final Telemetry t = Telemetry.get();
+    private final SimpleMatrix[] m_mat = new SimpleMatrix[4];
 
     /**
      * this (2n x 3) matrix looks something like
@@ -58,8 +60,8 @@ public class SwerveDriveKinematics100 {
 
     private final SimpleMatrix m_inverseKinematics;
     /**
-     * this (3 x 2n) matrix is the pseudo-inverse of above, which ends up something
      * like this:
+     * this (3 x 2n) matrix is the pseudo-inverse of above, which ends up something
      * 
      * <pre>
      *  0.25 0.00 0.25 0.00 ...
@@ -98,6 +100,11 @@ public class SwerveDriveKinematics100 {
         checkModuleCount(moduleTranslationsM);
         m_numModules = moduleTranslationsM.length;
         m_moduleLocations = Arrays.copyOf(moduleTranslationsM, m_numModules);
+        for (int i = 0; i <4; i++) {
+            m_mat[i] = new SimpleMatrix(2,3);
+            m_mat[i].setRow(0, 0, 1, 0, -m_moduleLocations[i].getY());
+            m_mat[i].setRow(1, 0, 0, 1, m_moduleLocations[i].getX());
+        }
         m_inverseKinematics = inverseMatrix(m_moduleLocations);
         m_forwardKinematics = m_inverseKinematics.pseudoInverse();
         m_moduleHeadings = zeros(m_numModules);
@@ -118,16 +125,14 @@ public class SwerveDriveKinematics100 {
      * 
      * Does not take Tires into account.
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
         if (fullStop(chassisSpeeds)) {
             return constantModuleHeadings(); // avoid steering when stopped
         }
         // [vx; vy; omega] (3 x 1)
         SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
         // [v cos; v sin; ...] (2n x 1)
-        SwerveModuleState[] prevStates = { new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(),
-                new SwerveModuleState() };
-        SwerveModuleState[] states = statesFromVector(chassisSpeedsVector, prevStates);
+        SwerveModuleState100[] states = statesFromVector(chassisSpeedsVector);
         updateHeadings(states);
         return states;
     }
@@ -139,19 +144,19 @@ public class SwerveDriveKinematics100 {
      * 
      * Does not take Tires into account.
      */
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds, SwerveModuleState[] prevStates) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds, SwerveModuleState100[] prevStates) {
         if (fullStop(chassisSpeeds)) {
             return constantModuleHeadings(); // avoid steering when stopped
         }
         // [vx; vy; omega] (3 x 1)
         SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
         // [v cos; v sin; ...] (2n x 1)
-        SwerveModuleState[] states = statesFromVector(chassisSpeedsVector, prevStates);
+        SwerveModuleState100[] states = statesFromVector(chassisSpeedsVector);
         updateHeadings(states);
         return states;
     }
 
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
             ChassisSpeeds chassisSpeedsAcceleration, double dt) {
         if (fullStop(chassisSpeeds)) {
             return constantModuleHeadings(); // avoid steering when stopped
@@ -160,16 +165,16 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
         SimpleMatrix chassisSpeedsAccelerationVector = chassisSpeeds2Vector(chassisSpeedsAcceleration);
         // [v cos; v sin; ...] (2n x 1)
-        SwerveModuleState[] prevStates = { new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(),
-                new SwerveModuleState() };
-        SwerveModuleState[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
+        SwerveModuleState100[] prevStates = { new SwerveModuleState100(), new SwerveModuleState100(), new SwerveModuleState100(),
+                new SwerveModuleState100() };
+        SwerveModuleState100[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
                 prevStates, dt);
         updateHeadings(states);
         return states;
     }
 
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
-            ChassisSpeeds chassisSpeedsAcceleration, SwerveModuleState[] prevStates, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
+            ChassisSpeeds chassisSpeedsAcceleration, SwerveModuleState100[] prevStates, double dt) {
         if (fullStop(chassisSpeeds)) {
             return constantModuleHeadings(); // avoid steering when stopped
         }
@@ -177,22 +182,8 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
         SimpleMatrix chassisSpeedsAccelerationVector = chassisSpeeds2Vector(chassisSpeedsAcceleration);
         // [v cos; v sin; ...] (2n x 1)
-        SwerveModuleState[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
+        SwerveModuleState100[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
                 prevStates, dt);
-        updateHeadings(states);
-        return states;
-    }
-    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
-            ChassisSpeeds chassisSpeedsAcceleration, SwerveModuleState[] prevStates, double dt, int i) {
-        if (fullStop(chassisSpeeds)) {
-            return constantModuleHeadings(); // avoid steering when stopped
-        }
-        // [vx; vy; omega] (3 x 1)
-        SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
-        SimpleMatrix chassisSpeedsAccelerationVector = chassisSpeeds2Vector(chassisSpeedsAcceleration);
-        // [v cos; v sin; ...] (2n x 1)
-        SwerveModuleState[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
-                prevStates, dt, i);
         updateHeadings(states);
         return states;
     }
@@ -229,7 +220,7 @@ public class SwerveDriveKinematics100 {
      * does not take tires into account
      * 
      */
-    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... states) {
+    public ChassisSpeeds toChassisSpeeds(SwerveModuleState100... states) {
         checkLength(states);
         // [v cos; v sin; ...] (2n x 1)
         SimpleMatrix statesVector = states2Vector(states);
@@ -263,38 +254,38 @@ public class SwerveDriveKinematics100 {
      * @param maxAccelM_s2  Max module acceleration
      * @param maxDeccelM_s2 Max module deceleration
      */
-    public static void desaturateWheelSpeeds(SwerveModuleState[] states, double maxSpeedM_s, double maxAccelM_s2,
+    public static void desaturateWheelSpeeds(SwerveModuleState100[] states, double maxSpeedM_s, double maxAccelM_s2,
             double maxDeccelM_s2, double maxTurnVelocityM_s) {
         double realMaxSpeed = 0;
         double realMaxAccel = 0;
         double realMaxDeccel = 0;
         double realTurnVelocity = 0;
-        for (SwerveModuleState moduleState : states) {
+        for (SwerveModuleState100 moduleState : states) {
             realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
             realMaxAccel = Math.max(realMaxAccel, moduleState.speedMetersPerSecond_2);
             realMaxDeccel = Math.min(realMaxDeccel, moduleState.speedMetersPerSecond_2);
             realTurnVelocity = Math.max(maxTurnVelocityM_s, Math.abs(moduleState.angle_2.getRadians()));
         }
         if (realMaxSpeed > maxSpeedM_s) {
-            for (SwerveModuleState moduleState : states) {
+            for (SwerveModuleState100 moduleState : states) {
                 moduleState.speedMetersPerSecond = moduleState.speedMetersPerSecond / realMaxSpeed
                         * maxSpeedM_s;
             }
         }
         if (realMaxAccel > maxAccelM_s2) {
-            for (SwerveModuleState moduleState : states) {
+            for (SwerveModuleState100 moduleState : states) {
                 moduleState.speedMetersPerSecond_2 = moduleState.speedMetersPerSecond_2 / realMaxAccel
                         * maxAccelM_s2;
             }
         }
         if (realMaxDeccel < -1.0 * maxDeccelM_s2) {
-            for (SwerveModuleState moduleState : states) {
+            for (SwerveModuleState100 moduleState : states) {
                 moduleState.speedMetersPerSecond_2 = moduleState.speedMetersPerSecond_2 / (-1.0 * realMaxDeccel)
                         * maxDeccelM_s2;
             }
         }
         if (realTurnVelocity > maxTurnVelocityM_s) {
-            for (SwerveModuleState moduleState : states) {
+            for (SwerveModuleState100 moduleState : states) {
                 moduleState.angle_2 = new Rotation2d(moduleState.angle_2.getRadians() / realTurnVelocity
                         * maxTurnVelocityM_s);
             }
@@ -307,13 +298,13 @@ public class SwerveDriveKinematics100 {
      * @param states      WILL BE MUTATED!
      * @param maxSpeedM_s Max module speed
      */
-    public static void desaturateWheelSpeeds(SwerveModuleState[] states, double maxSpeedM_s) {
+    public static void desaturateWheelSpeeds(SwerveModuleState100[] states, double maxSpeedM_s) {
         double realMaxSpeed = 0;
-        for (SwerveModuleState moduleState : states) {
+        for (SwerveModuleState100 moduleState : states) {
             realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
         }
         if (realMaxSpeed > maxSpeedM_s) {
-            for (SwerveModuleState moduleState : states) {
+            for (SwerveModuleState100 moduleState : states) {
                 moduleState.speedMetersPerSecond = moduleState.speedMetersPerSecond / realMaxSpeed
                         * maxSpeedM_s;
             }
@@ -323,10 +314,10 @@ public class SwerveDriveKinematics100 {
     ///////////////////////////////////////
 
     /** states -> [v cos; v sin; ... v cos; v sin] (2n x 1) */
-    private SimpleMatrix states2Vector(SwerveModuleState... moduleStates) {
+    private SimpleMatrix states2Vector(SwerveModuleState100... moduleStates) {
         SimpleMatrix moduleStatesMatrix = new SimpleMatrix(m_numModules * 2, 1);
         for (int i = 0; i < m_numModules; i++) {
-            SwerveModuleState module = moduleStates[i];
+            SwerveModuleState100 module = moduleStates[i];
             moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.getCos());
             moduleStatesMatrix.set(i * 2 + 1, 0, module.speedMetersPerSecond * module.angle.getSin());
         }
@@ -391,10 +382,10 @@ public class SwerveDriveKinematics100 {
     }
 
     /** Zero velocity, same heading as before. */
-    private SwerveModuleState[] constantModuleHeadings() {
-        SwerveModuleState[] mods = new SwerveModuleState[m_numModules];
+    private SwerveModuleState100[] constantModuleHeadings() {
+        SwerveModuleState100[] mods = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
-            mods[i] = new SwerveModuleState(0.0, m_moduleHeadings[i]);
+            mods[i] = new SwerveModuleState100(0.0, m_moduleHeadings[i]);
         }
         return mods;
     }
@@ -412,9 +403,9 @@ public class SwerveDriveKinematics100 {
      * 
      * The resulting module speed is always positive.
      */
-    public SwerveModuleState[] statesFromVector(SimpleMatrix chassisSpeedsVector, SwerveModuleState[] prevStates) {
+    public SwerveModuleState100[] statesFromVector(SimpleMatrix chassisSpeedsVector) {
         SimpleMatrix moduleStatesMatrix = m_inverseKinematics.mult(chassisSpeedsVector);
-        SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
+        SwerveModuleState100[] moduleStates = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
             double x = moduleStatesMatrix.get(i * 2, 0);
             double y = moduleStatesMatrix.get(i * 2 + 1, 0);
@@ -427,7 +418,7 @@ public class SwerveDriveKinematics100 {
             //     moduleStates[i] = new SwerveModuleState(speed, prevStates[i].angle);
             // } else {
                 // t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 0);
-                moduleStates[i] = new SwerveModuleState(speed, angle
+                moduleStates[i] = new SwerveModuleState100(speed, angle
                 );
             // }
         }
@@ -437,113 +428,34 @@ public class SwerveDriveKinematics100 {
     /**
      * https://www.chiefdelphi.com/uploads/short-url/qzj4k2LyBs7rLxAem0YajNIlStH.pdf
      */
-    public SwerveModuleState[] accelerationFromVector(SimpleMatrix chassisSpeedsMatrix,
-            SimpleMatrix chassisSpeedsAccelerationMatrix, SwerveModuleState[] prevStates, double dt) {
-        SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
+    public SwerveModuleState100[] accelerationFromVector(SimpleMatrix chassisSpeedsMatrix,
+            SimpleMatrix chassisSpeedsAccelerationMatrix, SwerveModuleState100[] prevStates, double dt) {
+        SwerveModuleState100[] moduleStates = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
-            SimpleMatrix mat = new SimpleMatrix(2, 3);
-            mat.setRow(0, 0, 1, 0, -m_moduleLocations[i].getY());
-            mat.setRow(1, 0, 0, 1, m_moduleLocations[i].getX());
-            SimpleMatrix dmodulexy = new SimpleMatrix(2, 1);
-            SimpleMatrix moduleAccelMat = new SimpleMatrix(2, 1);
-            dmodulexy = mat.mult(chassisSpeedsMatrix);
+            SimpleMatrix dmodulexy = m_mat[i].mult(chassisSpeedsMatrix);
             double vx = dmodulexy.get(0, 0);
             double vy = dmodulexy.get(1, 0);
             double speed = Math.hypot(vx, vy);
             Rotation2d angle;
-            // if (speed <= 0.01 && Math.hypot(Math.hypot(chassisSpeedsMatrix.get(0,0), chassisSpeedsMatrix.get(1,0)), chassisSpeedsMatrix.get(2,0)) > 0.5) {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 1);
-            //     System.out.println("w");
-            //     angle = new Rotation2d(MathUtil
-            //             .angleModulus(prevStates[i].angle.getRadians() + prevStates[i].angle_2.getRadians() * dt));
-            // } else {
-                // t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 0);
+            if (speed <= 1e-6) {
+                angle = new Rotation2d(MathUtil
+                        .angleModulus(prevStates[i].angle.getRadians() + prevStates[i].angle_2.getRadians() * dt));
+            } else {
                 angle = new Rotation2d(vx, vy);
-            // }
+            }
             SimpleMatrix multiplier = new SimpleMatrix(2, 2);
             multiplier.setRow(0, 0, Math.cos(angle.getRadians()), Math.sin(angle.getRadians()));
             multiplier.setRow(1, 0, -Math.sin(angle.getRadians()), Math.cos(angle.getRadians()));
-            SimpleMatrix moduleAccelerationXY = getModuleAccelerationXY(m_moduleLocations[i],
+            SimpleMatrix moduleAccelerationXY = getModuleAccelerationXY(i,
                     chassisSpeedsAccelerationMatrix);
-            moduleAccelMat = multiplier.mult(moduleAccelerationXY);
-            // if (speed <= 0.01) {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 1);
-            //     moduleAccelMat.set(1, 0, prevStates[i].angle_2.getRadians());
-            // } else {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 0);
+            SimpleMatrix moduleAccelMat = multiplier.mult(moduleAccelerationXY);
+            if (speed != 0) {
                 moduleAccelMat.set(1, 0, (moduleAccelMat.get(1, 0) / speed));
-            // }
-            moduleStates[i] = new SwerveModuleState(speed, angle, moduleAccelMat.get(0, 0),
+            } else {
+                moduleAccelMat.set(1,0, moduleAccelMat.get(1, 0) * 100000);
+            }
+            moduleStates[i] = new SwerveModuleState100(speed, angle, moduleAccelMat.get(0, 0),
                     new Rotation2d(moduleAccelMat.get(1, 0)));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "speed", speed);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "vx", vx);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "vy", vy);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "angle", angle.getRadians());
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "moduleAccelerationX", moduleAccelerationXY.get(0, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "moduleAccelerationY", moduleAccelerationXY.get(1, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "ax matrix", chassisSpeedsAccelerationMatrix.get(0, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "ay matrix", chassisSpeedsAccelerationMatrix.get(1, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "alpha matrix",
-                    chassisSpeedsAccelerationMatrix.get(2, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "MOd Accel matrix", moduleAccelMat.get(0, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "Mod angular velocity matrix", moduleAccelMat.get(1, 0));
-        }
-        return moduleStates;
-    }
-
-    /**
-     * https://www.chiefdelphi.com/uploads/short-url/qzj4k2LyBs7rLxAem0YajNIlStH.pdf
-     */
-    public SwerveModuleState[] accelerationFromVector(SimpleMatrix chassisSpeedsMatrix,
-            SimpleMatrix chassisSpeedsAccelerationMatrix, SwerveModuleState[] prevStates, double dt, int j) {
-        SwerveModuleState[] moduleStates = new SwerveModuleState[m_numModules];
-        for (int i = 0; i < m_numModules; i++) {
-            SimpleMatrix mat = new SimpleMatrix(2, 3);
-            mat.setRow(0, 0, 1, 0, -m_moduleLocations[i].getY());
-            mat.setRow(1, 0, 0, 1, m_moduleLocations[i].getX());
-            SimpleMatrix dmodulexy = new SimpleMatrix(2, 1);
-            SimpleMatrix moduleAccelMat = new SimpleMatrix(2, 1);
-            dmodulexy = mat.mult(chassisSpeedsMatrix);
-            double vx = dmodulexy.get(0, 0);
-            double vy = dmodulexy.get(1, 0);
-            double speed = Math.hypot(vx, vy);
-            Rotation2d angle;
-            // if (speed <= 0.01 && Math.hypot(Math.hypot(chassisSpeedsMatrix.get(0,0), chassisSpeedsMatrix.get(1,0)), chassisSpeedsMatrix.get(2,0)) > 0.5) {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 1);
-            //     System.out.println("w");
-            //     angle = new Rotation2d(MathUtil
-            //             .angleModulus(prevStates[i].angle.getRadians() + prevStates[i].angle_2.getRadians() * dt));
-            // } else {
-                // t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 0);
-                angle = new Rotation2d(vx, vy);
-            // }
-            SimpleMatrix multiplier = new SimpleMatrix(2, 2);
-            multiplier.setRow(0, 0, Math.cos(angle.getRadians()), Math.sin(angle.getRadians()));
-            multiplier.setRow(1, 0, -Math.sin(angle.getRadians()), Math.cos(angle.getRadians()));
-            SimpleMatrix moduleAccelerationXY = getModuleAccelerationXY(m_moduleLocations[i],
-                    chassisSpeedsAccelerationMatrix);
-            moduleAccelMat = multiplier.mult(moduleAccelerationXY);
-            // if (speed <= 0.01) {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 1);
-            //     moduleAccelMat.set(1, 0, prevStates[i].angle_2.getRadians());
-            // } else {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 0);
-                moduleAccelMat.set(1, 0, (moduleAccelMat.get(1, 0) / speed));
-            // }
-            moduleStates[i] = new SwerveModuleState(speed, angle, moduleAccelMat.get(0, 0),
-                    new Rotation2d(moduleAccelMat.get(1, 0)));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "speed", speed);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "vx", vx);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "vy", vy);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "angle", angle.getRadians());
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "moduleAccelerationX", moduleAccelerationXY.get(0, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "moduleAccelerationY", moduleAccelerationXY.get(1, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "ax matrix", chassisSpeedsAccelerationMatrix.get(0, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "ay matrix", chassisSpeedsAccelerationMatrix.get(1, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "alpha matrix",
-                    chassisSpeedsAccelerationMatrix.get(2, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "MOd Accel matrix", moduleAccelMat.get(0, 0));
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i+j, "Mod angular velocity matrix", moduleAccelMat.get(1, 0));
         }
         return moduleStates;
     }
@@ -555,15 +467,11 @@ public class SwerveDriveKinematics100 {
     /**
      * Outputs a 2x1 matrix of acceleration of the module in x and y
      */
-    public static SimpleMatrix getModuleAccelerationXY(Translation2d moduleLocation, SimpleMatrix chassisSpeedsAccelerationMatrix) {
-        SimpleMatrix d2modulexy = new SimpleMatrix(2, 1);
-        SimpleMatrix mat = new SimpleMatrix(2, 3);
+    public SimpleMatrix getModuleAccelerationXY(int moduleLocation, SimpleMatrix chassisSpeedsAccelerationMatrix) {
         SimpleMatrix acceleration2vector = new SimpleMatrix(3, 1);
         acceleration2vector.setColumn(0, 0, chassisSpeedsAccelerationMatrix.get(0, 0),
                 chassisSpeedsAccelerationMatrix.get(1, 0), chassisSpeedsAccelerationMatrix.get(2, 0));
-        mat.setRow(0, 0, 1, 0, -moduleLocation.getY());
-        mat.setRow(1, 0, 0, 1, moduleLocation.getX());
-        d2modulexy = mat.mult(acceleration2vector);
+        SimpleMatrix d2modulexy = m_mat[moduleLocation].mult(acceleration2vector);
         return d2modulexy;
     }
 
@@ -583,7 +491,7 @@ public class SwerveDriveKinematics100 {
     }
 
     /** Keep a copy of headings in case we need them for full-stop. */
-    private void updateHeadings(SwerveModuleState[] moduleStates) {
+    private void updateHeadings(SwerveModuleState100[] moduleStates) {
         for (int i = 0; i < m_numModules; i++) {
             m_moduleHeadings[i] = moduleStates[i].angle;
         }

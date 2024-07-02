@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.geometry.Vector2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -45,7 +45,7 @@ class SlipperyTireUtilTest {
         // state is a velocity at an angle
         // i think the idea is that this angle would be fixed
         // during the whole time?
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
         check(0, 0, states[0]);
         check(0, 0, states[1]);
         check(0, 0, states[2]);
@@ -120,7 +120,7 @@ class SlipperyTireUtilTest {
         // state is a velocity at an angle
         // i think the idea is that this angle would be fixed
         // during the whole time?
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
         check(1, 0, states[0]);
         check(1, 0, states[1]);
         check(1, 0, states[2]);
@@ -194,7 +194,7 @@ class SlipperyTireUtilTest {
 
         // speed
         // 0.02 radians * radius of sqrt(2)/2 / 0.02 sec = sqrt(2)/2
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
         check(0.707, 135, states[0]);
         check(0.707, 45, states[1]);
         check(0.707, -135, states[2]);
@@ -315,7 +315,7 @@ class SlipperyTireUtilTest {
     void check(
             double metersPerSecond,
             double degrees,
-            SwerveModuleState state) {
+            SwerveModuleState100 state) {
         assertEquals(metersPerSecond, state.speedMetersPerSecond, kDelta);
         assertEquals(degrees, state.angle.getDegrees(), kDelta);
     }

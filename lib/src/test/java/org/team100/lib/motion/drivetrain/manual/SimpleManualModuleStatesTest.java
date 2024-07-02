@@ -1,5 +1,5 @@
 package org.team100.lib.motion.drivetrain.manual;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +17,7 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        SwerveModuleState[] ms = s.apply(input);
+        SwerveModuleState100[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
         assertEquals(0, ms[1].angle.getRadians(), kDelta);
         assertEquals(0, ms[2].angle.getRadians(), kDelta);
@@ -34,7 +34,7 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0.5);
-        SwerveModuleState[] ms = s.apply(input);
+        SwerveModuleState100[] ms = s.apply(input);
         assertEquals(Math.PI / 2, ms[0].angle.getRadians(), kDelta);
         assertEquals(Math.PI / 2, ms[1].angle.getRadians(), kDelta);
         assertEquals(Math.PI / 2, ms[2].angle.getRadians(), kDelta);
@@ -51,7 +51,7 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0.5, 0, 0);
-        SwerveModuleState[] ms = s.apply(input);
+        SwerveModuleState100[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
         assertEquals(0, ms[1].angle.getRadians(), kDelta);
         assertEquals(0, ms[2].angle.getRadians(), kDelta);
