@@ -18,7 +18,12 @@ import edu.wpi.first.wpilibj.Timer;
  * Single NavX over USB, using high update rate.
  */
 public class SingleNavXGyro implements Gyro100 {
-    private static final byte kUpdateRateHz = (byte) 200;
+    // 200 hz seems to make edu.wpi.first.hal.SPIJNI.spiReadB do a lot of work (7.5%
+    // self time according to VisualVM)
+    // private static final byte kUpdateRateHz = (byte) 200;
+    // 60 is the default
+    private static final byte kUpdateRateHz = (byte) 60;
+
     private static final int kSPIBitRateHz = 500000;
     private final Telemetry.Logger t;
     private final AHRS m_gyro1;
@@ -64,7 +69,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getYawNEDDeg() {
         float yawDeg = m_gyro1.getYaw();
-        t.log(Level.TRACE,  "Yaw NED (deg)", yawDeg);
+        t.log(Level.TRACE, "Yaw NED (deg)", yawDeg);
         return yawDeg;
     }
 
@@ -74,7 +79,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getPitchDeg() {
         float pitchDeg = m_gyro1.getPitch();
-        t.log(Level.TRACE,  "Pitch (deg)", pitchDeg);
+        t.log(Level.TRACE, "Pitch (deg)", pitchDeg);
         return pitchDeg;
     }
 
