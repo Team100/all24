@@ -19,6 +19,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.telemetry.Chronos.Sample;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.util.Util;
@@ -147,7 +148,7 @@ public class Telemetry {
     }
 
     public void log(Level level, String root, String leaf, Double val) {
-        m_chronos.start(kName);
+        Sample s = m_chronos.sample(kName);
         try {
             if (val == null)
                 return;
@@ -162,7 +163,7 @@ public class Telemetry {
                 return t.publish();
             }, DoublePublisher.class).set(val);
         } finally {
-            m_chronos.end(kName);
+            s.end();
         }
     }
 

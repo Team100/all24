@@ -11,13 +11,36 @@ import edu.wpi.first.wpilibj.Timer;
  * accumulate time, and then to spit out the fraction of time spent in each one.
  */
 public class Chronos {
+    /**
+     * Use this as follows:
+     * 
+     * <pre>
+     * Sample s = Chronos.get().sample("foo");
+     * try {
+     *     ... code under test ...
+     * } finally {
+     *     s.end();
+     * }
+     * </pre>
+     */
+    public class Sample {
+        String m_name;
+        double m_startS;
+
+        public Sample(String name) {
+            m_name = name;
+            m_startS = Timer.getFPGATimestamp();
+        }
+
+        public void end() {
+            double durationS = Timer.getFPGATimestamp() - m_startS;
+            m_durationsS.merge(m_name, durationS, Double::sum);
+        }
+    }
+
     private static final Chronos instance = new Chronos();
 
-    /** This is just for tasks that are running. */
-    private final Map<String, Double> m_starts = new ConcurrentHashMap<>();
-
-    /** This accumulates between calls to log. */
-    private final Map<String, Double> m_durations = new ConcurrentHashMap<>();
+    private final Map<String, Double> m_durationsS = new ConcurrentHashMap<>();
 
     private double m_time = Timer.getFPGATimestamp();
 
@@ -25,24 +48,13 @@ public class Chronos {
         return instance;
     }
 
-    /**
-     * Don't leave these hanging, use try/finally. Will be confused by parallel
-     * tasks.
-     */
-    public void start(String name) {
-        m_starts.put(name, Timer.getFPGATimestamp());
-    }
-
-    /** Expected to be inside a finally block. */
-    public void end(String name) {
-        double start = m_starts.get(name);
-        double duration = Timer.getFPGATimestamp() - start;
-        double prevDuration = m_durations.getOrDefault(name, 0.0);
-        m_durations.put(name, duration + prevDuration);
+    /** Call end() on this sample when done. */
+    public Sample sample(String name) {
+        return new Sample(name);
     }
 
     public Map<String, Double> durations() {
-        return m_durations;
+        return m_durationsS;
     }
 
     public double elapsed() {
@@ -51,7 +63,9 @@ public class Chronos {
 
     public void reset() {
         m_time = Timer.getFPGATimestamp();
-        m_durations.clear();
+        for (String key : m_durationsS.keySet()) {
+            m_durationsS.put(key, 0.0);
+        }
     }
 
 }
