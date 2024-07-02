@@ -28,7 +28,7 @@ public class Blue implements Alliance {
     /**
      * Use a real player robot instead of an NPC.
      */
-    private static final boolean kRealPlayer = false;
+    private static final boolean kRealPlayer = true;
     private final RobotAssembly player;
     private final RobotAssembly friend1;
     private final RobotAssembly friend2;
@@ -39,10 +39,14 @@ public class Blue implements Alliance {
         if (kRealPlayer) {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
+
                             new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                     new Pose2d(3.0, 7.5, new Rotation2d(Math.PI)), false,
                                     8, 7, 6),
-                            new ManualPilot()),
+                            new ManualPilot(x.getDrive())
+                            
+                            ),
+
                     new Player(world, false),
                     false);
             // use the pilot assembly with manual control, to test the buttons.
