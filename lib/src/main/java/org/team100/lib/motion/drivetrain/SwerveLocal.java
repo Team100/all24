@@ -99,8 +99,11 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState100[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
                 kDtSec);
-        for (SwerveModuleState100 state : swerveModuleStates) {
-            state.speedMetersPerSecond = 0;
+        for (int i =0; i < swerveModuleStates.length; i++) {
+            if (swerveModuleStates[i]== null) {
+                swerveModuleStates[i] = prevSetpoint.getModuleStates()[i];
+            }
+            swerveModuleStates[i].speedMetersPerSecond = 0;
         }
         setModuleStates(swerveModuleStates);
         // previous setpoint should be at rest with the current states

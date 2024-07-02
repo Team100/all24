@@ -57,8 +57,8 @@ public class SwerveModule100 implements Glassy {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
         if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve))  {
-            m_driveServo.setVelocity(state.speedMetersPerSecond, state.speedMetersPerSecond_2);
-            m_turningServo.setPosition(state.angle.getRadians(), state.angle_2.getRadians());
+            m_driveServo.setVelocity(state.speedMetersPerSecond, state.accelMetersPerSecond_2);
+            m_turningServo.setPosition(state.angle.getRadians(), state.angle_2);
         } else {
             m_driveServo.setVelocity(state.speedMetersPerSecond);
             m_turningServo.setPosition(state.angle.getRadians(),0);

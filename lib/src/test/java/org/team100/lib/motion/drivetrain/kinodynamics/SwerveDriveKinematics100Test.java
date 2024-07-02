@@ -412,12 +412,12 @@ class SwerveDriveKinematics100Test {
         SwerveModuleState100[] output3 = kinematics.accelerationFromVector(velocities2,
                 accelerations2,prevStates, 0.02);
                 Util.println(output[0].toString());
-        assertEquals(0, output[0].speedMetersPerSecond_2, 0.0001);
-        for (int i = 0; i < 4; i++) {
+        assertEquals(0, output[0].accelMetersPerSecond_2, 0.0001);
+        for (int i = 0; i < output.length; i++) {
             assertEquals(output[i].angle, output2[i].angle);
             assertEquals(output[i].speedMetersPerSecond, output2[i].speedMetersPerSecond);
         }
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < output.length; i++) {
             assertEquals(output3[i].angle, output4[i].angle);
             assertEquals(output3[i].speedMetersPerSecond, output4[i].speedMetersPerSecond);
         }

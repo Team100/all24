@@ -1,11 +1,9 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import java.util.Arrays;
+
 import org.ejml.simple.SimpleMatrix;
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,7 +25,6 @@ public class SwerveDriveKinematics100 {
     private static final double kEpsilon = 1e-6;
     private final int m_numModules;
     private final Translation2d[] m_moduleLocations;
-    private final Telemetry t = Telemetry.get();
     private final SimpleMatrix[] m_mat = new SimpleMatrix[4];
 
     /**
@@ -100,7 +97,7 @@ public class SwerveDriveKinematics100 {
         checkModuleCount(moduleTranslationsM);
         m_numModules = moduleTranslationsM.length;
         m_moduleLocations = Arrays.copyOf(moduleTranslationsM, m_numModules);
-        for (int i = 0; i <4; i++) {
+        for (int i = 0; i < m_moduleLocations.length; i++) {
             m_mat[i] = new SimpleMatrix(2,3);
             m_mat[i].setRow(0, 0, 1, 0, -m_moduleLocations[i].getY());
             m_mat[i].setRow(1, 0, 0, 1, m_moduleLocations[i].getX());
@@ -262,9 +259,9 @@ public class SwerveDriveKinematics100 {
         double realTurnVelocity = 0;
         for (SwerveModuleState100 moduleState : states) {
             realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
-            realMaxAccel = Math.max(realMaxAccel, moduleState.speedMetersPerSecond_2);
-            realMaxDeccel = Math.min(realMaxDeccel, moduleState.speedMetersPerSecond_2);
-            realTurnVelocity = Math.max(maxTurnVelocityM_s, Math.abs(moduleState.angle_2.getRadians()));
+            realMaxAccel = Math.max(realMaxAccel, moduleState.accelMetersPerSecond_2);
+            realMaxDeccel = Math.min(realMaxDeccel, moduleState.accelMetersPerSecond_2);
+            realTurnVelocity = Math.max(maxTurnVelocityM_s, Math.abs(moduleState.angle_2));
         }
         if (realMaxSpeed > maxSpeedM_s) {
             for (SwerveModuleState100 moduleState : states) {
@@ -274,20 +271,20 @@ public class SwerveDriveKinematics100 {
         }
         if (realMaxAccel > maxAccelM_s2) {
             for (SwerveModuleState100 moduleState : states) {
-                moduleState.speedMetersPerSecond_2 = moduleState.speedMetersPerSecond_2 / realMaxAccel
+                moduleState.accelMetersPerSecond_2 = moduleState.accelMetersPerSecond_2 / realMaxAccel
                         * maxAccelM_s2;
             }
         }
         if (realMaxDeccel < -1.0 * maxDeccelM_s2) {
             for (SwerveModuleState100 moduleState : states) {
-                moduleState.speedMetersPerSecond_2 = moduleState.speedMetersPerSecond_2 / (-1.0 * realMaxDeccel)
+                moduleState.accelMetersPerSecond_2 = moduleState.accelMetersPerSecond_2 / (-1.0 * realMaxDeccel)
                         * maxDeccelM_s2;
             }
         }
         if (realTurnVelocity > maxTurnVelocityM_s) {
             for (SwerveModuleState100 moduleState : states) {
-                moduleState.angle_2 = new Rotation2d(moduleState.angle_2.getRadians() / realTurnVelocity
-                        * maxTurnVelocityM_s);
+                moduleState.angle_2 = moduleState.angle_2 / realTurnVelocity
+                        * maxTurnVelocityM_s;
             }
         }
     }
@@ -409,18 +406,15 @@ public class SwerveDriveKinematics100 {
         for (int i = 0; i < m_numModules; i++) {
             double x = moduleStatesMatrix.get(i * 2, 0);
             double y = moduleStatesMatrix.get(i * 2 + 1, 0);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "x", x);
             Rotation2d angle = new Rotation2d(x, y);
-            t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "y", y);
             double speed = Math.hypot(x, y);
-            // if (speed <= 0.2 && chassisSpeedsVector.get(0,0) > 0.001 && chassisSpeedsVector.get(1,0) > 0.001 && chassisSpeedsVector.get(2,0) > 0.001) {
-            //     t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 1);
-            //     moduleStates[i] = new SwerveModuleState(speed, prevStates[i].angle);
-            // } else {
-                // t.log(Level.TRACE, "Swerve Drive Kinematics" + i, "on", 0);
-                moduleStates[i] = new SwerveModuleState100(speed, angle
-                );
-            // }
+            if (speed <= 1e-6) {
+                //TODO fix this
+                moduleStates[i]= new SwerveModuleState100(speed, angle);
+                // moduleStates[i] = new SwerveModuleState100(speed, null);
+            } else {
+                moduleStates[i]= new SwerveModuleState100(speed, angle);
+            }
         }
         return moduleStates;
     }
@@ -439,7 +433,7 @@ public class SwerveDriveKinematics100 {
             Rotation2d angle;
             if (speed <= 1e-6) {
                 angle = new Rotation2d(MathUtil
-                        .angleModulus(prevStates[i].angle.getRadians() + prevStates[i].angle_2.getRadians() * dt));
+                        .angleModulus(prevStates[i].angle.getRadians() + prevStates[i].angle_2 * dt));
             } else {
                 angle = new Rotation2d(vx, vy);
             }
@@ -455,7 +449,7 @@ public class SwerveDriveKinematics100 {
                 moduleAccelMat.set(1,0, moduleAccelMat.get(1, 0) * 100000);
             }
             moduleStates[i] = new SwerveModuleState100(speed, angle, moduleAccelMat.get(0, 0),
-                    new Rotation2d(moduleAccelMat.get(1, 0)));
+                    moduleAccelMat.get(1, 0));
         }
         return moduleStates;
     }
@@ -493,6 +487,7 @@ public class SwerveDriveKinematics100 {
     /** Keep a copy of headings in case we need them for full-stop. */
     private void updateHeadings(SwerveModuleState100[] moduleStates) {
         for (int i = 0; i < m_numModules; i++) {
+            if (moduleStates[i].angle == null) continue;
             m_moduleHeadings[i] = moduleStates[i].angle;
         }
     }

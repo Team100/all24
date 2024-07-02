@@ -21,8 +21,7 @@ class SteeringRateLimiterTest {
         Rotation2d[] prev_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 0 };
-        Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
-        Rotation2d[] desired_heading_velocity = new Rotation2d[] { GeometryUtil.kRotationZero };
+        Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };        double[] desired_heading_velocity = new double[] { 0 };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
         double s = c.enforceSteeringLimit(
@@ -50,7 +49,7 @@ class SteeringRateLimiterTest {
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 1 };
         Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotation90 };
-        Rotation2d[] desired_heading_velocity = new Rotation2d[] { GeometryUtil.kRotation90 };
+        double[] desired_heading_velocity = new double[] { 0 };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
         double s = c.enforceSteeringLimit(

@@ -66,7 +66,7 @@ class SlipperyTireUtilTest {
         // all these angles should be somehow consistent
         // maybe just use the velocity angle.
         SwerveModulePosition[] position1 = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < position1.length; ++i) {
             position1[i] = new SwerveModulePosition(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
@@ -141,7 +141,7 @@ class SlipperyTireUtilTest {
         // all these angles should be somehow consistent
         // maybe just use the velocity angle.
         SwerveModulePosition[] position1 = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < position1.length; ++i) {
             position1[i] = new SwerveModulePosition(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
@@ -216,7 +216,7 @@ class SlipperyTireUtilTest {
         // postion = speed * dt
         // 0.707 * 0.02 = 0.014
         SwerveModulePosition[] position1 = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < position1.length; ++i) {
             position1[i] = new SwerveModulePosition(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
