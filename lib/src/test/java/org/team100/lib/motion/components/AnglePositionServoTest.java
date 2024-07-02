@@ -53,7 +53,7 @@ class AnglePositionServoTest {
         MockEncoder100<Angle100> externalEncoder = new MockEncoder100<>();
         MockEncoder100<Angle100> builtInEncoder = new MockEncoder100<>();
         CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
-                externalEncoder, builtInEncoder);
+                externalEncoder, 1.0, builtInEncoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
         OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
