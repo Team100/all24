@@ -70,8 +70,8 @@ public class NeoTurningEncoder implements SettableEncoder<Angle100> {
         // should be fast, no need to cache it.
         double motorPositionRev = m_motor.getPositionRot();
         double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
-        t.log(Level.DEBUG,  "motor position (rev)", motorPositionRev);
-        t.log(Level.DEBUG,  "output position (rad)", positionRad);
+        t.logDouble(Level.DEBUG,  "motor position (rev)",()-> motorPositionRev);
+        t.logDouble(Level.DEBUG,  "output position (rad)",()-> positionRad);
         return positionRad;
     }
 
@@ -79,8 +79,8 @@ public class NeoTurningEncoder implements SettableEncoder<Angle100> {
         // should be fast, no need to cache it.
         double motorVelocityRev_S = m_motor.getRateRPM() / 60;
         double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
-        t.log(Level.DEBUG,  "motor velocity (rev_s)", motorVelocityRev_S);
-        t.log(Level.DEBUG,  "output velocity (rad_s)", outputVelocityRad_S);
+        t.logDouble(Level.DEBUG,  "motor velocity (rev_s)", ()->motorVelocityRev_S);
+        t.logDouble(Level.DEBUG,  "output velocity (rad_s)", ()->outputVelocityRad_S);
         return outputVelocityRad_S;
     }
 }

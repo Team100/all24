@@ -135,7 +135,7 @@ public class RobotContainer implements Glassy {
 
         Logger l = Telemetry.get().logger("mylogger");
         // slashes are ok everywhere
-        l.log(Level.ERROR, "qwerty/uiop", 1.0);
+        l.logDouble(Level.ERROR, "qwerty/uiop",()-> 1.0);
 
         m_name = Names.name(this);
 

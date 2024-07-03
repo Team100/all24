@@ -72,7 +72,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v1.setDutyCycle(0);
             return;
         }
-        t.log(Level.DEBUG, "LEFT VALUE", value);
+        t.logDouble(Level.DEBUG, "LEFT VALUE", ()->value);
     }
 
     public void setRightWithSoftLimits(double value) {
@@ -89,7 +89,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v2.setDutyCycle(0);
             return;
         }
-        t.log(Level.DEBUG, "RIGHT VALUE", value);
+        t.logDouble(Level.DEBUG, "RIGHT VALUE",()-> value);
     }
 
     public void zeroClimbers() {

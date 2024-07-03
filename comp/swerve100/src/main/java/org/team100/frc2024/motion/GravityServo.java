@@ -103,20 +103,20 @@ public class GravityServo {
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        t.log(Level.DEBUG,  "u_FB", u_FB);
-        t.log(Level.DEBUG,  "u_FF", u_FF);
-        t.log(Level.DEBUG,  "static FF", staticFF);
-        t.log(Level.DEBUG,  "gravity T", gravityTorque);
-        t.log(Level.DEBUG,  "u_TOTAL", u_TOTAL);
-        t.log(Level.DEBUG,  "Measurement", measurement);
+        t.logDouble(Level.DEBUG,  "u_FB",()-> u_FB);
+        t.logDouble(Level.DEBUG,  "u_FF",()-> u_FF);
+        t.logDouble(Level.DEBUG,  "static FF", ()->staticFF);
+        t.logDouble(Level.DEBUG,  "gravity T", ()->gravityTorque);
+        t.logDouble(Level.DEBUG,  "u_TOTAL",()-> u_TOTAL);
+        t.logDouble(Level.DEBUG,  "Measurement",()-> measurement);
         t.log(Level.DEBUG,  "Goal", m_goal);
         t.log(Level.DEBUG,  "Setpoint", m_setpoint);
-        t.log(Level.DEBUG,  "Setpoint Velocity", m_setpoint.v());
-        t.log(Level.DEBUG,  "Controller Position Error", m_controller.getPositionError());
-        t.log(Level.DEBUG,  "Controller Velocity Error", m_controller.getVelocityError());
-        t.log(Level.DEBUG,  "COOSIIINEEE", Math.cos((measurement / m_params.gearRatio())));
-        t.log(Level.DEBUG,  "POSE * GEAR RAT", measurement / m_params.gearRatio());
-        t.log(Level.DEBUG,  "ENCODEr", measurement);
+        t.logDouble(Level.DEBUG,  "Setpoint Velocity", m_setpoint::v);
+        t.logDouble(Level.DEBUG,  "Controller Position Error", m_controller::getPositionError);
+        t.logDouble(Level.DEBUG,  "Controller Velocity Error", m_controller::getVelocityError);
+        t.logDouble(Level.DEBUG,  "COOSIIINEEE", ()->Math.cos((measurement / m_params.gearRatio())));
+        t.logDouble(Level.DEBUG,  "POSE * GEAR RAT",()-> measurement / m_params.gearRatio());
+        t.logDouble(Level.DEBUG,  "ENCODEr",()-> measurement);
     }
 
     public void setWithSoftLimits(double value) {
@@ -167,19 +167,19 @@ public class GravityServo {
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        t.log(Level.DEBUG,  "u_FB", u_FB);
-        t.log(Level.DEBUG,  "u_FF", u_FF);
-        t.log(Level.DEBUG,  "GRAVITY", gravityTorque);
-        t.log(Level.DEBUG,  "u_TOTAL", u_TOTAL);
-        t.log(Level.DEBUG,  "Measurement", measurement);
+        t.logDouble(Level.DEBUG,  "u_FB",()-> u_FB);
+        t.logDouble(Level.DEBUG,  "u_FF", ()->u_FF);
+        t.logDouble(Level.DEBUG,  "GRAVITY",()-> gravityTorque);
+        t.logDouble(Level.DEBUG,  "u_TOTAL",()-> u_TOTAL);
+        t.logDouble(Level.DEBUG,  "Measurement",()-> measurement);
         t.log(Level.DEBUG,  "Goal", m_goal);
         t.log(Level.DEBUG,  "Setpoint", m_setpoint);
-        t.log(Level.DEBUG,  "Setpoint Velocity", m_setpoint.v());
-        t.log(Level.DEBUG,  "Controller Position Error", m_controller.getPositionError());
-        t.log(Level.DEBUG,  "Controller Velocity Error", m_controller.getVelocityError());
-        t.log(Level.DEBUG,  "COOSIIINEEE", Math.cos((measurement / m_params.gearRatio())));
-        t.log(Level.DEBUG,  "POSE * GEAR RAT", measurement / m_params.gearRatio());
-        t.log(Level.DEBUG,  "ENCODEr", measurement);
+        t.logDouble(Level.DEBUG,  "Setpoint Velocity",()-> m_setpoint.v());
+        t.logDouble(Level.DEBUG,  "Controller Position Error",()-> m_controller.getPositionError());
+        t.logDouble(Level.DEBUG,  "Controller Velocity Error", ()->m_controller.getVelocityError());
+        t.logDouble(Level.DEBUG,  "COOSIIINEEE",()-> Math.cos((measurement / m_params.gearRatio())));
+        t.logDouble(Level.DEBUG,  "POSE * GEAR RAT",()-> measurement / m_params.gearRatio());
+        t.logDouble(Level.DEBUG,  "ENCODEr",()-> measurement);
     }
 
     public void set(double value) {

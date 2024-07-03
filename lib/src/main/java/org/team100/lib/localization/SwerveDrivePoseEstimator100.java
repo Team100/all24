@@ -275,7 +275,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
 
         double t1 = currentTimeS - lowerEntry.getKey();
-        t.log(Level.DEBUG, "t1", t1);
+        t.logDouble(Level.DEBUG, "t1", t1);
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousPose = value.m_state;
 
@@ -290,7 +290,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
 
             t0 = lowerEntry.getKey() - earlierEntry.getKey();
-            t.log(Level.DEBUG, "t0", t0);
+            t.logDouble(Level.DEBUG, "t0", ()->t0);
             earlierPose = earlierEntry.getValue().m_state;
             Vector2d[] corners = SlipperyTireUtil.cornerDeltas(
                     m_kinodynamics.getKinematics(),
@@ -311,7 +311,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         Pose2d newPose = new Pose2d(previousPose.pose().exp(twist).getTranslation(), angle);
 
-        t.log(Level.TRACE, "posex", newPose.getX());
+        t.logDouble(Level.TRACE, "posex", newPose.getX());
 
         FieldRelativeDelta deltaTransform = FieldRelativeDelta.delta(
                 previousPose.pose(), newPose).div(t1);

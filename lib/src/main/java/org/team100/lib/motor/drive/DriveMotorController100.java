@@ -39,7 +39,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, "duty cycle", output);
+        t.logDouble(Level.TRACE, "duty cycle", output);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
         double motorRev_S = wheelRev_S * m_gearRatio;
         double motorDutyCycle = motorRev_S * velocityFFDutyCycle_Rev_S;
         m_motor.set(motorDutyCycle);
-        t.log(Level.TRACE, "duty cycle", motorDutyCycle);
+        t.logDouble(Level.TRACE, "duty cycle",()-> motorDutyCycle);
     }
 
     @Override

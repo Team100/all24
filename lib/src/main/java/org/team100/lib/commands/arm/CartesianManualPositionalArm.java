@@ -79,10 +79,10 @@ public class CartesianManualPositionalArm extends Command100 {
         t.log(Level.TRACE, "setpoint", setpoint);
         t.log(Level.TRACE, "measurement", measurement.get());
         t.log(Level.TRACE, "cartesian_measurement", cartesian_measurement);
-        t.log(Level.TRACE, "output/u1", u1);
-        t.log(Level.TRACE, "output/u2", u2);
-        t.log(Level.TRACE, "error/e1", m_lowerController.getPositionError());
-        t.log(Level.TRACE, "error/e2", m_upperController.getPositionError());
+        t.logDouble(Level.TRACE, "output/u1", ()->u1);
+        t.logDouble(Level.TRACE, "output/u2",()-> u2);
+        t.logDouble(Level.TRACE, "error/e1", m_lowerController::getPositionError);
+        t.logDouble(Level.TRACE, "error/e2", m_upperController::getPositionError);
     }
 
     @Override

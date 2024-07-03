@@ -39,8 +39,8 @@ public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
 
     private void set(double speed) {
         m_motor.set(speed);
-        t.log(Level.TRACE, "DUTY", m_motor.getAppliedOutput());
-        t.log(Level.TRACE, "AMPS", m_motor.getOutputCurrent());
+        t.logDouble(Level.TRACE, "DUTY", m_motor.getAppliedOutput());
+        t.logDouble(Level.TRACE, "AMPS", m_motor.getOutputCurrent());
     }
 
     @Override

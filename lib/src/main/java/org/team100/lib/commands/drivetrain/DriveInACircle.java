@@ -97,7 +97,7 @@ public class DriveInACircle extends Command100 {
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
         t.log(Level.TRACE,  "center", m_center);
-        t.log(Level.TRACE,  "angle", m_angleRad);
+        t.logDouble(Level.TRACE,  "angle", ()->m_angleRad);
         t.log(Level.TRACE,  "reference", reference);
         t.log(Level.TRACE,  "target", fieldRelativeTarget);
     }

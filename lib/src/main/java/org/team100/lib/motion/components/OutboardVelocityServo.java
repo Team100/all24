@@ -45,7 +45,7 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     public void setVelocity(double setpoint) {
         m_setpoint = setpoint;
         m_motor.setVelocity(setpoint, accel(setpoint), 0);
-        t.log(Level.TRACE, "Desired setpoint", setpoint);
+        t.logDouble(Level.TRACE, "Desired setpoint", setpoint);
     }
 
     /**

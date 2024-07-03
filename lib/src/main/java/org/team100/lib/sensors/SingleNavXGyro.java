@@ -119,20 +119,20 @@ public class SingleNavXGyro implements Gyro100 {
             rateDeg_S = 0;
         }
 
-        t.log(Level.TRACE, "Rate NED (deg_s)", rateDeg_S);
+        t.logDouble(Level.TRACE, "Rate NED (deg_s)", rateDeg_S);
         return (float) rateDeg_S;
     }
 
     private void logStuff() {
         if (m_gyro1.isConnected()) {
-            t.log(Level.TRACE, "Connected", true);
+            t.logBoolean(Level.TRACE, "Connected", true);
         } else {
-            t.log(Level.ERROR, "Connected", false);
+            t.logBoolean(Level.ERROR, "Connected", false);
         }
-        t.log(Level.TRACE, "Angle (deg)", m_gyro1.getAngle());
+        t.logDouble(Level.TRACE, "Angle (deg)",()-> m_gyro1.getAngle());
         t.log(Level.TRACE, "Fused (deg)", m_gyro1.getFusedHeading());
         t.log(Level.TRACE, "Yaw (deg)", m_gyro1.getYaw());
-        t.log(Level.TRACE, "Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
+        t.logDouble(Level.TRACE, "Angle Mod 360 (deg)", ()->m_gyro1.getAngle() % 360);
         t.log(Level.TRACE, "Compass Heading (deg)", m_gyro1.getCompassHeading());
     }
 }

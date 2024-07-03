@@ -72,7 +72,7 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
         // raw position is in rotations
         // this is fast, doesn't need to be cached
         double positionM = m_motor.getPositionRot() * m_distancePerTurn;
-        t.log(Level.DEBUG, "position (m)", positionM);
+        t.logDouble(Level.DEBUG, "position (m)", ()->positionM);
         return positionM;
     }
 
@@ -80,7 +80,7 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
         // raw velocity is in RPM
         // this is fast, doesn't need to be cached
         double velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
-        t.log(Level.DEBUG, "velocity (m_s)", velocityM_S);
+        t.logDouble(Level.DEBUG, "velocity (m_s)",()-> velocityM_S);
         return velocityM_S;
     }
 

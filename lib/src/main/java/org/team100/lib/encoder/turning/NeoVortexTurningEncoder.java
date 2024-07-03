@@ -69,14 +69,14 @@ public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
     private double getPositionRad() {
         // should be fast, no need to cache
         double positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
-        t.log(Level.DEBUG,  "position (rad)", positionRad);
+        t.logDouble(Level.DEBUG,  "position (rad)", ()->positionRad);
         return positionRad;
     }
 
     private double getRateRad_S() {
         // should be fast, no need to cache
         double rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
-        t.log(Level.DEBUG,  "velocity (rad_s)", rateRad_S);
+        t.logDouble(Level.DEBUG,  "velocity (rad_s)", ()->rateRad_S);
         return rateRad_S;
     }
 }

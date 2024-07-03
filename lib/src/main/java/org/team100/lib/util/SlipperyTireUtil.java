@@ -78,7 +78,7 @@ public class SlipperyTireUtil {
                     new Rotation2d(actualSpeedM_s.getX(), actualSpeedM_s.getY()));
 
             t.log(Level.WARN, "result", result[i]);
-            t.log(Level.WARN, "dts", dtS);
+            t.logDouble(Level.WARN, "dts", dtS);
         }
         return result;
     }
@@ -118,10 +118,10 @@ public class SlipperyTireUtil {
             SwerveDriveKinematics100 kinematics,
             Pose2d pose0,
             Pose2d pose1) {
-        t.log(Level.TRACE, "pose0x", pose0.getX());
-        t.log(Level.TRACE, "pose1x", pose1.getX());
+        t.logDouble(Level.TRACE, "pose0x", pose0.getX());
+        t.logDouble(Level.TRACE, "pose1x", pose1.getX());
         Twist2d twist = pose0.log(pose1);
-        t.log(Level.TRACE, "twistdx", twist.dx);
+        t.logDouble(Level.TRACE, "twistdx", twist.dx);
         SwerveModulePosition[] p = kinematics.toSwerveModulePosition(twist);
         return kinematics.pos2vec(p);
     }

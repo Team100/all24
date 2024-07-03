@@ -60,9 +60,9 @@ public class ShootSmartWithRotation extends Command100 {
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
         Translation2d difference = robotLocation.minus(speakerLocation);
         double angle = MathUtil.angleModulus(Math.atan2(difference.getY(), difference.getX()) - Math.PI);
-        t.log(Level.DEBUG, "angle", angle);
+        t.logDouble(Level.DEBUG, "angle", angle);
         double angleModulus = MathUtil.angleModulus(m_drive.getState().pose().getRotation().getRadians());
-        t.log(Level.DEBUG, "realangle", angleModulus);
+        t.logDouble(Level.DEBUG, "realangle", angleModulus);
         double angleError = angle - angleModulus;
         double distance = robotLocation.getDistance(speakerLocation);
         m_shooter.setAngle(ShooterUtil.getAngleRad(distance));

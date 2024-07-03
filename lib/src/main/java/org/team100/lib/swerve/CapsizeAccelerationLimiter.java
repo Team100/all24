@@ -26,7 +26,7 @@ public class CapsizeAccelerationLimiter implements Glassy {
         if (Math.abs(dv) > 1e-6) {
             s = kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
         }
-        t.log(Level.DEBUG, "s", s);
+        t.logDouble(Level.DEBUG, "s", s);
         return s;
     }
 

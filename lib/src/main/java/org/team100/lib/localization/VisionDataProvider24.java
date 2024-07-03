@@ -272,7 +272,7 @@ public class VisionDataProvider24 implements Glassy {
 
                 // this is just for logging
                 Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-                t.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
+                t.logDouble(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation", tagRotation.getAngle());
 
                 Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
                 if (!tagInFieldCoordsOptional.isPresent())

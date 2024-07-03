@@ -78,9 +78,9 @@ public class DriverXboxControl implements DriverControl {
         }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
         Speed speed = speed();
-        t.log(Level.TRACE,  "Xbox/right y", m_controller.getRightY());
-        t.log(Level.TRACE,  "Xbox/right x", m_controller.getRightX());
-        t.log(Level.TRACE,  "Xbox/left x", m_controller.getLeftX());
+        t.logDouble(Level.TRACE,  "Xbox/right y",()-> m_controller.getRightY());
+        t.logDouble(Level.TRACE,  "Xbox/right x",()-> m_controller.getRightX());
+        t.logDouble(Level.TRACE,  "Xbox/left x",()-> m_controller.getLeftX());
         switch (speed) {
             case SLOW:
                 return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);

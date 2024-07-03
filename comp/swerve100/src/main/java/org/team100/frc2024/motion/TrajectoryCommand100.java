@@ -56,8 +56,8 @@ public class TrajectoryCommand100 extends Command100 {
         t.log(Level.TRACE, "chassis speeds", output);
         double thetaErrorRad = m_goal.getRotation().getRadians()
                 - m_robotDrive.getState().pose().getRotation().getRadians();
-        t.log(Level.TRACE, "THETA ERROR", thetaErrorRad);
-        t.log(Level.TRACE, "FINSIHED", false);
+        t.logDouble(Level.TRACE, "THETA ERROR",()-> thetaErrorRad);
+        t.logBoolean(Level.TRACE, "FINSIHED", false);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class TrajectoryCommand100 extends Command100 {
 
     @Override
     public void end100(boolean interrupted) {
-        t.log(Level.TRACE, "FINSIHED", true);
+        t.logBoolean(Level.TRACE, "FINSIHED", true);
         m_robotDrive.stop();
         TrajectoryVisualization.clear();
     }

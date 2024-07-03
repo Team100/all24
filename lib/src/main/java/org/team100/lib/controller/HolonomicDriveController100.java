@@ -83,20 +83,20 @@ public class HolonomicDriveController100 implements Glassy {
         double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
         double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
         double omega = thetaFF + thetaFB + omegaFB;
-        t.log(Level.TRACE, "u_FF/x", xFF);
-        t.log(Level.TRACE, "u_FF/y", yFF);
-        t.log(Level.TRACE, "u_FF/theta", thetaFF);
-        t.log(Level.TRACE, "u_FB/x", xFB);
-        t.log(Level.TRACE, "u_FB/y", yFB);
-        t.log(Level.TRACE, "u_FB/theta", thetaFB);
+        t.logDouble(Level.TRACE, "u_FF/x",()-> xFF);
+        t.logDouble(Level.TRACE, "u_FF/y",()-> yFF);
+        t.logDouble(Level.TRACE, "u_FF/theta",()-> thetaFF);
+        t.logDouble(Level.TRACE, "u_FB/x",()-> xFB);
+        t.logDouble(Level.TRACE, "u_FB/y",()-> yFB);
+        t.logDouble(Level.TRACE, "u_FB/theta",()-> thetaFB);
         t.log(Level.TRACE, "measurement", currentPose);
 
-        t.log(Level.DEBUG, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.DEBUG, "setpoint/y", m_yController.getSetpoint());
-        t.log(Level.TRACE, "setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.TRACE, "error/x", m_xController.getPositionError());
-        t.log(Level.TRACE, "error/y", m_yController.getPositionError());
-        t.log(Level.TRACE, "error/theta", m_thetaController.getPositionError());
+        t.logDouble(Level.DEBUG, "setpoint/x",()-> m_xController.getSetpoint());
+        t.logDouble(Level.DEBUG, "setpoint/y",()-> m_yController.getSetpoint());
+        t.logDouble(Level.TRACE, "setpoint/theta", ()->m_thetaController.getSetpoint());
+        t.logDouble(Level.TRACE, "error/x",()-> m_xController.getPositionError());
+        t.logDouble(Level.TRACE, "error/y",()-> m_yController.getPositionError());
+        t.logDouble(Level.TRACE, "error/theta", ()->m_thetaController.getPositionError());
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }

@@ -88,8 +88,8 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            t.log(Level.TRACE, "Desired X", desiredState.state().getPose().getX());
-            t.log(Level.TRACE, "Desired Y", desiredState.state().getPose().getY());
+            t.logDouble(Level.TRACE, "Desired X",()-> desiredState.state().getPose().getX());
+            t.logDouble(Level.TRACE, "Desired Y",()-> desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -108,8 +108,8 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            t.log(Level.TRACE, "Desired X", desiredState.state().getPose().getX());
-            t.log(Level.TRACE, "Desired Y", desiredState.state().getPose().getY());
+            t.logDouble(Level.TRACE, "Desired X",()-> desiredState.state().getPose().getX());
+            t.logDouble(Level.TRACE, "Desired Y", ()->desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -117,12 +117,12 @@ public class DriveToWaypoint3 extends Command100 {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
-        t.log(Level.TRACE, "Aligned", m_steeringAligned);
+        t.logBoolean(Level.TRACE, "Aligned", m_steeringAligned);
 
-        t.log(Level.TRACE, "Pose X", m_swerve.getState().pose().getX());
-        t.log(Level.TRACE, "Pose Y", m_swerve.getState().pose().getY());
-        t.log(Level.TRACE, "Desired Rot", m_goal.getRotation().getRadians());
-        t.log(Level.TRACE, "Pose Rot", m_swerve.getState().pose().getRotation().getRadians());
+        t.logDouble(Level.TRACE, "Pose X",()-> m_swerve.getState().pose().getX());
+        t.logDouble(Level.TRACE, "Pose Y",()-> m_swerve.getState().pose().getY());
+        t.logDouble(Level.TRACE, "Desired Rot",()-> m_goal.getRotation().getRadians());
+        t.logDouble(Level.TRACE, "Pose Rot",()-> m_swerve.getState().pose().getRotation().getRadians());
     }
 
     @Override

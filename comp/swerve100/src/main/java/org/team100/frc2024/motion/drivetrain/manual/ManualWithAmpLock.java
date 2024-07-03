@@ -120,7 +120,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
-        t.log(Level.TRACE, "apparent motion", targetMotion);
+        t.logDouble(Level.TRACE, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -136,14 +136,14 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
         t.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.TRACE, "theta/measurement", measurement);
-        t.log(Level.TRACE, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.TRACE, "theta/fb", thetaFB);
+        t.logDouble(Level.TRACE, "theta/measurement", ()->measurement);
+        t.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
+        t.logDouble(Level.TRACE, "theta/fb", ()->thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
         t.log(Level.TRACE, "omega/reference", m_thetaSetpoint);
-        t.log(Level.TRACE, "omega/measurement", headingRate);
-        t.log(Level.TRACE, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.TRACE, "omega/fb", omegaFB);
+        t.logDouble(Level.TRACE, "omega/measurement", ()->headingRate);
+        t.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
+        t.logDouble(Level.TRACE, "omega/fb", ()->omegaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,

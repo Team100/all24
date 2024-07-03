@@ -117,9 +117,9 @@ public class Intake extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, "lower", m_intake.get());
+        t.logDouble(Level.DEBUG, "lower", m_intake.get());
         t.log(Level.DEBUG, "upper", superRollers.getVelocity());
-        t.log(Level.DEBUG, "centering", m_centering.get());
+        t.logDouble(Level.DEBUG, "centering", m_centering.get());
     }
 
     @Override

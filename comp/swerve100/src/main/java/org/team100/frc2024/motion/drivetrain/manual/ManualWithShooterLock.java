@@ -127,7 +127,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         checkBearing(bearing, currentRotation);
 
-        t.log(Level.TRACE, "Bearing Check", bearing.minus(currentRotation).getDegrees());
+        t.logDouble(Level.TRACE, "Bearing Check", ()->bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.
         if (first) {
@@ -143,7 +143,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
-        t.log(Level.TRACE, "apparent motion", targetMotion);
+        t.logDouble(Level.TRACE, "apparent motion", ()->targetMotion);
         State100 goal = new State100(bearing.getRadians(), targetMotion);
         if (Math.abs(goal.x() - prevGoal.x()) < 0.05 || Math.abs(2 * Math.PI - goal.x() - prevGoal.x()) < 0.05) {
             goal = new State100(prevGoal.x(), goal.v(), goal.a());
@@ -177,13 +177,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         }
         t.log(Level.TRACE, "target", target);
         t.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.TRACE, "theta/measurement", measurement);
-        t.log(Level.TRACE, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.TRACE, "theta/fb", thetaFB);
-        t.log(Level.TRACE, "omega/measurement", headingRate);
-        t.log(Level.TRACE, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.TRACE, "omega/fb", omegaFB);
-        t.log(Level.TRACE, "target motion", targetMotion);
+        t.logDouble(Level.TRACE, "theta/measurement", ()->measurement);
+        t.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
+        t.logDouble(Level.TRACE, "theta/fb", thetaFB);
+        t.logDouble(Level.TRACE, "omega/measurement", ()->headingRate);
+        t.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
+        t.logDouble(Level.TRACE, "omega/fb", ()->omegaFB);
+        t.logDouble(Level.TRACE, "target motion", targetMotion);
         t.log(Level.TRACE, "goal", goal);
         prevGoal = goal;
         double omega = MathUtil.clamp(

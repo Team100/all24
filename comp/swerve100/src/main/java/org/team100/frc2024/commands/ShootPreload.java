@@ -109,7 +109,7 @@ public class ShootPreload extends Command {
         m_shooter.setAngle(pivotSetpoint);
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
-            t.log(Level.DEBUG, "PIVOT DEFECIT",
+            t.logDouble(Level.DEBUG, "PIVOT DEFECIT",
                     Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
         }
 

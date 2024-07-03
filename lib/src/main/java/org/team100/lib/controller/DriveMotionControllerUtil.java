@@ -35,7 +35,7 @@ public class DriveMotionControllerUtil {
      */
     public static ChassisSpeeds feedforward(Pose2d currentPose, TimedPose setpoint) {
         final double velocity_m = setpoint.velocityM_S();
-        t.log(Level.TRACE, "setpoint velocity", velocity_m);
+        t.logDouble(Level.TRACE, "setpoint velocity", ()->velocity_m);
 
         // robot-relative motion direction
         Rotation2d motion_direction = direction(currentPose, setpoint);

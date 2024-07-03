@@ -107,7 +107,7 @@ public class DrivePIDFController implements DriveMotionController {
 
         Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
         if (!sample_point.isPresent()) {
-            t.log(Level.TRACE, "IS MT", true);
+            t.logBoolean(Level.TRACE, "IS MT", true);
 
             return Optional.empty();
         }

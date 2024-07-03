@@ -184,16 +184,16 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, "mode", "snap");
-        t.log(Level.TRACE, "goal/theta", m_goal.getRadians());
-        t.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
-        t.log(Level.TRACE, "measurement/theta", headingMeasurement);
-        t.log(Level.TRACE, "measurement/omega", headingRate);
-        t.log(Level.TRACE, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.TRACE, "error/omega", m_thetaSetpoint.v() - headingRate);
-        t.log(Level.TRACE, "goal_error/theta", m_thetaSetpoint.x() - goalState.x());
-        t.log(Level.TRACE, "goal_error/omega", m_thetaSetpoint.v() - goalState.v());
-        t.log(Level.TRACE, "thetaFF", thetaFF);
-        t.log(Level.TRACE, "output/omega", omega);
+        t.logDouble(Level.TRACE, "goal/theta",()-> m_goal.getRadians());
+        t.log(Level.TRACE, "setpoint/theta",m_thetaSetpoint);
+        t.logDouble(Level.TRACE, "measurement/theta",()-> headingMeasurement);
+        t.logDouble(Level.TRACE, "measurement/omega", ()->headingRate);
+        t.logDouble(Level.TRACE, "error/theta",()-> m_thetaSetpoint.x() - headingMeasurement);
+        t.logDouble(Level.TRACE, "error/omega",()-> m_thetaSetpoint.v() - headingRate);
+        t.logDouble(Level.TRACE, "goal_error/theta",()-> m_thetaSetpoint.x() - goalState.x());
+        t.logDouble(Level.TRACE, "goal_error/omega", ()->m_thetaSetpoint.v() - goalState.v());
+        t.logDouble(Level.TRACE, "thetaFF",()-> thetaFF);
+        t.logDouble(Level.TRACE, "output/omega", ()->omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

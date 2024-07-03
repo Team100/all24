@@ -117,14 +117,14 @@ public class ArmTrajectoryCommand extends Command100 {
 
         m_armSubsystem.set(u1, u2);
 
-        t.log(Level.TRACE, "Lower FF ", ff1);
-        t.log(Level.TRACE, "Lower Controller Output: ", u1_pos);
-        t.log(Level.TRACE, "Upper FF ", ff2);
-        t.log(Level.TRACE, "Upper Controller Output: ", u2_pos);
-        t.log(Level.TRACE, "Lower Ref: ", r.th1);
-        t.log(Level.TRACE, "Upper Ref: ", r.th2);
-        t.log(Level.TRACE, "Output Upper: ", u1);
-        t.log(Level.TRACE, "Output Lower: ", u2);
+        t.logDouble(Level.TRACE, "Lower FF ",()-> ff1);
+        t.logDouble(Level.TRACE, "Lower Controller Output: ", ()->u1_pos);
+        t.logDouble(Level.TRACE, "Upper FF ", ()->ff2);
+        t.logDouble(Level.TRACE, "Upper Controller Output: ", ()->u2_pos);
+        t.logDouble(Level.TRACE, "Lower Ref: ",()-> r.th1);
+        t.logDouble(Level.TRACE, "Upper Ref: ",()-> r.th2);
+        t.logDouble(Level.TRACE, "Output Upper: ",()-> u1);
+        t.logDouble(Level.TRACE, "Output Lower: ",()-> u2);
     }
 
     private State getDesiredState() {

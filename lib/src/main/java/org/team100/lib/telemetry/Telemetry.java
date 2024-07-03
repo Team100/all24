@@ -129,7 +129,7 @@ public class Telemetry {
             m_root = root;
         }
 
-        public void log(Level level, String leaf, Boolean val) {
+        public void logBoolean(Level level, String leaf, boolean val) {
             if (!m_level.admit(level))
                 return;
             String key = append(m_root, leaf);
@@ -158,13 +158,13 @@ public class Telemetry {
                     e -> consumer.accept(e.valueData.value.getDouble()));
         }
 
-        public void log(Level level, String leaf, Double val) {
+        // using a supplier here is faster in the non-logging case.
+        public void logDouble(Level level, String leaf, DoubleSupplier vals) {
             Sample s = m_chronos.sample(kName);
             try {
-                if (val == null)
-                    return;
                 if (!m_level.admit(level))
                     return;
+                double val = vals.getAsDouble();
                 String key = append(m_root, leaf);
                 print(key, val);
                 pub(key, k -> {
@@ -184,14 +184,7 @@ public class Telemetry {
             if (val.isEmpty()) {
                 return;
             }
-            log(level, leaf, val.getAsDouble());
-        }
-
-        // using a supplier here is faster in the non-logging case.
-        public void log(Level level, String leaf, DoubleSupplier val) {
-            if (!m_level.admit(level))
-                return;
-            log(level, leaf, val.getAsDouble());
+            logDouble(level, leaf, val::getAsDouble);
         }
 
         public void log(Level level, String leaf, float val) {
@@ -278,18 +271,18 @@ public class Telemetry {
         }
 
         public void log(Level level, String leaf, Translation2d val) {
-            log(level, append(leaf, "x"), val.getX());
-            log(level, append(leaf, "y"), val.getY());
+            logDouble(level, append(leaf, "x"), ()->val.getX());
+            logDouble(level, append(leaf, "y"),()-> val.getY());
         }
 
         public void log(Level level, String leaf, Vector2d val) {
-            log(level, append(leaf, "x"), val.getX());
-            log(level, append(leaf, "y"), val.getY());
+            logDouble(level, append(leaf, "x"),()-> val.getX());
+            logDouble(level, append(leaf, "y"), ()->val.getY());
 
         }
 
         public void log(Level level, String leaf, Rotation2d val) {
-            log(level, append(leaf, "rad"), val.getRadians());
+            logDouble(level, append(leaf, "rad"),()-> val.getRadians());
         }
 
         public void log(Level level, String leaf, TrajectorySamplePoint val) {
@@ -298,9 +291,9 @@ public class Telemetry {
 
         public void log(Level level, String leaf, TimedPose val) {
             log(level, append(leaf, "posestate"), val.state());
-            log(level, append(leaf, "time"), val.getTimeS());
-            log(level, append(leaf, "velocity"), val.velocityM_S());
-            log(level, append(leaf, "accel"), val.acceleration());
+            logDouble(level, append(leaf, "time"), ()->val.getTimeS());
+            logDouble(level, append(leaf, "velocity"), ()->val.velocityM_S());
+            logDouble(level, append(leaf, "accel"), ()->val.acceleration());
         }
 
         public void log(Level level, String leaf, PoseWithCurvature val) {
@@ -316,33 +309,33 @@ public class Telemetry {
         }
 
         public void log(Level level, String leaf, Twist2d val) {
-            log(level, append(leaf, "dx"), val.dx);
-            log(level, append(leaf, "dy"), val.dy);
-            log(level, append(leaf, "dtheta"), val.dtheta);
+            logDouble(level, append(leaf, "dx"), () -> val.dx);
+            logDouble(level, append(leaf, "dy"), () -> val.dy);
+            logDouble(level, append(leaf, "dtheta"), () -> val.dtheta);
         }
 
         public void log(Level level, String leaf, ChassisSpeeds val) {
-            log(level, append(leaf, "vx m_s"), val.vxMetersPerSecond);
-            log(level, append(leaf, "vy m_s"), val.vyMetersPerSecond);
-            log(level, append(leaf, "omega rad_s"), val.omegaRadiansPerSecond);
+            logDouble(level, append(leaf, "vx m_s"), () -> val.vxMetersPerSecond);
+            logDouble(level, append(leaf, "vy m_s"), () -> val.vyMetersPerSecond);
+            logDouble(level, append(leaf, "omega rad_s"), () -> val.omegaRadiansPerSecond);
         }
 
         public void log(Level level, String leaf, FieldRelativeVelocity val) {
-            log(level, append(leaf, "x m_s"), val.x());
-            log(level, append(leaf, "y m_s"), val.y());
-            log(level, append(leaf, "theta rad_s"), val.theta());
+            logDouble(level, append(leaf, "x m_s"), () -> val.x());
+            logDouble(level, append(leaf, "y m_s"), () -> val.y());
+            logDouble(level, append(leaf, "theta rad_s"), () -> val.theta());
         }
 
         public void log(Level level, String leaf, FieldRelativeAcceleration val) {
-            log(level, append(leaf, "x m_s_s"), val.x());
-            log(level, append(leaf, "y m_s_s"), val.y());
-            log(level, append(leaf, "theta rad_s_s"), val.theta());
+            logDouble(level, append(leaf, "x m_s_s"), () -> val.x());
+            logDouble(level, append(leaf, "y m_s_s"), () -> val.y());
+            logDouble(level, append(leaf, "theta rad_s_s"), () -> val.theta());
         }
 
         public void log(Level level, String leaf, State100 state) {
-            log(level, append(leaf, "x"), state.x());
-            log(level, append(leaf, "v"), state.v());
-            log(level, append(leaf, "a"), state.a());
+            logDouble(level, append(leaf, "x"), () -> state.x());
+            logDouble(level, append(leaf, "v"), () -> state.v());
+            logDouble(level, append(leaf, "a"), () -> state.a());
         }
 
         public void log(Level level, String leaf, SwerveState state) {
@@ -352,20 +345,20 @@ public class Telemetry {
         }
 
         public void log(Level level, String leaf, SwerveModulePosition val) {
-            log(level, append(leaf, "distance"), val.distanceMeters);
+            logDouble(level, append(leaf, "distance"),()-> val.distanceMeters);
             log(level, append(leaf, "angle"), val.angle);
         }
 
         public void log(Level level, String leaf, ArmAngles angles) {
-            log(level, append(leaf, "th1"), angles.th1);
-            log(level, append(leaf, "th2"), angles.th2);
+            logDouble(level, append(leaf, "th1"), ()->angles.th1);
+            logDouble(level, append(leaf, "th2"),()-> angles.th2);
         }
 
         public void log(Level level, String leaf, State state) {
             log(level, append(leaf, "pose"), state.poseMeters);
-            log(level, append(leaf, "curvature"), state.curvatureRadPerMeter);
-            log(level, append(leaf, "velocity"), state.velocityMetersPerSecond);
-            log(level, append(leaf, "accel"), state.accelerationMetersPerSecondSq);
+            logDouble(level, append(leaf, "curvature"), ()->state.curvatureRadPerMeter);
+            logDouble(level, append(leaf, "velocity"), ()->state.velocityMetersPerSecond);
+            logDouble(level, append(leaf, "accel"), ()->state.accelerationMetersPerSecondSq);
         }
 
         private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {

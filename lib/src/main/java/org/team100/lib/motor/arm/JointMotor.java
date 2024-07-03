@@ -46,7 +46,7 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, "Duty Cycle", output);
+        t.logDouble(Level.TRACE, "Duty Cycle", output);
     }
 
     /**
@@ -55,10 +55,10 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     @Override
     public void setVelocity(double velocity, double accel, double torqueNm) {
         m_motor.set(kV * velocity);
-        t.log(Level.TRACE, "Velocity", velocity);
-        t.log(Level.TRACE, "Accel", accel);
-        t.log(Level.TRACE, "Desired torque Nm", torqueNm);
-        t.log(Level.TRACE, "Actual torque Nm", getTorque());
+        t.logDouble(Level.TRACE, "Velocity", ()->velocity);
+        t.logDouble(Level.TRACE, "Accel",()-> accel);
+        t.logDouble(Level.TRACE, "Desired torque Nm",()->torqueNm);
+        t.logDouble(Level.TRACE, "Actual torque Nm",()-> getTorque());
     }
 
     @Override

@@ -66,7 +66,7 @@ public class SteeringOverride implements Glassy {
                 }
             }
         }
-        t.log(Level.DEBUG, "s", min_s);
+        t.logDouble(Level.DEBUG, "s", min_s);
         return min_s;
     }
 

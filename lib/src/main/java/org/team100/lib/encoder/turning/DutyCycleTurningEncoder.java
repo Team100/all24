@@ -84,10 +84,10 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
 
     private double getPositionRad() {
         double positionRad = m_encoder.getDistance();
-        t.log(Level.DEBUG,  "position (rad) ROBOT USES THIS (CCW POSITIVE)", positionRad);
-        t.log(Level.DEBUG,  "position (turns) USE FOR OFFSETS", m_encoder.get());
-        t.log(Level.DEBUG,  "position (absolute)", m_encoder.getAbsolutePosition());
-        t.log(Level.DEBUG,  "Wrapped position rads (absolute)", MathUtil.angleModulus(positionRad));
+        t.logDouble(Level.DEBUG,  "position (rad) ROBOT USES THIS (CCW POSITIVE)",()-> positionRad);
+        t.logDouble(Level.DEBUG,  "position (turns) USE FOR OFFSETS",()-> m_encoder.get());
+        t.logDouble(Level.DEBUG,  "position (absolute)", ()->m_encoder.getAbsolutePosition());
+        t.logDouble(Level.DEBUG,  "Wrapped position rads (absolute)", ()->MathUtil.angleModulus(positionRad));
         return positionRad;
     }
 
@@ -107,7 +107,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         prevTime = time;
 
         double rateRad_S = dx / dt;
-        t.log(Level.DEBUG,  "rate (rad_s)", rateRad_S);
+        t.logDouble(Level.DEBUG,  "rate (rad_s)",()-> rateRad_S);
         return rateRad_S;
     }
 }

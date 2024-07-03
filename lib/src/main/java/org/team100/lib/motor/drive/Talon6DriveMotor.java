@@ -40,7 +40,7 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
     @Override
     public void setVelocity(double outputM_S, double accelM_S_S, double outputTorqueN) {
         double wheelRev_S = outputM_S / (m_wheelDiameterM * Math.PI);
-        t.log(Level.TRACE, "module input (RPS)", wheelRev_S);
+        t.logDouble(Level.TRACE, "module input (RPS)", wheelRev_S);
         double motorRev_S = wheelRev_S * m_gearRatio;
         double wheelRev_S2 = accelM_S_S / (m_wheelDiameterM * Math.PI);
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;

@@ -25,14 +25,14 @@ public class Heading implements HeadingInterface {
     @Override
     public Rotation2d getHeadingNWU() {
         Rotation2d currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getYawNEDDeg());
-        t.log(Level.TRACE, "Heading NWU (rad)", currentHeadingNWU.getRadians());
+        t.logDouble(Level.TRACE, "Heading NWU (rad)", ()->currentHeadingNWU.getRadians());
         return currentHeadingNWU;
     }
 
     @Override
     public double getHeadingRateNWU() {
         double currentHeadingRateNWU = Math.toRadians(m_gyro.getYawRateNEDDeg_s());
-        t.log(Level.TRACE, "Heading Rate NWU (rad_s)", currentHeadingRateNWU);
+        t.logDouble(Level.TRACE, "Heading Rate NWU (rad_s)", ()->currentHeadingRateNWU);
         return currentHeadingRateNWU;
     }
 

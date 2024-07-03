@@ -80,20 +80,20 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        t.log(Level.TRACE, "u_FF/x", xFF);
-        t.log(Level.TRACE, "u_FF/y", yFF);
-        t.log(Level.TRACE, "u_FF/theta", thetaFF);
-        t.log(Level.TRACE, "u_FB/x", xFB);
-        t.log(Level.TRACE, "u_FB/y", yFB);
-        t.log(Level.TRACE, "u_FB/theta", thetaFB);
+        t.logDouble(Level.TRACE, "u_FF/x", ()->xFF);
+        t.logDouble(Level.TRACE, "u_FF/y", ()->yFF);
+        t.logDouble(Level.TRACE, "u_FF/theta",()-> thetaFF);
+        t.logDouble(Level.TRACE, "u_FB/x", ()->xFB);
+        t.logDouble(Level.TRACE, "u_FB/y",()-> yFB);
+        t.logDouble(Level.TRACE, "u_FB/theta", ()->thetaFB);
         t.log(Level.TRACE, "measurement", currentPose);
 
-        t.log(Level.TRACE, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.TRACE, "setpoint/y", m_yController.getSetpoint());
-        t.log(Level.TRACE, "setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.TRACE, "error/x", m_xController.getPositionError());
-        t.log(Level.TRACE, "error/y", m_yController.getPositionError());
-        t.log(Level.TRACE, "error/theta", m_thetaController.getPositionError());
+        t.logDouble(Level.TRACE, "setpoint/x",()-> m_xController.getSetpoint());
+        t.logDouble(Level.TRACE, "setpoint/y",()-> m_yController.getSetpoint());
+        t.logDouble(Level.TRACE, "setpoint/theta",()-> m_thetaController.getSetpoint());
+        t.logDouble(Level.TRACE, "error/x",()-> m_xController.getPositionError());
+        t.logDouble(Level.TRACE, "error/y",()-> m_yController.getPositionError());
+        t.logDouble(Level.TRACE, "error/theta",()-> m_thetaController.getPositionError());
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }

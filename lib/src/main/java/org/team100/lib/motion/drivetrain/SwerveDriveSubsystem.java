@@ -197,7 +197,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     @Override
     public void periodic100(double dt) {
         t.log(Level.DEBUG, "pose", m_stateSupplier.get());
-        t.log(Level.TRACE, "Tur Deg", m_stateSupplier.get().pose().getRotation().getDegrees());
+        t.logDouble(Level.TRACE, "Tur Deg",()-> m_stateSupplier.get().pose().getRotation().getDegrees());
         t.log(Level.DEBUG, "pose array",
                 new double[] {
                         m_stateSupplier.get().pose().getX(),
@@ -214,7 +214,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 m_stateSupplier.get().pose().getY(),
                 m_stateSupplier.get().pose().getRotation().getDegrees()
         });
-        t.log(Level.DEBUG, "heading rate rad_s", m_heading.getHeadingRateNWU());
+        t.logDouble(Level.DEBUG, "heading rate rad_s", ()->m_heading.getHeadingRateNWU());
     }
 
     @Override

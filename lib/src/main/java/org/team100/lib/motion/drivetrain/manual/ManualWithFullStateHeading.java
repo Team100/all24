@@ -169,16 +169,16 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         t.log(Level.TRACE, "mode", "snap");
-        t.log(Level.TRACE, "goal/theta", m_goal.getRadians());
+        t.logDouble(Level.TRACE, "goal/theta",()-> m_goal.getRadians());
         t.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
-        t.log(Level.TRACE, "measurement/theta", headingMeasurement);
-        t.log(Level.TRACE, "measurement/omega", headingRate);
-        t.log(Level.TRACE, "error/theta", thetaError);
-        t.log(Level.TRACE, "error/omega", omegaError);
-        t.log(Level.TRACE, "thetaFF", thetaFF);
-        t.log(Level.TRACE, "thetaFB", thetaFB);
-        t.log(Level.TRACE, "omegaFB", omegaFB);
-        t.log(Level.TRACE, "output/omega", omega);
+        t.logDouble(Level.TRACE, "measurement/theta",()-> headingMeasurement);
+        t.logDouble(Level.TRACE, "measurement/omega",()-> headingRate);
+        t.logDouble(Level.TRACE, "error/theta",()-> thetaError);
+        t.logDouble(Level.TRACE, "error/omega",()-> omegaError);
+        t.logDouble(Level.TRACE, "thetaFF",()-> thetaFF);
+        t.logDouble(Level.TRACE, "thetaFB",()-> thetaFB);
+        t.logDouble(Level.TRACE, "omegaFB",()-> omegaFB);
+        t.logDouble(Level.TRACE, "output/omega", ()->omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

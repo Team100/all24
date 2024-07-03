@@ -137,7 +137,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target.get());
-        t.log(Level.DEBUG, "apparent motion", targetMotion);
+        t.logDouble(Level.DEBUG, "apparent motion", targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -149,14 +149,14 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
         t.log(Level.DEBUG, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.DEBUG, "theta/measurement", measurement);
-        t.log(Level.DEBUG, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.DEBUG, "theta/fb", thetaFB);
+        t.logDouble(Level.DEBUG, "theta/measurement", measurement);
+        t.logDouble(Level.DEBUG, "theta/error", m_thetaController.getPositionError());
+        t.logDouble(Level.DEBUG, "theta/fb", thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
         t.log(Level.DEBUG, "omega/reference", m_thetaSetpoint);
-        t.log(Level.DEBUG, "omega/measurement", headingRate);
-        t.log(Level.DEBUG, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.DEBUG, "omega/fb", omegaFB);
+        t.logDouble(Level.DEBUG, "omega/measurement", headingRate);
+        t.logDouble(Level.DEBUG, "omega/error", m_omegaController.getPositionError());
+        t.logDouble(Level.DEBUG, "omega/fb", omegaFB);
 
         omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,

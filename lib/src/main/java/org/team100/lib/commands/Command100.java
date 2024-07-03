@@ -77,7 +77,7 @@ public abstract class Command100 extends Command implements Glassy {
         t.log(Level.DEBUG, "command state", "execute");
         double now = Timer.getFPGATimestamp();
         double dt = now - prevTime;
-        t.log(Level.DEBUG, "dt", dt);
+        t.logDouble(Level.DEBUG, "dt", ()->dt);
         prevTime = now;
         execute100(dt);
     }
@@ -131,7 +131,7 @@ public abstract class Command100 extends Command implements Glassy {
                 t.log(Level.DEBUG, "command state", "execute");
                 double now = Timer.getFPGATimestamp();
                 double dt = now - prevTime;
-                t.log(Level.DEBUG, "dt", dt);
+                t.logDouble(Level.DEBUG, "dt",()-> dt);
                 prevTime = now;
                 execute100(dt);
             } catch (Throwable e) {

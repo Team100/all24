@@ -58,14 +58,14 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         m_position += m_rate * dt;
         m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
-        t.log(Level.TRACE,  "position", m_position);
+        t.logDouble(Level.TRACE,  "position",()-> m_position);
         return OptionalDouble.of(m_position);
     }
 
     @Override
     public OptionalDouble getRate() {
         double m_rate = m_motor.getVelocity() / m_reduction;
-        t.log(Level.TRACE,  "rate", m_rate);
+        t.logDouble(Level.TRACE,  "rate",()-> m_rate);
         return OptionalDouble.of(m_rate);
     }
 

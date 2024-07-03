@@ -21,21 +21,21 @@ public class CompSensors implements SensorInterface {
     @Override
     public boolean getIntakeSensor() {
         boolean sensorState = intakeSensor.get();
-        t.log(Level.DEBUG,  "intake", sensorState);
+        t.logBoolean(Level.DEBUG,  "intake", sensorState);
         return sensorState;
     }
 
     @Override
     public boolean getAmpSensor() {
         boolean sensorState = ampSensor.get();
-        t.log(Level.DEBUG,  "amp", sensorState);
+        t.logBoolean(Level.DEBUG,  "amp", sensorState);
         return sensorState;
     }
 
     @Override
     public boolean getFeederSensor() {
         boolean sensorState = feederSensor.get();
-        t.log(Level.DEBUG,  "feeder", sensorState);
+        t.logBoolean(Level.DEBUG,  "feeder", sensorState);
         return sensorState;
     }
 }

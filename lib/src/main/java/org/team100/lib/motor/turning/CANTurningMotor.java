@@ -136,7 +136,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, "Output", output);
+        t.logDouble(Level.TRACE, "Output", output);
         log();
     }
 
@@ -171,10 +171,10 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     }
 
     public void log() {
-        t.log(Level.TRACE, "Encoder Value",
-                m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.log(Level.TRACE, "Velocity Value",
-                m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
+        t.logDouble(Level.TRACE, "Encoder Value",
+        ()-> m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
+        t.logDouble(Level.TRACE, "Velocity Value",
+        ()->  m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
     ///////////////////////////////////////////////////////

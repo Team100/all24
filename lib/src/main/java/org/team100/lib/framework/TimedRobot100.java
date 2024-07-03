@@ -141,7 +141,7 @@ public class TimedRobot100 extends IterativeRobotBase {
             double endWaitingS = Timer.getFPGATimestamp();
             double slackS = endWaitingS - startWaitingS;
             // this is the main loop slack, don't let it go to zero!
-            t.log(Level.INFO, "slack time (s)", slackS);
+            t.logDouble(Level.INFO, "slack time (s)", ()->slackS);
 
             log(callback.func::run, callback.name);
 
@@ -162,9 +162,9 @@ public class TimedRobot100 extends IterativeRobotBase {
             for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
                 Double duration = durations.getValue();
                 String name = durations.getKey();
-                t.log(Level.INFO, "duration (s)/" + name, duration);
+                t.logDouble(Level.INFO, "duration (s)/" + name, duration);
                 double fraction = duration / elapsed;
-                t.log(Level.INFO, "fraction (pct)/" + name, 100.0 * fraction);
+                t.logDouble(Level.INFO, "fraction (pct)/" + name, ()->100.0 * fraction);
             }
             chronos.reset();
         }
@@ -175,7 +175,7 @@ public class TimedRobot100 extends IterativeRobotBase {
         r.run();
         double endWaitingS = Timer.getFPGATimestamp();
         double durationS = endWaitingS - startWaitingS;
-        t.log(Level.INFO, "duration (s)/" + name, durationS);
+        t.logDouble(Level.INFO, "duration (s)/" + name,()-> durationS);
     }
 
     /** Ends the main loop in startCompetition(). */
