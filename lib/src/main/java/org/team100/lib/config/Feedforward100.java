@@ -94,4 +94,8 @@ public class Feedforward100 {
         return kDS * direction;
     }
 
+     public static Feedforward100 makeTest() {
+        return new Feedforward100(0.3, 0.000, 0.000, 0.100, 3.5);
+    }
+
 }

@@ -119,7 +119,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 encoder);
     }
 
-    private static PositionServo<Angle100> turningServo(
+    public static PositionServo<Angle100> turningServo(
             String name,
             Class<? extends Encoder100<Angle100>> encoderClass,
             int turningMotorCanId,
@@ -154,7 +154,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
 
-        Profile100 profile = kinodynamics.getSteeringProfile();
+            Profile100 profile = kinodynamics.getSteeringProfile();
+            
         PositionServo<Angle100> turningServo = getTurningServo(
                 name,
                 kinodynamics,

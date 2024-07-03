@@ -17,6 +17,7 @@ import org.team100.lib.util.Util;
  * Instead of a WPILib Notifier, this uses a java executor with a single thread,
  * in order to set the thread priority really low and avoid the notifier interrupt.
  */
+
 public class ExecutorAsync implements Async {
     private final ScheduledExecutorService m_scheduler;
 
@@ -52,6 +53,7 @@ public class ExecutorAsync implements Async {
             thread.setName("Async Thread " + id.getAndIncrement());
             return thread;
         }
+
     }
 
     private static class CrashWrapper implements Runnable {
