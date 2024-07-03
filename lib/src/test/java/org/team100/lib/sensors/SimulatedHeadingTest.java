@@ -8,6 +8,8 @@ import org.team100.lib.async.MockAsync;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -21,7 +23,8 @@ class SimulatedHeadingTest implements Timeless {
     void testInitial() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         Async async = new MockAsync();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l, async);
         SimulatedHeading h = new SimulatedHeading(l, c);
         assertEquals(0, h.getHeadingNWU().getRadians(), kDelta);
         assertEquals(0, h.getHeadingRateNWU(), kDelta);
@@ -31,7 +34,8 @@ class SimulatedHeadingTest implements Timeless {
     void testTranslation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         Async async = new MockAsync();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l, async);
         SwerveModulePosition[] p = c.positions();
         assertEquals(0, p[0].distanceMeters, kDelta);
         assertEquals(0, p[1].distanceMeters, kDelta);
@@ -60,7 +64,8 @@ class SimulatedHeadingTest implements Timeless {
     void testRotation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         Async async = new MockAsync();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l, async);
         SimulatedHeading h = new SimulatedHeading(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
         // includes discretization
@@ -100,7 +105,8 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(-0.224, states[3].angle.getRadians(), kDelta);
 
         Async async = new MockAsync();
-        SwerveModuleCollection c = SwerveModuleCollection.get(10, 20, l, async);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l, async);
         SimulatedHeading h = new SimulatedHeading(l, c);
         c.reset();
 

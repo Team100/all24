@@ -27,7 +27,7 @@ public class Tire {
     Tire(double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
-        t = Telemetry.get().logger("tire");
+        t = Telemetry.get().rootLogger("tire");
     }
 
     public static Tire noslip() {

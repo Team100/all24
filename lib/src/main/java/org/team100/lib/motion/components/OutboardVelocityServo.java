@@ -6,6 +6,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
 import org.team100.lib.util.Names;
 
@@ -25,9 +26,9 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     private double prevTime;
     private double m_setpoint;
 
-    public OutboardVelocityServo(String name, VelocityMotor100<T> motor, Encoder100<T> encoder) {
+    public OutboardVelocityServo(String name, Logger parent, VelocityMotor100<T> motor, Encoder100<T> encoder) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_motor = motor;
         m_encoder = encoder;
     }

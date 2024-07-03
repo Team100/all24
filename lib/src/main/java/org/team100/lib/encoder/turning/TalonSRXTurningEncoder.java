@@ -6,6 +6,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
@@ -20,13 +21,13 @@ import edu.wpi.first.math.MathUtil;
 public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
     private static final int ticksPerRevolution = 1666;
 
-    private final Telemetry.Logger t;
+    private final Logger t;
     private final String m_name;
     private final WPI_TalonSRX m_motor;
 
-    public TalonSRXTurningEncoder(String name, CANTurningMotor motor) {
+    public TalonSRXTurningEncoder(String name, Logger parent, CANTurningMotor motor) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_motor = motor.getMotor();
     }
 

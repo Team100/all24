@@ -37,6 +37,8 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -80,7 +82,9 @@ public class RobotContainerParkingLot {
         driverControl = new DriverControlProxy(async);
         operatorControl = new OperatorControlProxy(async);
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        final Logger logger = Telemetry.get().rootLogger("RobotContainer");
         m_modules = SwerveModuleCollection.get(
+                logger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics,

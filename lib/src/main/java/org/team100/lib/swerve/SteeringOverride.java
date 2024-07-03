@@ -5,6 +5,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
@@ -21,9 +22,9 @@ public class SteeringOverride implements Glassy {
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 
-    public SteeringOverride(String parent, SwerveKinodynamics limits) {
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
+    public SteeringOverride(String name, Logger parent, SwerveKinodynamics limits) {
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
         m_limits = limits;
     }
 

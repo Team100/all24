@@ -5,6 +5,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
 /**
@@ -23,6 +24,7 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
 
     protected Talon6DriveMotor(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             double supplyLimit,
@@ -31,7 +33,7 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
             double wheelDiameter,
             PIDConstants pid,
             Feedforward100 ff) {
-        super(name, canId, motorPhase, supplyLimit, statorLimit, pid, ff);
+        super(name, parent, canId, motorPhase, supplyLimit, statorLimit, pid, ff);
         m_gearRatio = gearRatio;
         m_wheelDiameterM = wheelDiameter;
         m_distancePerTurn = wheelDiameter * Math.PI / gearRatio;
@@ -40,7 +42,7 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
     @Override
     public void setVelocity(double outputM_S, double accelM_S_S, double outputTorqueN) {
         double wheelRev_S = outputM_S / (m_wheelDiameterM * Math.PI);
-        t.logDouble(Level.TRACE, "module input (RPS)", ()->wheelRev_S);
+        t.logDouble(Level.TRACE, "module input (RPS)", () -> wheelRev_S);
         double motorRev_S = wheelRev_S * m_gearRatio;
         double wheelRev_S2 = accelM_S_S / (m_wheelDiameterM * Math.PI);
         double motorRev_S2 = wheelRev_S2 * m_gearRatio;

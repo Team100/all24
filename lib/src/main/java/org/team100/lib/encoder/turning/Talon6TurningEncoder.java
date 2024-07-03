@@ -6,6 +6,7 @@ import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.turning.Talon6TurningMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
@@ -15,11 +16,12 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
     private final double m_gearRatio;
 
     public Talon6TurningEncoder(
-            String m_name,
+            String name,
+            Logger parent,
             Talon6TurningMotor m_motor,
             double m_gearRatio) {
-        this.m_name = m_name;
-        t = Telemetry.get().logger(m_name);
+        this.m_name = name;
+        t = Telemetry.get().logger(m_name, parent);
         this.m_motor = m_motor;
         this.m_gearRatio = m_gearRatio;
     }

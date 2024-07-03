@@ -22,6 +22,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Kraken6DriveMotor;
 import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
@@ -50,6 +51,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     public static WCPSwerveModule100 get(
             String name,
+            Logger parent,
             double supplyLimitAmps,
             double statorLimitAmps,
             int driveMotorCanId,
@@ -68,6 +70,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
+                parent.child("/Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
@@ -77,6 +80,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         PositionServo<Angle100> turningServo = turningServo(
                 name + "/Turning",
+                parent.child("/Turning"),
                 encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -93,6 +97,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static VelocityServo<Distance100> driveServo(
             String name,
+            Logger parent,
             double supplyLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -103,6 +108,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         Kraken6DriveMotor driveMotor = new Kraken6DriveMotor(
                 name,
+                parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
                 supplyLimit,
@@ -112,15 +118,20 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 pidConstants,
                 ff);
         Talon6DriveEncoder encoder = new Talon6DriveEncoder(
-                name, driveMotor, distancePerTurn);
+                name,
+                parent,
+                driveMotor,
+                distancePerTurn);
         return new OutboardVelocityServo<>(
                 name,
+                parent,
                 driveMotor,
                 encoder);
     }
 
     private static PositionServo<Angle100> turningServo(
             String name,
+            Logger parent,
             Class<? extends Encoder100<Angle100>> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -134,6 +145,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         final double turningGearRatio = 1.0;
         Falcon6TurningMotor turningMotor = new Falcon6TurningMotor(
                 name,
+                parent,
                 turningMotorCanId,
                 motorPhase,
                 gearRatio,
@@ -142,6 +154,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Encoder100<Angle100> turningEncoder = turningEncoder(
                 encoderClass,
                 name,
+                parent,
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio,
@@ -157,6 +170,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle100> turningServo = getTurningServo(
                 name,
+                parent,
                 kinodynamics,
                 turningMotor,
                 turningEncoder,
@@ -169,6 +183,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static PositionServo<Angle100> getTurningServo(
             String name,
+            Logger parent,
             SwerveKinodynamics kinodynamics,
             Falcon6TurningMotor turningMotor,
             Encoder100<Angle100> turningEncoder,
@@ -177,6 +192,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Profile100 profile) {
         Talon6TurningEncoder builtInEncoder = new Talon6TurningEncoder(
                 name,
+                parent,
                 turningMotor,
                 turningGearRatio);
         // if we correct to exactly the primary reading, we effectively inject noise
@@ -188,12 +204,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 builtInEncoder);
         PositionServo<Angle100> outboard = new OutboardPositionServo<>(
                 name,
+                parent,
                 turningMotor,
                 combinedEncoder,
                 profile,
                 Angle100.instance);
         PositionServo<Angle100> onboard = new OnboardPositionServo<>(
                 name,
+                parent,
                 turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
@@ -209,12 +227,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static Encoder100<Angle100> turningEncoder(
             Class<?> encoderClass,
             String name,
+            Logger parent,
             int channel,
             double inputOffset,
             double gearRatio,
             EncoderDrive drive) {
         if (encoderClass == AnalogTurningEncoder.class) {
             return new AnalogTurningEncoder(name,
+                    parent,
                     channel,
                     inputOffset,
                     gearRatio,
@@ -222,6 +242,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         }
         if (encoderClass == DutyCycleTurningEncoder.class) {
             return new DutyCycleTurningEncoder(name,
+                    parent,
                     channel,
                     inputOffset,
                     gearRatio,

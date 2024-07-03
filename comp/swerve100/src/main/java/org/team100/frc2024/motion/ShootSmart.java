@@ -34,7 +34,7 @@ public class ShootSmart extends Command {
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        t = Telemetry.get().logger("ShootSmart");
+        t = Telemetry.get().rootLogger("ShootSmart");
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;

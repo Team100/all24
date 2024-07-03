@@ -21,6 +21,7 @@ import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
@@ -62,12 +63,14 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final GravityServo pivotServo;
 
     public DrumShooter(
+            Logger parent,
             int leftID,
-            int rightID, int pivotID,
+            int rightID,
+            int pivotID,
             double supplyLimit,
             double statorLimit) {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
 
         SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(
                 1, // gear ratio
@@ -87,12 +90,15 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
         String leftName = m_name + "/Left";
         String rightName = m_name + "/Right";
+        Logger leftLogger = parent.child("/Left");
+        Logger rightLogger = parent.child("/Right");
         switch (Identity.instance) {
             case COMP_BOT:
                 double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
                 Falcon6DriveMotor leftMotor = new Falcon6DriveMotor(
                         leftName,
+                        leftLogger,
                         leftID,
                         MotorPhase.REVERSE,
                         supplyLimit,
@@ -102,11 +108,12 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
                 Talon6DriveEncoder leftEncoder = new Talon6DriveEncoder(
-                        leftName, leftMotor, distancePerTurn);
-                leftRoller = new OutboardVelocityServo<>(m_name, leftMotor, leftEncoder);
+                        leftName, leftLogger, leftMotor, distancePerTurn);
+                leftRoller = new OutboardVelocityServo<>(leftName, leftLogger, leftMotor, leftEncoder);
 
                 Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
                         rightName,
+                        rightLogger,
                         rightID,
                         MotorPhase.FORWARD,
                         supplyLimit,
@@ -116,17 +123,18 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
                 Talon6DriveEncoder rightEncoder = new Talon6DriveEncoder(
-                        rightName, rightMotor, distancePerTurn);
-                rightRoller = new OutboardVelocityServo<>(m_name, rightMotor, rightEncoder);
+                        rightName, rightLogger, rightMotor, distancePerTurn);
+                rightRoller = new OutboardVelocityServo<>(rightName, rightLogger, rightMotor, rightEncoder);
 
                 pivotServo = new GravityServo(
-                        new NeoProxy(m_name, pivotID, IdleMode.kCoast, 40),
+                        new NeoProxy(m_name, parent, pivotID, IdleMode.kCoast, 40),
                         m_name + "/Pivot",
+                        parent.child("/Pivot"),
                         pivotParams,
                         pivotController,
                         profile,
                         period,
-                        new DutyCycleEncoder100("SHOOTER PIVOT", 0, 0.508753, false),
+                        new DutyCycleEncoder100("SHOOTER PIVOT", parent, 0, 0.508753, false),
                         softLimits);
 
                 break;
@@ -134,14 +142,17 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 // For testing and simulation
                 leftRoller = ServoFactory.limitedSimulatedVelocityServo(
                         leftName,
+                        leftLogger,
                         shooterParams);
                 rightRoller = ServoFactory.limitedSimulatedVelocityServo(
                         rightName,
+                        rightLogger,
                         shooterParams);
                 // motor speed is rad/s
-                SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(m_name, 600);
+                SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(m_name, parent, 600);
                 SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
                         m_name,
+                        parent,
                         simMotor,
                         165, // see above
                         -Double.MAX_VALUE,
@@ -150,6 +161,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 pivotServo = new GravityServo(
                         simMotor,
                         m_name + "/Pivot",
+                        parent.child("/Pivot"),
                         pivotParams,
                         pivotController,
                         profile,

@@ -91,7 +91,7 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
-        t = Telemetry.get().logger(Names.name(this));
+        t = Telemetry.get().rootLogger(Names.name(this));
         if (track < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -160,7 +160,7 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
-        t = Telemetry.get().logger(Names.name(this));
+        t = Telemetry.get().rootLogger(Names.name(this));
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)

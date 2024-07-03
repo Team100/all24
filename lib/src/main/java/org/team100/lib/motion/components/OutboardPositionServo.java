@@ -8,6 +8,7 @@ import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
 import org.team100.lib.util.Names;
 
@@ -37,12 +38,13 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
 
     public OutboardPositionServo(
             String name,
+            Logger parent,
             PositionMotor100<T> motor,
             CombinedEncoder<T> encoder,
             Profile100 profile,
             T instance) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_motor = motor;
         m_encoder = encoder;
         m_profile = profile;

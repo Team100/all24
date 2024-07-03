@@ -3,6 +3,7 @@ package org.team100.lib.motor.turning;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Talon6Motor;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.units.Angle100;
 
@@ -18,12 +19,13 @@ public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
 
     protected Talon6TurningMotor(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             double gearRatio,
             PIDConstants pid,
             Feedforward100 ff) {
-        super(name, canId, motorPhase, kSupplyLimit, kStatorLimit, pid, ff);
+        super(name, parent, canId, motorPhase, kSupplyLimit, kStatorLimit, pid, ff);
         m_gearRatio = gearRatio;
     }
 

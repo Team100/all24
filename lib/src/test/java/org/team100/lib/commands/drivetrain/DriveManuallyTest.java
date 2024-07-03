@@ -13,6 +13,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.wpilibj.simulation.SimHooks;
@@ -30,14 +32,16 @@ class DriveManuallyTest extends Fixtured implements Timeless {
         DriveManually command = new DriveManually(twistSupplier, robotDrive);
         DriveManually.shutDownForTest();
 
+        Logger logger = Telemetry.get().rootLogger("foo");
+
         command.register("MODULE_STATE", false,
-                new SimpleManualModuleStates("foo", swerveKinodynamics));
+                new SimpleManualModuleStates("foo", logger, swerveKinodynamics));
 
         command.register("ROBOT_RELATIVE_CHASSIS_SPEED", false,
-                new ManualChassisSpeeds("foo", swerveKinodynamics));
+                new ManualChassisSpeeds("foo", logger, swerveKinodynamics));
 
         command.register("FIELD_RELATIVE_TWIST", false,
-                new ManualFieldRelativeSpeeds("foo", swerveKinodynamics));
+                new ManualFieldRelativeSpeeds("foo", logger, swerveKinodynamics));
 
         command.overrideMode(() -> desiredMode);
 

@@ -24,7 +24,7 @@ public class JvmLogger implements Glassy {
 
     public JvmLogger() {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
         times = new HashMap<>();
         counts = new HashMap<>();
     }

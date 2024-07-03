@@ -49,7 +49,7 @@ public class DriveWithProfileNote extends Command100 {
             SwerveDriveSubsystem drivetrain,
             FullStateDriveController controller,
             SwerveKinodynamics limits) {
-        fieldLogger = Telemetry.get().logger("field");
+        fieldLogger = Telemetry.get().rootLogger("field");
         previousGoal = null;
         count = 0;
         m_intake = intake;

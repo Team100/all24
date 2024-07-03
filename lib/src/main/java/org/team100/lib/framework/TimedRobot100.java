@@ -73,7 +73,7 @@ public class TimedRobot100 extends IterativeRobotBase {
     public static final double kDefaultPeriod = 0.02;
     private static final String kName = "TimedRobot100";
 
-    private final Telemetry.Logger t = Telemetry.get().logger(kName);
+    private final Telemetry.Logger t = Telemetry.get().rootLogger(kName);
     private final Chronos chronos = Chronos.get();
 
     // The C pointer to the notifier object. We don't use it directly, it is

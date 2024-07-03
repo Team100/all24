@@ -19,6 +19,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,9 +37,10 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -66,9 +69,10 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -103,9 +107,10 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -174,9 +179,10 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -238,9 +244,10 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -295,9 +302,10 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -338,7 +346,7 @@ class ManualWithMinTimeHeadingTest {
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // velocity carries forward
         assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
-        //  ?
+        // ?
         assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(2.796, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // ?

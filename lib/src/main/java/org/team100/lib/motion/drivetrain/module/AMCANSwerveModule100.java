@@ -14,6 +14,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
@@ -35,6 +36,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
 
     public static AMCANSwerveModule100 get(
             String name,
+            Logger parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -47,6 +49,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
         VelocityServo<Distance100> driveServo = driveServo(
                 name + "/Drive",
+                parent.child("/Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -55,6 +58,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
 
         PositionServo<Angle100> turningServo = turningServo(
                 name + "/Turning",
+                parent.child("/Turning"),
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -67,6 +71,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
 
     private static VelocityServo<Distance100> driveServo(
             String name,
+            Logger parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -75,6 +80,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
         Falcon6DriveMotor driveMotor = new Falcon6DriveMotor(
                 name,
+                parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
                 currentLimit,
@@ -84,23 +90,29 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 pidConstants,
                 ff);
         Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
-                name, driveMotor, distancePerTurn);
+                name,
+                parent,
+                driveMotor,
+                distancePerTurn);
         return new OutboardVelocityServo<>(
                 name,
+                parent,
                 driveMotor,
                 driveEncoder);
     }
 
     private static PositionServo<Angle100> turningServo(
             String name,
+            Logger parent,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
             EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
-        CANTurningMotor turningMotor = new CANTurningMotor(name, turningMotorCanId);
+        CANTurningMotor turningMotor = new CANTurningMotor(name, parent, turningMotorCanId);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
                 name,
+                parent,
                 turningEncoderChannel,
                 turningOffset,
                 turningGearRatio, turningDrive);
@@ -114,6 +126,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
                 name,
+                parent,
                 turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),

@@ -32,7 +32,7 @@ public class Intake extends SubsystemBase implements Glassy {
 
     public Intake(SensorInterface sensors) {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
         m_sensors = sensors;
 
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
@@ -43,6 +43,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
                         m_name + "/Super Roller",
+                        t.child("/Super Roller"),
                         5,
                         MotorPhase.FORWARD,
                         20,
@@ -56,6 +57,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
                         m_name + "/Super Roller",
+                        t.child("/Super Roller"),
                         rollerParameter);
         }
     }
@@ -117,9 +119,9 @@ public class Intake extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.logDouble(Level.DEBUG, "lower",()-> m_intake.get());
+        t.logDouble(Level.DEBUG, "lower", () -> m_intake.get());
         t.log(Level.DEBUG, "upper", superRollers.getVelocity());
-        t.logDouble(Level.DEBUG, "centering", ()->m_centering.get());
+        t.logDouble(Level.DEBUG, "centering", () -> m_centering.get());
     }
 
     @Override

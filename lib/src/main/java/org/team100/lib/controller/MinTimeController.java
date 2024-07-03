@@ -5,6 +5,7 @@ import java.util.function.DoubleUnaryOperator;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
@@ -137,7 +138,8 @@ public class MinTimeController implements Glassy {
      * @param k              full-state gains
      */
     public MinTimeController(
-            String parent,
+            String name,
+            Logger parent,
             DoubleUnaryOperator modulus,
             double maxVel,
             double switchingAccel,
@@ -154,8 +156,8 @@ public class MinTimeController implements Glassy {
         m_tolerance = tolerance;
         m_finish = finish;
         m_k = k;
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
     }
 
     private State100 modulus(double x, double v, double a) {

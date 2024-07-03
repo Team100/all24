@@ -22,7 +22,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
     public FeederSubsystem(SensorInterface sensors) {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
         switch (Identity.instance) {
             case COMP_BOT:
                 feedRoller = new PWMSparkMax(3);

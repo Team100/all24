@@ -46,8 +46,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal = swerveLocal;
         m_speed = speed;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
-        fieldLogger = Telemetry.get().logger("field");
+        t = Telemetry.get().rootLogger(m_name);
+        fieldLogger = Telemetry.get().rootLogger("field");
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();

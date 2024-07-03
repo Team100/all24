@@ -8,6 +8,8 @@ import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Util;
@@ -40,8 +42,10 @@ class PositionProfileTest implements Timeless {
     @Test
     void testTrapezoid() {
         Profile100 profile = new ProfileWPI(1, 1);
+        Logger logger = Telemetry.get().rootLogger("foo");
         servo = new OnboardPositionServo<>(
                 name,
+                logger,
                 motor,
                 encoder,
                 1,
@@ -56,8 +60,10 @@ class PositionProfileTest implements Timeless {
     @Test
     void testProfile() {
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        Logger logger = Telemetry.get().rootLogger("foo");
         servo = new OnboardPositionServo<>(
                 name,
+                logger,
                 motor,
                 encoder,
                 1,

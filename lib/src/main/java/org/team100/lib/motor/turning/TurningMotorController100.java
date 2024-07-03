@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
@@ -25,12 +26,13 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
 
     public TurningMotorController100(
             String name,
+            Logger parent,
             MotorController motorController,
             double kDriveReduction) {
         m_motor = motorController;
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_gearRatio = kDriveReduction;
     }
 

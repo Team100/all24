@@ -7,6 +7,8 @@ import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -30,8 +32,10 @@ class AnglePositionServoProfileTest {
         controller2.enableContinuousInput(-Math.PI, Math.PI);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        Logger logger = Telemetry.get().rootLogger("foo");
         servo = new OnboardPositionServo<>(
                 name,
+                logger,
                 motor,
                 encoder,
                 1,

@@ -11,6 +11,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.VecBuilder;
@@ -32,7 +34,8 @@ public class Fixture {
     public Fixture() {
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Async async = new MockAsync();
-        collection = SwerveModuleCollection.get(10, 20, swerveKinodynamics, async);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics, async);
         SwerveModuleVisualization.make(collection, async);
         heading = new SimulatedHeading(swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(

@@ -40,7 +40,7 @@ public abstract class Command100 extends Command implements Glassy {
 
     protected Command100() {
         m_name = Names.append(Command100.class.getSimpleName(), this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     public void initialize100() {

@@ -15,6 +15,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
@@ -57,21 +58,23 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * @param omegaController
      */
     public ManualWithMinTimeHeading(
-            String parent,
+            String name,
+            Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_desiredRotation = desiredRotation;
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
 
         // these parameters are total guesses
         m_controller = new MinTimeController(
                 m_name,
+                parent,
                 MathUtil::angleModulus,
                 15, // maxV
                 12, // switchingA

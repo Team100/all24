@@ -7,6 +7,8 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
@@ -16,7 +18,8 @@ class ManualChassisSpeedsTest {
     @Test
     void testChassisSpeedsZero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         ChassisSpeeds speeds = manual.apply(new SwerveState(), input);
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
@@ -29,7 +32,8 @@ class ManualChassisSpeedsTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         assertEquals(1, limits.getMaxDriveVelocityM_S(), kDelta);
         assertEquals(2.828, limits.getMaxAngleSpeedRad_S(), kDelta);
-        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", logger, limits);
         // clipping to the unit circle, then desaturating.
         DriverControl.Velocity input = new DriverControl.Velocity(1, 2, 3);
         ChassisSpeeds speeds = manual.apply(new SwerveState(), input);

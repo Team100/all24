@@ -8,6 +8,8 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 class ManualFieldRelativeSpeedsTest {
     private static final double kDelta = 0.001;
@@ -15,7 +17,8 @@ class ManualFieldRelativeSpeedsTest {
     @Test
     void testTwistZero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         SwerveState s = new SwerveState();
         FieldRelativeVelocity twist = manual.apply(s, input);
@@ -27,7 +30,8 @@ class ManualFieldRelativeSpeedsTest {
     @Test
     void testTwistNonzero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", logger, limits);
         // these inputs are clipped and desaturated
         DriverControl.Velocity input = new DriverControl.Velocity(1, 2, 3);
         SwerveState s = new SwerveState();

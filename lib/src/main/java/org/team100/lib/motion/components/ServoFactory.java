@@ -16,6 +16,7 @@ import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
@@ -38,6 +39,7 @@ public class ServoFactory {
      */
     public static LimitedVelocityServo<Distance100> limitedNeoVelocityServo(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -46,6 +48,7 @@ public class ServoFactory {
             PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
+                parent,
                 canId,
                 motorPhase,
                 currentLimit,
@@ -55,10 +58,12 @@ public class ServoFactory {
                 lowLevelVelocityConstants);
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 name,
+                parent,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
+                parent,
                 motor,
                 encoder);
         return new LimitedVelocityServo<>(v,
@@ -69,12 +74,14 @@ public class ServoFactory {
 
     public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
             String name,
+            Logger parent,
             SysParam param) {
         // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, 600);
-        SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, parent, 600);
+        SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(name, parent, motor, 1, -1, 1);
         VelocityServo<Distance100> v = new OutboardVelocityServo<>(
                 name,
+                parent,
                 motor,
                 encoder);
         return new LimitedVelocityServo<>(v,
@@ -89,6 +96,7 @@ public class ServoFactory {
      */
     public static PositionServo<Angle100> neoAngleServo(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -98,6 +106,7 @@ public class ServoFactory {
             PIDConstants lowLevelVelocityConstants) {
         NeoTurningMotor motor = new NeoTurningMotor(
                 name,
+                parent,
                 canId,
                 motorPhase,
                 currentLimit,
@@ -106,11 +115,13 @@ public class ServoFactory {
                 lowLevelVelocityConstants);
         NeoTurningEncoder encoder = new NeoTurningEncoder(
                 name,
+                parent,
                 motor,
                 param.gearRatio());
 
         return new OnboardPositionServo<>(
                 name,
+                parent,
                 motor,
                 encoder,
                 param.maxVelM_S(),
@@ -125,6 +136,7 @@ public class ServoFactory {
      */
     public static PositionServo<Angle100> neoVortexAngleServo(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -134,6 +146,7 @@ public class ServoFactory {
             PIDConstants lowLevelVelocityConstants) {
         NeoVortexTurningMotor motor = new NeoVortexTurningMotor(
                 name,
+                parent,
                 canId,
                 motorPhase,
                 currentLimit,
@@ -142,10 +155,12 @@ public class ServoFactory {
                 lowLevelVelocityConstants);
         NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(
                 name,
+                parent,
                 motor,
                 param.gearRatio());
         return new OnboardPositionServo<>(
                 name,
+                parent,
                 motor,
                 encoder,
                 param.maxVelM_S(),
@@ -156,18 +171,21 @@ public class ServoFactory {
 
     public static PositionServo<Angle100> simulatedAngleServo(
             String name,
+            Logger parent,
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
-        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name, 600);
+        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(name, parent, 600);
         SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(
                 name,
+                parent,
                 motor,
                 1,
                 0, // minimum hard stop
                 2); // maximum hard stop
         return new OnboardPositionServo<>(
                 name,
+                parent,
                 motor,
                 encoder,
                 param.maxVelM_S(),
@@ -182,6 +200,7 @@ public class ServoFactory {
      */
     public static PositionServo<Distance100> neoDistanceServo(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -191,6 +210,7 @@ public class ServoFactory {
             PIDConstants lowLevelVelocityConstants) {
         NeoDriveMotor motor = new NeoDriveMotor(
                 name,
+                parent,
                 canId,
                 motorPhase,
                 currentLimit,
@@ -200,10 +220,12 @@ public class ServoFactory {
                 lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoDriveEncoder(
                 name,
+                parent,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
         return new OnboardPositionServo<>(
                 name,
+                parent,
                 motor,
                 encoder,
                 param.maxVelM_S(),
@@ -220,6 +242,7 @@ public class ServoFactory {
      */
     public static OnboardPositionServo<Distance100> neoVortexDistanceServo(
             String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -229,6 +252,7 @@ public class ServoFactory {
             PIDConstants lowLevelVelocityConstants) {
         NeoVortexDriveMotor motor = new NeoVortexDriveMotor(
                 name,
+                parent,
                 canId,
                 motorPhase,
                 currentLimit,
@@ -238,10 +262,12 @@ public class ServoFactory {
                 lowLevelVelocityConstants);
         Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
                 name,
+                parent,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
         return new OnboardPositionServo<>(
                 name,
+                parent,
                 motor,
                 encoder,
                 param.maxVelM_S(),
@@ -252,13 +278,15 @@ public class ServoFactory {
 
     public static PositionServo<Distance100> simulatedDistanceServo(
             String name,
+            Logger parent,
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, 600);
-        Encoder100<Distance100> encoder = new SimulatedEncoder<>(name, motor, 1, -1, 1);
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(name, parent, 600);
+        Encoder100<Distance100> encoder = new SimulatedEncoder<>(name, parent, motor, 1, -1, 1);
         return new OnboardPositionServo<>(
                 name,
+                parent,
                 motor,
                 encoder,
                 param.maxVelM_S(),

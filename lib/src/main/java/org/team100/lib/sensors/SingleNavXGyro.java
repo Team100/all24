@@ -34,7 +34,7 @@ public class SingleNavXGyro implements Gyro100 {
      */
     public SingleNavXGyro(Async async) {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?

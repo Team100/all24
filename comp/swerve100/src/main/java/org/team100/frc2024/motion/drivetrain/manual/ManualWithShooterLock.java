@@ -16,6 +16,7 @@ import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
@@ -65,7 +66,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private boolean first;
 
     public ManualWithShooterLock(
-            String parent,
+            String name,
+            Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             PIDController thetaController,
@@ -75,9 +77,9 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         isAligned = false;
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
-        fieldLogger = Telemetry.get().logger("field");
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
+        fieldLogger = Telemetry.get().rootLogger("field");
         m_trigger = () -> false;
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),

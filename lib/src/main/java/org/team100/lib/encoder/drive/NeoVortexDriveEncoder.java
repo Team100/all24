@@ -6,6 +6,7 @@ import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 
@@ -27,12 +28,13 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
      */
     public NeoVortexDriveEncoder(
             String name,
+            Logger parent,
             NeoVortexDriveMotor motor,
             double distancePerTurn) {
         if (name.startsWith("/"))
             throw new IllegalArgumentException();
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
     }

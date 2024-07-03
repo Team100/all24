@@ -37,7 +37,7 @@ public class HolonomicDriveController100 implements Glassy {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     public static HolonomicDriveController100 withTolerance(

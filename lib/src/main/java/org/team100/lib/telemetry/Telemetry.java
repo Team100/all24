@@ -121,16 +121,19 @@ public class Telemetry {
         return instance;
     }
 
-    public Logger logger(String root) {
-        return new Logger(root);
+    public Logger logger(String root, Logger parent) {
+        return new Logger(root, parent);
     }
 
-    public class Logger {
-        private final String m_root;
+    public Logger rootLogger(String root) {
+        return new RootLogger(root);
+    }
+
+    public class RootLogger extends Logger {
         private final BooleanSubscriber m_sub;
 
-        private Logger(String root) {
-            m_root = root;
+        public RootLogger(String root) {
+            super(root);
             // System.out.println("root: " + root);
             BooleanTopic t = inst.getBooleanTopic(root + "/enable");
             t.publish().set(false);
@@ -138,11 +141,34 @@ public class Telemetry {
             t.setRetained(true);
             // t.publish().set(false);
             m_sub = t.subscribe(false);
-            // SmartDashboard.putBoolean(root + "/enable", false);
         }
 
-        private boolean enabled() {
+        @Override
+        boolean enabled() {
             return m_sub.get();
+        }
+    }
+
+    public class Logger {
+        private final String m_root;
+        private final Logger m_parent;
+
+        private Logger(String root) {
+            m_root = root;
+            m_parent = null;
+        }
+
+        private Logger(String root, Logger parent) {
+            m_root = root;
+            m_parent = parent;
+        }
+
+        public Logger child(String stem) {
+            return new Logger(m_root + stem, this);
+        }
+
+        boolean enabled() {
+            return m_parent.enabled();
         }
 
         public void logBoolean(Level level, String leaf, boolean val) {

@@ -105,7 +105,7 @@ public class VisionDataProvider24 implements Glassy {
         m_poseEstimator = poseEstimator;
         m_fireControl = fireControl;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     /** Start listening for updates. */

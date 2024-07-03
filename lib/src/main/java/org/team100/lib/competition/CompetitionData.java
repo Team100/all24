@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation.MatchType;
 
 public class CompetitionData {
 
-    public static Telemetry.Logger t = Telemetry.get().logger("CompetitionData");
+    public static Telemetry.Logger t = Telemetry.get().rootLogger("CompetitionData");
 
     public static void startupData() {
 

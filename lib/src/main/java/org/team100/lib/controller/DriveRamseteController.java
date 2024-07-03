@@ -38,7 +38,7 @@ public class DriveRamseteController implements DriveMotionController {
 
     public DriveRamseteController() {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     private TrajectoryTimeIterator m_iter;

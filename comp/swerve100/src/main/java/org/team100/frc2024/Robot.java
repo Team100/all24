@@ -33,7 +33,7 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     public Robot() {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     @Override

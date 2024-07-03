@@ -16,6 +16,8 @@ import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.selftest.VeeringSelfTest;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
 
@@ -69,14 +71,17 @@ public class SelfTestRunner extends Command {
         if (kTestDrivetrain) {
             // "treatment" is in situ.
             // commented out to simplify the container for comp
-            // addCase(new SquareSelfTest(drivetrain, m_listener), m_container.m_driveInALittleSquare);
+            // addCase(new SquareSelfTest(drivetrain, m_listener),
+            // m_container.m_driveInALittleSquare);
 
             // treatment is a specific manual input, supplied by the test case.
             DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
 
             DriveManually driveManually = new DriveManually(driveManuallyTest::treatment, drivetrain);
+            Logger logger = Telemetry.get().rootLogger("foo");
+
             driveManually.register("MODULE_STATE", false,
-                    new SimpleManualModuleStates("foo", SwerveKinodynamicsFactory.forTest()));
+                    new SimpleManualModuleStates("foo", logger, SwerveKinodynamicsFactory.forTest()));
             driveManually.overrideMode(() -> "MODULE_STATE");
             addCase(driveManuallyTest, driveManually);
 
@@ -100,19 +105,24 @@ public class SelfTestRunner extends Command {
         if (kTestMechanisms) {
             // mechanism tests
 
-            // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer, m_listener);
-            // addCase(indexerSelfTest, container.m_indexer.run(indexerSelfTest::treatment));
+            // IndexerSelfTest indexerSelfTest = new IndexerSelfTest(container.m_indexer,
+            // m_listener);
+            // addCase(indexerSelfTest,
+            // container.m_indexer.run(indexerSelfTest::treatment));
 
             AmpSelfTest ampSelfTest = new AmpSelfTest(container.m_ampPivot, m_listener);
             addCase(ampSelfTest, container.m_ampFeeder.run(ampSelfTest::treatment));
 
-            // ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter, m_listener);
-            // addCase(shooterSelfTest, container.m_shooter.run(shooterSelfTest::treatment));
+            // ShooterSelfTest shooterSelfTest = new ShooterSelfTest(container.m_shooter,
+            // m_listener);
+            // addCase(shooterSelfTest,
+            // container.m_shooter.run(shooterSelfTest::treatment));
         }
 
         if (kTestVision) {
-            // Oscillate is a good choice for vision since it uses acceleration-limited profiles
-            // and relatively slow speed.  This moves back and forth in x, using
+            // Oscillate is a good choice for vision since it uses acceleration-limited
+            // profiles
+            // and relatively slow speed. This moves back and forth in x, using
             // module direct mode.
             Oscillate oscillate = new Oscillate(drivetrain);
             // end up where you started

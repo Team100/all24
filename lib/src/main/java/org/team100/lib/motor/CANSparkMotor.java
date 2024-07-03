@@ -5,6 +5,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
 import org.team100.lib.util.Names;
 
@@ -26,6 +27,7 @@ public abstract class CANSparkMotor<T extends Measure100>
 
     protected CANSparkMotor(
             String name,
+            Logger parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
             int currentLimit,
@@ -33,7 +35,7 @@ public abstract class CANSparkMotor<T extends Measure100>
             PIDConstants pid) {
         m_motor = motor;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_ff = ff;
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, motorPhase, 20);

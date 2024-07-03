@@ -41,7 +41,7 @@ public class DrivePIDFController implements DriveMotionController {
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     @Override

@@ -5,6 +5,7 @@ import java.util.OptionalDouble;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
@@ -34,12 +35,13 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
      */
     public AnalogTurningEncoder(
             String name,
+            Logger parent,
             int channel,
             double inputOffset,
             double gearRatio,
             EncoderDrive drive) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_input = new AnalogInput(channel);
         m_encoder = new AnalogEncoder(m_input);
         m_encoder.setPositionOffset(inputOffset);

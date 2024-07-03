@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -16,7 +18,8 @@ class SteeringOverrideTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        SteeringOverride c = new SteeringOverride("foo", l);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SteeringOverride c = new SteeringOverride("foo", logger, l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
@@ -38,7 +41,8 @@ class SteeringOverrideTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
-        SteeringOverride c = new SteeringOverride("foo", l);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SteeringOverride c = new SteeringOverride("foo", logger, l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(1, GeometryUtil.kRotation90)

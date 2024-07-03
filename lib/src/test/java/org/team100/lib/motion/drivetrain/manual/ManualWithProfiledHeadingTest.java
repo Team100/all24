@@ -19,6 +19,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,8 +42,10 @@ class ManualWithProfiledHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -76,8 +80,10 @@ class ManualWithProfiledHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -119,8 +125,10 @@ class ManualWithProfiledHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -195,8 +203,10 @@ class ManualWithProfiledHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -264,8 +274,10 @@ class ManualWithProfiledHeadingTest {
         PIDController thetaController = new PIDController(0, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0);
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
@@ -327,8 +339,10 @@ class ManualWithProfiledHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,

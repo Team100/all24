@@ -29,11 +29,12 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     public ClimberSubsystem(int leftClimberID, int rightClimberID) {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
         switch (Identity.instance) {
             case COMP_BOT:
                 VortexProxy vp1 = new VortexProxy(
                         m_name + "/left",
+                        t.child("/left"),
                         leftClimberID,
                         MotorPhase.FORWARD,
                         kCurrentLimit);
@@ -41,6 +42,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 v1 = vp1;
                 VortexProxy vp2 = new VortexProxy(
                         m_name + "/right",
+                        t.child("/right"),
                         rightClimberID,
                         MotorPhase.REVERSE,
                         kCurrentLimit);
@@ -49,11 +51,15 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 break;
             default:
                 // for testing and simulation
-                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(m_name + "left", 1);
-                e1 = new SimulatedEncoder<>(m_name + "left", vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
+                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(
+                        m_name + "left", t.child("left"), 1);
+                e1 = new SimulatedEncoder<>(m_name + "left", t.child("left"),
+                        vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
                 v1 = vs1;
-                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(m_name + "right", 1);
-                e2 = new SimulatedEncoder<>(m_name + "right", vs2, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
+                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(
+                        m_name + "right", t.child("right"), 1);
+                e2 = new SimulatedEncoder<>(m_name + "right", t.child("right"), vs2, 1, -Double.MAX_VALUE,
+                        Double.MAX_VALUE);
                 v2 = vs2;
         }
     }
@@ -72,7 +78,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v1.setDutyCycle(0);
             return;
         }
-        t.logDouble(Level.DEBUG, "LEFT VALUE", ()->value);
+        t.logDouble(Level.DEBUG, "LEFT VALUE", () -> value);
     }
 
     public void setRightWithSoftLimits(double value) {
@@ -89,7 +95,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v2.setDutyCycle(0);
             return;
         }
-        t.logDouble(Level.DEBUG, "RIGHT VALUE",()-> value);
+        t.logDouble(Level.DEBUG, "RIGHT VALUE", () -> value);
     }
 
     public void zeroClimbers() {

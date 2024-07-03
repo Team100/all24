@@ -15,6 +15,7 @@ import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Names;
@@ -59,7 +60,8 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * @param omegaController
      */
     public ManualWithProfiledHeading(
-            String parent,
+            String name,
+            Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation,
@@ -70,8 +72,8 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
     }

@@ -23,7 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public class SlipperyTireUtil {
     /** Clip corner speeds to this. */
     private static final double kMaxSpeedM_s = 5.0;
-    private static final Telemetry.Logger t = Telemetry.get().logger("tireutil");
+    private static final Telemetry.Logger t = Telemetry.get().rootLogger("tireutil");
 
     private final Tire m_tire;
 

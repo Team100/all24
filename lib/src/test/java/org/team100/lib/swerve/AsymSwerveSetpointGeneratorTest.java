@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -75,8 +77,8 @@ class AsymSwerveSetpointGeneratorTest {
                 new SwerveModuleState()
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(new ChassisSpeeds(), initialStates);
-
-        AsymSwerveSetpointGenerator generator = new AsymSwerveSetpointGenerator("foo", kKinematicLimits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator generator = new AsymSwerveSetpointGenerator("foo", logger, kKinematicLimits);
 
         ChassisSpeeds goalSpeeds = new ChassisSpeeds(0.0, 0.0, 1.0);
         setpoint = driveToGoal(setpoint, goalSpeeds, generator);
@@ -106,7 +108,8 @@ class AsymSwerveSetpointGeneratorTest {
     @Test
     void testLimiting() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -140,7 +143,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testNotLimiting() {
         // high centripetal limit to stay out of the way
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -165,8 +169,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testLimitingALittle() {
         // high centripetal limit to stay out of the way
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
-
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -197,8 +201,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testLowCentripetal() {
         // very low centripetal limit so we can see it
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.lowCapsize();
-
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -235,8 +239,8 @@ class AsymSwerveSetpointGeneratorTest {
         boolean dump = false;
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
-
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initially moving full speed +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(4, 0, 0);
@@ -294,8 +298,8 @@ class AsymSwerveSetpointGeneratorTest {
         // this corresponds to the "4" cases in SwerveUtilTest.
 
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.decelCase();
-
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initially moving 0.5 +y
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0.5, 0);
@@ -328,7 +332,8 @@ class AsymSwerveSetpointGeneratorTest {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highDecelAndCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initial speed is faster than possible.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(10, 0, 0);
@@ -354,7 +359,8 @@ class AsymSwerveSetpointGeneratorTest {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", limits);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator("foo", logger, limits);
 
         // initial speed is at the limit +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(5, 0, 0);

@@ -16,7 +16,7 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 public class TrajectoryVisualization {
     private static final String kField = "field";
     private static final String kTrajectory = "trajectory";
-    private static final Telemetry.Logger fieldLogger = Telemetry.get().logger(kField);
+    private static final Telemetry.Logger fieldLogger = Telemetry.get().rootLogger(kField);
 
     private TrajectoryVisualization() {
         //

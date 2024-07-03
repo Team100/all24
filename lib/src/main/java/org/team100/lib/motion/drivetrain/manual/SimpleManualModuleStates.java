@@ -5,6 +5,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,10 +24,10 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
-    public SimpleManualModuleStates(String parent, SwerveKinodynamics swerveKinodynamics) {
+    public SimpleManualModuleStates(String name, Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
     }
 
     /**

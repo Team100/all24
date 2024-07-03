@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -15,7 +17,8 @@ class SteeringRateLimiterTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        SteeringRateLimiter c = new SteeringRateLimiter("foo", l);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SteeringRateLimiter c = new SteeringRateLimiter("foo", logger, l);
 
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
@@ -41,7 +44,8 @@ class SteeringRateLimiterTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
-        SteeringRateLimiter c = new SteeringRateLimiter("foo", l);
+        Logger logger = Telemetry.get().rootLogger("foo");
+        SteeringRateLimiter c = new SteeringRateLimiter("foo", logger, l);
 
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };

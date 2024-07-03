@@ -9,6 +9,7 @@ import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 import org.team100.lib.visualization.ArmVisualization;
@@ -46,13 +47,14 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
      */
     ArmSubsystem(
             String name,
+            Logger parent,
             Motor100<Angle100> lowerMotor,
             Encoder100<Angle100> lowerEncoder,
             Motor100<Angle100> upperMotor,
             Encoder100<Angle100> upperEncoder,
             Async async) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);

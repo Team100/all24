@@ -85,7 +85,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
         m_tireUtil = new SlipperyTireUtil(m_kinodynamics.getTire());

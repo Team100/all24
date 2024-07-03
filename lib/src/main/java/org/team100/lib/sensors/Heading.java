@@ -19,7 +19,7 @@ public class Heading implements HeadingInterface {
     public Heading(Gyro100 gyro) {
         m_gyro = gyro;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     @Override

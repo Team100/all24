@@ -19,6 +19,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,13 +37,14 @@ class ManualWithFullStateHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
 
@@ -67,13 +70,14 @@ class ManualWithFullStateHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
 
@@ -105,13 +109,14 @@ class ManualWithFullStateHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -181,13 +186,14 @@ class ManualWithFullStateHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // currently facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -248,13 +254,15 @@ class ManualWithFullStateHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
+        Logger logger = Telemetry.get().rootLogger("foo");
 
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
@@ -306,13 +314,14 @@ class ManualWithFullStateHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);

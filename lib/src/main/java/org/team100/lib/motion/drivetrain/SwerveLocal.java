@@ -57,8 +57,8 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_name, m_swerveKinodynamics);
+        t = Telemetry.get().rootLogger(m_name);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_name, t, m_swerveKinodynamics);
         prevSetpoint = new SwerveSetpoint();
     }
 

@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -25,8 +27,10 @@ class MinTimeControllerTest {
         // System.out.println("testDelayWithAccel");
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 1, // switchingA
@@ -66,8 +70,10 @@ class MinTimeControllerTest {
         // ratio of the delay and the timestep (!)
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 1, // switchingA
@@ -103,9 +109,10 @@ class MinTimeControllerTest {
     @Test
     void testAngleWrapping() {
         // System.out.println("testAngleWrapping");
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 MathUtil::angleModulus,
                 1, // maxV
                 0.9, // switchingA
@@ -158,9 +165,10 @@ class MinTimeControllerTest {
     @Test
     void testMovingAngleWrapping() {
         // System.out.println("testMovingAngleWrapping");
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 MathUtil::angleModulus,
                 1, // maxV
                 0.4, // switchingA
@@ -207,9 +215,10 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -251,9 +260,10 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 0.6, // maxV
                 0.9, // switchingA
@@ -297,9 +307,10 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
-
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -341,8 +352,10 @@ class MinTimeControllerTest {
     @Test
     void testUnderdrive() {
         // System.out.println("testUnderdrive");
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -385,8 +398,10 @@ class MinTimeControllerTest {
     @Test
     void testOverdrive() {
         // System.out.println("testOverdrive");
+        Logger logger = Telemetry.get().rootLogger("foo");
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 0.9, // switchingA
@@ -444,9 +459,11 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
+        Logger logger = Telemetry.get().rootLogger("foo");
 
         final MinTimeController profile = new MinTimeController(
                 "test",
+                logger,
                 x -> x,
                 1, // maxV
                 0.9, // switchingA

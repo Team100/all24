@@ -9,6 +9,7 @@ import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -30,6 +31,7 @@ public class GravityServo {
     public GravityServo(
             DutyCycleMotor100 motor,
             String name,
+            Logger parent,
             SysParam params,
             PIDController controller,
             Profile100 profile,
@@ -38,7 +40,7 @@ public class GravityServo {
             double[] softLimits) {
         m_motor = motor;
         m_name = name;
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_params = params;
         m_controller = controller;
         m_controller.setTolerance(0.02);

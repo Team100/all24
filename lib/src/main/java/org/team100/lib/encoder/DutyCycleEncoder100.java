@@ -4,6 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
@@ -33,12 +34,13 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
      */
     public DutyCycleEncoder100(
             String name,
+            Logger parent,
             int channel,
             double inputOffset,
             boolean reversed) {
         m_reversed = reversed;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);

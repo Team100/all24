@@ -6,6 +6,7 @@ import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -26,11 +27,12 @@ public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
 
     public NeoProxy(
             String name,
+            Logger parent,
             int canId,
             IdleMode idleMode,
             int currentLimit) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, idleMode, MotorPhase.FORWARD, 20);
@@ -39,8 +41,8 @@ public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
 
     private void set(double speed) {
         m_motor.set(speed);
-        t.logDouble(Level.TRACE, "DUTY",()-> m_motor.getAppliedOutput());
-        t.logDouble(Level.TRACE, "AMPS", ()->m_motor.getOutputCurrent());
+        t.logDouble(Level.TRACE, "DUTY", () -> m_motor.getAppliedOutput());
+        t.logDouble(Level.TRACE, "AMPS", () -> m_motor.getOutputCurrent());
     }
 
     @Override

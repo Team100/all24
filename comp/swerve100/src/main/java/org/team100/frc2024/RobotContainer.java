@@ -121,7 +121,6 @@ public class RobotContainer implements Glassy {
         final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
         poller.setDefault(Level.TRACE);
 
-
         // TODO: remove all this, it's joel figuring out how to do choosers and logging.
         // slash here makes a tree
         var foo = new NamedChooser<String>("asdf/foochooser") {
@@ -133,11 +132,12 @@ public class RobotContainer implements Glassy {
         foo.onChange((val) -> System.out.println(val));
         SmartDashboard.putData(foo);
 
-        Logger l = Telemetry.get().logger("mylogger");
+        Logger l = Telemetry.get().rootLogger("mylogger");
         // slashes are ok everywhere
-        l.logDouble(Level.ERROR, "qwerty/uiop",()-> 1.0);
+        l.logDouble(Level.ERROR, "qwerty/uiop", () -> 1.0);
 
         m_name = Names.name(this);
+        Logger logger = Telemetry.get().rootLogger(m_name);
 
         final DriverControl driverControl = new DriverControlProxy(async);
         final OperatorControl operatorControl = new OperatorControlProxy(async);
@@ -154,6 +154,7 @@ public class RobotContainer implements Glassy {
         }
 
         m_modules = SwerveModuleCollection.get(
+                logger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics,
@@ -204,7 +205,7 @@ public class RobotContainer implements Glassy {
 
         final Intake m_intake = new Intake(m_sensors);
 
-        m_shooter = new DrumShooter(3, 13, 27, 58, 100);
+        m_shooter = new DrumShooter(logger, 3, 13, 27, 58, 100);
 
         ///////////////////////////
         //
@@ -300,14 +301,15 @@ public class RobotContainer implements Glassy {
         DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
         driveManually.register("MODULE_STATE", false,
-                new SimpleManualModuleStates(m_name, swerveKinodynamics));
+                new SimpleManualModuleStates(m_name, logger, swerveKinodynamics));
 
         driveManually.register("ROBOT_RELATIVE_CHASSIS_SPEED", false,
-                new ManualChassisSpeeds(m_name, swerveKinodynamics));
+                new ManualChassisSpeeds(m_name, logger, swerveKinodynamics));
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
                 new ManualWithNoteRotation(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         notePositionDetector::getClosestTranslation2d,
@@ -316,11 +318,12 @@ public class RobotContainer implements Glassy {
                         driverControl::trigger));
 
         driveManually.register("FIELD_RELATIVE_TWIST", false,
-                new ManualFieldRelativeSpeeds(m_name, swerveKinodynamics));
+                new ManualFieldRelativeSpeeds(m_name, logger, swerveKinodynamics));
 
         driveManually.register("SNAPS_PROFILED", true,
                 new ManualWithProfiledHeading(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
@@ -331,6 +334,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("SNAPS_FULL_STATE", true,
                 new ManualWithFullStateHeading(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
@@ -339,6 +343,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation));
@@ -346,6 +351,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         notePositionDetector::getClosestTranslation2d,
@@ -356,6 +362,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::target,
@@ -366,6 +373,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("SHOOTER_LOCK", false,
                 new ManualWithShooterLock(
                         m_name,
+                        logger,
                         swerveKinodynamics,
                         m_heading,
                         thetaController,
@@ -375,6 +383,7 @@ public class RobotContainer implements Glassy {
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
+                logger,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
@@ -382,6 +391,7 @@ public class RobotContainer implements Glassy {
 
         ManualWithAmpLock ampLock = new ManualWithAmpLock(
                 m_name,
+                logger,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,

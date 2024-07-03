@@ -4,6 +4,7 @@ import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Names;
 
@@ -86,7 +87,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     private final WPI_TalonSRX m_motor;
     private final String m_name;
 
-    public CANTurningMotor(String name, int channel) {
+    public CANTurningMotor(String name, Logger parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
@@ -125,7 +126,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
         m_motor.setSensorPhase(true);
 
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().logger(m_name, parent);
         t.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
     }
 

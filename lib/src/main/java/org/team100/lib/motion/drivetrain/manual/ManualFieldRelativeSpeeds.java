@@ -7,6 +7,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Names;
 
@@ -22,10 +23,10 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
-    public ManualFieldRelativeSpeeds(String parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualFieldRelativeSpeeds(String name, Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.append(parent, this);
-        t = Telemetry.get().logger(m_name);
+        m_name = Names.append(name, this);
+        t = Telemetry.get().logger(m_name, parent);
     }
 
     /**

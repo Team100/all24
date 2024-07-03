@@ -34,7 +34,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_yController = yController;
         m_thetaController = thetaController;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     public static HolonomicDriveController3 withTolerance(

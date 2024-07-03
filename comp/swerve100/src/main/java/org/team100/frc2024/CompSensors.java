@@ -12,7 +12,7 @@ public class CompSensors implements SensorInterface {
     private final DigitalInput ampSensor;
 
     public CompSensors(int port1, int port2, int port3) {
-        t = Telemetry.get().logger("CompSensors");
+        t = Telemetry.get().rootLogger("CompSensors");
         intakeSensor = new DigitalInput(port1);
         feederSensor = new DigitalInput(port2);
         ampSensor = new DigitalInput(port3);

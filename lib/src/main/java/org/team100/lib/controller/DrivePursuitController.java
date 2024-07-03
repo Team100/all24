@@ -66,7 +66,7 @@ public class DrivePursuitController implements DriveMotionController {
     DrivePursuitController(SwerveKinodynamics limits) {
         m_limits = limits;
         m_name = Names.name(this);
-        t = Telemetry.get().logger(m_name);
+        t = Telemetry.get().rootLogger(m_name);
     }
 
     @Override
